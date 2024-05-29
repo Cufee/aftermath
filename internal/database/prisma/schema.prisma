@@ -1,0 +1,309 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator db {
+  provider = "go run github.com/steebchen/prisma-client-go"
+}
+
+//
+// === App Configuration ===
+//
+
+model AppConfiguration {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  valueEncoded    String
+  metadataEncoded String @default("")
+
+  @@map("app_configurations")
+}
+
+//
+// === Authentification === 
+// 
+
+model AuthNonce {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expiresAt DateTime
+
+  referenceId     String
+  metadataEncoded String @default("")
+
+  @@index([createdAt])
+  @@index([referenceId])
+  @@index([referenceId, expiresAt])
+  @@map("auth_nonces")
+}
+
+//
+// === Users ===
+//
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  permissions         String @default("")
+  featureFlagsEncoded String @default("")
+
+  subscriptions UserSubscription[]
+  connections   UserConnection[]
+  content       UserContent[]
+
+  @@map("users")
+}
+
+model UserSubscription {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  type        String
+  expiresAt   DateTime
+  referenceId String
+  permissions String   @default("")
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([type, userId, expiresAt])
+  @@index([type, userId])
+  @@index([referenceId])
+  @@index([type, referenceId])
+  @@map("user_subscriptions")
+}
+
+model UserConnection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  type        String
+  permissions String @default("")
+  referenceId String
+
+  metadataEncoded String @default("")
+
+  @@index([userId])
+  @@index([type, userId])
+  @@index([referenceId])
+  @@index([type, referenceId])
+  @@map("user_connections")
+}
+
+model UserContent {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  type        String
+  referenceId String
+
+  valueEncoded    String
+  metadataEncoded String @default("")
+
+  @@index([userId])
+  @@index([type, userId])
+  @@index([referenceId])
+  @@index([type, referenceId])
+  @@map("user_content")
+}
+
+//
+// === External Data ===
+//
+
+model Account {
+  id        Int      @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lastBattleTime   DateTime
+  accountCreatedAt DateTime
+
+  realm    String
+  nickname String
+  private  Boolean @default(false)
+
+  clan   Clan? @relation(fields: [clanId], references: [id])
+  clanId Int?
+
+  @@index([realm])
+  @@index([clanId])
+  @@index([nickname])
+  @@index([lastBattleTime])
+  @@map("accounts")
+}
+
+model AccountSnapshot {
+  id        String   @id @default(cuid())
+  createdAt DateTime
+  updatedAt DateTime @updatedAt
+
+  type           String
+  accountId      Int
+  referenceId    String
+  lastBattleTime Int
+
+  dataEncoded String
+
+  @@index([createdAt])
+  @@index([type, accountId])
+  @@index([type, accountId, createdAt])
+  @@index([type, accountId, lastBattleTime])
+  @@index([type, referenceId])
+  @@index([type, referenceId, createdAt])
+  @@map("account_snapshots")
+}
+
+model AccountRatingSeasonSnapshot {
+  id        String   @id @default(cuid())
+  createdAt DateTime
+  updatedAt DateTime @updatedAt
+
+  seasonId       Int
+  accountId      Int
+  referenceId    String
+  lastBattleTime Int
+
+  dataEncoded String
+
+  @@index([createdAt])
+  @@index([seasonId, accountId])
+  @@index([seasonId, referenceId])
+  @@map("account_rating_season_snapshots")
+}
+
+model Clan {
+  id        Int      @id
+  createdAt DateTime
+  updatedAt DateTime @updatedAt
+
+  tag      String
+  name     String
+  emblemId String @default("")
+
+  accounts      Account[]
+  membersString String
+
+  recordUpdatedAt DateTime @updatedAt
+
+  @@index([tag])
+  @@map("account_clans")
+}
+
+model VehicleAverage {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dataEncoded String
+
+  @@map("glossary_averages")
+}
+
+model Vehicle {
+  id        Int      @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tier   Int
+  type   String
+  class  String
+  nation String
+
+  localizedNamesEncoded String
+
+  @@map("glossary_vehicles")
+}
+
+model Achievement {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  section String
+
+  dataEncoded String
+
+  @@map("glossary_achievements")
+}
+
+// 
+// === App Data === 
+// 
+
+model UserInteraction {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  type        String
+  userId      String
+  referenceId String
+
+  dataEncoded     String
+  metadataEncoded String
+
+  @@index([type])
+  @@index([userId])
+  @@index([userId, type])
+  @@index([referenceId])
+  @@index([referenceId, type])
+  @@map("user_interactions")
+}
+
+model DiscordBotLiveSession {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locale String
+
+  userId      String
+  referenceId String
+
+  guildId   String?
+  channelId String
+  messageId String
+
+  lastUpdate     DateTime @default(now())
+  lastBattleTime Int      @default(0)
+
+  optionsEncoded String
+
+  @@index([referenceId])
+  @@map("discord_live_sessions")
+}
+
+model StatsRequestsOptions {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  type        String
+  userId      String
+  accountId   Int
+  referenceId String
+
+  dataEncoded String
+
+  @@index([referenceId])
+  @@map("stats_request_options")
+}
