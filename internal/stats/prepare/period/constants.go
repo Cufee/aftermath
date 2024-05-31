@@ -14,17 +14,17 @@ type Cards struct {
 	Highlights []VehicleCard `json:"highlights"`
 }
 
-type OverviewCard common.StatsCard[[]common.StatsBlock[blockData], string]
-type VehicleCard common.StatsCard[common.StatsBlock[blockData], string]
+type OverviewCard common.StatsCard[[]common.StatsBlock[BlockData], string]
+type VehicleCard common.StatsCard[common.StatsBlock[BlockData], string]
 
-type blockData struct {
+type BlockData struct {
 	Flavor blockFlavor `json:"flavor"`
 }
 
 type blockFlavor string
 
 const (
-	blockFlavorDefault   blockFlavor = "default"
-	blockFlavorSpecial   blockFlavor = "special"
-	blockFlavorSecondary blockFlavor = "secondary"
+	BlockFlavorDefault   blockFlavor = "default"
+	BlockFlavorSpecial   blockFlavor = "special"
+	BlockFlavorSecondary blockFlavor = "secondary"
 )

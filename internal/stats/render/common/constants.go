@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"image/color"
 
 	"github.com/cufee/aftermath/internal/stats/render/assets"
@@ -31,17 +32,19 @@ var (
 
 var fontCache map[float64]font.Face
 
-func init() {
+func InitLoadedAssets() error {
 	var ok bool
 	fontCache, ok = assets.GetLoadedFontFaces("default", 36, 32, 24, 18, 14)
 	if !ok {
-		panic("default font not found")
+		return errors.New("default font not found")
 	}
 	FontXL = fontCache[32]
 	Font2XL = fontCache[36]
 	FontLarge = fontCache[24]
 	FontMedium = fontCache[18]
 	FontSmall = fontCache[14]
+
+	return nil
 }
 
 func GetCustomFont(size float64) (font.Face, bool) {

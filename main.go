@@ -2,26 +2,71 @@ package main
 
 import (
 	"embed"
-	"encoding/json"
-	"fmt"
+	"image/png"
 	"log"
 	"os"
 	"time"
 
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
+	"github.com/cufee/aftermath/internal/stats"
 	"github.com/cufee/aftermath/internal/stats/fetch"
-	"github.com/cufee/aftermath/internal/stats/prepare"
-	"github.com/cufee/aftermath/internal/stats/prepare/period"
+
 	"github.com/cufee/aftermath/internal/stats/render/assets"
-	_ "github.com/joho/godotenv/autoload"
+	render "github.com/cufee/aftermath/internal/stats/render/common"
 	"github.com/rs/zerolog"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 //go:generate go run github.com/steebchen/prisma-client-go generate
 
 //go:embed static/*
 var static embed.FS
+
+func main() {
+	// Logger
+	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
+	zerolog.SetGlobalLevel(level)
+
+	// Assets for rendering
+	err := assets.LoadAssets(static)
+	if err != nil {
+		log.Fatalf("assets#LoadAssets failed to load assets from static/ embed.FS %s", err)
+	}
+	err = render.InitLoadedAssets()
+	if err != nil {
+		log.Fatalf("render#InitLoadedAssets failed %s", err)
+	}
+
+	statsClient := fetchClientFromEnv()
+
+	// test
+	var days time.Duration = 30
+	accountStats, err := statsClient.PeriodStats("579553160", time.Now().Add(time.Hour*24*days*-1))
+	if err != nil {
+		panic(err)
+	}
+
+	// localePrinter := func(s string) string { return "localized:" + s }
+
+	img, err := stats.PeriodImage(accountStats)
+	if err != nil {
+		panic(err)
+	}
+
+	f, err := os.Create("tmp/test-image.png")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	err = png.Encode(f, img)
+	if err != nil {
+		panic(err)
+	}
+
+}
 
 func fetchClientFromEnv() fetch.Client {
 	// Dependencies
@@ -38,37 +83,4 @@ func fetchClientFromEnv() fetch.Client {
 	}
 
 	return client
-}
-
-func main() {
-	// Logger
-	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
-	zerolog.SetGlobalLevel(level)
-
-	// Assets for rendering
-	err := assets.LoadAssets(static)
-	if err != nil {
-		log.Fatalf("assets#LoadAssets failed to load assets from static/ embed.FS %s", err)
-	}
-
-	statsClient := fetchClientFromEnv()
-
-	// test
-	var days time.Duration = 30
-	stats, err := statsClient.PeriodStats("579553160", time.Now().Add(time.Hour*24*days*-1))
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("%v - %v\n", stats.Account.Nickname, stats.RegularBattles.Battles)
-
-	localePrinter := func(s string) string { return "localized:" + s }
-
-	cards, err := prepare.Period(stats, period.WithPrinter(localePrinter))
-	if err != nil {
-		panic(err)
-	}
-
-	data, _ := json.MarshalIndent(cards, "", "  ")
-	println(string(data))
 }

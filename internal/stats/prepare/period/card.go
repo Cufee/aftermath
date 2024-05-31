@@ -21,7 +21,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.G
 
 	// Overview Card
 	for _, column := range selectedBlocks {
-		var columnBlocks []common.StatsBlock[blockData]
+		var columnBlocks []common.StatsBlock[BlockData]
 		for _, preset := range column {
 			if preset == TagAvgTier {
 				// value := calculateAvgTier(input.Stats.Vehicles, input.VehicleGlossary)
@@ -58,7 +58,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.G
 
 	highlightedVehicles := getHighlightedVehicles(selectedHighlights, stats.RegularBattles.Vehicles, minimumBattles)
 	for _, data := range highlightedVehicles {
-		var vehicleBlocks []common.StatsBlock[blockData]
+		var vehicleBlocks []common.StatsBlock[BlockData]
 
 		for _, preset := range data.highlight.blocks {
 			block := presetToBlock(preset, *data.vehicle.StatsFrame)

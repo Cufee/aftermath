@@ -24,17 +24,15 @@ func LoadAssets(assets fs.FS) error {
 		return err
 	}
 
-	fonts, err := loadFonts(files)
+	fontsMap, err = loadFonts(files)
 	if err != nil {
 		return err
 	}
-	fontsMap = fonts
 
-	images, err := loadImages(files)
+	imagesMap, err = loadImages(files)
 	if err != nil {
 		return err
 	}
-	imagesMap = images
 
 	return nil
 }
@@ -45,6 +43,7 @@ func loadFonts(files map[string][]byte) (map[string]*truetype.Font, error) {
 		if !strings.HasSuffix(path, ".ttf") {
 			continue
 		}
+
 		font, err := truetype.Parse(data)
 		if err != nil {
 			return nil, err

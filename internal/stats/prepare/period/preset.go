@@ -5,34 +5,31 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common"
 )
 
-func presetToBlock(preset common.Tag, stats fetch.StatsFrame) common.StatsBlock[blockData] {
-	block := common.StatsBlock[blockData](common.NewBlock(preset, blockData{}))
+func presetToBlock(preset common.Tag, stats fetch.StatsFrame) common.StatsBlock[BlockData] {
+	block := common.StatsBlock[BlockData](common.NewBlock(preset, BlockData{}))
 	block.FillValue(stats)
 
 	switch preset {
 	case common.TagWN8:
-		block.Data.Flavor = blockFlavorSpecial
+		block.Data.Flavor = BlockFlavorSpecial
 
 	case common.TagBattles:
-		block.Data.Flavor = blockFlavorSpecial
+		block.Data.Flavor = BlockFlavorSpecial
 
 	case common.TagSurvivalRatio:
-		block.Data.Flavor = blockFlavorSecondary
+		block.Data.Flavor = BlockFlavorSecondary
 
 	case common.TagSurvivalPercent:
-		block.Data.Flavor = blockFlavorSecondary
+		block.Data.Flavor = BlockFlavorSecondary
 
 	case common.TagAccuracy:
-		block.Data.Flavor = blockFlavorSecondary
-
-	case common.TagAvgDamage:
-		block.Data.Flavor = blockFlavorDefault
+		block.Data.Flavor = BlockFlavorSecondary
 
 	case common.TagDamageRatio:
-		block.Data.Flavor = blockFlavorSecondary
+		block.Data.Flavor = BlockFlavorSecondary
 
 	default:
-		block.Data.Flavor = blockFlavorDefault
+		block.Data.Flavor = BlockFlavorDefault
 	}
 
 	return block

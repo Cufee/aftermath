@@ -9,7 +9,7 @@ type ratingColors struct {
 	Content    color.Color
 }
 
-func GetWN8Colors(r int) ratingColors {
+func GetWN8Colors(r float32) ratingColors {
 	if r > 0 && r < 301 {
 		return ratingColors{color.RGBA{255, 0, 0, 255}, color.White}
 	}
@@ -43,7 +43,7 @@ func GetWN8Colors(r int) ratingColors {
 	return ratingColors{color.Transparent, color.Transparent}
 }
 
-func GetWN8TierName(r int) string {
+func GetWN8TierName(r float32) string {
 	if r > 0 && r < 301 {
 		return "Very Bad"
 	}
