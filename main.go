@@ -23,30 +23,39 @@ import (
 //go:embed static/*
 var static embed.FS
 
-func main() {
-	// Logger
-	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
-	zerolog.SetGlobalLevel(level)
-
-	// Clients for stats checks
+func fetchClientFromEnv() fetch.Client {
+	// Dependencies
 	wgClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_PRIMARY_APP_ID"), os.Getenv("WG_PRIMARY_APP_RPS"), os.Getenv("WG_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_PROXY_HOST_LIST"))
 	if err != nil {
 		log.Fatalf("wargaming#NewClientFromEnv failed %s", err)
 	}
 	bsClient := blitzstars.NewClient(os.Getenv("BLITZ_STARS_API_URL"), time.Second*3)
+
+	// Fetch client
 	client, err := fetch.NewMultiSourceClient(wgClient, bsClient)
 	if err != nil {
 		log.Fatalf("fetch#NewMultiSourceClient failed %s", err)
 	}
 
+	return client
+}
+
+func main() {
+	// Logger
+	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
+	zerolog.SetGlobalLevel(level)
+
 	// Assets for rendering
-	err = assets.LoadAssets(static)
+	err := assets.LoadAssets(static)
 	if err != nil {
-		log.Fatalf("failed to load static assets %s", err)
+		log.Fatalf("assets#LoadAssets failed to load assets from static/ embed.FS %s", err)
 	}
 
+	statsClient := fetchClientFromEnv()
+
+	// test
 	var days time.Duration = 30
-	stats, err := client.PeriodStats("579553160", time.Now().Add(time.Hour*24*days*-1))
+	stats, err := statsClient.PeriodStats("579553160", time.Now().Add(time.Hour*24*days*-1))
 	if err != nil {
 		panic(err)
 	}
