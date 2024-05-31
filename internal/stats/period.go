@@ -1,22 +1,42 @@
 package stats
 
 import (
+	"context"
 	"image"
+	"time"
 
 	"github.com/cufee/aftermath/internal/stats/fetch"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period"
 	render "github.com/cufee/aftermath/internal/stats/render/period"
 )
 
-func PeriodCards(stats fetch.AccountStatsOverPeriod, opts ...prepare.Option) (prepare.Cards, error) {
-	return prepare.NewCards(stats, nil, opts...)
+type renderer struct {
+	fetchClient fetch.Client
 }
 
-func PeriodImage(stats fetch.AccountStatsOverPeriod, opts ...prepare.Option) (image.Image, error) {
-	cards, err := PeriodCards(stats, opts...)
+func (r *renderer) Period(ctx context.Context, accountId string, from time.Time) (image.Image, Metadata, error) {
+	meta := Metadata{}
+
+	stop := meta.Timer("fetchClient#PeriodStats")
+	stats, err := r.fetchClient.PeriodStats(ctx, accountId, from)
+	stop()
 	if err != nil {
-		return nil, err
+		return nil, meta, err
 	}
 
-	return render.CardsToImage(stats, cards, nil)
+	stop = meta.Timer("prepare#NewCards")
+	cards, err := prepare.NewCards(stats, nil)
+	stop()
+	if err != nil {
+		return nil, meta, err
+	}
+
+	stop = meta.Timer("render#CardsToImage")
+	image, err := render.CardsToImage(stats, cards, nil)
+	stop()
+	if err != nil {
+		return nil, meta, err
+	}
+
+	return image, meta, err
 }

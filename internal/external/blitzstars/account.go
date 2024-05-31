@@ -1,6 +1,7 @@
 package blitzstars
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,8 +17,13 @@ type TankHistoryEntry struct {
 	Stats           types.StatsFrame `json:"all"`
 }
 
-func (c *Client) AccountTankHistories(accountId string) (map[int][]TankHistoryEntry, error) {
-	res, err := c.http.Get(fmt.Sprintf("%s/tankhistories/for/%s", c.apiURL, accountId))
+func (c *Client) AccountTankHistories(ctx context.Context, accountId string) (map[int][]TankHistoryEntry, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/tankhistories/for/%s", c.apiURL, accountId), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.http.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

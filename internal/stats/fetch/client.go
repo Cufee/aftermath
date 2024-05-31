@@ -1,6 +1,7 @@
 package fetch
 
 import (
+	"context"
 	"time"
 
 	"github.com/cufee/am-wg-proxy-next/v2/types"
@@ -26,6 +27,6 @@ type StatsWithVehicles struct {
 
 type Client interface {
 	// Search(id string) (AccountStatsOverPeriod, error)
-	CurrentStats(id string) (AccountStatsOverPeriod, error)
-	PeriodStats(id string, from time.Time) (AccountStatsOverPeriod, error)
+	CurrentStats(ctx context.Context, id string) (AccountStatsOverPeriod, error)
+	PeriodStats(ctx context.Context, id string, from time.Time) (AccountStatsOverPeriod, error)
 }

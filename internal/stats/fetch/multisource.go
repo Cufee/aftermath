@@ -1,6 +1,7 @@
 package fetch
 
 import (
+	"context"
 	"slices"
 	"strconv"
 	"sync"
@@ -35,7 +36,7 @@ Get live account stats from wargaming
   - Each request will be retried c.retriesPerRequest times
   - This function will assume the player ID is valid and optimistically run all request concurrently, returning the first error once all request finish
 */
-func (c *multiSourceClient) CurrentStats(id string) (AccountStatsOverPeriod, error) {
+func (c *multiSourceClient) CurrentStats(ctx context.Context, id string) (AccountStatsOverPeriod, error) {
 	realm := c.wargaming.RealmFromAccountID(id)
 
 	var group sync.WaitGroup
@@ -47,16 +48,16 @@ func (c *multiSourceClient) CurrentStats(id string) (AccountStatsOverPeriod, err
 
 	go func() {
 		defer group.Done()
-		account = withRetry(func() (types.ExtendedAccount, error) { return c.wargaming.AccountByID(realm, id) }, c.retriesPerRequest, c.retrySleepInterval)
+		account = withRetry(func() (types.ExtendedAccount, error) { return c.wargaming.AccountByID(ctx, realm, id) }, c.retriesPerRequest, c.retrySleepInterval)
 	}()
 	go func() {
 		defer group.Done()
 		// we should not retry this request since it is not critical and will fail on accounts without a clan
-		clan, _ = c.wargaming.AccountClan(realm, id)
+		clan, _ = c.wargaming.AccountClan(ctx, realm, id)
 	}()
 	go func() {
 		defer group.Done()
-		vehicles = withRetry(func() ([]types.VehicleStatsFrame, error) { return c.wargaming.AccountVehicles(realm, id) }, c.retriesPerRequest, c.retrySleepInterval)
+		vehicles = withRetry(func() ([]types.VehicleStatsFrame, error) { return c.wargaming.AccountVehicles(ctx, realm, id) }, c.retriesPerRequest, c.retrySleepInterval)
 	}()
 
 	group.Wait()
@@ -73,8 +74,8 @@ func (c *multiSourceClient) CurrentStats(id string) (AccountStatsOverPeriod, err
 	return wargamingToStats(account.Data, clan, vehicles.Data), nil
 }
 
-func (c *multiSourceClient) PeriodStats(id string, periodStart time.Time) (AccountStatsOverPeriod, error) {
-	current, err := c.CurrentStats(id)
+func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodStart time.Time) (AccountStatsOverPeriod, error) {
+	current, err := c.CurrentStats(ctx, id)
 	if err != nil {
 		return AccountStatsOverPeriod{}, err
 	}
@@ -100,7 +101,9 @@ func (c *multiSourceClient) PeriodStats(id string, periodStart time.Time) (Accou
 		RatingBattles:  StatsWithVehicles{Vehicles: make(map[string]VehicleStatsFrame)},
 	}
 
-	histories := withRetry(func() (map[int][]blitzstars.TankHistoryEntry, error) { return c.blitzstars.AccountTankHistories(id) }, c.retriesPerRequest, c.retrySleepInterval)
+	histories := withRetry(func() (map[int][]blitzstars.TankHistoryEntry, error) {
+		return c.blitzstars.AccountTankHistories(ctx, id)
+	}, c.retriesPerRequest, c.retrySleepInterval)
 	if histories.Err != nil {
 		return AccountStatsOverPeriod{}, histories.Err
 	}

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"embed"
+	"fmt"
 	"image/png"
 	"log"
 	"os"
@@ -42,18 +44,17 @@ func main() {
 	statsClient := fetchClientFromEnv()
 
 	// test
-	var days time.Duration = 30
-	accountStats, err := statsClient.PeriodStats("579553160", time.Now().Add(time.Hour*24*days*-1))
-	if err != nil {
-		panic(err)
-	}
-
 	// localePrinter := func(s string) string { return "localized:" + s }
 
-	img, err := stats.PeriodImage(accountStats)
+	renderer := stats.NewRenderer(statsClient)
+
+	var days time.Duration = 30
+	img, meta, err := renderer.Period(context.Background(), "579553160", time.Now().Add(time.Hour*24*days*-1))
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Printf("rendered in %v\n", meta.TotalTime())
 
 	f, err := os.Create("tmp/test-image.png")
 	if err != nil {
