@@ -1,80 +1,11 @@
 package fetch
 
 import (
-	"fmt"
 	"math"
 	"time"
 
 	"go.dedis.ch/protobuf"
 )
-
-type ValueInt uint32
-
-func (value ValueInt) String() string {
-	return fmt.Sprintf("%d", value)
-}
-
-func (value ValueInt) Float() float32 {
-	return float32(value)
-}
-
-type ValueFloatDecimal float32
-
-func (value ValueFloatDecimal) String() string {
-	return fmt.Sprintf("%.2f", value)
-}
-
-func (value ValueFloatDecimal) Float() float32 {
-	return float32(value)
-}
-
-type ValueFloatPercent float32
-
-func (value ValueFloatPercent) String() string {
-	return fmt.Sprintf("%.2f%%", value)
-}
-
-func (value ValueFloatPercent) Float() float32 {
-	return float32(value)
-}
-
-type valueInvalid struct{}
-
-func (value valueInvalid) String() string {
-	return "-"
-}
-
-func (value valueInvalid) Float() float32 {
-	return -1
-}
-
-func (value valueInvalid) Equals(compareTo Value) bool {
-	return compareTo.Float() == value.Float()
-}
-
-var InvalidValue = valueInvalid{}
-
-type ValueSpecialRating float32
-
-func (value ValueSpecialRating) int() uint32 {
-	if value <= 0 {
-		return uint32(InvalidValue.Float())
-	}
-	return uint32((value * 10) + 3000)
-}
-
-func (value ValueSpecialRating) String() string {
-	return fmt.Sprintf("%d", int(value.int()))
-}
-
-func (value ValueSpecialRating) Float() float32 {
-	return float32(value.int())
-}
-
-type Value interface {
-	String() string
-	Float() float32
-}
 
 /*
 StatsFrame is a frame to structure statistics overview
@@ -176,7 +107,7 @@ func (r *StatsFrame) Survival() Value {
 		return InvalidValue
 	}
 	if r.survivalPercent == 0 {
-		r.survivalPercent = ValueFloatPercent(r.Survival().Float() / r.Battles.Float() * 100)
+		r.survivalPercent = ValueFloatPercent(r.BattlesSurvived.Float() / r.Battles.Float() * 100)
 	}
 	return r.survivalPercent
 }
