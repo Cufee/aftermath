@@ -130,7 +130,7 @@ model UserContent {
 //
 
 model Account {
-  id        Int      @id
+  id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -141,8 +141,8 @@ model Account {
   nickname String
   private  Boolean @default(false)
 
-  clan   Clan? @relation(fields: [clanId], references: [id])
-  clanId Int?
+  clan   Clan?   @relation(fields: [clanId], references: [id])
+  clanId String?
 
   @@index([realm])
   @@index([clanId])
@@ -157,9 +157,9 @@ model AccountSnapshot {
   updatedAt DateTime @updatedAt
 
   type           String
-  accountId      Int
+  accountId      String
   referenceId    String
-  lastBattleTime Int
+  lastBattleTime DateTime
 
   dataEncoded String
 
@@ -177,10 +177,10 @@ model AccountRatingSeasonSnapshot {
   createdAt DateTime
   updatedAt DateTime @updatedAt
 
-  seasonId       Int
-  accountId      Int
+  seasonId       String
+  accountId      String
   referenceId    String
-  lastBattleTime Int
+  lastBattleTime DateTime
 
   dataEncoded String
 
@@ -191,7 +191,7 @@ model AccountRatingSeasonSnapshot {
 }
 
 model Clan {
-  id        Int      @id
+  id        String   @id
   createdAt DateTime
   updatedAt DateTime @updatedAt
 
@@ -219,7 +219,7 @@ model VehicleAverage {
 }
 
 model Vehicle {
-  id        Int      @id
+  id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -284,7 +284,7 @@ model DiscordBotLiveSession {
   messageId String
 
   lastUpdate     DateTime @default(now())
-  lastBattleTime Int      @default(0)
+  lastBattleTime DateTime @default(now())
 
   optionsEncoded String
 
@@ -299,7 +299,7 @@ model StatsRequestsOptions {
 
   type        String
   userId      String
-  accountId   Int
+  accountId   String
   referenceId String
 
   dataEncoded String
