@@ -1,11 +1,11 @@
 package period
 
 import (
-	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/common"
 )
 
-func presetToBlock(preset common.Tag, stats fetch.StatsFrame) common.StatsBlock[BlockData] {
+func presetToBlock(preset common.Tag, stats frame.StatsFrame) common.StatsBlock[BlockData] {
 	block := common.StatsBlock[BlockData](common.NewBlock(preset, BlockData{}))
 	block.FillValue(stats)
 

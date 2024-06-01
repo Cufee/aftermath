@@ -2,13 +2,13 @@ package fetch
 
 import (
 	"context"
-	"slices"
-	"strconv"
 	"sync"
 	"time"
 
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
+	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
@@ -16,12 +16,14 @@ type multiSourceClient struct {
 	retriesPerRequest  int
 	retrySleepInterval time.Duration
 
+	database   *database.Client
 	wargaming  wargaming.Client
 	blitzstars blitzstars.Client
 }
 
-func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Client) (Client, error) {
+func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Client, database *database.Client) (Client, error) {
 	mc := multiSourceClient{
+		database:   database,
 		wargaming:  wargaming,
 		blitzstars: blitzstars,
 
@@ -75,73 +77,62 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string) (Accoun
 }
 
 func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodStart time.Time) (AccountStatsOverPeriod, error) {
-	current, err := c.CurrentStats(ctx, id)
-	if err != nil {
-		return AccountStatsOverPeriod{}, err
-	}
+	var histories DataWithErr[map[int][]blitzstars.TankHistoryEntry]
+	var averages DataWithErr[map[string]frame.StatsFrame]
+	var current DataWithErr[AccountStatsOverPeriod]
 
-	// TODO: Get tank averages for WN8
+	var group sync.WaitGroup
+	group.Add(1)
+	go func() {
+		defer group.Done()
+		// Get current stats
+		stats, err := c.CurrentStats(ctx, id)
+		current = DataWithErr[AccountStatsOverPeriod]{stats, err}
+		if err != nil {
+			return
+		}
+
+		// Get vehicle averages from db, a list of tanks is required for a more optimal query here
+		var vehicles []string
+		for _, vehicle := range stats.RegularBattles.Vehicles {
+			vehicles = append(vehicles, vehicle.VehicleID)
+		}
+		data, err := c.database.GetVehicleAverages(ctx, vehicles)
+		averages = DataWithErr[map[string]frame.StatsFrame]{data, err}
+	}()
 
 	// TODO: Lookup a session from the database first
 
 	// Return career stats if stats are requested for 90+ days, blitzstars and aftermath do not track that far
 	if time.Since(periodStart).Hours()/24 >= 90 {
+		group.Wait()
+		if current.Err != nil {
+			return AccountStatsOverPeriod{}, current.Err
+		}
+
 		// TODO: Set wn8 for all vehicles
-		return current, nil
+
+		return current.Data, nil
 	}
 
-	// blitzstars does not provide rating battle data
-	periodStats := AccountStatsOverPeriod{
-		Account:        current.Account,
-		Clan:           current.Clan,
-		PeriodStart:    periodStart,
-		PeriodEnd:      current.LastBattleTime,
-		LastBattleTime: current.LastBattleTime,
-		RegularBattles: StatsWithVehicles{Vehicles: make(map[string]VehicleStatsFrame)},
-		RatingBattles:  StatsWithVehicles{Vehicles: make(map[string]VehicleStatsFrame)},
-	}
+	group.Add(1)
+	go func() {
+		defer group.Done()
+		histories = withRetry(func() (map[int][]blitzstars.TankHistoryEntry, error) {
+			return c.blitzstars.AccountTankHistories(ctx, id)
+		}, c.retriesPerRequest, c.retrySleepInterval)
+	}()
 
-	histories := withRetry(func() (map[int][]blitzstars.TankHistoryEntry, error) {
-		return c.blitzstars.AccountTankHistories(ctx, id)
-	}, c.retriesPerRequest, c.retrySleepInterval)
+	// wait for all requests to finish and check errors
+	group.Wait()
+	if current.Err != nil {
+		return AccountStatsOverPeriod{}, current.Err
+	}
 	if histories.Err != nil {
 		return AccountStatsOverPeriod{}, histories.Err
 	}
 
-	for _, vehicle := range current.RegularBattles.Vehicles {
-		if vehicle.LastBattleTime.Before(periodStart) {
-			continue
-		}
-
-		id, err := strconv.Atoi(vehicle.VehicleID)
-		if err != nil || id == 0 {
-			continue
-		}
-
-		entries := histories.Data[id]
-		// Sort entries by number of battles in descending order
-		slices.SortFunc(entries, func(i, j blitzstars.TankHistoryEntry) int {
-			return j.Stats.Battles - i.Stats.Battles
-		})
-
-		var selectedEntry blitzstars.TankHistoryEntry
-		for _, entry := range entries {
-			if entry.LastBattleTime < int(periodStats.PeriodStart.Unix()) {
-				selectedEntry = entry
-				break
-			}
-		}
-
-		if selectedEntry.Stats.Battles < int(vehicle.Battles) {
-			selectedFrame := wargamingToFrame(selectedEntry.Stats)
-			vehicle.StatsFrame.Subtract(selectedFrame)
-
-			// TODO: add WN8
-
-			periodStats.RegularBattles.Vehicles[vehicle.VehicleID] = vehicle
-			periodStats.RegularBattles.Add(*vehicle.StatsFrame)
-		}
-	}
-
-	return periodStats, nil
+	current.Data.PeriodStart = periodStart
+	current.Data.RegularBattles = blitzstarsToStats(current.Data.RegularBattles.Vehicles, histories.Data, averages.Data, periodStart)
+	return current.Data, nil
 }

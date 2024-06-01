@@ -23,6 +23,7 @@ func (r *renderer) Period(ctx context.Context, accountId string, from time.Time)
 	if err != nil {
 		return nil, meta, err
 	}
+	meta.Stats = stats
 
 	stop = meta.Timer("prepare#NewCards")
 	cards, err := prepare.NewCards(stats, nil)

@@ -3,7 +3,7 @@ package common
 import (
 	"errors"
 
-	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
 type cardType string
@@ -27,7 +27,7 @@ type StatsBlock[D any] struct {
 	Data  D           `json:"data"`
 	Tag   Tag         `json:"tag"`
 	Label string      `json:"label"`
-	Value fetch.Value `json:"value"`
+	Value frame.Value `json:"value"`
 }
 
 func NewBlock[D any](tag Tag, data D) StatsBlock[D] {
@@ -38,7 +38,7 @@ func (block *StatsBlock[D]) Localize(printer func(string) string) {
 	block.Label = printer(block.Label)
 }
 
-func (block *StatsBlock[D]) FillValue(stats fetch.StatsFrame) error {
+func (block *StatsBlock[D]) FillValue(stats frame.StatsFrame) error {
 	switch block.Tag {
 	case TagWN8:
 		block.Value = stats.WN8()

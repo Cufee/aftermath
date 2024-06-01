@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/stats"
@@ -48,7 +49,7 @@ func main() {
 
 	renderer := stats.NewRenderer(statsClient)
 
-	var days time.Duration = 30
+	var days time.Duration = 60
 	img, meta, err := renderer.Period(context.Background(), "579553160", time.Now().Add(time.Hour*24*days*-1))
 	if err != nil {
 		panic(err)
@@ -75,10 +76,14 @@ func fetchClientFromEnv() fetch.Client {
 	if err != nil {
 		log.Fatalf("wargaming#NewClientFromEnv failed %s", err)
 	}
+	dbClient, err := database.NewClient()
+	if err != nil {
+		log.Fatalf("database#NewClient failed %s", err)
+	}
 	bsClient := blitzstars.NewClient(os.Getenv("BLITZ_STARS_API_URL"), time.Second*3)
 
 	// Fetch client
-	client, err := fetch.NewMultiSourceClient(wgClient, bsClient)
+	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, dbClient)
 	if err != nil {
 		log.Fatalf("fetch#NewMultiSourceClient failed %s", err)
 	}

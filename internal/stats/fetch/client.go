@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
@@ -21,8 +22,8 @@ type AccountStatsOverPeriod struct {
 }
 
 type StatsWithVehicles struct {
-	StatsFrame
-	Vehicles map[string]VehicleStatsFrame
+	frame.StatsFrame
+	Vehicles map[string]frame.VehicleStatsFrame
 }
 
 type Client interface {

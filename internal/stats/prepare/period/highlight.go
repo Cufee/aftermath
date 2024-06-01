@@ -1,7 +1,7 @@
 package period
 
 import (
-	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/common"
 )
 
@@ -19,11 +19,11 @@ var (
 
 type highlightedVehicle struct {
 	highlight highlight
-	vehicle   fetch.VehicleStatsFrame
-	value     fetch.Value
+	vehicle   frame.VehicleStatsFrame
+	value     frame.Value
 }
 
-func getHighlightedVehicles(highlights []highlight, vehicles map[string]fetch.VehicleStatsFrame, minBattles int) []highlightedVehicle {
+func getHighlightedVehicles(highlights []highlight, vehicles map[string]frame.VehicleStatsFrame, minBattles int) []highlightedVehicle {
 	leadersMap := make(map[string]highlightedVehicle)
 	for _, vehicle := range vehicles {
 		if int(vehicle.Battles.Float()) < minBattles {
