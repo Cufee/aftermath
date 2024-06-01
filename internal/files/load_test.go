@@ -1,4 +1,4 @@
-package assets
+package files
 
 import (
 	"io/fs"
@@ -18,11 +18,11 @@ func TestGetAllFiles(t *testing.T) {
 		},
 	}
 
-	files, err := readAllFiles(mockFs, ".")
+	files, err := ReadDirFiles(mockFs, ".")
 	assert.NoError(t, err)
 	assert.Equal(t, string(files["file.txt"]), "file.txt value")
 	assert.Equal(t, string(files["sub_dir/file.txt"]), "sub_dir/file.txt value")
 
-	_, err = readAllFiles(nil, ".")
+	_, err = ReadDirFiles(nil, ".")
 	assert.ErrorIs(t, err, fs.ErrInvalid)
 }

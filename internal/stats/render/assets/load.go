@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cufee/aftermath/internal/files"
 	"github.com/golang/freetype/truetype"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/image/font"
@@ -19,17 +20,17 @@ var fontsMap = make(map[string]*truetype.Font)
 var imagesMap = make(map[string]image.Image)
 
 func LoadAssets(assets fs.FS) error {
-	files, err := readAllFiles(assets, ".")
+	dirFiles, err := files.ReadDirFiles(assets, ".")
 	if err != nil {
 		return err
 	}
 
-	fontsMap, err = loadFonts(files)
+	fontsMap, err = loadFonts(dirFiles)
 	if err != nil {
 		return err
 	}
 
-	imagesMap, err = loadImages(files)
+	imagesMap, err = loadImages(dirFiles)
 	if err != nil {
 		return err
 	}
@@ -76,35 +77,6 @@ func loadImages(files map[string][]byte) (map[string]image.Image, error) {
 	}
 
 	return imagesMap, nil
-}
-
-func readAllFiles(dir fs.FS, path string) (map[string][]byte, error) {
-	if dir == nil {
-		return nil, fs.ErrInvalid
-	}
-
-	files := make(map[string][]byte)
-
-	fs.WalkDir(dir, path, func(path string, d fs.DirEntry, err error) error {
-		// If we are not able to access a file/directory for some reason, continue
-		if err != nil {
-			log.Err(err).Str("path", path).Msg("failed to read a file")
-			return nil
-		}
-
-		if d.IsDir() {
-			return nil
-		}
-
-		data, err := fs.ReadFile(dir, path)
-		if err != nil {
-			return err
-		}
-		files[path] = data
-		return nil
-	})
-
-	return files, nil
 }
 
 func GetLoadedFontFaces(name string, sizes ...float64) (map[float64]font.Face, bool) {
