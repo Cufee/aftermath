@@ -16,6 +16,7 @@ require (
 	go.dedis.ch/protobuf v1.0.11
 	golang.org/x/exp v0.0.0-20240530194437-404ba88c7ed0
 	golang.org/x/image v0.16.0
+	golang.org/x/text v0.15.0
 )
 
 require (
@@ -25,6 +26,5 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
