@@ -17,7 +17,7 @@ type TankHistoryEntry struct {
 	Stats           types.StatsFrame `json:"all"`
 }
 
-func (c *Client) AccountTankHistories(ctx context.Context, accountId string) (map[int][]TankHistoryEntry, error) {
+func (c *client) AccountTankHistories(ctx context.Context, accountId string) (map[int][]TankHistoryEntry, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/tankhistories/for/%s", c.apiURL, accountId), nil)
 	if err != nil {
 		return nil, err

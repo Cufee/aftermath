@@ -78,19 +78,18 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 
 	var renderedCards []common.Block
 
-	// We first footer in order to calculate the minimum required width
-	// Footer Card
+	// We first render a footer in order to calculate the minimum required width
 	var footerCard common.Block
 	{
 		var footer []string
-		// switch strings.ToLower(wargaming.Clients.Live.RealmFromAccountID(strconv.Itoa(stats.Account.ID))) {
-		// case "na":
-		// 	footer = append(footer, "North America")
-		// case "eu":
-		// 	footer = append(footer, "Europe")
-		// case "as":
-		// 	footer = append(footer, "Asia")
-		// }
+		switch strings.ToLower(stats.Realm) {
+		case "na":
+			footer = append(footer, "North America")
+		case "eu":
+			footer = append(footer, "Europe")
+		case "as":
+			footer = append(footer, "Asia")
+		}
 
 		sessionTo := stats.PeriodEnd.Format("January 2, 2006")
 		sessionFrom := stats.PeriodStart.Format("January 2, 2006")

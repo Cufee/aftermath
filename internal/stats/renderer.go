@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/stats/fetch"
+	"golang.org/x/text/language"
 )
 
 type Renderer interface {
@@ -14,6 +15,6 @@ type Renderer interface {
 	// Session(accountId string, from time.Time) (image.Image, error)
 }
 
-func NewRenderer(fetch fetch.Client) Renderer {
-	return &renderer{fetch}
+func NewRenderer(fetch fetch.Client, locale language.Tag) *renderer {
+	return &renderer{fetch, locale}
 }

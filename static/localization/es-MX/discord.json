@@ -1,84 +1,494 @@
-{
-  "advertise_command_background": "Algún mensaje",
-  "advertise_command_fancy": "Algún mensaje",
-  "advertise_command_help": "Algún mensaje",
-  "advertise_command_link": "Algún mensaje",
-  "advertise_command_live": "Algún mensaje",
-  "advertise_command_session": "Algún mensaje",
-  "advertise_command_stats": "Algún mensaje",
-  "advertise_command_subscribe": "Algún mensaje",
-  "advertise_command_verify": "Algún mensaje",
-  "advertise_command_widget": "Algún mensaje",
-  "label_realm_na": "Norteamérica",
-  "label_realm_eu": "Europa",
-  "label_nickname": "Nombre del jugador",
-  "label_realm_as": "Asia",
-  "label_server": "Servidor",
-  "label_discord_member": "Usuario de Discord",
-  "commands_background_description": "¡Sube tu propio fondo para las estadísticas!",
-  "label_days": "Days",
-  "label_ban_reason": "Reason",
-  "commands_background_option_link": "Enlace a una imagen PNG o JPEG",
-  "commands_background_option_image": "Imagen PNG o JPEG",
-  "commands_background_updated_successfully": "## :tada: Tu fondo ha sido actualizado. ¡Checa tu sesión de nuevo!",
-  "commands_fancy_description": "¡Elige un fondo para tus estadísticas!",
-  "commands_fancy_selection_expired": "_Esas opciones ya no están disponibles, usa `/fancy` para ver los nuevos fondos_",
-  "commands_fancy_updated_successfully": "## :tada: Tu fondo fue actualizado\n¡Intenta revisar tu sesión de nuevo!",
-  "commands_help_description": "¿Cómo usar el bot? ¡Dale clic aquí!",
-  "commands_help_refresh_times_fmt": "Norteamérica: <t:%d:t> (<t:%d:R>)\nEuropa: <t:%d:t> (<t:%d:R>)\nAsia: <t:%d:t> (<t:%d:R>)",
-  "commands_help_message_fmt": "## :chart_with_upwards_trend: Sigue tu progreso\n### ○ /session\nGenera una imagen con las estadísticas de tu sesión actual. También puedes mencionar a otro usuario para ver sus estadísticas.\n### Las sesiones se reinician diariamente a esta hora:\n%s\n### ○ /live <:aftermath_plus:1208860683211513957>\nInicia una nueva sesión que se actualizará automáticamente mientras juegas.\n### ○ /stats\nObtén una imagen con tus estadísticas generales. También puedes mencionar a otro usuario para ver sus estadísticas.\n## :film_frames: Profundiza en cada batalla\n### ○ /replay\nSube tu replay para un análisis detallado.\n## :link: Comunica a Aftermath tu apodo en Blitz\n### ○ /link\nConfigura una cuenta predeterminada usando _/link_ para usar _/session_ y _/stats_ sin necesidad de especificar un apodo y servidor.\n### ○ /verify\nVerifica tu cuenta de Wargaming para desbloquear más funciones.\n## :frame_photo: Agrega estilo\n### ○ /background <:aftermath_plus:1208860683211513957>\nSube tu propio fondo para las sesiones.\n### ○ /fancy\nElige un fondo de la lista de opciones disponibles.\n*Los fondos para _/fancy_ se actualizarán %s*\n## :desktop: Destaca en tu transmisión\n### ○ /widget\nGenera un enlace al widget para tu transmisión en vivo. El widget se actualizará automáticamente con tus últimas estadísticas de sesión.\n\n_¿Encontraste un error en la traducción? Avísanos en el servidor oficial de Aftermath_\n## :heart: ¡Comparte Aftermath!",
-  "commands_link_description": "Vincula tu cuenta de Blitz",
-  "commands_link_linked_successfully_fmt": "¡Listo! Aftermath ahora mostrará por defecto **%s** en **%s**. Usa `/verify` para confirmar tu cuenta.",
-  "commands_live_description": "Inicia una nueva sesión en vivo que se actualizará automáticamente mientras juegas",
-  "commands_live_session_started": "¡Genial! Tu sesión en vivo ha comenzado. Pronto recibirás un mensaje directo.",
-  "commands_live_session_ended": "Tu sesión en vivo ha terminado.",
-  "commands_live_session_label_fmt": "### Sesión en vivo desde <t:%d:f>\n_Actualizada <t:%d:R>_",
-  "commands_session_description": "Revisa las estadísticas de tu última sesión",
-  "commands_session_refresh_expired": "Este botón de actualización ha expirado. Por favor, utiliza el comando `/session` en su lugar.",
-  "commands_replay_description": "Analyze your replay and view stats for every single player",
-  "commands_subscribe_description": "Obtén más información sobre las suscripciones a Aftermath",
-  "commands_replay_option_file": "Replay file",
-  "commands_replay_option_link": "A link to your replay file",
-  "commands_subscribe_action_button": "Subscribe on Aftermath Official",
-  "commands_stats_description": "View your career stats",
-  "commands_subscribe_message": "## You can support Aftermath and unlock some awesome features using Discord Server Subscriptions!",
-  "commands_verify_description": "Verifica tu cuenta de Wargaming para desbloquear más funciones.",
-  "commands_verify_action_button": "Verificar en Wargaming.net",
-  "commands_verify_message": "## Haz clic en el botón de abajo para verificar tu cuenta\nEste enlace está activo durante 5 minutos, por favor no lo compartas con nadie.",
-  "commands_widget_description": "Obtén un widget de transmisión en vivo para tu cuenta",
-  "commands_widget_option_flavor": "Apariencia del widget",
-  "commands_widget_flavor_legacy": "Detallado, incluye carrera",
-  "commands_widget_flavor_ticker": "Simplificado, solo sesión",
-  "commands_widget_message_fmt": "### ¡Aquí tienes el enlace a tu widget!\n%s\n\nAgrégalo como fuente de navegador en OBS. Coloca el siguiente código en la sección de CSS personalizado\n```css\n:root { background-color: rgba(0, 0, 0, 0); white-space: nowrap; }\n```También puedes ajustar el widget a tu UI con\n```css\n.widget { width: 100%%; }```",
-  "buttons_join_primary_guild": "Únete a Aftermath Oficial",
-  "buttons_add_aftermath_to_your_server": "Agrega Aftermath a tu servidor",
-  "buttons_end_live_session": "Terminar sesión",
-  "buttons_try_again": "Intentar de nuevo",
-  "buttons_report_issue": "Reportar un problema",
-  "buttons_refresh": "Actualizar",
-  "errors_generic_unhandled_reported": "Algo inesperado sucedió y tu comando no se ejecutó.\n*Este error se ha informado automáticamente, también puedes contactar con nuestro equipo en Aftermath Oficial*",
-  "errors_generic_unhandled_not_reported": "Algo inesperado sucedió y tu comando no se ejecutó.\n*Puedes contactar con nuestro equipo en Aftermath Oficial si deseas informar de este error*",
-  "errors_generic_command_missing_permissions": "No tienes permiso para usar este comando.",
-  "errors_generic_command_not_subscribed": "Esta función de Aftermath solo está disponible para usuarios con una suscripción activa.\nPuedes suscribirte usando el comando `/subscribe`.",
-  "errors_generic_connection_not_verified": "Parece que aún no has verificado tu cuenta de Blitz. Prueba con el comando `/verify`.",
-  "errors_generic_nickname_invalid": "Esto no parece ser un nombre de jugador válido, asegúrate de estar usando tu nombre en el juego.",
-  "errors_generic_nickname_not_found_fmt": "No se pudo encontrar un jugador llamado **%s** en **%s**. ¿Estaba el nombre escrito correctamente?",
-  "errors_generic_user_restricted_fmt": "You are banned from using some or all features of Aftermath until <t:%d:t>",
-  "errors_generic_missing_dm_permissions": "Aftermath no puede enviarte un mensaje directo.",
-  "errors_generic_user_spam_detected": "Hey there! It seems like you're using commands too quickly. To ensure a smooth experience for everyone, please refrain from spamming.",
-  "errors_generic_target_user_has_no_connection": "El usuario mencionado no tiene una cuenta de Blitz vinculada.",
-  "errors_generic_current_user_has_no_connection": "Parece que aún no tenemos tu apodo de Blitz. Prueba con el comando `/link`.",
-  "errors_generic_nickname_and_server_required": "Necesito tanto el nombre como el servidor para encontrar tu cuenta. También puedes usar el comando `/link` para configurar una cuenta predeterminada.",
-  "errors_generic_wargaming_outage": "Parece que Wargaming está experimentando algunos problemas temporales. Por favor, inténtalo de nuevo en unos momentos.",
-  "errors_background_not_subscribed": "Esta función de Aftermath solo está disponible para usuarios con una suscripción activa.\nPuedes suscribirte usando el comando `/subscribe` o elegir un fondo usando `/fancy`.",
-  "errors_background_invalid_attachment": "El archivo adjunto no es válido.",
-  "errors_background_missing_image": "Necesitas adjuntar una imagen o proporcionar un enlace para subir un fondo personalizado.",
-  "errors_background_invalid_image": "La imagen proporcionada es inválida. Por favor, asegúrate de que sea una imagen PNG o JPEG.",
-  "errors_link_missing_name_and_server": "Necesito tanto el nombre como el servidor para encontrar tu cuenta.",
-  "errors_verify_missing_server": "Por favor, selecciona un servidor en el que esté registrada tu cuenta.",
-  "errors_mention_missing_dm_permissions_fmt": "Hey %s, Aftermath is not able to send you a direct message. Try using `/help` instead.",
-  "errors_generic_wargaming_invalid_account": "This account is marked private by Wargaming and no stats are available for it at this time.",
-  "errors_generic_aftermath_outage": "Aftermath is currently undergoing maintenance and is temporarily unavailable. Please try again in a few moments.",
-  "errors_replay_invalid_attachment": "The file you have attached does not look like a valid WoT Blitz replay.",
-  "errors_replay_missing_attachment": "You need to provide a link or attach a WoT Blitz replay file."
-}
+[
+  {
+    "key": "advertise_command_widget",
+    "value": "Algún mensaje",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_widget_flavor_legacy",
+    "value": "Detallado, incluye carrera",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_link_missing_name_and_server",
+    "value": "Necesito tanto el nombre como el servidor para encontrar tu cuenta.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_realm_eu",
+    "value": "Europa",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_replay_invalid_attachment",
+    "value": "The file you have attached does not look like a valid WoT Blitz replay.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_subscribe_message",
+    "value": "## You can support Aftermath and unlock some awesome features using Discord Server Subscriptions!",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_background_description",
+    "value": "¡Sube tu propio fondo para las estadísticas!",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_user_spam_detected",
+    "value": "Hey there! It seems like you're using commands too quickly. To ensure a smooth experience for everyone, please refrain from spamming.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_verify_action_button",
+    "value": "Verificar en Wargaming.net",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "advertise_command_stats",
+    "value": "Algún mensaje",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "buttons_end_live_session",
+    "value": "Terminar sesión",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "advertise_command_verify",
+    "value": "Algún mensaje",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_command_not_subscribed",
+    "value": "Esta función de Aftermath solo está disponible para usuarios con una suscripción activa.\nPuedes suscribirte usando el comando `/subscribe`.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_user_restricted_fmt",
+    "value": "You are banned from using some or all features of Aftermath until \u003ct:%d:t\u003e",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_replay_missing_attachment",
+    "value": "You need to provide a link or attach a WoT Blitz replay file.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_live_session_started",
+    "value": "¡Genial! Tu sesión en vivo ha comenzado. Pronto recibirás un mensaje directo.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "advertise_command_link",
+    "value": "Algún mensaje",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_nickname_and_server_required",
+    "value": "Necesito tanto el nombre como el servidor para encontrar tu cuenta. También puedes usar el comando `/link` para configurar una cuenta predeterminada.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "buttons_report_issue",
+    "value": "Reportar un problema",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_widget_description",
+    "value": "Obtén un widget de transmisión en vivo para tu cuenta",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_aftermath_outage",
+    "value": "Aftermath is currently undergoing maintenance and is temporarily unavailable. Please try again in a few moments.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_link_description",
+    "value": "Vincula tu cuenta de Blitz",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_days",
+    "value": "Days",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_verify_message",
+    "value": "## Haz clic en el botón de abajo para verificar tu cuenta\nEste enlace está activo durante 5 minutos, por favor no lo compartas con nadie.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_nickname",
+    "value": "Nombre del jugador",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_subscribe_action_button",
+    "value": "Subscribe on Aftermath Official",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "advertise_command_help",
+    "value": "Algún mensaje",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_help_refresh_times_fmt",
+    "value": "Norteamérica: \u003ct:%d:t\u003e (\u003ct:%d:R\u003e)\nEuropa: \u003ct:%d:t\u003e (\u003ct:%d:R\u003e)\nAsia: \u003ct:%d:t\u003e (\u003ct:%d:R\u003e)",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_live_session_ended",
+    "value": "Tu sesión en vivo ha terminado.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_nickname_invalid",
+    "value": "Esto no parece ser un nombre de jugador válido, asegúrate de estar usando tu nombre en el juego.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_help_message_fmt",
+    "value": "## :chart_with_upwards_trend: Sigue tu progreso\n### ○ /session\nGenera una imagen con las estadísticas de tu sesión actual. También puedes mencionar a otro usuario para ver sus estadísticas.\n### Las sesiones se reinician diariamente a esta hora:\n%s\n### ○ /live \u003c:aftermath_plus:1208860683211513957\u003e\nInicia una nueva sesión que se actualizará automáticamente mientras juegas.\n### ○ /stats\nObtén una imagen con tus estadísticas generales. También puedes mencionar a otro usuario para ver sus estadísticas.\n## :film_frames: Profundiza en cada batalla\n### ○ /replay\nSube tu replay para un análisis detallado.\n## :link: Comunica a Aftermath tu apodo en Blitz\n### ○ /link\nConfigura una cuenta predeterminada usando _/link_ para usar _/session_ y _/stats_ sin necesidad de especificar un apodo y servidor.\n### ○ /verify\nVerifica tu cuenta de Wargaming para desbloquear más funciones.\n## :frame_photo: Agrega estilo\n### ○ /background \u003c:aftermath_plus:1208860683211513957\u003e\nSube tu propio fondo para las sesiones.\n### ○ /fancy\nElige un fondo de la lista de opciones disponibles.\n*Los fondos para _/fancy_ se actualizarán %s*\n## :desktop: Destaca en tu transmisión\n### ○ /widget\nGenera un enlace al widget para tu transmisión en vivo. El widget se actualizará automáticamente con tus últimas estadísticas de sesión.\n\n_¿Encontraste un error en la traducción? Avísanos en el servidor oficial de Aftermath_\n## :heart: ¡Comparte Aftermath!",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_stats_description",
+    "value": "View your career stats",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_discord_member",
+    "value": "Usuario de Discord",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_fancy_description",
+    "value": "¡Elige un fondo para tus estadísticas!",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_replay_option_file",
+    "value": "Replay file",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "advertise_command_background",
+    "value": "Algún mensaje",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_missing_dm_permissions",
+    "value": "Aftermath no puede enviarte un mensaje directo.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_subscribe_description",
+    "value": "Obtén más información sobre las suscripciones a Aftermath",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_unhandled_reported",
+    "value": "Algo inesperado sucedió y tu comando no se ejecutó.\n*Este error se ha informado automáticamente, también puedes contactar con nuestro equipo en Aftermath Oficial*",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_widget_option_flavor",
+    "value": "Apariencia del widget",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_verify_description",
+    "value": "Verifica tu cuenta de Wargaming para desbloquear más funciones.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_widget_message_fmt",
+    "value": "### ¡Aquí tienes el enlace a tu widget!\n%s\n\nAgrégalo como fuente de navegador en OBS. Coloca el siguiente código en la sección de CSS personalizado\n```css\n:root { background-color: rgba(0, 0, 0, 0); white-space: nowrap; }\n```También puedes ajustar el widget a tu UI con\n```css\n.widget { width: 100%%; }```",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_background_updated_successfully",
+    "value": "## :tada: Tu fondo ha sido actualizado. ¡Checa tu sesión de nuevo!",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_command_missing_permissions",
+    "value": "No tienes permiso para usar este comando.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "buttons_join_primary_guild",
+    "value": "Únete a Aftermath Oficial",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_current_user_has_no_connection",
+    "value": "Parece que aún no tenemos tu apodo de Blitz. Prueba con el comando `/link`.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_session_refresh_expired",
+    "value": "Este botón de actualización ha expirado. Por favor, utiliza el comando `/session` en su lugar.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_widget_flavor_ticker",
+    "value": "Simplificado, solo sesión",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_server",
+    "value": "Servidor",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "buttons_try_again",
+    "value": "Intentar de nuevo",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_live_description",
+    "value": "Inicia una nueva sesión en vivo que se actualizará automáticamente mientras juegas",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_background_option_link",
+    "value": "Enlace a una imagen PNG o JPEG",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_background_option_image",
+    "value": "Imagen PNG o JPEG",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_session_description",
+    "value": "Revisa las estadísticas de tu última sesión",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_verify_missing_server",
+    "value": "Por favor, selecciona un servidor en el que esté registrada tu cuenta.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_wargaming_outage",
+    "value": "Parece que Wargaming está experimentando algunos problemas temporales. Por favor, inténtalo de nuevo en unos momentos.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_unhandled_not_reported",
+    "value": "Algo inesperado sucedió y tu comando no se ejecutó.\n*Puedes contactar con nuestro equipo en Aftermath Oficial si deseas informar de este error*",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_nickname_not_found_fmt",
+    "value": "No se pudo encontrar un jugador llamado **%s** en **%s**. ¿Estaba el nombre escrito correctamente?",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_target_user_has_no_connection",
+    "value": "El usuario mencionado no tiene una cuenta de Blitz vinculada.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_background_not_subscribed",
+    "value": "Esta función de Aftermath solo está disponible para usuarios con una suscripción activa.\nPuedes suscribirte usando el comando `/subscribe` o elegir un fondo usando `/fancy`.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_mention_missing_dm_permissions_fmt",
+    "value": "Hey %s, Aftermath is not able to send you a direct message. Try using `/help` instead.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_replay_option_link",
+    "value": "A link to your replay file",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_link_linked_successfully_fmt",
+    "value": "¡Listo! Aftermath ahora mostrará por defecto **%s** en **%s**. Usa `/verify` para confirmar tu cuenta.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_ban_reason",
+    "value": "Reason",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "buttons_add_aftermath_to_your_server",
+    "value": "Agrega Aftermath a tu servidor",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_realm_as",
+    "value": "Asia",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_background_invalid_image",
+    "value": "La imagen proporcionada es inválida. Por favor, asegúrate de que sea una imagen PNG o JPEG.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_help_description",
+    "value": "¿Cómo usar el bot? ¡Dale clic aquí!",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_background_invalid_attachment",
+    "value": "El archivo adjunto no es válido.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "advertise_command_live",
+    "value": "Algún mensaje",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_live_session_label_fmt",
+    "value": "### Sesión en vivo desde \u003ct:%d:f\u003e\n_Actualizada \u003ct:%d:R\u003e_",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "advertise_command_fancy",
+    "value": "Algún mensaje",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_connection_not_verified",
+    "value": "Parece que aún no has verificado tu cuenta de Blitz. Prueba con el comando `/verify`.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_background_missing_image",
+    "value": "Necesitas adjuntar una imagen o proporcionar un enlace para subir un fondo personalizado.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_replay_description",
+    "value": "Analyze your replay and view stats for every single player",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "buttons_refresh",
+    "value": "Actualizar",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_realm_na",
+    "value": "Norteamérica",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "advertise_command_session",
+    "value": "Algún mensaje",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "errors_generic_wargaming_invalid_account",
+    "value": "This account is marked private by Wargaming and no stats are available for it at this time.",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_fancy_selection_expired",
+    "value": "_Esas opciones ya no están disponibles, usa `/fancy` para ver los nuevos fondos_",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "advertise_command_subscribe",
+    "value": "Algún mensaje",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "commands_fancy_updated_successfully",
+    "value": "## :tada: Tu fondo fue actualizado\n¡Intenta revisar tu sesión de nuevo!",
+    "notes": "",
+    "context": ""
+  }
+]

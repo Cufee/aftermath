@@ -1,40 +1,230 @@
-{
-  "label_battles": "Battles",
-  "label_avg_damage": "Damage",
-  "label_damage_ratio": "Damage Ratio",
-  "label_winrate": "Winrate",
-  "label_wn8": "WN8",
-  "label_frags": "Kills",
-  "label_accuracy": "Accuracy",
-  "label_ranked_rating": "Rating",
-  "label_overview_unrated": "Regular Battles",
-  "label_overview_rating": "Rating Battles",
-  "label_damage_dealt": "Damage",
-  "label_damage_taken": "Damage Received",
-  "label_damage_assisted": "Assisted",
-  "label_damage_blocked": "Blocked",
-  "label_assisted_combined": "Assisted",
-  "label_avg_tier": "Tier",
-  "label_survival_ratio": "Survival",
-  "label_survival_percent": "Survived",
-  "label_highlight_avg_damage": "Best Performance",
-  "label_highlight_battles": "Favorite Tank",
-  "label_highlight_wn8": "Biggest Impact",
-  "label_victory": "Victory",
-  "label_defeat": "Defeat",
-  "label_battle_type_unknown": "Unknown",
-  "label_battle_type_regular": "Encounter",
-  "label_battle_type_supremacy": "Supremacy",
-  "label_game_mode_unknown": "Unknown",
-  "label_game_mode_regular": "Regular Battle",
-  "label_game_mode_training": "Training Room",
-  "label_game_mode_tournament": "Tournament",
-  "label_game_mode_quick_tournament": "Quick Tournament",
-  "label_game_mode_rating": "Rating Battle",
-  "label_game_mode_mad_games": "Mad Games",
-  "label_game_mode_realistic": "Realistic Battle",
-  "label_game_mode_uprising": "Uprising",
-  "label_game_mode_gravity": "Gravity",
-  "label_game_mode_skirmish": "Skirmish",
-  "label_game_mode_burning_games": "Burning Games"
-}
+[
+  {
+    "key": "label_damage_blocked",
+    "value": "Blocked",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_damage_ratio",
+    "value": "Damage Ratio",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_victory",
+    "value": "Victory",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_burning_games",
+    "value": "Burning Games",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_damage_dealt",
+    "value": "Damage",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_highlight_wn8",
+    "value": "Biggest Impact",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_battle_type_supremacy",
+    "value": "Supremacy",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_avg_damage",
+    "value": "Damage",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_defeat",
+    "value": "Defeat",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_mad_games",
+    "value": "Mad Games",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_gravity",
+    "value": "Gravity",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_regular",
+    "value": "Regular Battle",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_overview_rating",
+    "value": "Rating Battles",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_winrate",
+    "value": "Winrate",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_rating",
+    "value": "Rating Battle",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_battle_type_regular",
+    "value": "Encounter",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_training",
+    "value": "Training Room",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_unknown",
+    "value": "Unknown",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_tournament",
+    "value": "Tournament",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_damage_taken",
+    "value": "Damage Received",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_ranked_rating",
+    "value": "Rating",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_quick_tournament",
+    "value": "Quick Tournament",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_accuracy",
+    "value": "Accuracy",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_uprising",
+    "value": "Uprising",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_damage_assisted",
+    "value": "Assisted",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_skirmish",
+    "value": "Skirmish",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_battles",
+    "value": "Battles",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_survival_ratio",
+    "value": "Survival",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_wn8",
+    "value": "WN8",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_frags",
+    "value": "Kills",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_game_mode_realistic",
+    "value": "Realistic Battle",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_highlight_avg_damage",
+    "value": "Best Performance",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_highlight_battles",
+    "value": "Favorite Tank",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_avg_tier",
+    "value": "Tier",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_overview_unrated",
+    "value": "Regular Battles",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_battle_type_unknown",
+    "value": "Unknown",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_survival_percent",
+    "value": "Survived",
+    "notes": "",
+    "context": ""
+  },
+  {
+    "key": "label_assisted_combined",
+    "value": "Assisted",
+    "notes": "",
+    "context": ""
+  }
+]

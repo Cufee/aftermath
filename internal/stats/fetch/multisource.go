@@ -8,7 +8,6 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
-	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
@@ -16,21 +15,20 @@ type multiSourceClient struct {
 	retriesPerRequest  int
 	retrySleepInterval time.Duration
 
-	database   *database.Client
+	database   database.Client
 	wargaming  wargaming.Client
 	blitzstars blitzstars.Client
 }
 
-func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Client, database *database.Client) (Client, error) {
-	mc := multiSourceClient{
+func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Client, database database.Client) (*multiSourceClient, error) {
+	return &multiSourceClient{
 		database:   database,
 		wargaming:  wargaming,
 		blitzstars: blitzstars,
 
 		retriesPerRequest:  2,
 		retrySleepInterval: time.Millisecond * 100,
-	}
-	return &mc, nil
+	}, nil
 }
 
 /*
@@ -50,7 +48,10 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string) (Accoun
 
 	go func() {
 		defer group.Done()
-		account = withRetry(func() (types.ExtendedAccount, error) { return c.wargaming.AccountByID(ctx, realm, id) }, c.retriesPerRequest, c.retrySleepInterval)
+
+		account = withRetry(func() (types.ExtendedAccount, error) {
+			return c.wargaming.AccountByID(ctx, realm, id)
+		}, c.retriesPerRequest, c.retrySleepInterval)
 	}()
 	go func() {
 		defer group.Done()
@@ -59,7 +60,10 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string) (Accoun
 	}()
 	go func() {
 		defer group.Done()
-		vehicles = withRetry(func() ([]types.VehicleStatsFrame, error) { return c.wargaming.AccountVehicles(ctx, realm, id) }, c.retriesPerRequest, c.retrySleepInterval)
+
+		vehicles = withRetry(func() ([]types.VehicleStatsFrame, error) {
+			return c.wargaming.AccountVehicles(ctx, realm, id)
+		}, c.retriesPerRequest, c.retrySleepInterval)
 	}()
 
 	group.Wait()
@@ -71,46 +75,31 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string) (Accoun
 		return AccountStatsOverPeriod{}, vehicles.Err
 	}
 
-	// TODO: Get tank averages for WN8
-
-	return wargamingToStats(account.Data, clan, vehicles.Data), nil
+	return wargamingToStats(realm, account.Data, clan, vehicles.Data), nil
 }
 
 func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodStart time.Time) (AccountStatsOverPeriod, error) {
 	var histories DataWithErr[map[int][]blitzstars.TankHistoryEntry]
-	var averages DataWithErr[map[string]frame.StatsFrame]
 	var current DataWithErr[AccountStatsOverPeriod]
 
 	var group sync.WaitGroup
 	group.Add(1)
 	go func() {
 		defer group.Done()
-		// Get current stats
+
 		stats, err := c.CurrentStats(ctx, id)
 		current = DataWithErr[AccountStatsOverPeriod]{stats, err}
-		if err != nil {
-			return
-		}
-
-		// Get vehicle averages from db, a list of tanks is required for a more optimal query here
-		var vehicles []string
-		for _, vehicle := range stats.RegularBattles.Vehicles {
-			vehicles = append(vehicles, vehicle.VehicleID)
-		}
-		data, err := c.database.GetVehicleAverages(ctx, vehicles)
-		averages = DataWithErr[map[string]frame.StatsFrame]{data, err}
 	}()
 
-	// TODO: Lookup a session from the database first
+	// TODO: lookup a session from the database first
+	// if a session exists in the database, we don't need BlitzStars and have better data
 
-	// Return career stats if stats are requested for 90+ days, blitzstars and aftermath do not track that far
-	if time.Since(periodStart).Hours()/24 >= 90 {
+	// return career stats if stats are requested for 90+ days, we do not track that far
+	if time.Since(periodStart).Hours()/24 > 90 {
 		group.Wait()
 		if current.Err != nil {
 			return AccountStatsOverPeriod{}, current.Err
 		}
-
-		// TODO: Set wn8 for all vehicles
 
 		return current.Data, nil
 	}
@@ -133,6 +122,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	}
 
 	current.Data.PeriodStart = periodStart
-	current.Data.RegularBattles = blitzstarsToStats(current.Data.RegularBattles.Vehicles, histories.Data, averages.Data, periodStart)
+	current.Data.RatingBattles = StatsWithVehicles{} // blitzstars do not provide rating battles stats
+	current.Data.RegularBattles = blitzstarsToStats(current.Data.RegularBattles.Vehicles, histories.Data, periodStart)
 	return current.Data, nil
 }

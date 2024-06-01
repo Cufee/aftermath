@@ -12,8 +12,10 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
+	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats"
 	"github.com/cufee/aftermath/internal/stats/fetch"
+	"golang.org/x/text/language"
 
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	render "github.com/cufee/aftermath/internal/stats/render/common"
@@ -33,7 +35,7 @@ func main() {
 	zerolog.SetGlobalLevel(level)
 
 	// Assets for rendering
-	err := assets.LoadAssets(static)
+	err := assets.LoadAssets(static, "static")
 	if err != nil {
 		log.Fatalf("assets#LoadAssets failed to load assets from static/ embed.FS %s", err)
 	}
@@ -41,13 +43,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("render#InitLoadedAssets failed %s", err)
 	}
+	err = localization.LoadAssets(static, "static/localization")
+	if err != nil {
+		log.Fatalf("localization#LoadAssets failed %s", err)
+	}
 
 	statsClient := fetchClientFromEnv()
 
 	// test
 	// localePrinter := func(s string) string { return "localized:" + s }
 
-	renderer := stats.NewRenderer(statsClient)
+	renderer := stats.NewRenderer(statsClient, language.English)
 
 	var days time.Duration = 60
 	img, meta, err := renderer.Period(context.Background(), "579553160", time.Now().Add(time.Hour*24*days*-1))
@@ -57,13 +63,16 @@ func main() {
 
 	fmt.Printf("rendered in %v\n", meta.TotalTime())
 
+	bgImage, _ := assets.GetLoadedImage("bg-light")
+	finalImage := render.AddBackground(img, bgImage, render.Style{Blur: 10, BorderRadius: 30})
+
 	f, err := os.Create("tmp/test-image.png")
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
 
-	err = png.Encode(f, img)
+	err = png.Encode(f, finalImage)
 	if err != nil {
 		panic(err)
 	}

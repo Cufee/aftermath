@@ -14,8 +14,9 @@ func timestampToTime(timestamp int) time.Time {
 	return time.Unix(int64(timestamp), 0)
 }
 
-func wargamingToStats(accountData types.ExtendedAccount, clanMember types.ClanMember, vehicleData []types.VehicleStatsFrame) AccountStatsOverPeriod {
+func wargamingToStats(realm string, accountData types.ExtendedAccount, clanMember types.ClanMember, vehicleData []types.VehicleStatsFrame) AccountStatsOverPeriod {
 	stats := AccountStatsOverPeriod{
+		Realm:   realm,
 		Account: accountData.Account,
 		Clan:    clanMember.Clan,
 		RegularBattles: StatsWithVehicles{
@@ -73,8 +74,7 @@ func wargamingVehiclesToFrame(wg []types.VehicleStatsFrame) map[string]frame.Veh
 	return stats
 }
 
-// var tankAverages DataWithErr[any]
-func blitzstarsToStats(vehicles map[string]frame.VehicleStatsFrame, histories map[int][]blitzstars.TankHistoryEntry, averages map[string]frame.StatsFrame, from time.Time) StatsWithVehicles {
+func blitzstarsToStats(vehicles map[string]frame.VehicleStatsFrame, histories map[int][]blitzstars.TankHistoryEntry, from time.Time) StatsWithVehicles {
 	stats := StatsWithVehicles{
 		Vehicles: make(map[string]frame.VehicleStatsFrame),
 	}
@@ -106,7 +106,6 @@ func blitzstarsToStats(vehicles map[string]frame.VehicleStatsFrame, histories ma
 		if selectedEntry.Stats.Battles < int(vehicle.Battles) {
 			selectedFrame := wargamingToFrame(selectedEntry.Stats)
 			vehicle.StatsFrame.Subtract(selectedFrame)
-			vehicle.WN8(averages[vehicle.VehicleID])
 
 			stats.Vehicles[vehicle.VehicleID] = vehicle
 			stats.Add(*vehicle.StatsFrame)

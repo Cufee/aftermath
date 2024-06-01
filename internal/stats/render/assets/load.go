@@ -19,8 +19,8 @@ import (
 var fontsMap = make(map[string]*truetype.Font)
 var imagesMap = make(map[string]image.Image)
 
-func LoadAssets(assets fs.FS) error {
-	dirFiles, err := files.ReadDirFiles(assets, ".")
+func LoadAssets(assets fs.FS, directory string) error {
+	dirFiles, err := files.ReadDirFiles(assets, directory)
 	if err != nil {
 		return err
 	}

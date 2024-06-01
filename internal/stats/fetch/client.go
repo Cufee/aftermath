@@ -9,6 +9,8 @@ import (
 )
 
 type AccountStatsOverPeriod struct {
+	Realm string `json:"realm"`
+
 	Account types.Account `json:"account"`
 	Clan    types.Clan    `json:"clan"`
 
