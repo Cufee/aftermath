@@ -7,6 +7,32 @@ import (
 	"github.com/cufee/aftermath/internal/database/prisma/db"
 )
 
+type User struct {
+	ID string
+
+	Connections   []UserConnection
+	Subscriptions []UserSubscription
+}
+
+type ConnectionType string
+
+const (
+	ConnectionTypeDiscord   = ConnectionType("discord")
+	ConnectionTypeWargaming = ConnectionType("wargaming")
+)
+
+type UserConnection struct {
+	ID string `json:"id"`
+
+	ConnectionType ConnectionType `json:"type"`
+
+	UserID      string `json:"userId"`
+	ReferenceID string `json:"referenceId"`
+	Permissions string `bson:"permissions" json:"permissions"`
+
+	Metadata map[string]any `bson:"metadata" json:"metadata"`
+}
+
 type SubscriptionType string
 
 func (s SubscriptionType) GetPermissions() permissions.Permissions {

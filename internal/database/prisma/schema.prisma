@@ -17,7 +17,7 @@ model AppConfiguration {
   updatedAt DateTime @updatedAt
 
   valueEncoded    String
-  metadataEncoded String @default("")
+  metadataEncoded String?
 
   @@map("app_configurations")
 }
@@ -47,12 +47,12 @@ model AuthNonce {
 //
 
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  permissions         String @default("")
-  featureFlagsEncoded String @default("")
+  permissions         String?
+  featureFlagsEncoded String?
 
   subscriptions UserSubscription[]
   connections   UserConnection[]
@@ -72,7 +72,7 @@ model UserSubscription {
   type        String
   expiresAt   DateTime
   referenceId String
-  permissions String   @default("")
+  permissions String?
 
   @@index([userId])
   @@index([expiresAt])
@@ -92,10 +92,10 @@ model UserConnection {
   userId String
 
   type        String
-  permissions String @default("")
+  permissions String?
   referenceId String
 
-  metadataEncoded String @default("")
+  metadataEncoded String?
 
   @@index([userId])
   @@index([type, userId])
@@ -116,7 +116,7 @@ model UserContent {
   referenceId String
 
   valueEncoded    String
-  metadataEncoded String @default("")
+  metadataEncoded String?
 
   @@index([userId])
   @@index([type, userId])
@@ -197,7 +197,7 @@ model Clan {
 
   tag      String
   name     String
-  emblemId String @default("")
+  emblemId String?
 
   accounts      Account[]
   membersString String
