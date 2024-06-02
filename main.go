@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/discord"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
@@ -33,9 +34,9 @@ func main() {
 	zerolog.SetGlobalLevel(level)
 
 	loadStaticAssets(static)
-	// statsClient := fetchClientFromEnv()
+	coreClient := core.Client{Fetch: fetchClientFromEnv()}
 
-	discordHandler, err := discord.NewRouterHandler(os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
+	discordHandler, err := discord.NewRouterHandler(coreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
 	if err != nil {
 		panic(err)
 	}

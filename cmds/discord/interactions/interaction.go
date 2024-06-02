@@ -3,6 +3,7 @@ package interactions
 import (
 	c "context"
 
+	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/disgoorg/disgo/events"
@@ -24,9 +25,9 @@ type context struct {
 	event *events.ComponentInteractionCreate
 }
 
-func ContextFrom(ctx c.Context, event *events.ComponentInteractionCreate, user database.User) *context {
+func ContextFrom(ctx c.Context, client core.Client, event *events.ComponentInteractionCreate, user database.User) *context {
 	return &context{
-		common.NewContext(ctx, user, event.Locale().String()),
+		common.NewContext(ctx, client, user, event.Locale().String()),
 		event,
 	}
 }

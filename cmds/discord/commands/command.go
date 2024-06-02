@@ -3,6 +3,7 @@ package commands
 import (
 	c "context"
 
+	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/disgoorg/disgo/discord"
@@ -21,9 +22,9 @@ type context struct {
 	event *events.ApplicationCommandInteractionCreate
 }
 
-func ContextFrom(ctx c.Context, event *events.ApplicationCommandInteractionCreate, user database.User) *context {
+func ContextFrom(ctx c.Context, client core.Client, event *events.ApplicationCommandInteractionCreate, user database.User) *context {
 	return &context{
-		common.NewContext(ctx, user, event.Locale().String()),
+		common.NewContext(ctx, client, user, event.Locale().String()),
 		event,
 	}
 }
