@@ -7,7 +7,7 @@ import (
 	"github.com/cufee/aftermath/cmds/discord/commands"
 	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/cufee/aftermath/cmds/discord/interactions"
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/cmds/discord/middleware"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
@@ -18,58 +18,59 @@ import (
 Creates a new context and runs the middleware chain
 */
 func (r *Router) handleEvent(event bot.Event) {
-	nextHandler, exists := r.getEventHandler(event)
+	nextHandler, middleware, exists := r.getEventHandler(event)
 	if !exists {
 		return
 	}
 
 	// Check if the event can be cast to an interaction, we need this to pull some data from it later
-	_, ok := event.(discord.Interaction)
+	interaction, ok := event.(discord.Interaction)
 	if !ok {
 		log.Error().Msg("bad interaction, failed to cast")
 		return
 	}
 
-	ctx := context.Background()
-	for i := len(r.middleware) - 1; i >= 0; i-- {
-		nextHandler = r.middleware[i](ctx, nextHandler)
+	withMember := context.WithValue(context.Background(), common.ContextKeyMember, interaction.User())
+	withInteraction := context.WithValue(withMember, common.ContextKeyInteraction, interaction)
+
+	chain := append(middleware, r.middleware...)
+	for i := len(chain) - 1; i >= 0; i-- {
+		nextHandler = chain[i](withInteraction, nextHandler)
 	}
-	nextHandler(ctx, event)
+	nextHandler(withInteraction, event)
 }
 
-func (r *Router) getEventHandler(event bot.Event) (func(ctx context.Context, event bot.Event), bool) {
+func (r *Router) getEventHandler(event bot.Event) (func(ctx context.Context, event bot.Event), []middleware.MiddlewareFunc, bool) {
 	switch reflect.TypeOf(event) {
 	case reflect.TypeOf(&events.ApplicationCommandInteractionCreate{}):
-		command := event.(*events.ApplicationCommandInteractionCreate)
-		if handler, ok := r.commandHandlers[command.Data.CommandName()]; ok {
-			return func(ctx context.Context, e bot.Event) {
-				user, _ := ctx.Value(common.ContextKeyUser).(database.User)
-				err := handler(commands.ContextFrom(ctx, r.core, command, user))
+		event := event.(*events.ApplicationCommandInteractionCreate)
+		if command, ok := r.commands[event.Data.CommandName()]; ok {
+			return func(ctx context.Context, _ bot.Event) {
+				err := command.Handler(commands.ContextFrom(ctx, r.core, event))
 				if err != nil {
-					log.Err(err).Str("command", command.Data.CommandName()).Msg("error while handling a command")
+					log.Err(err).Str("command", event.Data.CommandName()).Msg("error while handling a command")
 				}
-			}, true
+			}, command.Middleware, true
 		}
 
 	case reflect.TypeOf(&events.ComponentInteractionCreate{}):
-		interaction := event.(*events.ComponentInteractionCreate)
-		if handler, ok := r.interactionHandlers[interaction.Data.CustomID()]; ok {
-			return func(ctx context.Context, event bot.Event) {
-				user, _ := ctx.Value(common.ContextKeyUser).(database.User)
-				err := handler(interactions.ContextFrom(ctx, r.core, interaction, user))
+		event := event.(*events.ComponentInteractionCreate)
+		if interaction, ok := r.interactions[event.Data.CustomID()]; ok {
+			return func(ctx context.Context, _ bot.Event) {
+				err := interaction.Handler(interactions.ContextFrom(ctx, r.core, event))
 				if err != nil {
-					log.Err(err).Str("customId", interaction.Data.CustomID()).Msg("error while handling an interaction")
+					log.Err(err).Str("customId", event.Data.CustomID()).Msg("error while handling an interaction")
 				}
-			}, true
+			}, interaction.Middleware, true
 		}
 
 	case reflect.TypeOf(&events.InteractionCreate{}):
 		// For some reason, events come twice.
 		// one of the events will have this generic payload, while the others have a specific one
 		// we just ignore this event
-		return nil, false
+		return nil, nil, false
 	}
 
 	log.Info().Type("eventType", event).Msg("received an unhandled interaction type")
-	return nil, false
+	return nil, nil, false
 }

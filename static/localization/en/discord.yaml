@@ -1,0 +1,17 @@
+# Check README.md for schema
+
+# Commands
+- key: command_stats_name
+  value: stats
+  context: Command for /stats
+- key: command_stats_description
+  value: View your career stats
+  context: Description shown next to the name when a user is typing out the command
+
+# - key: command_name_stats
+#   value: stats
+#   context: Command for /stats
+# - key: command_description_stats
+#   value: View your career stats
+#   context: Description shown next to the name when a user is typing out the command
+

@@ -1,7 +1,7 @@
 package localization
 
 import (
-	"encoding/json"
+	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -10,13 +10,14 @@ import (
 
 	"github.com/cufee/aftermath/internal/files"
 	"golang.org/x/text/language"
+	"gopkg.in/yaml.v3"
 )
 
 type localizationString struct {
-	Key     string `json:"key"`
-	Value   string `json:"value"`
-	Notes   string `json:"notes"`
-	Context string `json:"context"`
+	Key     string `yaml:"key"`
+	Value   string `yaml:"value"`
+	Notes   string `yaml:"notes"`
+	Context string `yaml:"context"`
 }
 
 type localizationStrings struct {
@@ -55,8 +56,27 @@ func (l *localizationStrings) Printer(module string, lang language.Tag) (Printer
 		return nil, fmt.Errorf("language %s not registered", lang.String())
 	}
 	return func(s string) string {
-		return l.data[module][lang][s]
+		if v := l.data[module][lang][s]; v != "" {
+			return v
+		}
+		return s
 	}, nil
+}
+
+func (l *localizationStrings) AllLanguages(module string, key string) (map[language.Tag]string, error) {
+	if l.data[module] == nil {
+		return nil, fmt.Errorf("module %s not registered", module)
+	}
+
+	allLanguages := make(map[language.Tag]string)
+	for tag, dict := range l.data[module] {
+		if value := dict[key]; value != "" {
+			allLanguages[tag] = value
+		} else {
+			allLanguages[tag] = l.data[module][language.English][key]
+		}
+	}
+	return allLanguages, nil
 }
 
 var loadedLocalizationStrings localizationStrings
@@ -68,7 +88,7 @@ func LoadAssets(assets fs.FS, directory string) error {
 	}
 
 	for name, data := range dirFiles {
-		if !strings.HasSuffix(name, ".json") {
+		if !strings.HasSuffix(name, ".yaml") {
 			continue
 		}
 
@@ -88,7 +108,9 @@ func LoadAssets(assets fs.FS, directory string) error {
 		}
 
 		var localeStrings []localizationString
-		err = json.Unmarshal(data, &localeStrings)
+		decoder := yaml.NewDecoder(bytes.NewBuffer(data))
+
+		err = decoder.Decode(&localeStrings)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal a locale file: %w", err)
 		}

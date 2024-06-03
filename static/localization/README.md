@@ -4,25 +4,21 @@ _Localization module uses `golang.org/x/text/language` and requires language cod
 **Aftermath localization is organized in the following way:**
 ```
 - {language_code}/
-  - {module_name}.json
+  - {module_name}.yaml
 ```
 
-**Each `json` file is expected to have the following schema:**
+**Each `yaml` file is expected to have the following schema:**
 ```
-[
-  {
-    "key": "required, key_passed_to_printer",
-    "value": "required, value returned by the printer",
-    "context": "optional, this should add meaningful context to help translators localize the string better"
-    "notes": "optional all other notes",
-  },
-  ...
-]
+- key: internal key for lookups
+  value: user facing string
+  context (Optional): describe how/where the string will be used
+  notes (Optional) any additional notes
+...
 ```
 
 ## Submitting Issues
 When submitting and issue/pull request for a localization change, please include the following for **each change** made:
-- path to the file, eg `static/localization/en/discord.json`  
+- path to the file, eg `static/localization/en/discord.yaml`  
   (_for each key changed_)
   - key
   - why this change was made

@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -18,11 +19,11 @@ import (
 
 func NewRouter(coreClient core.Client, token, publicKey string) (*Router, error) {
 	return &Router{
-		core:                coreClient,
-		token:               token,
-		publicKey:           publicKey,
-		commandHandlers:     make(map[string]commands.Handler),
-		interactionHandlers: make(map[string]interactions.Handler),
+		core:         coreClient,
+		token:        token,
+		publicKey:    publicKey,
+		commands:     make(map[string]commands.Command),
+		interactions: make(map[string]interactions.Interaction),
 	}, nil
 }
 
@@ -34,10 +35,8 @@ type Router struct {
 
 	middleware []middleware.MiddlewareFunc
 
-	commands            []commands.Command
-	interactions        []interactions.Interaction
-	commandHandlers     map[string]commands.Handler
-	interactionHandlers map[string]interactions.Handler
+	commands     map[string]commands.Command
+	interactions map[string]interactions.Interaction
 }
 
 /*
@@ -78,9 +77,8 @@ func (r *Router) HTTPHandler() (http.HandlerFunc, error) {
 Loads commands into the router, does not update bot commands through Discord API
 */
 func (r *Router) LoadCommands(commands ...commands.Command) {
-	r.commands = append(r.commands, commands...)
 	for _, cmd := range commands {
-		r.commandHandlers[cmd.CommandName()] = cmd.Handler
+		r.commands[cmd.CommandName()] = cmd
 	}
 }
 
@@ -88,9 +86,8 @@ func (r *Router) LoadCommands(commands ...commands.Command) {
 Loads interactions into the router
 */
 func (r *Router) LoadInteractions(interactions ...interactions.Interaction) {
-	r.interactions = append(r.interactions, interactions...)
 	for _, intc := range interactions {
-		r.interactionHandlers[intc.Name] = intc.Handler
+		r.interactions[intc.Name] = intc
 	}
 }
 
@@ -106,7 +103,7 @@ Updates all loaded commands using the Discord REST API
 */
 func (r *Router) UpdateCommands() error {
 	if len(r.commands) < 1 {
-		return nil
+		return errors.New("no commands to update")
 	}
 
 	client, err := r.client()
@@ -116,7 +113,11 @@ func (r *Router) UpdateCommands() error {
 
 	var options []discord.ApplicationCommandCreate
 	for _, cmd := range r.commands {
-		options = append(options, cmd)
+		options = append(options, cmd.ApplicationCommandCreate)
+
+		d, _ := json.MarshalIndent(cmd.ApplicationCommandCreate, "", "  ")
+		println(string(d))
+
 	}
 
 	if _, err := client.Rest().SetGlobalCommands(client.ApplicationID(), options); err != nil {

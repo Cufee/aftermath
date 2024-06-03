@@ -18,6 +18,7 @@ require (
 	golang.org/x/exp v0.0.0-20240530194437-404ba88c7ed0
 	golang.org/x/image v0.16.0
 	golang.org/x/text v0.15.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -33,5 +34,4 @@ require (
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

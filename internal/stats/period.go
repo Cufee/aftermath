@@ -2,7 +2,6 @@ package stats
 
 import (
 	"context"
-	"image"
 	"time"
 
 	"github.com/cufee/aftermath/internal/localization"
@@ -17,7 +16,7 @@ type renderer struct {
 	locale      language.Tag
 }
 
-func (r *renderer) Period(ctx context.Context, accountId string, from time.Time) (image.Image, Metadata, error) {
+func (r *renderer) Period(ctx context.Context, accountId string, from time.Time) (Image, Metadata, error) {
 	meta := Metadata{}
 
 	printer, err := localization.NewPrinter("stats", r.locale)
@@ -47,5 +46,5 @@ func (r *renderer) Period(ctx context.Context, accountId string, from time.Time)
 		return nil, meta, err
 	}
 
-	return image, meta, err
+	return &imageImp{image}, meta, err
 }

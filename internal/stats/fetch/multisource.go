@@ -94,8 +94,8 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	// TODO: lookup a session from the database first
 	// if a session exists in the database, we don't need BlitzStars and have better data
 
-	// return career stats if stats are requested for 90+ days, we do not track that far
-	if time.Since(periodStart).Hours()/24 > 90 {
+	// return career stats if stats are requested for 0 or 90+ days, we do not track that far
+	if days := time.Since(periodStart).Hours() / 24; days > 90 || days < 1 {
 		group.Wait()
 		if current.Err != nil {
 			return AccountStatsOverPeriod{}, current.Err
