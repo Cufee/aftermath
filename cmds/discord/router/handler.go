@@ -14,6 +14,8 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmds/discord/commands/builder"
+	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/rs/zerolog/log"
 )
 
@@ -21,8 +23,7 @@ import (
 var interactionTimeout = time.Minute*14 + time.Second*45
 
 type interactionState struct {
-	lock sync.RWMutex
-
+	mx      *sync.Mutex
 	acked   bool
 	replied bool
 }
@@ -76,15 +77,14 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 	if router.publicKey == "" {
 		return nil, errors.New("missing publicKey")
 	}
-
 	hexDecodedKey, err := hex.DecodeString(router.publicKey)
 	if err != nil {
 		return nil, errors.New("invalid public key")
 	}
 
-	// handler := httpserver.HandleInteraction(hexDecodedKey, client.Logger(), handlers.DefaultHTTPServerEventHandlerFunc(client))
-
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
 		if ok := verifyPublicKey(r, hexDecodedKey); !ok {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			log.Debug().Msg("invalid request received on callback handler")
@@ -101,111 +101,173 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(r.Context(), time.Second*4)
-		defer cancel()
-
-		w.Header().Set("Content-Type", "application/json")
-		err = router.routeInteraction(ctx, w, data)
-		if err != nil {
-			log.Err(err).Any("body", data).Msg("failed to route an interaction")
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		if data.Type == discordgo.InteractionPing {
+			sendPingReply(w)
 			return
 		}
+
+		command, err := router.routeInteraction(data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Err(err).Msg("failed to route interaction")
+			return
+		}
+
+		// ack the interaction
+		err = writeDeferredInteractionResponseAck(w, data.Type, command.Ephemeral)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Err(err).Msg("failed to ack an interaction")
+			return
+		}
+
+		// route the interaction to a proper handler for a later reply
+		state := &interactionState{mx: &sync.Mutex{}, acked: true}
+		state.mx.Lock()
+		go func() {
+			// unlock once this context is done and the ack is delivered
+			<-r.Context().Done()
+			state.mx.Unlock()
+		}()
+
+		router.startInteractionHandlerAsync(data, state, command)
 	}, nil
 }
 
-func (router *Router) routeInteraction(_ context.Context, w http.ResponseWriter, interaction discordgo.Interaction) error {
-	if interaction.Type == discordgo.InteractionPing {
-		_, err := w.Write([]byte(fmt.Sprintf(`{"type": %d}`, discordgo.InteractionPing)))
-		return err
+func (r *Router) routeInteraction(interaction discordgo.Interaction) (*builder.Command, error) {
+	var matchKey string
+
+	switch interaction.Type {
+	case discordgo.InteractionApplicationCommand:
+		data, _ := interaction.Data.(discordgo.ApplicationCommandInteractionData)
+		matchKey = data.Name
+	case discordgo.InteractionMessageComponent:
+		data, _ := interaction.Data.(discordgo.MessageComponentInteractionData)
+		matchKey = data.CustomID
 	}
 
-	responseCh := make(chan discordgo.InteractionResponseData, 1)
-	doneCh := make(chan struct{}, 1)
-	var state interactionState
+	if matchKey == "" {
+		return nil, errors.New("match key not found")
+	}
 
-	state.lock.Lock()
-	defer func() {
-		state.acked = true
-		state.lock.Unlock()
-	}()
+	for _, cmd := range r.commands {
+		if cmd.Match(matchKey) {
+			return &cmd, nil
+		}
+	}
+	return nil, fmt.Errorf("failed to match %s to a command handler", matchKey)
+}
+
+func (r *Router) handleInteraction(ctx context.Context, interaction discordgo.Interaction, command *builder.Command, reply chan<- discordgo.InteractionResponseData, done func()) {
+	defer done()
+
+	err := command.Handler(common.NewContext(ctx, interaction, reply, r.restClient, r.core))
+	if err != nil {
+		reply <- discordgo.InteractionResponseData{Content: "Something went wrong while working on your command. Please try again later."}
+	}
+}
+
+func sendPingReply(w http.ResponseWriter) {
+	_, err := w.Write([]byte(fmt.Sprintf(`{"type": %d}`, discordgo.InteractionPing)))
+	if err != nil {
+		log.Err(err).Msg("failed to reply to a discord PING")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interaction, state *interactionState, command *builder.Command) {
+	// create a timer for the interaction response
+	responseTimer := time.NewTimer(interactionTimeout)
+	defer responseTimer.Stop()
+
+	// create a new context and cancel it on reply
+	workerCtx, cancelWorker := context.WithCancel(context.Background())
+	defer cancelWorker()
+
+	// handle the interaction
+	doneCh := make(chan struct{})
+	responseCh := make(chan discordgo.InteractionResponseData, 2)
+	go router.handleInteraction(workerCtx, interaction, command, responseCh, func() { doneCh <- struct{}{} })
 
 	go func() {
-		defer close(doneCh)
 		defer close(responseCh)
-
-		// create a timer for the interaction response
-		responseTimer := time.NewTimer(interactionTimeout)
-		defer responseTimer.Stop()
-
-		// create a new context and cancel it on reply
-		workerCtx, cancelWorker := context.WithCancel(context.Background())
-		defer cancelWorker()
-
-		// handle the interaction
-		go router.handleInteraction(workerCtx, interaction, responseCh, doneCh)
+		defer close(doneCh)
 
 		for {
 			select {
 			case <-responseTimer.C:
-				state.lock.Lock()
+				state.mx.Lock()
 				// discord will handle the user-facing error, so we just log it
-				log.Error().Any("interaction", interaction).Msg("interaction update timed out")
-				defer state.lock.Unlock()
+				log.Error().Any("interaction", interaction).Msg("interaction response timed out")
+				defer state.mx.Unlock()
 				return
 
 			case <-doneCh:
+				state.mx.Lock()
 				// we are done, there is nothing else we should do here
-				state.lock.Lock()
-				// wait in case responseCh is still busy sending some data over
-				defer state.lock.Unlock()
+				// lock in case responseCh is still busy sending some data over
+				defer state.mx.Unlock()
 				return
 
 			case data := <-responseCh:
-				state.lock.Lock()
-				router.sendInteractionReply(interaction, &state, data)
-				state.lock.Unlock()
-
+				state.mx.Lock()
+				router.sendInteractionReply(interaction, state, data)
+				state.mx.Unlock()
 			}
 		}
 	}()
-
-	return sendDeferredInteractionResponse(w, interaction.Type)
 }
 
 func (r *Router) sendInteractionReply(interaction discordgo.Interaction, state *interactionState, data discordgo.InteractionResponseData) {
-	payload := discordgo.InteractionResponse{Data: &data}
+	var handler func() error
 
-	var err error
 	switch interaction.Type {
 	case discordgo.InteractionApplicationCommand:
 		if state.replied {
-			payload.Type = discordgo.InteractionResponseUpdateMessage
-			err = r.restClient.UpdateInteractionMessage(interaction.Token, payload)
+			// We already replied to this interaction - edit the message
+			handler = func() error {
+				return r.restClient.UpdateInteractionResponse(interaction.AppID, interaction.Token, data)
+			}
 		} else if state.acked {
-			payload.Type = discordgo.InteractionResponseChannelMessageWithSource
-			err = r.restClient.SendInteractionResponse(interaction.ID, interaction.Token, payload)
+			// We acked this interaction and an initial reply is pending - edit the message
+			handler = func() error {
+				return r.restClient.UpdateInteractionResponse(interaction.AppID, interaction.Token, data)
+			}
 		} else {
-			payload.Type = discordgo.InteractionResponseUpdateMessage
-			err = r.restClient.SendInteractionResponse(interaction.ID, interaction.Token, payload)
+			// We never replied to this message, create a new reply
+			handler = func() error {
+				payload := discordgo.InteractionResponse{Data: &data, Type: discordgo.InteractionResponseChannelMessageWithSource}
+				return r.restClient.SendInteractionResponse(interaction.ID, interaction.Token, payload)
+			}
 		}
 	}
+
+	err := handler()
 	if err != nil {
 		log.Err(err).Msg("failed to send an interaction response")
+		return
 	}
+	state.acked = true
+	state.replied = true
 }
 
-func sendDeferredInteractionResponse(w http.ResponseWriter, t discordgo.InteractionType) error {
+func writeDeferredInteractionResponseAck(w http.ResponseWriter, t discordgo.InteractionType, ephemeral bool) error {
+	var response discordgo.InteractionResponse
+	if ephemeral {
+		response.Data.Flags = discordgo.MessageFlagsEphemeral
+	}
+
 	switch t {
 	case discordgo.InteractionApplicationCommand:
-		_, err := w.Write([]byte(fmt.Sprintf(`{"type": %d}`, discordgo.InteractionResponseDeferredChannelMessageWithSource)))
-		return err
+		response.Type = discordgo.InteractionResponseDeferredChannelMessageWithSource
 	case discordgo.InteractionMessageComponent:
-		_, err := w.Write([]byte(fmt.Sprintf(`{"type": %d}`, discordgo.InteractionResponseDeferredMessageUpdate)))
-		return err
+		response.Type = discordgo.InteractionResponseDeferredMessageUpdate
+
 	default:
-		log.Error().Str("type", t.String()).Msg("received an unsupported interaction type")
-		http.Error(w, "unsupported interaction type", http.StatusInternalServerError)
-		return nil
+		return fmt.Errorf("interaction type %s not supported", t.String())
 	}
+
+	body, _ := json.Marshal(response)
+	_, err := w.Write(body)
+	return err
 }

@@ -1,10 +1,8 @@
 package router
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/middleware"
@@ -33,39 +31,14 @@ type Router struct {
 	restClient *rest.Client
 
 	middleware []middleware.MiddlewareFunc
-	commands   []command
-}
-
-type command struct {
-	data    discordgo.ApplicationCommand
-	handler builder.CommandHandler
-	match   func(string) bool
-}
-
-/*
-Initializes the client using the router settings or returns an existing client
-*/
-func (r *Router) client() (*rest.Client, error) {
-	// if r.botClient != nil {
-	// 	return r.botClient, nil
-	// }
-
-	// client, err := disgo.New(r.token,
-	// 	bot.WithEventListenerFunc(r.handleEvent),
-	// )
-	// r.botClient = client
-
-	return nil, nil
+	commands   []builder.Command
 }
 
 /*
 Loads commands into the router, does not update bot commands through Discord API
 */
-func (r *Router) LoadCommands(commands ...func() (discordgo.ApplicationCommand, func(s string) bool, builder.CommandHandler)) {
-	for _, build := range commands {
-		d, m, h := build()
-		r.commands = append(r.commands, command{d, h, m})
-	}
+func (r *Router) LoadCommands(commands ...builder.Command) {
+	r.commands = append(r.commands, commands...)
 }
 
 /*
@@ -101,14 +74,4 @@ func (r *Router) UpdateLoadedCommands() error {
 	// 	return err
 	// }
 	return nil
-}
-
-func (r *Router) handleInteraction(ctx context.Context, interaction discordgo.Interaction, reply chan<- discordgo.InteractionResponseData, done chan<- struct{}) {
-	defer func() {
-		done <- struct{}{}
-	}()
-
-	reply <- discordgo.InteractionResponseData{
-		Content: "pong",
-	}
 }

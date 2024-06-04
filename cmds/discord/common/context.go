@@ -23,7 +23,7 @@ const (
 )
 
 type Context struct {
-	context.Context
+	c      context.Context
 	User   database.User
 	Member discordgo.User
 
@@ -33,13 +33,20 @@ type Context struct {
 	Core core.Client
 
 	rest        *rest.Client
-	interaction discordgo.InteractionCreate
+	interaction discordgo.Interaction
+	respondCh   chan<- discordgo.InteractionResponseData
 }
 
-func NewContext(ctx context.Context, interaction discordgo.InteractionCreate, rest *rest.Client, client core.Client) *Context {
-	c := &Context{Context: ctx, Locale: language.English, Core: client, rest: rest, interaction: interaction}
+func NewContext(ctx context.Context, interaction discordgo.Interaction, respondCh chan<- discordgo.InteractionResponseData, rest *rest.Client, client core.Client) *Context {
+	c := &Context{c: ctx, Locale: language.English, Core: client, rest: rest, interaction: interaction, respondCh: respondCh}
 
-	c.Member = *interaction.User
+	if interaction.User != nil {
+		c.Member = *interaction.User
+	}
+	if interaction.Member != nil {
+		c.Member = *interaction.Member.User
+	}
+
 	c.User, _ = ctx.Value(ContextKeyUser).(database.User)
 
 	// Use the user locale selection by default with fallback to guild settings
@@ -55,4 +62,9 @@ func NewContext(ctx context.Context, interaction discordgo.InteractionCreate, re
 		c.Localize = printer
 	}
 	return c
+}
+
+func (c *Context) Reply(message string) error {
+	c.respondCh <- discordgo.InteractionResponseData{Content: message}
+	return nil
 }
