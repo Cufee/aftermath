@@ -1,15 +1,16 @@
 package common
 
 import (
+	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/internal/localization"
-	"github.com/disgoorg/disgo/discord"
+
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
 )
 
-func LocaleToLanguageTag(locale discord.Locale) language.Tag {
+func LocaleToLanguageTag(locale discordgo.Locale) language.Tag {
 	// Some discord locale tags don't match the standard
-	switch code := locale.Code(); code {
+	switch code := locale.String(); code {
 	case "":
 		return language.English
 	case "en-GB":
@@ -30,7 +31,7 @@ func LocaleToLanguageTag(locale discord.Locale) language.Tag {
 	}
 }
 
-func LanguageToLocale(tag language.Tag) discord.Locale {
+func LanguageToLocale(tag language.Tag) discordgo.Locale {
 	// Some discord locale tags don't match the standard
 	switch tag {
 	case language.BritishEnglish:
@@ -38,20 +39,20 @@ func LanguageToLocale(tag language.Tag) discord.Locale {
 	case language.AmericanEnglish:
 		fallthrough
 	case language.English:
-		return discord.LocaleEnglishUS
+		return discordgo.EnglishUS
 
 	case language.LatinAmericanSpanish:
-		return discord.Locale("es-419")
+		return discordgo.SpanishLATAM
 	case language.Spanish:
-		return discord.LocaleSpanishES
+		return discordgo.SpanishES
 
 	default:
-		return discord.LocaleEnglishUS
+		return discordgo.EnglishUS
 	}
 }
 
-func LocalizeKey(key string) map[discord.Locale]string {
-	localized := make(map[discord.Locale]string)
+func LocalizeKey(key string) map[discordgo.Locale]string {
+	localized := make(map[discordgo.Locale]string)
 
 	values, err := localization.ModuleKeyValues("discord", key)
 	if err != nil {

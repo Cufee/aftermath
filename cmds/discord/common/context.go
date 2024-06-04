@@ -3,10 +3,13 @@ package common
 import (
 	"context"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/core"
+	"github.com/cufee/aftermath/cmds/discord/rest"
+
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
-	"github.com/disgoorg/disgo/discord"
+
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
 )
@@ -21,29 +24,27 @@ const (
 
 type Context struct {
 	context.Context
-	User database.User
-
-	Member      discord.User
-	Interaction discord.Interaction
+	User   database.User
+	Member discordgo.User
 
 	Locale   language.Tag
 	Localize localization.Printer
 
 	Core core.Client
+
+	rest        *rest.Client
+	interaction discordgo.InteractionCreate
 }
 
-func NewContext(ctx context.Context, client core.Client) *Context {
-	c := &Context{Context: ctx, Core: client, Locale: language.English}
+func NewContext(ctx context.Context, interaction discordgo.InteractionCreate, rest *rest.Client, client core.Client) *Context {
+	c := &Context{Context: ctx, Locale: language.English, Core: client, rest: rest, interaction: interaction}
 
+	c.Member = *interaction.User
 	c.User, _ = ctx.Value(ContextKeyUser).(database.User)
-	c.Member, _ = ctx.Value(ContextKeyMember).(discord.User)
-	c.Interaction, _ = ctx.Value(ContextKeyInteraction).(discord.Interaction)
 
 	// Use the user locale selection by default with fallback to guild settings
-	if c.Interaction.Locale() != "" {
-		c.Locale = LocaleToLanguageTag(c.Interaction.Locale())
-	} else if locale := c.Interaction.GuildLocale(); locale != nil {
-		c.Locale = LocaleToLanguageTag(*locale)
+	if c.interaction.Locale != "" {
+		c.Locale = LocaleToLanguageTag(c.interaction.Locale)
 	}
 
 	printer, err := localization.NewPrinter("discord", c.Locale)

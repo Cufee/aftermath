@@ -1,93 +1,70 @@
 package router
 
 import (
-	"encoding/hex"
-	"encoding/json"
-	"errors"
-	"net/http"
+	"context"
+	"fmt"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/core"
-	"github.com/cufee/aftermath/cmds/discord/commands"
-	"github.com/cufee/aftermath/cmds/discord/interactions"
+	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/middleware"
-	"github.com/disgoorg/disgo"
-	"github.com/disgoorg/disgo/bot"
-	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/handlers"
-	"github.com/disgoorg/disgo/httpserver"
+	"github.com/cufee/aftermath/cmds/discord/rest"
 )
 
 func NewRouter(coreClient core.Client, token, publicKey string) (*Router, error) {
+	restClient, err := rest.NewClient(token)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create a new rest client :%w", err)
+	}
+
 	return &Router{
-		core:         coreClient,
-		token:        token,
-		publicKey:    publicKey,
-		commands:     make(map[string]commands.Command),
-		interactions: make(map[string]interactions.Interaction),
+		core:       coreClient,
+		token:      token,
+		publicKey:  publicKey,
+		restClient: restClient,
 	}, nil
 }
 
 type Router struct {
-	core      core.Client
-	token     string
-	publicKey string
-	botClient bot.Client
+	core core.Client
+
+	token      string
+	publicKey  string
+	restClient *rest.Client
 
 	middleware []middleware.MiddlewareFunc
+	commands   []command
+}
 
-	commands     map[string]commands.Command
-	interactions map[string]interactions.Interaction
+type command struct {
+	data    discordgo.ApplicationCommand
+	handler builder.CommandHandler
+	match   func(string) bool
 }
 
 /*
 Initializes the client using the router settings or returns an existing client
 */
-func (r *Router) client() (bot.Client, error) {
-	if r.botClient != nil {
-		return r.botClient, nil
-	}
+func (r *Router) client() (*rest.Client, error) {
+	// if r.botClient != nil {
+	// 	return r.botClient, nil
+	// }
 
-	client, err := disgo.New(r.token,
-		bot.WithEventListenerFunc(r.handleEvent),
-	)
-	r.botClient = client
+	// client, err := disgo.New(r.token,
+	// 	bot.WithEventListenerFunc(r.handleEvent),
+	// )
+	// r.botClient = client
 
-	return r.botClient, err
-}
-
-/*
-Returns a handler for the current router
-*/
-func (r *Router) HTTPHandler() (http.HandlerFunc, error) {
-	client, err := r.client()
-	if err != nil {
-		return nil, err
-	}
-
-	hexDecodedKey, err := hex.DecodeString(r.publicKey)
-	if err != nil {
-		return nil, errors.New("invalid public key")
-	}
-
-	handler := httpserver.HandleInteraction(hexDecodedKey, client.Logger(), handlers.DefaultHTTPServerEventHandlerFunc(client))
-	return handler, err
+	return nil, nil
 }
 
 /*
 Loads commands into the router, does not update bot commands through Discord API
 */
-func (r *Router) LoadCommands(commands ...commands.Command) {
-	for _, cmd := range commands {
-		r.commands[cmd.CommandName()] = cmd
-	}
-}
-
-/*
-Loads interactions into the router
-*/
-func (r *Router) LoadInteractions(interactions ...interactions.Interaction) {
-	for _, intc := range interactions {
-		r.interactions[intc.Name] = intc
+func (r *Router) LoadCommands(commands ...func() (discordgo.ApplicationCommand, func(s string) bool, builder.CommandHandler)) {
+	for _, build := range commands {
+		d, m, h := build()
+		r.commands = append(r.commands, command{d, h, m})
 	}
 }
 
@@ -101,40 +78,37 @@ func (r *Router) LoadMiddleware(middleware ...middleware.MiddlewareFunc) {
 /*
 Updates all loaded commands using the Discord REST API
 */
-func (r *Router) UpdateCommands() error {
-	if len(r.commands) < 1 {
-		return errors.New("no commands to update")
-	}
+func (r *Router) UpdateLoadedCommands() error {
+	// if len(r.commands) < 1 {
+	// 	return errors.New("no commands to update")
+	// }
 
-	client, err := r.client()
-	if err != nil {
-		return err
-	}
+	// client, err := r.client()
+	// if err != nil {
+	// 	return err
+	// }
 
-	var options []discord.ApplicationCommandCreate
-	for _, cmd := range r.commands {
-		options = append(options, cmd.ApplicationCommandCreate)
+	// var options []discord.ApplicationCommandCreate
+	// for _, cmd := range r.commands {
+	// 	options = append(options, cmd.ApplicationCommandCreate)
 
-		d, _ := json.MarshalIndent(cmd.ApplicationCommandCreate, "", "  ")
-		println(string(d))
+	// 	d, _ := json.MarshalIndent(cmd.ApplicationCommandCreate, "", "  ")
+	// 	println(string(d))
 
-	}
+	// }
 
-	if _, err := client.Rest().SetGlobalCommands(client.ApplicationID(), options); err != nil {
-		return err
-	}
+	// if _, err := client.Rest().SetGlobalCommands(client.ApplicationID(), options); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
-// func addContext[E bot.Event](next func(ctx context.Context, event E)) (f func(e E)) {
-// 	return func(e E) {
-// 		ctx := context.Background()
-// 		next(ctx, e)
-// 	}
-// }
+func (r *Router) handleInteraction(ctx context.Context, interaction discordgo.Interaction, reply chan<- discordgo.InteractionResponseData, done chan<- struct{}) {
+	defer func() {
+		done <- struct{}{}
+	}()
 
-// func fetchUser[E bot.Event](next func(ctx context.Context, event E)) func(ctx context.Context, event E) {
-// 	return func(ctx context.Context, event E) {
-// 		next(ctx, event)
-// 	}
-// }
+	reply <- discordgo.InteractionResponseData{
+		Content: "pong",
+	}
+}
