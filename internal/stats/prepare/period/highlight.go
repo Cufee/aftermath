@@ -34,7 +34,7 @@ func getHighlightedVehicles(highlights []highlight, vehicles map[string]frame.Ve
 			currentLeader, leaderExists := leadersMap[highlight.label]
 			block := presetToBlock(highlight.compareWith, *vehicle.StatsFrame)
 
-			if !leaderExists || block.Value.Float() > currentLeader.value.Float() {
+			if !frame.InvalidValue.Equals(block.Value) && (!leaderExists || block.Value.Float() > currentLeader.value.Float()) {
 				currentLeader.highlight = highlight
 				currentLeader.value = block.Value
 				currentLeader.vehicle = vehicle

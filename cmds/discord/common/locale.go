@@ -10,20 +10,22 @@ import (
 
 func LocaleToLanguageTag(locale discordgo.Locale) language.Tag {
 	// Some discord locale tags don't match the standard
-	switch code := locale.String(); code {
-	case "":
-		return language.English
-	case "en-GB":
+	switch locale {
+	case discordgo.EnglishUS:
 		fallthrough
-	case "en-US":
+	case discordgo.EnglishGB:
 		return language.English
+
 	case "es-419":
-		return language.LatinAmericanSpanish
-	case "es-ES":
+		fallthrough
+	case discordgo.SpanishES:
 		return language.Spanish
 
+	case discordgo.PortugueseBR:
+		return language.Portuguese
+
 	default:
-		tag, err := language.Parse(code)
+		tag, err := language.Parse(locale.String())
 		if err != nil {
 			return language.English
 		}
@@ -41,10 +43,17 @@ func LanguageToLocale(tag language.Tag) discordgo.Locale {
 	case language.English:
 		return discordgo.EnglishUS
 
-	case language.LatinAmericanSpanish:
-		return discordgo.SpanishLATAM
 	case language.Spanish:
+		fallthrough
+	case language.LatinAmericanSpanish:
 		return discordgo.SpanishES
+
+	case language.BrazilianPortuguese:
+		fallthrough
+	case language.EuropeanPortuguese:
+		fallthrough
+	case language.Portuguese:
+		return discordgo.PortugueseBR
 
 	default:
 		return discordgo.EnglishUS

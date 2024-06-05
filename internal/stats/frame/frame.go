@@ -34,7 +34,7 @@ type StatsFrame struct {
 	wn8             ValueInt          `json:"-" bson:"-"`
 	winRate         ValueFloatPercent `json:"-" bson:"-"`
 	accuracy        ValueFloatPercent `json:"-" bson:"-"`
-	avgDamage       ValueFloatDecimal `json:"-" bson:"-"`
+	avgDamage       ValueInt          `json:"-" bson:"-"`
 	survivalPercent ValueFloatPercent `json:"-" bson:"-"`
 	damageRatio     ValueFloatDecimal `json:"-" bson:"-"`
 	survivalRatio   ValueFloatDecimal `json:"-" bson:"-"`
@@ -68,7 +68,7 @@ func (r *StatsFrame) AvgDamage() Value {
 		return InvalidValue
 	}
 	if r.avgDamage == 0 {
-		r.avgDamage = ValueFloatDecimal(r.DamageDealt.Float() / r.Battles.Float())
+		r.avgDamage = ValueInt(r.DamageDealt.Float() / r.Battles.Float())
 	}
 	return r.avgDamage
 }
