@@ -1,94 +1,46 @@
 package router
 
 import (
-	"encoding/hex"
-	"encoding/json"
-	"errors"
-	"net/http"
+	"fmt"
+	"slices"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/core"
-	"github.com/cufee/aftermath/cmds/discord/commands"
-	"github.com/cufee/aftermath/cmds/discord/interactions"
+	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/middleware"
-	"github.com/disgoorg/disgo"
-	"github.com/disgoorg/disgo/bot"
-	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/handlers"
-	"github.com/disgoorg/disgo/httpserver"
+	"github.com/cufee/aftermath/cmds/discord/rest"
 )
 
 func NewRouter(coreClient core.Client, token, publicKey string) (*Router, error) {
+	restClient, err := rest.NewClient(token)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create a new rest client :%w", err)
+	}
+
 	return &Router{
-		core:         coreClient,
-		token:        token,
-		publicKey:    publicKey,
-		commands:     make(map[string]commands.Command),
-		interactions: make(map[string]interactions.Interaction),
+		core:       coreClient,
+		token:      token,
+		publicKey:  publicKey,
+		restClient: restClient,
 	}, nil
 }
 
 type Router struct {
-	core      core.Client
-	token     string
-	publicKey string
-	botClient bot.Client
+	core core.Client
+
+	token      string
+	publicKey  string
+	restClient *rest.Client
 
 	middleware []middleware.MiddlewareFunc
-
-	commands     map[string]commands.Command
-	interactions map[string]interactions.Interaction
-}
-
-/*
-Initializes the client using the router settings or returns an existing client
-*/
-func (r *Router) client() (bot.Client, error) {
-	if r.botClient != nil {
-		return r.botClient, nil
-	}
-
-	client, err := disgo.New(r.token,
-		bot.WithEventListenerFunc(r.handleEvent),
-	)
-	r.botClient = client
-
-	return r.botClient, err
-}
-
-/*
-Returns a handler for the current router
-*/
-func (r *Router) HTTPHandler() (http.HandlerFunc, error) {
-	client, err := r.client()
-	if err != nil {
-		return nil, err
-	}
-
-	hexDecodedKey, err := hex.DecodeString(r.publicKey)
-	if err != nil {
-		return nil, errors.New("invalid public key")
-	}
-
-	handler := httpserver.HandleInteraction(hexDecodedKey, client.Logger(), handlers.DefaultHTTPServerEventHandlerFunc(client))
-	return handler, err
+	commands   []builder.Command
 }
 
 /*
 Loads commands into the router, does not update bot commands through Discord API
 */
-func (r *Router) LoadCommands(commands ...commands.Command) {
-	for _, cmd := range commands {
-		r.commands[cmd.CommandName()] = cmd
-	}
-}
-
-/*
-Loads interactions into the router
-*/
-func (r *Router) LoadInteractions(interactions ...interactions.Interaction) {
-	for _, intc := range interactions {
-		r.interactions[intc.Name] = intc
-	}
+func (r *Router) LoadCommands(commands ...builder.Command) {
+	r.commands = append(r.commands, commands...)
 }
 
 /*
@@ -100,41 +52,74 @@ func (r *Router) LoadMiddleware(middleware ...middleware.MiddlewareFunc) {
 
 /*
 Updates all loaded commands using the Discord REST API
+  - any commands that are loaded will be created/updated
+  - any commands that were not loaded will be deleted
 */
-func (r *Router) UpdateCommands() error {
-	if len(r.commands) < 1 {
-		return errors.New("no commands to update")
+func (r *Router) UpdateLoadedCommands() error {
+	toOverwrite := make(map[string]discordgo.ApplicationCommand)
+
+	for _, cmd := range r.commands {
+		if cmd.Type != builder.CommandTypeChat {
+			continue
+		}
+		toOverwrite[cmd.Name] = cmd.ApplicationCommand
 	}
 
-	client, err := r.client()
+	current, err := r.restClient.GetGlobalApplicationCommands()
 	if err != nil {
 		return err
 	}
 
-	var options []discord.ApplicationCommandCreate
+	var toDelete []string
+	var currentCommands []string
+	for _, command := range current {
+		currentCommands = append(currentCommands, command.Name)
+		if _, ok := toOverwrite[command.Name]; !ok {
+			toDelete = append(toDelete, command.ID)
+			continue
+		}
+
+		newCmd := toOverwrite[command.Name]
+		newCmd.ID = command.ID
+
+		toOverwrite[command.Name] = newCmd
+	}
+
 	for _, cmd := range r.commands {
-		options = append(options, cmd.ApplicationCommandCreate)
-
-		d, _ := json.MarshalIndent(cmd.ApplicationCommandCreate, "", "  ")
-		println(string(d))
-
+		if cmd.Type != builder.CommandTypeChat {
+			continue
+		}
+		if !slices.Contains(currentCommands, cmd.Name) {
+			// it will be created during the bulk overwrite call
+			continue
+		}
+		// Check if the command needs to be updated
+		// if true {
+		delete(toOverwrite, cmd.Name)
+		// 	continue
+		// }
 	}
 
-	if _, err := client.Rest().SetGlobalCommands(client.ApplicationID(), options); err != nil {
-		return err
+	for _, id := range toDelete {
+		err := r.restClient.DeleteGlobalApplicationCommand(id)
+		if err != nil {
+			return fmt.Errorf("failed to delete a command: %w", err)
+		}
 	}
+
+	if len(toOverwrite) < 1 {
+		return nil
+	}
+
+	var commandUpdates []discordgo.ApplicationCommand
+	for _, cmd := range toOverwrite {
+		commandUpdates = append(commandUpdates, cmd)
+	}
+
+	err = r.restClient.OverwriteGlobalApplicationCommands(commandUpdates)
+	if err != nil {
+		return fmt.Errorf("failed to bulk update application commands: %w", err)
+	}
+
 	return nil
 }
-
-// func addContext[E bot.Event](next func(ctx context.Context, event E)) (f func(e E)) {
-// 	return func(e E) {
-// 		ctx := context.Background()
-// 		next(ctx, e)
-// 	}
-// }
-
-// func fetchUser[E bot.Event](next func(ctx context.Context, event E)) func(ctx context.Context, event E) {
-// 	return func(ctx context.Context, event E) {
-// 		next(ctx, event)
-// 	}
-// }

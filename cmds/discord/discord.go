@@ -16,12 +16,12 @@ func NewRouterHandler(coreClient core.Client, token string, publicKey string) (h
 		return nil, err
 	}
 
-	rt.LoadCommands(commands.Loaded.Build()...)
+	rt.LoadCommands(commands.Loaded.Compose()...)
 
 	// should always be loaded last
 	rt.LoadMiddleware(middleware.FetchUser(common.ContextKeyUser, coreClient.DB))
 
-	err = rt.UpdateCommands()
+	err = rt.UpdateLoadedCommands()
 	if err != nil {
 		return nil, err
 	}

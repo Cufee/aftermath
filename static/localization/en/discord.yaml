@@ -8,6 +8,45 @@
   value: View your career stats
   context: Description shown next to the name when a user is typing out the command
 
+# Common command options
+- key: common_option_stats_days_name
+  value: days
+  context: Label for days command option, shown while typing a command
+- key: common_option_stats_days_description
+  value: How far back should the session go?
+  context: Description for days command option, shown while typing a command
+
+- key: common_option_stats_user_name
+  value: user
+  context: Label for discord @member command option, shown while typing a command
+- key: common_option_stats_user_description
+  value: Select another user to view their stats
+  context: Description for user command option, shown while typing a command
+  
+- key: common_option_stats_nickname_name
+  value: nickname
+  context: Label for nickname command option, shown while typing a command
+- key: common_option_stats_nickname_description
+  value: Blitz player name
+  context: Description for nickname command option, shown while typing a command
+
+- key: common_option_stats_realm_name
+  value: server
+  context: Label for server command option, shown while typing a command
+- key: common_option_stats_realm_description
+  value: What server is this account on?
+  context: Description for server command option, shown while typing a command
+
+# Common labels that are safe to use in multiple contexts
+- key: common_label_realm_na
+  value: North America
+- key: common_label_realm_eu
+  value: Europe
+- key: common_label_realm_as
+  value: Asia
+- key: common_label_realm_ru
+  value: CIS
+
 # - key: command_name_stats
 #   value: stats
 #   context: Command for /stats
