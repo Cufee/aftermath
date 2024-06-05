@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"strings"
 	"time"
 
@@ -52,6 +54,58 @@ func (c *Client) request(method string, url string, payload any) (*http.Request,
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	return req, nil
+}
+
+func (c *Client) requestWithFiles(method string, url string, payload any, files []*discordgo.File) (*http.Request, error) {
+	buffer := &bytes.Buffer{}
+	writer := multipart.NewWriter(buffer)
+	writer.FormDataContentType()
+
+	encoded, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode json payload: %s", err)
+	}
+
+	part, err := writer.CreatePart(partHeader(`form-data; name="payload_json"`, "application/json"))
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err = part.Write(encoded); err != nil {
+		return nil, err
+	}
+
+	for i, file := range files {
+		part, err = writer.CreatePart(partHeader(fmt.Sprintf(`form-data; name="files[%d]"; filename="%s"`, i, file.Name), "application/octet-stream"))
+		if err != nil {
+			return nil, err
+		}
+		if _, err = io.Copy(part, file.Reader); err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(method, url, buffer)
+	if err != nil {
+		return nil, fmt.Errorf("failed to make a new request: %s", err)
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Authorization", "Bot "+c.token)
+	req.Header.Set("Accept", "application/json")
+	return req, nil
+}
+
+func partHeader(contentDisposition string, contentType string) textproto.MIMEHeader {
+	return textproto.MIMEHeader{
+		"Content-Disposition": []string{contentDisposition},
+		"Content-Type":        []string{contentType},
+	}
 }
 
 func (c *Client) do(req *http.Request, target any) error {
