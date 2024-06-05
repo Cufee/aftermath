@@ -5,6 +5,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
@@ -12,49 +13,36 @@ import (
 
 func init() {
 	Loaded.add(
-		builder.NewCommand("ping").
-			// 	Name("stats").
-			// 	Option("days", discord.ApplicationCommandOptionInt{
-			// 		MaxValue: common.Pointer(90),
-			// 		MinValue: common.Pointer(1),
-			// 		Required: false,
-			// 	},
-			// 		SetNameKey("common_option_days_name"),
-			// 		SetDescKey("common_option_days_description"),
-			// 	).
-			// 	Option("user", discord.ApplicationCommandOptionUser{
-			// 		Required: false,
-			// 	},
-
-			// 		SetNameKey("common_option_user_name"),
-			// 		SetDescKey("common_option_user_description"),
-			// 	).
-			// 	Option("nickname", discord.ApplicationCommandOptionString{
-			// 		Required: false,
-			// 	},
-			// 		SetNameKey("common_option_nickname_name"),
-			// 		SetDescKey("common_option_nickname_description")).
-			// 	Option("server", discord.ApplicationCommandOptionString{
-			// 		Required: false,
-			// 		Choices: []discord.ApplicationCommandOptionChoiceString{
-			// 			{
-			// 				Name:  "North America",
-			// 				Value: "na",
-			// 			},
-			// 			{
-			// 				Name:  "Europe",
-			// 				Value: "eu",
-			// 			},
-			// 			{
-			// 				Name:  "Asia",
-			// 				Value: "as",
-			// 			},
-			// 		},
-			// 	},
-
-			// 		SetNameKey("common_option_server_name"),
-			// 		SetDescKey("common_option_server_description"),
-			// 	).
+		builder.NewCommand("stats").
+			Options(
+				builder.NewOption("days", discordgo.ApplicationCommandOptionNumber).
+					Min(1).
+					Max(90).
+					Params(
+						builder.SetNameKey("common_option_stats_days_name"),
+						builder.SetDescKey("common_option_stats_days_description"),
+					),
+				builder.NewOption("user", discordgo.ApplicationCommandOptionUser).
+					Params(
+						builder.SetNameKey("common_option_stats_user_name"),
+						builder.SetDescKey("common_option_stats_user_description"),
+					),
+				builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
+					Params(
+						builder.SetNameKey("common_option_stats_nickname_name"),
+						builder.SetDescKey("common_option_stats_nickname_description"),
+					),
+				builder.NewOption("server", discordgo.ApplicationCommandOptionString).
+					Params(
+						builder.SetNameKey("common_option_stats_realm_name"),
+						builder.SetDescKey("common_option_stats_realm_description"),
+					).
+					Choices(
+						builder.NewChoice("realm_na", "na").Params(builder.SetNameKey("common_label_realm_na")),
+						builder.NewChoice("realm_eu", "eu").Params(builder.SetNameKey("common_label_realm_eu")),
+						builder.NewChoice("realm_as", "as").Params(builder.SetNameKey("common_label_realm_as")),
+					),
+			).
 			Handler(func(ctx *common.Context) error {
 				var periodStart time.Time
 				// if days := time.Duration(ctx.Options().Int("days")); days > 0 {
@@ -80,9 +68,7 @@ func init() {
 					return err
 				}
 
-				// return ctx.File(&buf, "image_by_aftermath.png")
-				return ctx.Reply("stats go here")
-
+				return ctx.File(&buf, "image_by_aftermath.png")
 			}),
 	)
 }

@@ -2,7 +2,9 @@ package router
 
 import (
 	"fmt"
+	"slices"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/middleware"
@@ -50,28 +52,74 @@ func (r *Router) LoadMiddleware(middleware ...middleware.MiddlewareFunc) {
 
 /*
 Updates all loaded commands using the Discord REST API
+  - any commands that are loaded will be created/updated
+  - any commands that were not loaded will be deleted
 */
 func (r *Router) UpdateLoadedCommands() error {
-	// if len(r.commands) < 1 {
-	// 	return errors.New("no commands to update")
-	// }
+	toOverwrite := make(map[string]discordgo.ApplicationCommand)
 
-	// client, err := r.client()
-	// if err != nil {
-	// 	return err
-	// }
+	for _, cmd := range r.commands {
+		if cmd.Type != builder.CommandTypeChat {
+			continue
+		}
+		toOverwrite[cmd.Name] = cmd.ApplicationCommand
+	}
 
-	// var options []discord.ApplicationCommandCreate
-	// for _, cmd := range r.commands {
-	// 	options = append(options, cmd.ApplicationCommandCreate)
+	current, err := r.restClient.GetGlobalApplicationCommands()
+	if err != nil {
+		return err
+	}
 
-	// 	d, _ := json.MarshalIndent(cmd.ApplicationCommandCreate, "", "  ")
-	// 	println(string(d))
+	var toDelete []string
+	var currentCommands []string
+	for _, command := range current {
+		currentCommands = append(currentCommands, command.Name)
+		if _, ok := toOverwrite[command.Name]; !ok {
+			toDelete = append(toDelete, command.ID)
+			continue
+		}
 
-	// }
+		newCmd := toOverwrite[command.Name]
+		newCmd.ID = command.ID
 
-	// if _, err := client.Rest().SetGlobalCommands(client.ApplicationID(), options); err != nil {
-	// 	return err
-	// }
+		toOverwrite[command.Name] = newCmd
+	}
+
+	for _, cmd := range r.commands {
+		if cmd.Type != builder.CommandTypeChat {
+			continue
+		}
+		if !slices.Contains(currentCommands, cmd.Name) {
+			// it will be created during the bulk overwrite call
+			continue
+		}
+		// Check if the command needs to be updated
+		// if true {
+		delete(toOverwrite, cmd.Name)
+		// 	continue
+		// }
+	}
+
+	for _, id := range toDelete {
+		err := r.restClient.DeleteGlobalApplicationCommand(id)
+		if err != nil {
+			return fmt.Errorf("failed to delete a command: %w", err)
+		}
+	}
+
+	if len(toOverwrite) < 1 {
+		return nil
+	}
+
+	var commandUpdates []discordgo.ApplicationCommand
+	for _, cmd := range toOverwrite {
+		commandUpdates = append(commandUpdates, cmd)
+	}
+
+	err = r.restClient.OverwriteGlobalApplicationCommands(commandUpdates)
+	if err != nil {
+		return fmt.Errorf("failed to bulk update application commands: %w", err)
+	}
+
 	return nil
 }

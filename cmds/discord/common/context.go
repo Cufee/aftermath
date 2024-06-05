@@ -2,6 +2,8 @@ package common
 
 import (
 	"context"
+	"fmt"
+	"io"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/core"
@@ -64,7 +66,64 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, respondC
 	return c
 }
 
-func (c *Context) Reply(message string) error {
-	c.respondCh <- discordgo.InteractionResponseData{Content: message}
+func (c *Context) Reply(key string) error {
+	c.respondCh <- discordgo.InteractionResponseData{Content: c.Localize(key)}
 	return nil
+}
+
+func (c *Context) ReplyFmt(key string, args ...any) error {
+	c.respondCh <- discordgo.InteractionResponseData{Content: fmt.Sprintf(c.Localize(key), args...)}
+	return nil
+}
+
+func (c *Context) File(r io.Reader, name string) error {
+	c.respondCh <- discordgo.InteractionResponseData{Files: []*discordgo.File{{Reader: r, Name: name}}}
+	return nil
+}
+
+func (c *Context) isCommand() bool {
+	return c.interaction.Type == discordgo.InteractionApplicationCommand
+}
+
+func (c *Context) isComponentInteraction() bool {
+	return c.interaction.Type == discordgo.InteractionMessageComponent
+}
+
+func (c *Context) ID() string {
+	if c.isCommand() {
+		d, _ := c.CommandData()
+		return d.Name
+	}
+	if c.isComponentInteraction() {
+		d, _ := c.ComponentData()
+		return d.CustomID
+	}
+	return ""
+}
+
+func (c *Context) Option(name string) any {
+	if data, ok := c.CommandData(); ok {
+		for _, opt := range data.Options {
+			if opt.Name == name {
+				return opt.Value
+			}
+		}
+	}
+	return nil
+}
+
+func (c *Context) CommandData() (discordgo.ApplicationCommandInteractionData, bool) {
+	if !c.isCommand() {
+		return discordgo.ApplicationCommandInteractionData{}, false
+	}
+	data, ok := c.interaction.Data.(discordgo.ApplicationCommandInteractionData)
+	return data, ok
+}
+
+func (c *Context) ComponentData() (discordgo.MessageComponentInteractionData, bool) {
+	if !c.isComponentInteraction() {
+		return discordgo.MessageComponentInteractionData{}, false
+	}
+	data, ok := c.interaction.Data.(discordgo.MessageComponentInteractionData)
+	return data, ok
 }

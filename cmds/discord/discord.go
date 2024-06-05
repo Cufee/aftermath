@@ -21,10 +21,10 @@ func NewRouterHandler(coreClient core.Client, token string, publicKey string) (h
 	// should always be loaded last
 	rt.LoadMiddleware(middleware.FetchUser(common.ContextKeyUser, coreClient.DB))
 
-	// err = rt.UpdateLoadedCommands()
-	// if err != nil {
-	// return nil, err
-	// }
+	err = rt.UpdateLoadedCommands()
+	if err != nil {
+		return nil, err
+	}
 
 	return rt.HTTPHandler()
 }
