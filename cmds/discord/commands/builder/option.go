@@ -93,6 +93,10 @@ func (o Option) Build(command string) discordgo.ApplicationCommandOption {
 		Description:              stringOr(descLocalized[discordgo.EnglishUS], o.name),
 		NameLocalizations:        nameLocalized,
 		DescriptionLocalizations: descLocalized,
+		MinLength:                o.minLength,
+		MaxLength:                o.maxLength,
+		MinValue:                 o.minValue,
+		MaxValue:                 o.maxValue,
 		Choices:                  choices,
 		Type:                     o.kind,
 	}

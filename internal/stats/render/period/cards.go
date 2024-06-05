@@ -8,16 +8,19 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common"
 	"github.com/cufee/aftermath/internal/stats/prepare/period"
+	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/common"
 
 	"github.com/rs/zerolog/log"
 )
 
-func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []database.UserSubscription, opts options) ([]common.Block, error) {
+func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []database.UserSubscription, opts render.Options) (render.Segments, error) {
 	if len(cards.Overview.Blocks) == 0 && len(cards.Highlights) == 0 {
 		log.Error().Msg("player cards slice is 0 length, this should not happen")
-		return nil, errors.New("no cards provided")
+		return render.Segments{}, errors.New("no cards provided")
 	}
+
+	var segments render.Segments
 
 	// Calculate minimal card width to fit all the content
 	var cardWidth float64
@@ -76,10 +79,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		}
 	}
 
-	var renderedCards []common.Block
-
 	// We first render a footer in order to calculate the minimum required width
-	var footerCard common.Block
 	{
 		var footer []string
 		switch strings.ToLower(stats.Realm) {
@@ -101,24 +101,24 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		footerBlock := common.NewFooterCard(strings.Join(footer, " • "))
 		footerImage, err := footerBlock.Render()
 		if err != nil {
-			return renderedCards, err
+			return segments, err
 		}
 		cardWidth = common.Max(cardWidth, float64(footerImage.Bounds().Dx()))
-		footerCard = common.NewImageContent(common.Style{Width: cardWidth, Height: float64(footerImage.Bounds().Dy())}, footerImage)
+		segments.AddFooter(common.NewImageContent(common.Style{Width: cardWidth, Height: float64(footerImage.Bounds().Dy())}, footerImage))
 	}
 
 	// Header card
 	if headerCard, headerCardExists := newHeaderCard(subs, opts); headerCardExists {
 		headerImage, err := headerCard.Render()
 		if err != nil {
-			return renderedCards, err
+			return segments, err
 		}
 		cardWidth = common.Max(cardWidth, float64(headerImage.Bounds().Dx()))
-		renderedCards = append(renderedCards, common.NewImageContent(common.Style{Width: cardWidth, Height: float64(headerImage.Bounds().Dy())}, headerImage))
+		segments.AddHeader(common.NewImageContent(common.Style{Width: cardWidth, Height: float64(headerImage.Bounds().Dy())}, headerImage))
 	}
 
 	// Player Title card
-	renderedCards = append(renderedCards, common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(titleCardStyle(cardWidth)), stats.Account.Nickname, stats.Clan.Tag, subs))
+	segments.AddContent(common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(titleCardStyle(cardWidth)), stats.Account.Nickname, stats.Clan.Tag, subs))
 
 	// Overview Card
 	{
@@ -126,24 +126,22 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		for _, column := range cards.Overview.Blocks {
 			columnBlock, err := statsBlocksToColumnBlock(getOverviewStyle(overviewColumnWidth), column)
 			if err != nil {
-				return nil, err
+				return segments, err
 			}
 			overviewCardBlocks = append(overviewCardBlocks, columnBlock)
 		}
-		renderedCards = append(renderedCards, common.NewBlocksContent(overviewCardStyle(cardWidth), overviewCardBlocks...))
+		segments.AddContent(common.NewBlocksContent(overviewCardStyle(cardWidth), overviewCardBlocks...))
 	}
 
 	// Highlights
 	for _, card := range cards.Highlights {
-		renderedCards = append(renderedCards, newHighlightCard(highlightCardStyle(defaultCardStyle(cardWidth)), card))
+		segments.AddContent(newHighlightCard(highlightCardStyle(defaultCardStyle(cardWidth)), card))
 	}
 
-	// Add footer
-	renderedCards = append(renderedCards, footerCard)
-	return renderedCards, nil
+	return segments, nil
 }
 
-func newHeaderCard(subscriptions []database.UserSubscription, options options) (common.Block, bool) {
+func newHeaderCard(subscriptions []database.UserSubscription, options render.Options) (common.Block, bool) {
 	var cards []common.Block
 
 	var addPromoText = true
@@ -157,10 +155,10 @@ func newHeaderCard(subscriptions []database.UserSubscription, options options) (
 		}
 	}
 
-	if addPromoText && options.promoText != nil {
+	if addPromoText && options.PromoText != nil {
 		// Users without a subscription get promo text
 		var textBlocks []common.Block
-		for _, text := range options.promoText {
+		for _, text := range options.PromoText {
 			textBlocks = append(textBlocks, common.NewTextContent(common.Style{Font: &common.FontMedium, FontColor: common.TextPrimary}, text))
 		}
 		cards = append(cards, common.NewBlocksContent(common.Style{

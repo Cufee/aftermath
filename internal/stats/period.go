@@ -7,6 +7,7 @@ import (
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats/fetch"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period"
+	options "github.com/cufee/aftermath/internal/stats/render"
 	render "github.com/cufee/aftermath/internal/stats/render/period"
 	"golang.org/x/text/language"
 )
@@ -16,7 +17,7 @@ type renderer struct {
 	locale      language.Tag
 }
 
-func (r *renderer) Period(ctx context.Context, accountId string, from time.Time) (Image, Metadata, error) {
+func (r *renderer) Period(ctx context.Context, accountId string, from time.Time, opts ...options.Option) (Image, Metadata, error) {
 	meta := Metadata{}
 
 	printer, err := localization.NewPrinter("stats", r.locale)
@@ -40,7 +41,7 @@ func (r *renderer) Period(ctx context.Context, accountId string, from time.Time)
 	}
 
 	stop = meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(stats, cards, nil)
+	image, err := render.CardsToImage(stats, cards, nil, opts...)
 	stop()
 	if err != nil {
 		return nil, meta, err

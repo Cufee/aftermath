@@ -71,6 +71,10 @@ func (c *Context) Reply(key string) error {
 	return nil
 }
 
+func (c *Context) Err(err error, message string) error {
+	return c.Reply(err.Error() + "," + message)
+}
+
 func (c *Context) ReplyFmt(key string, args ...any) error {
 	c.respondCh <- discordgo.InteractionResponseData{Content: fmt.Sprintf(c.Localize(key), args...)}
 	return nil
@@ -104,12 +108,27 @@ func (c *Context) ID() string {
 func (c *Context) Option(name string) any {
 	if data, ok := c.CommandData(); ok {
 		for _, opt := range data.Options {
+			fmt.Printf("%+v", opt)
 			if opt.Name == name {
 				return opt.Value
 			}
 		}
 	}
 	return nil
+}
+
+func GetOption[T any](c *Context, name string) (T, bool) {
+	var v T
+	if data, ok := c.CommandData(); ok {
+		for _, opt := range data.Options {
+			if opt.Name == name {
+				v, _ = opt.Value.(T)
+
+				return v, true
+			}
+		}
+	}
+	return v, false
 }
 
 func (c *Context) CommandData() (discordgo.ApplicationCommandInteractionData, bool) {

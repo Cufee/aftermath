@@ -8,6 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/common"
+	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 )
 
@@ -15,7 +16,7 @@ func init() {
 	Loaded.add(
 		builder.NewCommand("stats").
 			Options(
-				builder.NewOption("days", discordgo.ApplicationCommandOptionNumber).
+				builder.NewOption("days", discordgo.ApplicationCommandOptionInteger).
 					Min(1).
 					Max(90).
 					Params(
@@ -28,6 +29,8 @@ func init() {
 						builder.SetDescKey("common_option_stats_user_description"),
 					),
 				builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
+					Min(5).
+					Max(30).
 					Params(
 						builder.SetNameKey("common_option_stats_nickname_name"),
 						builder.SetDescKey("common_option_stats_nickname_description"),
@@ -45,27 +48,20 @@ func init() {
 			).
 			Handler(func(ctx *common.Context) error {
 				var periodStart time.Time
-				// if days := time.Duration(ctx.Options().Int("days")); days > 0 {
-				// 	periodStart = time.Now().Add(time.Hour * 24 * days * -1)
-				// }
-
-				// fmt.Printf("%#v", ctx.Options().All())
-
-				image, _, err := ctx.Core.Render(ctx.Locale).Period(context.Background(), "579553160", periodStart)
-				if err != nil {
-					return err
+				if days, _ := common.GetOption[float64](ctx, "days"); days > 0 {
+					periodStart = time.Now().Add(time.Hour * 24 * time.Duration(days) * -1)
 				}
 
-				background, _ := assets.GetLoadedImage("bg-light")
-				err = image.AddBackground(background)
+				background, _ := assets.GetLoadedImage("bg-default")
+				image, _, err := ctx.Core.Render(ctx.Locale).Period(context.Background(), "1013072123", periodStart, render.WithBackground(background))
 				if err != nil {
-					return err
+					return ctx.Err(err, "some_error_message_key")
 				}
 
 				var buf bytes.Buffer
 				err = image.PNG(&buf)
 				if err != nil {
-					return err
+					return ctx.Err(err, "some_error_message_key")
 				}
 
 				return ctx.File(&buf, "image_by_aftermath.png")
