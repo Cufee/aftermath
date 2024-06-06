@@ -48,34 +48,6 @@ func main() {
 
 	http.Handle("/discord/callback", discordHandler)
 	panic(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
-
-	// test
-	// localePrinter := func(s string) string { return "localized:" + s }
-
-	// renderer := stats.NewRenderer(statsClient, language.English)
-
-	// var days time.Duration = 60
-	// img, meta, err := renderer.Period(context.Background(), "579553160", time.Now().Add(time.Hour*24*days*-1))
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// fmt.Printf("rendered in %v\n", meta.TotalTime())
-
-	// bgImage, _ := assets.GetLoadedImage("bg-light")
-	// finalImage := render.AddBackground(img, bgImage, render.Style{Blur: 10, BorderRadius: 30})
-
-	// f, err := os.Create("tmp/test-image.png")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer f.Close()
-
-	// err = png.Encode(f, finalImage)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
 }
 
 func loadStaticAssets(static fs.FS) {
