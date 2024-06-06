@@ -97,6 +97,7 @@ func (o Option) Build(command string) discordgo.ApplicationCommandOption {
 		MaxLength:                o.maxLength,
 		MinValue:                 o.minValue,
 		MaxValue:                 o.maxValue,
+		Required:                 o.required,
 		Choices:                  choices,
 		Type:                     o.kind,
 	}

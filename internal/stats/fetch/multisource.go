@@ -2,6 +2,7 @@ package fetch
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
+
+var _ Client = &multiSourceClient{}
 
 type multiSourceClient struct {
 	retriesPerRequest  int
@@ -29,6 +32,18 @@ func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Clie
 		retriesPerRequest:  2,
 		retrySleepInterval: time.Millisecond * 100,
 	}, nil
+}
+
+func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string) (types.Account, error) {
+	accounts, err := c.wargaming.SearchAccounts(ctx, realm, nickname)
+	if err != nil {
+		return types.Account{}, err
+	}
+	if len(accounts) < 1 {
+		return types.Account{}, errors.New("no results found")
+	}
+
+	return accounts[0], nil
 }
 
 /*

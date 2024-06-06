@@ -54,7 +54,7 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, respondC
 		return nil, errors.New("failed to get a valid discord user id")
 	}
 
-	user, err := client.DB.GetUserByID(ctx, c.Member.ID)
+	user, err := client.DB.GetOrCreateUserByID(ctx, c.Member.ID, database.WithConnections(), database.WithSubscriptions())
 	if err != nil {
 		return nil, err
 	}
@@ -80,8 +80,14 @@ func (c *Context) Reply(key string) error {
 	return nil
 }
 
-func (c *Context) Err(err error, message string) error {
-	return c.Reply(err.Error() + "," + message)
+func (c *Context) Err(err error) error {
+	log.Err(err).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
+	return c.Reply(err.Error())
+}
+
+func (c *Context) Error(message string) error {
+	log.Error().Str("message", message).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
+	return c.Reply(message)
 }
 
 func (c *Context) ReplyFmt(key string, args ...any) error {

@@ -9,6 +9,7 @@ import (
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/middleware"
 	"github.com/cufee/aftermath/cmds/discord/rest"
+	"github.com/rs/zerolog/log"
 )
 
 func NewRouter(coreClient core.Client, token, publicKey string) (*Router, error) {
@@ -84,6 +85,7 @@ func (r *Router) UpdateLoadedCommands() error {
 
 		toOverwrite[command.Name] = newCmd
 	}
+	log.Debug().Any("commands", currentCommands).Msg("current application commands")
 
 	for _, cmd := range r.commands {
 		if cmd.Type != builder.CommandTypeChat {
@@ -93,21 +95,19 @@ func (r *Router) UpdateLoadedCommands() error {
 			// it will be created during the bulk overwrite call
 			continue
 		}
-		// TODO: check if the command needs to be updated
-		if true {
-			delete(toOverwrite, cmd.Name)
-			continue
-		}
 	}
 
 	for _, id := range toDelete {
+		log.Debug().Str("id", id).Msg("deleting old application command")
 		err := r.restClient.DeleteGlobalApplicationCommand(id)
 		if err != nil {
 			return fmt.Errorf("failed to delete a command: %w", err)
 		}
+		log.Debug().Str("id", id).Msg("deleted old application command")
 	}
 
-	if len(toOverwrite) < 1 {
+	if len(toOverwrite) < 1 || len(currentCommands) == len(toOverwrite) {
+		log.Debug().Msg("no application commands need an update")
 		return nil
 	}
 
@@ -116,10 +116,12 @@ func (r *Router) UpdateLoadedCommands() error {
 		commandUpdates = append(commandUpdates, cmd)
 	}
 
+	log.Debug().Msg("updating application commands")
 	err = r.restClient.OverwriteGlobalApplicationCommands(commandUpdates)
 	if err != nil {
 		return fmt.Errorf("failed to bulk update application commands: %w", err)
 	}
+	log.Debug().Msg("updated application commands")
 
 	return nil
 }

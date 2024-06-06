@@ -28,7 +28,7 @@ func wargamingToStats(realm string, accountData types.ExtendedAccount, clanMembe
 			Vehicles:   make(map[string]frame.VehicleStatsFrame),
 		},
 		LastBattleTime: timestampToTime(accountData.LastBattleTime),
-		PeriodStart:    timestampToTime(accountData.CreatedAt),
+		PeriodStart:    time.Now(),
 		PeriodEnd:      timestampToTime(accountData.LastBattleTime),
 	}
 	// An account can be blank with no last battle played

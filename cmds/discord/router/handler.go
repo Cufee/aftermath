@@ -127,6 +127,9 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 		go func() {
 			// unlock once this context is done and the ack is delivered
 			<-r.Context().Done()
+			// give discord time to register the reply
+			// in very rare cases, out reply comes right after the unlock and discord returns an error
+			time.Sleep(time.Millisecond * 50)
 			state.mx.Unlock()
 		}()
 
@@ -158,8 +161,13 @@ func (r *Router) routeInteraction(interaction discordgo.Interaction) (*builder.C
 	return nil, fmt.Errorf("failed to match %s to a command handler", matchKey)
 }
 
-func (r *Router) handleInteraction(ctx context.Context, interaction discordgo.Interaction, command *builder.Command, reply chan<- discordgo.InteractionResponseData, done func()) {
-	defer done()
+func (r *Router) handleInteraction(ctx context.Context, cancel context.CancelFunc, interaction discordgo.Interaction, command *builder.Command, reply chan<- discordgo.InteractionResponseData) {
+	defer cancel()
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error().Interface("error", r).Msg("interaction handler panic")
+		}
+	}()
 
 	cCtx, err := common.NewContext(ctx, interaction, reply, r.restClient, r.core)
 	if err != nil {
@@ -185,6 +193,8 @@ func sendPingReply(w http.ResponseWriter) {
 }
 
 func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interaction, state *interactionState, command *builder.Command) {
+	log.Debug().Str("id", interaction.ID).Msg("started handling an interaction")
+
 	// create a timer for the interaction response
 	responseTimer := time.NewTimer(interactionTimeout)
 	defer responseTimer.Stop()
@@ -193,14 +203,11 @@ func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interac
 	workerCtx, cancelWorker := context.WithCancel(context.Background())
 
 	// handle the interaction
-	doneCh := make(chan struct{})
-	responseCh := make(chan discordgo.InteractionResponseData, 2)
-	go router.handleInteraction(workerCtx, interaction, command, responseCh, func() { doneCh <- struct{}{} })
+	responseCh := make(chan discordgo.InteractionResponseData)
+	go router.handleInteraction(workerCtx, cancelWorker, interaction, command, responseCh)
 
 	go func() {
 		defer close(responseCh)
-		defer close(doneCh)
-		defer cancelWorker()
 
 		for {
 			select {
@@ -211,15 +218,17 @@ func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interac
 				defer state.mx.Unlock()
 				return
 
-			case <-doneCh:
+			case <-workerCtx.Done():
 				state.mx.Lock()
 				// we are done, there is nothing else we should do here
 				// lock in case responseCh is still busy sending some data over
 				defer state.mx.Unlock()
+				log.Debug().Str("id", interaction.ID).Msg("finished handling an interaction")
 				return
 
 			case data := <-responseCh:
 				state.mx.Lock()
+				log.Debug().Str("id", interaction.ID).Msg("sending an interaction reply")
 				router.sendInteractionReply(interaction, state, data)
 				state.mx.Unlock()
 			}

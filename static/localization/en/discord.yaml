@@ -1,35 +1,49 @@
 # Check README.md for schema
 
 # Commands
+# name is always the command name shown when typing /, names have to be lowercase
+# description is shown next to the command name
+# /stats
 - key: command_stats_name
   value: stats
-  context: Command for /stats
 - key: command_stats_description
-  value: View your career stats
-  context: Description shown next to the name when a user is typing out the command
+  value: Get an overview of your stats
+# /session
+- key: command_session_name
+  value: session
+- key: command_session_description
+  value: Get detailed stats for your recent session
+# /link
+- key: command_link_name
+  value: link
+- key: command_link_description
+  value: Link your Blitz account to Aftermath
+- key: command_link_linked_successfully_fmt
+  value: "Your account has been linked! Aftermath will now default to **%s** on **%s** when checking stats.\nYou can also verify your account with `/verify`"
 
 # Common command options
+# days
 - key: common_option_stats_days_name
   value: days
   context: Label for days command option, shown while typing a command
 - key: common_option_stats_days_description
   value: How far back should the session go?
   context: Description for days command option, shown while typing a command
-
+# user mention
 - key: common_option_stats_user_name
   value: user
   context: Label for discord @member command option, shown while typing a command
 - key: common_option_stats_user_description
   value: Select another user to view their stats
   context: Description for user command option, shown while typing a command
-  
+  # nickname
 - key: common_option_stats_nickname_name
   value: nickname
   context: Label for nickname command option, shown while typing a command
 - key: common_option_stats_nickname_description
   value: Blitz player name
   context: Description for nickname command option, shown while typing a command
-
+# server/realm
 - key: common_option_stats_realm_name
   value: server
   context: Label for server command option, shown while typing a command
@@ -47,10 +61,113 @@
 - key: common_label_realm_ru
   value: CIS
 
-# - key: command_name_stats
-#   value: stats
-#   context: Command for /stats
-# - key: command_description_stats
-#   value: View your career stats
-#   context: Description shown next to the name when a user is typing out the command
+# Errors
+# internal/Unknown errors
+- key: common_error_service_outage
+  value: "Aftermath is currently undergoing maintenance and is temporarily unavailable. Please try again in a few moments."
+  context: Failed to reach some internal service
 
+- key: common_error_unhandled_reported
+  value: Something unexpected happened and your command failed.\n*This error was reported automatically, you can also reach out to our team on Aftermath Official*"
+  context: We failed to execute a command, the error is not user-facing and will be reported to a dev automatically
+
+- key: common_error_unhandled_not_reported
+  value: "Something unexpected happened and your command failed.\n*You can reach out to our team on Aftermath Official if you would like to report this error*"
+  context: We failed to execute a command, the error is not user-facing
+
+- key: common_error_user_spam_detected
+  value: "Hey there! It seems like you're using commands too quickly. To ensure a smooth experience for everyone, please refrain from spamming."
+  context: User is spamming using commands/buttons
+
+- key: common_error_command_missing_permissions
+  value: "You don't have permission to use this command."
+
+- key: common_error_payment_required
+  value: "This feature of Aftermath is only available for users with an active subscription.\nYou can subscribe by using the `/subscribe` command."
+
+- key: common_error_user_restricted_vague_fmt
+  value: "### You are banned from using some or all features of Aftermath until <t:%d:f>"
+  context: User has some kind of restriction/ban in place, but we did not check what the restriction is
+
+- key: common_error_missing_permissions_dm
+  value: "Aftermath is not able to send you a direct message."
+  context: User has DMs restricted to friends only\
+
+- key: common_error_missing_permissions_dm_mention_fmt
+  value: "Hey %s, Aftermath is not able to send you a direct message."
+  context: User has DMs restricted to friends only
+
+# stats-related errors
+- key: stats_error_connection_not_verified
+  value: "Looks like you haven't verified your Blitz account yet. Give the `/verify` command a shot."
+  context: User does not have a verified connection and the command requires one
+
+- key: stats_error_connection_not_found_vague
+  value: "The user you mentioned does not have a Blitz account linked."
+  context: No Blitz account linked for a user mentioned
+
+- key: stats_error_mentioned_self_non_blocking
+  value: "You don't need to @mention yourself when checking stats, just type the command without any options to check your own account."
+  context: Mentioned self when checking stats, will not prevent the command from running
+
+- key: stats_error_connection_not_found_personal
+  value: "Looks like we haven't got your Blitz nickname yet. Give the `/link` command a shot."
+  context: No Blitz account linked
+
+- key: stats_error_nickname_or_server_missing
+  value: "I need both the name and server to find your account. You can also use the `/link` command to setup a default account."
+  context: User provided a nickname, but no server
+
+- key: stats_error_nickname_invalid
+  value: "This does not look like a valid player name, make sure you are using your in-game name."
+  context: Invalid Blitz username provided
+  notes: This does not mean it was not found, just that the input provided cannot possibly be a valid nickname
+
+- key: stats_error_invalid_options_combination
+  value: "It looks like you have provided too many options. You can't specify a nickname when mentioning another user."
+  context: Both user mention and nickname provided
+
+- key: stats_error_nickname_not_fount_fmt
+  value: "I was not able to find a player named **%s** on **%s**. Was the name spelled correctly?"
+  context: Invalid Blitz username provided
+
+# /background errors
+- key: background_error_payment_required
+  value: "This feature of Aftermath is only available for users with an active subscription.\nYou can subscribe by using the `/subscribe` command or pick a background using `/fancy` instead."
+  context: User does not have a paid subscription, but tried to set a background
+
+- key: background_error_missing_attachment
+  value: "You need to attach an image or provide a link in order to upload a custom background."
+  context: Command used without a file attached or a link provided
+
+- key: background_error_invalid_attachment_vague
+  value: "The file attached is not a valid image."
+  context: Invalid file attached
+
+- key: background_error_invalid_attachment_image
+  value: "The image you have provided is invalid. Please make sure it is a PNG or JPEG image."
+  context: Invalid file attached
+
+  # /replay errors
+- key: replay_error_missing_attachment
+  value: "You need to provide a link or attach a WoT Blitz replay file."
+  context: Invalid file attached
+  
+  # /link errors
+- key: link_error_missing_input
+  value: "I need both the nickname and server to find your account."
+  context: Nickname or server not provided
+
+  # /verify errors
+- key: verify_error_missing_server
+  value: "Please select a server your account is registered on."
+  context: Server not selected
+  
+  # Wargaming specific errors
+- key: wargaming_error_private_account
+  value: "This account is marked private by Wargaming and no stats are available for it at this time."
+  context: Some accounts are valid, but do not return any stats data
+
+- key: wargaming_error_outage
+  value: "It looks like Wargaming are having some temporary issues. Please try again in a few seconds."
+  context: This error is sent whenever a request to WG fails for whatever reason

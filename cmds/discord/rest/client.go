@@ -25,7 +25,7 @@ type Client struct {
 func NewClient(token string) (*Client, error) {
 	client := &Client{
 		token: token,
-		http:  http.Client{Timeout: time.Millisecond * 500},
+		http:  http.Client{Timeout: time.Millisecond * 3000},
 	}
 
 	_, err := client.lookupApplicationID()

@@ -3,11 +3,12 @@ package commands
 import (
 	"bytes"
 	"context"
-	"time"
+	"fmt"
+	"strings"
 
-	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/common"
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 )
@@ -15,56 +16,61 @@ import (
 func init() {
 	Loaded.add(
 		builder.NewCommand("stats").
-			Options(
-				builder.NewOption("days", discordgo.ApplicationCommandOptionInteger).
-					Min(1).
-					Max(90).
-					Params(
-						builder.SetNameKey("common_option_stats_days_name"),
-						builder.SetDescKey("common_option_stats_days_description"),
-					),
-				builder.NewOption("user", discordgo.ApplicationCommandOptionUser).
-					Params(
-						builder.SetNameKey("common_option_stats_user_name"),
-						builder.SetDescKey("common_option_stats_user_description"),
-					),
-				builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
-					Min(5).
-					Max(30).
-					Params(
-						builder.SetNameKey("common_option_stats_nickname_name"),
-						builder.SetDescKey("common_option_stats_nickname_description"),
-					),
-				builder.NewOption("server", discordgo.ApplicationCommandOptionString).
-					Params(
-						builder.SetNameKey("common_option_stats_realm_name"),
-						builder.SetDescKey("common_option_stats_realm_description"),
-					).
-					Choices(
-						builder.NewChoice("realm_na", "na").Params(builder.SetNameKey("common_label_realm_na")),
-						builder.NewChoice("realm_eu", "eu").Params(builder.SetNameKey("common_label_realm_eu")),
-						builder.NewChoice("realm_as", "as").Params(builder.SetNameKey("common_label_realm_as")),
-					),
-			).
+			Options(defaultStatsOptions...).
 			Handler(func(ctx *common.Context) error {
-				var periodStart time.Time
-				if days, _ := common.GetOption[float64](ctx, "days"); days > 0 {
-					periodStart = time.Now().Add(time.Hour * 24 * time.Duration(days) * -1)
+				options := getDefaultStatsOptions(ctx)
+				message, valid := options.Validate(ctx)
+				if !valid {
+					return ctx.Reply(message)
 				}
 
+				var accountID string
 				background, _ := assets.GetLoadedImage("bg-default")
-				image, _, err := ctx.Core.Render(ctx.Locale).Period(context.Background(), "1013072123", periodStart, render.WithBackground(background))
+
+				switch {
+				case options.UserID != "":
+					// mentioned another user, check if the user has an account linked
+					mentionedUser, _ := ctx.Core.DB.GetUserByID(ctx.Context, options.UserID, database.WithConnections(), database.WithContent())
+					defaultAccount, hasDefaultAccount := mentionedUser.Connection(database.ConnectionTypeWargaming)
+					if !hasDefaultAccount {
+						return ctx.Reply("stats_error_connection_not_found_vague")
+					}
+					accountID = defaultAccount.ReferenceID
+					// TODO: Get user background
+
+				case options.Nickname != "" && options.Server != "":
+					// nickname provided and server selected - lookup the account
+					account, err := ctx.Core.Fetch.Search(ctx.Context, options.Nickname, options.Server)
+					if err != nil {
+						if err.Error() == "no results found" {
+							return ctx.ReplyFmt("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server))
+						}
+						return ctx.Err(err)
+					}
+					accountID = fmt.Sprint(account.ID)
+
+				default:
+					defaultAccount, hasDefaultAccount := ctx.User.Connection(database.ConnectionTypeWargaming)
+					if !hasDefaultAccount {
+						return ctx.Reply("stats_error_nickname_or_server_missing")
+					}
+					// command used without options, but user has a default connection
+					accountID = defaultAccount.ReferenceID
+					// TODO: Get user background
+				}
+
+				image, _, err := ctx.Core.Render(ctx.Locale).Period(context.Background(), accountID, options.PeriodStart, render.WithBackground(background))
 				if err != nil {
-					return ctx.Err(err, "some_error_message_key")
+					return ctx.Err(err)
 				}
 
 				var buf bytes.Buffer
 				err = image.PNG(&buf)
 				if err != nil {
-					return ctx.Err(err, "some_error_message_key")
+					return ctx.Err(err)
 				}
 
-				return ctx.File(&buf, "image_by_aftermath.png")
+				return ctx.File(&buf, "stats_command_by_aftermath.png")
 			}),
 	)
 }

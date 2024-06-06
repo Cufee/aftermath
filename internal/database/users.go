@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"slices"
 	"time"
 
@@ -17,6 +19,24 @@ type User struct {
 
 	Connections   []UserConnection
 	Subscriptions []UserSubscription
+}
+
+func (u User) Connection(kind ConnectionType) (UserConnection, bool) {
+	for _, connection := range u.Connections {
+		if connection.Type == kind {
+			return connection, true
+		}
+	}
+	return UserConnection{}, false
+}
+
+func (u User) Subscription(kind SubscriptionType) (UserSubscription, bool) {
+	for _, subscription := range u.Subscriptions {
+		if subscription.Type == kind {
+			return subscription, true
+		}
+	}
+	return UserSubscription{}, false
 }
 
 type ConnectionType string
@@ -40,6 +60,7 @@ type UserConnection struct {
 func (c UserConnection) FromModel(model *db.UserConnectionModel) UserConnection {
 	c.ID = model.ID
 	c.UserID = model.UserID
+	c.Metadata = make(map[string]any)
 	c.ReferenceID = model.ReferenceID
 	c.Permissions = permissions.Parse(model.Permissions, permissions.Blank)
 
@@ -131,8 +152,45 @@ type userGetOpts struct {
 
 type userGetOption func(*userGetOpts)
 
+func WithConnections() userGetOption {
+	return func(ugo *userGetOpts) {
+		ugo.connections = true
+	}
+}
+func WithSubscriptions() userGetOption {
+	return func(ugo *userGetOpts) {
+		ugo.subscriptions = true
+	}
+}
+func WithContent() userGetOption {
+	return func(ugo *userGetOpts) {
+		ugo.content = true
+	}
+}
+
 /*
 Gets or creates a user with specified ID
+  - assumes the ID is valid
+*/
+func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error) {
+	user, err := c.GetUserByID(ctx, id, opts...)
+	if err != nil {
+		if db.IsErrNotFound(err) {
+			model, err := c.prisma.User.CreateOne(db.User.ID.Set(id), db.User.Permissions.Set(permissions.User.Encode())).Exec(ctx)
+			if err != nil {
+				return User{}, err
+			}
+			user.ID = model.ID
+			user.Permissions = permissions.Parse(model.Permissions, permissions.User)
+		}
+		return user, nil
+	}
+
+	return user, nil
+}
+
+/*
+Gets a user with specified ID
   - assumes the ID is valid
 */
 func (c *client) GetUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error) {
@@ -154,13 +212,7 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...userGetOpti
 
 	model, err := c.prisma.User.FindUnique(db.User.ID.Equals(id)).With(fields...).Exec(ctx)
 	if err != nil {
-		if !db.IsErrNotFound(err) {
-			return User{}, err
-		}
-		model, err = c.prisma.User.CreateOne(db.User.ID.Set(id), db.User.Permissions.Set(permissions.User.Encode())).Exec(ctx)
-		if err != nil {
-			return User{}, err
-		}
+		return User{}, err
 	}
 
 	var user User
@@ -174,4 +226,59 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...userGetOpti
 	}
 
 	return user, nil
+}
+
+func (c *client) UpdateConnection(ctx context.Context, connection UserConnection) (UserConnection, error) {
+	if connection.ReferenceID == "" {
+		return UserConnection{}, errors.New("connection referenceID cannot be left blank")
+	}
+
+	encoded, err := json.Marshal(connection.Metadata)
+	if err != nil {
+		return UserConnection{}, fmt.Errorf("failed to encode metadata: %w", err)
+	}
+
+	model, err := c.prisma.UserConnection.FindUnique(db.UserConnection.ID.Equals(connection.ID)).Update(
+		db.UserConnection.ReferenceID.Set(connection.ReferenceID),
+		db.UserConnection.Permissions.Set(connection.Permissions.Encode()),
+		db.UserConnection.MetadataEncoded.Set(string(encoded)),
+	).Exec(ctx)
+	if err != nil {
+		return UserConnection{}, err
+	}
+
+	return connection.FromModel(model), nil
+}
+
+func (c *client) UpsertConnection(ctx context.Context, connection UserConnection) (UserConnection, error) {
+	if connection.ID != "" {
+		return c.UpdateConnection(ctx, connection)
+	}
+	if connection.UserID == "" {
+		return UserConnection{}, errors.New("connection userID cannot be left blank")
+	}
+	if connection.ReferenceID == "" {
+		return UserConnection{}, errors.New("connection referenceID cannot be left blank")
+	}
+	if connection.Type == "" {
+		return UserConnection{}, errors.New("connection Type cannot be left blank")
+	}
+
+	encoded, err := json.Marshal(connection.Metadata)
+	if err != nil {
+		return UserConnection{}, fmt.Errorf("failed to encode metadata: %w", err)
+	}
+
+	model, err := c.prisma.UserConnection.CreateOne(
+		db.UserConnection.User.Link(db.User.ID.Equals(connection.UserID)),
+		db.UserConnection.Type.Set(string(connection.Type)),
+		db.UserConnection.Permissions.Set(connection.Permissions.Encode()),
+		db.UserConnection.ReferenceID.Set(connection.ReferenceID),
+		db.UserConnection.MetadataEncoded.Set(string(encoded)),
+	).Exec(ctx)
+	if err != nil {
+		return UserConnection{}, err
+	}
+
+	return connection.FromModel(model), nil
 }

@@ -29,7 +29,7 @@ type StatsWithVehicles struct {
 }
 
 type Client interface {
-	// Search(id string) (AccountStatsOverPeriod, error)
+	Search(ctx context.Context, nickname, realm string) (types.Account, error)
 	CurrentStats(ctx context.Context, id string) (AccountStatsOverPeriod, error)
 	PeriodStats(ctx context.Context, id string, from time.Time) (AccountStatsOverPeriod, error)
 }

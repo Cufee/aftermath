@@ -12,6 +12,9 @@ type Client interface {
 	GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error)
 
 	GetUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
+	GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
+	UpdateConnection(ctx context.Context, connection UserConnection) (UserConnection, error)
+	UpsertConnection(ctx context.Context, connection UserConnection) (UserConnection, error)
 }
 
 // var _ Client = &client{} // just a marker to see if it is implemented correctly
