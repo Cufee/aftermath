@@ -17,7 +17,7 @@ model AppConfiguration {
   updatedAt DateTime @updatedAt
 
   valueEncoded    String
-  metadataEncoded String?
+  metadataEncoded String @default("")
 
   @@map("app_configurations")
 }
@@ -51,8 +51,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  permissions         String?
-  featureFlagsEncoded String?
+  permissions         String
+  featureFlagsEncoded String @default("")
 
   subscriptions UserSubscription[]
   connections   UserConnection[]
@@ -72,7 +72,7 @@ model UserSubscription {
   type        String
   expiresAt   DateTime
   referenceId String
-  permissions String?
+  permissions String
 
   @@index([userId])
   @@index([expiresAt])
@@ -92,10 +92,10 @@ model UserConnection {
   userId String
 
   type        String
-  permissions String?
+  permissions String
   referenceId String
 
-  metadataEncoded String?
+  metadataEncoded String @default("")
 
   @@index([userId])
   @@index([type, userId])
@@ -116,7 +116,7 @@ model UserContent {
   referenceId String
 
   valueEncoded    String
-  metadataEncoded String?
+  metadataEncoded String @default("")
 
   @@index([userId])
   @@index([type, userId])
@@ -197,7 +197,7 @@ model Clan {
 
   tag      String
   name     String
-  emblemId String?
+  emblemId String @default("")
 
   accounts      Account[]
   membersString String
@@ -259,7 +259,7 @@ model UserInteraction {
   referenceId String
 
   dataEncoded     String
-  metadataEncoded String
+  metadataEncoded String @default("")
 
   @@index([type])
   @@index([userId])

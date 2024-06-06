@@ -23,7 +23,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-//go:generate go run github.com/steebchen/prisma-client-go generate
+//go:generate go run github.com/steebchen/prisma-client-go generate --schema ./internal/database/prisma/schema.prisma
 
 //go:embed static/*
 var static embed.FS
@@ -34,7 +34,12 @@ func main() {
 	zerolog.SetGlobalLevel(level)
 
 	loadStaticAssets(static)
-	coreClient := core.Client{Fetch: fetchClientFromEnv()}
+
+	dbClient, err := database.NewClient()
+	if err != nil {
+		panic(err)
+	}
+	coreClient := core.NewClient(fetchClientFromEnv(), dbClient)
 
 	discordHandler, err := discord.NewRouterHandler(coreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
 	if err != nil {

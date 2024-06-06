@@ -161,9 +161,18 @@ func (r *Router) routeInteraction(interaction discordgo.Interaction) (*builder.C
 func (r *Router) handleInteraction(ctx context.Context, interaction discordgo.Interaction, command *builder.Command, reply chan<- discordgo.InteractionResponseData, done func()) {
 	defer done()
 
-	err := command.Handler(common.NewContext(ctx, interaction, reply, r.restClient, r.core))
+	cCtx, err := common.NewContext(ctx, interaction, reply, r.restClient, r.core)
 	if err != nil {
+		log.Err(err).Msg("failed to create a common.Context for a handler")
 		reply <- discordgo.InteractionResponseData{Content: "Something went wrong while working on your command. Please try again later."}
+		return
+	}
+
+	err = command.Handler(cCtx)
+	if err != nil {
+		log.Err(err).Msg("handler returned an error")
+		reply <- discordgo.InteractionResponseData{Content: "Something went wrong while working on your command. Please try again later."}
+		return
 	}
 }
 
@@ -182,7 +191,6 @@ func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interac
 
 	// create a new context and cancel it on reply
 	workerCtx, cancelWorker := context.WithCancel(context.Background())
-	defer cancelWorker()
 
 	// handle the interaction
 	doneCh := make(chan struct{})
@@ -192,6 +200,7 @@ func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interac
 	go func() {
 		defer close(responseCh)
 		defer close(doneCh)
+		defer cancelWorker()
 
 		for {
 			select {

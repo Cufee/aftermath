@@ -4,7 +4,6 @@ go 1.22.3
 
 require (
 	github.com/bwmarrin/discordgo v0.28.1
-	github.com/cufee/aftermath-core v1.5.6
 	github.com/cufee/am-wg-proxy-next/v2 v2.1.2
 	github.com/disintegration/imaging v1.6.2
 	github.com/fogleman/gg v1.3.0

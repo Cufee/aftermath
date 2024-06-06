@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
@@ -25,7 +26,7 @@ const (
 )
 
 type Context struct {
-	c      context.Context
+	context.Context
 	User   database.User
 	Member discordgo.User
 
@@ -39,8 +40,8 @@ type Context struct {
 	respondCh   chan<- discordgo.InteractionResponseData
 }
 
-func NewContext(ctx context.Context, interaction discordgo.Interaction, respondCh chan<- discordgo.InteractionResponseData, rest *rest.Client, client core.Client) *Context {
-	c := &Context{c: ctx, Locale: language.English, Core: client, rest: rest, interaction: interaction, respondCh: respondCh}
+func NewContext(ctx context.Context, interaction discordgo.Interaction, respondCh chan<- discordgo.InteractionResponseData, rest *rest.Client, client core.Client) (*Context, error) {
+	c := &Context{Context: ctx, Locale: language.English, Core: client, rest: rest, interaction: interaction, respondCh: respondCh}
 
 	if interaction.User != nil {
 		c.Member = *interaction.User
@@ -49,7 +50,15 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, respondC
 		c.Member = *interaction.Member.User
 	}
 
-	c.User, _ = ctx.Value(ContextKeyUser).(database.User)
+	if c.Member.ID == "" {
+		return nil, errors.New("failed to get a valid discord user id")
+	}
+
+	user, err := client.DB.GetUserByID(ctx, c.Member.ID)
+	if err != nil {
+		return nil, err
+	}
+	c.User = user
 
 	// Use the user locale selection by default with fallback to guild settings
 	if c.interaction.Locale != "" {
@@ -63,7 +72,7 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, respondC
 	} else {
 		c.Localize = printer
 	}
-	return c
+	return c, nil
 }
 
 func (c *Context) Reply(key string) error {

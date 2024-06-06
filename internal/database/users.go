@@ -1,14 +1,19 @@
 package database
 
 import (
+	"context"
+	"encoding/json"
 	"slices"
+	"time"
 
-	"github.com/cufee/aftermath-core/permissions/v2"
 	"github.com/cufee/aftermath/internal/database/prisma/db"
+	"github.com/cufee/aftermath/internal/permissions"
 )
 
 type User struct {
 	ID string
+
+	Permissions permissions.Permissions
 
 	Connections   []UserConnection
 	Subscriptions []UserSubscription
@@ -17,20 +22,32 @@ type User struct {
 type ConnectionType string
 
 const (
-	ConnectionTypeDiscord   = ConnectionType("discord")
 	ConnectionTypeWargaming = ConnectionType("wargaming")
 )
 
 type UserConnection struct {
 	ID string `json:"id"`
 
-	ConnectionType ConnectionType `json:"type"`
+	Type ConnectionType `json:"type"`
 
-	UserID      string `json:"userId"`
-	ReferenceID string `json:"referenceId"`
-	Permissions string `bson:"permissions" json:"permissions"`
+	UserID      string                  `json:"userId"`
+	ReferenceID string                  `json:"referenceId"`
+	Permissions permissions.Permissions `json:"permissions"`
 
-	Metadata map[string]any `bson:"metadata" json:"metadata"`
+	Metadata map[string]any `json:"metadata"`
+}
+
+func (c UserConnection) FromModel(model *db.UserConnectionModel) UserConnection {
+	c.ID = model.ID
+	c.UserID = model.UserID
+	c.ReferenceID = model.ReferenceID
+	c.Permissions = permissions.Parse(model.Permissions, permissions.Blank)
+
+	c.Type = ConnectionType(model.Type)
+	if model.MetadataEncoded != "" {
+		_ = json.Unmarshal([]byte(model.MetadataEncoded), &c.Metadata)
+	}
+	return c
 }
 
 type SubscriptionType string
@@ -84,9 +101,77 @@ func (s SubscriptionType) Valid() bool {
 }
 
 type UserSubscription struct {
+	ID          string
+	Type        SubscriptionType
+	UserID      string
+	ExpiresAt   time.Time
+	ReferenceID string
+	Permissions permissions.Permissions
+
+	// id        String   @id @default(cuid())
+	// createdAt DateTime @default(now())
+	// updatedAt DateTime @updatedAt
+
+	// user   User   @relation(fields: [userId], references: [id])
+	// userId String
+
+	// type        String
+	// expiresAt   DateTime
+	// referenceId String
+	// permissions String?
+
 	db.UserSubscriptionModel
 }
 
-func (sub UserSubscription) Type() SubscriptionType {
-	return SubscriptionType(sub.UserSubscriptionModel.Type)
+type userGetOpts struct {
+	content       bool
+	connections   bool
+	subscriptions bool
+}
+
+type userGetOption func(*userGetOpts)
+
+/*
+Gets or creates a user with specified ID
+  - assumes the ID is valid
+*/
+func (c *client) GetUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error) {
+	var options userGetOpts
+	for _, apply := range opts {
+		apply(&options)
+	}
+
+	var fields []db.UserRelationWith
+	if options.subscriptions {
+		fields = append(fields, db.User.Subscriptions.Fetch())
+	}
+	if options.connections {
+		fields = append(fields, db.User.Connections.Fetch())
+	}
+	if options.content {
+		fields = append(fields, db.User.Content.Fetch())
+	}
+
+	model, err := c.prisma.User.FindUnique(db.User.ID.Equals(id)).With(fields...).Exec(ctx)
+	if err != nil {
+		if !db.IsErrNotFound(err) {
+			return User{}, err
+		}
+		model, err = c.prisma.User.CreateOne(db.User.ID.Set(id), db.User.Permissions.Set(permissions.User.Encode())).Exec(ctx)
+		if err != nil {
+			return User{}, err
+		}
+	}
+
+	var user User
+	user.ID = model.ID
+	user.Permissions = permissions.Parse(model.Permissions, permissions.User)
+
+	if options.connections {
+		for _, cModel := range model.Connections() {
+			user.Connections = append(user.Connections, UserConnection{}.FromModel(&cModel))
+		}
+	}
+
+	return user, nil
 }

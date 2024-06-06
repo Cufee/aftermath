@@ -1,8 +1,6 @@
 github.com/bwmarrin/discordgo v0.28.1 h1:gXsuo2GBO7NbR6uqmrrBDplPUx2T3nzu775q/Rd1aG4=
 github.com/bwmarrin/discordgo v0.28.1/go.mod h1:NJZpH+1AfhIcyQsPeuBKsUtYrRnjkyu0kIVMCHkZtRY=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
-github.com/cufee/aftermath-core v1.5.6 h1:DJj74XMj39K20UQ8XwjxI6+CfN0BX8VIc7h0tyZ4HNE=
-github.com/cufee/aftermath-core v1.5.6/go.mod h1:HFtAOx/q77ML0CX91EAzlxIfw1DkJi4rrhvg48uWU8g=
 github.com/cufee/am-wg-proxy-next/v2 v2.1.2 h1:j45xbLPs5FqSsfEccls8AWXK1DIWjnIFEKoiB7M/TGY=
 github.com/cufee/am-wg-proxy-next/v2 v2.1.2/go.mod h1:+VxiIdbrdhHdRThASbVmZ5Fz4H6XPCzL3S2Ix6TO/84=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

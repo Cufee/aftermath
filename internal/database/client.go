@@ -8,8 +8,10 @@ import (
 )
 
 type Client interface {
-	SetVehicleAverages(averages map[string]frame.StatsFrame) error
+	SetVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error
 	GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error)
+
+	GetUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
 }
 
 // var _ Client = &client{} // just a marker to see if it is implemented correctly

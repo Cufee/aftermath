@@ -143,13 +143,13 @@ var (
 
 func SubscriptionsBadges(subscriptions []database.UserSubscription) ([]Block, error) {
 	slices.SortFunc(subscriptions, func(i, j database.UserSubscription) int {
-		return subscriptionWeight[j.Type()] - subscriptionWeight[i.Type()]
+		return subscriptionWeight[j.Type] - subscriptionWeight[i.Type]
 	})
 
 	var badges []Block
 	for _, subscription := range subscriptions {
 		var header *subscriptionHeader
-		switch subscription.Type() {
+		switch subscription.Type {
 		case database.SubscriptionTypeDeveloper:
 			header = subscriptionDeveloper
 		case database.SubscriptionTypeServerModerator:
@@ -169,7 +169,7 @@ func SubscriptionsBadges(subscriptions []database.UserSubscription) ([]Block, er
 	}
 	for _, subscription := range subscriptions {
 		var header *subscriptionHeader
-		switch subscription.Type() {
+		switch subscription.Type {
 		case database.SubscriptionTypeContentTranslator:
 			header = subscriptionTranslator
 		}
@@ -185,7 +185,7 @@ func SubscriptionsBadges(subscriptions []database.UserSubscription) ([]Block, er
 	}
 	for _, subscription := range subscriptions {
 		var header *subscriptionHeader
-		switch subscription.Type() {
+		switch subscription.Type {
 		case database.SubscriptionTypePro:
 			header = userSubscriptionPro
 		case database.SubscriptionTypePlus:
@@ -213,7 +213,7 @@ func ClanSubscriptionsBadges(subscriptions []database.UserSubscription) *subscri
 	var headers []*subscriptionHeader
 
 	for _, subscription := range subscriptions {
-		switch subscription.Type() {
+		switch subscription.Type {
 		case database.SubscriptionTypeProClan:
 			headers = append(headers, clanSubscriptionPro)
 		case database.SubscriptionTypeVerifiedClan:

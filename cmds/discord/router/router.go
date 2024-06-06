@@ -93,11 +93,11 @@ func (r *Router) UpdateLoadedCommands() error {
 			// it will be created during the bulk overwrite call
 			continue
 		}
-		// Check if the command needs to be updated
-		// if true {
-		delete(toOverwrite, cmd.Name)
-		// 	continue
-		// }
+		// TODO: check if the command needs to be updated
+		if true {
+			delete(toOverwrite, cmd.Name)
+			continue
+		}
 	}
 
 	for _, id := range toDelete {

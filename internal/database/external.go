@@ -18,7 +18,7 @@ func (v GlossaryVehicle) Name(printer localization.Printer) string {
 	return printer("name")
 }
 
-func (c *client) SetVehicleAverages(averages map[string]frame.StatsFrame) error {
+func (c *client) SetVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error {
 	if len(averages) < 1 {
 		return nil
 	}

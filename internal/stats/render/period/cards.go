@@ -146,7 +146,7 @@ func newHeaderCard(subscriptions []database.UserSubscription, options render.Opt
 
 	var addPromoText = true
 	for _, sub := range subscriptions {
-		switch sub.Type() {
+		switch sub.Type {
 		case database.SubscriptionTypePro, database.SubscriptionTypePlus, database.SubscriptionTypeDeveloper:
 			addPromoText = false
 		}

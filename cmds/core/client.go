@@ -15,3 +15,7 @@ type Client struct {
 func (c *Client) Render(locale language.Tag) stats.Renderer {
 	return stats.NewRenderer(c.Fetch, locale)
 }
+
+func NewClient(fetch fetch.Client, database database.Client) Client {
+	return Client{Fetch: fetch, DB: database}
+}
