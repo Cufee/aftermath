@@ -14,7 +14,7 @@ COPY ./ ./
 RUN go generate ./...
 
 # build a fully standalone binary with zero dependencies
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o app .
+RUN CGO_ENABLED=0 GOOS=linux go build -o app .
 
 
 # <!> railway.app does not really have a way to run a migration container on the volume, so we have to improvise here
@@ -37,5 +37,6 @@ COPY --from=builder /workspace/go.sum /go.sum
 # install prisma and prefetch binaries
 RUN go install github.com/steebchen/prisma-client-go
 RUN go run github.com/steebchen/prisma-client-go prefetch
+RUN chmod +x /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
