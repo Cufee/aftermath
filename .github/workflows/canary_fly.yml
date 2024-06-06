@@ -9,9 +9,10 @@ on:
 jobs:
   deploy:
     name: Deploy app to canary
-    environment: Fly Canary
     runs-on: ubuntu-latest
+    environment: Fly Canary
     concurrency: deploy-group
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
