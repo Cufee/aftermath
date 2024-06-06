@@ -41,7 +41,7 @@ func init() {
 					return ctx.Reply(message)
 				}
 
-				account, err := ctx.Core.Fetch.Search(ctx.Context, options.Nickname, options.Server)
+				account, err := ctx.Core.Fetch().Search(ctx.Context, options.Nickname, options.Server)
 				if err != nil {
 					if err.Error() == "no results found" {
 						return ctx.ReplyFmt("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server))
@@ -59,7 +59,7 @@ func init() {
 				currentConnection.Metadata["verified"] = false
 				currentConnection.ReferenceID = fmt.Sprint(account.ID)
 
-				_, err = ctx.Core.DB.UpsertConnection(ctx.Context, currentConnection)
+				_, err = ctx.Core.Database().UpsertConnection(ctx.Context, currentConnection)
 				if err != nil {
 					return ctx.Err(err)
 				}

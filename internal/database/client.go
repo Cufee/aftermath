@@ -8,8 +8,8 @@ import (
 )
 
 type Client interface {
-	SetVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error
 	GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error)
+	UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error
 
 	GetUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
 	GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
@@ -20,7 +20,7 @@ type Client interface {
 // var _ Client = &client{} // just a marker to see if it is implemented correctly
 
 type client struct {
-	prisma *db.PrismaClient
+	Raw *db.PrismaClient
 }
 
 func NewClient() (*client, error) {
@@ -30,5 +30,5 @@ func NewClient() (*client, error) {
 		return nil, err
 	}
 
-	return &client{prisma: prisma}, nil
+	return &client{Raw: prisma}, nil
 }

@@ -1,10 +1,9 @@
 package frame
 
 import (
+	"encoding/json"
 	"math"
 	"time"
-
-	"go.dedis.ch/protobuf"
 )
 
 /*
@@ -42,7 +41,7 @@ type StatsFrame struct {
 
 func DecodeStatsFrame(encoded string) (StatsFrame, error) {
 	var data StatsFrame
-	err := protobuf.Decode([]byte(encoded), &data)
+	err := json.Unmarshal([]byte(encoded), &data)
 	if err != nil {
 		return StatsFrame{}, err
 	}
@@ -53,7 +52,7 @@ func DecodeStatsFrame(encoded string) (StatsFrame, error) {
 Encode StatsFrame to string
 */
 func (r *StatsFrame) Encode() (string, error) {
-	data, err := protobuf.Encode(r)
+	data, err := json.Marshal(r)
 	if err != nil {
 		return "", err
 	}
@@ -63,7 +62,7 @@ func (r *StatsFrame) Encode() (string, error) {
 /*
 Calculate and return average damage per battle
 */
-func (r *StatsFrame) AvgDamage() Value {
+func (r *StatsFrame) AvgDamage(_ ...any) Value {
 	if r.Battles == 0 {
 		return InvalidValue
 	}
@@ -76,7 +75,7 @@ func (r *StatsFrame) AvgDamage() Value {
 /*
 Calculate and return damage dealt vs damage received ration
 */
-func (r *StatsFrame) DamageRatio() Value {
+func (r *StatsFrame) DamageRatio(_ ...any) Value {
 	if r.Battles == 0 || r.DamageReceived == 0 {
 		return InvalidValue
 	}
@@ -89,7 +88,7 @@ func (r *StatsFrame) DamageRatio() Value {
 /*
 Calculate and return survival battles vs total battles ratio
 */
-func (r *StatsFrame) SurvivalRatio() Value {
+func (r *StatsFrame) SurvivalRatio(_ ...any) Value {
 	if r.Battles == 0 {
 		return InvalidValue
 	}
@@ -102,7 +101,7 @@ func (r *StatsFrame) SurvivalRatio() Value {
 /*
 Calculate and return survival percentage
 */
-func (r *StatsFrame) Survival() Value {
+func (r *StatsFrame) Survival(_ ...any) Value {
 	if r.Battles == 0 {
 		return InvalidValue
 	}
@@ -115,7 +114,7 @@ func (r *StatsFrame) Survival() Value {
 /*
 Calculate and return win percentage
 */
-func (r *StatsFrame) WinRate() Value {
+func (r *StatsFrame) WinRate(_ ...any) Value {
 	if r.Battles == 0 {
 		return InvalidValue
 	}
@@ -128,7 +127,7 @@ func (r *StatsFrame) WinRate() Value {
 /*
 Calculate and return accuracy
 */
-func (r *StatsFrame) Accuracy() Value {
+func (r *StatsFrame) Accuracy(_ ...any) Value {
 	if r.Battles == 0 || r.ShotsFired == 0 {
 		return InvalidValue
 	}
@@ -149,17 +148,17 @@ func (r *StatsFrame) SetWN8(wn8 int) {
 	 Calculate WN8 Rating for a tank using the following formula:
 		(980*rDAMAGEc + 210*rDAMAGEc*rFRAGc + 155*rFRAGc*rSPOTc + 75*rDEFc*rFRAGc + 145*MIN(1.8,rWINc))/EXPc
 */
-func (r *StatsFrame) WN8(vehicleAverages ...StatsFrame) Value {
+func (r *StatsFrame) WN8(averages ...any) Value {
 	if r.wn8 > 0 {
 		return r.wn8
 	}
 
-	if r.Battles == 0 || len(vehicleAverages) < 1 {
+	if r.Battles == 0 || len(averages) < 1 {
 		return InvalidValue
 	}
 
-	average := vehicleAverages[0]
-	if average.Battles == 0 {
+	average, ok := averages[0].(StatsFrame)
+	if !ok || average.Battles == 0 {
 		return InvalidValue
 	}
 

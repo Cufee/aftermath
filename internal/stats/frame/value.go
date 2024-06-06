@@ -2,7 +2,7 @@ package frame
 
 import "fmt"
 
-type ValueInt uint32
+type ValueInt int
 
 func (value ValueInt) String() string {
 	return fmt.Sprintf("%d", value)

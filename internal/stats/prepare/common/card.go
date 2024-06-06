@@ -38,28 +38,28 @@ func (block *StatsBlock[D]) Localize(printer func(string) string) {
 	block.Label = printer(block.Label)
 }
 
-func (block *StatsBlock[D]) FillValue(stats frame.StatsFrame) error {
+func (block *StatsBlock[D]) FillValue(stats frame.StatsFrame, args ...any) error {
 	switch block.Tag {
 	case TagWN8:
-		block.Value = stats.WN8()
+		block.Value = stats.WN8(args...)
 	case TagFrags:
 		block.Value = stats.Frags
 	case TagBattles:
 		block.Value = stats.Battles
 	case TagWinrate:
-		block.Value = stats.WinRate()
+		block.Value = stats.WinRate(args...)
 	case TagAccuracy:
-		block.Value = stats.Accuracy()
+		block.Value = stats.Accuracy(args...)
 	case TagRankedRating:
 		block.Value = stats.Rating
 	case TagAvgDamage:
-		block.Value = stats.AvgDamage()
+		block.Value = stats.AvgDamage(args...)
 	case TagDamageRatio:
-		block.Value = stats.DamageRatio()
+		block.Value = stats.DamageRatio(args...)
 	case TagSurvivalRatio:
-		block.Value = stats.SurvivalRatio()
+		block.Value = stats.SurvivalRatio(args...)
 	case TagSurvivalPercent:
-		block.Value = stats.Survival()
+		block.Value = stats.Survival(args...)
 	case TagDamageDealt:
 		block.Value = stats.DamageDealt
 	case TagDamageTaken:

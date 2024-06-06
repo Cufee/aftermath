@@ -8,6 +8,7 @@ import (
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/rs/zerolog/log"
+	"github.com/steebchen/prisma-client-go/runtime/transaction"
 )
 
 type GlossaryVehicle struct {
@@ -18,12 +19,32 @@ func (v GlossaryVehicle) Name(printer localization.Printer) string {
 	return printer("name")
 }
 
-func (c *client) SetVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error {
+func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error {
 	if len(averages) < 1 {
 		return nil
 	}
 
-	return nil
+	var transactions []transaction.Transaction
+	for id, data := range averages {
+		encoded, err := data.Encode()
+		if err != nil {
+			log.Err(err).Str("id", id).Msg("failed to encode a stats frame for vehicle averages")
+			continue
+		}
+
+		transactions = append(transactions, c.Raw.VehicleAverage.
+			UpsertOne(db.VehicleAverage.ID.Equals(id)).
+			Create(
+				db.VehicleAverage.ID.Set(id),
+				db.VehicleAverage.DataEncoded.Set(encoded),
+			).
+			Update(
+				db.VehicleAverage.DataEncoded.Set(encoded),
+			).Tx(),
+		)
+	}
+
+	return c.Raw.Prisma.Transaction(transactions...).Exec(ctx)
 }
 
 func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {
@@ -33,7 +54,7 @@ func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[stri
 
 	qCtx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
-	records, err := c.prisma.VehicleAverage.FindMany(db.VehicleAverage.ID.In(ids)).Exec(qCtx)
+	records, err := c.Raw.VehicleAverage.FindMany(db.VehicleAverage.ID.In(ids)).Exec(qCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -44,9 +65,9 @@ func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[stri
 
 	for _, record := range records {
 		parsed, err := frame.DecodeStatsFrame(record.DataEncoded)
-		if err != nil && !db.IsErrNotFound(err) {
+		lastErr = err
+		if err != nil {
 			badRecords = append(badRecords, record.ID)
-			lastErr = err
 			continue
 		}
 		averages[record.ID] = parsed
@@ -61,7 +82,7 @@ func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[stri
 		// we can just delete the record and move on
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
-		_, err := c.prisma.VehicleAverage.FindMany(db.VehicleAverage.ID.In(badRecords)).Delete().Exec(ctx)
+		_, err := c.Raw.VehicleAverage.FindMany(db.VehicleAverage.ID.In(badRecords)).Delete().Exec(ctx)
 		if err != nil {
 			log.Err(err).Strs("ids", badRecords).Msg("failed to delete a bad vehicle average records")
 		}

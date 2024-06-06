@@ -7,15 +7,32 @@ import (
 	"golang.org/x/text/language"
 )
 
-type Client struct {
-	Fetch fetch.Client
-	DB    database.Client
+var _ Client = &client{}
+
+type Client interface {
+	Render(locale language.Tag) stats.Renderer
+
+	Database() database.Client
+	Fetch() fetch.Client
 }
 
-func (c *Client) Render(locale language.Tag) stats.Renderer {
-	return stats.NewRenderer(c.Fetch, locale)
+type client struct {
+	fetch fetch.Client
+	db    database.Client
 }
 
-func NewClient(fetch fetch.Client, database database.Client) Client {
-	return Client{Fetch: fetch, DB: database}
+func (c *client) Database() database.Client {
+	return c.db
+}
+
+func (c *client) Fetch() fetch.Client {
+	return c.fetch
+}
+
+func (c *client) Render(locale language.Tag) stats.Renderer {
+	return stats.NewRenderer(c.fetch, locale)
+}
+
+func NewClient(fetch fetch.Client, database database.Client) *client {
+	return &client{fetch: fetch, db: database}
 }
