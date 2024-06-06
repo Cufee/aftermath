@@ -1,0 +1,41 @@
+app = 'aftermath-canary'
+primary_region = 'lhr'
+kill_signal = 'SIGINT'
+kill_timeout = '5s'
+
+
+[http_service]
+internal_port = 8080
+force_https = true
+auto_stop_machines = false
+auto_start_machines = false
+processes = ['app']
+
+[env]
+# Database configuration
+DATABASE_URL = "file:/data/db/canary.db"
+# Wargaming API
+WG_PRIMARY_APP_RPS = "10"
+WG_REQUEST_TIMEOUT_SEC = "5"
+# External services
+BLITZ_STARS_API_URL = "https://www.blitzstars.com/api"
+WOT_BLITZ_PUBLIC_API_URL_FMT = "https://%s.wotblitz.com/en/api"
+WOT_INSPECTOR_REPLAYS_URL = 'https://api.wotinspector.com/v2/blitz/replays/'
+WOT_INSPECTOR_TANK_DB_URL = "https://armor.wotinspector.com/static/armorinspector/tank_db_blitz.js"
+# Discord
+DISCORD_PRIMARY_GUILD_ID = "1090331056449781793"
+# Misc configuration
+LOG_LEVEL = "info"
+NETWORK = "tcp"
+PORT = "8080"
+
+[[mounts]]
+source = 'aftermath_canary_data'
+destination = '/data/db'
+initial_size = '1GB'
+auto_extend_size_threshold = 80
+auto_extend_size_increment = '1GB'
+auto_extend_size_limit = '100GB'
+
+[[vm]]
+size = 'shared-cpu-2x'
