@@ -47,7 +47,7 @@ func main() {
 	}
 
 	http.Handle("/discord/callback", discordHandler)
-	panic(http.ListenAndServe(":9092", nil))
+	panic(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 
 	// test
 	// localePrinter := func(s string) string { return "localized:" + s }
