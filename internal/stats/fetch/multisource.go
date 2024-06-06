@@ -3,12 +3,14 @@ package fetch
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
+	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
@@ -51,7 +53,12 @@ Get live account stats from wargaming
   - Each request will be retried c.retriesPerRequest times
   - This function will assume the player ID is valid and optimistically run all request concurrently, returning the first error once all request finish
 */
-func (c *multiSourceClient) CurrentStats(ctx context.Context, id string) (AccountStatsOverPeriod, error) {
+func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ...statsOption) (AccountStatsOverPeriod, error) {
+	var options statsOptions
+	for _, apply := range opts {
+		apply(&options)
+	}
+
 	realm := c.wargaming.RealmFromAccountID(id)
 
 	var group sync.WaitGroup
@@ -60,6 +67,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string) (Accoun
 	var clan types.ClanMember
 	var account DataWithErr[types.ExtendedAccount]
 	var vehicles DataWithErr[[]types.VehicleStatsFrame]
+	var averages DataWithErr[map[string]frame.StatsFrame]
 
 	go func() {
 		defer group.Done()
@@ -79,6 +87,17 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string) (Accoun
 		vehicles = withRetry(func() ([]types.VehicleStatsFrame, error) {
 			return c.wargaming.AccountVehicles(ctx, realm, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
+
+		if vehicles.Err != nil || len(vehicles.Data) < 1 || !options.withWN8 {
+			return
+		}
+
+		var ids []string
+		for _, v := range vehicles.Data {
+			ids = append(ids, fmt.Sprint(v.TankID))
+		}
+		a, err := c.database.GetVehicleAverages(ctx, ids)
+		averages = DataWithErr[map[string]frame.StatsFrame]{a, err}
 	}()
 
 	group.Wait()
@@ -90,11 +109,22 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string) (Accoun
 		return AccountStatsOverPeriod{}, vehicles.Err
 	}
 
-	return wargamingToStats(realm, account.Data, clan, vehicles.Data), nil
+	stats := wargamingToStats(realm, account.Data, clan, vehicles.Data)
+	if options.withWN8 {
+		stats.AddWN8(averages.Data)
+	}
+
+	return stats, nil
 }
 
-func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodStart time.Time) (AccountStatsOverPeriod, error) {
+func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodStart time.Time, opts ...statsOption) (AccountStatsOverPeriod, error) {
+	var options statsOptions
+	for _, apply := range opts {
+		apply(&options)
+	}
+
 	var histories DataWithErr[map[int][]blitzstars.TankHistoryEntry]
+	var averages DataWithErr[map[string]frame.StatsFrame]
 	var current DataWithErr[AccountStatsOverPeriod]
 
 	var group sync.WaitGroup
@@ -104,6 +134,17 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 
 		stats, err := c.CurrentStats(ctx, id)
 		current = DataWithErr[AccountStatsOverPeriod]{stats, err}
+
+		if err != nil || stats.RegularBattles.Battles < 1 || !options.withWN8 {
+			return
+		}
+
+		var ids []string
+		for id := range stats.RegularBattles.Vehicles {
+			ids = append(ids, id)
+		}
+		a, err := c.database.GetVehicleAverages(ctx, ids)
+		averages = DataWithErr[map[string]frame.StatsFrame]{a, err}
 	}()
 
 	// TODO: lookup a session from the database first
@@ -116,7 +157,11 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 			return AccountStatsOverPeriod{}, current.Err
 		}
 
-		return current.Data, nil
+		stats := current.Data
+		if options.withWN8 {
+			stats.AddWN8(averages.Data)
+		}
+		return stats, nil
 	}
 
 	group.Add(1)
@@ -139,5 +184,14 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	current.Data.PeriodStart = periodStart
 	current.Data.RatingBattles = StatsWithVehicles{} // blitzstars do not provide rating battles stats
 	current.Data.RegularBattles = blitzstarsToStats(current.Data.RegularBattles.Vehicles, histories.Data, periodStart)
-	return current.Data, nil
+
+	stats := current.Data
+	if options.withWN8 {
+		stats.AddWN8(averages.Data)
+	}
+	return stats, nil
+}
+
+func (c *multiSourceClient) CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error) {
+	return c.blitzstars.CurrentTankAverages(ctx)
 }

@@ -26,7 +26,7 @@ func (r *renderer) Period(ctx context.Context, accountId string, from time.Time,
 	}
 
 	stop := meta.Timer("fetchClient#PeriodStats")
-	stats, err := r.fetchClient.PeriodStats(ctx, accountId, from)
+	stats, err := r.fetchClient.PeriodStats(ctx, accountId, from, fetch.WithWN8())
 	stop()
 	if err != nil {
 		return nil, meta, err

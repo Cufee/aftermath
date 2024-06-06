@@ -7,8 +7,8 @@ import (
 
 func presetToBlock(preset common.Tag, stats frame.StatsFrame) common.StatsBlock[BlockData] {
 	block := common.StatsBlock[BlockData](common.NewBlock(preset, BlockData{}))
-	block.FillValue(stats)
 
+	var args []any
 	switch preset {
 	case common.TagWN8:
 		block.Data.Flavor = BlockFlavorSpecial
@@ -32,5 +32,6 @@ func presetToBlock(preset common.Tag, stats frame.StatsFrame) common.StatsBlock[
 		block.Data.Flavor = BlockFlavorDefault
 	}
 
+	block.FillValue(stats, args...)
 	return block
 }

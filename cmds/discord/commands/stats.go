@@ -30,7 +30,7 @@ func init() {
 				switch {
 				case options.UserID != "":
 					// mentioned another user, check if the user has an account linked
-					mentionedUser, _ := ctx.Core.DB.GetUserByID(ctx.Context, options.UserID, database.WithConnections(), database.WithContent())
+					mentionedUser, _ := ctx.Core.Database().GetUserByID(ctx.Context, options.UserID, database.WithConnections(), database.WithContent())
 					defaultAccount, hasDefaultAccount := mentionedUser.Connection(database.ConnectionTypeWargaming)
 					if !hasDefaultAccount {
 						return ctx.Reply("stats_error_connection_not_found_vague")
@@ -40,7 +40,7 @@ func init() {
 
 				case options.Nickname != "" && options.Server != "":
 					// nickname provided and server selected - lookup the account
-					account, err := ctx.Core.Fetch.Search(ctx.Context, options.Nickname, options.Server)
+					account, err := ctx.Core.Fetch().Search(ctx.Context, options.Nickname, options.Server)
 					if err != nil {
 						if err.Error() == "no results found" {
 							return ctx.ReplyFmt("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server))
