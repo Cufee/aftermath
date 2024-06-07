@@ -79,6 +79,10 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]Vehicle
 }
 
 func (c *client) GetVehicles(ctx context.Context, ids []string) (map[string]Vehicle, error) {
+	if len(ids) < 1 {
+		return nil, nil
+	}
+
 	models, err := c.Raw.Vehicle.FindMany(db.Vehicle.ID.In(ids)).Exec(ctx)
 	if err != nil {
 		return nil, err
