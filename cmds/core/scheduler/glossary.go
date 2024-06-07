@@ -10,16 +10,14 @@ import (
 	"golang.org/x/text/language"
 )
 
-// CurrentTankAverages
-
 func UpdateAveragesWorker(client core.Client) func() {
+	// we just run the logic directly as it's not a heavy task and it doesn't matter if it fails
 	return func() {
 		log.Info().Msg("updating tank averages cache")
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
 		defer cancel()
 
-		// we just run the logic directly as it's not a heavy task and it doesn't matter if it fails
 		averages, err := client.Fetch().CurrentTankAverages(ctx)
 		if err != nil {
 			log.Err(err).Msg("failed to update averages cache")
@@ -37,8 +35,8 @@ func UpdateAveragesWorker(client core.Client) func() {
 }
 
 func UpdateGlossaryWorker(client core.Client) func() {
+	// we just run the logic directly as it's not a heavy task and it doesn't matter if it fails
 	return func() {
-		// we just run the logic directly as it's not a heavy task and it doesn't matter if it fails
 		log.Info().Msg("updating glossary cache")
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
