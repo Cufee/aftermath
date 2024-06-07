@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-const version = "v3"
+const version = "v4"
 
 type Permissions struct {
 	value *big.Int

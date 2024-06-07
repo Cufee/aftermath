@@ -23,8 +23,8 @@ model AppConfiguration {
 }
 
 //
-// === Authentification === 
-// 
+// === Authentification ===
+//
 
 model AuthNonce {
   id        String   @id @default(cuid())
@@ -245,9 +245,9 @@ model Achievement {
   @@map("glossary_achievements")
 }
 
-// 
-// === App Data === 
-// 
+//
+// === App Data ===
+//
 
 model UserInteraction {
   id        String   @id @default(cuid())
@@ -306,4 +306,26 @@ model StatsRequestsOptions {
 
   @@index([referenceId])
   @@map("stats_request_options")
+}
+
+model CronTask {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  type           String
+  referenceId    String
+  targetsEncoded String
+
+  status         String
+  lastRun        DateTime
+  scheduledAfter DateTime
+
+  logsEncoded String @default("")
+  dataEncoded String @default("")
+
+  @@index([referenceId])
+  @@index([status, referenceId, scheduledAfter])
+  @@index([lastRun, status])
+  @@map("cron_tasks")
 }

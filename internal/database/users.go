@@ -128,20 +128,6 @@ type UserSubscription struct {
 	ExpiresAt   time.Time
 	ReferenceID string
 	Permissions permissions.Permissions
-
-	// id        String   @id @default(cuid())
-	// createdAt DateTime @default(now())
-	// updatedAt DateTime @updatedAt
-
-	// user   User   @relation(fields: [userId], references: [id])
-	// userId String
-
-	// type        String
-	// expiresAt   DateTime
-	// referenceId String
-	// permissions String?
-
-	db.UserSubscriptionModel
 }
 
 type userGetOpts struct {
@@ -176,7 +162,7 @@ func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...use
 	user, err := c.GetUserByID(ctx, id, opts...)
 	if err != nil {
 		if db.IsErrNotFound(err) {
-			model, err := c.Raw.User.CreateOne(db.User.ID.Set(id), db.User.Permissions.Set(permissions.User.Encode())).Exec(ctx)
+			model, err := c.prisma.User.CreateOne(db.User.ID.Set(id), db.User.Permissions.Set(permissions.User.Encode())).Exec(ctx)
 			if err != nil {
 				return User{}, err
 			}
@@ -210,7 +196,7 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...userGetOpti
 		fields = append(fields, db.User.Content.Fetch())
 	}
 
-	model, err := c.Raw.User.FindUnique(db.User.ID.Equals(id)).With(fields...).Exec(ctx)
+	model, err := c.prisma.User.FindUnique(db.User.ID.Equals(id)).With(fields...).Exec(ctx)
 	if err != nil {
 		return User{}, err
 	}
@@ -238,7 +224,7 @@ func (c *client) UpdateConnection(ctx context.Context, connection UserConnection
 		return UserConnection{}, fmt.Errorf("failed to encode metadata: %w", err)
 	}
 
-	model, err := c.Raw.UserConnection.FindUnique(db.UserConnection.ID.Equals(connection.ID)).Update(
+	model, err := c.prisma.UserConnection.FindUnique(db.UserConnection.ID.Equals(connection.ID)).Update(
 		db.UserConnection.ReferenceID.Set(connection.ReferenceID),
 		db.UserConnection.Permissions.Set(connection.Permissions.Encode()),
 		db.UserConnection.MetadataEncoded.Set(string(encoded)),
@@ -269,7 +255,7 @@ func (c *client) UpsertConnection(ctx context.Context, connection UserConnection
 		return UserConnection{}, fmt.Errorf("failed to encode metadata: %w", err)
 	}
 
-	model, err := c.Raw.UserConnection.CreateOne(
+	model, err := c.prisma.UserConnection.CreateOne(
 		db.UserConnection.User.Link(db.User.ID.Equals(connection.UserID)),
 		db.UserConnection.Type.Set(string(connection.Type)),
 		db.UserConnection.Permissions.Set(connection.Permissions.Encode()),

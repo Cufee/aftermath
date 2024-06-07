@@ -109,7 +109,7 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 		command, err := router.routeInteraction(data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Err(err).Msg("failed to route interaction")
+			log.Err(err).Str("id", data.ID).Msg("failed to route interaction")
 			return
 		}
 
@@ -117,16 +117,19 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 		err = writeDeferredInteractionResponseAck(w, data.Type, command.Ephemeral)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Err(err).Msg("failed to ack an interaction")
+			log.Err(err).Str("id", data.ID).Msg("failed to ack an interaction")
 			return
 		}
 
 		// route the interaction to a proper handler for a later reply
-		state := &interactionState{mx: &sync.Mutex{}, acked: true}
+		state := &interactionState{mx: &sync.Mutex{}}
 		state.mx.Lock()
 		go func() {
 			// unlock once this context is done and the ack is delivered
 			<-r.Context().Done()
+			log.Debug().Str("id", data.ID).Msg("sent an interaction ack")
+
+			state.acked = true
 			state.mx.Unlock()
 		}()
 
@@ -190,7 +193,7 @@ func sendPingReply(w http.ResponseWriter) {
 }
 
 func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interaction, state *interactionState, command *builder.Command) {
-	log.Debug().Str("id", interaction.ID).Msg("started handling an interaction")
+	log.Info().Str("id", interaction.ID).Msg("started handling an interaction")
 
 	// create a timer for the interaction response
 	responseTimer := time.NewTimer(interactionTimeout)
@@ -220,7 +223,7 @@ func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interac
 				// we are done, there is nothing else we should do here
 				// lock in case responseCh is still busy sending some data over
 				defer state.mx.Unlock()
-				log.Debug().Str("id", interaction.ID).Msg("finished handling an interaction")
+				log.Info().Str("id", interaction.ID).Msg("finished handling an interaction")
 				return
 
 			case data := <-responseCh:

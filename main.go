@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/cmds/core"
+	"github.com/cufee/aftermath/cmds/core/scheduler"
+	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
 	"github.com/cufee/aftermath/cmds/discord"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
@@ -34,9 +36,12 @@ func main() {
 	zerolog.SetGlobalLevel(level)
 
 	loadStaticAssets(static)
-
 	coreClient := coreClientFromEnv()
 
+	// this can be adjusted to balance memory usage vs time for cache updates
+	taskQueueConcurrency := 10
+	tasksQueue := tasks.NewQueue(coreClient, tasks.DefaultHandlers(), taskQueueConcurrency)
+	scheduler.StartCronJobs(coreClient, tasksQueue)
 	// scheduler.UpdateAveragesWorker(coreClient)()
 	// scheduler.UpdateGlossaryWorker(coreClient)()
 

@@ -23,7 +23,7 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 			continue
 		}
 
-		transactions = append(transactions, c.Raw.VehicleAverage.
+		transactions = append(transactions, c.prisma.VehicleAverage.
 			UpsertOne(db.VehicleAverage.ID.Equals(id)).
 			Create(
 				db.VehicleAverage.ID.Set(id),
@@ -35,7 +35,7 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 		)
 	}
 
-	return c.Raw.Prisma.Transaction(transactions...).Exec(ctx)
+	return c.prisma.Prisma.Transaction(transactions...).Exec(ctx)
 }
 
 func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {
@@ -45,7 +45,7 @@ func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[stri
 
 	qCtx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
-	records, err := c.Raw.VehicleAverage.FindMany(db.VehicleAverage.ID.In(ids)).Exec(qCtx)
+	records, err := c.prisma.VehicleAverage.FindMany(db.VehicleAverage.ID.In(ids)).Exec(qCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[stri
 		// we can just delete the record and move on
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
-		_, err := c.Raw.VehicleAverage.FindMany(db.VehicleAverage.ID.In(badRecords)).Delete().Exec(ctx)
+		_, err := c.prisma.VehicleAverage.FindMany(db.VehicleAverage.ID.In(badRecords)).Delete().Exec(ctx)
 		if err != nil {
 			log.Err(err).Strs("ids", badRecords).Msg("failed to delete a bad vehicle average records")
 		}
