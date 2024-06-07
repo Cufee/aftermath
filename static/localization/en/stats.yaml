@@ -14,7 +14,7 @@
 - key: label_frags
   value: Kills
 - key: label_damage_ratio
-  value: Damage Ratio
+  value: Dmg. Ratio
 - key: label_damage_blocked
   value: Blocked
 - key: label_avg_tier

@@ -24,7 +24,8 @@ var (
 	TextSubscriptionPlus    = color.RGBA{72, 167, 250, 255}
 	TextSubscriptionPremium = color.RGBA{255, 223, 0, 255}
 
-	DefaultCardColor = color.RGBA{10, 10, 10, 180}
+	DefaultCardColor        = color.RGBA{10, 10, 10, 180}
+	DefaultCardColorNoAlpha = color.RGBA{10, 10, 10, 255}
 
 	ColorAftermathRed  = color.RGBA{255, 0, 120, 255}
 	ColorAftermathBlue = color.RGBA{90, 90, 255, 255}

@@ -10,7 +10,7 @@ import (
 )
 
 type Image interface {
-	AddBackground(image.Image) error
+	AddBackground(image.Image, common.Style) error
 	PNG(io.Writer) error
 }
 
@@ -18,11 +18,11 @@ type imageImp struct {
 	image.Image
 }
 
-func (i *imageImp) AddBackground(bg image.Image) error {
+func (i *imageImp) AddBackground(bg image.Image, style common.Style) error {
 	if bg == nil {
 		return errors.New("background cannot be nil")
 	}
-	i.Image = common.AddBackground(i, bg, common.Style{Blur: 10, BorderRadius: 30})
+	i.Image = common.AddBackground(i, bg, style)
 	return nil
 }
 
