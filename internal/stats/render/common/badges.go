@@ -54,7 +54,7 @@ var (
 		Name: "Supporter",
 		Icon: "images/icons/fire",
 		Style: subscriptionPillStyle{
-			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColor, BorderRadius: 15, PaddingX: 7, PaddingY: 5, Height: 32},
+			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 7, PaddingY: 5, Height: 32},
 			Icon:      Style{Width: 16, Height: 16, BackgroundColor: TextSubscriptionPlus},
 			Text:      Style{Font: &FontSmall, FontColor: TextSecondary, PaddingX: 5},
 		},
@@ -63,7 +63,7 @@ var (
 		Name: "Aftermath+",
 		Icon: "images/icons/star",
 		Style: subscriptionPillStyle{
-			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColor, BorderRadius: 15, PaddingX: 5, PaddingY: 5, Height: 32},
+			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 5, PaddingY: 5, Height: 32},
 			Icon:      Style{Width: 24, Height: 24, BackgroundColor: TextSubscriptionPlus},
 			Text:      Style{Font: &FontSmall, FontColor: TextSecondary, PaddingX: 5},
 		},
@@ -72,7 +72,7 @@ var (
 		Name: "Aftermath Pro",
 		Icon: "images/icons/star",
 		Style: subscriptionPillStyle{
-			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColor, BorderRadius: 15, PaddingX: 5, PaddingY: 5, Height: 32},
+			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 5, PaddingY: 5, Height: 32},
 			Icon:      Style{Width: 24, Height: 24, BackgroundColor: TextSubscriptionPremium},
 			Text:      Style{Font: &FontSmall, FontColor: TextSecondary, PaddingX: 5},
 		},
@@ -107,7 +107,7 @@ var (
 		Name: "Community Moderator",
 		Icon: "images/icons/logo-128",
 		Style: subscriptionPillStyle{
-			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColor, BorderRadius: 15, PaddingX: 7, PaddingY: 5, Gap: 5, Height: 32},
+			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 7, PaddingY: 5, Gap: 5, Height: 32},
 			Icon:      Style{Width: 20, Height: 20},
 			Text:      Style{Font: &FontSmall, FontColor: TextSecondary, PaddingX: 2},
 		},
@@ -116,7 +116,7 @@ var (
 		Name: "Moderator",
 		Icon: "images/icons/logo-128",
 		Style: subscriptionPillStyle{
-			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColor, BorderRadius: 15, PaddingX: 7, PaddingY: 5, Gap: 5, Height: 32},
+			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 7, PaddingY: 5, Gap: 5, Height: 32},
 			Icon:      Style{Width: 20, Height: 20},
 			Text:      Style{Font: &FontSmall, FontColor: TextSecondary, PaddingX: 2},
 		},
@@ -125,7 +125,7 @@ var (
 		Name: "Booster",
 		Icon: "images/icons/discord-booster",
 		Style: subscriptionPillStyle{
-			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColor, BorderRadius: 15, PaddingX: 10, PaddingY: 5, Gap: 5, Height: 32},
+			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 10, PaddingY: 5, Gap: 5, Height: 32},
 			Icon:      Style{Width: 20, Height: 20},
 			Text:      Style{Font: &FontSmall, FontColor: TextSecondary},
 		},
@@ -134,7 +134,7 @@ var (
 		Name: "Translator",
 		Icon: "images/icons/translator",
 		Style: subscriptionPillStyle{
-			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColor, BorderRadius: 15, PaddingX: 10, PaddingY: 5, Gap: 5, Height: 32},
+			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 10, PaddingY: 5, Gap: 5, Height: 32},
 			Icon:      Style{Width: 20, Height: 20, BackgroundColor: TextPrimary},
 			Text:      Style{Font: &FontSmall, FontColor: TextSecondary},
 		},

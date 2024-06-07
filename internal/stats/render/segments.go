@@ -49,7 +49,7 @@ func (s *Segments) Render(opts ...Option) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	mainSegmentImg = common.AddBackground(mainSegmentImg, options.Background, common.Style{Blur: 10, BorderRadius: 30})
+	mainSegmentImg = common.AddBackground(mainSegmentImg, options.Background, common.Style{Blur: 10, BorderRadius: 42.5})
 
 	frameParts = append(frameParts, common.NewImageContent(common.Style{}, mainSegmentImg))
 	if len(s.header) > 0 {

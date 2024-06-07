@@ -1,7 +1,7 @@
 package common
 
 func NewFooterCard(text string) Block {
-	backgroundColor := DefaultCardColor
+	backgroundColor := DefaultCardColorNoAlpha
 	backgroundColor.A = 120
 	return NewBlocksContent(Style{
 		JustifyContent:  JustifyContentCenter,
