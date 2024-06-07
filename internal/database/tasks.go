@@ -1,0 +1,247 @@
+package database
+
+import (
+	"context"
+	"encoding/json"
+	"strings"
+	"time"
+
+	"github.com/cufee/aftermath/internal/database/prisma/db"
+)
+
+type TaskType string
+
+const (
+	TaskTypeUpdateClans              TaskType = "UPDATE_CLANS"
+	TaskTypeRecordSessions           TaskType = "RECORD_ACCOUNT_SESSIONS"
+	TaskTypeUpdateAccountWN8         TaskType = "UPDATE_ACCOUNT_WN8"
+	TaskTypeRecordPlayerAchievements TaskType = "UPDATE_ACCOUNT_ACHIEVEMENTS"
+)
+
+// Task statuses
+type taskStatus string
+
+const (
+	TaskStatusScheduled  taskStatus = "TASK_SCHEDULED"
+	TaskStatusInProgress taskStatus = "TASK_IN_PROGRESS"
+	TaskStatusComplete   taskStatus = "TASK_COMPLETE"
+	TaskStatusFailed     taskStatus = "TASK_FAILED"
+)
+
+type Task struct {
+	ID        string    `json:"id"`
+	Type      TaskType  `json:"kind"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	ReferenceID string   `json:"referenceId"`
+	Targets     []string `json:"targets"`
+
+	Logs []TaskLog `json:"logs"`
+
+	Status         taskStatus `json:"status"`
+	ScheduledAfter time.Time  `json:"scheduledAfter"`
+	LastRun        time.Time  `json:"lastRun"`
+
+	Data map[string]any `json:"data"`
+}
+
+func (t Task) FromModel(model db.CronTaskModel) Task {
+	t.ID = model.ID
+	t.Type = TaskType(model.Type)
+
+	t.Status = taskStatus(model.Status)
+	t.ReferenceID = model.ReferenceID
+
+	t.LastRun = model.LastRun
+	t.CreatedAt = model.CreatedAt
+	t.UpdatedAt = model.UpdatedAt
+	t.ScheduledAfter = model.ScheduledAfter
+
+	t.decodeData(model.DataEncoded)
+	t.decodeLogs(model.LogsEncoded)
+	t.decodeTargets(model.TargetsEncoded)
+	return t
+}
+
+func (t *Task) LogAttempt(log TaskLog) {
+	t.Logs = append(t.Logs, log)
+}
+
+func (t *Task) OnCreated() {
+	t.LastRun = time.Now()
+	t.CreatedAt = time.Now()
+	t.UpdatedAt = time.Now()
+}
+func (t *Task) OnUpdated() {
+	t.UpdatedAt = time.Now()
+}
+
+func (t *Task) encodeTargets() string {
+	return strings.Join(t.Targets, ";")
+}
+func (t *Task) decodeTargets(targets string) {
+	t.Targets = strings.Split(targets, ";")
+}
+
+func (t *Task) encodeLogs() string {
+	data, _ := json.Marshal(t.Logs)
+	return string(data)
+}
+func (t *Task) decodeLogs(logs string) {
+	_ = json.Unmarshal([]byte(logs), &t.Logs)
+}
+
+func (t *Task) encodeData() string {
+	if t.Data == nil {
+		return ""
+	}
+	data, _ := json.Marshal(t.Data)
+	return string(data)
+}
+func (t *Task) decodeData(data string) {
+	t.Data = make(map[string]any)
+	_ = json.Unmarshal([]byte(data), &t.Data)
+}
+
+type TaskLog struct {
+	Targets   []string  `json:"targets" bson:"targets"`
+	Timestamp time.Time `json:"timestamp" bson:"timestamp"`
+	Comment   string    `json:"result" bson:"result"`
+	Error     string    `json:"error" bson:"error"`
+}
+
+func NewAttemptLog(task Task, comment, err string) TaskLog {
+	return TaskLog{
+		Targets:   task.Targets,
+		Timestamp: time.Now(),
+		Comment:   comment,
+		Error:     err,
+	}
+}
+
+/*
+GetAndStartTasks retrieves up to limit number of tasks matching the referenceId and updates their status to in progress
+  - this func will block until all other calls to task update funcs are done
+*/
+func (c *client) GetAndStartTasks(ctx context.Context, referenceId string, limit int) ([]Task, error) {
+	if limit < 1 {
+		return nil, nil
+	}
+	if err := c.tasksUpdateSem.Acquire(ctx, 1); err != nil {
+		return nil, err
+	}
+
+	models, err := c.prisma.CronTask.
+		FindMany(
+			db.CronTask.Status.Equals(string(TaskStatusScheduled)),
+			db.CronTask.ReferenceID.Equals(referenceId),
+			db.CronTask.ScheduledAfter.Gte(time.Now()),
+		).
+		Take(limit).
+		Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []string
+	var tasks []Task
+	for _, model := range models {
+		tasks = append(tasks, Task{}.FromModel(model))
+		ids = append(ids, model.ID)
+	}
+
+	_, err = c.prisma.CronTask.
+		FindMany(db.CronTask.ID.In(ids)).
+		Update(db.CronTask.Status.Set(string(TaskStatusInProgress))).
+		Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
+
+func (c *client) CreateTasks(ctx context.Context, tasks ...Task) error {
+	if len(tasks) < 1 {
+		return nil
+	}
+	// we do not block using c.tasksUpdateSem here because the order of ops in GetAndStartTasks makes this safe
+
+	var txns []db.PrismaTransaction
+	for _, task := range tasks {
+		task.OnCreated()
+		txns = append(txns, c.prisma.CronTask.CreateOne(
+			db.CronTask.Type.Set(string(task.Type)),
+			db.CronTask.ReferenceID.Set(task.ReferenceID),
+			db.CronTask.TargetsEncoded.Set(task.encodeTargets()),
+			db.CronTask.Status.Set(string(task.Status)),
+			db.CronTask.LastRun.Set(task.LastRun),
+			db.CronTask.ScheduledAfter.Set(task.ScheduledAfter),
+			db.CronTask.LogsEncoded.Set(task.encodeLogs()),
+			db.CronTask.DataEncoded.Set(task.encodeData()),
+		).Tx())
+	}
+
+	err := c.prisma.Prisma.Transaction(txns...).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+UpdateTasks will update all tasks passed in
+  - the following fields will be replaced: targets, status, leastRun, scheduleAfterm logs, data
+  - this func will block until all other calls to task update funcs are done
+*/
+func (c *client) UpdateTasks(ctx context.Context, tasks ...Task) error {
+	if len(tasks) < 1 {
+		return nil
+	}
+
+	if err := c.tasksUpdateSem.Acquire(ctx, 1); err != nil {
+		return err
+	}
+
+	var txns []db.PrismaTransaction
+	for _, task := range tasks {
+		task.OnUpdated()
+		txns = append(txns, c.prisma.CronTask.
+			FindUnique(db.CronTask.ID.Equals(task.ID)).
+			Update(
+				db.CronTask.TargetsEncoded.Set(task.encodeTargets()),
+				db.CronTask.Status.Set(string(task.Status)),
+				db.CronTask.LastRun.Set(task.LastRun),
+				db.CronTask.ScheduledAfter.Set(task.ScheduledAfter),
+				db.CronTask.LogsEncoded.Set(task.encodeLogs()),
+				db.CronTask.DataEncoded.Set(task.encodeData()),
+			).Tx())
+	}
+
+	err := c.prisma.Prisma.Transaction(txns...).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+DeleteTasks will delete all tasks matching by ids
+  - this func will block until all other calls to task update funcs are done
+*/
+func (c *client) DeleteTasks(ctx context.Context, ids ...string) error {
+	if len(ids) < 1 {
+		return nil
+	}
+
+	if err := c.tasksUpdateSem.Acquire(ctx, 1); err != nil {
+		return nil
+	}
+
+	_, err := c.prisma.CronTask.FindMany(db.CronTask.ID.In(ids)).Delete().Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}

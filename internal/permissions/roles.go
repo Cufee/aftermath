@@ -50,5 +50,6 @@ var (
 			Add(UpdateSoftRestriction).
 			Add(UpdateHardRestriction).
 			Add(RemoveSoftRestriction).
-			Add(RemoveHardRestriction)
+			Add(RemoveHardRestriction).
+			Add(ViewLogs)
 )

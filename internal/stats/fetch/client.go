@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
@@ -11,8 +12,7 @@ import (
 type AccountStatsOverPeriod struct {
 	Realm string `json:"realm"`
 
-	Account types.Account `json:"account"`
-	Clan    types.Clan    `json:"clan"`
+	Account database.Account `json:"account"`
 
 	PeriodStart time.Time `json:"start"`
 	PeriodEnd   time.Time `json:"end"`

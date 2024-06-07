@@ -10,12 +10,15 @@ require (
 	github.com/go-co-op/gocron v1.37.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/joho/godotenv v1.5.1
+	github.com/nlpodyssey/gopickle v0.3.0
 	github.com/rs/zerolog v1.33.0
 	github.com/shopspring/decimal v1.4.0
 	github.com/steebchen/prisma-client-go v0.37.0
 	github.com/stretchr/testify v1.9.0
+	go.dedis.ch/protobuf v1.0.11
 	golang.org/x/exp v0.0.0-20240530194437-404ba88c7ed0
 	golang.org/x/image v0.16.0
+	golang.org/x/sync v0.7.0
 	golang.org/x/text v0.15.0
 	gopkg.in/yaml.v3 v3.0.1
 )

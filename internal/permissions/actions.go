@@ -35,16 +35,16 @@ var (
 	RemoveUserPersonalContent             = fromLsh(32)
 
 	// Subscriptions
-	ViewUserSubscriptions     Permissions = fromLsh(33)
-	CreateUserSubscription                = fromLsh(34)
-	ExtendUserSubscription                = fromLsh(35)
-	TerminateUserSubscription             = fromLsh(36)
+	ViewUserSubscriptions     Permissions = fromLsh(35)
+	CreateUserSubscription                = fromLsh(36)
+	ExtendUserSubscription                = fromLsh(37)
+	TerminateUserSubscription             = fromLsh(38)
 
 	// Connections
-	ViewUserConnections  Permissions = fromLsh(37)
-	CreateUserConnection             = fromLsh(38)
-	UpdateUserConnection             = fromLsh(39)
-	RemoveUserConnection             = fromLsh(30)
+	ViewUserConnections  Permissions = fromLsh(40)
+	CreateUserConnection             = fromLsh(41)
+	UpdateUserConnection             = fromLsh(42)
+	RemoveUserConnection             = fromLsh(43)
 
 	// Restrictions
 	ViewUserRestrictions      Permissions = fromLsh(45)
@@ -56,7 +56,7 @@ var (
 	RemoveHardRestriction                 = fromLsh(51)
 )
 
-const (
-// Admin
-// _ Permissions = = fromLsh(60)
+var (
+	// Admin
+	ViewLogs Permissions = fromLsh(60)
 )

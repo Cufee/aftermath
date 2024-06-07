@@ -4,17 +4,18 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/cmds/core"
+	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
 	"github.com/go-co-op/gocron"
 	"github.com/rs/zerolog/log"
 )
 
-func StartCronJobs(client core.Client) {
-	log.Info().Msg("starting cron jobs")
+func StartCronJobs(client core.Client, queue *tasks.Queue) {
+	defer log.Info().Msg("started cron scheduler")
 
 	c := gocron.NewScheduler(time.UTC)
 	// Tasks
-	c.Cron("* * * * *").Do(runTasksWorker(client))
-	c.Cron("0 * * * *").Do(restartTasksWorker(client))
+	c.Cron("* * * * *").Do(runTasksWorker(queue))
+	c.Cron("0 * * * *").Do(restartTasksWorker(queue))
 
 	// Glossary - Do it around the same time WG releases game updates
 	c.Cron("0 10 * * *").Do(UpdateGlossaryWorker(client))

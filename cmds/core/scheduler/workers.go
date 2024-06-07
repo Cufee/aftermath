@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"github.com/cufee/aftermath/cmds/core"
+	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
 )
 
 func rotateBackgroundPresetsWorker(client core.Client) func() {
@@ -29,7 +30,7 @@ func createSessionTasksWorker(client core.Client, realm string) func() {
 	}
 }
 
-func runTasksWorker(client core.Client) func() {
+func runTasksWorker(queue *tasks.Queue) func() {
 	return func() {
 		// 	if tasks.DefaultQueue.ActiveWorkers() > 0 {
 		// 		return
@@ -57,7 +58,7 @@ func runTasksWorker(client core.Client) func() {
 	}
 }
 
-func restartTasksWorker(client core.Client) func() {
+func restartTasksWorker(queue *tasks.Queue) func() {
 	return func() {
 		// _, err := tasks.RestartAbandonedTasks(nil)
 		// if err != nil {

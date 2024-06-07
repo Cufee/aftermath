@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
@@ -14,11 +15,25 @@ func timestampToTime(timestamp int) time.Time {
 	return time.Unix(int64(timestamp), 0)
 }
 
+func wargamingToAccount(realm string, account types.ExtendedAccount, clan types.ClanMember, private bool) database.Account {
+	return database.Account{
+		ID:       strconv.Itoa(account.ID),
+		Realm:    realm,
+		Nickname: account.Nickname,
+		ClanTag:  clan.Clan.Tag,
+		ClanID:   strconv.Itoa(clan.ClanID),
+
+		Private:        private,
+		CreatedAt:      timestampToTime(account.CreatedAt),
+		LastBattleTime: timestampToTime(account.LastBattleTime),
+	}
+}
+
 func wargamingToStats(realm string, accountData types.ExtendedAccount, clanMember types.ClanMember, vehicleData []types.VehicleStatsFrame) AccountStatsOverPeriod {
 	stats := AccountStatsOverPeriod{
-		Realm:   realm,
-		Account: accountData.Account,
-		Clan:    clanMember.Clan,
+		Realm: realm,
+		// we got the stats, so the account is obv not private at this point
+		Account: wargamingToAccount(realm, accountData, clanMember, false),
 		RegularBattles: StatsWithVehicles{
 			StatsFrame: wargamingToFrame(accountData.Statistics.All),
 			Vehicles:   wargamingVehiclesToFrame(vehicleData),

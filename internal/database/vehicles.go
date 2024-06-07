@@ -55,7 +55,7 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]Vehicle
 			continue
 		}
 
-		transactions = append(transactions, c.Raw.Vehicle.
+		transactions = append(transactions, c.prisma.Vehicle.
 			UpsertOne(db.Vehicle.ID.Equals(id)).
 			Create(
 				db.Vehicle.ID.Set(id),
@@ -75,7 +75,7 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]Vehicle
 		)
 	}
 
-	return c.Raw.Prisma.Transaction(transactions...).Exec(ctx)
+	return c.prisma.Prisma.Transaction(transactions...).Exec(ctx)
 }
 
 func (c *client) GetVehicles(ctx context.Context, ids []string) (map[string]Vehicle, error) {
@@ -83,7 +83,7 @@ func (c *client) GetVehicles(ctx context.Context, ids []string) (map[string]Vehi
 		return nil, nil
 	}
 
-	models, err := c.Raw.Vehicle.FindMany(db.Vehicle.ID.In(ids)).Exec(ctx)
+	models, err := c.prisma.Vehicle.FindMany(db.Vehicle.ID.In(ids)).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
