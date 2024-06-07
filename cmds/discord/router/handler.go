@@ -262,7 +262,7 @@ func (r *Router) sendInteractionReply(interaction discordgo.Interaction, state *
 
 	err := handler()
 	if err != nil {
-		log.Err(err).Msg("failed to send an interaction response")
+		log.Err(err).Any("data", data).Msg("failed to send an interaction response")
 		return
 	}
 	state.acked = true
