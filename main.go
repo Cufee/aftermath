@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/cmds/core"
+	"github.com/cufee/aftermath/cmds/core/scheduler"
 	"github.com/cufee/aftermath/cmds/discord"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
@@ -38,6 +39,7 @@ func main() {
 	coreClient := coreClientFromEnv()
 
 	// scheduler.UpdateAveragesWorker(coreClient)()
+	scheduler.UpdateGlossaryWorker(coreClient)()
 
 	discordHandler, err := discord.NewRouterHandler(coreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
 	if err != nil {
@@ -69,7 +71,7 @@ func coreClientFromEnv() core.Client {
 		log.Fatalf("fetch#NewMultiSourceClient failed %s", err)
 	}
 
-	return core.NewClient(client, dbClient)
+	return core.NewClient(client, wgClient, dbClient)
 }
 
 func loadStaticAssets(static fs.FS) {

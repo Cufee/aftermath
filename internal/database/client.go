@@ -10,6 +10,8 @@ import (
 type Client interface {
 	GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error)
 	UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error
+	GetVehicles(ctx context.Context, ids []string) (map[string]Vehicle, error)
+	UpsertVehicles(ctx context.Context, vehicles map[string]Vehicle) error
 
 	GetUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
 	GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
