@@ -8,13 +8,13 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common"
 )
 
-func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.GlossaryVehicle, opts ...Option) (Cards, error) {
+func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.Vehicle, opts ...Option) (Cards, error) {
 	options := defaultOptions
 	for _, apply := range opts {
 		apply(&options)
 	}
 	if glossary == nil {
-		glossary = make(map[string]database.GlossaryVehicle)
+		glossary = make(map[string]database.Vehicle)
 	}
 
 	var cards Cards
@@ -23,14 +23,13 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.G
 	for _, column := range selectedBlocks {
 		var columnBlocks []common.StatsBlock[BlockData]
 		for _, preset := range column {
-			if preset == TagAvgTier {
-				// value := calculateAvgTier(input.Stats.Vehicles, input.VehicleGlossary)
-				continue
-			}
 			block := presetToBlock(preset, stats.RegularBattles.StatsFrame)
+			if preset == TagAvgTier {
+				block = avgTierBlock(stats.RegularBattles.Vehicles, glossary)
+			}
+
 			block.Localize(options.localePrinter)
 			columnBlocks = append(columnBlocks, block)
-
 		}
 
 		cards.Overview.Type = common.CardTypeOverview
@@ -70,7 +69,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.G
 		glossary.ID = data.vehicle.VehicleID
 
 		cards.Highlights = append(cards.Highlights, VehicleCard{
-			Title:  fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.localePrinter)),
+			Title:  fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.locale)),
 			Type:   common.CardTypeVehicle,
 			Blocks: vehicleBlocks,
 			Meta:   options.localePrinter(data.highlight.label),

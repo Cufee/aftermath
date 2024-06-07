@@ -5,7 +5,9 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/cmds/core"
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/text/language"
 )
 
 // CurrentTankAverages
@@ -36,13 +38,36 @@ func UpdateAveragesWorker(client core.Client) func() {
 
 func UpdateGlossaryWorker(client core.Client) func() {
 	return func() {
-		// // We just run the logic directly as it's not a heavy task and it doesn't matter if it fails due to the app failing
-		// log.Info().Msg("updating glossary cache")
-		// err := cache.UpdateGlossaryCache()
-		// if err != nil {
-		// 	log.Err(err).Msg("failed to update glossary cache")
-		// } else {
-		// 	log.Info().Msg("glossary cache updated")
-		// }
+		// we just run the logic directly as it's not a heavy task and it doesn't matter if it fails
+		log.Info().Msg("updating glossary cache")
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		defer cancel()
+
+		glossary, err := client.Wargaming().CompleteVehicleGlossary(ctx, "eu", "en")
+		if err != nil {
+			log.Err(err).Msg("failed to get vehicle glossary")
+			return
+		}
+
+		vehicles := make(map[string]database.Vehicle)
+		for id, data := range glossary {
+			vehicles[id] = database.Vehicle{
+				ID:   id,
+				Tier: data.Tier,
+				Type: data.Type,
+				// Class: ,
+				Nation:         data.Nation,
+				LocalizedNames: map[language.Tag]string{language.English: data.Name},
+			}
+		}
+
+		err = client.Database().UpsertVehicles(ctx, vehicles)
+		if err != nil {
+			log.Err(err).Msg("failed to save vehicle glossary")
+			return
+		}
+
+		log.Info().Msg("glossary cache updated")
 	}
 }

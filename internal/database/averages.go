@@ -5,19 +5,10 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/prisma/db"
-	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/rs/zerolog/log"
 	"github.com/steebchen/prisma-client-go/runtime/transaction"
 )
-
-type GlossaryVehicle struct {
-	db.VehicleModel
-}
-
-func (v GlossaryVehicle) Name(printer localization.Printer) string {
-	return printer("name")
-}
 
 func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error {
 	if len(averages) < 1 {

@@ -24,6 +24,9 @@ const (
 	TagSurvivalPercent Tag = "survival_percent"
 	TagDamageDealt     Tag = "damage_dealt"
 	TagDamageTaken     Tag = "damage_taken"
+
+	// Module Specific
+	TagAvgTier Tag = "avg_tier"
 )
 
 func ParseTags(tags ...string) ([]Tag, error) {
