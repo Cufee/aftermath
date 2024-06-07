@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/internal/retry"
 )
 
 type Client struct {
@@ -25,7 +26,7 @@ type Client struct {
 func NewClient(token string) (*Client, error) {
 	client := &Client{
 		token: token,
-		http:  http.Client{Timeout: time.Millisecond * 3000},
+		http:  http.Client{Timeout: time.Millisecond * 1000},
 	}
 
 	_, err := client.lookupApplicationID()
@@ -109,29 +110,35 @@ func partHeader(contentDisposition string, contentType string) textproto.MIMEHea
 }
 
 func (c *Client) do(req *http.Request, target any) error {
-	res, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode > 299 {
-		var body discordgo.APIErrorMessage
-		_ = json.NewDecoder(res.Body).Decode(&body)
-		message := body.Message
-		if message == "" {
-			message = res.Status
-		}
-		return errors.New("discord: " + strings.ToLower(message))
-	}
-
-	if target != nil {
-		err = json.NewDecoder(res.Body).Decode(target)
+	result := retry.Retry(func() (any, error) {
+		res, err := c.http.Do(req)
 		if err != nil {
-			return fmt.Errorf("failed to decode response body :%w", err)
+			return nil, err
 		}
-	}
-	return nil
+		defer res.Body.Close()
+
+		if res.StatusCode > 299 {
+			var body discordgo.APIErrorMessage
+			_ = json.NewDecoder(res.Body).Decode(&body)
+			message := body.Message
+			if message == "" {
+				message = res.Status
+			}
+
+			return nil, errors.New("discord: " + strings.ToLower(message))
+		}
+
+		if target != nil {
+			err = json.NewDecoder(res.Body).Decode(target)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode response body :%w", err)
+			}
+		}
+
+		return nil, nil
+	}, 3, time.Millisecond*150)
+
+	return result.Err
 }
 
 func (c *Client) lookupApplicationID() (string, error) {

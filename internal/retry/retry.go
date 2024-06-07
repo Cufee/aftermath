@@ -1,4 +1,4 @@
-package fetch
+package retry
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ type DataWithErr[T any] struct {
 	Err  error
 }
 
-func withRetry[T any](fn func() (T, error), tries int, sleepOnFail time.Duration) DataWithErr[T] {
+func Retry[T any](fn func() (T, error), tries int, sleepOnFail time.Duration) DataWithErr[T] {
 	if tries < 1 {
 		return DataWithErr[T]{Err: errors.New("invalid number of tries provided")}
 	}
@@ -22,5 +22,5 @@ func withRetry[T any](fn func() (T, error), tries int, sleepOnFail time.Duration
 	}
 
 	time.Sleep(sleepOnFail)
-	return withRetry(fn, tries, sleepOnFail)
+	return Retry(fn, tries, sleepOnFail)
 }

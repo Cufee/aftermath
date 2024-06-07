@@ -127,9 +127,6 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 		go func() {
 			// unlock once this context is done and the ack is delivered
 			<-r.Context().Done()
-			// give discord time to register the reply
-			// in very rare cases, out reply comes right after the unlock and discord returns an error
-			time.Sleep(time.Millisecond * 50)
 			state.mx.Unlock()
 		}()
 

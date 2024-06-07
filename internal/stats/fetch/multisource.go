@@ -10,6 +10,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
+	"github.com/cufee/aftermath/internal/retry"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
@@ -65,14 +66,14 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 	group.Add(3)
 
 	var clan types.ClanMember
-	var account DataWithErr[types.ExtendedAccount]
-	var vehicles DataWithErr[[]types.VehicleStatsFrame]
-	var averages DataWithErr[map[string]frame.StatsFrame]
+	var account retry.DataWithErr[types.ExtendedAccount]
+	var vehicles retry.DataWithErr[[]types.VehicleStatsFrame]
+	var averages retry.DataWithErr[map[string]frame.StatsFrame]
 
 	go func() {
 		defer group.Done()
 
-		account = withRetry(func() (types.ExtendedAccount, error) {
+		account = retry.Retry(func() (types.ExtendedAccount, error) {
 			return c.wargaming.AccountByID(ctx, realm, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 	}()
@@ -84,7 +85,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 	go func() {
 		defer group.Done()
 
-		vehicles = withRetry(func() ([]types.VehicleStatsFrame, error) {
+		vehicles = retry.Retry(func() ([]types.VehicleStatsFrame, error) {
 			return c.wargaming.AccountVehicles(ctx, realm, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 
@@ -97,7 +98,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 			ids = append(ids, fmt.Sprint(v.TankID))
 		}
 		a, err := c.database.GetVehicleAverages(ctx, ids)
-		averages = DataWithErr[map[string]frame.StatsFrame]{a, err}
+		averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
 	}()
 
 	group.Wait()
@@ -123,9 +124,9 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 		apply(&options)
 	}
 
-	var histories DataWithErr[map[int][]blitzstars.TankHistoryEntry]
-	var averages DataWithErr[map[string]frame.StatsFrame]
-	var current DataWithErr[AccountStatsOverPeriod]
+	var histories retry.DataWithErr[map[int][]blitzstars.TankHistoryEntry]
+	var averages retry.DataWithErr[map[string]frame.StatsFrame]
+	var current retry.DataWithErr[AccountStatsOverPeriod]
 
 	var group sync.WaitGroup
 	group.Add(1)
@@ -133,7 +134,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 		defer group.Done()
 
 		stats, err := c.CurrentStats(ctx, id)
-		current = DataWithErr[AccountStatsOverPeriod]{stats, err}
+		current = retry.DataWithErr[AccountStatsOverPeriod]{Data: stats, Err: err}
 
 		if err != nil || stats.RegularBattles.Battles < 1 || !options.withWN8 {
 			return
@@ -144,7 +145,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 			ids = append(ids, id)
 		}
 		a, err := c.database.GetVehicleAverages(ctx, ids)
-		averages = DataWithErr[map[string]frame.StatsFrame]{a, err}
+		averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
 	}()
 
 	// TODO: lookup a session from the database first
@@ -167,7 +168,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	group.Add(1)
 	go func() {
 		defer group.Done()
-		histories = withRetry(func() (map[int][]blitzstars.TankHistoryEntry, error) {
+		histories = retry.Retry(func() (map[int][]blitzstars.TankHistoryEntry, error) {
 			return c.blitzstars.AccountTankHistories(ctx, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 	}()
