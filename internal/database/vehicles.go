@@ -2,9 +2,9 @@ package database
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/cufee/aftermath/internal/database/prisma/db"
+	"github.com/cufee/aftermath/internal/encoding"
 	"github.com/rs/zerolog/log"
 	"github.com/steebchen/prisma-client-go/runtime/transaction"
 	"golang.org/x/text/language"
@@ -17,7 +17,7 @@ type Vehicle struct {
 	Class  string
 	Nation string
 
-	LocalizedNames map[language.Tag]string
+	LocalizedNames map[string]string
 }
 
 func (v Vehicle) FromModel(model db.VehicleModel) Vehicle {
@@ -25,18 +25,27 @@ func (v Vehicle) FromModel(model db.VehicleModel) Vehicle {
 	v.Tier = model.Tier
 	v.Type = model.Type
 	v.Nation = model.Nation
-	v.LocalizedNames = make(map[language.Tag]string)
-	if model.LocalizedNamesEncoded != "" {
-		_ = json.Unmarshal([]byte(model.LocalizedNamesEncoded), &v.LocalizedNames)
+	v.LocalizedNames = make(map[string]string)
+	if model.LocalizedNamesEncoded != nil {
+		err := encoding.DecodeGob(model.LocalizedNamesEncoded, &v.LocalizedNames)
+		if err != nil {
+			log.Err(err).Str("id", v.ID).Msg("failed to decode vehicle localized names")
+		}
+
 	}
 	return v
 }
 
+func (v Vehicle) EncodeNames() []byte {
+	encoded, _ := encoding.EncodeGob(v.LocalizedNames)
+	return encoded
+}
+
 func (v Vehicle) Name(locale language.Tag) string {
-	if n := v.LocalizedNames[locale]; n != "" {
+	if n := v.LocalizedNames[locale.String()]; n != "" {
 		return n
 	}
-	if n := v.LocalizedNames[language.English]; n != "" {
+	if n := v.LocalizedNames[language.English.String()]; n != "" {
 		return n
 	}
 	return "Secret Tank"
@@ -49,12 +58,6 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]Vehicle
 
 	var transactions []transaction.Transaction
 	for id, data := range vehicles {
-		encoded, err := json.Marshal(data.LocalizedNames)
-		if err != nil {
-			log.Err(err).Str("id", id).Msg("failed to encode a stats frame for vehicle averages")
-			continue
-		}
-
 		transactions = append(transactions, c.prisma.Vehicle.
 			UpsertOne(db.Vehicle.ID.Equals(id)).
 			Create(
@@ -63,14 +66,14 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]Vehicle
 				db.Vehicle.Type.Set(data.Type),
 				db.Vehicle.Class.Set(data.Class),
 				db.Vehicle.Nation.Set(data.Nation),
-				db.Vehicle.LocalizedNamesEncoded.Set(string(encoded)),
+				db.Vehicle.LocalizedNamesEncoded.Set(data.EncodeNames()),
 			).
 			Update(
 				db.Vehicle.Tier.Set(data.Tier),
 				db.Vehicle.Type.Set(data.Type),
 				db.Vehicle.Class.Set(data.Class),
 				db.Vehicle.Nation.Set(data.Nation),
-				db.Vehicle.LocalizedNamesEncoded.Set(string(encoded)),
+				db.Vehicle.LocalizedNamesEncoded.Set(data.EncodeNames()),
 			).Tx(),
 		)
 	}

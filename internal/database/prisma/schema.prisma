@@ -8,51 +8,79 @@ generator db {
 }
 
 //
-// === App Configuration ===
+// === App Data ===
 //
 
+// Stores some long-lived app condiguration values
+// the values here would typically be set programmatically
 model AppConfiguration {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  valueEncoded    String
-  metadataEncoded String @default("")
+  valueEncoded    Bytes
+  metadataEncoded Bytes @default("")
 
   @@map("app_configurations")
+}
+
+// A record of a cron task
+model CronTask {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  type           String
+  referenceId    String
+  targetsEncoded Bytes
+
+  status         String
+  lastRun        DateTime
+  scheduledAfter DateTime
+
+  logsEncoded Bytes @default("")
+  dataEncoded Bytes @default("")
+
+  @@index([referenceId])
+  @@index([status, referenceId, scheduledAfter])
+  @@index([lastRun, status])
+  @@map("cron_tasks")
 }
 
 //
 // === Authentification ===
 //
 
-model AuthNonce {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// // A single-use nonce value generated during the auth flow
+// model AuthNonce {
+//   id        String   @id @default(cuid())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  expiresAt DateTime
+//   expiresAt DateTime
 
-  referenceId     String
-  metadataEncoded String @default("")
+//   referenceId     String
+//   metadataEncoded Bytes  @default("")
 
-  @@index([createdAt])
-  @@index([referenceId])
-  @@index([referenceId, expiresAt])
-  @@map("auth_nonces")
-}
+//   @@index([createdAt])
+//   @@index([referenceId])
+//   @@index([referenceId, expiresAt])
+//   @@map("auth_nonces")
+//   @@ignore
+// }
 
 //
 // === Users ===
 //
 
+// User record withing the app, primary id is a Discord user ID
 model User {
   id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  permissions         String
-  featureFlagsEncoded String @default("")
+  permissions  String
+  featureFlags Int    @default(0)
 
   subscriptions UserSubscription[]
   connections   UserConnection[]
@@ -61,6 +89,7 @@ model User {
   @@map("users")
 }
 
+// A subscription record for a user
 model UserSubscription {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -74,15 +103,11 @@ model UserSubscription {
   referenceId String
   permissions String
 
-  @@index([userId])
-  @@index([expiresAt])
-  @@index([type, userId, expiresAt])
-  @@index([type, userId])
-  @@index([referenceId])
-  @@index([type, referenceId])
   @@map("user_subscriptions")
 }
 
+// A connection to some external service for a user, like Google or Wargaming
+//   - ReferenceID here would be a user id received from the external service
 model UserConnection {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -95,7 +120,7 @@ model UserConnection {
   permissions String
   referenceId String
 
-  metadataEncoded String @default("")
+  metadataEncoded Bytes @default("")
 
   @@index([userId])
   @@index([type, userId])
@@ -104,6 +129,7 @@ model UserConnection {
   @@map("user_connections")
 }
 
+// Content uploaded by a user, such as an image
 model UserContent {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -115,8 +141,8 @@ model UserContent {
   type        String
   referenceId String
 
-  valueEncoded    String
-  metadataEncoded String @default("")
+  valueEncoded    Bytes
+  metadataEncoded Bytes @default("")
 
   @@index([userId])
   @@index([type, userId])
@@ -126,9 +152,10 @@ model UserContent {
 }
 
 //
-// === External Data ===
+// === Wargaming Data ===
 //
 
+// Wargaming Account record
 model Account {
   id        String   @id
   createdAt DateTime @default(now())
@@ -151,45 +178,7 @@ model Account {
   @@map("accounts")
 }
 
-model AccountSnapshot {
-  id        String   @id @default(cuid())
-  createdAt DateTime
-  updatedAt DateTime @updatedAt
-
-  type           String
-  accountId      String
-  referenceId    String
-  lastBattleTime DateTime
-
-  dataEncoded String
-
-  @@index([createdAt])
-  @@index([type, accountId])
-  @@index([type, accountId, createdAt])
-  @@index([type, accountId, lastBattleTime])
-  @@index([type, referenceId])
-  @@index([type, referenceId, createdAt])
-  @@map("account_snapshots")
-}
-
-model AccountRatingSeasonSnapshot {
-  id        String   @id @default(cuid())
-  createdAt DateTime
-  updatedAt DateTime @updatedAt
-
-  seasonId       String
-  accountId      String
-  referenceId    String
-  lastBattleTime DateTime
-
-  dataEncoded String
-
-  @@index([createdAt])
-  @@index([seasonId, accountId])
-  @@index([seasonId, referenceId])
-  @@map("account_rating_season_snapshots")
-}
-
+// Wargaming Clan record
 model Clan {
   id        String   @id
   createdAt DateTime
@@ -208,16 +197,89 @@ model Clan {
   @@map("account_clans")
 }
 
+// A snapshot of account statistics
+model AccountSnapshot {
+  id        String   @id @default(cuid())
+  createdAt DateTime
+
+  type           String
+  lastBattleTime DateTime
+
+  accountId   String
+  referenceId String
+
+  frameEncoded Bytes
+
+  @@index([createdAt])
+  @@index([accountId, lastBattleTime])
+  @@map("account_snapshots")
+}
+
+// A snapshot of vehicle statistics on a specific account
+model VehicleSnapshot {
+  id        String   @id @default(cuid())
+  createdAt DateTime
+
+  type           String
+  lastBattleTime DateTime
+
+  accountId   String
+  vehicleId   String
+  referenceId String
+
+  frameEncoded Bytes
+
+  @@index([createdAt])
+  @@index([accountId, vehicleId, lastBattleTime])
+  @@map("vehicle_snapshots")
+}
+
+// A snapshot of all account achievements
+model AchievementsSnapshot {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accountId   String
+  referenceId String
+
+  dataEncoded Bytes
+
+  @@map("achievements_snapshots")
+}
+
+// // A snapshot of account rating season stats
+// model AccountRatingSeasonSnapshot {
+//   id        String   @id @default(cuid())
+//   createdAt DateTime
+//   updatedAt DateTime @updatedAt
+
+//   seasonId       String
+//   accountId      String
+//   referenceId    String
+//   lastBattleTime DateTime
+
+//   dataEncoded Bytes
+
+//   @@index([createdAt])
+//   @@index([seasonId, accountId])
+//   @@index([seasonId, referenceId])
+//   @@map("account_rating_season_snapshots")
+//   @@ignore // unused atm and may require significant changes
+// }
+
+// A stats frame representing an average player performance on a vehicle
 model VehicleAverage {
   id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  dataEncoded String
+  dataEncoded Bytes
 
   @@map("glossary_averages")
 }
 
+// Wargaming Vehicle glossary information
 model Vehicle {
   id        String   @id
   createdAt DateTime @default(now())
@@ -228,104 +290,84 @@ model Vehicle {
   class  String
   nation String
 
-  localizedNamesEncoded String
+  localizedNamesEncoded Bytes
 
   @@map("glossary_vehicles")
 }
 
-model Achievement {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// // Wargaming Achievement glossary information
+// model Achievement {
+//   id        String   @id @default(uuid())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  section String
+//   section String
 
-  dataEncoded String
+//   dataEncoded Bytes
 
-  @@map("glossary_achievements")
-}
+//   @@map("glossary_achievements")
+//   @@ignore
+// }
 
 //
-// === App Data ===
+// === Discord Data ===
 //
 
-model UserInteraction {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// // A log of a user interaction with the bot
+// model DiscordInteraction {
+//   id        String   @id @default(cuid())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  type        String
-  userId      String
-  referenceId String
+//   type        String
+//   userId      String
+//   referenceId String
 
-  dataEncoded     String
-  metadataEncoded String @default("")
+//   dataEncoded     Bytes
+//   metadataEncoded Bytes @default("")
 
-  @@index([type])
-  @@index([userId])
-  @@index([userId, type])
-  @@index([referenceId])
-  @@index([referenceId, type])
-  @@map("user_interactions")
-}
+//   @@map("user_interactions")
+//   @@ignore
+// }
 
-model DiscordBotLiveSession {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// // An active live session record of a user, requested through the bot
+// model LiveSession {
+//   id        String   @id @default(cuid())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  locale String
+//   locale String
 
-  userId      String
-  referenceId String
+//   userId      String
+//   referenceId String
 
-  guildId   String?
-  channelId String
-  messageId String
+//   lastUpdate     DateTime @default(now())
+//   lastBattleTime DateTime @default(now())
 
-  lastUpdate     DateTime @default(now())
-  lastBattleTime DateTime @default(now())
+//   options   StatsRequestsOptions @relation(fields: [optionsId], references: [id])
+//   optionsId String
 
-  optionsEncoded String
+//   metadataEncoded Bytes @default("")
 
-  @@index([referenceId])
-  @@map("discord_live_sessions")
-}
+//   @@index([referenceId])
+//   @@map("live_sessions")
+//   @@ignore
+// }
 
-model StatsRequestsOptions {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// model StatsRequestsOptions {
+//   id        String   @id @default(cuid())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  type        String
-  userId      String
-  accountId   String
-  referenceId String
+//   type        String
+//   userId      String
+//   accountId   String
+//   referenceId String
 
-  dataEncoded String
+//   dataEncoded  Bytes
+//   liveSessions LiveSession[] @ignore
 
-  @@index([referenceId])
-  @@map("stats_request_options")
-}
-
-model CronTask {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  type           String
-  referenceId    String
-  targetsEncoded String
-
-  status         String
-  lastRun        DateTime
-  scheduledAfter DateTime
-
-  logsEncoded String @default("")
-  dataEncoded String @default("")
-
-  @@index([referenceId])
-  @@index([status, referenceId, scheduledAfter])
-  @@index([lastRun, status])
-  @@map("cron_tasks")
-}
+//   @@index([referenceId])
+//   @@map("stats_request_options")
+//   @@ignore
+// }

@@ -162,24 +162,25 @@ func (r *Router) routeInteraction(interaction discordgo.Interaction) (*builder.C
 }
 
 func (r *Router) handleInteraction(ctx context.Context, cancel context.CancelFunc, interaction discordgo.Interaction, command *builder.Command, reply chan<- discordgo.InteractionResponseData) {
-	defer cancel()
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error().Interface("error", r).Msg("interaction handler panic")
+			reply <- discordgo.InteractionResponseData{Content: "Something went really wrong while working on your command. Please try again later."}
 		}
+		cancel()
 	}()
 
 	cCtx, err := common.NewContext(ctx, interaction, reply, r.restClient, r.core)
 	if err != nil {
 		log.Err(err).Msg("failed to create a common.Context for a handler")
-		reply <- discordgo.InteractionResponseData{Content: "Something went wrong while working on your command. Please try again later."}
+		reply <- discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")}
 		return
 	}
 
 	err = command.Handler(cCtx)
 	if err != nil {
 		log.Err(err).Msg("handler returned an error")
-		reply <- discordgo.InteractionResponseData{Content: "Something went wrong while working on your command. Please try again later."}
+		reply <- discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")}
 		return
 	}
 }

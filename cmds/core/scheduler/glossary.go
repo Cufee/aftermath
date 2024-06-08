@@ -56,7 +56,7 @@ func UpdateGlossaryWorker(client core.Client) func() {
 				Type: data.Type,
 				// Class: ,
 				Nation:         data.Nation,
-				LocalizedNames: map[language.Tag]string{language.English: data.Name},
+				LocalizedNames: map[string]string{language.English.String(): data.Name},
 			}
 		}
 

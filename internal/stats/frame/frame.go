@@ -1,9 +1,10 @@
 package frame
 
 import (
-	"encoding/json"
 	"math"
 	"time"
+
+	"github.com/cufee/aftermath/internal/encoding"
 )
 
 /*
@@ -39,24 +40,16 @@ type StatsFrame struct {
 	survivalRatio   ValueFloatDecimal `json:"-" bson:"-"`
 }
 
-func DecodeStatsFrame(encoded string) (StatsFrame, error) {
+func DecodeStatsFrame(encoded []byte) (StatsFrame, error) {
 	var data StatsFrame
-	err := json.Unmarshal([]byte(encoded), &data)
-	if err != nil {
-		return StatsFrame{}, err
-	}
-	return data, nil
+	return data, encoding.DecodeGob(encoded, &data)
 }
 
 /*
 Encode StatsFrame to string
 */
-func (r *StatsFrame) Encode() (string, error) {
-	data, err := json.Marshal(r)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
+func (r StatsFrame) Encode() ([]byte, error) {
+	return encoding.EncodeGob(r)
 }
 
 /*
