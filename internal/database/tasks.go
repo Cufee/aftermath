@@ -127,24 +127,31 @@ func NewAttemptLog(task Task, comment, err string) TaskLog {
 GetAndStartTasks retrieves up to limit number of tasks matching the referenceId and updates their status to in progress
   - this func will block until all other calls to task update funcs are done
 */
-func (c *client) GetAndStartTasks(ctx context.Context, referenceId string, limit int) ([]Task, error) {
+func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]Task, error) {
 	if limit < 1 {
 		return nil, nil
 	}
 	if err := c.tasksUpdateSem.Acquire(ctx, 1); err != nil {
 		return nil, err
 	}
+	defer c.tasksUpdateSem.Release(1)
 
 	models, err := c.prisma.CronTask.
 		FindMany(
 			db.CronTask.Status.Equals(string(TaskStatusScheduled)),
-			db.CronTask.ReferenceID.Equals(referenceId),
-			db.CronTask.ScheduledAfter.Gte(time.Now()),
+			db.CronTask.ScheduledAfter.Lt(time.Now()),
 		).
+		OrderBy(db.CronTask.ScheduledAfter.Order(db.ASC)).
 		Take(limit).
 		Exec(ctx)
 	if err != nil {
+		if db.IsErrNotFound(err) {
+			return nil, nil
+		}
 		return nil, err
+	}
+	if len(models) < 1 {
+		return nil, nil
 	}
 
 	var ids []string
@@ -206,6 +213,7 @@ func (c *client) UpdateTasks(ctx context.Context, tasks ...Task) error {
 	if err := c.tasksUpdateSem.Acquire(ctx, 1); err != nil {
 		return err
 	}
+	defer c.tasksUpdateSem.Release(1)
 
 	var txns []db.PrismaTransaction
 	for _, task := range tasks {
@@ -241,6 +249,7 @@ func (c *client) DeleteTasks(ctx context.Context, ids ...string) error {
 	if err := c.tasksUpdateSem.Acquire(ctx, 1); err != nil {
 		return nil
 	}
+	defer c.tasksUpdateSem.Release(1)
 
 	_, err := c.prisma.CronTask.FindMany(db.CronTask.ID.In(ids)).Delete().Exec(ctx)
 	if err != nil {

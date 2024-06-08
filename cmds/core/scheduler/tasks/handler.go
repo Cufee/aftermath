@@ -6,8 +6,8 @@ import (
 )
 
 type TaskHandler struct {
-	process     func(client core.Client, task database.Task) (string, error)
-	shouldRetry func(task *database.Task) bool
+	Process     func(client core.Client, task database.Task) (string, error)
+	ShouldRetry func(task *database.Task) bool
 }
 
 var defaultHandlers = make(map[database.TaskType]TaskHandler)

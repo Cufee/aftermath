@@ -1,4 +1,4 @@
-package tasks
+package scheduler
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/cmds/core"
+	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/rs/zerolog/log"
 )
@@ -15,7 +16,7 @@ type Queue struct {
 	concurrencyLimit int
 	lastTaskRun      time.Time
 
-	handlers map[database.TaskType]TaskHandler
+	handlers map[database.TaskType]tasks.TaskHandler
 	core     core.Client
 }
 
@@ -31,7 +32,7 @@ func (q *Queue) LastTaskRun() time.Time {
 	return q.lastTaskRun
 }
 
-func NewQueue(client core.Client, handlers map[database.TaskType]TaskHandler, concurrencyLimit int) *Queue {
+func NewQueue(client core.Client, handlers map[database.TaskType]tasks.TaskHandler, concurrencyLimit int) *Queue {
 	return &Queue{
 		core:             client,
 		handlers:         handlers,
@@ -83,7 +84,7 @@ func (q *Queue) Process(callback func(error), tasks ...database.Task) {
 				Timestamp: time.Now(),
 			}
 
-			message, err := handler.process(nil, t)
+			message, err := handler.Process(nil, t)
 			attempt.Comment = message
 			if err != nil {
 				attempt.Error = err.Error()
@@ -106,7 +107,7 @@ func (q *Queue) Process(callback func(error), tasks ...database.Task) {
 			continue
 		}
 
-		if task.Status == database.TaskStatusFailed && handler.shouldRetry(&task) {
+		if task.Status == database.TaskStatusFailed && handler.ShouldRetry(&task) {
 			rescheduledCount++
 			task.Status = database.TaskStatusScheduled
 		}

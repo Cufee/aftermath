@@ -12,7 +12,7 @@ import (
 
 func init() {
 	defaultHandlers[database.TaskTypeRecordSessions] = TaskHandler{
-		process: func(client core.Client, task database.Task) (string, error) {
+		Process: func(client core.Client, task database.Task) (string, error) {
 			if task.Data == nil {
 				return "no data provided", errors.New("no data provided")
 			}
@@ -42,7 +42,7 @@ func init() {
 			// task.Targets = failedAccounts
 			// return "retrying failed accounts", errors.New("some accounts failed")
 		},
-		shouldRetry: func(task *database.Task) bool {
+		ShouldRetry: func(task *database.Task) bool {
 			triesLeft, ok := task.Data["triesLeft"].(int32)
 			if !ok {
 				return false
@@ -59,30 +59,28 @@ func init() {
 	}
 }
 
-func CreateSessionUpdateTasks(client core.Client) func(realm string) error {
-	return func(realm string) error {
-		realm = strings.ToUpper(realm)
-		task := database.Task{
-			Type:        database.TaskTypeRecordSessions,
-			ReferenceID: "realm_" + realm,
-			Data: map[string]any{
-				"realm":     realm,
-				"triesLeft": int32(3),
-			},
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-		defer cancel()
-
-		accounts, err := client.Database().GetRealmAccounts(ctx, realm)
-		if err != nil {
-			return err
-		}
-		if len(accounts) < 1 {
-			return nil
-		}
-
-		// This update requires (2 + n) requests per n players
-		return client.Database().CreateTasks(ctx, splitTaskByTargets(task, 50)...)
+func CreateSessionUpdateTasks(client core.Client, realm string) error {
+	realm = strings.ToUpper(realm)
+	task := database.Task{
+		Type:        database.TaskTypeRecordSessions,
+		ReferenceID: "realm_" + realm,
+		Data: map[string]any{
+			"realm":     realm,
+			"triesLeft": int32(3),
+		},
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	accounts, err := client.Database().GetRealmAccounts(ctx, realm)
+	if err != nil {
+		return err
+	}
+	if len(accounts) < 1 {
+		return nil
+	}
+
+	// This update requires (2 + n) requests per n players
+	return client.Database().CreateTasks(ctx, splitTaskByTargets(task, 90)...)
 }
