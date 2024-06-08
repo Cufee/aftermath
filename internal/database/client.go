@@ -27,6 +27,7 @@ type Client interface {
 	CreateTasks(ctx context.Context, tasks ...Task) error
 	UpdateTasks(ctx context.Context, tasks ...Task) error
 	DeleteTasks(ctx context.Context, ids ...string) error
+	GetAndStartTasks(ctx context.Context, limit int) ([]Task, error)
 }
 
 var _ Client = &client{}

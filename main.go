@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/cufee/aftermath/cmds/core"
@@ -37,13 +38,7 @@ func main() {
 
 	loadStaticAssets(static)
 	coreClient := coreClientFromEnv()
-
-	// this can be adjusted to balance memory usage vs time for cache updates
-	taskQueueConcurrency := 10
-	tasksQueue := tasks.NewQueue(coreClient, tasks.DefaultHandlers(), taskQueueConcurrency)
-	scheduler.StartCronJobs(coreClient, tasksQueue)
-	// scheduler.UpdateAveragesWorker(coreClient)()
-	// scheduler.UpdateGlossaryWorker(coreClient)()
+	startSchedulerFromEnvAsync()
 
 	discordHandler, err := discord.NewRouterHandler(coreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
 	if err != nil {
@@ -54,11 +49,50 @@ func main() {
 	panic(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
 
+func startSchedulerFromEnvAsync() {
+	if os.Getenv("SCHEDULER_ENABLED") != "true" {
+		return
+	}
+
+	// This wargaming client is using a different proxy as it needs a lot higher rps, but can be slow
+	wgClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_CACHE_APP_ID"), os.Getenv("WG_CACHE_APP_RPS"), os.Getenv("WG_CACHE_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_CACHE_PROXY_HOST_LIST"))
+	if err != nil {
+		log.Fatalf("wgClient: wargaming#NewClientFromEnv failed %s", err)
+	}
+	dbClient, err := database.NewClient()
+	if err != nil {
+		log.Fatalf("database#NewClient failed %s", err)
+	}
+	bsClient, err := blitzstars.NewClient(os.Getenv("BLITZ_STARS_API_URL"), time.Second*10)
+	if err != nil {
+		log.Fatalf("failed to init a blitzstars client %s", err)
+	}
+
+	// Fetch client
+	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, dbClient)
+	if err != nil {
+		log.Fatalf("fetch#NewMultiSourceClient failed %s", err)
+	}
+	coreClient := core.NewClient(client, wgClient, dbClient)
+
+	// Queue
+	taskQueueConcurrency := 10
+	if v, err := strconv.Atoi(os.Getenv("SCHEDULER_CONCURRENT_WORKERS")); err == nil {
+		taskQueueConcurrency = v
+	}
+	queue := scheduler.NewQueue(coreClient, tasks.DefaultHandlers(), taskQueueConcurrency)
+	queue.StartCronJobsAsync()
+
+	// Some tasks should run on startup
+	// scheduler.UpdateAveragesWorker(coreClient)()
+	// scheduler.UpdateGlossaryWorker(coreClient)()
+}
+
 func coreClientFromEnv() core.Client {
 	// Dependencies
 	wgClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_PRIMARY_APP_ID"), os.Getenv("WG_PRIMARY_APP_RPS"), os.Getenv("WG_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_PROXY_HOST_LIST"))
 	if err != nil {
-		log.Fatalf("wargaming#NewClientFromEnv failed %s", err)
+		log.Fatalf("wgClient: wargaming#NewClientFromEnv failed %s", err)
 	}
 	dbClient, err := database.NewClient()
 	if err != nil {

@@ -3,13 +3,11 @@ package scheduler
 import (
 	"time"
 
-	"github.com/cufee/aftermath/cmds/core"
-	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
 	"github.com/go-co-op/gocron"
 	"github.com/rs/zerolog/log"
 )
 
-func StartCronJobs(client core.Client, queue *tasks.Queue) {
+func (queue *Queue) StartCronJobsAsync() {
 	defer log.Info().Msg("started cron scheduler")
 
 	c := gocron.NewScheduler(time.UTC)
@@ -18,19 +16,17 @@ func StartCronJobs(client core.Client, queue *tasks.Queue) {
 	c.Cron("0 * * * *").Do(restartTasksWorker(queue))
 
 	// Glossary - Do it around the same time WG releases game updates
-	c.Cron("0 10 * * *").Do(UpdateGlossaryWorker(client))
-	c.Cron("0 12 * * *").Do(UpdateGlossaryWorker(client))
+	c.Cron("0 10 * * *").Do(UpdateGlossaryWorker(queue.core))
+	c.Cron("0 12 * * *").Do(UpdateGlossaryWorker(queue.core))
 	// c.AddFunc("40 9 * * 0", updateAchievementsWorker)
 
-	// Averages - Update averages shortly after session refreshes
-	c.Cron("0 10 * * *").Do(UpdateAveragesWorker(client))
-	c.Cron("0 2 * * *").Do(UpdateAveragesWorker(client))
-	c.Cron("0 19 * * *").Do(UpdateAveragesWorker(client))
+	// Averages - Update averages once daily
+	c.Cron("0 0 * * *").Do(UpdateAveragesWorker(queue.core))
 
 	// Sessions
-	c.Cron("0 9 * * *").Do(createSessionTasksWorker(client, "NA"))  // NA
-	c.Cron("0 1 * * *").Do(createSessionTasksWorker(client, "EU"))  // EU
-	c.Cron("0 18 * * *").Do(createSessionTasksWorker(client, "AS")) // Asia
+	c.Cron("0 9 * * *").Do(createSessionTasksWorker(queue.core, "NA"))  // NA
+	c.Cron("0 1 * * *").Do(createSessionTasksWorker(queue.core, "EU"))  // EU
+	c.Cron("0 18 * * *").Do(createSessionTasksWorker(queue.core, "AS")) // Asia
 
 	// Refresh WN8
 	// "45 9 * * *" 	// NA
@@ -38,7 +34,7 @@ func StartCronJobs(client core.Client, queue *tasks.Queue) {
 	// "45 18 * * *" 	// Asia
 
 	// Configurations
-	c.Cron("0 0 */7 * *").Do(rotateBackgroundPresetsWorker(client))
+	c.Cron("0 0 */7 * *").Do(rotateBackgroundPresetsWorker(queue.core))
 
 	// Start the Cron job scheduler
 	c.StartAsync()

@@ -31,7 +31,6 @@ func (v Vehicle) FromModel(model db.VehicleModel) Vehicle {
 		if err != nil {
 			log.Err(err).Str("id", v.ID).Msg("failed to decode vehicle localized names")
 		}
-
 	}
 	return v
 }

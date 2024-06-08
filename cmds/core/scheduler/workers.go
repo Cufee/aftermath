@@ -1,8 +1,12 @@
 package scheduler
 
 import (
+	"context"
+	"time"
+
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
+	"github.com/rs/zerolog/log"
 )
 
 func rotateBackgroundPresetsWorker(client core.Client) func() {
@@ -23,42 +27,44 @@ func rotateBackgroundPresetsWorker(client core.Client) func() {
 
 func createSessionTasksWorker(client core.Client, realm string) func() {
 	return func() {
-		// err := tasks.CreateSessionUpdateTasks(realm)
-		// if err != nil {
-		// 	log.Err(err).Msg("failed to create session update tasks")
-		// }
+		err := tasks.CreateSessionUpdateTasks(client, realm)
+		if err != nil {
+			log.Err(err).Str("realm", realm).Msg("failed to schedule session update tasks")
+		}
 	}
 }
 
-func runTasksWorker(queue *tasks.Queue) func() {
+func runTasksWorker(queue *Queue) func() {
 	return func() {
-		// 	if tasks.DefaultQueue.ActiveWorkers() > 0 {
-		// 		return
-		// 	}
+		activeWorkers := queue.ActiveWorkers()
+		if activeWorkers >= queue.concurrencyLimit {
+			return
+		}
 
-		// 	activeTasks, err := tasks.StartScheduledTasks(nil, 50)
-		// 	if err != nil {
-		// 		log.Err(err).Msg("failed to start scheduled tasks")
-		// 		return
-		// 	}
-		// 	if len(activeTasks) == 0 {
-		// 		return
-		// 	}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
 
-		// 	tasks.DefaultQueue.Process(func(err error) {
-		// 		if err != nil {
-		// 			log.Err(err).Msg("failed to process tasks")
-		// 			return
-		// 		}
+		// each task worked handles 1 task at a time, but tasks might be very fast
+		// for now, we queue up 10 tasks per worker, this can be adjusted later/smarter
+		batchSize := queue.concurrencyLimit - activeWorkers
+		tasks, err := queue.core.Database().GetAndStartTasks(ctx, batchSize*10)
+		if err != nil {
+			log.Err(err).Msg("failed to start scheduled tasks")
+			return
+		}
 
-		// 		// If the queue is now empty, we can run the next batch of tasks right away
-		// 		runTasksWorker()
-
-		// 	}, activeTasks...)
+		queue.Process(func(err error) {
+			if err != nil {
+				log.Err(err).Msg("failed to process tasks")
+				return
+			}
+			// if the queue is now empty, we can run the next batch of tasks right away
+			runTasksWorker(queue)
+		}, tasks...)
 	}
 }
 
-func restartTasksWorker(queue *tasks.Queue) func() {
+func restartTasksWorker(queue *Queue) func() {
 	return func() {
 		// _, err := tasks.RestartAbandonedTasks(nil)
 		// if err != nil {
