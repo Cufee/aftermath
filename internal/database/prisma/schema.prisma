@@ -172,7 +172,6 @@ model Account {
   clanId String?
 
   @@index([realm])
-  @@index([clanId])
   @@index([nickname])
   @@index([lastBattleTime])
   @@map("accounts")

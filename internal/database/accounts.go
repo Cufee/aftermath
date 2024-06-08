@@ -106,7 +106,11 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []Account) map[str
 			defer wg.Done()
 			optional := []db.AccountSetParam{db.Account.Private.Set(account.Private)}
 			if account.ClanID != "" {
-				optional = append(optional, db.Account.Clan.Link(db.Clan.ID.Equals(account.ClanID)))
+				clan, err := c.prisma.Clan.FindUnique(db.Clan.ID.Equals(account.ClanID)).Exec(ctx)
+				if err == nil {
+					optional = append(optional, db.Account.Clan.Link(db.Clan.ID.Equals(clan.ID)))
+				}
+
 			}
 
 			_, err := c.prisma.Account.
@@ -118,11 +122,18 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []Account) map[str
 					db.Account.Nickname.Set(account.Nickname),
 					optional...,
 				).
+				Update(
+					append(optional,
+						db.Account.Nickname.Set(account.Nickname),
+						db.Account.LastBattleTime.Set(account.LastBattleTime),
+					)...,
+				).
 				Exec(ctx)
 			if err != nil {
 				mx.Lock()
 				errors[account.ID] = err
 				mx.Unlock()
+				return
 			}
 		}(account)
 	}
