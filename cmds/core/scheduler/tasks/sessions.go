@@ -62,8 +62,9 @@ func init() {
 func CreateSessionUpdateTasks(client core.Client, realm string) error {
 	realm = strings.ToUpper(realm)
 	task := database.Task{
-		Type:        database.TaskTypeRecordSessions,
-		ReferenceID: "realm_" + realm,
+		Type:           database.TaskTypeRecordSessions,
+		ReferenceID:    "realm_" + realm,
+		ScheduledAfter: time.Now(),
 		Data: map[string]any{
 			"realm":     realm,
 			"triesLeft": int32(3),

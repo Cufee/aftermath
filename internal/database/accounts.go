@@ -110,7 +110,6 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []Account) map[str
 				if err == nil {
 					optional = append(optional, db.Account.Clan.Link(db.Clan.ID.Equals(clan.ID)))
 				}
-
 			}
 
 			_, err := c.prisma.Account.

@@ -86,7 +86,7 @@ func (t *Task) decodeTargets(targets []byte) {
 
 func (t *Task) encodeLogs() []byte {
 	if t.Logs == nil {
-		return nil
+		return []byte{}
 	}
 	data, _ := encoding.EncodeGob(t.Logs)
 	return data
@@ -97,7 +97,7 @@ func (t *Task) decodeLogs(logs []byte) {
 
 func (t *Task) encodeData() []byte {
 	if t.Data == nil {
-		return nil
+		return []byte{}
 	}
 	data, _ := encoding.EncodeGob(t.Data)
 	return data
@@ -185,8 +185,8 @@ func (c *client) CreateTasks(ctx context.Context, tasks ...Task) error {
 			db.CronTask.Type.Set(string(task.Type)),
 			db.CronTask.ReferenceID.Set(task.ReferenceID),
 			db.CronTask.TargetsEncoded.Set(task.encodeTargets()),
-			db.CronTask.Status.Set(string(task.Status)),
-			db.CronTask.LastRun.Set(task.LastRun),
+			db.CronTask.Status.Set(string(TaskStatusScheduled)),
+			db.CronTask.LastRun.Set(time.Now()),
 			db.CronTask.ScheduledAfter.Set(task.ScheduledAfter),
 			db.CronTask.LogsEncoded.Set(task.encodeLogs()),
 			db.CronTask.DataEncoded.Set(task.encodeData()),

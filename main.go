@@ -85,7 +85,7 @@ func startSchedulerFromEnvAsync() {
 
 	// Some tasks should run on startup
 	// scheduler.UpdateAveragesWorker(coreClient)()
-	// scheduler.UpdateGlossaryWorker(coreClient)()
+	// scheduler.CreateSessionTasksWorker(coreClient, "NA")()
 }
 
 func coreClientFromEnv() core.Client {

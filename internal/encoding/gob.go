@@ -7,12 +7,12 @@ import (
 
 func EncodeGob(data any) ([]byte, error) {
 	if data == nil {
-		return nil, nil
+		return []byte{}, nil
 	}
 	var buf bytes.Buffer
 	err := gob.NewEncoder(&buf).Encode(data)
 	if err != nil {
-		return nil, err
+		return []byte{}, err
 	}
 	return buf.Bytes(), nil
 }

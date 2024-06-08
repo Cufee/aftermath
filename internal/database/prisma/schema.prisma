@@ -19,7 +19,7 @@ model AppConfiguration {
   updatedAt DateTime @updatedAt
 
   valueEncoded    Bytes
-  metadataEncoded Bytes @default("")
+  metadataEncoded Bytes
 
   @@map("app_configurations")
 }
@@ -38,8 +38,8 @@ model CronTask {
   lastRun        DateTime
   scheduledAfter DateTime
 
-  logsEncoded Bytes @default("")
-  dataEncoded Bytes @default("")
+  logsEncoded Bytes
+  dataEncoded Bytes
 
   @@index([referenceId])
   @@index([status, referenceId, scheduledAfter])
@@ -60,7 +60,7 @@ model CronTask {
 //   expiresAt DateTime
 
 //   referenceId     String
-//   metadataEncoded Bytes  @default("")
+//   metadataEncoded Bytes
 
 //   @@index([createdAt])
 //   @@index([referenceId])
@@ -120,7 +120,7 @@ model UserConnection {
   permissions String
   referenceId String
 
-  metadataEncoded Bytes @default("")
+  metadataEncoded Bytes
 
   @@index([userId])
   @@index([type, userId])
@@ -142,7 +142,7 @@ model UserContent {
   referenceId String
 
   valueEncoded    Bytes
-  metadataEncoded Bytes @default("")
+  metadataEncoded Bytes
 
   @@index([userId])
   @@index([type, userId])
@@ -172,8 +172,9 @@ model Account {
   clanId String?
 
   @@index([realm])
-  @@index([nickname])
-  @@index([lastBattleTime])
+  @@index([realm, lastBattleTime])
+  @@index([id, lastBattleTime])
+  @@index([clanId])
   @@map("accounts")
 }
 
@@ -323,7 +324,7 @@ model Vehicle {
 //   referenceId String
 
 //   dataEncoded     Bytes
-//   metadataEncoded Bytes @default("")
+//   metadataEncoded Bytes
 
 //   @@map("user_interactions")
 //   @@ignore
@@ -346,7 +347,7 @@ model Vehicle {
 //   options   StatsRequestsOptions @relation(fields: [optionsId], references: [id])
 //   optionsId String
 
-//   metadataEncoded Bytes @default("")
+//   metadataEncoded Bytes
 
 //   @@index([referenceId])
 //   @@map("live_sessions")

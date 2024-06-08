@@ -12,9 +12,9 @@ func (queue *Queue) StartCronJobsAsync() {
 
 	c := gocron.NewScheduler(time.UTC)
 	// Tasks
-	c.Cron("* * * * *").Do(runTasksWorker(queue))
+	c.Cron("* * * * *").Do(RunTasksWorker(queue))
 	// some tasks might be stuck due to a panic or restart, restart them
-	c.Cron("0 * * * *").Do(restartTasksWorker(queue))
+	c.Cron("0 * * * *").Do(RestartTasksWorker(queue))
 
 	// Glossary - Do it around the same time WG releases game updates
 	c.Cron("0 10 * * *").Do(UpdateGlossaryWorker(queue.core))
@@ -25,9 +25,9 @@ func (queue *Queue) StartCronJobsAsync() {
 	c.Cron("0 0 * * *").Do(UpdateAveragesWorker(queue.core))
 
 	// Sessions
-	c.Cron("0 9 * * *").Do(createSessionTasksWorker(queue.core, "NA"))  // NA
-	c.Cron("0 1 * * *").Do(createSessionTasksWorker(queue.core, "EU"))  // EU
-	c.Cron("0 18 * * *").Do(createSessionTasksWorker(queue.core, "AS")) // Asia
+	c.Cron("0 9 * * *").Do(CreateSessionTasksWorker(queue.core, "NA"))  // NA
+	c.Cron("0 1 * * *").Do(CreateSessionTasksWorker(queue.core, "EU"))  // EU
+	c.Cron("0 18 * * *").Do(CreateSessionTasksWorker(queue.core, "AS")) // Asia
 
 	// Refresh WN8
 	// "45 9 * * *" 	// NA
@@ -35,7 +35,7 @@ func (queue *Queue) StartCronJobsAsync() {
 	// "45 18 * * *" 	// Asia
 
 	// Configurations
-	c.Cron("0 0 */7 * *").Do(rotateBackgroundPresetsWorker(queue.core))
+	c.Cron("0 0 */7 * *").Do(RotateBackgroundPresetsWorker(queue.core))
 
 	// Start the Cron job scheduler
 	c.StartAsync()

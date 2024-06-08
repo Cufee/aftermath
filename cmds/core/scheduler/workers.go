@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func rotateBackgroundPresetsWorker(client core.Client) func() {
+func RotateBackgroundPresetsWorker(client core.Client) func() {
 	return func() {
 		// // We just run the logic directly as it's not a heavy task and it doesn't matter if it fails due to the app failing
 		// log.Info().Msg("rotating background presets")
@@ -25,7 +25,7 @@ func rotateBackgroundPresetsWorker(client core.Client) func() {
 	}
 }
 
-func createSessionTasksWorker(client core.Client, realm string) func() {
+func CreateSessionTasksWorker(client core.Client, realm string) func() {
 	return func() {
 		err := tasks.CreateSessionUpdateTasks(client, realm)
 		if err != nil {
@@ -34,7 +34,7 @@ func createSessionTasksWorker(client core.Client, realm string) func() {
 	}
 }
 
-func runTasksWorker(queue *Queue) func() {
+func RunTasksWorker(queue *Queue) func() {
 	return func() {
 		activeWorkers := queue.ActiveWorkers()
 		if activeWorkers >= queue.concurrencyLimit {
@@ -59,12 +59,12 @@ func runTasksWorker(queue *Queue) func() {
 				return
 			}
 			// if the queue is now empty, we can run the next batch of tasks right away
-			runTasksWorker(queue)
+			RunTasksWorker(queue)
 		}, tasks...)
 	}
 }
 
-func restartTasksWorker(queue *Queue) func() {
+func RestartTasksWorker(queue *Queue) func() {
 	return func() {
 		// _, err := tasks.RestartAbandonedTasks(nil)
 		// if err != nil {
