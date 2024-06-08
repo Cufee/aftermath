@@ -2,11 +2,11 @@ package database
 
 import (
 	"context"
-	"encoding/json"
 	"strings"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/prisma/db"
+	"github.com/cufee/aftermath/internal/encoding"
 )
 
 type TaskType string
@@ -77,31 +77,34 @@ func (t *Task) OnUpdated() {
 	t.UpdatedAt = time.Now()
 }
 
-func (t *Task) encodeTargets() string {
-	return strings.Join(t.Targets, ";")
+func (t *Task) encodeTargets() []byte {
+	return []byte(strings.Join(t.Targets, ";"))
 }
-func (t *Task) decodeTargets(targets string) {
-	t.Targets = strings.Split(targets, ";")
-}
-
-func (t *Task) encodeLogs() string {
-	data, _ := json.Marshal(t.Logs)
-	return string(data)
-}
-func (t *Task) decodeLogs(logs string) {
-	_ = json.Unmarshal([]byte(logs), &t.Logs)
+func (t *Task) decodeTargets(targets []byte) {
+	t.Targets = strings.Split(string(targets), ";")
 }
 
-func (t *Task) encodeData() string {
-	if t.Data == nil {
-		return ""
+func (t *Task) encodeLogs() []byte {
+	if t.Logs == nil {
+		return nil
 	}
-	data, _ := json.Marshal(t.Data)
-	return string(data)
+	data, _ := encoding.EncodeGob(t.Logs)
+	return data
 }
-func (t *Task) decodeData(data string) {
+func (t *Task) decodeLogs(logs []byte) {
+	_ = encoding.DecodeGob(logs, &t.Logs)
+}
+
+func (t *Task) encodeData() []byte {
+	if t.Data == nil {
+		return nil
+	}
+	data, _ := encoding.EncodeGob(t.Data)
+	return data
+}
+func (t *Task) decodeData(data []byte) {
 	t.Data = make(map[string]any)
-	_ = json.Unmarshal([]byte(data), &t.Data)
+	_ = encoding.DecodeGob(data, &t.Data)
 }
 
 type TaskLog struct {

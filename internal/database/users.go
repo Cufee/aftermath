@@ -2,13 +2,13 @@ package database
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"slices"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/prisma/db"
+	"github.com/cufee/aftermath/internal/encoding"
 	"github.com/cufee/aftermath/internal/permissions"
 )
 
@@ -65,8 +65,8 @@ func (c UserConnection) FromModel(model *db.UserConnectionModel) UserConnection 
 	c.Permissions = permissions.Parse(model.Permissions, permissions.Blank)
 
 	c.Type = ConnectionType(model.Type)
-	if model.MetadataEncoded != "" {
-		_ = json.Unmarshal([]byte(model.MetadataEncoded), &c.Metadata)
+	if model.MetadataEncoded != nil {
+		_ = encoding.DecodeGob(model.MetadataEncoded, &c.Metadata)
 	}
 	return c
 }
@@ -219,7 +219,7 @@ func (c *client) UpdateConnection(ctx context.Context, connection UserConnection
 		return UserConnection{}, errors.New("connection referenceID cannot be left blank")
 	}
 
-	encoded, err := json.Marshal(connection.Metadata)
+	encoded, err := encoding.EncodeGob(connection.Metadata)
 	if err != nil {
 		return UserConnection{}, fmt.Errorf("failed to encode metadata: %w", err)
 	}
@@ -227,7 +227,7 @@ func (c *client) UpdateConnection(ctx context.Context, connection UserConnection
 	model, err := c.prisma.UserConnection.FindUnique(db.UserConnection.ID.Equals(connection.ID)).Update(
 		db.UserConnection.ReferenceID.Set(connection.ReferenceID),
 		db.UserConnection.Permissions.Set(connection.Permissions.Encode()),
-		db.UserConnection.MetadataEncoded.Set(string(encoded)),
+		db.UserConnection.MetadataEncoded.Set(encoded),
 	).Exec(ctx)
 	if err != nil {
 		return UserConnection{}, err
@@ -250,7 +250,7 @@ func (c *client) UpsertConnection(ctx context.Context, connection UserConnection
 		return UserConnection{}, errors.New("connection Type cannot be left blank")
 	}
 
-	encoded, err := json.Marshal(connection.Metadata)
+	encoded, err := encoding.EncodeGob(connection.Metadata)
 	if err != nil {
 		return UserConnection{}, fmt.Errorf("failed to encode metadata: %w", err)
 	}
@@ -260,7 +260,7 @@ func (c *client) UpsertConnection(ctx context.Context, connection UserConnection
 		db.UserConnection.Type.Set(string(connection.Type)),
 		db.UserConnection.Permissions.Set(connection.Permissions.Encode()),
 		db.UserConnection.ReferenceID.Set(connection.ReferenceID),
-		db.UserConnection.MetadataEncoded.Set(string(encoded)),
+		db.UserConnection.MetadataEncoded.Set(encoded),
 	).Exec(ctx)
 	if err != nil {
 		return UserConnection{}, err

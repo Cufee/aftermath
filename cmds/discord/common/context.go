@@ -75,27 +75,36 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, respondC
 	return c, nil
 }
 
-func (c *Context) Reply(key string) error {
-	c.respondCh <- discordgo.InteractionResponseData{Content: c.Localize(key)}
+func (c *Context) Message(message string) error {
+	if message == "" {
+		return errors.New("bad reply call with blank message")
+	}
+	c.respondCh <- discordgo.InteractionResponseData{Content: message}
 	return nil
+}
+
+func (c *Context) Reply(key string) error {
+	return c.Message(c.Localize(key))
 }
 
 func (c *Context) Err(err error) error {
 	log.Err(err).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
-	return c.Reply(err.Error())
+	return c.Reply("common_error_unhandled_not_reported")
 }
 
 func (c *Context) Error(message string) error {
 	log.Error().Str("message", message).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
-	return c.Reply(message)
+	return c.Reply("common_error_unhandled_not_reported")
 }
 
 func (c *Context) ReplyFmt(key string, args ...any) error {
-	c.respondCh <- discordgo.InteractionResponseData{Content: fmt.Sprintf(c.Localize(key), args...)}
-	return nil
+	return c.Message(fmt.Sprintf(c.Localize(key), args...))
 }
 
 func (c *Context) File(r io.Reader, name string) error {
+	if r == nil {
+		return errors.New("bad Context#File call with nil io.Reader")
+	}
 	c.respondCh <- discordgo.InteractionResponseData{Files: []*discordgo.File{{Reader: r, Name: name}}}
 	return nil
 }
