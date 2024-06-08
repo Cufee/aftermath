@@ -13,6 +13,7 @@ import (
 	"github.com/cufee/aftermath/internal/retry"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
+	"github.com/rs/zerolog/log"
 )
 
 var _ Client = &multiSourceClient{}
@@ -114,6 +115,16 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 	if options.withWN8 {
 		stats.AddWN8(averages.Data)
 	}
+
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		errMap := c.database.UpsertAccounts(ctx, []database.Account{stats.Account})
+		if err := errMap[id]; err != nil {
+			log.Err(err).Msg("failed to update account cache")
+		}
+	}()
 
 	return stats, nil
 }

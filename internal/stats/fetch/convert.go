@@ -16,17 +16,20 @@ func timestampToTime(timestamp int) time.Time {
 }
 
 func wargamingToAccount(realm string, account types.ExtendedAccount, clan types.ClanMember, private bool) database.Account {
-	return database.Account{
+	a := database.Account{
 		ID:       strconv.Itoa(account.ID),
 		Realm:    realm,
 		Nickname: account.Nickname,
-		ClanTag:  clan.Clan.Tag,
-		ClanID:   strconv.Itoa(clan.ClanID),
 
 		Private:        private,
 		CreatedAt:      timestampToTime(account.CreatedAt),
 		LastBattleTime: timestampToTime(account.LastBattleTime),
 	}
+	if clan.ClanID > 0 {
+		a.ClanTag = clan.Clan.Tag
+		a.ClanID = strconv.Itoa(clan.ClanID)
+	}
+	return a
 }
 
 func wargamingToStats(realm string, accountData types.ExtendedAccount, clanMember types.ClanMember, vehicleData []types.VehicleStatsFrame) AccountStatsOverPeriod {

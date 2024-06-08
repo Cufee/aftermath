@@ -13,6 +13,7 @@ func (queue *Queue) StartCronJobsAsync() {
 	c := gocron.NewScheduler(time.UTC)
 	// Tasks
 	c.Cron("* * * * *").Do(runTasksWorker(queue))
+	// some tasks might be stuck due to a panic or restart, restart them
 	c.Cron("0 * * * *").Do(restartTasksWorker(queue))
 
 	// Glossary - Do it around the same time WG releases game updates
