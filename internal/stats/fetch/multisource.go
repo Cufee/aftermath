@@ -193,6 +193,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 		return AccountStatsOverPeriod{}, histories.Err
 	}
 
+	current.Data.PeriodEnd = time.Now()
 	current.Data.PeriodStart = periodStart
 	current.Data.RatingBattles = StatsWithVehicles{} // blitzstars do not provide rating battles stats
 	current.Data.RegularBattles = blitzstarsToStats(current.Data.RegularBattles.Vehicles, histories.Data, periodStart)
