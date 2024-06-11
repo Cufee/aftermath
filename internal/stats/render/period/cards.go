@@ -91,8 +91,8 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 			footer = append(footer, "Asia")
 		}
 
-		sessionTo := stats.PeriodEnd.Format("January 2, 2006")
-		sessionFrom := stats.PeriodStart.Format("January 2, 2006")
+		sessionTo := stats.PeriodEnd.Format("Jan 2, 2006")
+		sessionFrom := stats.PeriodStart.Format("Jan 2, 2006")
 		if sessionFrom == sessionTo {
 			footer = append(footer, sessionTo)
 		} else {
