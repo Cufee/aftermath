@@ -82,7 +82,7 @@ func overviewCardStyle(width float64) common.Style {
 
 func highlightCardStyle(containerStyle common.Style) highlightStyle {
 	container := containerStyle
-	container.Gap = 5
+	container.Gap = 10
 	container.PaddingX = 20
 	container.PaddingY = 15
 	container.Direction = common.DirectionHorizontal

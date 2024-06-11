@@ -142,8 +142,6 @@ type imageSize struct {
 	extraSpacingX float64
 	extraSpacingY float64
 
-	totalGap float64
-
 	maxElementWidth  float64
 	maxElementHeight float64
 }
@@ -151,63 +149,47 @@ type imageSize struct {
 func getDetailedSize(images []image.Image, style Style) imageSize {
 	imageWidth, imageHeight := style.Width, style.Height
 
-	var totalGap float64
-	if len(images) > 1 {
-		totalGap = float64(len(images)-1) * style.Gap
-	}
-
-	var totalWidth float64 = style.PaddingX * 2
-	var totalHeight float64 = style.PaddingY * 2
-
+	var totalWidth float64
+	var totalHeight float64
 	maxWidth, maxHeight := 0.0, 0.0
-
 	for _, img := range images {
 		imgX := float64(img.Bounds().Dx())
-		if imgX > maxWidth {
-			maxWidth = imgX
-		}
+		maxWidth = max(maxWidth, imgX)
 
 		imgY := float64(img.Bounds().Dy())
-		if imgY > maxHeight {
-			maxHeight = imgY
-		}
+		maxHeight = max(maxHeight, imgY)
 
 		if style.Direction == DirectionHorizontal {
 			totalWidth += float64(img.Bounds().Dx())
+			totalHeight = max(totalHeight, imgY)
 		} else {
 			totalHeight += float64(img.Bounds().Dy())
+			totalWidth = max(totalWidth, imgX)
 		}
 	}
 
-	if style.Width == 0 {
+	totalWidth += style.PaddingX * 2
+	totalHeight += style.PaddingY * 2
+	totalGap := float64(len(images)-1) * style.Gap
+
+	switch style.Direction {
+	case DirectionVertical:
+		totalHeight += totalGap
+	case DirectionHorizontal:
+		totalWidth += totalGap
+	}
+
+	if imageWidth < 1 {
 		imageWidth = totalWidth
 	}
-	if style.Height == 0 {
+	if imageHeight < 1 {
 		imageHeight = totalHeight
 	}
 
 	extraSpacingX := imageWidth - totalWidth
 	extraSpacingY := imageHeight - totalHeight
 
-	switch style.Direction {
-	case DirectionVertical:
-		if extraSpacingY < totalGap {
-			imageHeight += totalGap
-		}
-		if style.Width == 0 {
-			imageWidth = maxWidth + (style.PaddingX * 2)
-		}
-	default: // DirectionHorizontal
-		if extraSpacingX < totalGap {
-			imageWidth += totalGap
-		}
-		if style.Height == 0 {
-			imageHeight = maxHeight + (style.PaddingY)*2
-		}
-	}
-
 	return imageSize{
-		totalGap:         totalGap,
 		width:            imageWidth,
 		height:           imageHeight,
 		extraSpacingX:    extraSpacingX,

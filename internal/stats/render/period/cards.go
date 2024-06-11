@@ -103,17 +103,15 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		if err != nil {
 			return segments, err
 		}
-		cardWidth = common.Max(cardWidth, float64(footerImage.Bounds().Dx()))
 		segments.AddFooter(common.NewImageContent(common.Style{Width: cardWidth, Height: float64(footerImage.Bounds().Dy())}, footerImage))
 	}
 
 	// Header card
-	if headerCard, headerCardExists := newHeaderCard(subs, opts); headerCardExists {
+	if headerCard, headerCardExists := newHeaderCard(cardWidth, subs, opts); headerCardExists {
 		headerImage, err := headerCard.Render()
 		if err != nil {
 			return segments, err
 		}
-		cardWidth = common.Max(cardWidth, float64(headerImage.Bounds().Dx()))
 		segments.AddHeader(common.NewImageContent(common.Style{Width: cardWidth, Height: float64(headerImage.Bounds().Dy())}, headerImage))
 	}
 
@@ -141,7 +139,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	return segments, nil
 }
 
-func newHeaderCard(subscriptions []database.UserSubscription, options render.Options) (common.Block, bool) {
+func newHeaderCard(width float64, subscriptions []database.UserSubscription, options render.Options) (common.Block, bool) {
 	var cards []common.Block
 
 	var addPromoText = true
@@ -180,7 +178,7 @@ func newHeaderCard(subscriptions []database.UserSubscription, options render.Opt
 		return common.Block{}, false
 	}
 
-	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, JustifyContent: common.JustifyContentCenter, Gap: 10}, cards...), true
+	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, JustifyContent: common.JustifyContentCenter, Gap: 10, Width: width}, cards...), true
 }
 
 func newHighlightCard(style highlightStyle, card period.VehicleCard) common.Block {

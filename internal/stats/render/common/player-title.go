@@ -20,6 +20,7 @@ func (style TitleCardStyle) TotalPaddingAndGaps() float64 {
 func DefaultPlayerTitleStyle(containerStyle Style) TitleCardStyle {
 	containerStyle.AlignItems = AlignItemsCenter
 	containerStyle.Direction = DirectionHorizontal
+	// containerStyle.Debug = true
 
 	clanTagBackgroundColor := DefaultCardColor
 	clanTagBackgroundColor.R += 10
@@ -29,7 +30,7 @@ func DefaultPlayerTitleStyle(containerStyle Style) TitleCardStyle {
 	return TitleCardStyle{
 		Container: containerStyle,
 		Nickname:  Style{Font: &FontLarge, FontColor: TextPrimary},
-		ClanTag:   Style{Font: &FontMedium, FontColor: TextSecondary, PaddingX: 10, PaddingY: 5, BackgroundColor: clanTagBackgroundColor, BorderRadius: 10},
+		ClanTag:   Style{Font: &FontMedium, FontColor: TextSecondary, PaddingX: 10, PaddingY: 5, BackgroundColor: clanTagBackgroundColor, BorderRadius: 15},
 	}
 }
 
