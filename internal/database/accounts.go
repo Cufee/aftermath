@@ -140,3 +140,11 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []Account) map[str
 
 	return errors
 }
+
+func (c *client) AccountSetPrivate(ctx context.Context, id string, value bool) error {
+	_, err := c.prisma.Account.FindUnique(db.Account.ID.Equals(id)).Update(db.Account.Private.Set(value)).Exec(ctx)
+	if err != nil && !db.IsErrNotFound(err) {
+		return err
+	}
+	return nil
+}

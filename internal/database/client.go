@@ -13,6 +13,7 @@ type Client interface {
 	GetAccounts(ctx context.Context, ids []string) ([]Account, error)
 	GetRealmAccounts(ctx context.Context, realm string) ([]Account, error)
 	UpsertAccounts(ctx context.Context, accounts []Account) map[string]error
+	AccountSetPrivate(ctx context.Context, id string, value bool) error
 
 	GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error)
 	UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error
@@ -23,6 +24,8 @@ type Client interface {
 	GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
 	UpdateConnection(ctx context.Context, connection UserConnection) (UserConnection, error)
 	UpsertConnection(ctx context.Context, connection UserConnection) (UserConnection, error)
+
+	CreateAccountSnapshots(ctx context.Context, snapshots ...AccountSnapshot) error
 
 	CreateTasks(ctx context.Context, tasks ...Task) error
 	UpdateTasks(ctx context.Context, tasks ...Task) error
