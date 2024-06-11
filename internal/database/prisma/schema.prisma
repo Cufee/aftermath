@@ -208,7 +208,11 @@ model AccountSnapshot {
   accountId   String
   referenceId String
 
-  frameEncoded Bytes
+  ratingBattles      Int
+  ratingFrameEncoded Bytes
+
+  regularBattles      Int
+  regularFrameEncoded Bytes
 
   @@index([createdAt])
   @@index([accountId, lastBattleTime])

@@ -111,7 +111,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		return AccountStatsOverPeriod{}, vehicles.Err
 	}
 
-	stats := wargamingToStats(realm, account.Data, clan, vehicles.Data)
+	stats := WargamingToStats(realm, account.Data, clan, vehicles.Data)
 	if options.withWN8 {
 		stats.AddWN8(averages.Data)
 	}

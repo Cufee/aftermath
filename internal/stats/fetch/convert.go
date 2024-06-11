@@ -32,7 +32,7 @@ func wargamingToAccount(realm string, account types.ExtendedAccount, clan types.
 	return a
 }
 
-func wargamingToStats(realm string, accountData types.ExtendedAccount, clanMember types.ClanMember, vehicleData []types.VehicleStatsFrame) AccountStatsOverPeriod {
+func WargamingToStats(realm string, accountData types.ExtendedAccount, clanMember types.ClanMember, vehicleData []types.VehicleStatsFrame) AccountStatsOverPeriod {
 	stats := AccountStatsOverPeriod{
 		Realm: realm,
 		// we got the stats, so the account is obv not private at this point

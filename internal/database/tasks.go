@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"time"
 
@@ -81,18 +82,20 @@ func (t *Task) encodeTargets() []byte {
 	return []byte(strings.Join(t.Targets, ";"))
 }
 func (t *Task) decodeTargets(targets []byte) {
-	t.Targets = strings.Split(string(targets), ";")
+	if string(targets) != "" {
+		t.Targets = strings.Split(string(targets), ";")
+	}
 }
 
 func (t *Task) encodeLogs() []byte {
 	if t.Logs == nil {
 		return []byte{}
 	}
-	data, _ := encoding.EncodeGob(t.Logs)
+	data, _ := json.Marshal(t.Logs)
 	return data
 }
 func (t *Task) decodeLogs(logs []byte) {
-	_ = encoding.DecodeGob(logs, &t.Logs)
+	_ = json.Unmarshal(logs, &t.Logs)
 }
 
 func (t *Task) encodeData() []byte {

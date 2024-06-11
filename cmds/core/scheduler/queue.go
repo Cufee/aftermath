@@ -84,7 +84,7 @@ func (q *Queue) Process(callback func(error), tasks ...database.Task) {
 				Timestamp: time.Now(),
 			}
 
-			message, err := handler.Process(nil, t)
+			message, err := handler.Process(q.core, t)
 			attempt.Comment = message
 			if err != nil {
 				attempt.Error = err.Error()
