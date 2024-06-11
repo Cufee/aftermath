@@ -18,6 +18,9 @@ func MeasureString(text string, font font.Face) stringSize {
 	if font == nil {
 		return stringSize{}
 	}
+	if text == "" {
+		return stringSize{}
+	}
 
 	measureCtx := gg.NewContext(1, 1)
 	measureCtx.SetFontFace(font)
