@@ -65,6 +65,7 @@ func defaultCardStyle(width float64) common.Style {
 func titleCardStyle(width float64) common.Style {
 	style := defaultCardStyle(width)
 	style.PaddingX = style.PaddingY
+	// style.Debug = true
 	return style
 }
 

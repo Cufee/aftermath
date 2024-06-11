@@ -23,9 +23,9 @@ func DefaultPlayerTitleStyle(containerStyle Style) TitleCardStyle {
 	// containerStyle.Debug = true
 
 	clanTagBackgroundColor := DefaultCardColor
-	clanTagBackgroundColor.R += 10
-	clanTagBackgroundColor.G += 10
-	clanTagBackgroundColor.B += 10
+	clanTagBackgroundColor.R += 15
+	clanTagBackgroundColor.G += 15
+	clanTagBackgroundColor.B += 15
 
 	return TitleCardStyle{
 		Container: containerStyle,
