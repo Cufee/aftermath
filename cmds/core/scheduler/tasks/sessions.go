@@ -39,6 +39,7 @@ func init() {
 
 			log.Debug().Str("taskId", task.ID).Any("targets", task.Targets).Msg("started working on a session refresh task")
 
+			createdAt := time.Now()
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 			defer cancel()
 
@@ -64,7 +65,7 @@ func init() {
 					}(id)
 					continue
 				}
-				if data.LastBattleTime < int(time.Now().Add(time.Hour*-25).Unix()) {
+				if data.LastBattleTime < int(createdAt.Add(time.Hour*-25).Unix()) {
 					log.Debug().Str("accountId", id).Str("taskId", task.ID).Msg("account played no battles")
 					// if the last battle was played 25+ hours ago, there is nothing for us to update
 					continue
@@ -99,6 +100,7 @@ func init() {
 			var withErrors []string
 			var accountUpdates []database.Account
 			var snapshots []database.AccountSnapshot
+			var vehicleSnapshots []database.VehicleSnapshot
 			for result := range vehicleCh {
 				// there is only 1 key in this map
 				for id, vehicles := range result.Data {
@@ -124,19 +126,45 @@ func init() {
 
 					snapshots = append(snapshots, database.AccountSnapshot{
 						Type:           database.SnapshotTypeDaily,
-						CreatedAt:      time.Now(),
+						CreatedAt:      createdAt,
 						AccountID:      stats.Account.ID,
 						ReferenceID:    stats.Account.ID,
 						LastBattleTime: stats.LastBattleTime,
 						RatingBattles:  stats.RatingBattles.StatsFrame,
 						RegularBattles: stats.RegularBattles.StatsFrame,
 					})
+
+					if len(vehicles) < 1 {
+						continue
+					}
+					vehicleStats := fetch.WargamingVehiclesToFrame(vehicles)
+					for _, vehicle := range vehicleStats {
+						if vehicle.LastBattleTime.Before(createdAt.Add(time.Hour * -25)) {
+							log.Debug().Str("accountId", id).Str("taskId", task.ID).Msg("account played no battles")
+							// if the last battle was played 25+ hours ago, there is nothing for us to update
+							continue
+						}
+						vehicleSnapshots = append(vehicleSnapshots, database.VehicleSnapshot{
+							CreatedAt:      createdAt,
+							Type:           database.SnapshotTypeDaily,
+							LastBattleTime: vehicle.LastBattleTime,
+							AccountID:      stats.Account.ID,
+							VehicleID:      vehicle.VehicleID,
+							ReferenceID:    stats.Account.ID,
+							Stats:          *vehicle.StatsFrame,
+						})
+					}
 				}
 			}
 
 			err = client.Database().CreateAccountSnapshots(ctx, snapshots...)
 			if err != nil {
-				return "failed to save snapshots to database", err
+				return "failed to save account snapshots to database", err
+			}
+
+			err = client.Database().CreateVehicleSnapshots(ctx, vehicleSnapshots...)
+			if err != nil {
+				return "failed to save vehicle snapshots to database", err
 			}
 
 			if len(withErrors) == 0 {

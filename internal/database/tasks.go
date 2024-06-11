@@ -17,6 +17,8 @@ const (
 	TaskTypeRecordSessions           TaskType = "RECORD_ACCOUNT_SESSIONS"
 	TaskTypeUpdateAccountWN8         TaskType = "UPDATE_ACCOUNT_WN8"
 	TaskTypeRecordPlayerAchievements TaskType = "UPDATE_ACCOUNT_ACHIEVEMENTS"
+
+	TaskTypeDatabaseCleanup TaskType = "CLEANUP_DATABASE"
 )
 
 // Task statuses
@@ -124,6 +126,26 @@ func NewAttemptLog(task Task, comment, err string) TaskLog {
 		Comment:   comment,
 		Error:     err,
 	}
+}
+
+/*
+Returns up limit tasks that have TaskStatusInProgress and were last updates 1+ hours ago
+*/
+func (c *client) GetStaleTasks(ctx context.Context, limit int) ([]Task, error) {
+	models, err := c.prisma.CronTask.FindMany(db.CronTask.And(
+		db.CronTask.Status.Equals(string(TaskStatusInProgress)),
+		db.CronTask.UpdatedAt.Before(time.Now().Add(time.Hour*-1)),
+	)).OrderBy(db.CronTask.ScheduledAfter.Order(db.ASC)).Take(limit).Exec(ctx)
+	if err != nil && !db.IsErrNotFound(err) {
+		return nil, err
+	}
+
+	var tasks []Task
+	for _, model := range models {
+		tasks = append(tasks, Task{}.FromModel(model))
+	}
+
+	return tasks, nil
 }
 
 /*

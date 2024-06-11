@@ -6,8 +6,18 @@ import (
 
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/rs/zerolog/log"
 )
+
+func CreateCleanupTaskWorker(client core.Client) func() {
+	return func() {
+		err := tasks.CreateCleanupTasks(client)
+		if err != nil {
+			log.Err(err).Msg("failed to schedule a cleanup tasks")
+		}
+	}
+}
 
 func RotateBackgroundPresetsWorker(client core.Client) func() {
 	return func() {
@@ -66,10 +76,27 @@ func RunTasksWorker(queue *Queue) func() {
 
 func RestartTasksWorker(queue *Queue) func() {
 	return func() {
-		// _, err := tasks.RestartAbandonedTasks(nil)
-		// if err != nil {
-		// 	log.Err(err).Msg("failed to start scheduled tasks")
-		// 	return
-		// }
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		defer cancel()
+
+		staleTasks, err := queue.core.Database().GetStaleTasks(ctx, 100)
+		if err != nil {
+			log.Err(err).Msg("failed to reschedule stale tasks")
+		}
+
+		if len(staleTasks) < 1 {
+			return
+		}
+
+		now := time.Now()
+		for _, task := range staleTasks {
+			task.Status = database.TaskStatusScheduled
+			task.ScheduledAfter = now
+		}
+
+		err = queue.core.Database().UpdateTasks(ctx, staleTasks...)
+		if err != nil {
+			log.Err(err).Msg("failed to update stale tasks")
+		}
 	}
 }

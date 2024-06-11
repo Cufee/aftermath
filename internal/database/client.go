@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/cufee/aftermath/internal/database/prisma/db"
 	"github.com/cufee/aftermath/internal/stats/frame"
@@ -26,11 +27,16 @@ type Client interface {
 	UpsertConnection(ctx context.Context, connection UserConnection) (UserConnection, error)
 
 	CreateAccountSnapshots(ctx context.Context, snapshots ...AccountSnapshot) error
+	CreateVehicleSnapshots(ctx context.Context, snapshots ...VehicleSnapshot) error
 
 	CreateTasks(ctx context.Context, tasks ...Task) error
 	UpdateTasks(ctx context.Context, tasks ...Task) error
 	DeleteTasks(ctx context.Context, ids ...string) error
+	GetStaleTasks(ctx context.Context, limit int) ([]Task, error)
 	GetAndStartTasks(ctx context.Context, limit int) ([]Task, error)
+
+	DeleteExpiredTasks(ctx context.Context, expiration time.Time) error
+	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
 }
 
 var _ Client = &client{}
