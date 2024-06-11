@@ -6,12 +6,13 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
@@ -242,13 +243,8 @@ func (r *Router) sendInteractionReply(interaction discordgo.Interaction, state *
 
 	switch interaction.Type {
 	case discordgo.InteractionApplicationCommand:
-		if state.replied {
+		if state.replied || state.acked {
 			// We already replied to this interaction - edit the message
-			handler = func() error {
-				return r.restClient.UpdateInteractionResponse(interaction.AppID, interaction.Token, data)
-			}
-		} else if state.acked {
-			// We acked this interaction and an initial reply is pending - edit the message
 			handler = func() error {
 				return r.restClient.UpdateInteractionResponse(interaction.AppID, interaction.Token, data)
 			}
@@ -263,7 +259,7 @@ func (r *Router) sendInteractionReply(interaction discordgo.Interaction, state *
 
 	err := handler()
 	if err != nil {
-		log.Err(err).Any("data", data).Str("id", interaction.ID).Stack().Msg("failed to send an interaction response")
+		log.Err(err).Stack().Any("state", state).Any("data", data).Str("id", interaction.ID).Msg("failed to send an interaction response")
 		return
 	}
 	state.acked = true

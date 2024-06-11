@@ -2,9 +2,10 @@ package common
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
+
+	"github.com/pkg/errors"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/core"

@@ -2,10 +2,11 @@ package database
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"slices"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database/prisma/db"
 	"github.com/cufee/aftermath/internal/encoding"

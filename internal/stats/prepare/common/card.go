@@ -1,7 +1,7 @@
 package common
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/stats/frame"
 )

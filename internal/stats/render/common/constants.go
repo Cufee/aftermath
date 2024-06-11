@@ -1,8 +1,9 @@
 package common
 
 import (
-	"errors"
 	"image/color"
+
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	"golang.org/x/image/font"

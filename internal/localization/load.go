@@ -2,11 +2,12 @@ package localization
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/fs"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/files"
 	"golang.org/x/text/language"
