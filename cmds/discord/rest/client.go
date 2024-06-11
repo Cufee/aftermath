@@ -3,14 +3,15 @@ package rest
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
-	"strings"
+	"runtime/debug"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/internal/retry"
@@ -125,7 +126,9 @@ func (c *Client) do(req *http.Request, target any) error {
 				message = res.Status
 			}
 
-			return nil, errors.New("discord: " + strings.ToLower(message))
+			println(string(debug.Stack()))
+
+			return nil, errors.New("discord error: " + message)
 		}
 
 		if target != nil {

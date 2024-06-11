@@ -1,8 +1,9 @@
 package period
 
 import (
-	"errors"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/stats/fetch"
@@ -103,6 +104,8 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		if err != nil {
 			return segments, err
 		}
+
+		cardWidth = max(cardWidth, float64(footerImage.Bounds().Dx()))
 		segments.AddFooter(common.NewImageContent(common.Style{Width: cardWidth, Height: float64(footerImage.Bounds().Dy())}, footerImage))
 	}
 

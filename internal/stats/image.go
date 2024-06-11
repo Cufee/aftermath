@@ -1,10 +1,11 @@
 package stats
 
 import (
-	"errors"
 	"image"
 	"image/png"
 	"io"
+
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/stats/render/common"
 )

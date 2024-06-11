@@ -1,9 +1,10 @@
 package common
 
 import (
-	"errors"
 	"image/color"
 	"slices"
+
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/stats/render/assets"

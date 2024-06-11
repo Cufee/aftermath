@@ -1,8 +1,9 @@
 package render
 
 import (
-	"errors"
 	"image"
+
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/stats/render/common"
 )

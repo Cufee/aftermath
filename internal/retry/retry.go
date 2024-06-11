@@ -1,8 +1,9 @@
 package retry
 
 import (
-	"errors"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type DataWithErr[T any] struct {

@@ -2,10 +2,11 @@ package tasks
 
 import (
 	"context"
-	"errors"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/internal/database"

@@ -2,13 +2,13 @@ package tasks
 
 import (
 	"context"
-	"errors"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/internal/database"
 )
-
 
 func init() {
 	defaultHandlers[database.TaskTypeDatabaseCleanup] = TaskHandler{
@@ -26,17 +26,17 @@ func init() {
 				return "invalid expiration_tasks", errors.New("failed to cast expiration_tasks to time")
 			}
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
 			err := client.Database().DeleteExpiredTasks(ctx, taskExpiration)
 			if err != nil {
-			return 	"failed to delete expired tasks", err
+				return "failed to delete expired tasks", err
 			}
 
 			err = client.Database().DeleteExpiredSnapshots(ctx, snapshotExpiration)
 			if err != nil {
-			return 	"failed to delete expired snapshots", err
+				return "failed to delete expired snapshots", err
 			}
 
 			return "cleanup complete", nil
@@ -55,8 +55,8 @@ func CreateCleanupTasks(client core.Client) error {
 		ReferenceID:    "database_cleanup",
 		ScheduledAfter: now,
 		Data: map[string]any{
-			"expiration_snapshots":     now.Add(-1 * time.Hour * 24 * 90), // 90 days
-			"expiration_tasks": now.Add(-1 * time.Hour * 24 * 7), // 7 days
+			"expiration_snapshots": now.Add(-1 * time.Hour * 24 * 90), // 90 days
+			"expiration_tasks":     now.Add(-1 * time.Hour * 24 * 7),  // 7 days
 		},
 	}
 

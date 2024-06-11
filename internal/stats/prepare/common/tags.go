@@ -1,7 +1,7 @@
 package common
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 )
 
 type Tag string

@@ -2,10 +2,11 @@ package fetch
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"

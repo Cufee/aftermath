@@ -1,9 +1,10 @@
 package common
 
 import (
-	"errors"
 	"image"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
