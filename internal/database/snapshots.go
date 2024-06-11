@@ -10,7 +10,13 @@ import (
 	"github.com/steebchen/prisma-client-go/runtime/transaction"
 )
 
-// model AccountSnapshot {
+type snapshotType string
+
+const (
+	SnapshotTypeDaily snapshotType = "daily"
+)
+
+// model VehicleSnapshot {
 //   id        String   @id @default(cuid())
 //   createdAt DateTime
 
@@ -18,20 +24,47 @@ import (
 //   lastBattleTime DateTime
 
 //   accountId   String
+//   vehicleId   String
 //   referenceId String
 
 //   frameEncoded Bytes
 
 //   @@index([createdAt])
-//   @@index([accountId, lastBattleTime])
-//   @@map("account_snapshots")
+//   @@index([accountId, vehicleId, lastBattleTime])
+//   @@map("vehicle_snapshots")
 // }
 
-type snapshotType string
+type VehicleSnapshot struct {
+	ID        string
+	CreatedAt time.Time
 
-const (
-	SnapshotTypeDaily snapshotType = "daily"
-)
+	Type           snapshotType
+	LastBattleTime time.Time
+
+	AccountID   string
+	VehicleID   string
+	ReferenceID string
+
+	Stats frame.StatsFrame
+}
+
+func (s *VehicleSnapshot) FromModel(model db.VehicleSnapshotModel) error {
+	s.ID = model.ID
+	s.Type = snapshotType(model.Type)
+	s.CreatedAt = model.CreatedAt
+	s.LastBattleTime = model.LastBattleTime
+
+	s.AccountID = model.AccountID
+	s.VehicleID = model.VehicleID
+	s.ReferenceID = model.ReferenceID
+
+	stats, err := frame.DecodeStatsFrame(model.FrameEncoded)
+	if err != nil {
+		return err
+	}
+	s.Stats = stats
+	return nil
+}
 
 type AccountSnapshot struct {
 	ID             string
@@ -65,6 +98,36 @@ func (s *AccountSnapshot) FromModel(model db.AccountSnapshotModel) error {
 	s.RegularBattles = regular
 
 	return nil
+}
+
+func (c *client) CreateVehicleSnapshots(ctx context.Context, snapshots ...VehicleSnapshot) error {
+	if len(snapshots) < 1 {
+		return nil
+	}
+
+	var transactions []transaction.Transaction
+	for _, data := range snapshots {
+		encoded, err := data.Stats.Encode()
+		if err != nil {
+			log.Err(err).Str("accountId", data.AccountID).Str("vehicleId", data.VehicleID).Msg("failed to encode a stats frame for vehicle snapthsot")
+			continue
+		}
+
+		transactions = append(transactions, c.prisma.VehicleSnapshot.
+			CreateOne(
+				db.VehicleSnapshot.CreatedAt.Set(data.CreatedAt),
+				db.VehicleSnapshot.Type.Set(string(data.Type)),
+				db.VehicleSnapshot.LastBattleTime.Set(data.LastBattleTime),
+				db.VehicleSnapshot.AccountID.Set(data.AccountID),
+				db.VehicleSnapshot.VehicleID.Set(data.VehicleID),
+				db.VehicleSnapshot.ReferenceID.Set(data.ReferenceID),
+				db.VehicleSnapshot.Battles.Set(int(data.Stats.Battles)),
+				db.VehicleSnapshot.FrameEncoded.Set(encoded),
+			).Tx(),
+		)
+	}
+
+	return c.prisma.Prisma.Transaction(transactions...).Exec(ctx)
 }
 
 func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...AccountSnapshot) error {

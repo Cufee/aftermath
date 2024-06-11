@@ -38,11 +38,11 @@ func WargamingToStats(realm string, accountData types.ExtendedAccount, clanMembe
 		// we got the stats, so the account is obv not private at this point
 		Account: wargamingToAccount(realm, accountData, clanMember, false),
 		RegularBattles: StatsWithVehicles{
-			StatsFrame: wargamingToFrame(accountData.Statistics.All),
-			Vehicles:   wargamingVehiclesToFrame(vehicleData),
+			StatsFrame: WargamingToFrame(accountData.Statistics.All),
+			Vehicles:   WargamingVehiclesToFrame(vehicleData),
 		},
 		RatingBattles: StatsWithVehicles{
-			StatsFrame: wargamingToFrame(accountData.Statistics.Rating),
+			StatsFrame: WargamingToFrame(accountData.Statistics.Rating),
 			Vehicles:   make(map[string]frame.VehicleStatsFrame),
 		},
 		LastBattleTime: timestampToTime(accountData.LastBattleTime),
@@ -57,7 +57,7 @@ func WargamingToStats(realm string, accountData types.ExtendedAccount, clanMembe
 	return stats
 }
 
-func wargamingToFrame(wg types.StatsFrame) frame.StatsFrame {
+func WargamingToFrame(wg types.StatsFrame) frame.StatsFrame {
 	return frame.StatsFrame{
 		Battles:              frame.ValueInt(wg.Battles),
 		BattlesWon:           frame.ValueInt(wg.Wins),
@@ -75,12 +75,12 @@ func wargamingToFrame(wg types.StatsFrame) frame.StatsFrame {
 	}
 }
 
-func wargamingVehiclesToFrame(wg []types.VehicleStatsFrame) map[string]frame.VehicleStatsFrame {
+func WargamingVehiclesToFrame(wg []types.VehicleStatsFrame) map[string]frame.VehicleStatsFrame {
 	stats := make(map[string]frame.VehicleStatsFrame)
 
 	for _, record := range wg {
 		id := strconv.Itoa(record.TankID)
-		inner := wargamingToFrame(record.Stats)
+		inner := WargamingToFrame(record.Stats)
 		stats[id] = frame.VehicleStatsFrame{
 			VehicleID:      id,
 			StatsFrame:     &inner,

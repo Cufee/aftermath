@@ -231,6 +231,7 @@ model VehicleSnapshot {
   vehicleId   String
   referenceId String
 
+  battles      Int
   frameEncoded Bytes
 
   @@index([createdAt])
