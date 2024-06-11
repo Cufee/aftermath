@@ -93,7 +93,7 @@ func renderImages(images []image.Image, style Style) (image.Image, error) {
 		switch style.Direction {
 		case DirectionVertical:
 			if i > 0 {
-				posY += max(style.Gap, justifyOffsetY)
+				posY += justifyOffsetY + style.Gap
 			}
 			lastY = posY + targetHeight
 
@@ -107,7 +107,7 @@ func renderImages(images []image.Image, style Style) (image.Image, error) {
 			}
 		default: // DirectionHorizontal
 			if i > 0 {
-				posX += max(style.Gap, justifyOffsetX)
+				posX += justifyOffsetX + style.Gap
 			}
 			lastX = posX + targetWidth
 
@@ -138,6 +138,7 @@ type imageSize struct {
 	width  float64
 	height float64
 
+	totalGap float64
 	// The amount of extra spacing added to the image, used for alignment
 	extraSpacingX float64
 	extraSpacingY float64
@@ -192,6 +193,7 @@ func getDetailedSize(images []image.Image, style Style) imageSize {
 	return imageSize{
 		width:            imageWidth,
 		height:           imageHeight,
+		totalGap:         totalGap,
 		extraSpacingX:    extraSpacingX,
 		extraSpacingY:    extraSpacingY,
 		maxElementWidth:  maxWidth,

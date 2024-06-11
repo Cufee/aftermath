@@ -108,11 +108,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 
 	// Header card
 	if headerCard, headerCardExists := newHeaderCard(cardWidth, subs, opts); headerCardExists {
-		headerImage, err := headerCard.Render()
-		if err != nil {
-			return segments, err
-		}
-		segments.AddHeader(common.NewImageContent(common.Style{Width: cardWidth, Height: float64(headerImage.Bounds().Dy())}, headerImage))
+		segments.AddHeader(headerCard)
 	}
 
 	// Player Title card
