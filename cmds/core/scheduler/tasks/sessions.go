@@ -36,6 +36,7 @@ func init() {
 				task.Data["triesLeft"] = int(0) // do not retry
 				return "targed ids cannot be left blank", errors.New("invalid targets length")
 			}
+			forceUpdate, _ := task.Data["force"].(bool)
 
 			log.Debug().Str("taskId", task.ID).Any("targets", task.Targets).Msg("started working on a session refresh task")
 
@@ -65,9 +66,9 @@ func init() {
 					}(id)
 					continue
 				}
-				if data.LastBattleTime < int(createdAt.Add(time.Hour*-25).Unix()) {
-					log.Debug().Str("accountId", id).Str("taskId", task.ID).Msg("account played no battles")
+				if !forceUpdate && data.LastBattleTime < int(createdAt.Add(time.Hour*-25).Unix()) {
 					// if the last battle was played 25+ hours ago, there is nothing for us to update
+					log.Debug().Str("accountId", id).Str("taskId", task.ID).Msg("account played no battles")
 					continue
 				}
 				validAccouts = append(validAccouts, id)
@@ -133,15 +134,15 @@ func init() {
 						RatingBattles:  stats.RatingBattles.StatsFrame,
 						RegularBattles: stats.RegularBattles.StatsFrame,
 					})
-
 					if len(vehicles) < 1 {
 						continue
 					}
+
 					vehicleStats := fetch.WargamingVehiclesToFrame(vehicles)
 					for _, vehicle := range vehicleStats {
-						if vehicle.LastBattleTime.Before(createdAt.Add(time.Hour * -25)) {
-							log.Debug().Str("accountId", id).Str("taskId", task.ID).Msg("account played no battles")
+						if !forceUpdate && vehicle.LastBattleTime.Before(createdAt.Add(time.Hour*-25)) {
 							// if the last battle was played 25+ hours ago, there is nothing for us to update
+							log.Debug().Str("accountId", id).Str("vehicleId", vehicle.VehicleID).Str("taskId", task.ID).Msg("vehicle played no battles")
 							continue
 						}
 						vehicleSnapshots = append(vehicleSnapshots, database.VehicleSnapshot{

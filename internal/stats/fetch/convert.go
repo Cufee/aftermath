@@ -122,7 +122,7 @@ func blitzstarsToStats(vehicles map[string]frame.VehicleStatsFrame, histories ma
 		}
 
 		if selectedEntry.Stats.Battles < int(vehicle.Battles) {
-			selectedFrame := wargamingToFrame(selectedEntry.Stats)
+			selectedFrame := WargamingToFrame(selectedEntry.Stats)
 			vehicle.StatsFrame.Subtract(selectedFrame)
 
 			stats.Vehicles[vehicle.VehicleID] = vehicle
