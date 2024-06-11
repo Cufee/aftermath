@@ -2,6 +2,7 @@ package period
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/stats/fetch"
@@ -41,21 +42,24 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.V
 	}
 
 	// Vehicle Highlights
-	var minimumBattles int = 5
+	var minimumBattles float64 = 5
 	periodDays := stats.PeriodEnd.Sub(stats.PeriodStart).Hours() / 24
+	withFallback := func(battles float64) float64 {
+		return math.Min(battles, float64(stats.RegularBattles.Battles.Float())/float64(len(selectedHighlights)))
+	}
 	if periodDays > 90 {
-		minimumBattles = 100
+		minimumBattles = withFallback(100)
 	} else if periodDays > 60 {
-		minimumBattles = 75
+		minimumBattles = withFallback(75)
 	} else if periodDays > 30 {
-		minimumBattles = 50
+		minimumBattles = withFallback(50)
 	} else if periodDays > 14 {
-		minimumBattles = 25
+		minimumBattles = withFallback(25)
 	} else if periodDays > 7 {
-		minimumBattles = 10
+		minimumBattles = withFallback(10)
 	}
 
-	highlightedVehicles := getHighlightedVehicles(selectedHighlights, stats.RegularBattles.Vehicles, minimumBattles)
+	highlightedVehicles := getHighlightedVehicles(selectedHighlights, stats.RegularBattles.Vehicles, int(minimumBattles))
 	for _, data := range highlightedVehicles {
 		var vehicleBlocks []common.StatsBlock[BlockData]
 
