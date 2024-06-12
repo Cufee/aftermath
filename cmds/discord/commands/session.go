@@ -9,8 +9,10 @@ import (
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/stats"
 	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -61,6 +63,9 @@ func init() {
 
 				image, _, err := ctx.Core.Render(ctx.Locale).Session(context.Background(), accountID, options.PeriodStart, render.WithBackground(background))
 				if err != nil {
+					if errors.Is(err, stats.ErrAccountNotTracked) {
+						return ctx.Reply("session_error_account_was_not_tracked")
+					}
 					return ctx.Err(err)
 				}
 

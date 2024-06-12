@@ -70,9 +70,9 @@ func (s getSnapshotQuery) vehiclesQuery(accountID, referenceID string, kind snap
 	}
 
 	// Determine the order by clause
-	var orderBy string = "createdAt ASC"
-	if s.createdBefore != nil {
-		orderBy = "createdAt DESC"
+	var orderBy string = "createdAt DESC"
+	if s.createdAfter != nil {
+		orderBy = "createdAt ASC"
 	}
 
 	// Base query
@@ -103,17 +103,72 @@ func (s getSnapshotQuery) vehiclesQuery(accountID, referenceID string, kind snap
 	return query, args
 }
 
-func (s getSnapshotQuery) accountOrder() []db.AccountSnapshotOrderByParam {
-	var order []db.AccountSnapshotOrderByParam
+func (s getSnapshotQuery) manyAccountsQuery(accountIDs []string, kind snapshotType) (query string, params []interface{}) {
+	var conditions []string
+	var args []interface{}
 
-	switch {
-	case s.createdAfter != nil:
-		order = append(order, db.AccountSnapshot.CreatedAt.Order(db.ASC))
-	default:
-		order = append(order, db.AccountSnapshot.CreatedAt.Order(db.DESC))
+	// Mandatory conditions
+	conditions = append(conditions, "type = ?")
+	args = append(args, kind)
+
+	// Optional conditions
+	if s.createdAfter != nil {
+		conditions = append(conditions, "createdAt > ?")
+		args = append(args, *s.createdAfter)
+	}
+	if s.createdBefore != nil {
+		conditions = append(conditions, "createdAt < ?")
+		args = append(args, *s.createdBefore)
 	}
 
-	return order
+	// Filter by account IDs
+	placeholders := make([]string, len(accountIDs))
+	for i := range accountIDs {
+		placeholders[i] = "?"
+	}
+	conditions = append(conditions, fmt.Sprintf("accountId IN (%s)", strings.Join(placeholders, ",")))
+	for _, id := range accountIDs {
+		args = append(args, id)
+	}
+
+	// Determine the order by clause
+	var orderBy string = "createdAt DESC"
+	if s.createdAfter != nil {
+		orderBy = "createdAt ASC"
+	}
+
+	// Combine conditions into a single string
+	conditionsStr := strings.Join(conditions, " AND ")
+
+	// Base query
+	query = fmt.Sprintf(`
+			SELECT
+				id, createdAt, type, lastBattleTime, accountId, referenceId, ratingBattles, ratingFrameEncoded, regularBattles, regularFrameEncoded
+			FROM
+				account_snapshots
+			WHERE
+				%s
+			ORDER BY
+				%s
+		`, conditionsStr, orderBy)
+
+	// Wrap the query to select the latest snapshot per accountId
+	wrappedQuery := fmt.Sprintf(`
+			SELECT * FROM (
+				%s
+			) AS ordered_snapshots
+			GROUP BY accountId
+		`, query)
+
+	return wrappedQuery, args
+}
+
+func (s getSnapshotQuery) accountOrder() []db.AccountSnapshotOrderByParam {
+	order := db.DESC
+	if s.createdAfter != nil {
+		order = db.ASC
+	}
+	return []db.AccountSnapshotOrderByParam{db.AccountSnapshot.CreatedAt.Order(order)}
 }
 
 type SnapshotQuery func(*getSnapshotQuery)
@@ -310,4 +365,30 @@ func (c *client) GetAccountSnapshot(ctx context.Context, accountID, referenceID 
 	}
 
 	return AccountSnapshot{}.FromModel(model)
+}
+
+func (c *client) GetManyAccountSnapshots(ctx context.Context, accountIDs []string, kind snapshotType, options ...SnapshotQuery) ([]AccountSnapshot, error) {
+	var query getSnapshotQuery
+	for _, apply := range options {
+		apply(&query)
+	}
+
+	var models []db.AccountSnapshotModel
+	raw, args := query.manyAccountsQuery(accountIDs, kind)
+	err := c.prisma.Prisma.Raw.QueryRaw(raw, args...).Exec(ctx, &models)
+	if err != nil {
+		return nil, err
+	}
+
+	var snapshots []AccountSnapshot
+	for _, model := range models {
+		snapshot, err := AccountSnapshot{}.FromModel(&model)
+		if err != nil {
+			return nil, err
+		}
+		snapshots = append(snapshots, snapshot)
+	}
+
+	return snapshots, nil
+
 }

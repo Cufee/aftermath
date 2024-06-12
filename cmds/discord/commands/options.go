@@ -50,6 +50,7 @@ var defaultStatsOptions = append([]builder.Option{
 
 type statsOptions struct {
 	PeriodStart time.Time
+	Days        int
 	Server      string
 	Nickname    string
 	UserID      string
@@ -84,6 +85,7 @@ func getDefaultStatsOptions(ctx *common.Context) statsOptions {
 	options.UserID, _ = common.GetOption[string](ctx, "user")
 
 	if days, _ := common.GetOption[float64](ctx, "days"); days > 0 {
+		options.Days = int(days)
 		options.PeriodStart = time.Now().Add(time.Hour * 24 * time.Duration(days) * -1)
 	}
 

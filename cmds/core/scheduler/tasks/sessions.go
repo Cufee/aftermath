@@ -3,20 +3,15 @@ package tasks
 import (
 	"context"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/retry"
-	"github.com/cufee/aftermath/internal/stats/fetch"
-	"github.com/cufee/am-wg-proxy-next/v2/types"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/rs/zerolog/log"
 )
-
-type vehicleResponseData map[string][]types.VehicleStatsFrame
 
 func init() {
 	defaultHandlers[database.TaskTypeRecordSessions] = TaskHandler{
@@ -41,136 +36,23 @@ func init() {
 
 			log.Debug().Str("taskId", task.ID).Any("targets", task.Targets).Msg("started working on a session refresh task")
 
-			createdAt := time.Now()
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 			defer cancel()
 
-			accounts, err := client.Wargaming().BatchAccountByID(ctx, realm, task.Targets)
+			accountErrors, err := logic.RecordAccountSnapshots(ctx, client.Wargaming(), client.Database(), realm, forceUpdate, task.Targets...)
 			if err != nil {
-				return "failed to fetch accounts", err
+				return "failed to record sessions", err
 			}
 
-			// Make a new slice just in case some accounts were not returned/are private
-			var validAccouts []string
-			for _, id := range task.Targets {
-				data, ok := accounts[id]
-				if !ok {
-					go func(id string) {
-						log.Debug().Str("accountId", id).Str("taskId", task.ID).Msg("account is private")
-						// update account cache (if it exists) to set account as private
-						ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-						defer cancel()
-						err := client.Database().AccountSetPrivate(ctx, id, true)
-						if err != nil {
-							log.Err(err).Str("accountId", id).Msg("failed to set account status as private")
-						}
-					}(id)
-					continue
-				}
-				if !forceUpdate && data.LastBattleTime < int(createdAt.Add(time.Hour*-25).Unix()) {
-					// if the last battle was played 25+ hours ago, there is nothing for us to update
-					log.Debug().Str("accountId", id).Str("taskId", task.ID).Msg("account played no battles")
-					continue
-				}
-				validAccouts = append(validAccouts, id)
-			}
-
-			if len(validAccouts) == 0 {
-				return "no updates required due to last battle or private accounts status", nil
-			}
-
-			// clans are options-ish
-			clans, err := client.Wargaming().BatchAccountClan(ctx, realm, validAccouts)
-			if err != nil {
-				log.Err(err).Msg("failed to get batch account clans")
-				clans = make(map[string]types.ClanMember)
-			}
-
-			vehicleCh := make(chan retry.DataWithErr[vehicleResponseData], len(validAccouts))
-			var group sync.WaitGroup
-			group.Add(len(validAccouts))
-			for _, id := range validAccouts {
-				go func(id string) {
-					defer group.Done()
-					data, err := client.Wargaming().AccountVehicles(ctx, realm, id)
-					vehicleCh <- retry.DataWithErr[vehicleResponseData]{Data: vehicleResponseData{id: data}, Err: err}
-				}(id)
-			}
-			group.Wait()
-			close(vehicleCh)
-
-			var withErrors []string
-			var accountUpdates []database.Account
-			var snapshots []database.AccountSnapshot
-			var vehicleSnapshots []database.VehicleSnapshot
-			for result := range vehicleCh {
-				// there is only 1 key in this map
-				for id, vehicles := range result.Data {
-					if result.Err != nil {
-						withErrors = append(withErrors, id)
-						continue
-					}
-
-					stats := fetch.WargamingToStats(realm, accounts[id], clans[id], vehicles)
-					accountUpdates = append(accountUpdates, database.Account{
-						Realm:    stats.Realm,
-						ID:       stats.Account.ID,
-						Nickname: stats.Account.Nickname,
-
-						Private:        false,
-						CreatedAt:      stats.Account.CreatedAt,
-						LastBattleTime: stats.LastBattleTime,
-
-						ClanID:  stats.Account.ClanID,
-						ClanTag: stats.Account.ClanTag,
-					})
-					snapshots = append(snapshots, database.AccountSnapshot{
-						Type:           database.SnapshotTypeDaily,
-						CreatedAt:      createdAt,
-						AccountID:      stats.Account.ID,
-						ReferenceID:    stats.Account.ID,
-						LastBattleTime: stats.LastBattleTime,
-						RatingBattles:  stats.RatingBattles.StatsFrame,
-						RegularBattles: stats.RegularBattles.StatsFrame,
-					})
-
-					if len(vehicles) < 1 {
-						continue
-					}
-					vehicleStats := fetch.WargamingVehiclesToFrame(vehicles)
-					for _, vehicle := range vehicleStats {
-						if vehicle.LastBattleTime.IsZero() {
-							continue
-						}
-						vehicleSnapshots = append(vehicleSnapshots, database.VehicleSnapshot{
-							CreatedAt:      createdAt,
-							Type:           database.SnapshotTypeDaily,
-							LastBattleTime: vehicle.LastBattleTime,
-							AccountID:      stats.Account.ID,
-							VehicleID:      vehicle.VehicleID,
-							ReferenceID:    stats.Account.ID,
-							Stats:          *vehicle.StatsFrame,
-						})
-					}
-				}
-			}
-
-			err = client.Database().CreateAccountSnapshots(ctx, snapshots...)
-			if err != nil {
-				return "failed to save account snapshots to database", err
-			}
-
-			err = client.Database().CreateVehicleSnapshots(ctx, vehicleSnapshots...)
-			if err != nil {
-				return "failed to save vehicle snapshots to database", err
-			}
-
-			if len(withErrors) == 0 {
+			if len(accountErrors) == 0 {
 				return "finished session update on all accounts", nil
 			}
 
 			// Retry failed accounts
-			task.Targets = withErrors
+			task.Targets = make([]string, len(accountErrors))
+			for id := range accountErrors {
+				task.Targets = append(task.Targets, id)
+			}
 			return "retrying failed accounts", errors.New("some accounts failed")
 		},
 		ShouldRetry: func(task *database.Task) bool {

@@ -53,6 +53,51 @@ func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string) 
 }
 
 /*
+Gets account info from wg and updates cache
+*/
+func (c *multiSourceClient) Account(ctx context.Context, id string) (database.Account, error) {
+	realm := c.wargaming.RealmFromAccountID(id)
+
+	var group sync.WaitGroup
+	group.Add(2)
+
+	var clan types.ClanMember
+	var wgAccount retry.DataWithErr[types.ExtendedAccount]
+
+	go func() {
+		defer group.Done()
+
+		wgAccount = retry.Retry(func() (types.ExtendedAccount, error) {
+			return c.wargaming.AccountByID(ctx, realm, id)
+		}, c.retriesPerRequest, c.retrySleepInterval)
+	}()
+	go func() {
+		defer group.Done()
+		// we should not retry this request since it is not critical and will fail on accounts without a clan
+		clan, _ = c.wargaming.AccountClan(ctx, realm, id)
+	}()
+
+	group.Wait()
+
+	if wgAccount.Err != nil {
+		return database.Account{}, wgAccount.Err
+	}
+
+	account := wargamingToAccount(realm, wgAccount.Data, clan, false)
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		errMap := c.database.UpsertAccounts(ctx, []database.Account{account})
+		if err := errMap[id]; err != nil {
+			log.Err(err).Msg("failed to update account cache")
+		}
+	}()
+
+	return account, nil
+}
+
+/*
 Get live account stats from wargaming
   - Each request will be retried c.retriesPerRequest times
   - This function will assume the player ID is valid and optimistically run all request concurrently, returning the first error once all request finish
@@ -224,8 +269,20 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	for _, apply := range opts {
 		apply(&options)
 	}
+
+	// sessions and period stats are tracked differenttly
+	// we look up the latest session _before_ sessionBefore, not after sessionStart
 	if sessionStart.IsZero() {
-		sessionStart = time.Now().Add(time.Hour * 25 * -1)
+		sessionStart = time.Now()
+	}
+	if days := time.Since(sessionStart).Hours() / 24; days > 90 {
+		return AccountStatsOverPeriod{}, ErrInvalidSessionStart
+	}
+
+	sessionBefore := sessionStart
+	if time.Since(sessionStart).Hours() >= 24 {
+		// 3 days would mean today and yest, so before the reset 2 days ago and so on
+		sessionBefore = sessionBefore.Add(time.Hour * 24 * -1)
 	}
 
 	var accountSnapshot retry.DataWithErr[database.AccountSnapshot]
@@ -253,31 +310,12 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
 	}()
 
-	// return career stats if stats are requested for 0 or 90+ days, we do not track that far
-	if days := time.Since(sessionStart).Hours() / 24; days > 90 || days < 1 {
-		group.Wait()
-		if current.Err != nil {
-			return AccountStatsOverPeriod{}, current.Err
-		}
-		if averages.Err != nil {
-			// not critical, this will only affect WN8
-			log.Err(averages.Err).Msg("failed to get tank averages")
-		}
-
-		stats := current.Data
-		if options.withWN8 {
-			stats.AddWN8(averages.Data)
-		}
-		return stats, nil
-	}
-
 	group.Add(1)
 	go func() {
 		defer group.Done()
-		s, err := c.database.GetAccountSnapshot(ctx, id, id, database.SnapshotTypeDaily, database.WithCreatedAfter(sessionStart))
+		s, err := c.database.GetAccountSnapshot(ctx, id, id, database.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
 		accountSnapshot = retry.DataWithErr[database.AccountSnapshot]{Data: s, Err: err}
-
-		v, err := c.database.GetVehicleSnapshots(ctx, id, id, database.SnapshotTypeDaily, database.WithCreatedAfter(sessionStart))
+		v, err := c.database.GetVehicleSnapshots(ctx, id, id, database.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
 		vehiclesSnapshots = retry.DataWithErr[[]database.VehicleSnapshot]{Data: v, Err: err}
 	}()
 
@@ -287,17 +325,10 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		return AccountStatsOverPeriod{}, current.Err
 	}
 	if accountSnapshot.Err != nil {
-		if !db.IsErrNotFound(accountSnapshot.Err) {
-			return AccountStatsOverPeriod{}, accountSnapshot.Err
+		if db.IsErrNotFound(accountSnapshot.Err) {
+			return AccountStatsOverPeriod{}, ErrSessionNotFound
 		}
-		// if there is no snapshot, we just return 0 battles
-		stats := current.Data
-		stats.PeriodEnd = time.Now()
-		stats.PeriodStart = sessionStart
-		stats.RatingBattles.StatsFrame = frame.StatsFrame{}
-		stats.RegularBattles.StatsFrame = frame.StatsFrame{}
-		stats.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, 0)
-		return stats, nil
+		return AccountStatsOverPeriod{}, accountSnapshot.Err
 	}
 	if averages.Err != nil {
 		// not critical, this will only affect WN8
