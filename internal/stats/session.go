@@ -19,7 +19,7 @@ import (
 func (r *renderer) Session(ctx context.Context, accountId string, from time.Time, opts ...options.Option) (Image, Metadata, error) {
 	meta := Metadata{}
 	stop := meta.Timer("database#GetAccountByID")
-	_, err := r.database.GetAccountByID(ctx, accountId)
+	account, err := r.database.GetAccountByID(ctx, accountId)
 	stop()
 	if err != nil {
 		if db.IsErrNotFound(err) {
@@ -56,17 +56,16 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 		// the error will be checked below
 	}
 	if errors.Is(err, fetch.ErrSessionNotFound) {
-		// Get account info and return a blank session
-		current, err := r.fetchClient.CurrentStats(ctx, accountId)
-		if err != nil {
-			return nil, meta, err
+		// blank session
+		err = nil
+		stats = fetch.AccountStatsOverPeriod{
+			Account:        account,
+			LastBattleTime: account.LastBattleTime,
+			PeriodStart:    time.Now(),
+			PeriodEnd:      time.Now(),
 		}
-		current.PeriodEnd = time.Now()
-		current.PeriodStart = current.PeriodEnd
-		current.RatingBattles = fetch.StatsWithVehicles{}
-		current.RegularBattles = fetch.StatsWithVehicles{}
-		stats = current
 	}
+
 	if err != nil {
 		return nil, meta, err
 	}
