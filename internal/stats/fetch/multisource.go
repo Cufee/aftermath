@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/prisma/db"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/retry"
@@ -111,6 +112,10 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 	if vehicles.Err != nil {
 		return AccountStatsOverPeriod{}, vehicles.Err
 	}
+	if averages.Err != nil {
+		// not critical, this will only affect WN8
+		log.Err(averages.Err).Msg("failed to get tank averages")
+	}
 
 	stats := WargamingToStats(realm, account.Data, clan, vehicles.Data)
 	if options.withWN8 {
@@ -169,6 +174,10 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 		if current.Err != nil {
 			return AccountStatsOverPeriod{}, current.Err
 		}
+		if averages.Err != nil {
+			// not critical, this will only affect WN8
+			log.Err(averages.Err).Msg("failed to get tank averages")
+		}
 
 		stats := current.Data
 		if options.withWN8 {
@@ -193,6 +202,10 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	if histories.Err != nil {
 		return AccountStatsOverPeriod{}, histories.Err
 	}
+	if averages.Err != nil {
+		// not critical, this will only affect WN8
+		log.Err(averages.Err).Msg("failed to get tank averages")
+	}
 
 	current.Data.PeriodEnd = time.Now()
 	current.Data.PeriodStart = periodStart
@@ -204,6 +217,125 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 		stats.AddWN8(averages.Data)
 	}
 	return stats, nil
+}
+
+func (c *multiSourceClient) SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...statsOption) (AccountStatsOverPeriod, error) {
+	var options statsOptions
+	for _, apply := range opts {
+		apply(&options)
+	}
+	if sessionStart.IsZero() {
+		sessionStart = time.Now().Add(time.Hour * 25 * -1)
+	}
+
+	var accountSnapshot retry.DataWithErr[database.AccountSnapshot]
+	var vehiclesSnapshots retry.DataWithErr[[]database.VehicleSnapshot]
+	var averages retry.DataWithErr[map[string]frame.StatsFrame]
+	var current retry.DataWithErr[AccountStatsOverPeriod]
+
+	var group sync.WaitGroup
+	group.Add(1)
+	go func() {
+		defer group.Done()
+
+		stats, err := c.CurrentStats(ctx, id)
+		current = retry.DataWithErr[AccountStatsOverPeriod]{Data: stats, Err: err}
+
+		if err != nil || stats.RegularBattles.Battles < 1 || !options.withWN8 {
+			return
+		}
+
+		var ids []string
+		for id := range stats.RegularBattles.Vehicles {
+			ids = append(ids, id)
+		}
+		a, err := c.database.GetVehicleAverages(ctx, ids)
+		averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
+	}()
+
+	// return career stats if stats are requested for 0 or 90+ days, we do not track that far
+	if days := time.Since(sessionStart).Hours() / 24; days > 90 || days < 1 {
+		group.Wait()
+		if current.Err != nil {
+			return AccountStatsOverPeriod{}, current.Err
+		}
+		if averages.Err != nil {
+			// not critical, this will only affect WN8
+			log.Err(averages.Err).Msg("failed to get tank averages")
+		}
+
+		stats := current.Data
+		if options.withWN8 {
+			stats.AddWN8(averages.Data)
+		}
+		return stats, nil
+	}
+
+	group.Add(1)
+	go func() {
+		defer group.Done()
+		s, err := c.database.GetAccountSnapshot(ctx, id, id, database.SnapshotTypeDaily, database.WithCreatedAfter(sessionStart))
+		accountSnapshot = retry.DataWithErr[database.AccountSnapshot]{Data: s, Err: err}
+
+		v, err := c.database.GetVehicleSnapshots(ctx, id, id, database.SnapshotTypeDaily, database.WithCreatedAfter(sessionStart))
+		vehiclesSnapshots = retry.DataWithErr[[]database.VehicleSnapshot]{Data: v, Err: err}
+	}()
+
+	// wait for all requests to finish and check errors
+	group.Wait()
+	if current.Err != nil {
+		return AccountStatsOverPeriod{}, current.Err
+	}
+	if accountSnapshot.Err != nil {
+		if !db.IsErrNotFound(accountSnapshot.Err) {
+			return AccountStatsOverPeriod{}, accountSnapshot.Err
+		}
+		// if there is no snapshot, we just return 0 battles
+		stats := current.Data
+		stats.PeriodEnd = time.Now()
+		stats.PeriodStart = sessionStart
+		stats.RatingBattles.StatsFrame = frame.StatsFrame{}
+		stats.RegularBattles.StatsFrame = frame.StatsFrame{}
+		stats.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, 0)
+		return stats, nil
+	}
+	if averages.Err != nil {
+		// not critical, this will only affect WN8
+		log.Err(averages.Err).Msg("failed to get tank averages")
+	}
+
+	stats := current.Data
+	stats.PeriodEnd = time.Now()
+	stats.PeriodStart = sessionStart
+	stats.RatingBattles.StatsFrame.Subtract(accountSnapshot.Data.RatingBattles)
+	stats.RegularBattles.StatsFrame.Subtract(accountSnapshot.Data.RegularBattles)
+
+	snapshotsMap := make(map[string]int, len(vehiclesSnapshots.Data))
+	for i, data := range vehiclesSnapshots.Data {
+		snapshotsMap[data.VehicleID] = i
+	}
+
+	stats.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, len(current.Data.RegularBattles.Vehicles))
+	for id, current := range current.Data.RegularBattles.Vehicles {
+		snapshotIndex, exists := snapshotsMap[id]
+		if !exists {
+			stats.RegularBattles.Vehicles[id] = current
+			continue
+		}
+
+		snapshot := vehiclesSnapshots.Data[snapshotIndex]
+		if current.Battles == 0 || current.Battles == snapshot.Stats.Battles {
+			continue
+		}
+		current.StatsFrame.Subtract(snapshot.Stats)
+		stats.RegularBattles.Vehicles[id] = current
+	}
+
+	if options.withWN8 {
+		stats.AddWN8(averages.Data)
+	}
+	return stats, nil
+
 }
 
 func (c *multiSourceClient) CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error) {

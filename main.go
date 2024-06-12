@@ -92,7 +92,7 @@ func startSchedulerFromEnvAsync() {
 	queue.StartCronJobsAsync()
 	// Some tasks should run on startup
 	// scheduler.UpdateAveragesWorker(coreClient)()
-	// scheduler.CreateSessionTasksWorker(coreClient, "NA")()
+	// scheduler.CreateSessionTasksWorker(coreClient, "AS")()
 }
 
 func coreClientFromEnv() core.Client {

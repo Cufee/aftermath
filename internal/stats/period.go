@@ -5,20 +5,12 @@ import (
 	"slices"
 	"time"
 
-	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats/fetch"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period"
 	options "github.com/cufee/aftermath/internal/stats/render"
 	render "github.com/cufee/aftermath/internal/stats/render/period"
-	"golang.org/x/text/language"
 )
-
-type renderer struct {
-	fetchClient fetch.Client
-	database    database.Client
-	locale      language.Tag
-}
 
 func (r *renderer) Period(ctx context.Context, accountId string, from time.Time, opts ...options.Option) (Image, Metadata, error) {
 	meta := Metadata{}

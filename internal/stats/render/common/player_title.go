@@ -14,7 +14,7 @@ type TitleCardStyle struct {
 }
 
 func (style TitleCardStyle) TotalPaddingAndGaps() float64 {
-	return style.Container.PaddingX*2 + style.Container.Gap + style.Nickname.PaddingX*2 + style.ClanTag.PaddingX*2
+	return style.Container.PaddingX*2 + style.Container.Gap*2 + style.Nickname.PaddingX*2 + style.ClanTag.PaddingX*2
 }
 
 func DefaultPlayerTitleStyle(containerStyle Style) TitleCardStyle {

@@ -8,7 +8,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
-	"runtime/debug"
 	"time"
 
 	"github.com/pkg/errors"
@@ -120,13 +119,18 @@ func (c *Client) do(req *http.Request, target any) error {
 
 		if res.StatusCode > 299 {
 			var body discordgo.APIErrorMessage
-			_ = json.NewDecoder(res.Body).Decode(&body)
+			data, err := io.ReadAll(res.Body)
+			if err != nil {
+				return nil, fmt.Errorf("failed to read body: %w", err)
+			}
+
+			_ = json.Unmarshal(data, &body)
 			message := body.Message
 			if message == "" {
 				message = res.Status
 			}
 
-			println(string(debug.Stack()))
+			println(string(data))
 
 			return nil, errors.New("discord error: " + message)
 		}
