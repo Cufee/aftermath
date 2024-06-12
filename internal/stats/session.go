@@ -59,10 +59,11 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 		// blank session
 		err = nil
 		stats = fetch.AccountStatsOverPeriod{
+			Realm:          account.Realm,
 			Account:        account,
-			LastBattleTime: account.LastBattleTime,
-			PeriodStart:    time.Now(),
 			PeriodEnd:      time.Now(),
+			PeriodStart:    time.Now(),
+			LastBattleTime: account.LastBattleTime,
 		}
 	}
 
