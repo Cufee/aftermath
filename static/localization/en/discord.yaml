@@ -131,6 +131,10 @@
   value: "I was not able to find a player named **%s** on **%s**. Was the name spelled correctly?"
   context: Invalid Blitz username provided
 
+- key: session_error_account_was_not_tracked
+  value: "Aftermath just started tracking this account. Please play a few battles before using this command again."
+  context: We were not tracking this account, but successfully started tracking it just now
+
 # /background errors
 - key: background_error_payment_required
   value: "This feature of Aftermath is only available for users with an active subscription.\nYou can subscribe by using the `/subscribe` command or pick a background using `/fancy` instead."
@@ -152,7 +156,7 @@
 - key: replay_error_missing_attachment
   value: "You need to provide a link or attach a WoT Blitz replay file."
   context: Invalid file attached
-  
+
   # /link errors
 - key: link_error_missing_input
   value: "I need both the nickname and server to find your account."
@@ -162,7 +166,7 @@
 - key: verify_error_missing_server
   value: "Please select a server your account is registered on."
   context: Server not selected
-  
+
   # Wargaming specific errors
 - key: wargaming_error_private_account
   value: "This account is marked private by Wargaming and no stats are available for it at this time."

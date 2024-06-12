@@ -215,6 +215,7 @@ model AccountSnapshot {
   regularFrameEncoded Bytes
 
   @@index([createdAt])
+  @@index([type, accountId, createdAt])
   @@index([type, accountId, referenceId])
   @@index([type, accountId, referenceId, createdAt])
   @@map("account_snapshots")

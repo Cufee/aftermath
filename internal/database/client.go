@@ -30,6 +30,7 @@ type Client interface {
 
 	CreateAccountSnapshots(ctx context.Context, snapshots ...AccountSnapshot) error
 	GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind snapshotType, options ...SnapshotQuery) (AccountSnapshot, error)
+	GetManyAccountSnapshots(ctx context.Context, accountIDs []string, kind snapshotType, options ...SnapshotQuery) ([]AccountSnapshot, error)
 	CreateVehicleSnapshots(ctx context.Context, snapshots ...VehicleSnapshot) error
 	GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind snapshotType, options ...SnapshotQuery) ([]VehicleSnapshot, error)
 

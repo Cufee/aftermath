@@ -47,6 +47,7 @@ type StatsWithVehicles struct {
 }
 
 type Client interface {
+	Account(ctx context.Context, id string) (database.Account, error)
 	Search(ctx context.Context, nickname, realm string) (types.Account, error)
 	CurrentStats(ctx context.Context, id string, opts ...statsOption) (AccountStatsOverPeriod, error)
 
