@@ -25,6 +25,8 @@ type Option struct {
 	maxLength int
 
 	choices []OptionChoice
+
+	options []Option
 }
 
 func NewOption(name string, kind discordgo.ApplicationCommandOptionType) Option {
@@ -66,6 +68,11 @@ func (o Option) Params(params ...Param) Option {
 	for _, apply := range params {
 		apply(&o.params)
 	}
+	return o
+}
+
+func (o Option) Options(options ...Option) Option {
+	o.options = append(o.options, options...)
 	return o
 }
 

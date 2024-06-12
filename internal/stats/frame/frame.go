@@ -207,6 +207,15 @@ func (r *StatsFrame) Add(other StatsFrame) {
 	r.EnemiesSpotted += other.EnemiesSpotted
 	r.CapturePoints += other.CapturePoints
 	r.DroppedCapturePoints += other.DroppedCapturePoints
+
+	// Reset cache
+	r.wn8 = 0
+	r.winRate = 0
+	r.accuracy = 0
+	r.avgDamage = 0
+	r.damageRatio = 0
+	r.survivalRatio = 0
+	r.survivalPercent = 0
 }
 
 /*
@@ -230,6 +239,15 @@ func (r *StatsFrame) Subtract(other StatsFrame) {
 	r.EnemiesSpotted -= other.EnemiesSpotted
 	r.CapturePoints -= other.CapturePoints
 	r.DroppedCapturePoints -= other.DroppedCapturePoints
+
+	// Reset cache
+	r.wn8 = 0
+	r.winRate = 0
+	r.accuracy = 0
+	r.avgDamage = 0
+	r.damageRatio = 0
+	r.survivalRatio = 0
+	r.survivalPercent = 0
 }
 
 /*

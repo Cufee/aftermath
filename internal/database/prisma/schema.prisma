@@ -215,7 +215,8 @@ model AccountSnapshot {
   regularFrameEncoded Bytes
 
   @@index([createdAt])
-  @@index([accountId, lastBattleTime])
+  @@index([type, accountId, referenceId])
+  @@index([type, accountId, referenceId, createdAt])
   @@map("account_snapshots")
 }
 
@@ -235,21 +236,27 @@ model VehicleSnapshot {
   frameEncoded Bytes
 
   @@index([createdAt])
-  @@index([accountId, vehicleId, lastBattleTime])
+  @@index([vehicleId, createdAt])
+  @@index([accountId, referenceId])
+  @@index([accountId, referenceId, vehicleId])
+  @@index([accountId, referenceId, type])
+  @@index([accountId, referenceId, createdAt])
   @@map("vehicle_snapshots")
 }
 
 // A snapshot of all account achievements
 model AchievementsSnapshot {
   id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime
 
   accountId   String
   referenceId String
 
   dataEncoded Bytes
 
+  @@index([createdAt])
+  @@index([accountId, referenceId])
+  @@index([accountId, referenceId, createdAt])
   @@map("achievements_snapshots")
 }
 
@@ -257,7 +264,6 @@ model AchievementsSnapshot {
 // model AccountRatingSeasonSnapshot {
 //   id        String   @id @default(cuid())
 //   createdAt DateTime
-//   updatedAt DateTime @updatedAt
 
 //   seasonId       String
 //   accountId      String

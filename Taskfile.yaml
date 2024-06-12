@@ -8,6 +8,19 @@ vars:
   PRISMA_SCHEMA: --schema ./internal/database/prisma/schema.prisma
 
 tasks:
+  test:
+    desc: runs tests
+    env:
+      DATABASE_URL: "file:{{.USER_WORKING_DIR}}/tmp/local_test.db"
+    cmds:
+      - go run {{ .PRISMA_CLIENT }} db push {{ .PRISMA_SCHEMA }}
+      - |
+        if [ -z "{{ .CLI_ARGS }}" ]; then
+          go test -timeout 30s --count=1 -v ./...
+        else
+          go test -timeout 30s --count=1 -v -run {{ .CLI_ARGS }}
+        fi
+
   prisma-install:
     desc: installs the correct version of prisma
     cmd: go get {{ .PRISMA_CLIENT }}
@@ -18,19 +31,19 @@ tasks:
 
   db-push:
     desc: sync the database with the schema for development
-    cmd: go run {{ .PRISMA_CLIENT }} db push {{ .PRISMA_SCHEMA }} 
+    cmd: go run {{ .PRISMA_CLIENT }} db push {{ .PRISMA_SCHEMA }}
 
   db-generate:
     desc: re-generate the Go client
-    cmd: go run {{ .PRISMA_CLIENT }} generate {{ .PRISMA_SCHEMA }} 
+    cmd: go run {{ .PRISMA_CLIENT }} generate {{ .PRISMA_SCHEMA }}
 
   db-migrate-dev:
     desc: for production use, create a migration locally
-    cmd: go run {{ .PRISMA_CLIENT }} migrate dev {{ .PRISMA_SCHEMA }} 
+    cmd: go run {{ .PRISMA_CLIENT }} migrate dev {{ .PRISMA_SCHEMA }}
 
   db-migrate-deploy:
     desc: sync production database with migrations
-    cmd: go run {{ .PRISMA_CLIENT }} migrate deploy {{ .PRISMA_SCHEMA }} 
+    cmd: go run {{ .PRISMA_CLIENT }} migrate deploy {{ .PRISMA_SCHEMA }}
 
   dev:
     desc: Start a local dev server

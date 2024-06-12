@@ -12,11 +12,17 @@ import (
 
 var _ Renderer = &renderer{}
 
+type renderer struct {
+	fetchClient fetch.Client
+	database    database.Client
+	locale      language.Tag
+}
+
 type Renderer interface {
 	Period(ctx context.Context, accountId string, from time.Time, opts ...render.Option) (Image, Metadata, error)
+	Session(ctx context.Context, accountId string, from time.Time, opts ...render.Option) (Image, Metadata, error)
 
 	// Replay(accountId string, from time.Time) (image.Image, error)
-	// Session(accountId string, from time.Time) (image.Image, error)
 }
 
 func NewRenderer(fetch fetch.Client, database database.Client, locale language.Tag) *renderer {

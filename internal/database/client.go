@@ -9,6 +9,8 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
+var _ Client = &client{}
+
 type Client interface {
 	GetAccountByID(ctx context.Context, id string) (Account, error)
 	GetAccounts(ctx context.Context, ids []string) ([]Account, error)
@@ -27,7 +29,9 @@ type Client interface {
 	UpsertConnection(ctx context.Context, connection UserConnection) (UserConnection, error)
 
 	CreateAccountSnapshots(ctx context.Context, snapshots ...AccountSnapshot) error
+	GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind snapshotType, options ...SnapshotQuery) (AccountSnapshot, error)
 	CreateVehicleSnapshots(ctx context.Context, snapshots ...VehicleSnapshot) error
+	GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind snapshotType, options ...SnapshotQuery) ([]VehicleSnapshot, error)
 
 	CreateTasks(ctx context.Context, tasks ...Task) error
 	UpdateTasks(ctx context.Context, tasks ...Task) error
@@ -38,8 +42,6 @@ type Client interface {
 	DeleteExpiredTasks(ctx context.Context, expiration time.Time) error
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
 }
-
-var _ Client = &client{}
 
 type client struct {
 	prisma *db.PrismaClient

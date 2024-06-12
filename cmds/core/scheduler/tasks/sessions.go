@@ -112,7 +112,6 @@ func init() {
 					}
 
 					stats := fetch.WargamingToStats(realm, accounts[id], clans[id], vehicles)
-
 					accountUpdates = append(accountUpdates, database.Account{
 						Realm:    stats.Realm,
 						ID:       stats.Account.ID,
@@ -125,7 +124,6 @@ func init() {
 						ClanID:  stats.Account.ClanID,
 						ClanTag: stats.Account.ClanTag,
 					})
-
 					snapshots = append(snapshots, database.AccountSnapshot{
 						Type:           database.SnapshotTypeDaily,
 						CreatedAt:      createdAt,
@@ -135,15 +133,13 @@ func init() {
 						RatingBattles:  stats.RatingBattles.StatsFrame,
 						RegularBattles: stats.RegularBattles.StatsFrame,
 					})
+
 					if len(vehicles) < 1 {
 						continue
 					}
-
 					vehicleStats := fetch.WargamingVehiclesToFrame(vehicles)
 					for _, vehicle := range vehicleStats {
-						if !forceUpdate && vehicle.LastBattleTime.Before(createdAt.Add(time.Hour*-25)) {
-							// if the last battle was played 25+ hours ago, there is nothing for us to update
-							log.Debug().Str("accountId", id).Str("vehicleId", vehicle.VehicleID).Str("taskId", task.ID).Msg("vehicle played no battles")
+						if vehicle.LastBattleTime.IsZero() {
 							continue
 						}
 						vehicleSnapshots = append(vehicleSnapshots, database.VehicleSnapshot{
