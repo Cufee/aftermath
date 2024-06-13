@@ -2,7 +2,6 @@ package commands
 
 import (
 	"encoding/json"
-	"os"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
@@ -15,8 +14,8 @@ import (
 func init() {
 	Loaded.add(
 		builder.NewCommand("manage").
-			ExclusiveToGuilds(os.Getenv("DISCORD_PRIMARY_GUILD_ID")).
-			Middleware(middleware.RequirePermissions(permissions.GlobalAdmin)).
+			// ExclusiveToGuilds(os.Getenv("DISCORD_PRIMARY_GUILD_ID")).
+			Middleware(middleware.RequirePermissions(permissions.ContentModerator)).
 			Options(
 				builder.NewOption("users", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
 					builder.NewOption("lookup", discordgo.ApplicationCommandOptionSubCommand).Options(
