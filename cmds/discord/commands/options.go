@@ -39,13 +39,15 @@ var nicknameAndServerOptions = []builder.Option{
 		),
 }
 
+var userOption = builder.NewOption("user", discordgo.ApplicationCommandOptionUser).
+	Params(
+		builder.SetNameKey("common_option_stats_user_name"),
+		builder.SetDescKey("common_option_stats_user_description"),
+	)
+
 var defaultStatsOptions = append([]builder.Option{
 	daysOption,
-	builder.NewOption("user", discordgo.ApplicationCommandOptionUser).
-		Params(
-			builder.SetNameKey("common_option_stats_user_name"),
-			builder.SetDescKey("common_option_stats_user_description"),
-		),
+	userOption,
 }, nicknameAndServerOptions...)
 
 type statsOptions struct {

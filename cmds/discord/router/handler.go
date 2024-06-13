@@ -178,7 +178,12 @@ func (r *Router) handleInteraction(ctx context.Context, cancel context.CancelFun
 		return
 	}
 
-	err = command.Handler(cCtx)
+	handler := command.Handler
+	for i := len(command.Middleware) - 1; i >= 0; i-- {
+		handler = command.Middleware[i](cCtx, handler)
+	}
+
+	err = handler(cCtx)
 	if err != nil {
 		log.Err(err).Msg("handler returned an error")
 		reply <- discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")}

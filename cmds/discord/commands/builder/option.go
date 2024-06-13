@@ -86,6 +86,12 @@ func (o Option) Build(command string) discordgo.ApplicationCommandOption {
 		panic("option type is not set")
 	}
 
+	var options []*discordgo.ApplicationCommandOption
+	for _, option := range o.options {
+		opt := option.Build(command + "_" + o.name)
+		options = append(options, &opt)
+	}
+
 	nameLocalized := common.LocalizeKey(o.nameKey(command))
 	descLocalized := common.LocalizeKey(o.descKey(command))
 
@@ -106,6 +112,7 @@ func (o Option) Build(command string) discordgo.ApplicationCommandOption {
 		MaxValue:                 o.maxValue,
 		Required:                 o.required,
 		Choices:                  choices,
+		Options:                  options,
 		Type:                     o.kind,
 	}
 }

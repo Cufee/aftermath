@@ -130,16 +130,35 @@ func (c *Context) ID() string {
 	return ""
 }
 
-func (c *Context) Option(name string) any {
+func (c *Context) Options() options {
 	if data, ok := c.CommandData(); ok {
-		for _, opt := range data.Options {
-			fmt.Printf("%+v", opt)
-			if opt.Name == name {
-				return opt.Value
-			}
+		return data.Options
+	}
+	return options{}
+}
+
+type options []*discordgo.ApplicationCommandInteractionDataOption
+
+func (o options) Value(name string) any {
+	for _, opt := range o {
+		if opt.Name == name {
+			return opt.Value
 		}
 	}
 	return nil
+}
+
+func (o options) Subcommand() (string, options, bool) {
+	for _, opt := range o {
+		if opt.Type == discordgo.ApplicationCommandOptionSubCommandGroup {
+			name, opts, ok := options(opt.Options).Subcommand()
+			return opt.Name + "_" + name, opts, ok
+		}
+		if opt.Type == discordgo.ApplicationCommandOptionSubCommand {
+			return opt.Name, opt.Options, true
+		}
+	}
+	return "", options{}, false
 }
 
 func GetOption[T any](c *Context, name string) (T, bool) {

@@ -17,6 +17,7 @@ import (
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch"
 
 	"github.com/cufee/aftermath/internal/stats/render/assets"
@@ -40,6 +41,9 @@ func main() {
 	loadStaticAssets(static)
 	coreClient := coreClientFromEnv()
 	startSchedulerFromEnvAsync()
+
+	// Load some init options to registed admin accounts and etc
+	logic.ApplyInitOptions(coreClient.Database())
 
 	discordHandler, err := discord.NewRouterHandler(coreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
 	if err != nil {
@@ -97,7 +101,7 @@ func startSchedulerFromEnvAsync() {
 
 func coreClientFromEnv() core.Client {
 	// Dependencies
-	wgClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_PRIMARY_APP_ID"), os.Getenv("WG_PRIMARY_APP_RPS"), os.Getenv("WG_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_PROXY_HOST_LIST"))
+	wgClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_PRIMARY_APP_ID"), os.Getenv("WG_PRIMARY_APP_RPS"), os.Getenv("WG_PRIMARY_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_PROXY_HOST_LIST"))
 	if err != nil {
 		log.Fatal().Msgf("wgClient: wargaming#NewClientFromEnv failed %s", err)
 	}

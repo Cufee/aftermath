@@ -215,6 +215,20 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...userGetOpti
 	return user, nil
 }
 
+func (c *client) UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (User, error) {
+	model, err := c.prisma.User.UpsertOne(db.User.ID.Equals(userID)).
+		Create(db.User.ID.Set(userID), db.User.Permissions.Set(perms.String())).
+		Update(db.User.Permissions.Set(perms.String())).Exec(ctx)
+	if err != nil {
+		return User{}, err
+	}
+
+	var user User
+	user.ID = model.ID
+	user.Permissions = permissions.Parse(model.Permissions, permissions.User)
+	return user, nil
+}
+
 func (c *client) UpdateConnection(ctx context.Context, connection UserConnection) (UserConnection, error) {
 	if connection.ReferenceID == "" {
 		return UserConnection{}, errors.New("connection referenceID cannot be left blank")

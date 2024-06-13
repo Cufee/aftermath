@@ -353,6 +353,23 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...Accoun
 	return c.prisma.Prisma.Transaction(transactions...).Exec(ctx)
 }
 
+func (c *client) GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]AccountSnapshot, error) {
+	models, err := c.prisma.AccountSnapshot.FindMany(db.AccountSnapshot.AccountID.Equals(accountID)).OrderBy(db.AccountSnapshot.CreatedAt.Order(db.DESC)).Take(limit).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var snapshots []AccountSnapshot
+	for _, model := range models {
+		s, err := AccountSnapshot{}.FromModel(&model)
+		if err != nil {
+			return nil, err
+		}
+		snapshots = append(snapshots, s)
+	}
+	return snapshots, nil
+}
+
 func (c *client) GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind snapshotType, options ...SnapshotQuery) (AccountSnapshot, error) {
 	var query getSnapshotQuery
 	for _, apply := range options {
