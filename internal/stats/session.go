@@ -66,7 +66,6 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 			LastBattleTime: account.LastBattleTime,
 		}
 	}
-
 	if err != nil {
 		return nil, meta, err
 	}
