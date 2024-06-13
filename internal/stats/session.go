@@ -50,11 +50,6 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 	stop = meta.Timer("fetchClient#SessionStats")
 	stats, err := r.fetchClient.SessionStats(ctx, accountId, from, fetch.WithWN8())
 	stop()
-	if errors.Is(err, fetch.ErrSessionNotFound) && time.Since(from).Hours()/24 <= 90 {
-		// we dont have a session, but one might be available from blitzstars
-		stats, err = r.fetchClient.PeriodStats(ctx, accountId, from, fetch.WithWN8())
-		// the error will be checked below
-	}
 	if errors.Is(err, fetch.ErrSessionNotFound) {
 		// blank session
 		err = nil

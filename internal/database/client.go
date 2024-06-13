@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/prisma/db"
+	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"golang.org/x/sync/semaphore"
 )
@@ -27,8 +28,10 @@ type Client interface {
 	GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
 	UpdateConnection(ctx context.Context, connection UserConnection) (UserConnection, error)
 	UpsertConnection(ctx context.Context, connection UserConnection) (UserConnection, error)
+	UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (User, error)
 
 	CreateAccountSnapshots(ctx context.Context, snapshots ...AccountSnapshot) error
+	GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]AccountSnapshot, error)
 	GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind snapshotType, options ...SnapshotQuery) (AccountSnapshot, error)
 	GetManyAccountSnapshots(ctx context.Context, accountIDs []string, kind snapshotType, options ...SnapshotQuery) ([]AccountSnapshot, error)
 	CreateVehicleSnapshots(ctx context.Context, snapshots ...VehicleSnapshot) error

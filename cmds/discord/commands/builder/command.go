@@ -21,6 +21,10 @@ type CommandHandler func(*common.Context) error
 type Command struct {
 	discordgo.ApplicationCommand
 
+	DMOnly    bool
+	GuildIDs  []string
+	GuildOnly bool
+
 	Type       commandType
 	Match      func(string) bool
 	Handler    CommandHandler
@@ -32,6 +36,10 @@ type Builder struct {
 	name   string
 	kind   commandType
 	params parameters
+
+	dmOnly    bool
+	guildOnly bool
+	guilds    []string
 
 	match      func(string) bool
 	handler    CommandHandler
@@ -70,7 +78,11 @@ func (c Builder) Build() Command {
 			DescriptionLocalizations: &descLocalized,
 			Options:                  options,
 			Type:                     discordgo.ChatApplicationCommand,
+			DMPermission:             &c.dmOnly,
 		},
+		c.dmOnly,
+		c.guilds,
+		c.guildOnly,
 		c.kind,
 		c.match,
 		c.handler,
@@ -91,12 +103,27 @@ func (c Builder) Params(params ...Param) Builder {
 	return c
 }
 
-func (c Builder) IsEphemeral() Builder {
+func (c Builder) DMOnly() Builder {
+	c.dmOnly = true
+	return c
+}
+
+func (c Builder) GuildOnly() Builder {
+	c.guildOnly = true
+	return c
+}
+
+func (c Builder) ExclusiveToGuilds(guilds ...string) Builder {
+	c.guilds = append(c.guilds, guilds...)
+	return c
+}
+
+func (c Builder) Ephemeral() Builder {
 	c.ephemeral = true
 	return c
 }
 
-func (c Builder) IsComponentType() Builder {
+func (c Builder) ComponentType() Builder {
 	c.kind = CommandTypeComponent
 	return c
 }
