@@ -25,6 +25,12 @@ services:
         condition: service_completed_successfully
     entrypoint: ["app"]
     restart: always
+    deploy:
+      resources:
+        reservations:
+          memory: 128m
+        limits:
+          memory: 256m
     ports:
       - 3000
     networks:
