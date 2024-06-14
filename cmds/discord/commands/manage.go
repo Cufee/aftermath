@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
@@ -28,7 +29,13 @@ func init() {
 					),
 				),
 				builder.NewOption("tasks", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
-					builder.NewOption("view", discordgo.ApplicationCommandOptionSubCommand),
+					builder.NewOption("view", discordgo.ApplicationCommandOptionSubCommand).Options(
+						builder.NewOption("status", discordgo.ApplicationCommandOptionString).Choices(
+							builder.NewChoice("failed", string(database.TaskStatusFailed)),
+							builder.NewChoice("complete", string(database.TaskStatusComplete)),
+							builder.NewChoice("in-progress", string(database.TaskStatusInProgress)),
+						).Required(),
+					),
 				),
 				builder.NewOption("snapshots", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
 					builder.NewOption("view", discordgo.ApplicationCommandOptionSubCommand).Options(
@@ -96,7 +103,23 @@ func init() {
 					return ctx.Reply("```" + string(bytes) + "```")
 
 				case "tasks_view":
-					return ctx.Reply("tasks view")
+					status, _ := opts.Value("status").(string)
+					tasks, err := ctx.Core.Database().GetRecentTasks(ctx.Context, time.Now().Add(time.Hour*24*-1), database.TaskStatus(status))
+					if err != nil {
+						return ctx.Reply("Database#GetRecentTasks: " + err.Error())
+					}
+					if len(tasks) < 1 {
+						return ctx.Reply("No recent tasks with status " + status)
+					}
+
+					bytes, err := json.MarshalIndent(tasks, "", "  ")
+					if err != nil {
+						return ctx.Reply("json.Marshal: " + err.Error())
+					}
+					if len(string(bytes)) > 1990 {
+						return ctx.ReplyFmt("Too many tasks to show - %d", len(tasks))
+					}
+					return ctx.Reply("```" + string(bytes) + "```")
 
 				default:
 					return ctx.Reply("invalid subcommand, thought this should never happen")

@@ -22,13 +22,13 @@ const (
 )
 
 // Task statuses
-type taskStatus string
+type TaskStatus string
 
 const (
-	TaskStatusScheduled  taskStatus = "TASK_SCHEDULED"
-	TaskStatusInProgress taskStatus = "TASK_IN_PROGRESS"
-	TaskStatusComplete   taskStatus = "TASK_COMPLETE"
-	TaskStatusFailed     taskStatus = "TASK_FAILED"
+	TaskStatusScheduled  TaskStatus = "TASK_SCHEDULED"
+	TaskStatusInProgress TaskStatus = "TASK_IN_PROGRESS"
+	TaskStatusComplete   TaskStatus = "TASK_COMPLETE"
+	TaskStatusFailed     TaskStatus = "TASK_FAILED"
 )
 
 type Task struct {
@@ -42,7 +42,7 @@ type Task struct {
 
 	Logs []TaskLog `json:"logs"`
 
-	Status         taskStatus `json:"status"`
+	Status         TaskStatus `json:"status"`
 	ScheduledAfter time.Time  `json:"scheduledAfter"`
 	LastRun        time.Time  `json:"lastRun"`
 
@@ -53,7 +53,7 @@ func (t Task) FromModel(model db.CronTaskModel) Task {
 	t.ID = model.ID
 	t.Type = TaskType(model.Type)
 
-	t.Status = taskStatus(model.Status)
+	t.Status = TaskStatus(model.Status)
 	t.ReferenceID = model.ReferenceID
 
 	t.LastRun = model.LastRun
@@ -136,6 +136,33 @@ func (c *client) GetStaleTasks(ctx context.Context, limit int) ([]Task, error) {
 		db.CronTask.Status.Equals(string(TaskStatusInProgress)),
 		db.CronTask.UpdatedAt.Before(time.Now().Add(time.Hour*-1)),
 	)).OrderBy(db.CronTask.ScheduledAfter.Order(db.ASC)).Take(limit).Exec(ctx)
+	if err != nil && !db.IsErrNotFound(err) {
+		return nil, err
+	}
+
+	var tasks []Task
+	for _, model := range models {
+		tasks = append(tasks, Task{}.FromModel(model))
+	}
+
+	return tasks, nil
+}
+
+/*
+Returns all tasks that were created after createdAfter, sorted by ScheduledAfter (DESC)
+*/
+func (c *client) GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...TaskStatus) ([]Task, error) {
+	var statusStr []string
+	for _, s := range status {
+		statusStr = append(statusStr, string(s))
+	}
+
+	params := []db.CronTaskWhereParam{db.CronTask.CreatedAt.After(createdAfter)}
+	if len(statusStr) > 0 {
+		params = append(params, db.CronTask.Status.In(statusStr))
+	}
+
+	models, err := c.prisma.CronTask.FindMany(params...).OrderBy(db.CronTask.ScheduledAfter.Order(db.DESC)).Exec(ctx)
 	if err != nil && !db.IsErrNotFound(err) {
 		return nil, err
 	}
