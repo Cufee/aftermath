@@ -16,6 +16,7 @@ services:
     env_file:
       - .env
     environment:
+      - PORT=3000
       - DATABASE_URL=file:/database/${DATABASE_NAME}
     volumes:
       - ${DATABASE_DIR}:/database
@@ -23,3 +24,18 @@ services:
       apply-migrations:
         condition: service_completed_successfully
     entrypoint: ["app"]
+    restart: always
+    ports:
+      - 3000
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aftermath-monorepo-compose.rule=Host(`${TRAEFIK_HOST}`)"
+      - "traefik.http.routers.aftermath-monorepo-compose.entrypoints=websecure"
+      - "traefik.http.routers.aftermath-monorepo-compose.tls.certResolver=letsencrypt"
+      - "traefik.http.services.aftermath-monorepo-compose.loadbalancer.server.port=3000"
+
+networks:
+  dokploy-network:
+    external: true
