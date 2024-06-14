@@ -1,14 +1,16 @@
 package router
 
 import (
+	"context"
 	"fmt"
-	"slices"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/middleware"
 	"github.com/cufee/aftermath/cmds/discord/rest"
+	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/rs/zerolog/log"
 )
 
@@ -51,19 +53,22 @@ func (r *Router) LoadMiddleware(middleware ...middleware.MiddlewareFunc) {
 	r.middleware = append(r.middleware, middleware...)
 }
 
+type command struct {
+	requested *builder.Command
+	current   *discordgo.ApplicationCommand
+	cached    *database.ApplicationCommand
+	action    string
+}
+
 /*
 Updates all loaded commands using the Discord REST API
   - any commands that are loaded will be created/updated
   - any commands that were not loaded will be deleted
 */
 func (r *Router) UpdateLoadedCommands() error {
-	toOverwrite := make(map[string]discordgo.ApplicationCommand)
-
+	var commandByName = make(map[string]command)
 	for _, cmd := range r.commands {
-		if cmd.Type != builder.CommandTypeChat {
-			continue
-		}
-		toOverwrite[cmd.Name] = cmd.ApplicationCommand
+		commandByName[cmd.Name] = command{requested: &cmd}
 	}
 
 	current, err := r.restClient.GetGlobalApplicationCommands()
@@ -71,57 +76,80 @@ func (r *Router) UpdateLoadedCommands() error {
 		return err
 	}
 
-	var toDelete []string
-	var currentCommands []string
-	for _, command := range current {
-		currentCommands = append(currentCommands, command.Name)
-		if _, ok := toOverwrite[command.Name]; !ok {
-			toDelete = append(toDelete, command.ID)
-			continue
-		}
+	var currentIDs []string
+	for _, cmd := range current {
+		command := commandByName[cmd.Name]
+		command.current = &cmd
+		commandByName[cmd.Name] = command
 
-		newCmd := toOverwrite[command.Name]
-		newCmd.ID = command.ID
-
-		toOverwrite[command.Name] = newCmd
-	}
-	log.Debug().Any("commands", currentCommands).Msg("current application commands")
-
-	for _, cmd := range r.commands {
-		if cmd.Type != builder.CommandTypeChat {
-			continue
-		}
-		if !slices.Contains(currentCommands, cmd.Name) {
-			// it will be created during the bulk overwrite call
-			continue
-		}
+		currentIDs = append(currentIDs, cmd.ID)
 	}
 
-	for _, id := range toDelete {
-		log.Debug().Str("id", id).Msg("deleting old application command")
-		err := r.restClient.DeleteGlobalApplicationCommand(id)
-		if err != nil {
-			return fmt.Errorf("failed to delete a command: %w", err)
-		}
-		log.Debug().Str("id", id).Msg("deleted old application command")
-	}
-
-	if len(toOverwrite) < 1 || len(currentCommands) == len(toOverwrite) {
-		log.Debug().Msg("no application commands need an update")
-		return nil
-	}
-
-	var commandUpdates []discordgo.ApplicationCommand
-	for _, cmd := range toOverwrite {
-		commandUpdates = append(commandUpdates, cmd)
-	}
-
-	log.Debug().Msg("updating application commands")
-	err = r.restClient.OverwriteGlobalApplicationCommands(commandUpdates)
+	cachedCommands, err := r.core.Database().GetCommandsByID(context.Background(), currentIDs...)
 	if err != nil {
-		return fmt.Errorf("failed to bulk update application commands: %w", err)
+		return err
 	}
-	log.Debug().Msg("updated application commands")
+
+	for _, cmd := range cachedCommands {
+		command := commandByName[cmd.Name]
+		command.cached = &cmd
+		commandByName[cmd.Name] = command
+	}
+
+	for _, data := range commandByName {
+		switch {
+		case data.requested != nil && data.current == nil:
+			log.Debug().Str("name", data.requested.Name).Msg("creating a global command")
+			hash, err := logic.HashAny(data.requested.ApplicationCommand)
+			if err != nil {
+				return err
+			}
+			command, err := r.restClient.CreateGlobalApplicationCommand(data.requested.ApplicationCommand)
+			if err != nil {
+				return err
+			}
+			err = r.core.Database().UpsertCommands(context.Background(), database.ApplicationCommand{ID: command.ID, Name: command.Name, Hash: hash, Version: command.Version})
+			if err != nil {
+				return err
+			}
+			log.Debug().Str("name", data.requested.Name).Str("id", command.ID).Msg("created and cached a global command")
+
+		case data.requested == nil && data.current != nil:
+			log.Debug().Str("name", data.current.Name).Str("id", data.current.ID).Msg("deleting a global command")
+			err := r.restClient.DeleteGlobalApplicationCommand(data.current.ID)
+			if err != nil {
+				return err
+			}
+			log.Debug().Str("name", data.current.Name).Str("id", data.current.ID).Msg("deleted a global command")
+
+		case data.current != nil && data.requested != nil:
+			hash, err := logic.HashAny(data.requested.ApplicationCommand)
+			if err != nil {
+				return err
+			}
+			if data.cached == nil || data.cached.Hash != hash {
+				log.Debug().Str("name", data.current.Name).Str("id", data.current.ID).Msg("updating a global command")
+				hash, err := logic.HashAny(data.requested.ApplicationCommand)
+				if err != nil {
+					return err
+				}
+				command, err := r.restClient.UpdateGlobalApplicationCommand(data.current.ID, data.requested.ApplicationCommand)
+				if err != nil {
+					return err
+				}
+				err = r.core.Database().UpsertCommands(context.Background(), database.ApplicationCommand{ID: command.ID, Name: command.Name, Hash: hash, Version: command.Version})
+				if err != nil {
+					return err
+				}
+				log.Debug().Str("name", data.current.Name).Str("id", data.current.ID).Msg("updated global command")
+			} else {
+				log.Debug().Str("name", data.current.Name).Str("id", data.current.ID).Msg("global command is up to date")
+			}
+
+		default:
+			log.Debug().Str("name", data.current.Name).Str("id", data.current.ID).Msg("global command does not require any action")
+		}
+	}
 
 	return nil
 }

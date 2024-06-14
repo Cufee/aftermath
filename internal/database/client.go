@@ -45,6 +45,9 @@ type Client interface {
 
 	DeleteExpiredTasks(ctx context.Context, expiration time.Time) error
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
+
+	UpsertCommands(ctx context.Context, commands ...ApplicationCommand) error
+	GetCommandsByID(ctx context.Context, commandIDs ...string) ([]ApplicationCommand, error)
 }
 
 type client struct {
