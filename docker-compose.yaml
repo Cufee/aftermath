@@ -1,0 +1,25 @@
+services:
+  apply-migrations:
+    image: aftermath-prisma-migrate
+    build:
+      dockerfile: Dockerfile.migrate
+    environment:
+      - DATABASE_URL=file:/database/${DATABASE_NAME}
+    volumes:
+      - ${DATABASE_DIR}:/database
+    command: sh -c "go run github.com/steebchen/prisma-client-go migrate deploy --schema /prisma/schema.prisma"
+
+  aftermath-service:
+    image: aftermath-service
+    build:
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=file:/database/${DATABASE_NAME}
+    volumes:
+      - ${DATABASE_DIR}:/database
+    depends_on:
+      apply-migrations:
+        condition: service_completed_successfully
+    entrypoint: ["app"]

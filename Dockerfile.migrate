@@ -1,0 +1,17 @@
+FROM golang:1.22.3-alpine
+
+WORKDIR /migrate
+
+# copy migrations and schema
+COPY ./internal/database/prisma/migrations /prisma/migrations
+COPY ./internal/database/prisma/schema.prisma /prisma/schema.prisma
+
+# copy go.mod
+COPY ./go.mod /go.mod
+COPY ./go.sum /go.sum
+
+# install prisma and prefetch binaries
+RUN go install github.com/steebchen/prisma-client-go@latest
+RUN go run github.com/steebchen/prisma-client-go prefetch
+
+ENTRYPOINT ["sh", "-c", "go run github.com/steebchen/prisma-client-go migrate deploy --schema /prisma/schema.prisma"]
