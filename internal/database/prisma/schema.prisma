@@ -325,6 +325,19 @@ model Vehicle {
 // === Discord Data ===
 //
 
+model ApplicationCommand {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  version     String
+  optionsHash String
+
+  @@index([optionsHash])
+  @@map("application_commands")
+}
+
 // // A log of a user interaction with the bot
 // model DiscordInteraction {
 //   id        String   @id @default(cuid())
