@@ -35,6 +35,7 @@ func init() {
 							builder.NewChoice("complete", string(database.TaskStatusComplete)),
 							builder.NewChoice("in-progress", string(database.TaskStatusInProgress)),
 						).Required(),
+						builder.NewOption("hours", discordgo.ApplicationCommandOptionNumber).Required(),
 					),
 				),
 				builder.NewOption("snapshots", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
@@ -103,8 +104,13 @@ func init() {
 					return ctx.Reply("```" + string(bytes) + "```")
 
 				case "tasks_view":
+					hours, _ := opts.Value("status").(float64)
 					status, _ := opts.Value("status").(string)
-					tasks, err := ctx.Core.Database().GetRecentTasks(ctx.Context, time.Now().Add(time.Hour*24*-1), database.TaskStatus(status))
+					if hours < 1 {
+						hours = 1
+					}
+
+					tasks, err := ctx.Core.Database().GetRecentTasks(ctx.Context, time.Now().Add(time.Hour*time.Duration(hours)*-1), database.TaskStatus(status))
 					if err != nil {
 						return ctx.Reply("Database#GetRecentTasks: " + err.Error())
 					}
