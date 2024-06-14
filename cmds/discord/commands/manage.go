@@ -104,7 +104,7 @@ func init() {
 					return ctx.Reply("```" + string(bytes) + "```")
 
 				case "tasks_view":
-					hours, _ := opts.Value("status").(float64)
+					hours, _ := opts.Value("hours").(float64)
 					status, _ := opts.Value("status").(string)
 					if hours < 1 {
 						hours = 1
