@@ -264,7 +264,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	return stats, nil
 }
 
-func (c *multiSourceClient) SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...statsOption) (AccountStatsOverPeriod, error) {
+func (c *multiSourceClient) SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...statsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error) {
 	var options statsOptions
 	for _, apply := range opts {
 		apply(&options)
@@ -276,7 +276,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		sessionStart = time.Now()
 	}
 	if days := time.Since(sessionStart).Hours() / 24; days > 90 {
-		return AccountStatsOverPeriod{}, ErrInvalidSessionStart
+		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, ErrInvalidSessionStart
 	}
 
 	sessionBefore := sessionStart
@@ -322,35 +322,54 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	// wait for all requests to finish and check errors
 	group.Wait()
 	if current.Err != nil {
-		return AccountStatsOverPeriod{}, current.Err
+		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, current.Err
 	}
 	if accountSnapshot.Err != nil {
 		if db.IsErrNotFound(accountSnapshot.Err) {
-			return AccountStatsOverPeriod{}, ErrSessionNotFound
+			return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, ErrSessionNotFound
 		}
-		return AccountStatsOverPeriod{}, accountSnapshot.Err
+		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, accountSnapshot.Err
 	}
 	if averages.Err != nil {
 		// not critical, this will only affect WN8
 		log.Err(averages.Err).Msg("failed to get tank averages")
 	}
 
-	stats := current.Data
-	stats.PeriodEnd = time.Now()
-	stats.PeriodStart = sessionStart
-	stats.RatingBattles.StatsFrame.Subtract(accountSnapshot.Data.RatingBattles)
-	stats.RegularBattles.StatsFrame.Subtract(accountSnapshot.Data.RegularBattles)
+	session := current.Data
+	session.PeriodEnd = time.Now()
+	session.PeriodStart = sessionStart
+	session.RatingBattles.StatsFrame.Subtract(accountSnapshot.Data.RatingBattles)
+	session.RegularBattles.StatsFrame.Subtract(accountSnapshot.Data.RegularBattles)
+	session.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, len(current.Data.RegularBattles.Vehicles))
+
+	career := AccountStatsOverPeriod{
+		Realm:          current.Data.Realm,
+		Account:        current.Data.Account,
+		LastBattleTime: accountSnapshot.Data.LastBattleTime,
+		PeriodStart:    current.Data.Account.CreatedAt,
+		PeriodEnd:      sessionStart,
+	}
+	career.Account.LastBattleTime = accountSnapshot.Data.LastBattleTime
+	career.RatingBattles.StatsFrame = accountSnapshot.Data.RatingBattles
+	career.RegularBattles.StatsFrame = accountSnapshot.Data.RegularBattles
+	career.RatingBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, 0)
+	career.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, len(vehiclesSnapshots.Data))
 
 	snapshotsMap := make(map[string]int, len(vehiclesSnapshots.Data))
 	for i, data := range vehiclesSnapshots.Data {
 		snapshotsMap[data.VehicleID] = i
+
+		career.RegularBattles.Vehicles[data.VehicleID] = frame.VehicleStatsFrame{
+			LastBattleTime: data.LastBattleTime,
+			VehicleID:      data.VehicleID,
+			StatsFrame:     &data.Stats,
+		}
 	}
 
-	stats.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, len(current.Data.RegularBattles.Vehicles))
 	for id, current := range current.Data.RegularBattles.Vehicles {
 		snapshotIndex, exists := snapshotsMap[id]
 		if !exists {
-			stats.RegularBattles.Vehicles[id] = current
+			session.RegularBattles.Vehicles[id] = current
 			continue
 		}
 
@@ -359,13 +378,15 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 			continue
 		}
 		current.StatsFrame.Subtract(snapshot.Stats)
-		stats.RegularBattles.Vehicles[id] = current
+		session.RegularBattles.Vehicles[id] = current
 	}
 
 	if options.withWN8 {
-		stats.AddWN8(averages.Data)
+		career.AddWN8(averages.Data)
+		session.AddWN8(averages.Data)
 	}
-	return stats, nil
+
+	return session, career, nil
 
 }
 

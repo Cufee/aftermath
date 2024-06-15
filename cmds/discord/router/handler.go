@@ -20,9 +20,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// we need to respond within 15 minutes of the initial interaction
-var interactionTimeout = time.Minute*14 + time.Second*45
-
 type interactionState struct {
 	mx      *sync.Mutex
 	acked   bool
@@ -163,18 +160,17 @@ func (r *Router) routeInteraction(interaction discordgo.Interaction) (*builder.C
 }
 
 func (r *Router) handleInteraction(ctx context.Context, cancel context.CancelFunc, interaction discordgo.Interaction, command *builder.Command, reply chan<- discordgo.InteractionResponseData) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Error().Interface("error", r).Msg("interaction handler panic")
-			reply <- discordgo.InteractionResponseData{Content: "Something went really wrong while working on your command. Please try again later."}
-		}
-		cancel()
-	}()
+	defer cancel()
 
 	cCtx, err := common.NewContext(ctx, interaction, reply, r.restClient, r.core)
 	if err != nil {
 		log.Err(err).Msg("failed to create a common.Context for a handler")
-		reply <- discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")}
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			reply <- discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")}
+		}
 		return
 	}
 
@@ -186,7 +182,12 @@ func (r *Router) handleInteraction(ctx context.Context, cancel context.CancelFun
 	err = handler(cCtx)
 	if err != nil {
 		log.Err(err).Msg("handler returned an error")
-		reply <- discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")}
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			reply <- discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")}
+		}
 		return
 	}
 }
@@ -202,12 +203,9 @@ func sendPingReply(w http.ResponseWriter) {
 func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interaction, state *interactionState, command *builder.Command) {
 	log.Info().Str("id", interaction.ID).Msg("started handling an interaction")
 
-	// create a timer for the interaction response
-	responseTimer := time.NewTimer(interactionTimeout)
-	defer responseTimer.Stop()
-
 	// create a new context and cancel it on reply
-	workerCtx, cancelWorker := context.WithCancel(context.Background())
+	// we need to respond within 15 minutes, but it's safe to assume something failed if we did not reply quickly
+	workerCtx, cancelWorker := context.WithTimeout(context.Background(), time.Second*10)
 
 	// handle the interaction
 	responseCh := make(chan discordgo.InteractionResponseData)
@@ -215,21 +213,15 @@ func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interac
 
 	go func() {
 		defer close(responseCh)
+		defer cancelWorker()
 
 		for {
 			select {
-			case <-responseTimer.C:
-				state.mx.Lock()
-				// discord will handle the user-facing error, so we just log it
-				log.Error().Any("interaction", interaction).Msg("interaction response timed out")
-				defer state.mx.Unlock()
-				return
-
 			case <-workerCtx.Done():
 				state.mx.Lock()
+				defer state.mx.Unlock()
 				// we are done, there is nothing else we should do here
 				// lock in case responseCh is still busy sending some data over
-				defer state.mx.Unlock()
 				log.Info().Str("id", interaction.ID).Msg("finished handling an interaction")
 				return
 

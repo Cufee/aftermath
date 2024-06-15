@@ -52,7 +52,7 @@ type Client interface {
 	CurrentStats(ctx context.Context, id string, opts ...statsOption) (AccountStatsOverPeriod, error)
 
 	PeriodStats(ctx context.Context, id string, from time.Time, opts ...statsOption) (AccountStatsOverPeriod, error)
-	SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...statsOption) (AccountStatsOverPeriod, error)
+	SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...statsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error)
 
 	CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error)
 }

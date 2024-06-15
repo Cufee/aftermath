@@ -5,10 +5,9 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common"
 )
 
-func presetToBlock(preset common.Tag, stats frame.StatsFrame) common.StatsBlock[BlockData] {
+func presetToBlock(preset common.Tag, stats frame.StatsFrame) (common.StatsBlock[BlockData], error) {
 	block := common.StatsBlock[BlockData](common.NewBlock(preset, BlockData{}))
 
-	var args []any
 	switch preset {
 	case common.TagWN8:
 		block.Data.Flavor = BlockFlavorSpecial
@@ -32,6 +31,6 @@ func presetToBlock(preset common.Tag, stats frame.StatsFrame) common.StatsBlock[
 		block.Data.Flavor = BlockFlavorDefault
 	}
 
-	block.FillValue(stats, args...)
-	return block
+	err := block.FillValue(stats)
+	return block, err
 }

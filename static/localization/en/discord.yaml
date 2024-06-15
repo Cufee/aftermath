@@ -135,6 +135,10 @@
   value: "Aftermath just started tracking this account. Please play a few battles before using this command again."
   context: We were not tracking this account, but successfully started tracking it just now
 
+- key: session_error_no_session_for_period
+  value: "Aftermath does not yet have a session for this period. Try changing the number of days or using `/stats` instead."
+  context: This account is being tracked, but there is no session available
+
 # /background errors
 - key: background_error_payment_required
   value: "This feature of Aftermath is only available for users with an active subscription.\nYou can subscribe by using the `/subscribe` command or pick a background using `/fancy` instead."

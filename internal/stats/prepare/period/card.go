@@ -9,8 +9,8 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common"
 )
 
-func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.Vehicle, opts ...Option) (Cards, error) {
-	options := defaultOptions
+func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.Vehicle, opts ...common.Option) (Cards, error) {
+	options := common.DefaultOptions
 	for _, apply := range opts {
 		apply(&options)
 	}
@@ -21,15 +21,20 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.V
 	var cards Cards
 
 	// Overview Card
-	for _, column := range selectedBlocks {
+	for _, column := range overviewBlocks {
 		var columnBlocks []common.StatsBlock[BlockData]
 		for _, preset := range column {
-			block := presetToBlock(preset, stats.RegularBattles.StatsFrame)
+			var block common.StatsBlock[BlockData]
 			if preset == TagAvgTier {
 				block = avgTierBlock(stats.RegularBattles.Vehicles, glossary)
+			} else {
+				b, err := presetToBlock(preset, stats.RegularBattles.StatsFrame)
+				if err != nil {
+					return Cards{}, err
+				}
+				block = b
 			}
-
-			block.Localize(options.localePrinter)
+			block.Localize(options.Printer())
 			columnBlocks = append(columnBlocks, block)
 		}
 
@@ -37,7 +42,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.V
 		cards.Overview.Blocks = append(cards.Overview.Blocks, columnBlocks)
 	}
 
-	if len(stats.RegularBattles.Vehicles) < 1 || len(selectedHighlights) < 1 {
+	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 {
 		return cards, nil
 	}
 
@@ -45,7 +50,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.V
 	var minimumBattles float64 = 5
 	periodDays := stats.PeriodEnd.Sub(stats.PeriodStart).Hours() / 24
 	withFallback := func(battles float64) float64 {
-		return math.Min(battles, float64(stats.RegularBattles.Battles.Float())/float64(len(selectedHighlights)))
+		return math.Min(battles, float64(stats.RegularBattles.Battles.Float())/float64(len(highlights)))
 	}
 	if periodDays > 90 {
 		minimumBattles = withFallback(100)
@@ -59,24 +64,31 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.V
 		minimumBattles = withFallback(10)
 	}
 
-	highlightedVehicles := getHighlightedVehicles(selectedHighlights, stats.RegularBattles.Vehicles, int(minimumBattles))
+	highlightedVehicles, err := common.GetHighlightedVehicles(highlights, stats.RegularBattles.Vehicles, int(minimumBattles))
+	if err != nil {
+		return Cards{}, err
+	}
+
 	for _, data := range highlightedVehicles {
 		var vehicleBlocks []common.StatsBlock[BlockData]
 
-		for _, preset := range data.highlight.blocks {
-			block := presetToBlock(preset, *data.vehicle.StatsFrame)
-			block.Localize(options.localePrinter)
+		for _, preset := range data.Highlight.Blocks {
+			block, err := presetToBlock(preset, *data.Vehicle.StatsFrame)
+			if err != nil {
+				return Cards{}, err
+			}
+			block.Localize(options.Printer())
 			vehicleBlocks = append(vehicleBlocks, block)
 		}
 
-		glossary := glossary[data.vehicle.VehicleID]
-		glossary.ID = data.vehicle.VehicleID
+		glossary := glossary[data.Vehicle.VehicleID]
+		glossary.ID = data.Vehicle.VehicleID
 
 		cards.Highlights = append(cards.Highlights, VehicleCard{
-			Title:  fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.locale)),
+			Title:  fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.Locale())),
+			Meta:   options.Printer()(data.Highlight.Label),
 			Type:   common.CardTypeVehicle,
 			Blocks: vehicleBlocks,
-			Meta:   options.localePrinter(data.highlight.label),
 		})
 	}
 

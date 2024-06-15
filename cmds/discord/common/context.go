@@ -76,12 +76,21 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, respondC
 	return c, nil
 }
 
+func (c *Context) respond(data discordgo.InteractionResponseData) error {
+	select {
+	case <-c.Context.Done():
+		return c.Context.Err()
+	default:
+		c.respondCh <- data
+	}
+	return nil
+}
+
 func (c *Context) Message(message string) error {
 	if message == "" {
 		return errors.New("bad reply call with blank message")
 	}
-	c.respondCh <- discordgo.InteractionResponseData{Content: message}
-	return nil
+	return c.respond(discordgo.InteractionResponseData{Content: message})
 }
 
 func (c *Context) Reply(key string) error {
@@ -106,8 +115,7 @@ func (c *Context) File(r io.Reader, name string) error {
 	if r == nil {
 		return errors.New("bad Context#File call with nil io.Reader")
 	}
-	c.respondCh <- discordgo.InteractionResponseData{Files: []*discordgo.File{{Reader: r, Name: name}}}
-	return nil
+	return c.respond(discordgo.InteractionResponseData{Files: []*discordgo.File{{Reader: r, Name: name}}})
 }
 
 func (c *Context) isCommand() bool {

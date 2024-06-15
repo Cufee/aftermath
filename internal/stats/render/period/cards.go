@@ -110,7 +110,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	}
 
 	// Header card
-	if headerCard, headerCardExists := newHeaderCard(cardWidth, subs, opts); headerCardExists {
+	if headerCard, headerCardExists := common.NewHeaderCard(cardWidth, subs, opts.PromoText); headerCardExists {
 		segments.AddHeader(headerCard)
 	}
 
@@ -136,48 +136,6 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	}
 
 	return segments, nil
-}
-
-func newHeaderCard(width float64, subscriptions []database.UserSubscription, options render.Options) (common.Block, bool) {
-	var cards []common.Block
-
-	var addPromoText = true
-	for _, sub := range subscriptions {
-		switch sub.Type {
-		case database.SubscriptionTypePro, database.SubscriptionTypePlus, database.SubscriptionTypeDeveloper:
-			addPromoText = false
-		}
-		if !addPromoText {
-			break
-		}
-	}
-
-	if addPromoText && options.PromoText != nil {
-		// Users without a subscription get promo text
-		var textBlocks []common.Block
-		for _, text := range options.PromoText {
-			textBlocks = append(textBlocks, common.NewTextContent(common.Style{Font: &common.FontMedium, FontColor: common.TextPrimary}, text))
-		}
-		cards = append(cards, common.NewBlocksContent(common.Style{
-			Direction:  common.DirectionVertical,
-			AlignItems: common.AlignItemsCenter,
-		},
-			textBlocks...,
-		))
-	}
-
-	// User Subscription Badge and promo text
-	if badges, _ := common.SubscriptionsBadges(subscriptions); len(badges) > 0 {
-		cards = append(cards, common.NewBlocksContent(common.Style{Direction: common.DirectionHorizontal, AlignItems: common.AlignItemsCenter, Gap: 10},
-			badges...,
-		))
-	}
-
-	if len(cards) < 1 {
-		return common.Block{}, false
-	}
-
-	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, JustifyContent: common.JustifyContentCenter, Gap: 10, Width: width}, cards...), true
 }
 
 func newHighlightCard(style highlightStyle, card period.VehicleCard) common.Block {

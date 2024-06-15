@@ -7,7 +7,7 @@ import (
 )
 
 type Metadata struct {
-	Stats   fetch.AccountStatsOverPeriod
+	Stats   map[string]fetch.AccountStatsOverPeriod
 	Timings map[string]time.Duration
 	timers  map[string]time.Time
 }
