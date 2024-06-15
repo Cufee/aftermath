@@ -6,18 +6,18 @@ import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
-type cardType string
+type CardType string
 
 const (
-	CardTypeVehicle        cardType = "vehicle"
-	CardTypeRatingVehicle  cardType = "ratingVehicle"
-	CardTypeOverview       cardType = "overview"
-	CardTypeHighlight      cardType = "overview"
-	CardTypeTierPercentage cardType = "tierPercentage"
+	CardTypeVehicle        CardType = "vehicle"
+	CardTypeRatingVehicle  CardType = "ratingVehicle"
+	CardTypeOverview       CardType = "overview"
+	CardTypeHighlight      CardType = "overview"
+	CardTypeTierPercentage CardType = "tierPercentage"
 )
 
 type StatsCard[B, M any] struct {
-	Type   cardType `json:"type"`
+	Type   CardType `json:"type"`
 	Title  string   `json:"title"`
 	Blocks []B      `json:"blocks"`
 	Meta   M        `json:"meta,omitempty"`
@@ -39,31 +39,40 @@ func (block *StatsBlock[D]) Localize(printer func(string) string) {
 }
 
 func (block *StatsBlock[D]) FillValue(stats frame.StatsFrame, args ...any) error {
-	switch block.Tag {
+	value, err := PresetValue(block.Tag, stats)
+	if err != nil {
+		return err
+	}
+	block.Value = value
+	return nil
+}
+
+func PresetValue(preset Tag, stats frame.StatsFrame, args ...any) (frame.Value, error) {
+	switch preset {
 	case TagWN8:
-		block.Value = stats.WN8(args...)
+		return stats.WN8(args...), nil
 	case TagFrags:
-		block.Value = stats.Frags
+		return stats.Frags, nil
 	case TagBattles:
-		block.Value = stats.Battles
+		return stats.Battles, nil
 	case TagWinrate:
-		block.Value = stats.WinRate(args...)
+		return stats.WinRate(args...), nil
 	case TagAccuracy:
-		block.Value = stats.Accuracy(args...)
+		return stats.Accuracy(args...), nil
 	case TagRankedRating:
-		block.Value = stats.Rating
+		return stats.Rating, nil
 	case TagAvgDamage:
-		block.Value = stats.AvgDamage(args...)
+		return stats.AvgDamage(args...), nil
 	case TagDamageRatio:
-		block.Value = stats.DamageRatio(args...)
+		return stats.DamageRatio(args...), nil
 	case TagSurvivalRatio:
-		block.Value = stats.SurvivalRatio(args...)
+		return stats.SurvivalRatio(args...), nil
 	case TagSurvivalPercent:
-		block.Value = stats.Survival(args...)
+		return stats.Survival(args...), nil
 	case TagDamageDealt:
-		block.Value = stats.DamageDealt
+		return stats.DamageDealt, nil
 	case TagDamageTaken:
-		block.Value = stats.DamageReceived
+		return stats.DamageReceived, nil
 
 	// Some tags cannot be parsed here and should be implemented by the package
 	// TagAvgTier - period
@@ -71,9 +80,6 @@ func (block *StatsBlock[D]) FillValue(stats frame.StatsFrame, args ...any) error
 	// TagDamageAssisted - replay
 	// TagDamageAssistedCombined - replay
 	default:
-		return errors.New("invalid preset")
+		return frame.InvalidValue, errors.New("invalid preset " + preset.String())
 	}
-
-	return nil
-
 }

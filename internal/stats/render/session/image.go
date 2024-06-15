@@ -1,0 +1,24 @@
+package session
+
+import (
+	"image"
+
+	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/prepare/session"
+	"github.com/cufee/aftermath/internal/stats/render"
+)
+
+func CardsToImage(session, career fetch.AccountStatsOverPeriod, cards session.Cards, subs []database.UserSubscription, opts ...render.Option) (image.Image, error) {
+	o := render.DefaultOptions()
+	for _, apply := range opts {
+		apply(&o)
+	}
+
+	segments, err := cardsToSegments(session, career, cards, subs, o)
+	if err != nil {
+		return nil, err
+	}
+
+	return segments.Render(opts...)
+}

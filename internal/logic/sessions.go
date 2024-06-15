@@ -138,7 +138,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			}
 			vehicleStats := fetch.WargamingVehiclesToFrame(vehicles)
 			for id, vehicle := range vehicleStats {
-				if vehicle.LastBattleTime.IsZero() {
+				if vehicle.LastBattleTime.Unix() < 1 {
 					// vehicle was never played
 					continue
 				}

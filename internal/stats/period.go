@@ -7,13 +7,14 @@ import (
 
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/prepare/common"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period"
 	options "github.com/cufee/aftermath/internal/stats/render"
 	render "github.com/cufee/aftermath/internal/stats/render/period"
 )
 
 func (r *renderer) Period(ctx context.Context, accountId string, from time.Time, opts ...options.Option) (Image, Metadata, error) {
-	meta := Metadata{}
+	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
 	printer, err := localization.NewPrinter("stats", r.locale)
 	if err != nil {
@@ -26,7 +27,7 @@ func (r *renderer) Period(ctx context.Context, accountId string, from time.Time,
 	if err != nil {
 		return nil, meta, err
 	}
-	meta.Stats = stats
+	meta.Stats["period"] = stats
 
 	stop = meta.Timer("prepare#GetVehicles")
 	var vehicles []string
@@ -46,7 +47,7 @@ func (r *renderer) Period(ctx context.Context, accountId string, from time.Time,
 	stop()
 
 	stop = meta.Timer("prepare#NewCards")
-	cards, err := prepare.NewCards(stats, glossary, prepare.WithPrinter(printer, r.locale))
+	cards, err := prepare.NewCards(stats, glossary, common.WithPrinter(printer, r.locale))
 	stop()
 	if err != nil {
 		return nil, meta, err

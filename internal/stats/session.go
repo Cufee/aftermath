@@ -9,17 +9,18 @@ import (
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch"
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/period"
+	"github.com/cufee/aftermath/internal/stats/prepare/common"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/session"
 	options "github.com/cufee/aftermath/internal/stats/render"
-	render "github.com/cufee/aftermath/internal/stats/render/period"
-	"github.com/pkg/errors"
+	render "github.com/cufee/aftermath/internal/stats/render/session"
 	"github.com/rs/zerolog/log"
 )
 
 func (r *renderer) Session(ctx context.Context, accountId string, from time.Time, opts ...options.Option) (Image, Metadata, error) {
-	meta := Metadata{}
+	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
+
 	stop := meta.Timer("database#GetAccountByID")
-	account, err := r.database.GetAccountByID(ctx, accountId)
+	_, err := r.database.GetAccountByID(ctx, accountId)
 	stop()
 	if err != nil {
 		if db.IsErrNotFound(err) {
@@ -48,30 +49,30 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 	}
 
 	stop = meta.Timer("fetchClient#SessionStats")
-	stats, err := r.fetchClient.SessionStats(ctx, accountId, from, fetch.WithWN8())
+	session, career, err := r.fetchClient.SessionStats(ctx, accountId, from, fetch.WithWN8())
 	stop()
-	if errors.Is(err, fetch.ErrSessionNotFound) {
-		// blank session
-		err = nil
-		stats = fetch.AccountStatsOverPeriod{
-			Realm:          account.Realm,
-			Account:        account,
-			PeriodEnd:      time.Now(),
-			PeriodStart:    time.Now(),
-			LastBattleTime: account.LastBattleTime,
-		}
-	}
 	if err != nil {
 		return nil, meta, err
 	}
-	meta.Stats = stats
+	meta.Stats["career"] = career
+	meta.Stats["session"] = session
 
 	stop = meta.Timer("prepare#GetVehicles")
 	var vehicles []string
-	for id := range stats.RegularBattles.Vehicles {
+	for id := range session.RegularBattles.Vehicles {
 		vehicles = append(vehicles, id)
 	}
-	for id := range stats.RatingBattles.Vehicles {
+	for id := range session.RatingBattles.Vehicles {
+		if !slices.Contains(vehicles, id) {
+			vehicles = append(vehicles, id)
+		}
+	}
+	for id := range career.RegularBattles.Vehicles {
+		if !slices.Contains(vehicles, id) {
+			vehicles = append(vehicles, id)
+		}
+	}
+	for id := range career.RatingBattles.Vehicles {
 		if !slices.Contains(vehicles, id) {
 			vehicles = append(vehicles, id)
 		}
@@ -84,14 +85,14 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 	stop()
 
 	stop = meta.Timer("prepare#NewCards")
-	cards, err := prepare.NewCards(stats, glossary, prepare.WithPrinter(printer, r.locale))
+	cards, err := prepare.NewCards(session, career, glossary, common.WithPrinter(printer, r.locale))
 	stop()
 	if err != nil {
 		return nil, meta, err
 	}
 
 	stop = meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(stats, cards, nil, opts...)
+	image, err := render.CardsToImage(session, career, cards, nil, opts...)
 	stop()
 	if err != nil {
 		return nil, meta, err

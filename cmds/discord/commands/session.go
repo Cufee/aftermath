@@ -10,6 +10,7 @@ import (
 	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/stats"
+	"github.com/cufee/aftermath/internal/stats/fetch"
 	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	"github.com/pkg/errors"
@@ -63,8 +64,11 @@ func init() {
 
 				image, _, err := ctx.Core.Render(ctx.Locale).Session(context.Background(), accountID, options.PeriodStart, render.WithBackground(background))
 				if err != nil {
-					if errors.Is(err, stats.ErrAccountNotTracked) {
+					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
 						return ctx.Reply("session_error_account_was_not_tracked")
+					}
+					if errors.Is(err, fetch.ErrSessionNotFound) {
+						return ctx.Reply("session_error_no_session_for_period")
 					}
 					return ctx.Err(err)
 				}

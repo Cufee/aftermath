@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/internal/retry"
@@ -110,6 +111,7 @@ func partHeader(contentDisposition string, contentType string) textproto.MIMEHea
 }
 
 func (c *Client) do(req *http.Request, target any) error {
+	log.Debug().Str("url", req.URL.String()).Str("contentType", req.Header.Get("Content-Type")).Msg("sending a request to Discord API")
 	result := retry.Retry(func() (any, error) {
 		res, err := c.http.Do(req)
 		if err != nil {
@@ -127,9 +129,8 @@ func (c *Client) do(req *http.Request, target any) error {
 			_ = json.Unmarshal(data, &body)
 			message := body.Message
 			if message == "" {
-				message = res.Status
+				message = res.Status + ", response was not valid json"
 			}
-
 			println(string(data))
 
 			return nil, errors.New("discord error: " + message)
@@ -145,7 +146,12 @@ func (c *Client) do(req *http.Request, target any) error {
 		return nil, nil
 	}, 3, time.Millisecond*150)
 
-	return result.Err
+	if result.Err != nil {
+		log.Debug().Err(result.Err).Str("url", req.URL.String()).Str("contentType", req.Header.Get("Content-Type")).Msg("request finished with error")
+		return result.Err
+	}
+	log.Debug().Str("url", req.URL.String()).Str("contentType", req.Header.Get("Content-Type")).Msg("request finished successfully")
+	return nil
 }
 
 func (c *Client) lookupApplicationID() (string, error) {
