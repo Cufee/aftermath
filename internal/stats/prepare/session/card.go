@@ -66,6 +66,10 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
 	})
 	for _, data := range ratingVehicles {
+		if len(cards.Rating.Vehicles) >= 5 {
+			break
+		}
+
 		glossary := glossary[data.VehicleID]
 		glossary.ID = data.VehicleID
 
@@ -93,6 +97,9 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
 	})
 	for _, data := range unratedVehicles {
+		if len(cards.Unrated.Vehicles) >= 5 {
+			break
+		}
 		if data.Battles < 1 {
 			continue
 		}
