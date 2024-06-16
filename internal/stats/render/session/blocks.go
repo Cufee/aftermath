@@ -1,145 +1,55 @@
 package session
 
-// type convertOptions struct {
-// 	showSessionStats    bool
-// 	showCareerStats     bool
-// 	showLabels          bool
-// 	showIcons           bool
-// 	highlightBlockIndex int
-// }
+import (
+	"image/color"
 
-// func newVehicleCard(style render.Style, card session.Card, sizes map[int]float64, opts convertOptions) (render.Block, error) {
-// 	if card.Type == dataprep.CardTypeRatingVehicle {
-// 		return slimVehicleCard(style, card, sizes, opts)
-// 	}
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/common"
+	"github.com/cufee/aftermath/internal/stats/prepare/session"
+	"github.com/cufee/aftermath/internal/stats/render/common"
+)
 
-// 	return defaultVehicleCard(style, card, sizes, opts)
-// }
+func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width float64) common.Block {
+	switch block.Tag {
+	case prepare.TagWN8:
+		ratingColors := common.GetWN8Colors(block.Value.Float())
+		if block.Value.Float() <= 0 {
+			ratingColors.Content = common.TextAlt
+			ratingColors.Background = common.TextAlt
+		}
 
-// func defaultVehicleCard(style render.Style, card session.Card, sizes map[int]float64, opts convertOptions) (render.Block, error) {
-// 	blocks, err := statsBlocksToCardBlocks(card.Blocks, sizes, opts)
-// 	if err != nil {
-// 		return render.Block{}, err
-// 	}
+		var column []common.Block
+		iconTop := common.AftermathLogo(ratingColors.Background, common.DefaultLogoOptions())
+		column = append(column, common.NewImageContent(common.Style{Width: specialRatingIconSize, Height: specialRatingIconSize}, iconTop))
 
-// 	cardContentBlocks := []render.Block{newCardTitle(card.Title)}
-// 	contentWidth := style.Width - style.PaddingX*2
+		pillColor := ratingColors.Background
+		if block.Value.Float() < 0 {
+			pillColor = color.Transparent
+		}
+		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
+			common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()),
+			common.NewBlocksContent(
+				overviewSpecialRatingPillStyle(pillColor),
+				common.NewTextContent(overviewSpecialRatingLabelStyle(ratingColors.Content), common.GetWN8TierName(block.Value.Float())),
+			),
+		))
+		return common.NewBlocksContent(specialRatingColumnStyle, column...)
 
-// 	statsRowBlock := render.NewBlocksContent(statsRowStyle(contentWidth), blocks...)
-// 	cardContentBlocks = append(cardContentBlocks, statsRowBlock)
+	case prepare.TagRankedRating:
+		var column []common.Block
+		icon, ok := getRatingIcon(block.Value)
+		if ok {
+			column = append(column, icon)
+		}
+		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
+			common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()),
+		))
+		return common.NewBlocksContent(specialRatingColumnStyle, column...)
 
-// 	return render.NewBlocksContent(style, cardContentBlocks...), nil
-// }
-
-// func slimVehicleCard(style render.Style, card session.Card, sizes map[int]float64, opts convertOptions) (render.Block, error) {
-// 	opts.highlightBlockIndex = -1
-// 	opts.showCareerStats = false
-// 	opts.showLabels = false
-// 	opts.showIcons = true
-
-// 	blocks, err := statsBlocksToCardBlocks(card.Blocks, sizes, opts)
-// 	if err != nil {
-// 		return render.Block{}, err
-// 	}
-
-// 	titleBlock := render.NewTextContent(ratingVehicleTitleStyle, card.Title)
-// 	statsRowBlock := render.NewBlocksContent(statsRowStyle(0), blocks...)
-
-// 	containerStyle := style
-// 	containerStyle.Direction = render.DirectionHorizontal
-// 	containerStyle.JustifyContent = render.JustifyContentSpaceBetween
-
-// 	return render.NewBlocksContent(containerStyle, titleBlock, statsRowBlock), nil
-// }
-
-// func statsBlocksToCardBlocks(stats []session.StatsBlock, blockWidth map[int]float64, opts ...convertOptions) ([]render.Block, error) {
-// 	var options convertOptions = convertOptions{
-// 		showSessionStats:    true,
-// 		showCareerStats:     true,
-// 		showLabels:          true,
-// 		showIcons:           true,
-// 		highlightBlockIndex: 0,
-// 	}
-// 	if len(opts) > 0 {
-// 		options = opts[0]
-// 	}
-
-// 	var content []render.Block
-// 	for index, statsBlock := range stats {
-// 		blocks := make([]render.Block, 0, 3)
-// 		if options.showSessionStats {
-// 			if options.showIcons && statsBlock.Tag != dataprep.TagBattles {
-// 				blocks = append(blocks, newStatsBlockRow(defaultBlockStyle.session, statsBlock.Session.String, comparisonIconFromBlock(statsBlock)))
-// 			} else {
-// 				blocks = append(blocks, render.NewTextContent(defaultBlockStyle.session, statsBlock.Session.String))
-// 			}
-// 		}
-// 		if options.showCareerStats && statsBlock.Career.String != "" {
-// 			if options.showIcons && statsBlock.Tag != dataprep.TagBattles {
-// 				blocks = append(blocks, newStatsBlockRow(defaultBlockStyle.career, statsBlock.Career.String, blockToWN8Icon(statsBlock.Career, statsBlock.Tag)))
-// 			} else {
-// 				blocks = append(blocks, render.NewTextContent(defaultBlockStyle.career, statsBlock.Career.String))
-// 			}
-// 		}
-// 		if options.showLabels && statsBlock.Tag != dataprep.TagBattles {
-// 			if options.showIcons {
-// 				blocks = append(blocks, newStatsBlockRow(defaultBlockStyle.label, statsBlock.Label, blankIconBlock))
-// 			} else {
-// 				blocks = append(blocks, render.NewTextContent(defaultBlockStyle.label, statsBlock.Label))
-// 			}
-// 		}
-
-// 		containerStyle := defaultStatsBlockStyle(blockWidth[index])
-// 		if index == options.highlightBlockIndex {
-// 			containerStyle = highlightStatsBlockStyle(blockWidth[index])
-// 		}
-// 		content = append(content, render.NewBlocksContent(containerStyle, blocks...))
-// 	}
-// 	return content, nil
-// }
-
-// func newStatsBlockRow(style render.Style, value string, icon render.Block) render.Block {
-// 	return render.NewBlocksContent(
-// 		render.Style{Direction: render.DirectionHorizontal, AlignItems: render.AlignItemsCenter},
-// 		icon,
-// 		render.NewTextContent(style, value),
-// 	)
-// }
-
-// func newCardTitle(label string) render.Block {
-// 	return render.NewTextContent(defaultBlockStyle.career, label)
-// }
-
-// func comparisonIconFromBlock(block session.StatsBlock) render.Block {
-// 	if !stats.ValueValid(block.Session.Value) || !stats.ValueValid(block.Career.Value) {
-// 		return blankIconBlock
-// 	}
-
-// 	if block.Tag == dataprep.TagWN8 {
-// 		// WN8 icons need to show the color
-// 		return blockToWN8Icon(block.Session, block.Tag)
-// 	}
-
-// 	var icon image.Image
-// 	var iconColor color.Color
-// 	if block.Session.Value > block.Career.Value {
-// 		icon, _ = assets.GetImage("images/icons/chevron-up-single")
-// 		iconColor = color.RGBA{R: 0, G: 255, B: 0, A: 255}
-// 	}
-// 	if block.Session.Value < block.Career.Value {
-// 		icon, _ = assets.GetImage("images/icons/chevron-down-single")
-// 		iconColor = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-// 	}
-// 	if icon == nil {
-// 		return blankIconBlock
-// 	}
-
-// 	return render.NewImageContent(render.Style{Width: float64(iconSize), Height: float64(iconSize), BackgroundColor: iconColor}, icon)
-// }
-
-// func blockToWN8Icon(value dataprep.Value, tag dataprep.Tag) render.Block {
-// 	if tag != dataprep.TagWN8 || !stats.ValueValid(value.Value) {
-// 		return blankIconBlock
-// 	}
-// 	return render.NewImageContent(render.Style{Width: float64(iconSize), Height: float64(iconSize), BackgroundColor: shared.GetWN8Colors(int(value.Value)).Background}, wn8Icon)
-// }
+	default:
+		return common.NewBlocksContent(statsBlockStyle(width),
+			common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()),
+			// common.NewTextContent(vehicleBlockStyle.career, block.Data.Career.String()),
+			common.NewTextContent(vehicleBlockStyle.label, block.Label),
+		)
+	}
+}
