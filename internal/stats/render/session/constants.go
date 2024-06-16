@@ -42,7 +42,7 @@ var (
 )
 
 func frameStyle() common.Style {
-	return common.Style{Gap: 20, Direction: common.DirectionHorizontal}
+	return common.Style{Gap: 10, Direction: common.DirectionHorizontal}
 }
 
 var (
@@ -69,7 +69,7 @@ func overviewSpecialRatingPillStyle(color color.Color) common.Style {
 
 func overviewColumnStyle(width float64) common.Style {
 	return common.Style{
-		Gap:            5,
+		Gap:            10,
 		Width:          width,
 		AlignItems:     common.AlignItemsCenter,
 		Direction:      common.DirectionVertical,
