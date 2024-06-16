@@ -11,9 +11,9 @@ type Highlight struct {
 }
 
 var (
-	HighlightAvgDamage = Highlight{TagAvgDamage, []Tag{TagBattles, TagAvgDamage,TagWN8}, "label_highlight_avg_damage"}
+	HighlightAvgDamage = Highlight{TagAvgDamage, []Tag{TagBattles, TagAvgDamage, TagWN8}, "label_highlight_avg_damage"}
 	HighlightBattles   = Highlight{TagBattles, []Tag{TagBattles, TagAvgDamage, TagWN8}, "label_highlight_battles"}
-	HighlightWN8       = Highlight{TagWN8, []Tag{TagBattles, TagAvgDamage,TagWN8}, "label_highlight_wn8"}
+	HighlightWN8       = Highlight{TagWN8, []Tag{TagBattles, TagAvgDamage, TagWN8}, "label_highlight_wn8"}
 )
 
 type highlightedVehicle struct {

@@ -25,15 +25,12 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.V
 		var columnBlocks []common.StatsBlock[BlockData]
 		for _, preset := range column {
 			var block common.StatsBlock[BlockData]
-			if preset == TagAvgTier {
-				block = avgTierBlock(stats.RegularBattles.Vehicles, glossary)
-			} else {
-				b, err := presetToBlock(preset, stats.RegularBattles.StatsFrame)
-				if err != nil {
-					return Cards{}, err
-				}
-				block = b
+			b, err := presetToBlock(preset, stats.RegularBattles.StatsFrame, stats.RegularBattles.Vehicles, glossary)
+			if err != nil {
+				return Cards{}, err
 			}
+			block = b
+
 			block.Localize(options.Printer())
 			columnBlocks = append(columnBlocks, block)
 		}
@@ -73,7 +70,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.V
 		var vehicleBlocks []common.StatsBlock[BlockData]
 
 		for _, preset := range data.Highlight.Blocks {
-			block, err := presetToBlock(preset, *data.Vehicle.StatsFrame)
+			block, err := presetToBlock(preset, *data.Vehicle.StatsFrame, nil, nil)
 			if err != nil {
 				return Cards{}, err
 			}

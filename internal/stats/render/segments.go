@@ -74,7 +74,7 @@ func (s *Segments) Render(opts ...Option) (image.Image, error) {
 		common.Style{
 			Direction:  common.DirectionVertical,
 			AlignItems: common.AlignItemsCenter,
-			Gap:        10,
+			Gap:        5,
 		},
 		frameParts...,
 	)

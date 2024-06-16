@@ -3,6 +3,7 @@ package common
 import (
 	"github.com/pkg/errors"
 
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
@@ -39,7 +40,7 @@ func (block *StatsBlock[D]) Localize(printer func(string) string) {
 }
 
 func (block *StatsBlock[D]) FillValue(stats frame.StatsFrame, args ...any) error {
-	value, err := PresetValue(block.Tag, stats)
+	value, err := PresetValue(block.Tag, stats, args...)
 	if err != nil {
 		return err
 	}
@@ -73,13 +74,39 @@ func PresetValue(preset Tag, stats frame.StatsFrame, args ...any) (frame.Value, 
 		return stats.DamageDealt, nil
 	case TagDamageTaken:
 		return stats.DamageReceived, nil
+	case TagAvgTier:
+		if len(args) != 2 {
+			return frame.InvalidValue, errors.New("invalid args length for avg_tier")
+		}
+		vehicles, ok := args[0].(map[string]frame.VehicleStatsFrame)
+		if !ok {
+			return frame.InvalidValue, errors.New("invalid args for avg_tier, first arg should be vehicles")
+		}
+		glossary, ok := args[1].(map[string]database.Vehicle)
+		if !ok {
+			return frame.InvalidValue, errors.New("invalid args for avg_tier, second arg should be glossary")
+		}
+		return avgTierValue(vehicles, glossary), nil
 
 	// Some tags cannot be parsed here and should be implemented by the package
-	// TagAvgTier - period
 	// TagDamageBlocked - replay
 	// TagDamageAssisted - replay
 	// TagDamageAssistedCombined - replay
 	default:
 		return frame.InvalidValue, errors.New("invalid preset " + preset.String())
 	}
+}
+
+func avgTierValue(vehicles map[string]frame.VehicleStatsFrame, glossary map[string]database.Vehicle) frame.Value {
+	var weightedTotal, battlesTotal float32
+	for _, vehicle := range vehicles {
+		if data, ok := glossary[vehicle.VehicleID]; ok && data.Tier > 0 {
+			battlesTotal += vehicle.Battles.Float()
+			weightedTotal += vehicle.Battles.Float() * float32(data.Tier)
+		}
+	}
+	if battlesTotal == 0 {
+		return frame.InvalidValue
+	}
+	return frame.ValueFloatDecimal(weightedTotal / battlesTotal)
 }

@@ -54,15 +54,18 @@ var InvalidValue = valueInvalid{}
 
 type ValueSpecialRating float32
 
-func (value ValueSpecialRating) int() uint32 {
-	if value <= 0 {
-		return uint32(InvalidValue.Float())
+func (value ValueSpecialRating) int() int {
+	if value >= 0 {
+		return int((value * 10) + 3000)
 	}
-	return uint32((value * 10) + 3000)
+	return int(InvalidValue.Float())
 }
 
 func (value ValueSpecialRating) String() string {
-	return fmt.Sprintf("%d", int(value.int()))
+	if value > 1 {
+		return fmt.Sprintf("%d", value.int())
+	}
+	return InvalidValue.String()
 }
 
 func (value ValueSpecialRating) Float() float32 {

@@ -1,8 +1,6 @@
 package session
 
 import (
-	"fmt"
-
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/stats/fetch"
 	"github.com/cufee/aftermath/internal/stats/frame"
@@ -45,8 +43,8 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	if session.RegularBattles.Battles > 0 {
 		card, err := makeOverviewCard(
 			unratedOverviewBlocks,
-			session.RatingBattles.StatsFrame,
-			career.RatingBattles.StatsFrame,
+			session.RegularBattles.StatsFrame,
+			career.RegularBattles.StatsFrame,
 			"label_overview_unrated",
 			options.Printer(),
 			nil,
@@ -59,19 +57,14 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 
 	// Rating battles vehicles
 	for id, data := range session.RatingBattles.Vehicles {
-		var careerFrame frame.StatsFrame
-		if frame, ok := career.RatingBattles.Vehicles[id]; ok {
-			careerFrame = *frame.StatsFrame
-		}
-
 		glossary := glossary[id]
 		glossary.ID = id
 
 		card, err := makeVehicleCard(
 			[]common.Tag{common.TagWN8},
 			common.CardTypeRatingVehicle,
-			*data.StatsFrame,
-			careerFrame,
+			data,
+			career.RatingBattles.Vehicles[id],
 			options.Printer(),
 			options.Locale(),
 			glossary,
@@ -83,18 +76,14 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	}
 	// Regular battles vehicles
 	for id, data := range session.RegularBattles.Vehicles {
-		var careerFrame frame.StatsFrame
-		if frame, ok := career.RegularBattles.Vehicles[id]; ok {
-			careerFrame = *frame.StatsFrame
-		}
 		glossary := glossary[id]
 		glossary.ID = id
 
 		card, err := makeVehicleCard(
 			vehicleBlocks,
 			common.CardTypeVehicle,
-			*data.StatsFrame,
-			careerFrame,
+			data,
+			career.RegularBattles.Vehicles[id],
 			options.Printer(),
 			options.Locale(),
 			glossary,
@@ -108,10 +97,10 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	return cards, nil
 }
 
-func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, career frame.StatsFrame, printer func(string) string, locale language.Tag, glossary database.Vehicle) (VehicleCard, error) {
+func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag, glossary database.Vehicle) (VehicleCard, error) {
 	var blocks []common.StatsBlock[BlockData]
 	for _, preset := range presets {
-		block, err := presetToBlock(preset, session, career)
+		block, err := presetToBlock(preset, *session.StatsFrame, *career.StatsFrame)
 		if err != nil {
 			return VehicleCard{}, err
 		}
@@ -120,7 +109,8 @@ func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, ca
 	}
 
 	return VehicleCard{
-		Title:  fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(locale)),
+		Meta:   common.IntToRoman(glossary.Tier),
+		Title:  glossary.Name(locale),
 		Type:   cardType,
 		Blocks: blocks,
 	}, nil

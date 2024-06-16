@@ -52,7 +52,7 @@ func defaultCardStyle(width float64) common.Style {
 		AlignItems:      common.AlignItemsCenter,
 		Direction:       common.DirectionVertical,
 		BackgroundColor: common.DefaultCardColor,
-		BorderRadius:    25,
+		BorderRadius:    common.BorderRadiusLG,
 		PaddingY:        10,
 		PaddingX:        20,
 		Gap:             20,

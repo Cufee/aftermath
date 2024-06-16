@@ -337,7 +337,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 
 	session := current.Data
 	session.PeriodEnd = time.Now()
-	session.PeriodStart = sessionStart
+	session.PeriodStart = accountSnapshot.Data.LastBattleTime
 	session.RatingBattles.StatsFrame.Subtract(accountSnapshot.Data.RatingBattles)
 	session.RegularBattles.StatsFrame.Subtract(accountSnapshot.Data.RegularBattles)
 	session.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, len(current.Data.RegularBattles.Vehicles))
@@ -347,7 +347,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		Account:        current.Data.Account,
 		LastBattleTime: accountSnapshot.Data.LastBattleTime,
 		PeriodStart:    current.Data.Account.CreatedAt,
-		PeriodEnd:      sessionStart,
+		PeriodEnd:      accountSnapshot.Data.LastBattleTime,
 	}
 	career.Account.LastBattleTime = accountSnapshot.Data.LastBattleTime
 	career.RatingBattles.StatsFrame = accountSnapshot.Data.RatingBattles
