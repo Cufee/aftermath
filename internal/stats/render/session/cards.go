@@ -101,6 +101,31 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		}
 	}
 
+	{ // render the footer first to make sure the card is wide enough
+		var footer []string
+		switch strings.ToLower(session.Realm) {
+		case "na":
+			footer = append(footer, "North America")
+		case "eu":
+			footer = append(footer, "Europe")
+		case "as":
+			footer = append(footer, "Asia")
+		}
+		if session.LastBattleTime.Unix() > 1 {
+			sessionTo := session.PeriodEnd.Format("Jan 2")
+			sessionFrom := session.PeriodStart.Format("Jan 2")
+			if sessionFrom == sessionTo {
+				footer = append(footer, sessionTo)
+			} else {
+				footer = append(footer, sessionFrom+" - "+sessionTo)
+			}
+		}
+
+		if len(footer) > 0 {
+			segments.AddFooter(common.NewFooterCard(strings.Join(footer, " • ")))
+		}
+	}
+
 	frameWidth := secondaryCardWidth + primaryCardWidth
 	if secondaryCardWidth > 0 && primaryCardWidth > 0 {
 		frameWidth += frameStyle().Gap
@@ -147,29 +172,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		columns = append(columns, common.NewBlocksContent(overviewColumnStyle(secondaryCardWidth), secondaryColumn...))
 	}
 	segments.AddContent(common.NewBlocksContent(frameStyle(), columns...))
-
-	var footer []string
-	switch session.Realm {
-	case "na":
-		footer = append(footer, "North America")
-	case "eu":
-		footer = append(footer, "Europe")
-	case "as":
-		footer = append(footer, "Asia")
-	}
-	if session.LastBattleTime.Unix() > 1 {
-		sessionTo := session.PeriodEnd.Format("Jan 2")
-		sessionFrom := session.PeriodStart.Format("Jan 2")
-		if sessionFrom == sessionTo {
-			footer = append(footer, sessionTo)
-		} else {
-			footer = append(footer, sessionFrom+" - "+sessionTo)
-		}
-	}
-
-	if len(footer) > 0 {
-		segments.AddFooter(common.NewFooterCard(strings.Join(footer, " • ")))
-	}
 
 	return segments, nil
 }
@@ -327,34 +329,3 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width 
 		)
 	}
 }
-
-// func uniqueBlockWN8(stats prepare.StatsBlock[period.BlockData]) common.Block {
-// 	var blocks []common.Block
-
-// 	valueStyle, labelStyle := style.block(stats)
-// 	valueBlock := common.NewTextContent(valueStyle, stats.Value.String())
-
-// 	ratingColors := common.GetWN8Colors(stats.Value.Float())
-// 	if stats.Value.Float() <= 0 {
-// 		ratingColors.Content = common.TextAlt
-// 		ratingColors.Background = common.TextAlt
-// 	}
-
-// 	iconTop := common.AftermathLogo(ratingColors.Background, common.DefaultLogoOptions())
-// 	iconBlockTop := common.NewImageContent(common.Style{Width: float64(iconTop.Bounds().Dx()), Height: float64(iconTop.Bounds().Dy())}, iconTop)
-
-// 	style.blockContainer.Gap = 10
-// 	blocks = append(blocks, common.NewBlocksContent(style.blockContainer, iconBlockTop, valueBlock))
-
-// 	if stats.Value.Float() >= 0 {
-// 		labelStyle.FontColor = ratingColors.Content
-// 		blocks = append(blocks, common.NewBlocksContent(common.Style{
-// 			PaddingY:        5,
-// 			PaddingX:        10,
-// 			BorderRadius:    15,
-// 			BackgroundColor: ratingColors.Background,
-// 		}, common.NewTextContent(labelStyle, common.GetWN8TierName(stats.Value.Float()))))
-// 	}
-
-// 	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Gap: 10, PaddingY: 5}, blocks...)
-// }
