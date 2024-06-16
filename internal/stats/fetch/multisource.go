@@ -284,7 +284,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		// 3 days would mean today and yest, so before the reset 2 days ago and so on
 		sessionBefore = sessionBefore.Add(time.Hour * 24 * -1)
 	} else {
-		sessionStart = time.Now()
+		sessionBefore = time.Now()
 	}
 
 	var accountSnapshot retry.DataWithErr[database.AccountSnapshot]
