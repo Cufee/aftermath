@@ -30,6 +30,11 @@ var (
 
 	ColorAftermathRed  = color.RGBA{255, 0, 120, 255}
 	ColorAftermathBlue = color.RGBA{90, 90, 255, 255}
+
+	BorderRadiusLG = 25.0
+	BorderRadiusMD = 20.0
+	BorderRadiusSM = 15.0
+	BorderRadiusXS = 10.0
 )
 
 var fontCache map[float64]font.Face

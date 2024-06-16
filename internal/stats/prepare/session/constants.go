@@ -5,8 +5,8 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common"
 )
 
-var unratedOverviewBlocks = [][]common.Tag{{common.TagBattles, common.TagAvgDamage}, {common.TagWinrate, common.TagDamageRatio}, {common.TagWN8}}
-var ratingOverviewBlocks = [][]common.Tag{{common.TagBattles, common.TagAvgDamage}, {common.TagWinrate, common.TagDamageRatio}, {common.TagRankedRating}}
+var unratedOverviewBlocks = [][]common.Tag{{common.TagBattles, common.TagWinrate}, {common.TagWN8}, {common.TagAvgDamage, common.TagDamageRatio}}
+var ratingOverviewBlocks = [][]common.Tag{{common.TagBattles, common.TagWinrate}, {common.TagRankedRating}, {common.TagAvgDamage, common.TagDamageRatio}}
 var vehicleBlocks = []common.Tag{common.TagBattles, common.TagAvgDamage, common.TagDamageRatio, common.TagWinrate, common.TagWN8}
 var highlights = []common.Highlight{common.HighlightBattles, common.HighlightWN8, common.HighlightAvgDamage}
 

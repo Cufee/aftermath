@@ -1,11 +1,12 @@
 package period
 
 import (
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/common"
 )
 
-func presetToBlock(preset common.Tag, stats frame.StatsFrame) (common.StatsBlock[BlockData], error) {
+func presetToBlock(preset common.Tag, stats frame.StatsFrame, vehicles map[string]frame.VehicleStatsFrame, glossary map[string]database.Vehicle) (common.StatsBlock[BlockData], error) {
 	block := common.StatsBlock[BlockData](common.NewBlock(preset, BlockData{}))
 
 	switch preset {
@@ -17,6 +18,11 @@ func presetToBlock(preset common.Tag, stats frame.StatsFrame) (common.StatsBlock
 
 	case common.TagSurvivalRatio:
 		block.Data.Flavor = BlockFlavorSecondary
+
+	case common.TagAvgTier:
+		block.Data.Flavor = BlockFlavorSecondary
+		err := block.FillValue(frame.StatsFrame{}, vehicles, glossary)
+		return block, err
 
 	case common.TagSurvivalPercent:
 		block.Data.Flavor = BlockFlavorSecondary

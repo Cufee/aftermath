@@ -70,6 +70,8 @@ type Client interface {
 	TasksClient
 
 	DiscordDataClient
+
+	Disconnect() error
 }
 
 type client struct {
@@ -77,6 +79,10 @@ type client struct {
 	// Prisma does not currently support updateManyAndReturn
 	// in order to avoid a case where we
 	tasksUpdateSem *semaphore.Weighted
+}
+
+func (c *client) Disconnect() error {
+	return c.prisma.Disconnect()
 }
 
 func (c *client) Prisma() *db.PrismaClient {

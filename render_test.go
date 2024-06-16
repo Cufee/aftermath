@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/stats"
+	"github.com/cufee/aftermath/internal/stats/render"
+	"github.com/cufee/aftermath/internal/stats/render/assets"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/language"
@@ -19,14 +21,18 @@ func TestRenderSession(t *testing.T) {
 
 	loadStaticAssets(static)
 	coreClient := coreClientFromEnv()
+	defer coreClient.Database().Disconnect()
+
+	bgImage, ok := assets.GetLoadedImage("bg-default")
+	assert.True(t, ok, "failed to load a background image")
 
 	renderer := stats.NewRenderer(coreClient.Fetch(), coreClient.Database(), coreClient.Wargaming(), language.English)
-	image, _, err := renderer.Session(context.Background(), "1013072123", time.Now())
+	image, _, err := renderer.Session(context.Background(), "1013072123", time.Now(), render.WithBackground(bgImage))
 	assert.NoError(t, err, "failed to render a session image")
 	assert.NotNil(t, image, "image is nil")
 
-	f, err := os.Open("render_test_session.png")
-	assert.NoError(t, err, "failed to open a file")
+	f, err := os.Create("tmp/render_test_session.png")
+	assert.NoError(t, err, "failed to create a file")
 	defer f.Close()
 
 	err = image.PNG(f)
