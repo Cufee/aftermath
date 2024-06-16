@@ -89,6 +89,12 @@ func overviewCardStyle(width float64) common.Style {
 	return style
 }
 
+func overviewRatingCardStyle(width float64) common.Style {
+	style := overviewCardStyle(width)
+	style.AlignItems = common.AlignItemsCenter
+	return style
+}
+
 func statsBlockStyle(width float64) common.Style {
 	return common.Style{
 		JustifyContent: common.JustifyContentCenter,

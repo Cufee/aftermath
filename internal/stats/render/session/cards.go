@@ -144,10 +144,10 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 
 	// overview cards
 	if len(cards.Unrated.Overview.Blocks) > 0 {
-		primaryColumn = append(primaryColumn, makeOverviewCard(cards.Unrated.Overview, primaryCardBlockSizes, primaryCardWidth))
+		primaryColumn = append(primaryColumn, makeOverviewCard(cards.Unrated.Overview, primaryCardBlockSizes, primaryCardWidth, overviewCardStyle(primaryCardWidth)))
 	}
 	if len(cards.Rating.Overview.Blocks) > 0 {
-		primaryColumn = append(primaryColumn, makeOverviewCard(cards.Rating.Overview, primaryCardBlockSizes, primaryCardWidth))
+		primaryColumn = append(primaryColumn, makeOverviewCard(cards.Rating.Overview, primaryCardBlockSizes, primaryCardWidth, overviewRatingCardStyle(primaryCardWidth)))
 	}
 
 	// highlights
@@ -266,7 +266,7 @@ func makeVehicleLegendCard(reference session.VehicleCard, blockSizes map[string]
 	return common.NewBlocksContent(style, common.NewBlocksContent(vehicleBlocksRowStyle(0), content...))
 }
 
-func makeOverviewCard(card session.OverviewCard, blockSizes map[string]float64, cardWidth float64) common.Block {
+func makeOverviewCard(card session.OverviewCard, blockSizes map[string]float64, cardWidth float64, style common.Style) common.Block {
 	var content []common.Block
 	for _, column := range card.Blocks {
 		var columnContent []common.Block
@@ -285,7 +285,7 @@ func makeOverviewCard(card session.OverviewCard, blockSizes map[string]float64, 
 		}
 		content = append(content, common.NewBlocksContent(overviewColumnStyle(0), columnContent...))
 	}
-	return common.NewBlocksContent(overviewCardStyle(cardWidth), content...)
+	return common.NewBlocksContent(style, content...)
 }
 
 func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width float64) common.Block {
