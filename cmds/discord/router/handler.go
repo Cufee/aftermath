@@ -209,7 +209,18 @@ func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interac
 
 	// handle the interaction
 	responseCh := make(chan discordgo.InteractionResponseData)
-	go router.handleInteraction(workerCtx, cancelWorker, interaction, command, responseCh)
+
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error().Stack().Any("recover", r).Msg("panic in interaction handler")
+				state.mx.Lock()
+				router.sendInteractionReply(interaction, state, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed. Please try again in a few seconds."})
+				state.mx.Unlock()
+			}
+		}()
+		router.handleInteraction(workerCtx, cancelWorker, interaction, command, responseCh)
+	}()
 
 	go func() {
 		defer close(responseCh)
