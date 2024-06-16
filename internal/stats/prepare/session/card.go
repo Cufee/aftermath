@@ -107,7 +107,7 @@ func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, ca
 		sFrame = *session.StatsFrame
 	}
 	if career.StatsFrame != nil {
-		sFrame = *career.StatsFrame
+		cFrame = *career.StatsFrame
 	}
 
 	var blocks []common.StatsBlock[BlockData]
