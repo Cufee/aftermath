@@ -270,7 +270,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		apply(&options)
 	}
 
-	// sessions and period stats are tracked differenttly
+	// sessions and period stats are tracked differently
 	// we look up the latest session _before_ sessionBefore, not after sessionStart
 	if sessionStart.IsZero() {
 		sessionStart = time.Now()
