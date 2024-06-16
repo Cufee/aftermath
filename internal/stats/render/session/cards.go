@@ -136,10 +136,10 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 
 	// unrated vehicles
 	for i, vehicle := range cards.Unrated.Vehicles {
-		if i == 0 {
+		secondaryColumn = append(secondaryColumn, makeVehicleCard(vehicle, secondaryCardBlockSizes, secondaryCardWidth))
+		if i == len(cards.Unrated.Vehicles)-1 {
 			secondaryColumn = append(secondaryColumn, makeVehicleLegendCard(cards.Unrated.Vehicles[0], secondaryCardBlockSizes, secondaryCardWidth))
 		}
-		secondaryColumn = append(secondaryColumn, makeVehicleCard(vehicle, secondaryCardBlockSizes, secondaryCardWidth))
 	}
 
 	columns := []common.Block{common.NewBlocksContent(overviewColumnStyle(primaryCardWidth), primaryColumn...)}
@@ -223,11 +223,14 @@ func overviewColumnBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], s
 func makeVehicleCard(vehicle session.VehicleCard, blockSizes map[string]float64, cardWidth float64) common.Block {
 	var content []common.Block
 	for _, block := range vehicle.Blocks {
+		var blockContent []common.Block
+		blockContent = append(blockContent, common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()))
+		if block.Data.Career.Float() > 0 {
+			blockContent = append(blockContent, common.NewTextContent(vehicleBlockStyle.career, block.Data.Career.String()))
+		}
+
 		content = append(content,
-			common.NewBlocksContent(statsBlockStyle(blockSizes[block.Tag.String()]),
-				common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()),
-				common.NewTextContent(vehicleBlockStyle.career, block.Data.Career.String()),
-			),
+			common.NewBlocksContent(statsBlockStyle(blockSizes[block.Tag.String()]), blockContent...),
 		)
 	}
 	return common.NewBlocksContent(vehicleCardStyle(cardWidth),
@@ -242,13 +245,15 @@ func makeVehicleCard(vehicle session.VehicleCard, blockSizes map[string]float64,
 func makeVehicleLegendCard(reference session.VehicleCard, blockSizes map[string]float64, cardWidth float64) common.Block {
 	var content []common.Block
 	for _, block := range reference.Blocks {
-		style := statsBlockStyle(blockSizes[block.Tag.String()])
-		style.BackgroundColor = common.DefaultCardColor
-		style.BorderRadius = common.BorderRadiusSM
-		style.PaddingY = 5
+		labelContainer := common.Style{
+			BackgroundColor: common.DefaultCardColor,
+			BorderRadius:    common.BorderRadiusSM,
+			PaddingY:        5,
+			PaddingX:        10,
+		}
 		content = append(content,
-			common.NewBlocksContent(style,
-				common.NewTextContent(vehicleBlockStyle.label, block.Label),
+			common.NewBlocksContent(statsBlockStyle(blockSizes[block.Tag.String()]),
+				common.NewBlocksContent(labelContainer, common.NewTextContent(vehicleBlockStyle.label, block.Label)),
 			),
 		)
 	}
@@ -300,6 +305,17 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width 
 				overviewSpecialRatingPillStyle(ratingColors.Background),
 				common.NewTextContent(overviewSpecialRatingLabelStyle(ratingColors.Content), common.GetWN8TierName(block.Value.Float())),
 			),
+		))
+		return common.NewBlocksContent(specialRatingColumnStyle, column...)
+
+	case prepare.TagRankedRating:
+		var column []common.Block
+		icon, ok := getRatingIcon(block.Value)
+		if ok {
+			column = append(column, icon)
+		}
+		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
+			common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()),
 		))
 		return common.NewBlocksContent(specialRatingColumnStyle, column...)
 

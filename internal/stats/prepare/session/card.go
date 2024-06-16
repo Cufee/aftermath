@@ -76,6 +76,10 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	}
 	// Regular battles vehicles
 	for id, data := range session.RegularBattles.Vehicles {
+		if data.Battles < 1 {
+			continue
+		}
+
 		glossary := glossary[id]
 		glossary.ID = id
 

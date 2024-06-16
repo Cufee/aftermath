@@ -57,7 +57,6 @@ type command struct {
 	requested *builder.Command
 	current   *discordgo.ApplicationCommand
 	cached    *database.ApplicationCommand
-	action    string
 }
 
 /*
