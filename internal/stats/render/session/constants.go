@@ -129,7 +129,6 @@ func vehicleBlocksRowStyle(width float64) common.Style {
 		Direction:      common.DirectionHorizontal,
 		AlignItems:     common.AlignItemsCenter,
 		Width:          width,
-		Gap:            10,
 	}
 }
 

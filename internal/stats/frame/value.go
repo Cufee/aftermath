@@ -55,7 +55,7 @@ var InvalidValue = valueInvalid{}
 type ValueSpecialRating float32
 
 func (value ValueSpecialRating) int() int {
-	if value >= 0 {
+	if value > 0 {
 		return int((value * 10) + 3000)
 	}
 	return int(InvalidValue.Float())
