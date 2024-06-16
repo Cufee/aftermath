@@ -1,6 +1,8 @@
 package session
 
 import (
+	"slices"
+
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/stats/fetch"
 	"github.com/cufee/aftermath/internal/stats/frame"
@@ -56,15 +58,22 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	}
 
 	// Rating battles vehicles
-	for id, data := range session.RatingBattles.Vehicles {
-		glossary := glossary[id]
-		glossary.ID = id
+	var ratingVehicles []frame.VehicleStatsFrame
+	for _, vehicle := range session.RatingBattles.Vehicles {
+		ratingVehicles = append(ratingVehicles, vehicle)
+	}
+	slices.SortFunc(ratingVehicles, func(a, b frame.VehicleStatsFrame) int {
+		return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
+	})
+	for _, data := range ratingVehicles {
+		glossary := glossary[data.VehicleID]
+		glossary.ID = data.VehicleID
 
 		card, err := makeVehicleCard(
 			[]common.Tag{common.TagWN8},
 			common.CardTypeRatingVehicle,
 			data,
-			career.RatingBattles.Vehicles[id],
+			career.RatingBattles.Vehicles[data.VehicleID],
 			options.Printer(),
 			options.Locale(),
 			glossary,
@@ -74,20 +83,28 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		}
 		cards.Rating.Vehicles = append(cards.Rating.Vehicles, card)
 	}
+
 	// Regular battles vehicles
-	for id, data := range session.RegularBattles.Vehicles {
+	var unratedVehicles []frame.VehicleStatsFrame
+	for _, vehicle := range session.RegularBattles.Vehicles {
+		unratedVehicles = append(unratedVehicles, vehicle)
+	}
+	slices.SortFunc(unratedVehicles, func(a, b frame.VehicleStatsFrame) int {
+		return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
+	})
+	for _, data := range unratedVehicles {
 		if data.Battles < 1 {
 			continue
 		}
 
-		glossary := glossary[id]
-		glossary.ID = id
+		glossary := glossary[data.VehicleID]
+		glossary.ID = data.VehicleID
 
 		card, err := makeVehicleCard(
 			vehicleBlocks,
 			common.CardTypeVehicle,
 			data,
-			career.RegularBattles.Vehicles[id],
+			career.RegularBattles.Vehicles[data.VehicleID],
 			options.Printer(),
 			options.Locale(),
 			glossary,
