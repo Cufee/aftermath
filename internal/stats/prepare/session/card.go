@@ -42,7 +42,7 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		cards.Rating.Overview = card
 	}
 	// Regular battles overview
-	if session.RegularBattles.Battles > 0 {
+	if session.RegularBattles.Battles > 0 || session.RatingBattles.Battles == 0 {
 		card, err := makeOverviewCard(
 			unratedOverviewBlocks,
 			session.RegularBattles.StatsFrame,
