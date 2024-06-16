@@ -12,7 +12,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/render"
 )
 
-func cardsToSegments(session, career fetch.AccountStatsOverPeriod, cards session.Cards, subs []database.UserSubscription, opts render.Options) (render.Segments, error) {
+func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Cards, subs []database.UserSubscription, opts render.Options) (render.Segments, error) {
 	var segments render.Segments
 	var primaryColumn []common.Block
 	var secondaryColumn []common.Block
@@ -55,7 +55,7 @@ func cardsToSegments(session, career fetch.AccountStatsOverPeriod, cards session
 	// rating vehicle cards go on the primary block - only show if there are no unrated battles/vehicles
 	if len(cards.Unrated.Vehicles) == 0 {
 		for _, card := range cards.Rating.Vehicles {
-			// [title]	[session]
+			// [title] [session]
 			titleSize := common.MeasureString(card.Title, *ratingVehicleCardTitleStyle.Font)
 			presetBlockWidth, contentWidth := vehicleBlocksWidth(card.Blocks, ratingVehicleBlockStyle.session, ratingVehicleBlockStyle.career, ratingVehicleBlockStyle.label, ratingVehicleBlocksRowStyle(0))
 			// add the gap and card padding, the gap here accounts for title being inline with content
@@ -70,8 +70,8 @@ func cardsToSegments(session, career fetch.AccountStatsOverPeriod, cards session
 	// highlighted vehicles go on the primary block
 	if len(cards.Unrated.Highlights) > len(cards.Unrated.Vehicles) {
 		for _, card := range cards.Unrated.Highlights {
-			// [card label]	[session]
-			// [title]  	 [label]
+			// [card label] [session]
+			// [title]  	  [label]
 			labelSize := common.MeasureString(card.Meta, *vehicleCardTitleStyle.Font)
 			titleSize := common.MeasureString(card.Title, *vehicleCardTitleStyle.Font)
 			presetBlockWidth, contentWidth := vehicleBlocksWidth(card.Blocks, vehicleBlockStyle.session, vehicleBlockStyle.career, vehicleBlockStyle.label, vehicleBlocksRowStyle(0))
@@ -89,7 +89,6 @@ func cardsToSegments(session, career fetch.AccountStatsOverPeriod, cards session
 			// 		[ label ]
 			// [session]
 			// [career ]
-			// [label  ] ...
 			presetBlockWidth, contentWidth := vehicleBlocksWidth(card.Blocks, vehicleBlockStyle.session, vehicleBlockStyle.career, vehicleBlockStyle.label, vehicleBlocksRowStyle(0))
 			contentWidth += vehicleBlocksRowStyle(0).Gap*float64(len(card.Blocks)-1) + vehicleCardStyle(0).PaddingX*2
 

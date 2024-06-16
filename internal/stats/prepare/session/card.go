@@ -98,9 +98,17 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 }
 
 func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag, glossary database.Vehicle) (VehicleCard, error) {
+	var sFrame, cFrame frame.StatsFrame
+	if session.StatsFrame != nil {
+		sFrame = *session.StatsFrame
+	}
+	if career.StatsFrame != nil {
+		sFrame = *career.StatsFrame
+	}
+
 	var blocks []common.StatsBlock[BlockData]
 	for _, preset := range presets {
-		block, err := presetToBlock(preset, *session.StatsFrame, *career.StatsFrame)
+		block, err := presetToBlock(preset, sFrame, cFrame)
 		if err != nil {
 			return VehicleCard{}, err
 		}
