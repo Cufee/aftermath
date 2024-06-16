@@ -101,7 +101,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		}
 	}
 
-	{ // render the footer first to make sure the card is wide enough
+	{
 		var footer []string
 		switch strings.ToLower(session.Realm) {
 		case "na":
