@@ -49,6 +49,9 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 	}
 
 	stop = meta.Timer("fetchClient#SessionStats")
+	if from.IsZero() {
+		from = time.Now()
+	}
 	session, career, err := r.fetchClient.SessionStats(ctx, accountId, from, fetch.WithWN8())
 	stop()
 	if err != nil {
