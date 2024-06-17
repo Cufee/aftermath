@@ -274,11 +274,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, ErrInvalidSessionStart
 	}
 
-	// 1 day should be the same as today
-	sessionBefore := time.Now()
-	if time.Since(sessionStart).Hours() >= 24 {
-		sessionBefore = sessionStart
-	}
+	sessionBefore := sessionStart
 
 	var accountSnapshot retry.DataWithErr[database.AccountSnapshot]
 	var vehiclesSnapshots retry.DataWithErr[[]database.VehicleSnapshot]
