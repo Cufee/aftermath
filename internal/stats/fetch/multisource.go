@@ -277,7 +277,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	// sessions and period stats are tracked differently
 	// we look up the latest session _before_ sessionBefore, not after sessionStart
 	sessionBefore := time.Now() // current session
-	if time.Since(sessionStart).Hours() >= 24 {
+	if time.Since(sessionStart).Hours() >= 48 {
 		// 3 days would mean today and yest, so before the reset 2 days ago and so on
 		sessionBefore = sessionStart.Add(time.Hour * 24 * -1)
 	}
