@@ -1,11 +1,9 @@
 package session
 
 import (
-	"image"
 	"image/color"
 
 	"github.com/cufee/aftermath/internal/stats/render/common"
-	"github.com/fogleman/gg"
 )
 
 type blockStyle struct {
@@ -14,26 +12,10 @@ type blockStyle struct {
 	label   common.Style
 }
 
-func init() {
-	{
-		ctx := gg.NewContext(iconSize, iconSize)
-		ctx.DrawRoundedRectangle(13, 2.5, 6, 17.5, 3)
-		ctx.SetColor(color.RGBA{R: 255, G: 255, B: 255, A: 255})
-		ctx.Fill()
-		wn8Icon = ctx.Image()
-	}
-
-	{
-		ctx := gg.NewContext(iconSize, 1)
-		blankIconBlock = common.NewImageContent(common.Style{Width: float64(iconSize), Height: 1}, ctx.Image())
-	}
-}
-
 var (
-	iconSize              = 25
+	vehicleWN8IconSize    = 20.0
 	specialRatingIconSize = 60.0
-	wn8Icon               image.Image
-	blankIconBlock        common.Block
+	minPrimaryCardWidth   = 300.0 // making the primary card too small looks bad if there are no battles in a session
 )
 
 var (
@@ -105,8 +87,14 @@ func statsBlockStyle(width float64) common.Style {
 }
 
 var (
-	vehicleCardTitleStyle = common.Style{Font: &common.FontMedium, FontColor: common.TextAlt, PaddingX: 5}
-	vehicleBlockStyle     = blockStyle{
+	vehicleLegendLabelContainer = common.Style{
+		BackgroundColor: common.DefaultCardColor,
+		BorderRadius:    common.BorderRadiusSM,
+		PaddingY:        5,
+		PaddingX:        10,
+	}
+	vehicleCardTitleTextStyle = common.Style{Font: &common.FontMedium, FontColor: common.TextAlt}
+	vehicleBlockStyle         = blockStyle{
 		common.Style{Font: &common.FontLarge, FontColor: common.TextPrimary},
 		common.Style{Font: &common.FontMedium, FontColor: common.TextSecondary},
 		common.Style{Font: &common.FontSmall, FontColor: common.TextAlt},
@@ -117,7 +105,6 @@ func vehicleCardTitleContainerStyle(width float64) common.Style {
 	return common.Style{
 		JustifyContent: common.JustifyContentSpaceBetween,
 		Direction:      common.DirectionHorizontal,
-		PaddingX:       defaultCardStyle(0).PaddingX * 2,
 		Width:          width,
 		Gap:            10,
 	}
@@ -125,6 +112,7 @@ func vehicleCardTitleContainerStyle(width float64) common.Style {
 
 func vehicleCardStyle(width float64) common.Style {
 	style := defaultCardStyle(width)
+	style.PaddingX, style.PaddingY = 20, 15
 	style.Gap = 5
 	return style
 }
@@ -135,6 +123,7 @@ func vehicleBlocksRowStyle(width float64) common.Style {
 		Direction:      common.DirectionHorizontal,
 		AlignItems:     common.AlignItemsCenter,
 		Width:          width,
+		Gap:            10,
 	}
 }
 

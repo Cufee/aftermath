@@ -3,6 +3,7 @@ package session
 import (
 	"image/color"
 
+	"github.com/cufee/aftermath/internal/stats/frame"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common"
 	"github.com/cufee/aftermath/internal/stats/prepare/session"
 	"github.com/cufee/aftermath/internal/stats/render/common"
@@ -52,4 +53,14 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width 
 			common.NewTextContent(vehicleBlockStyle.label, block.Label),
 		)
 	}
+}
+
+func vehicleWN8Icon(wn8 frame.Value) common.Block {
+	ratingColors := common.GetWN8Colors(wn8.Float())
+	if wn8.Float() <= 0 {
+		ratingColors.Content = common.TextAlt
+		ratingColors.Background = common.TextAlt
+	}
+	iconTop := common.AftermathLogo(ratingColors.Background, common.SmallLogoOptions())
+	return common.NewImageContent(common.Style{Width: vehicleWN8IconSize, Height: vehicleWN8IconSize}, iconTop)
 }
