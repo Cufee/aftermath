@@ -279,12 +279,10 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, ErrInvalidSessionStart
 	}
 
-	sessionBefore := sessionStart
-	if time.Since(sessionStart).Hours() >= 48 {
+	sessionBefore := time.Now()
+	if time.Since(sessionStart).Hours() >= 24 {
 		// 3 days would mean today and yest, so before the reset 2 days ago and so on
-		sessionBefore = sessionBefore.Add(time.Hour * 24 * -1)
-	} else {
-		sessionBefore = time.Now()
+		sessionBefore = sessionStart.Add(time.Hour * 24 * -1)
 	}
 
 	var accountSnapshot retry.DataWithErr[database.AccountSnapshot]
