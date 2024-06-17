@@ -274,12 +274,10 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, ErrInvalidSessionStart
 	}
 
-	// sessions and period stats are tracked differently
-	// we look up the latest session _before_ sessionBefore, not after sessionStart
-	sessionBefore := time.Now() // current session
-	if time.Since(sessionStart).Hours() >= 48 {
-		// 3 days would mean today and yest, so before the reset 2 days ago and so on
-		sessionBefore = sessionStart.Add(time.Hour * 24 * -1)
+	// 1 day should be the same as today
+	sessionBefore := time.Now()
+	if time.Since(sessionStart).Hours() >= 24 {
+		sessionBefore = sessionStart
 	}
 
 	var accountSnapshot retry.DataWithErr[database.AccountSnapshot]
