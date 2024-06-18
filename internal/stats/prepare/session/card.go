@@ -1,6 +1,7 @@
 package session
 
 import (
+	"math"
 	"slices"
 
 	"github.com/cufee/aftermath/internal/database"
@@ -122,6 +123,47 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		cards.Unrated.Vehicles = append(cards.Unrated.Vehicles, card)
 	}
 
+	// Vehicle Highlights
+	var minimumBattles float64 = 5
+	periodDays := session.PeriodEnd.Sub(session.PeriodStart).Hours() / 24
+	withFallback := func(battles float64) float64 {
+		return math.Min(battles, float64(session.RegularBattles.Battles.Float())/float64(len(highlights)))
+	}
+	if periodDays > 90 {
+		minimumBattles = withFallback(100)
+	} else if periodDays > 60 {
+		minimumBattles = withFallback(75)
+	} else if periodDays > 30 {
+		minimumBattles = withFallback(50)
+	} else if periodDays > 14 {
+		minimumBattles = withFallback(25)
+	} else if periodDays > 7 {
+		minimumBattles = withFallback(10)
+	}
+
+	highlightedVehicles, err := common.GetHighlightedVehicles(highlights, session.RegularBattles.Vehicles, int(minimumBattles))
+	if err != nil {
+		return Cards{}, err
+	}
+
+	for _, data := range highlightedVehicles {
+		glossary := glossary[data.Vehicle.VehicleID]
+		glossary.ID = data.Vehicle.VehicleID
+
+		card, err := makeHighlightCard(
+			data.Highlight,
+			data.Vehicle,
+			frame.VehicleStatsFrame{},
+			options.Printer(),
+			options.Locale(),
+			glossary,
+		)
+		if err != nil {
+			return Cards{}, err
+		}
+		cards.Unrated.Highlights = append(cards.Unrated.Highlights, card)
+	}
+
 	return cards, nil
 }
 
@@ -148,6 +190,33 @@ func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, ca
 		Meta:   common.IntToRoman(glossary.Tier),
 		Title:  glossary.Name(locale),
 		Type:   cardType,
+		Blocks: blocks,
+	}, nil
+}
+
+func makeHighlightCard(highlight common.Highlight, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag, glossary database.Vehicle) (VehicleCard, error) {
+	var sFrame, cFrame frame.StatsFrame
+	if session.StatsFrame != nil {
+		sFrame = *session.StatsFrame
+	}
+	if career.StatsFrame != nil {
+		cFrame = *career.StatsFrame
+	}
+
+	var blocks []common.StatsBlock[BlockData]
+	for _, preset := range highlight.Blocks {
+		block, err := presetToBlock(preset, sFrame, cFrame)
+		if err != nil {
+			return VehicleCard{}, err
+		}
+		block.Localize(printer)
+		blocks = append(blocks, block)
+	}
+
+	return VehicleCard{
+		Meta:   printer(highlight.Label),
+		Title:  common.IntToRoman(glossary.Tier) + " " + glossary.Name(locale),
+		Type:   common.CardTypeHighlight,
 		Blocks: blocks,
 	}, nil
 }

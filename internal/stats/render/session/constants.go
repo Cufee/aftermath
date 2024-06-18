@@ -124,6 +124,7 @@ func vehicleBlocksRowStyle(width float64) common.Style {
 		AlignItems:     common.AlignItemsCenter,
 		Width:          width,
 		Gap:            10,
+		// Debug:          true,
 	}
 }
 
@@ -145,12 +146,31 @@ func ratingVehicleBlocksRowStyle(width float64) common.Style {
 	return vehicleBlocksRowStyle(width)
 }
 
-func highlightCardStyle(width float64) common.Style {
-	return defaultCardStyle(width)
-}
+var (
+	highlightCardTitleTextStyle   = common.Style{Font: &common.FontSmall, FontColor: common.TextSecondary}
+	highlightVehicleNameTextStyle = common.Style{Font: &common.FontMedium, FontColor: common.TextPrimary}
+)
 
 func highlightedVehicleCardStyle(width float64) common.Style {
-	return vehicleCardStyle(width)
+	style := defaultCardStyle(width)
+	style.JustifyContent = common.JustifyContentSpaceBetween
+	style.Direction = common.DirectionHorizontal
+	style.AlignItems = common.AlignItemsCenter
+	style.PaddingX, style.PaddingY = 20, 15
+	style.Gap = 15
+	// style.Debug = true
+	return style
+}
+
+func highlightedVehicleBlockRowStyle(width float64) common.Style {
+	return common.Style{
+		JustifyContent: common.JustifyContentSpaceBetween,
+		Direction:      common.DirectionHorizontal,
+		AlignItems:     common.AlignItemsCenter,
+		Width:          width,
+		Gap:            10,
+		// Debug:          true,
+	}
 }
 
 func defaultCardStyle(width float64) common.Style {

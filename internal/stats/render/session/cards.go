@@ -32,6 +32,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	// Calculate minimal card width to fit all the content
 	primaryCardBlockSizes := make(map[string]float64)
 	secondaryCardBlockSizes := make(map[string]float64)
+	highlightCardBlockSizes := make(map[string]float64)
 	var primaryCardWidth float64 = minPrimaryCardWidth
 	var secondaryCardWidth, totalFrameWidth float64
 	// rating and unrated battles > 0	 	   unrated battles > 0		   rating battles > 0
@@ -89,15 +90,15 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		for _, card := range cards.Unrated.Highlights {
 			// [card label] [session]
 			// [title]  	  [label]
-			labelSize := common.MeasureString(card.Meta, *vehicleCardTitleTextStyle.Font)
-			titleSize := common.MeasureString(card.Title, *vehicleCardTitleTextStyle.Font)
-			presetBlockWidth, contentWidth := vehicleBlocksWidth(card.Blocks, vehicleBlockStyle.session, vehicleBlockStyle.career, vehicleBlockStyle.label, vehicleBlocksRowStyle(0))
+			labelSize := common.MeasureString(card.Meta, *highlightCardTitleTextStyle.Font)
+			titleSize := common.MeasureString(card.Title, *highlightVehicleNameTextStyle.Font)
+			presetBlockWidth, contentWidth := highlightedVehicleBlocksWidth(card.Blocks, vehicleBlockStyle.session, vehicleBlockStyle.career, vehicleBlockStyle.label, highlightedVehicleBlockRowStyle(0))
 			// add the gap and card padding, the gap here accounts for title/label being inline with content
-			contentWidth += vehicleBlocksRowStyle(0).Gap*float64(len(card.Blocks)) + highlightCardStyle(0).PaddingX*2 + common.Max(titleSize.TotalWidth, labelSize.TotalWidth)
+			contentWidth += highlightedVehicleBlockRowStyle(0).Gap*float64(len(card.Blocks)) + highlightedVehicleCardStyle(0).Gap + highlightedVehicleCardStyle(0).PaddingX*2 + common.Max(titleSize.TotalWidth, labelSize.TotalWidth)
 			primaryCardWidth = common.Max(primaryCardWidth, contentWidth)
 
 			for key, width := range presetBlockWidth {
-				primaryCardBlockSizes[key] = common.Max(primaryCardBlockSizes[key], width)
+				highlightCardBlockSizes[key] = common.Max(highlightCardBlockSizes[key], width)
 			}
 		}
 	}
@@ -169,7 +170,9 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 
 	// highlights
 	if shouldRenderUnratedHighlights {
-		//
+		for _, vehicle := range cards.Unrated.Highlights {
+			primaryColumn = append(primaryColumn, makeVehicleHighlightCard(vehicle, highlightCardBlockSizes, primaryCardWidth))
+		}
 	}
 	// rating vehicle cards
 	if shouldRenderRatingVehicles {
@@ -214,7 +217,36 @@ func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], sessionS
 			width = common.Max(width, size.TotalWidth+labelStyle.PaddingX*2+vehicleLegendLabelContainer.PaddingX*2)
 		}
 		maxBlockWidth = common.Max(maxBlockWidth, width)
-		presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], width) // add space for comparison icons
+		presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], width)
+	}
+
+	if containerStyle.Direction == common.DirectionHorizontal {
+		for _, w := range presetBlockWidth {
+			contentWidth += w
+		}
+	} else {
+		contentWidth = maxBlockWidth
+	}
+
+	return presetBlockWidth, contentWidth
+}
+
+func highlightedVehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], sessionStyle, _, labelStyle, containerStyle common.Style) (map[string]float64, float64) {
+	presetBlockWidth := make(map[string]float64)
+	var contentWidth float64
+	var maxBlockWidth float64
+	for _, block := range blocks {
+		var width float64
+		{
+			size := common.MeasureString(block.Data.Session.String(), *sessionStyle.Font)
+			width = common.Max(width, size.TotalWidth+sessionStyle.PaddingX*2)
+		}
+		{
+			size := common.MeasureString(block.Label, *labelStyle.Font)
+			width = common.Max(width, size.TotalWidth+labelStyle.PaddingX*2)
+		}
+		maxBlockWidth = common.Max(maxBlockWidth, width)
+		presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], width)
 	}
 
 	if containerStyle.Direction == common.DirectionHorizontal {
@@ -266,6 +298,26 @@ func makeVehicleCard(vehicle session.VehicleCard, blockSizes map[string]float64,
 			vehicleWN8Icon(vehicleWN8),
 		),
 		common.NewBlocksContent(vehicleBlocksRowStyle(0), content...),
+	)
+}
+
+func makeVehicleHighlightCard(vehicle session.VehicleCard, blockSizes map[string]float64, cardWidth float64) common.Block {
+	var content []common.Block
+	for _, block := range vehicle.Blocks {
+		content = append(content,
+			common.NewBlocksContent(statsBlockStyle(blockSizes[block.Tag.String()]),
+				common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()),
+				common.NewTextContent(vehicleBlockStyle.label, block.Label),
+			),
+		)
+	}
+
+	return common.NewBlocksContent(highlightedVehicleCardStyle(cardWidth),
+		common.NewBlocksContent(common.Style{Direction: common.DirectionVertical},
+			common.NewTextContent(highlightCardTitleTextStyle, vehicle.Meta),
+			common.NewTextContent(highlightVehicleNameTextStyle, vehicle.Title),
+		),
+		common.NewBlocksContent(highlightedVehicleBlockRowStyle(0), content...),
 	)
 }
 
