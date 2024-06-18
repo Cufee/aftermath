@@ -57,8 +57,10 @@ func renderImages(images []image.Image, style Style) (image.Image, error) {
 		lastX += float64(imageSize.extraSpacingX)
 		lastY += float64(imageSize.extraSpacingY)
 	case JustifyContentSpaceBetween:
-		justifyOffsetX = float64(imageSize.extraSpacingX / float64(len(images)-1))
-		justifyOffsetY = float64(imageSize.extraSpacingY / float64(len(images)-1))
+		if len(images) > 0 {
+			justifyOffsetX = float64(imageSize.extraSpacingX / float64(len(images)-1))
+			justifyOffsetY = float64(imageSize.extraSpacingY / float64(len(images)-1))
+		}
 	case JustifyContentSpaceAround:
 		spacingX := float64(imageSize.extraSpacingX / float64(len(images)+1))
 		spacingY := float64(imageSize.extraSpacingY / float64(len(images)+1))
@@ -188,8 +190,8 @@ func getDetailedSize(images []image.Image, style Style) imageSize {
 		imageHeight = totalHeight
 	}
 
-	extraSpacingX := imageWidth - totalWidth
-	extraSpacingY := imageHeight - totalHeight
+	extraSpacingX := max(0, imageWidth-totalWidth)
+	extraSpacingY := max(0, imageHeight-totalHeight)
 
 	return imageSize{
 		width:            imageWidth,
