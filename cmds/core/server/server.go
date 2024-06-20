@@ -16,7 +16,7 @@ func NewServer(port string, handlers ...Handler) func() {
 		mux.Handle(h.Path, h.Func)
 	}
 	srv := &http.Server{
-		Addr:         "127.0.0.1:" + port,
+		Addr:         ":" + port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  5 * time.Second,
 		Handler:      mux,
