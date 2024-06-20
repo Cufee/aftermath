@@ -16,12 +16,12 @@ import (
 
 func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Cards, subs []database.UserSubscription, opts render.Options) (render.Segments, error) {
 	var (
-		// primary card
+		// primary cards
 		shouldRenderUnratedOverview   = session.RegularBattles.Battles > 0 || session.RatingBattles.Battles == 0
-		shouldRenderUnratedHighlights = len(session.RegularBattles.Vehicles) > 3
+		shouldRenderUnratedHighlights = session.RegularBattles.Battles > 0 && len(session.RegularBattles.Vehicles) > 3
 		shouldRenderRatingOverview    = session.RatingBattles.Battles > 0
 		shouldRenderRatingVehicles    = len(cards.Unrated.Vehicles) == 0
-		// secondary card
+		// secondary cards
 		shouldRenderUnratedVehicles = len(cards.Unrated.Vehicles) > 0
 	)
 
