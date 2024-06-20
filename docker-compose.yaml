@@ -33,6 +33,7 @@ services:
           memory: 256m
     ports:
       - 3000
+      - ${PRIVATE_SERVER_PORT}
     networks:
       - dokploy-network
     labels:

@@ -23,7 +23,7 @@ func TestRenderSession(t *testing.T) {
 	zerolog.SetGlobalLevel(level)
 
 	loadStaticAssets(static)
-	coreClient := coreClientFromEnv()
+	coreClient, _ := coreClientsFromEnv()
 	defer coreClient.Database().Disconnect()
 
 	rating, _ := assets.GetLoadedImage("rating-calibration")
