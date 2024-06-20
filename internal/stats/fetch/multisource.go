@@ -83,7 +83,7 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (database.Ac
 		return database.Account{}, wgAccount.Err
 	}
 
-	account := wargamingToAccount(realm, wgAccount.Data, clan, false)
+	account := WargamingToAccount(realm, wgAccount.Data, clan, false)
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()

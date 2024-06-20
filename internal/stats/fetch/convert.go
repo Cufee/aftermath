@@ -15,7 +15,7 @@ func timestampToTime(timestamp int) time.Time {
 	return time.Unix(int64(timestamp), 0)
 }
 
-func wargamingToAccount(realm string, account types.ExtendedAccount, clan types.ClanMember, private bool) database.Account {
+func WargamingToAccount(realm string, account types.ExtendedAccount, clan types.ClanMember, private bool) database.Account {
 	a := database.Account{
 		ID:       strconv.Itoa(account.ID),
 		Realm:    realm,
@@ -36,7 +36,7 @@ func WargamingToStats(realm string, accountData types.ExtendedAccount, clanMembe
 	stats := AccountStatsOverPeriod{
 		Realm: realm,
 		// we got the stats, so the account is obv not private at this point
-		Account: wargamingToAccount(realm, accountData, clanMember, false),
+		Account: WargamingToAccount(realm, accountData, clanMember, false),
 		RegularBattles: StatsWithVehicles{
 			StatsFrame: WargamingToFrame(accountData.Statistics.All),
 			Vehicles:   WargamingVehiclesToFrame(vehicleData),
