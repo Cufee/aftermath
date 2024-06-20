@@ -162,10 +162,10 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 
 	// overview cards
 	if shouldRenderUnratedOverview {
-		primaryColumn = append(primaryColumn, makeOverviewCard(cards.Unrated.Overview, primaryCardBlockSizes, primaryCardWidth, overviewCardStyle(primaryCardWidth)))
+		primaryColumn = append(primaryColumn, makeOverviewCard(cards.Unrated.Overview, primaryCardBlockSizes, overviewCardStyle(primaryCardWidth)))
 	}
 	if shouldRenderRatingOverview {
-		primaryColumn = append(primaryColumn, makeOverviewCard(cards.Rating.Overview, primaryCardBlockSizes, primaryCardWidth, overviewRatingCardStyle(primaryCardWidth)))
+		primaryColumn = append(primaryColumn, makeOverviewCard(cards.Rating.Overview, primaryCardBlockSizes, overviewRatingCardStyle(primaryCardWidth)))
 	}
 
 	// highlights
@@ -337,7 +337,7 @@ func makeVehicleLegendCard(reference session.VehicleCard, blockSizes map[string]
 	return common.NewBlocksContent(style, common.NewBlocksContent(vehicleBlocksRowStyle(0), content...))
 }
 
-func makeOverviewCard(card session.OverviewCard, blockSizes map[string]float64, cardWidth float64, style common.Style) common.Block {
+func makeOverviewCard(card session.OverviewCard, blockSizes map[string]float64, style common.Style) common.Block {
 	var content []common.Block
 	for _, column := range card.Blocks {
 		var columnContent []common.Block

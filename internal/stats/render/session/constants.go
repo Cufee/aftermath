@@ -28,7 +28,6 @@ func frameStyle() common.Style {
 }
 
 var (
-	overviewCardTitleStyle  = common.Style{Font: &common.FontMedium, FontColor: common.TextAlt, PaddingX: 5}
 	overviewStatsBlockStyle = blockStyle{
 		common.Style{Font: &common.FontLarge, FontColor: common.TextPrimary},
 		common.Style{Font: &common.FontMedium, FontColor: common.TextSecondary},

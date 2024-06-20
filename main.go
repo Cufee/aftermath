@@ -4,7 +4,6 @@ import (
 	"embed"
 	"io/fs"
 
-	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -12,6 +11,8 @@ import (
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/core/scheduler"
 	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
+	"github.com/cufee/aftermath/cmds/core/server"
+	"github.com/cufee/aftermath/cmds/core/server/handlers/private"
 	"github.com/cufee/aftermath/cmds/discord"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
@@ -39,31 +40,42 @@ func main() {
 	zerolog.SetGlobalLevel(level)
 
 	loadStaticAssets(static)
-	coreClient := coreClientFromEnv()
-	startSchedulerFromEnvAsync()
 
-	// Load some init options to registed admin accounts and etc
-	logic.ApplyInitOptions(coreClient.Database())
+	liveCoreClient, cacheCoreClient := coreClientsFromEnv()
+	startSchedulerFromEnvAsync(cacheCoreClient.Wargaming())
 
-	discordHandler, err := discord.NewRouterHandler(coreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
+	// Load some init options to registered admin accounts and etc
+	logic.ApplyInitOptions(liveCoreClient.Database())
+
+	discordHandler, err := discord.NewRouterHandler(liveCoreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
 	if err != nil {
 		panic(err)
 	}
 
-	http.Handle("/discord/callback", discordHandler)
-	panic(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
+	if e := os.Getenv("PRIVATE_SERVER_ENABLED"); e == "true" {
+		port := os.Getenv("PRIVATE_SERVER_PORT")
+		servePrivate := server.NewServer(port, server.Handler{
+			Path: "POST /accounts/load",
+			Func: private.LoadAccountsHandler(cacheCoreClient),
+		})
+		log.Info().Str("port", port).Msg("starting a private server")
+		go servePrivate()
+	}
+
+	port := os.Getenv("PORT")
+	servePublic := server.NewServer(port, server.Handler{
+		Path: "POST /discord/callback",
+		Func: discordHandler,
+	})
+	log.Info().Str("port", port).Msg("starting a public server")
+	servePublic()
 }
 
-func startSchedulerFromEnvAsync() {
+func startSchedulerFromEnvAsync(wgClient wargaming.Client) {
 	if os.Getenv("SCHEDULER_ENABLED") != "true" {
 		return
 	}
 
-	// This wargaming client is using a different proxy as it needs a lot higher rps, but can be slow
-	wgClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_CACHE_APP_ID"), os.Getenv("WG_CACHE_APP_RPS"), os.Getenv("WG_CACHE_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_CACHE_PROXY_HOST_LIST"))
-	if err != nil {
-		log.Fatal().Msgf("wgClient: wargaming#NewClientFromEnv failed %s", err)
-	}
 	dbClient, err := database.NewClient()
 	if err != nil {
 		log.Fatal().Msgf("database#NewClient failed %s", err)
@@ -100,12 +112,8 @@ func startSchedulerFromEnvAsync() {
 	// scheduler.CreateSessionTasksWorker(coreClient, "AS")()
 }
 
-func coreClientFromEnv() core.Client {
+func coreClientsFromEnv() (core.Client, core.Client) {
 	// Dependencies
-	wgClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_PRIMARY_APP_ID"), os.Getenv("WG_PRIMARY_APP_RPS"), os.Getenv("WG_PRIMARY_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_PROXY_HOST_LIST"))
-	if err != nil {
-		log.Fatal().Msgf("wgClient: wargaming#NewClientFromEnv failed %s", err)
-	}
 	dbClient, err := database.NewClient()
 	if err != nil {
 		log.Fatal().Msgf("database#NewClient failed %s", err)
@@ -115,13 +123,15 @@ func coreClientFromEnv() core.Client {
 		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
 	}
 
+	liveClient, cacheClient := wargamingClientsFromEnv()
+
 	// Fetch client
-	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, dbClient)
+	fetchClient, err := fetch.NewMultiSourceClient(cacheClient, bsClient, dbClient)
 	if err != nil {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
 
-	return core.NewClient(client, wgClient, dbClient)
+	return core.NewClient(fetchClient, liveClient, dbClient), core.NewClient(fetchClient, cacheClient, dbClient)
 }
 
 func loadStaticAssets(static fs.FS) {
@@ -138,4 +148,19 @@ func loadStaticAssets(static fs.FS) {
 	if err != nil {
 		log.Fatal().Msgf("localization#LoadAssets failed %s", err)
 	}
+}
+
+func wargamingClientsFromEnv() (wargaming.Client, wargaming.Client) {
+	liveClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_PRIMARY_APP_ID"), os.Getenv("WG_PRIMARY_APP_RPS"), os.Getenv("WG_PRIMARY_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_PROXY_HOST_LIST"))
+	if err != nil {
+		log.Fatal().Msgf("wargamingClientsFromEnv#NewClientFromEnv failed %s", err)
+	}
+
+	// This wargaming client is using a different proxy as it needs a lot higher rps, but can be slow
+	cacheClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_CACHE_APP_ID"), os.Getenv("WG_CACHE_APP_RPS"), os.Getenv("WG_CACHE_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_CACHE_PROXY_HOST_LIST"))
+	if err != nil {
+		log.Fatal().Msgf("wargamingClientsFromEnv#NewClientFromEnv failed %s", err)
+	}
+
+	return liveClient, cacheClient
 }
