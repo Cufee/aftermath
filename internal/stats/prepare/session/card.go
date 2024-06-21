@@ -98,7 +98,7 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
 	})
 	for _, data := range unratedVehicles {
-		if len(cards.Unrated.Vehicles) >= 5 {
+		if len(cards.Unrated.Vehicles) >= 10 {
 			break
 		}
 		if data.Battles < 1 {
