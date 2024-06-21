@@ -16,11 +16,11 @@ func init() {
 			if task.Data == nil {
 				return "no data provided", errors.New("no data provided")
 			}
-			snapshotExpiration, ok := task.Data["expiration_snapshots"].(time.Time)
+			snapshotExpiration, ok := task.Data["expiration_snapshots"].(int64)
 			if !ok {
 				return "invalid expiration_snapshots", errors.New("failed to cast expiration_snapshots to time")
 			}
-			taskExpiration, ok := task.Data["expiration_tasks"].(time.Time)
+			taskExpiration, ok := task.Data["expiration_tasks"].(int64)
 			if !ok {
 				task.Data["triesLeft"] = int(0) // do not retry
 				return "invalid expiration_tasks", errors.New("failed to cast expiration_tasks to time")
@@ -29,12 +29,12 @@ func init() {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
-			err := client.Database().DeleteExpiredTasks(ctx, taskExpiration)
+			err := client.Database().DeleteExpiredTasks(ctx, time.Unix(taskExpiration, 0))
 			if err != nil {
 				return "failed to delete expired tasks", err
 			}
 
-			err = client.Database().DeleteExpiredSnapshots(ctx, snapshotExpiration)
+			err = client.Database().DeleteExpiredSnapshots(ctx, time.Unix(snapshotExpiration, 0))
 			if err != nil {
 				return "failed to delete expired snapshots", err
 			}
@@ -55,8 +55,8 @@ func CreateCleanupTasks(client core.Client) error {
 		ReferenceID:    "database_cleanup",
 		ScheduledAfter: now,
 		Data: map[string]any{
-			"expiration_snapshots": now.Add(-1 * time.Hour * 24 * 90), // 90 days
-			"expiration_tasks":     now.Add(-1 * time.Hour * 24 * 7),  // 7 days
+			"expiration_snapshots": now.Add(-1 * time.Hour * 24 * 90).Unix(), // 90 days
+			"expiration_tasks":     now.Add(-1 * time.Hour * 24 * 7).Unix(),  // 7 days
 		},
 	}
 
