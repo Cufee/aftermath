@@ -216,6 +216,7 @@ func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], sessionS
 			size := common.MeasureString(block.Label, *labelStyle.Font)
 			width = common.Max(width, size.TotalWidth+labelStyle.PaddingX*2+vehicleLegendLabelContainer.PaddingX*2)
 		}
+		width += vehicleComparisonIconSize
 		maxBlockWidth = common.Max(maxBlockWidth, width)
 		presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], width)
 	}
@@ -278,13 +279,17 @@ func makeVehicleCard(vehicle session.VehicleCard, blockSizes map[string]float64,
 	var content []common.Block
 	for _, block := range vehicle.Blocks {
 		var blockContent []common.Block
-		blockContent = append(blockContent, common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()))
-		if block.Data.Career.Float() > 0 {
-			blockContent = append(blockContent, common.NewTextContent(vehicleBlockStyle.career, block.Data.Career.String()))
+		if blockShouldHaveCompareIcon(block) {
+			blockContent = append(blockContent, blockWithVehicleIcon(common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()), block.Data.Session, block.Data.Career))
+		} else {
+			blockContent = append(blockContent, common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()))
 		}
+
+		style := statsBlockStyle(blockSizes[block.Tag.String()])
 		content = append(content,
-			common.NewBlocksContent(statsBlockStyle(blockSizes[block.Tag.String()]), blockContent...),
+			common.NewBlocksContent(style, blockContent...),
 		)
+
 		if block.Tag == prepare.TagWN8 {
 			vehicleWN8 = block.Value
 		}
@@ -324,10 +329,12 @@ func makeVehicleHighlightCard(vehicle session.VehicleCard, blockSizes map[string
 func makeVehicleLegendCard(reference session.VehicleCard, blockSizes map[string]float64, cardWidth float64) common.Block {
 	var content []common.Block
 	for _, block := range reference.Blocks {
+		containerStyle := statsBlockStyle(blockSizes[block.Tag.String()])
+		if blockShouldHaveCompareIcon(block) {
+			containerStyle.AlignItems = common.AlignItemsStart
+		}
 		content = append(content,
-			common.NewBlocksContent(statsBlockStyle(blockSizes[block.Tag.String()]),
-				common.NewBlocksContent(vehicleLegendLabelContainer, common.NewTextContent(vehicleBlockStyle.label, block.Label)),
-			),
+			common.NewBlocksContent(containerStyle, common.NewBlocksContent(vehicleLegendLabelContainer, common.NewTextContent(vehicleBlockStyle.label, block.Label))),
 		)
 	}
 	style := vehicleCardStyle(cardWidth)

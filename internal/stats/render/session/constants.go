@@ -13,9 +13,10 @@ type blockStyle struct {
 }
 
 var (
-	vehicleWN8IconSize    = 20.0
-	specialRatingIconSize = 60.0
-	minPrimaryCardWidth   = 300.0 // making the primary card too small looks bad if there are no battles in a session
+	vehicleWN8IconSize        = 20.0
+	specialRatingIconSize     = 60.0
+	vehicleComparisonIconSize = 10.0
+	minPrimaryCardWidth       = 300.0 // making the primary card too small looks bad if there are no battles in a session
 )
 
 var (
@@ -104,15 +105,19 @@ func vehicleCardTitleContainerStyle(width float64) common.Style {
 	return common.Style{
 		JustifyContent: common.JustifyContentSpaceBetween,
 		Direction:      common.DirectionHorizontal,
+		AlignItems:     common.AlignItemsCenter,
 		Width:          width,
+		PaddingX:       2.5,
+		PaddingY:       2.5,
 		Gap:            10,
 	}
 }
 
 func vehicleCardStyle(width float64) common.Style {
 	style := defaultCardStyle(width)
-	style.PaddingX, style.PaddingY = 20, 15
+	style.PaddingX, style.PaddingY = 15, 10
 	style.Gap = 5
+	// style.Debug = true
 	return style
 }
 
