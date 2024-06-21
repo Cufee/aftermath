@@ -89,7 +89,6 @@ func vehicleComparisonIcon(session, career frame.Value) common.Block {
 		icon, _ := assets.GetLoadedImage("triangle-down-solid")
 		ctx.DrawImage(imaging.Fill(icon, int(vehicleComparisonIconSize), int(vehicleComparisonIconSize), imaging.Center, imaging.Linear), 0, 0)
 		return common.NewImageContent(common.Style{BackgroundColor: color.RGBA{231, 130, 141, 255}}, ctx.Image())
-
 	}
 }
 
