@@ -7,7 +7,11 @@ import (
 )
 
 func (c *Client) SendInteractionResponse(id, token string, data discordgo.InteractionResponse) error {
-	req, err := c.interactionRequest("POST", discordgo.EndpointInteractionResponse(id, token), data, data.Data.Files)
+	var files []*discordgo.File
+	if data.Data != nil {
+		files = data.Data.Files
+	}
+	req, err := c.interactionRequest("POST", discordgo.EndpointInteractionResponse(id, token), data, files)
 	if err != nil {
 		return err
 	}

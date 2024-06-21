@@ -111,26 +111,23 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 			return
 		}
 
-		// ack the interaction
-		err = writeDeferredInteractionResponseAck(w, data.Type, command.Ephemeral)
+		// ack the interaction proactively
+		err = router.restClient.SendInteractionResponse(data.ID, data.Token, discordgo.InteractionResponse{Type: discordgo.InteractionResponseDeferredChannelMessageWithSource})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Err(err).Str("id", data.ID).Msg("failed to ack an interaction")
 			return
 		}
+		// write the ack into response
+		err = writeDeferredInteractionResponseAck(w, data.Type, command.Ephemeral)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Err(err).Str("id", data.ID).Msg("failed to write an interaction ack response")
+			return
+		}
 
 		// route the interaction to a proper handler for a later reply
-		state := &interactionState{mx: &sync.Mutex{}}
-		state.mx.Lock()
-		go func() {
-			// unlock once this context is done and the ack is delivered
-			<-r.Context().Done()
-			log.Debug().Str("id", data.ID).Msg("sent an interaction ack")
-
-			state.acked = true
-			state.mx.Unlock()
-		}()
-
+		state := &interactionState{mx: &sync.Mutex{}, acked: true}
 		router.startInteractionHandlerAsync(data, state, command)
 	}, nil
 }
