@@ -215,7 +215,7 @@ func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]Task, error
 
 	_, err = c.prisma.CronTask.
 		FindMany(db.CronTask.ID.In(ids)).
-		Update(db.CronTask.Status.Set(string(TaskStatusInProgress))).
+		Update(db.CronTask.Status.Set(string(TaskStatusInProgress)), db.CronTask.LastRun.Set(time.Now())).
 		Exec(ctx)
 	if err != nil {
 		return nil, err
