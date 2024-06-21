@@ -45,7 +45,7 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width 
 			column = append(column, icon)
 		}
 		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
-			common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()),
+			blockWithDoubleVehicleIcon(common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()), block.Data.Session, block.Data.Career),
 		))
 		return common.NewBlocksContent(specialRatingColumnStyle, column...)
 
@@ -80,20 +80,30 @@ func vehicleComparisonIcon(session, career frame.Value) common.Block {
 	default:
 		return common.NewImageContent(common.Style{}, ctx.Image())
 
-	case session.Float() > career.Float()*1.05:
+	case session.Float() > career.Float():
 		icon, _ := assets.GetLoadedImage("triangle-up-solid")
 		ctx.DrawImage(imaging.Fill(icon, int(vehicleComparisonIconSize), int(vehicleComparisonIconSize), imaging.Center, imaging.Linear), 0, 0)
 		return common.NewImageContent(common.Style{BackgroundColor: color.RGBA{3, 201, 169, 255}}, ctx.Image())
 
-	case session.Float() < career.Float()*0.95:
+	case session.Float() < career.Float():
 		icon, _ := assets.GetLoadedImage("triangle-down-solid")
 		ctx.DrawImage(imaging.Fill(icon, int(vehicleComparisonIconSize), int(vehicleComparisonIconSize), imaging.Center, imaging.Linear), 0, 0)
 		return common.NewImageContent(common.Style{BackgroundColor: color.RGBA{231, 130, 141, 255}}, ctx.Image())
+
+	case session.Float() == career.Float():
+		ctx.DrawRectangle(vehicleComparisonIconSize*0.2, (vehicleComparisonIconSize-2)/2, vehicleComparisonIconSize*0.8, 2)
+		ctx.SetColor(common.TextAlt)
+		ctx.Fill()
+		return common.NewImageContent(common.Style{}, ctx.Image())
 	}
 }
 
 func blockWithVehicleIcon(block common.Block, session, career frame.Value) common.Block {
 	return common.NewBlocksContent(common.Style{}, block, vehicleComparisonIcon(session, career))
+}
+
+func blockWithDoubleVehicleIcon(block common.Block, session, career frame.Value) common.Block {
+	return common.NewBlocksContent(common.Style{}, blankBlock(vehicleComparisonIconSize, 1), block, vehicleComparisonIcon(session, career))
 }
 
 func blockShouldHaveCompareIcon(block prepare.StatsBlock[session.BlockData]) bool {
