@@ -329,12 +329,13 @@ func makeVehicleHighlightCard(vehicle session.VehicleCard, blockSizes map[string
 func makeVehicleLegendCard(reference session.VehicleCard, blockSizes map[string]float64, cardWidth float64) common.Block {
 	var content []common.Block
 	for _, block := range reference.Blocks {
-		containerStyle := statsBlockStyle(blockSizes[block.Tag.String()])
+		label := common.NewBlocksContent(vehicleLegendLabelContainer, common.NewTextContent(vehicleBlockStyle.label, block.Label))
 		if blockShouldHaveCompareIcon(block) {
-			containerStyle.AlignItems = common.AlignItemsStart
+			label = common.NewBlocksContent(vehicleLegendLabelContainer, blockWithVehicleIcon(common.NewTextContent(vehicleBlockStyle.label, block.Label), frame.InvalidValue, frame.InvalidValue))
 		}
+		containerStyle := statsBlockStyle(blockSizes[block.Tag.String()])
 		content = append(content,
-			common.NewBlocksContent(containerStyle, common.NewBlocksContent(vehicleLegendLabelContainer, common.NewTextContent(vehicleBlockStyle.label, block.Label))),
+			common.NewBlocksContent(containerStyle, label),
 		)
 	}
 	style := vehicleCardStyle(cardWidth)
