@@ -82,6 +82,7 @@ func RestartTasksWorker(queue *Queue) func() {
 		staleTasks, err := queue.core.Database().GetStaleTasks(ctx, 100)
 		if err != nil {
 			log.Err(err).Msg("failed to reschedule stale tasks")
+			return
 		}
 
 		if len(staleTasks) < 1 {
@@ -97,6 +98,8 @@ func RestartTasksWorker(queue *Queue) func() {
 		err = queue.core.Database().UpdateTasks(ctx, staleTasks...)
 		if err != nil {
 			log.Err(err).Msg("failed to update stale tasks")
+			return
 		}
+		log.Debug().Int("count", len(staleTasks)).Msg("rescheduled stale tasks")
 	}
 }

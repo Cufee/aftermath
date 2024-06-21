@@ -78,6 +78,7 @@ func (q *Queue) Process(callback func(error), tasks ...database.Task) {
 				})
 				return
 			}
+			t.LastRun = time.Now()
 
 			attempt := database.TaskLog{
 				Targets:   t.Targets,
