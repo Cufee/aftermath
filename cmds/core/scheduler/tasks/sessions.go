@@ -30,7 +30,7 @@ func init() {
 			}
 			if len(task.Targets) < 1 {
 				task.Data["triesLeft"] = int(0) // do not retry
-				return "targed ids cannot be left blank", errors.New("invalid targets length")
+				return "target ids cannot be left blank", errors.New("invalid targets length")
 			}
 			forceUpdate, _ := task.Data["force"].(bool)
 
