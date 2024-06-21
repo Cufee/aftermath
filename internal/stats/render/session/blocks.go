@@ -75,20 +75,21 @@ func vehicleWN8Icon(wn8 frame.Value) common.Block {
 func vehicleComparisonIcon(session, career frame.Value) common.Block {
 	ctx := gg.NewContext(int(vehicleComparisonIconSize), int(vehicleComparisonIconSize))
 	switch {
+	case session.Float() < 0, career.Float() < 0:
+		fallthrough
+	default:
+		return common.NewImageContent(common.Style{}, ctx.Image())
+
 	case session.Float() > career.Float()*1.05:
 		icon, _ := assets.GetLoadedImage("triangle-up-solid")
 		ctx.DrawImage(imaging.Fill(icon, int(vehicleComparisonIconSize), int(vehicleComparisonIconSize), imaging.Center, imaging.Linear), 0, 0)
 		return common.NewImageContent(common.Style{BackgroundColor: color.RGBA{3, 201, 169, 255}}, ctx.Image())
-		// return common.NewImageContent(common.Style{BackgroundColor: common.TextPrimary}, ctx.Image())
 
 	case session.Float() < career.Float()*0.95:
 		icon, _ := assets.GetLoadedImage("triangle-down-solid")
 		ctx.DrawImage(imaging.Fill(icon, int(vehicleComparisonIconSize), int(vehicleComparisonIconSize), imaging.Center, imaging.Linear), 0, 0)
 		return common.NewImageContent(common.Style{BackgroundColor: color.RGBA{231, 130, 141, 255}}, ctx.Image())
-		// return common.NewImageContent(common.Style{BackgroundColor: common.TextPrimary}, ctx.Image())
 
-	default:
-		return common.NewImageContent(common.Style{}, ctx.Image())
 	}
 }
 

@@ -331,7 +331,7 @@ func makeVehicleLegendCard(reference session.VehicleCard, blockSizes map[string]
 	for _, block := range reference.Blocks {
 		label := common.NewBlocksContent(vehicleLegendLabelContainer, common.NewTextContent(vehicleBlockStyle.label, block.Label))
 		if blockShouldHaveCompareIcon(block) {
-			label = common.NewBlocksContent(vehicleLegendLabelContainer, blockWithVehicleIcon(common.NewTextContent(vehicleBlockStyle.label, block.Label), frame.InvalidValue, frame.InvalidValue))
+			label = blockWithVehicleIcon(common.NewBlocksContent(vehicleLegendLabelContainer, common.NewTextContent(vehicleBlockStyle.label, block.Label)), frame.InvalidValue, frame.InvalidValue)
 		}
 		containerStyle := statsBlockStyle(blockSizes[block.Tag.String()])
 		content = append(content,
@@ -356,7 +356,6 @@ func makeOverviewCard(card session.OverviewCard, blockSizes map[string]float64, 
 			} else {
 				col = common.NewBlocksContent(statsBlockStyle(blockSizes[block.Tag.String()]),
 					common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()),
-					// common.NewTextContent(vehicleBlockStyle.career, block.Data.Career.String()),
 					common.NewTextContent(vehicleBlockStyle.label, block.Label),
 				)
 			}
