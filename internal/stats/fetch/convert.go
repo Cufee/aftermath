@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
@@ -15,8 +15,8 @@ func timestampToTime(timestamp int) time.Time {
 	return time.Unix(int64(timestamp), 0)
 }
 
-func WargamingToAccount(realm string, account types.ExtendedAccount, clan types.ClanMember, private bool) database.Account {
-	a := database.Account{
+func WargamingToAccount(realm string, account types.ExtendedAccount, clan types.ClanMember, private bool) models.Account {
+	a := models.Account{
 		ID:       strconv.Itoa(account.ID),
 		Realm:    realm,
 		Nickname: account.Nickname,

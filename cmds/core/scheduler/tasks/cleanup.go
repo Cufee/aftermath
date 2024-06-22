@@ -7,12 +7,12 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/cmds/core"
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 )
 
 func init() {
-	defaultHandlers[database.TaskTypeDatabaseCleanup] = TaskHandler{
-		Process: func(client core.Client, task database.Task) (string, error) {
+	defaultHandlers[models.TaskTypeDatabaseCleanup] = TaskHandler{
+		Process: func(client core.Client, task models.Task) (string, error) {
 			if task.Data == nil {
 				return "no data provided", errors.New("no data provided")
 			}
@@ -41,7 +41,7 @@ func init() {
 
 			return "cleanup complete", nil
 		},
-		ShouldRetry: func(task *database.Task) bool {
+		ShouldRetry: func(task *models.Task) bool {
 			return false
 		},
 	}
@@ -50,8 +50,8 @@ func init() {
 func CreateCleanupTasks(client core.Client) error {
 	now := time.Now()
 
-	task := database.Task{
-		Type:           database.TaskTypeDatabaseCleanup,
+	task := models.Task{
+		Type:           models.TaskTypeDatabaseCleanup,
 		ReferenceID:    "database_cleanup",
 		ScheduledAfter: now,
 		Data: map[string]any{

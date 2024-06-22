@@ -4,14 +4,12 @@ dotenv:
   - ".env"
 
 vars:
-  PRISMA_CLIENT: github.com/steebchen/prisma-client-go@v0.37.0
-  PRISMA_SCHEMA: --schema ./internal/database/prisma/schema.prisma
+  ENT_CMD: go run -mod=mod entgo.io/ent/cmd/ent
+  ENT_DIRECTORY: internal/database/ent/schema
 
 tasks:
   test:
     desc: runs tests
-    env:
-      DATABASE_URL: "file:{{.USER_WORKING_DIR}}/tmp/local_test.db"
     cmds:
       - go run {{ .PRISMA_CLIENT }} db push {{ .PRISMA_SCHEMA }}
       - |
@@ -21,33 +19,22 @@ tasks:
           go test -timeout 30s --count=1 -v -run {{ .CLI_ARGS }}
         fi
 
-  prisma-install:
-    desc: installs the correct version of prisma
-    cmd: go get {{ .PRISMA_CLIENT }}
+  ent-new:
+    desc: init a new schema with a given name
+    cmd: '{{.ENT_CMD}} new --target {{.ENT_DIRECTORY}} {{.CLI_ARGS}}'
 
-  prisma:
-    desc: run a custom prisma command by adding `-- some command` to this task
-    cmd: go run {{ .PRISMA_CLIENT }} {{ .PRISMA_SCHEMA }} {{ .CLI_ARGS }}
+  ent-generate:
+    desc: generate go code for the ent schema directory
+    cmd: go generate internal/database/ent
 
-  db-push:
-    desc: sync the database with the schema for development
-    cmd: go run {{ .PRISMA_CLIENT }} db push {{ .PRISMA_SCHEMA }}
-
-  db-generate:
-    desc: re-generate the Go client
-    cmd: go run {{ .PRISMA_CLIENT }} generate {{ .PRISMA_SCHEMA }}
-
-  db-migrate-dev:
-    desc: for production use, create a migration locally
-    cmd: go run {{ .PRISMA_CLIENT }} migrate dev {{ .PRISMA_SCHEMA }}
-
-  db-migrate-deploy:
-    desc: sync production database with migrations
-    cmd: go run {{ .PRISMA_CLIENT }} migrate deploy {{ .PRISMA_SCHEMA }}
+  db-migrate:
+    desc: generate migrations
+    cmd: atlas migrate diff init --dir "file://internal/database/ent/migrate/migrations" --to "ent://internal/database/ent/schema" --dev-url "sqlite://tmp/file?mode=memory&_fk=1"
+  db-migrate-apply:
+    desc: apply migrations using atlas
+    cmd: ${ATLAS_TEMP_DIR} migrate apply --allow-dirty --dir "file://internal/database/ent/migrate/migrations" --tx-mode all --url "libsql+ws://0.0.0.0:8080"
 
   dev:
     desc: Start a local dev server
-    deps:
-      - db-push
     cmds:
       - air

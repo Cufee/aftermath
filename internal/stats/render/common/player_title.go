@@ -3,7 +3,7 @@ package common
 import (
 	"image/color"
 
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/rs/zerolog/log"
 )
 
@@ -34,7 +34,7 @@ func DefaultPlayerTitleStyle(containerStyle Style) TitleCardStyle {
 	}
 }
 
-func NewPlayerTitleCard(style TitleCardStyle, nickname, clanTag string, subscriptions []database.UserSubscription) Block {
+func NewPlayerTitleCard(style TitleCardStyle, nickname, clanTag string, subscriptions []models.UserSubscription) Block {
 	clanTagBlock, hasClanTagBlock := newClanTagBlock(style.ClanTag, clanTag, subscriptions)
 	if !hasClanTagBlock {
 		return NewBlocksContent(style.Container, NewTextContent(style.Nickname, nickname))
@@ -65,7 +65,7 @@ func NewPlayerTitleCard(style TitleCardStyle, nickname, clanTag string, subscrip
 
 }
 
-func newClanTagBlock(style Style, clanTag string, subs []database.UserSubscription) (Block, bool) {
+func newClanTagBlock(style Style, clanTag string, subs []models.UserSubscription) (Block, bool) {
 	if clanTag == "" {
 		return Block{}, false
 	}

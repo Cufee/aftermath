@@ -7,7 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/common"
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 )
 
 func init() {
@@ -49,11 +49,11 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				currentConnection, exists := ctx.User.Connection(database.ConnectionTypeWargaming)
+				currentConnection, exists := ctx.User.Connection(models.ConnectionTypeWargaming)
 				if !exists {
 					currentConnection.UserID = ctx.User.ID
 					currentConnection.Metadata = make(map[string]any)
-					currentConnection.Type = database.ConnectionTypeWargaming
+					currentConnection.Type = models.ConnectionTypeWargaming
 				}
 
 				currentConnection.Metadata["verified"] = false

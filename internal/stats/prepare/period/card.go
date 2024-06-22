@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch"
 	"github.com/cufee/aftermath/internal/stats/prepare/common"
 )
 
-func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]database.Vehicle, opts ...common.Option) (Cards, error) {
+func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Vehicle, opts ...common.Option) (Cards, error) {
 	options := common.DefaultOptions
 	for _, apply := range opts {
 		apply(&options)
 	}
 	if glossary == nil {
-		glossary = make(map[string]database.Vehicle)
+		glossary = make(map[string]models.Vehicle)
 	}
 
 	var cards Cards

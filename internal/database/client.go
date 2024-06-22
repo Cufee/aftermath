@@ -2,62 +2,68 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
-	"github.com/cufee/aftermath/internal/database/prisma/db"
+	"github.com/cufee/aftermath/internal/database/ent/db"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"golang.org/x/sync/semaphore"
+
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
+	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
-var _ Client = &client{}
+var _ Client = &libsqlClient{}
 
 type AccountsClient interface {
-	GetAccountByID(ctx context.Context, id string) (Account, error)
-	GetAccounts(ctx context.Context, ids []string) ([]Account, error)
-	GetRealmAccounts(ctx context.Context, realm string) ([]Account, error)
-	UpsertAccounts(ctx context.Context, accounts []Account) map[string]error
+	GetAccountByID(ctx context.Context, id string) (models.Account, error)
+	GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error)
+	GetAccounts(ctx context.Context, ids []string) ([]models.Account, error)
+	UpsertAccounts(ctx context.Context, accounts []models.Account) map[string]error
 	AccountSetPrivate(ctx context.Context, id string, value bool) error
 }
 
 type GlossaryClient interface {
 	GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error)
 	UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error
-	GetVehicles(ctx context.Context, ids []string) (map[string]Vehicle, error)
-	UpsertVehicles(ctx context.Context, vehicles map[string]Vehicle) error
+	GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error)
+	UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) error
 }
 
 type UsersClient interface {
-	GetUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
-	GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (User, error)
-	UpdateConnection(ctx context.Context, connection UserConnection) (UserConnection, error)
-	UpsertConnection(ctx context.Context, connection UserConnection) (UserConnection, error)
-	UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (User, error)
+	GetUserByID(ctx context.Context, id string, opts ...userGetOption) (models.User, error)
+	GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (models.User, error)
+	UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
+	UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
+	UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error)
 }
 
 type SnapshotsClient interface {
-	CreateAccountSnapshots(ctx context.Context, snapshots ...AccountSnapshot) error
-	GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]AccountSnapshot, error)
-	GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind snapshotType, options ...SnapshotQuery) (AccountSnapshot, error)
-	GetManyAccountSnapshots(ctx context.Context, accountIDs []string, kind snapshotType, options ...SnapshotQuery) ([]AccountSnapshot, error)
-	CreateVehicleSnapshots(ctx context.Context, snapshots ...VehicleSnapshot) error
-	GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind snapshotType, options ...SnapshotQuery) ([]VehicleSnapshot, error)
+	CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) error
+	GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]models.AccountSnapshot, error)
+	GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) (models.AccountSnapshot, error)
+	GetManyAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AccountSnapshot, error)
+	CreateVehicleSnapshots(ctx context.Context, snapshots ...models.VehicleSnapshot) error
+	GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error)
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
 }
 
 type TasksClient interface {
-	CreateTasks(ctx context.Context, tasks ...Task) error
-	UpdateTasks(ctx context.Context, tasks ...Task) error
+	CreateTasks(ctx context.Context, tasks ...models.Task) error
+	UpdateTasks(ctx context.Context, tasks ...models.Task) error
 	DeleteTasks(ctx context.Context, ids ...string) error
-	GetStaleTasks(ctx context.Context, limit int) ([]Task, error)
-	GetAndStartTasks(ctx context.Context, limit int) ([]Task, error)
+	GetStaleTasks(ctx context.Context, limit int) ([]models.Task, error)
+	GetAndStartTasks(ctx context.Context, limit int) ([]models.Task, error)
 	DeleteExpiredTasks(ctx context.Context, expiration time.Time) error
-	GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...TaskStatus) ([]Task, error)
+	GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...models.TaskStatus) ([]models.Task, error)
 }
 
 type DiscordDataClient interface {
-	UpsertCommands(ctx context.Context, commands ...ApplicationCommand) error
-	GetCommandsByID(ctx context.Context, commandIDs ...string) ([]ApplicationCommand, error)
+	UpsertCommands(ctx context.Context, commands ...models.ApplicationCommand) error
+	GetCommandsByID(ctx context.Context, commandIDs ...string) ([]models.ApplicationCommand, error)
 }
 
 type Client interface {
@@ -74,27 +80,25 @@ type Client interface {
 	Disconnect() error
 }
 
-type client struct {
-	prisma *db.PrismaClient
-	// Prisma does not currently support updateManyAndReturn
-	// in order to avoid a case where we
+type libsqlClient struct {
+	db             *db.Client
 	tasksUpdateSem *semaphore.Weighted
 }
 
-func (c *client) Disconnect() error {
-	return c.prisma.Disconnect()
+func (c *libsqlClient) Disconnect() error {
+	return c.db.Close()
 }
 
-func (c *client) Prisma() *db.PrismaClient {
-	return c.prisma
-}
-
-func NewClient() (*client, error) {
-	prisma := db.NewClient()
-	err := prisma.Connect()
+func NewLibSQLClient(primaryUrl string) (*libsqlClient, error) {
+	driver, err := sql.Open("libsql", primaryUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	return &client{prisma: prisma, tasksUpdateSem: semaphore.NewWeighted(1)}, nil
+	dbClient := db.NewClient(db.Driver(entsql.OpenDB(dialect.SQLite, driver)))
+
+	return &libsqlClient{
+		db:             dbClient,
+		tasksUpdateSem: semaphore.NewWeighted(1),
+	}, nil
 }

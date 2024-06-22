@@ -1,13 +1,13 @@
 package tasks
 
-import "github.com/cufee/aftermath/internal/database"
+import "github.com/cufee/aftermath/internal/database/models"
 
-func splitTaskByTargets(task database.Task, batchSize int) []database.Task {
+func splitTaskByTargets(task models.Task, batchSize int) []models.Task {
 	if len(task.Targets) <= batchSize {
-		return []database.Task{task}
+		return []models.Task{task}
 	}
 
-	var tasks []database.Task
+	var tasks []models.Task
 	subTasks := len(task.Targets) / batchSize
 
 	for i := 0; i <= subTasks; i++ {
