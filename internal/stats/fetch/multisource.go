@@ -9,7 +9,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/prisma/db"
+	"github.com/cufee/aftermath/internal/database/models"
+
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/retry"
@@ -55,7 +56,7 @@ func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string) 
 /*
 Gets account info from wg and updates cache
 */
-func (c *multiSourceClient) Account(ctx context.Context, id string) (database.Account, error) {
+func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Account, error) {
 	realm := c.wargaming.RealmFromAccountID(id)
 
 	var group sync.WaitGroup
@@ -80,7 +81,7 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (database.Ac
 	group.Wait()
 
 	if wgAccount.Err != nil {
-		return database.Account{}, wgAccount.Err
+		return models.Account{}, wgAccount.Err
 	}
 
 	account := WargamingToAccount(realm, wgAccount.Data, clan, false)
@@ -88,7 +89,7 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (database.Ac
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		errMap := c.database.UpsertAccounts(ctx, []database.Account{account})
+		errMap := c.database.UpsertAccounts(ctx, []models.Account{account})
 		if err := errMap[id]; err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
@@ -171,7 +172,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		errMap := c.database.UpsertAccounts(ctx, []database.Account{stats.Account})
+		errMap := c.database.UpsertAccounts(ctx, []models.Account{stats.Account})
 		if err := errMap[id]; err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
@@ -276,8 +277,8 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 
 	sessionBefore := sessionStart
 
-	var accountSnapshot retry.DataWithErr[database.AccountSnapshot]
-	var vehiclesSnapshots retry.DataWithErr[[]database.VehicleSnapshot]
+	var accountSnapshot retry.DataWithErr[models.AccountSnapshot]
+	var vehiclesSnapshots retry.DataWithErr[[]models.VehicleSnapshot]
 	var averages retry.DataWithErr[map[string]frame.StatsFrame]
 	var current retry.DataWithErr[AccountStatsOverPeriod]
 
@@ -304,10 +305,10 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	group.Add(1)
 	go func() {
 		defer group.Done()
-		s, err := c.database.GetAccountSnapshot(ctx, id, id, database.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
-		accountSnapshot = retry.DataWithErr[database.AccountSnapshot]{Data: s, Err: err}
-		v, err := c.database.GetVehicleSnapshots(ctx, id, id, database.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
-		vehiclesSnapshots = retry.DataWithErr[[]database.VehicleSnapshot]{Data: v, Err: err}
+		s, err := c.database.GetAccountSnapshot(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
+		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s, Err: err}
+		v, err := c.database.GetVehicleSnapshots(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
+		vehiclesSnapshots = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
 	}()
 
 	// wait for all requests to finish and check errors
@@ -316,7 +317,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, current.Err
 	}
 	if accountSnapshot.Err != nil {
-		if db.IsErrNotFound(accountSnapshot.Err) {
+		if database.IsNotFound(accountSnapshot.Err) {
 			return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, ErrSessionNotFound
 		}
 		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, accountSnapshot.Err

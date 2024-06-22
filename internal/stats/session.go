@@ -5,7 +5,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/cufee/aftermath/internal/database/prisma/db"
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch"
@@ -23,7 +23,7 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 	_, err := r.database.GetAccountByID(ctx, accountId)
 	stop()
 	if err != nil {
-		if db.IsErrNotFound(err) {
+		if database.IsNotFound(err) {
 			_, err := r.fetchClient.Account(ctx, accountId) // this will cache the account
 			if err != nil {
 				return nil, meta, err

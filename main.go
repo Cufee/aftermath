@@ -29,7 +29,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-//go:generate go run github.com/steebchen/prisma-client-go generate --schema ./internal/database/prisma/schema.prisma
+//go:generate go generate ./internal/database/ent
 
 //go:embed static/*
 var static embed.FS
@@ -42,7 +42,7 @@ func main() {
 	loadStaticAssets(static)
 
 	liveCoreClient, cacheCoreClient := coreClientsFromEnv()
-	startSchedulerFromEnvAsync(cacheCoreClient.Wargaming())
+	startSchedulerFromEnvAsync(cacheCoreClient.Database(), cacheCoreClient.Wargaming())
 
 	// Load some init options to registered admin accounts and etc
 	logic.ApplyInitOptions(liveCoreClient.Database())
@@ -71,15 +71,11 @@ func main() {
 	servePublic()
 }
 
-func startSchedulerFromEnvAsync(wgClient wargaming.Client) {
+func startSchedulerFromEnvAsync(dbClient database.Client, wgClient wargaming.Client) {
 	if os.Getenv("SCHEDULER_ENABLED") != "true" {
 		return
 	}
 
-	dbClient, err := database.NewClient()
-	if err != nil {
-		log.Fatal().Msgf("database#NewClient failed %s", err)
-	}
 	bsClient, err := blitzstars.NewClient(os.Getenv("BLITZ_STARS_API_URL"), time.Second*10)
 	if err != nil {
 		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
@@ -114,7 +110,7 @@ func startSchedulerFromEnvAsync(wgClient wargaming.Client) {
 
 func coreClientsFromEnv() (core.Client, core.Client) {
 	// Dependencies
-	dbClient, err := database.NewClient()
+	dbClient, err := database.NewLibSQLClient(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal().Msgf("database#NewClient failed %s", err)
 	}

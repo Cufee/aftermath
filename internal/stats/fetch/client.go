@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
@@ -12,7 +12,7 @@ import (
 type AccountStatsOverPeriod struct {
 	Realm string `json:"realm"`
 
-	Account database.Account `json:"account"`
+	Account models.Account `json:"account"`
 
 	PeriodStart time.Time `json:"start"`
 	PeriodEnd   time.Time `json:"end"`
@@ -47,7 +47,7 @@ type StatsWithVehicles struct {
 }
 
 type Client interface {
-	Account(ctx context.Context, id string) (database.Account, error)
+	Account(ctx context.Context, id string) (models.Account, error)
 	Search(ctx context.Context, nickname, realm string) (types.Account, error)
 	CurrentStats(ctx context.Context, id string, opts ...statsOption) (AccountStatsOverPeriod, error)
 

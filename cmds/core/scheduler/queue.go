@@ -7,7 +7,7 @@ import (
 
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/rs/zerolog/log"
 )
 
@@ -16,7 +16,7 @@ type Queue struct {
 	concurrencyLimit int
 	lastTaskRun      time.Time
 
-	handlers map[database.TaskType]tasks.TaskHandler
+	handlers map[models.TaskType]tasks.TaskHandler
 	core     core.Client
 }
 
@@ -32,7 +32,7 @@ func (q *Queue) LastTaskRun() time.Time {
 	return q.lastTaskRun
 }
 
-func NewQueue(client core.Client, handlers map[database.TaskType]tasks.TaskHandler, concurrencyLimit int) *Queue {
+func NewQueue(client core.Client, handlers map[models.TaskType]tasks.TaskHandler, concurrencyLimit int) *Queue {
 	return &Queue{
 		core:             client,
 		handlers:         handlers,
@@ -41,7 +41,7 @@ func NewQueue(client core.Client, handlers map[database.TaskType]tasks.TaskHandl
 	}
 }
 
-func (q *Queue) Process(callback func(error), tasks ...database.Task) {
+func (q *Queue) Process(callback func(error), tasks ...models.Task) {
 	var err error
 	if callback != nil {
 		defer callback(err)
@@ -55,10 +55,10 @@ func (q *Queue) Process(callback func(error), tasks ...database.Task) {
 
 	var wg sync.WaitGroup
 	q.lastTaskRun = time.Now()
-	processedTasks := make(chan database.Task, len(tasks))
+	processedTasks := make(chan models.Task, len(tasks))
 	for _, task := range tasks {
 		wg.Add(1)
-		go func(t database.Task) {
+		go func(t models.Task) {
 			q.limiter <- struct{}{}
 			defer func() {
 				processedTasks <- t
@@ -70,8 +70,8 @@ func (q *Queue) Process(callback func(error), tasks ...database.Task) {
 
 			handler, ok := q.handlers[t.Type]
 			if !ok {
-				t.Status = database.TaskStatusFailed
-				t.LogAttempt(database.TaskLog{
+				t.Status = models.TaskStatusFailed
+				t.LogAttempt(models.TaskLog{
 					Targets:   t.Targets,
 					Timestamp: time.Now(),
 					Error:     "missing task type handler",
@@ -80,7 +80,7 @@ func (q *Queue) Process(callback func(error), tasks ...database.Task) {
 			}
 			t.LastRun = time.Now()
 
-			attempt := database.TaskLog{
+			attempt := models.TaskLog{
 				Targets:   t.Targets,
 				Timestamp: time.Now(),
 			}
@@ -89,9 +89,9 @@ func (q *Queue) Process(callback func(error), tasks ...database.Task) {
 			attempt.Comment = message
 			if err != nil {
 				attempt.Error = err.Error()
-				t.Status = database.TaskStatusFailed
+				t.Status = models.TaskStatusFailed
 			} else {
-				t.Status = database.TaskStatusComplete
+				t.Status = models.TaskStatusComplete
 			}
 			t.LogAttempt(attempt)
 		}(task)
@@ -101,16 +101,16 @@ func (q *Queue) Process(callback func(error), tasks ...database.Task) {
 	close(processedTasks)
 
 	rescheduledCount := 0
-	processedSlice := make([]database.Task, 0, len(processedTasks))
+	processedSlice := make([]models.Task, 0, len(processedTasks))
 	for task := range processedTasks {
 		handler, ok := q.handlers[task.Type]
 		if !ok {
 			continue
 		}
 
-		if task.Status == database.TaskStatusFailed && handler.ShouldRetry(&task) {
+		if task.Status == models.TaskStatusFailed && handler.ShouldRetry(&task) {
 			rescheduledCount++
-			task.Status = database.TaskStatusScheduled
+			task.Status = models.TaskStatusScheduled
 		}
 		processedSlice = append(processedSlice, task)
 	}

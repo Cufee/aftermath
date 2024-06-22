@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
-func NewTierPercentageCard(style Style, vehicles map[string]frame.VehicleStatsFrame, glossary map[int]database.Vehicle) Block {
+func NewTierPercentageCard(style Style, vehicles map[string]frame.VehicleStatsFrame, glossary map[int]models.Vehicle) Block {
 	var blocks []Block
 	var elements int = 10
 

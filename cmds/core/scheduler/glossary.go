@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/cmds/core"
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
 )
@@ -48,9 +48,9 @@ func UpdateGlossaryWorker(client core.Client) func() {
 			return
 		}
 
-		vehicles := make(map[string]database.Vehicle)
+		vehicles := make(map[string]models.Vehicle)
 		for id, data := range glossary {
-			vehicles[id] = database.Vehicle{
+			vehicles[id] = models.Vehicle{
 				ID:   id,
 				Tier: data.Tier,
 				Type: data.Type,
