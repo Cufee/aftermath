@@ -9,6 +9,7 @@ import (
 	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/cufee/aftermath/cmds/discord/middleware"
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
 )
 
@@ -31,9 +32,9 @@ func init() {
 				builder.NewOption("tasks", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
 					builder.NewOption("view", discordgo.ApplicationCommandOptionSubCommand).Options(
 						builder.NewOption("status", discordgo.ApplicationCommandOptionString).Choices(
-							builder.NewChoice("failed", string(database.TaskStatusFailed)),
-							builder.NewChoice("complete", string(database.TaskStatusComplete)),
-							builder.NewChoice("in-progress", string(database.TaskStatusInProgress)),
+							builder.NewChoice("failed", string(models.TaskStatusFailed)),
+							builder.NewChoice("complete", string(models.TaskStatusComplete)),
+							builder.NewChoice("in-progress", string(models.TaskStatusInProgress)),
 						).Required(),
 						builder.NewOption("hours", discordgo.ApplicationCommandOptionNumber).Required(),
 					),
@@ -110,7 +111,7 @@ func init() {
 						hours = 1
 					}
 
-					tasks, err := ctx.Core.Database().GetRecentTasks(ctx.Context, time.Now().Add(time.Hour*time.Duration(hours)*-1), database.TaskStatus(status))
+					tasks, err := ctx.Core.Database().GetRecentTasks(ctx.Context, time.Now().Add(time.Hour*time.Duration(hours)*-1), models.TaskStatus(status))
 					if err != nil {
 						return ctx.Reply("Database#GetRecentTasks: " + err.Error())
 					}

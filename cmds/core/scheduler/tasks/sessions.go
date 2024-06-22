@@ -8,14 +8,14 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/cmds/core"
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/rs/zerolog/log"
 )
 
 func init() {
-	defaultHandlers[database.TaskTypeRecordSessions] = TaskHandler{
-		Process: func(client core.Client, task database.Task) (string, error) {
+	defaultHandlers[models.TaskTypeRecordSessions] = TaskHandler{
+		Process: func(client core.Client, task models.Task) (string, error) {
 			if task.Data == nil {
 				return "no data provided", errors.New("no data provided")
 			}
@@ -55,7 +55,7 @@ func init() {
 			}
 			return "retrying failed accounts", errors.New("some accounts failed")
 		},
-		ShouldRetry: func(task *database.Task) bool {
+		ShouldRetry: func(task *models.Task) bool {
 			triesLeft, ok := task.Data["triesLeft"].(int)
 			if !ok {
 				return false
@@ -74,8 +74,8 @@ func init() {
 
 func CreateSessionUpdateTasks(client core.Client, realm string) error {
 	realm = strings.ToUpper(realm)
-	task := database.Task{
-		Type:           database.TaskTypeRecordSessions,
+	task := models.Task{
+		Type:           models.TaskTypeRecordSessions,
 		ReferenceID:    "realm_" + realm,
 		ScheduledAfter: time.Now(),
 		Data: map[string]any{
@@ -87,16 +87,14 @@ func CreateSessionUpdateTasks(client core.Client, realm string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	accounts, err := client.Database().GetRealmAccounts(ctx, realm)
+	accounts, err := client.Database().GetRealmAccountIDs(ctx, realm)
 	if err != nil {
 		return err
 	}
 	if len(accounts) < 1 {
 		return nil
 	}
-	for _, account := range accounts {
-		task.Targets = append(task.Targets, account.ID)
-	}
+	task.Targets = append(task.Targets, accounts...)
 
 	// This update requires (2 + n) requests per n players
 	return client.Database().CreateTasks(ctx, splitTaskByTargets(task, 90)...)

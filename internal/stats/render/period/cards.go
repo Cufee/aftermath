@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common"
 	"github.com/cufee/aftermath/internal/stats/prepare/period"
@@ -15,7 +15,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []database.UserSubscription, opts render.Options) (render.Segments, error) {
+func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts render.Options) (render.Segments, error) {
 	if len(cards.Overview.Blocks) == 0 && len(cards.Highlights) == 0 {
 		log.Error().Msg("player cards slice is 0 length, this should not happen")
 		return render.Segments{}, errors.New("no cards provided")

@@ -1,16 +1,16 @@
 package common
 
 import (
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 )
 
-func NewHeaderCard(width float64, subscriptions []database.UserSubscription, promoText []string) (Block, bool) {
+func NewHeaderCard(width float64, subscriptions []models.UserSubscription, promoText []string) (Block, bool) {
 	var cards []Block
 
 	var addPromoText = len(promoText) > 0
 	for _, sub := range subscriptions {
 		switch sub.Type {
-		case database.SubscriptionTypePro, database.SubscriptionTypePlus, database.SubscriptionTypeDeveloper:
+		case models.SubscriptionTypePro, models.SubscriptionTypePlus, models.SubscriptionTypeDeveloper:
 			addPromoText = false
 		}
 		if !addPromoText {

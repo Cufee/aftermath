@@ -6,7 +6,7 @@ import (
 
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/rs/zerolog/log"
 )
 
@@ -28,7 +28,7 @@ func RotateBackgroundPresetsWorker(client core.Client) func() {
 		// 	log.Err(err).Msg("failed to pick random background images")
 		// 	return
 		// }
-		// err = database.UpdateAppConfiguration[[]string]("backgroundImagesSelection", images, nil, true)
+		// err = models.UpdateAppConfiguration[[]string]("backgroundImagesSelection", images, nil, true)
 		// if err != nil {
 		// 	log.Err(err).Msg("failed to update background images selection")
 		// }
@@ -92,7 +92,7 @@ func RestartTasksWorker(queue *Queue) func() {
 
 		now := time.Now()
 		for i, task := range staleTasks {
-			task.Status = database.TaskStatusScheduled
+			task.Status = models.TaskStatusScheduled
 			task.ScheduledAfter = now
 			staleTasks[i] = task
 		}

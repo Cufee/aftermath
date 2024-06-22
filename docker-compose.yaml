@@ -1,13 +1,26 @@
 services:
-  apply-migrations:
-    image: aftermath-prisma-migrate
+  aftermath-database:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    platform: linux/amd64
+    restart: always
+    environment:
+      - SQLD_NODE=primary
+    volumes:
+      - ${DATABASE_DIR}:/var/lib/sqld
+    networks:
+      - dokploy-network
+    hostname: aftermath-database
+
+  aftermath-migrate:
+    image: aftermath-migrate
     build:
       dockerfile: Dockerfile.migrate
-    environment:
-      - DATABASE_URL=file:/database/${DATABASE_NAME}
-    volumes:
-      - ${DATABASE_DIR}:/database
-    command: sh -c "go run github.com/steebchen/prisma-client-go migrate deploy --schema /prisma/schema.prisma"
+    depends_on:
+      aftermath-database:
+        condition: service_started
+    command: sh -c 'migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "libsql+ws://aftermath-database:8080"'
+    networks:
+      - dokploy-network
 
   aftermath-service:
     image: aftermath-service
@@ -17,11 +30,11 @@ services:
       - .env
     environment:
       - PORT=3000
-      - DATABASE_URL=file:/database/${DATABASE_NAME}
-    volumes:
-      - ${DATABASE_DIR}:/database
+      - DATABASE_URL=libsql://aftermath-database:8080
     depends_on:
-      apply-migrations:
+      aftermath-database:
+        condition: service_started
+      aftermath-migrate:
         condition: service_completed_successfully
     entrypoint: ["app"]
     restart: always
@@ -31,11 +44,9 @@ services:
           memory: 128m
         limits:
           memory: 256m
-    ports:
-      - 3000
-      - "${PRIVATE_SERVER_PORT}"
     networks:
       - dokploy-network
+    hostname: aftermath-service
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.aftermath-monorepo-compose.rule=Host(`${TRAEFIK_HOST}`)"

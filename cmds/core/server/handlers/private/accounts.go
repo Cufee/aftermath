@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/cufee/aftermath/cmds/core"
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"github.com/rs/zerolog/log"
@@ -91,7 +91,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 							return
 						}
 
-						var inserts []database.Account
+						var inserts []models.Account
 						for _, account := range data {
 							inserts = append(inserts, fetch.WargamingToAccount(realm, account, types.ClanMember{}, false))
 						}

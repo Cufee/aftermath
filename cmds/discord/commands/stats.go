@@ -9,6 +9,7 @@ import (
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 )
@@ -30,8 +31,8 @@ func init() {
 				switch {
 				case options.UserID != "":
 					// mentioned another user, check if the user has an account linked
-					mentionedUser, _ := ctx.Core.Database().GetUserByID(ctx.Context, options.UserID, database.WithConnections(), database.WithContent())
-					defaultAccount, hasDefaultAccount := mentionedUser.Connection(database.ConnectionTypeWargaming)
+					mentionedUser, _ := ctx.Core.Database().GetUserByID(ctx.Context, options.UserID, database.WithConnections(), database.WithSubscriptions(), database.WithContent())
+					defaultAccount, hasDefaultAccount := mentionedUser.Connection(models.ConnectionTypeWargaming)
 					if !hasDefaultAccount {
 						return ctx.Reply("stats_error_connection_not_found_vague")
 					}
@@ -50,7 +51,7 @@ func init() {
 					accountID = fmt.Sprint(account.ID)
 
 				default:
-					defaultAccount, hasDefaultAccount := ctx.User.Connection(database.ConnectionTypeWargaming)
+					defaultAccount, hasDefaultAccount := ctx.User.Connection(models.ConnectionTypeWargaming)
 					if !hasDefaultAccount {
 						return ctx.Reply("stats_error_nickname_or_server_missing")
 					}

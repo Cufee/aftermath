@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 )
 
@@ -34,20 +34,20 @@ func (sub subscriptionHeader) Block() (Block, error) {
 }
 
 var (
-	subscriptionWeight = map[database.SubscriptionType]int{
-		database.SubscriptionTypeDeveloper: 999,
+	subscriptionWeight = map[models.SubscriptionType]int{
+		models.SubscriptionTypeDeveloper: 999,
 		// Moderators
-		database.SubscriptionTypeServerModerator:  99,
-		database.SubscriptionTypeContentModerator: 98,
+		models.SubscriptionTypeServerModerator:  99,
+		models.SubscriptionTypeContentModerator: 98,
 		// Paid
-		database.SubscriptionTypePro:     89,
-		database.SubscriptionTypeProClan: 88,
-		database.SubscriptionTypePlus:    79,
+		models.SubscriptionTypePro:     89,
+		models.SubscriptionTypeProClan: 88,
+		models.SubscriptionTypePlus:    79,
 		//
-		database.SubscriptionTypeSupporter:     29,
-		database.SubscriptionTypeServerBooster: 28,
+		models.SubscriptionTypeSupporter:     29,
+		models.SubscriptionTypeServerBooster: 28,
 		//
-		database.SubscriptionTypeVerifiedClan: 19,
+		models.SubscriptionTypeVerifiedClan: 19,
 	}
 
 	// Personal
@@ -142,8 +142,8 @@ var (
 	}
 )
 
-func SubscriptionsBadges(subscriptions []database.UserSubscription) ([]Block, error) {
-	slices.SortFunc(subscriptions, func(i, j database.UserSubscription) int {
+func SubscriptionsBadges(subscriptions []models.UserSubscription) ([]Block, error) {
+	slices.SortFunc(subscriptions, func(i, j models.UserSubscription) int {
 		return subscriptionWeight[j.Type] - subscriptionWeight[i.Type]
 	})
 
@@ -151,11 +151,11 @@ func SubscriptionsBadges(subscriptions []database.UserSubscription) ([]Block, er
 	for _, subscription := range subscriptions {
 		var header *subscriptionHeader
 		switch subscription.Type {
-		case database.SubscriptionTypeDeveloper:
+		case models.SubscriptionTypeDeveloper:
 			header = subscriptionDeveloper
-		case database.SubscriptionTypeServerModerator:
+		case models.SubscriptionTypeServerModerator:
 			header = subscriptionServerModerator
-		case database.SubscriptionTypeContentModerator:
+		case models.SubscriptionTypeContentModerator:
 			header = subscriptionContentModerator
 		}
 
@@ -171,7 +171,7 @@ func SubscriptionsBadges(subscriptions []database.UserSubscription) ([]Block, er
 	for _, subscription := range subscriptions {
 		var header *subscriptionHeader
 		switch subscription.Type {
-		case database.SubscriptionTypeContentTranslator:
+		case models.SubscriptionTypeContentTranslator:
 			header = subscriptionTranslator
 		}
 
@@ -187,13 +187,13 @@ func SubscriptionsBadges(subscriptions []database.UserSubscription) ([]Block, er
 	for _, subscription := range subscriptions {
 		var header *subscriptionHeader
 		switch subscription.Type {
-		case database.SubscriptionTypePro:
+		case models.SubscriptionTypePro:
 			header = userSubscriptionPro
-		case database.SubscriptionTypePlus:
+		case models.SubscriptionTypePlus:
 			header = userSubscriptionPlus
-		case database.SubscriptionTypeServerBooster:
+		case models.SubscriptionTypeServerBooster:
 			header = subscriptionServerBooster
-		case database.SubscriptionTypeSupporter:
+		case models.SubscriptionTypeSupporter:
 			header = userSubscriptionSupporter
 		}
 
@@ -210,14 +210,14 @@ func SubscriptionsBadges(subscriptions []database.UserSubscription) ([]Block, er
 	return badges, nil
 }
 
-func ClanSubscriptionsBadges(subscriptions []database.UserSubscription) *subscriptionHeader {
+func ClanSubscriptionsBadges(subscriptions []models.UserSubscription) *subscriptionHeader {
 	var headers []*subscriptionHeader
 
 	for _, subscription := range subscriptions {
 		switch subscription.Type {
-		case database.SubscriptionTypeProClan:
+		case models.SubscriptionTypeProClan:
 			headers = append(headers, clanSubscriptionPro)
-		case database.SubscriptionTypeVerifiedClan:
+		case models.SubscriptionTypeVerifiedClan:
 			headers = append(headers, clanSubscriptionVerified)
 		}
 	}

@@ -9,7 +9,7 @@ import (
 	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/middleware"
 	"github.com/cufee/aftermath/cmds/discord/rest"
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/rs/zerolog/log"
 )
@@ -56,7 +56,7 @@ func (r *Router) LoadMiddleware(middleware ...middleware.MiddlewareFunc) {
 type command struct {
 	requested *builder.Command
 	current   *discordgo.ApplicationCommand
-	cached    *database.ApplicationCommand
+	cached    *models.ApplicationCommand
 }
 
 /*
@@ -107,7 +107,7 @@ func (r *Router) UpdateLoadedCommands() error {
 			if err != nil {
 				return err
 			}
-			err = r.core.Database().UpsertCommands(context.Background(), database.ApplicationCommand{ID: command.ID, Name: command.Name, Hash: hash, Version: command.Version})
+			err = r.core.Database().UpsertCommands(context.Background(), models.ApplicationCommand{ID: command.ID, Name: command.Name, Hash: hash, Version: command.Version})
 			if err != nil {
 				return err
 			}
@@ -136,7 +136,7 @@ func (r *Router) UpdateLoadedCommands() error {
 				if err != nil {
 					return err
 				}
-				err = r.core.Database().UpsertCommands(context.Background(), database.ApplicationCommand{ID: command.ID, Name: command.Name, Hash: hash, Version: command.Version})
+				err = r.core.Database().UpsertCommands(context.Background(), models.ApplicationCommand{ID: command.ID, Name: command.Name, Hash: hash, Version: command.Version})
 				if err != nil {
 					return err
 				}

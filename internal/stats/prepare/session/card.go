@@ -4,20 +4,20 @@ import (
 	"math"
 	"slices"
 
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/common"
 	"golang.org/x/text/language"
 )
 
-func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]database.Vehicle, opts ...common.Option) (Cards, error) {
+func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]models.Vehicle, opts ...common.Option) (Cards, error) {
 	options := common.DefaultOptions
 	for _, apply := range opts {
 		apply(&options)
 	}
 	if glossary == nil {
-		glossary = make(map[string]database.Vehicle)
+		glossary = make(map[string]models.Vehicle)
 	}
 
 	var cards Cards
@@ -167,7 +167,7 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	return cards, nil
 }
 
-func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag, glossary database.Vehicle) (VehicleCard, error) {
+func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag, glossary models.Vehicle) (VehicleCard, error) {
 	var sFrame, cFrame frame.StatsFrame
 	if session.StatsFrame != nil {
 		sFrame = *session.StatsFrame
@@ -194,7 +194,7 @@ func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, ca
 	}, nil
 }
 
-func makeHighlightCard(highlight common.Highlight, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag, glossary database.Vehicle) (VehicleCard, error) {
+func makeHighlightCard(highlight common.Highlight, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag, glossary models.Vehicle) (VehicleCard, error) {
 	var sFrame, cFrame frame.StatsFrame
 	if session.StatsFrame != nil {
 		sFrame = *session.StatsFrame

@@ -3,7 +3,7 @@ package common
 import (
 	"github.com/pkg/errors"
 
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
@@ -82,7 +82,7 @@ func PresetValue(preset Tag, stats frame.StatsFrame, args ...any) (frame.Value, 
 		if !ok {
 			return frame.InvalidValue, errors.New("invalid args for avg_tier, first arg should be vehicles")
 		}
-		glossary, ok := args[1].(map[string]database.Vehicle)
+		glossary, ok := args[1].(map[string]models.Vehicle)
 		if !ok {
 			return frame.InvalidValue, errors.New("invalid args for avg_tier, second arg should be glossary")
 		}
@@ -97,7 +97,7 @@ func PresetValue(preset Tag, stats frame.StatsFrame, args ...any) (frame.Value, 
 	}
 }
 
-func avgTierValue(vehicles map[string]frame.VehicleStatsFrame, glossary map[string]database.Vehicle) frame.Value {
+func avgTierValue(vehicles map[string]frame.VehicleStatsFrame, glossary map[string]models.Vehicle) frame.Value {
 	var weightedTotal, battlesTotal float32
 	for _, vehicle := range vehicles {
 		if data, ok := glossary[vehicle.VehicleID]; ok && data.Tier > 0 {

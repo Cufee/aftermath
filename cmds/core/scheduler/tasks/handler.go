@@ -2,16 +2,16 @@ package tasks
 
 import (
 	"github.com/cufee/aftermath/cmds/core"
-	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 )
 
 type TaskHandler struct {
-	Process     func(client core.Client, task database.Task) (string, error)
-	ShouldRetry func(task *database.Task) bool
+	Process     func(client core.Client, task models.Task) (string, error)
+	ShouldRetry func(task *models.Task) bool
 }
 
-var defaultHandlers = make(map[database.TaskType]TaskHandler)
+var defaultHandlers = make(map[models.TaskType]TaskHandler)
 
-func DefaultHandlers() map[database.TaskType]TaskHandler {
+func DefaultHandlers() map[models.TaskType]TaskHandler {
 	return defaultHandlers
 }

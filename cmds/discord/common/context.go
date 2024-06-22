@@ -12,6 +12,7 @@ import (
 	"github.com/cufee/aftermath/cmds/discord/rest"
 
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
 
 	"github.com/rs/zerolog/log"
@@ -28,7 +29,7 @@ const (
 
 type Context struct {
 	context.Context
-	User   database.User
+	User   models.User
 	Member discordgo.User
 
 	Locale   language.Tag

@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/prisma/db"
+	"github.com/cufee/aftermath/internal/database/models"
+
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/retry"
 	"github.com/cufee/aftermath/internal/stats/fetch"
@@ -29,11 +30,11 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	}
 
 	// existing snaphsots for accounts
-	existingSnapshots, err := dbClient.GetManyAccountSnapshots(ctx, accountIDs, database.SnapshotTypeDaily)
-	if err != nil && !db.IsErrNotFound(err) {
+	existingSnapshots, err := dbClient.GetManyAccountSnapshots(ctx, accountIDs, models.SnapshotTypeDaily)
+	if err != nil && !database.IsNotFound(err) {
 		return nil, errors.Wrap(err, "failed to get existing snapshots")
 	}
-	existingSnapshotsMap := make(map[string]*database.AccountSnapshot)
+	existingSnapshotsMap := make(map[string]*models.AccountSnapshot)
 	for _, snapshot := range existingSnapshots {
 		existingSnapshotsMap[snapshot.AccountID] = &snapshot
 	}
@@ -90,9 +91,9 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	close(vehicleCh)
 
 	var accountErrors = make(map[string]error)
-	var accountUpdates []database.Account
-	var snapshots []database.AccountSnapshot
-	var vehicleSnapshots []database.VehicleSnapshot
+	var accountUpdates []models.Account
+	var snapshots []models.AccountSnapshot
+	var vehicleSnapshots []models.VehicleSnapshot
 	for result := range vehicleCh {
 		// there is only 1 key in this map
 		for id, vehicles := range result.Data {
@@ -100,18 +101,18 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 				accountErrors[id] = result.Err
 				continue
 			}
-			existingSnapshots, err := dbClient.GetVehicleSnapshots(ctx, id, id, database.SnapshotTypeDaily)
-			if err != nil && !db.IsErrNotFound(err) {
+			existingSnapshots, err := dbClient.GetVehicleSnapshots(ctx, id, id, models.SnapshotTypeDaily)
+			if err != nil && !database.IsNotFound(err) {
 				accountErrors[id] = err
 				continue
 			}
-			existingSnapshotsMap := make(map[string]*database.VehicleSnapshot)
+			existingSnapshotsMap := make(map[string]*models.VehicleSnapshot)
 			for _, snapshot := range existingSnapshots {
 				existingSnapshotsMap[snapshot.VehicleID] = &snapshot
 			}
 
 			stats := fetch.WargamingToStats(realm, accounts[id], clans[id], vehicles)
-			accountUpdates = append(accountUpdates, database.Account{
+			accountUpdates = append(accountUpdates, models.Account{
 				Realm:    stats.Realm,
 				ID:       stats.Account.ID,
 				Nickname: stats.Account.Nickname,
@@ -123,8 +124,8 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 				ClanID:  stats.Account.ClanID,
 				ClanTag: stats.Account.ClanTag,
 			})
-			snapshots = append(snapshots, database.AccountSnapshot{
-				Type:           database.SnapshotTypeDaily,
+			snapshots = append(snapshots, models.AccountSnapshot{
+				Type:           models.SnapshotTypeDaily,
 				CreatedAt:      createdAt,
 				AccountID:      stats.Account.ID,
 				ReferenceID:    stats.Account.ID,
@@ -147,9 +148,9 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 					continue
 				}
 
-				vehicleSnapshots = append(vehicleSnapshots, database.VehicleSnapshot{
+				vehicleSnapshots = append(vehicleSnapshots, models.VehicleSnapshot{
 					CreatedAt:      createdAt,
-					Type:           database.SnapshotTypeDaily,
+					Type:           models.SnapshotTypeDaily,
 					LastBattleTime: vehicle.LastBattleTime,
 					AccountID:      stats.Account.ID,
 					VehicleID:      vehicle.VehicleID,
