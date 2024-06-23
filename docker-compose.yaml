@@ -18,7 +18,6 @@ services:
     depends_on:
       aftermath-migrate:
         condition: service_completed_successfully
-    entrypoint: ["app"]
     volumes:
       - ${DATABASE_PATH}:/data
 
