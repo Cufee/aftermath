@@ -15,7 +15,6 @@ services:
     environment:
       - PORT=3000
       - DATABASE_PATH=/data
-    entrypoint: ["app"]
     depends_on:
       aftermath-migrate:
         condition: service_completed_successfully
