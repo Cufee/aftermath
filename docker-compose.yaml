@@ -57,6 +57,3 @@ services:
 networks:
   dokploy-network:
     external: true
-
-volumes:
-  step-ca-home:
