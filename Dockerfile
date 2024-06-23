@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go mod download
 
 COPY ./ ./
-RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/workspace/internal/database/ent/db go generate /workspaceinternal/database/ent
+RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/workspace/internal/database/ent/db go generate internal/database/ent
 
 # build a fully standalone binary with zero dependencies
 RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/workspace/internal/database/ent/db CGO_ENABLED=1 GOOS=linux go build -o app .
