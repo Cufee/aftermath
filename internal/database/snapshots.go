@@ -60,11 +60,11 @@ func (c *libsqlClient) CreateVehicleSnapshots(ctx context.Context, snapshots ...
 			c.db.VehicleSnapshot.Create().
 				SetType(data.Type).
 				SetFrame(data.Stats).
-				SetAccountID(data.AccountID).
 				SetVehicleID(data.VehicleID).
 				SetReferenceID(data.ReferenceID).
 				SetBattles(int(data.Stats.Battles.Float())).
-				SetLastBattleTime(data.LastBattleTime.Unix()),
+				SetLastBattleTime(data.LastBattleTime.Unix()).
+				SetAccount(c.db.Account.GetX(ctx, data.AccountID)),
 		)
 	}
 
@@ -127,7 +127,7 @@ func (c *libsqlClient) CreateAccountSnapshots(ctx context.Context, snapshots ...
 	for _, s := range snapshots {
 		inserts = append(inserts,
 			c.db.AccountSnapshot.Create().
-				SetAccountID(s.AccountID).
+				SetAccount(c.db.Account.GetX(ctx, s.AccountID)). // we assume the account exists here
 				SetCreatedAt(s.CreatedAt.Unix()).
 				SetLastBattleTime(s.LastBattleTime.Unix()).
 				SetRatingBattles(int(s.RatingBattles.Battles.Float())).
@@ -168,7 +168,7 @@ func (c *libsqlClient) GetAccountSnapshot(ctx context.Context, accountID, refere
 		where = append(where, accountsnapshot.CreatedAtGT(query.createdAfter.Unix()))
 	}
 	if query.createdBefore != nil {
-		where = append(where, accountsnapshot.CreatedAtLT(query.createdAfter.Unix()))
+		where = append(where, accountsnapshot.CreatedAtLT(query.createdBefore.Unix()))
 	}
 
 	record, err := c.db.AccountSnapshot.Query().Where(where...).First(ctx)

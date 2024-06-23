@@ -99,7 +99,6 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 			SetNickname(update.Nickname).
 			SetPrivate(update.Private).
 			SetLastBattleTime(update.LastBattleTime.Unix()).
-			SetClanID(update.ClanID).
 			Exec(ctx)
 		if err != nil {
 			return rollback(tx, err)
@@ -117,8 +116,7 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 				SetNickname(a.Nickname).
 				SetPrivate(a.Private).
 				SetAccountCreatedAt(a.CreatedAt.Unix()).
-				SetLastBattleTime(a.LastBattleTime.Unix()).
-				SetClanID(a.ClanID),
+				SetLastBattleTime(a.LastBattleTime.Unix()),
 		)
 	}
 
