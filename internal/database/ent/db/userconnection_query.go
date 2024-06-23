@@ -297,7 +297,7 @@ func (ucq *UserConnectionQuery) WithUser(opts ...func(*UserQuery)) *UserConnecti
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -320,7 +320,7 @@ func (ucq *UserConnectionQuery) GroupBy(field string, fields ...string) *UserCon
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //	}
 //
 //	client.UserConnection.Query().

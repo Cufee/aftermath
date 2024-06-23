@@ -3,7 +3,10 @@
 package crontask
 
 import (
+	"fmt"
+
 	"entgo.io/ent/dialect/sql"
+	"github.com/cufee/aftermath/internal/database/models"
 )
 
 const (
@@ -62,20 +65,36 @@ func ValidColumn(column string) bool {
 
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() int
+	DefaultCreatedAt func() int64
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() int
+	DefaultUpdatedAt func() int64
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() int
-	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
-	TypeValidator func(string) error
+	UpdateDefaultUpdatedAt func() int64
 	// ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
 	ReferenceIDValidator func(string) error
-	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
-	StatusValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
+
+// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
+func TypeValidator(_type models.TaskType) error {
+	switch _type {
+	case "UPDATE_CLANS", "RECORD_ACCOUNT_SESSIONS", "UPDATE_ACCOUNT_WN8", "UPDATE_ACCOUNT_ACHIEVEMENTS", "CLEANUP_DATABASE":
+		return nil
+	default:
+		return fmt.Errorf("crontask: invalid enum value for type field: %q", _type)
+	}
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s models.TaskStatus) error {
+	switch s {
+	case "TASK_SCHEDULED", "TASK_IN_PROGRESS", "TASK_COMPLETE", "TASK_FAILED":
+		return nil
+	default:
+		return fmt.Errorf("crontask: invalid enum value for status field: %q", s)
+	}
+}
 
 // OrderOption defines the ordering options for the CronTask queries.
 type OrderOption func(*sql.Selector)

@@ -21,13 +21,13 @@ type AccountSnapshot struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int `json:"created_at,omitempty"`
+	CreatedAt int64 `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int `json:"updated_at,omitempty"`
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.SnapshotType `json:"type,omitempty"`
 	// LastBattleTime holds the value of the "last_battle_time" field.
-	LastBattleTime int `json:"last_battle_time,omitempty"`
+	LastBattleTime int64 `json:"last_battle_time,omitempty"`
 	// AccountID holds the value of the "account_id" field.
 	AccountID string `json:"account_id,omitempty"`
 	// ReferenceID holds the value of the "reference_id" field.
@@ -102,13 +102,13 @@ func (as *AccountSnapshot) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				as.CreatedAt = int(value.Int64)
+				as.CreatedAt = value.Int64
 			}
 		case accountsnapshot.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				as.UpdatedAt = int(value.Int64)
+				as.UpdatedAt = value.Int64
 			}
 		case accountsnapshot.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -120,7 +120,7 @@ func (as *AccountSnapshot) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field last_battle_time", values[i])
 			} else if value.Valid {
-				as.LastBattleTime = int(value.Int64)
+				as.LastBattleTime = value.Int64
 			}
 		case accountsnapshot.FieldAccountID:
 			if value, ok := values[i].(*sql.NullString); !ok {

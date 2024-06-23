@@ -297,7 +297,7 @@ func (ucq *UserContentQuery) WithUser(opts ...func(*UserQuery)) *UserContentQuer
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -320,7 +320,7 @@ func (ucq *UserContentQuery) GroupBy(field string, fields ...string) *UserConten
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //	}
 //
 //	client.UserContent.Query().

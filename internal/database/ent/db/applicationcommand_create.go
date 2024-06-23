@@ -20,13 +20,13 @@ type ApplicationCommandCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (acc *ApplicationCommandCreate) SetCreatedAt(i int) *ApplicationCommandCreate {
+func (acc *ApplicationCommandCreate) SetCreatedAt(i int64) *ApplicationCommandCreate {
 	acc.mutation.SetCreatedAt(i)
 	return acc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (acc *ApplicationCommandCreate) SetNillableCreatedAt(i *int) *ApplicationCommandCreate {
+func (acc *ApplicationCommandCreate) SetNillableCreatedAt(i *int64) *ApplicationCommandCreate {
 	if i != nil {
 		acc.SetCreatedAt(*i)
 	}
@@ -34,13 +34,13 @@ func (acc *ApplicationCommandCreate) SetNillableCreatedAt(i *int) *ApplicationCo
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acc *ApplicationCommandCreate) SetUpdatedAt(i int) *ApplicationCommandCreate {
+func (acc *ApplicationCommandCreate) SetUpdatedAt(i int64) *ApplicationCommandCreate {
 	acc.mutation.SetUpdatedAt(i)
 	return acc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (acc *ApplicationCommandCreate) SetNillableUpdatedAt(i *int) *ApplicationCommandCreate {
+func (acc *ApplicationCommandCreate) SetNillableUpdatedAt(i *int64) *ApplicationCommandCreate {
 	if i != nil {
 		acc.SetUpdatedAt(*i)
 	}
@@ -196,11 +196,11 @@ func (acc *ApplicationCommandCreate) createSpec() (*ApplicationCommand, *sqlgrap
 		_spec.ID.Value = id
 	}
 	if value, ok := acc.mutation.CreatedAt(); ok {
-		_spec.SetField(applicationcommand.FieldCreatedAt, field.TypeInt, value)
+		_spec.SetField(applicationcommand.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := acc.mutation.UpdatedAt(); ok {
-		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeInt64, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := acc.mutation.Name(); ok {

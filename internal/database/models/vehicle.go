@@ -3,12 +3,8 @@ package models
 import "golang.org/x/text/language"
 
 type Vehicle struct {
-	ID     string
-	Tier   int
-	Type   string
-	Class  string
-	Nation string
-
+	ID             string
+	Tier           int
 	LocalizedNames map[string]string
 }
 

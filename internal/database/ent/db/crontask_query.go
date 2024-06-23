@@ -261,7 +261,7 @@ func (ctq *CronTaskQuery) Clone() *CronTaskQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -284,7 +284,7 @@ func (ctq *CronTaskQuery) GroupBy(field string, fields ...string) *CronTaskGroup
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //	}
 //
 //	client.CronTask.Query().

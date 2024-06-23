@@ -96,9 +96,9 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 							inserts = append(inserts, fetch.WargamingToAccount(realm, account, types.ClanMember{}, false))
 						}
 
-						errors := client.Database().UpsertAccounts(ctx, inserts)
-						if len(errors) > 0 {
-							log.Error().Any("errors", errors).Msg("failed to upsert some accounts")
+						err = client.Database().UpsertAccounts(ctx, inserts)
+						if err != nil {
+							log.Err(err).Msg("failed to upsert accounts")
 							return
 						}
 

@@ -10,8 +10,8 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 )
 
-func toAccount(model db.Account) models.Account {
-	return models.Account{
+func toAccount(model *db.Account) models.Account {
+	account := models.Account{
 		ID:             model.ID,
 		Realm:          model.Realm,
 		Nickname:       model.Nickname,
@@ -19,6 +19,11 @@ func toAccount(model db.Account) models.Account {
 		CreatedAt:      time.Unix(int64(model.AccountCreatedAt), 0),
 		LastBattleTime: time.Unix(int64(model.LastBattleTime), 0),
 	}
+	if model.Edges.Clan != nil {
+		account.ClanID = model.Edges.Clan.ID
+		account.ClanTag = model.Edges.Clan.Tag
+	}
+	return account
 }
 
 func (c *libsqlClient) GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error) {
@@ -36,96 +41,98 @@ func (c *libsqlClient) GetRealmAccountIDs(ctx context.Context, realm string) ([]
 }
 
 func (c *libsqlClient) GetAccountByID(ctx context.Context, id string) (models.Account, error) {
-	// model, err := c.prisma.Account.FindUnique(db.Account.ID.Equals(id)).With(db.Account.Clan.Fetch()).Exec(ctx)
-	// if err != nil {
-	// 	return Account{}, err
-	// }
-
-	// account := Account{}.FromModel(*model)
-	// if clan, ok := model.Clan(); ok {
-	// 	account.AddClan(clan)
-	// }
-
-	return models.Account{}, nil
+	result, err := c.db.Account.Query().Where(account.ID(id)).WithClan().Only(ctx)
+	if err != nil {
+		return models.Account{}, err
+	}
+	return toAccount(result), nil
 }
 
 func (c *libsqlClient) GetAccounts(ctx context.Context, ids []string) ([]models.Account, error) {
-	// if len(ids) < 1 {
-	// 	return nil, nil
-	// }
+	if len(ids) < 1 {
+		return nil, nil
+	}
 
-	// models, err := c.prisma.Account.FindMany(db.Account.ID.In(ids)).With(db.Account.Clan.Fetch()).Exec(ctx)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	result, err := c.db.Account.Query().Where(account.IDIn(ids...)).WithClan().All(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	var accounts []models.Account
-	// for _, model := range models {
-	// 	account := Account{}.FromModel(model)
-	// 	if clan, ok := model.Clan(); ok {
-	// 		account.AddClan(clan)
-	// 	}
-	// 	accounts = append(accounts, account)
-	// }
+	for _, a := range result {
+		accounts = append(accounts, toAccount(a))
+	}
 
 	return accounts, nil
 }
 
-func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Account) map[string]error {
-	// if len(accounts) < 1 {
-	// 	return nil
-	// }
+func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Account) error {
+	if len(accounts) < 1 {
+		return nil
+	}
 
-	// var mx sync.Mutex
-	// var wg sync.WaitGroup
-	errors := make(map[string]error, len(accounts))
+	var ids []string
+	accountsMap := make(map[string]*models.Account)
+	for _, a := range accounts {
+		ids = append(ids, a.ID)
+		accountsMap[a.ID] = &a
+	}
 
-	// // we don't really want to exit if one fails
-	// for _, account := range accounts {
-	// 	wg.Add(1)
-	// 	go func(account Account) {
-	// 		defer wg.Done()
-	// 		optional := []db.AccountSetParam{db.Account.Private.Set(account.Private)}
-	// 		if account.ClanID != "" {
-	// 			clan, err := c.prisma.Clan.FindUnique(db.Clan.ID.Equals(account.ClanID)).Exec(ctx)
-	// 			if err == nil {
-	// 				optional = append(optional, db.Account.Clan.Link(db.Clan.ID.Equals(clan.ID)))
-	// 			}
-	// 		}
+	tx, err := c.db.Tx(ctx)
+	if err != nil {
+		return err
+	}
 
-	// 		_, err := c.prisma.Account.
-	// 			UpsertOne(db.Account.ID.Equals(account.ID)).
-	// 			Create(db.Account.ID.Set(account.ID),
-	// 				db.Account.LastBattleTime.Set(account.LastBattleTime),
-	// 				db.Account.AccountCreatedAt.Set(account.CreatedAt),
-	// 				db.Account.Realm.Set(account.Realm),
-	// 				db.Account.Nickname.Set(account.Nickname),
-	// 				optional...,
-	// 			).
-	// 			Update(
-	// 				append(optional,
-	// 					db.Account.Nickname.Set(account.Nickname),
-	// 					db.Account.LastBattleTime.Set(account.LastBattleTime),
-	// 				)...,
-	// 			).
-	// 			Exec(ctx)
-	// 		if err != nil {
-	// 			mx.Lock()
-	// 			errors[account.ID] = err
-	// 			mx.Unlock()
-	// 			return
-	// 		}
-	// 	}(account)
-	// }
-	// wg.Wait()
+	records, err := tx.Account.Query().Where(account.IDIn(ids...)).All(ctx)
+	if err != nil && !IsNotFound(err) {
+		return rollback(tx, err)
+	}
 
-	return errors
+	for _, r := range records {
+		update, ok := accountsMap[r.ID]
+		if !ok {
+			continue // this should never happen tho
+		}
+
+		err = tx.Account.UpdateOneID(r.ID).
+			SetRealm(update.Realm).
+			SetNickname(update.Nickname).
+			SetPrivate(update.Private).
+			SetLastBattleTime(update.LastBattleTime.Unix()).
+			SetClanID(update.ClanID).
+			Exec(ctx)
+		if err != nil {
+			return rollback(tx, err)
+		}
+
+		delete(accountsMap, r.ID)
+	}
+
+	var inserts []*db.AccountCreate
+	for _, a := range accountsMap {
+		inserts = append(inserts,
+			c.db.Account.Create().
+				SetID(a.ID).
+				SetRealm(a.Realm).
+				SetNickname(a.Nickname).
+				SetPrivate(a.Private).
+				SetAccountCreatedAt(a.CreatedAt.Unix()).
+				SetLastBattleTime(a.LastBattleTime.Unix()).
+				SetClanID(a.ClanID),
+		)
+	}
+
+	err = c.db.Account.CreateBulk(inserts...).Exec(ctx)
+	if err != nil {
+		return rollback(tx, err)
+	}
+	return tx.Commit()
 }
 
 func (c *libsqlClient) AccountSetPrivate(ctx context.Context, id string, value bool) error {
-	// _, err := c.prisma.Account.FindUnique(db.Account.ID.Equals(id)).Update(db.Account.Private.Set(value)).Exec(ctx)
-	// if err != nil && !database.IsNotFound(err) {
-	// 	return err
-	// }
+	err := c.db.Account.UpdateOneID(id).SetPrivate(value).Exec(ctx)
+	if err != nil && !IsNotFound(err) {
+		return err
+	}
 	return nil
 }

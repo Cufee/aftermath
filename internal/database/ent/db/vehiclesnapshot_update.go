@@ -30,14 +30,14 @@ func (vsu *VehicleSnapshotUpdate) Where(ps ...predicate.VehicleSnapshot) *Vehicl
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vsu *VehicleSnapshotUpdate) SetUpdatedAt(i int) *VehicleSnapshotUpdate {
+func (vsu *VehicleSnapshotUpdate) SetUpdatedAt(i int64) *VehicleSnapshotUpdate {
 	vsu.mutation.ResetUpdatedAt()
 	vsu.mutation.SetUpdatedAt(i)
 	return vsu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (vsu *VehicleSnapshotUpdate) AddUpdatedAt(i int) *VehicleSnapshotUpdate {
+func (vsu *VehicleSnapshotUpdate) AddUpdatedAt(i int64) *VehicleSnapshotUpdate {
 	vsu.mutation.AddUpdatedAt(i)
 	return vsu
 }
@@ -92,14 +92,14 @@ func (vsu *VehicleSnapshotUpdate) AddBattles(i int) *VehicleSnapshotUpdate {
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (vsu *VehicleSnapshotUpdate) SetLastBattleTime(i int) *VehicleSnapshotUpdate {
+func (vsu *VehicleSnapshotUpdate) SetLastBattleTime(i int64) *VehicleSnapshotUpdate {
 	vsu.mutation.ResetLastBattleTime()
 	vsu.mutation.SetLastBattleTime(i)
 	return vsu
 }
 
 // SetNillableLastBattleTime sets the "last_battle_time" field if the given value is not nil.
-func (vsu *VehicleSnapshotUpdate) SetNillableLastBattleTime(i *int) *VehicleSnapshotUpdate {
+func (vsu *VehicleSnapshotUpdate) SetNillableLastBattleTime(i *int64) *VehicleSnapshotUpdate {
 	if i != nil {
 		vsu.SetLastBattleTime(*i)
 	}
@@ -107,7 +107,7 @@ func (vsu *VehicleSnapshotUpdate) SetNillableLastBattleTime(i *int) *VehicleSnap
 }
 
 // AddLastBattleTime adds i to the "last_battle_time" field.
-func (vsu *VehicleSnapshotUpdate) AddLastBattleTime(i int) *VehicleSnapshotUpdate {
+func (vsu *VehicleSnapshotUpdate) AddLastBattleTime(i int64) *VehicleSnapshotUpdate {
 	vsu.mutation.AddLastBattleTime(i)
 	return vsu
 }
@@ -198,10 +198,10 @@ func (vsu *VehicleSnapshotUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 	}
 	if value, ok := vsu.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehiclesnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(vehiclesnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vsu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(vehiclesnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(vehiclesnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vsu.mutation.GetType(); ok {
 		_spec.SetField(vehiclesnapshot.FieldType, field.TypeEnum, value)
@@ -216,10 +216,10 @@ func (vsu *VehicleSnapshotUpdate) sqlSave(ctx context.Context) (n int, err error
 		_spec.AddField(vehiclesnapshot.FieldBattles, field.TypeInt, value)
 	}
 	if value, ok := vsu.mutation.LastBattleTime(); ok {
-		_spec.SetField(vehiclesnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.SetField(vehiclesnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := vsu.mutation.AddedLastBattleTime(); ok {
-		_spec.AddField(vehiclesnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.AddField(vehiclesnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := vsu.mutation.Frame(); ok {
 		_spec.SetField(vehiclesnapshot.FieldFrame, field.TypeJSON, value)
@@ -245,14 +245,14 @@ type VehicleSnapshotUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vsuo *VehicleSnapshotUpdateOne) SetUpdatedAt(i int) *VehicleSnapshotUpdateOne {
+func (vsuo *VehicleSnapshotUpdateOne) SetUpdatedAt(i int64) *VehicleSnapshotUpdateOne {
 	vsuo.mutation.ResetUpdatedAt()
 	vsuo.mutation.SetUpdatedAt(i)
 	return vsuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (vsuo *VehicleSnapshotUpdateOne) AddUpdatedAt(i int) *VehicleSnapshotUpdateOne {
+func (vsuo *VehicleSnapshotUpdateOne) AddUpdatedAt(i int64) *VehicleSnapshotUpdateOne {
 	vsuo.mutation.AddUpdatedAt(i)
 	return vsuo
 }
@@ -307,14 +307,14 @@ func (vsuo *VehicleSnapshotUpdateOne) AddBattles(i int) *VehicleSnapshotUpdateOn
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (vsuo *VehicleSnapshotUpdateOne) SetLastBattleTime(i int) *VehicleSnapshotUpdateOne {
+func (vsuo *VehicleSnapshotUpdateOne) SetLastBattleTime(i int64) *VehicleSnapshotUpdateOne {
 	vsuo.mutation.ResetLastBattleTime()
 	vsuo.mutation.SetLastBattleTime(i)
 	return vsuo
 }
 
 // SetNillableLastBattleTime sets the "last_battle_time" field if the given value is not nil.
-func (vsuo *VehicleSnapshotUpdateOne) SetNillableLastBattleTime(i *int) *VehicleSnapshotUpdateOne {
+func (vsuo *VehicleSnapshotUpdateOne) SetNillableLastBattleTime(i *int64) *VehicleSnapshotUpdateOne {
 	if i != nil {
 		vsuo.SetLastBattleTime(*i)
 	}
@@ -322,7 +322,7 @@ func (vsuo *VehicleSnapshotUpdateOne) SetNillableLastBattleTime(i *int) *Vehicle
 }
 
 // AddLastBattleTime adds i to the "last_battle_time" field.
-func (vsuo *VehicleSnapshotUpdateOne) AddLastBattleTime(i int) *VehicleSnapshotUpdateOne {
+func (vsuo *VehicleSnapshotUpdateOne) AddLastBattleTime(i int64) *VehicleSnapshotUpdateOne {
 	vsuo.mutation.AddLastBattleTime(i)
 	return vsuo
 }
@@ -443,10 +443,10 @@ func (vsuo *VehicleSnapshotUpdateOne) sqlSave(ctx context.Context) (_node *Vehic
 		}
 	}
 	if value, ok := vsuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehiclesnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(vehiclesnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vsuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(vehiclesnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(vehiclesnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vsuo.mutation.GetType(); ok {
 		_spec.SetField(vehiclesnapshot.FieldType, field.TypeEnum, value)
@@ -461,10 +461,10 @@ func (vsuo *VehicleSnapshotUpdateOne) sqlSave(ctx context.Context) (_node *Vehic
 		_spec.AddField(vehiclesnapshot.FieldBattles, field.TypeInt, value)
 	}
 	if value, ok := vsuo.mutation.LastBattleTime(); ok {
-		_spec.SetField(vehiclesnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.SetField(vehiclesnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := vsuo.mutation.AddedLastBattleTime(); ok {
-		_spec.AddField(vehiclesnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.AddField(vehiclesnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := vsuo.mutation.Frame(); ok {
 		_spec.SetField(vehiclesnapshot.FieldFrame, field.TypeJSON, value)

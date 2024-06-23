@@ -30,14 +30,14 @@ func (cu *ClanUpdate) Where(ps ...predicate.Clan) *ClanUpdate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (cu *ClanUpdate) SetUpdatedAt(i int) *ClanUpdate {
+func (cu *ClanUpdate) SetUpdatedAt(i int64) *ClanUpdate {
 	cu.mutation.ResetUpdatedAt()
 	cu.mutation.SetUpdatedAt(i)
 	return cu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (cu *ClanUpdate) AddUpdatedAt(i int) *ClanUpdate {
+func (cu *ClanUpdate) AddUpdatedAt(i int64) *ClanUpdate {
 	cu.mutation.AddUpdatedAt(i)
 	return cu
 }
@@ -207,10 +207,10 @@ func (cu *ClanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.UpdatedAt(); ok {
-		_spec.SetField(clan.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(clan.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := cu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(clan.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(clan.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := cu.mutation.Tag(); ok {
 		_spec.SetField(clan.FieldTag, field.TypeString, value)
@@ -298,14 +298,14 @@ type ClanUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (cuo *ClanUpdateOne) SetUpdatedAt(i int) *ClanUpdateOne {
+func (cuo *ClanUpdateOne) SetUpdatedAt(i int64) *ClanUpdateOne {
 	cuo.mutation.ResetUpdatedAt()
 	cuo.mutation.SetUpdatedAt(i)
 	return cuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (cuo *ClanUpdateOne) AddUpdatedAt(i int) *ClanUpdateOne {
+func (cuo *ClanUpdateOne) AddUpdatedAt(i int64) *ClanUpdateOne {
 	cuo.mutation.AddUpdatedAt(i)
 	return cuo
 }
@@ -505,10 +505,10 @@ func (cuo *ClanUpdateOne) sqlSave(ctx context.Context) (_node *Clan, err error) 
 		}
 	}
 	if value, ok := cuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(clan.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(clan.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := cuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(clan.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(clan.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := cuo.mutation.Tag(); ok {
 		_spec.SetField(clan.FieldTag, field.TypeString, value)

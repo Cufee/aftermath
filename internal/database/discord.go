@@ -3,64 +3,109 @@ package database
 import (
 	"context"
 
+	"github.com/cufee/aftermath/internal/database/ent/db"
+	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
 	"github.com/cufee/aftermath/internal/database/models"
 )
 
-func (c *libsqlClient) GetCommandsByID(ctx context.Context, commandIDs ...string) ([]models.ApplicationCommand, error) {
-	// if len(commandIDs) < 1 {
-	// 	return nil, nil
-	// }
+func toApplicationCommand(record *db.ApplicationCommand) models.ApplicationCommand {
+	return models.ApplicationCommand{
+		ID:      record.ID,
+		Name:    record.Name,
+		Hash:    record.OptionsHash,
+		Version: record.Version,
+	}
 
-	// models, err := c.prisma.models.ApplicationCommand.FindMany(db.models.ApplicationCommand.ID.In(commandIDs)).Exec(ctx)
-	// if err != nil {
-	// 	return nil, err
-	// }
+}
+
+func (c *libsqlClient) GetCommandsByID(ctx context.Context, commandIDs ...string) ([]models.ApplicationCommand, error) {
+	if len(commandIDs) < 1 {
+		return nil, nil
+	}
+
+	records, err := c.db.ApplicationCommand.Query().Where(applicationcommand.IDIn(commandIDs...)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	var commands []models.ApplicationCommand
-	// for _, model := range models {
-	// 	commands = append(commands, models.ApplicationCommand{}.fromModel(model))
-	// }
+	for _, c := range records {
+		commands = append(commands, toApplicationCommand(c))
+	}
 	return commands, nil
 }
 
 func (c *libsqlClient) GetCommandsByHash(ctx context.Context, commandHashes ...string) ([]models.ApplicationCommand, error) {
-	// if len(commandHashes) < 1 {
-	// 	return nil, nil
-	// }
+	if len(commandHashes) < 1 {
+		return nil, nil
+	}
 
-	// models, err := c.prisma.models.ApplicationCommand.FindMany(db.models.ApplicationCommand.OptionsHash.In(commandHashes)).Exec(ctx)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
+	records, err := c.db.ApplicationCommand.Query().Where(applicationcommand.OptionsHashIn(commandHashes...)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var commands []models.ApplicationCommand
-	// for _, model := range models {
-	// 	commands = append(commands, models.ApplicationCommand{}.fromModel(model))
-	// }
+	for _, c := range records {
+		commands = append(commands, toApplicationCommand(c))
+	}
 	return commands, nil
 }
 
 func (c *libsqlClient) UpsertCommands(ctx context.Context, commands ...models.ApplicationCommand) error {
-	// if len(commands) < 1 {
-	// 	return nil
-	// }
+	if len(commands) < 1 {
+		return nil
+	}
 
-	// var tx []db.PrismaTransaction
-	// for _, cmd := range commands {
-	// 	tx = append(tx, c.prisma.models.ApplicationCommand.UpsertOne(db.models.ApplicationCommand.ID.Equals(cmd.ID)).
-	// 		Create(
-	// 			db.models.ApplicationCommand.ID.Set(cmd.ID),
-	// 			db.models.ApplicationCommand.Name.Set(cmd.Name),
-	// 			db.models.ApplicationCommand.Version.Set(cmd.Version),
-	// 			db.models.ApplicationCommand.OptionsHash.Set(cmd.Hash),
-	// 		).
-	// 		Update(
-	// 			db.models.ApplicationCommand.Name.Set(cmd.Name),
-	// 			db.models.ApplicationCommand.Version.Set(cmd.Version),
-	// 			db.models.ApplicationCommand.OptionsHash.Set(cmd.Hash),
-	// 		).Tx(),
-	// 	)
-	// }
-	// return c.prisma.Prisma.Transaction(tx...).Exec(ctx)
-	return nil
+	var ids []string
+	commandsMap := make(map[string]*models.ApplicationCommand)
+	for _, c := range commands {
+		ids = append(ids, c.ID)
+		commandsMap[c.ID] = &c
+	}
+
+	tx, err := c.db.Tx(ctx)
+	if err != nil {
+		return err
+	}
+
+	existing, err := tx.ApplicationCommand.Query().Where(applicationcommand.IDIn(ids...)).All(ctx)
+	if err != nil {
+		return rollback(tx, err)
+	}
+
+	for _, c := range existing {
+		update, ok := commandsMap[c.ID]
+		if !ok {
+			continue
+		}
+
+		err := tx.ApplicationCommand.UpdateOneID(c.ID).
+			SetName(update.Name).
+			SetVersion(update.Version).
+			SetOptionsHash(update.Hash).
+			Exec(ctx)
+		if err != nil {
+			return rollback(tx, err)
+		}
+
+		delete(commandsMap, c.ID)
+	}
+
+	var inserts []*db.ApplicationCommandCreate
+	for _, cmd := range commandsMap {
+		inserts = append(inserts,
+			c.db.ApplicationCommand.Create().
+				SetID(cmd.ID).
+				SetName(cmd.Name).
+				SetVersion(cmd.Version).
+				SetOptionsHash(cmd.Hash),
+		)
+	}
+
+	err = tx.ApplicationCommand.CreateBulk(inserts...).Exec(ctx)
+	if err != nil {
+		return rollback(tx, err)
+	}
+
+	return tx.Commit()
 }

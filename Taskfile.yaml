@@ -29,7 +29,7 @@ tasks:
 
   db-migrate:
     desc: generate migrations
-    cmd: atlas migrate diff init --dir "file://internal/database/ent/migrate/migrations" --to "ent://internal/database/ent/schema" --dev-url "sqlite://tmp/file?mode=memory&_fk=1"
+    cmd: atlas migrate diff {{.CLI_ARGS}} --dir "file://internal/database/ent/migrate/migrations" --to "ent://internal/database/ent/schema" --dev-url "sqlite://file?mode=memory&_fk=1"
   db-migrate-apply:
     desc: apply migrations using atlas
     cmd: ${ATLAS_TEMP_DIR} migrate apply --allow-dirty --dir "file://internal/database/ent/migrate/migrations" --tx-mode all --url "libsql+ws://0.0.0.0:8080"

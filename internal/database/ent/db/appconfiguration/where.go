@@ -63,12 +63,12 @@ func IDContainsFold(id string) predicate.AppConfiguration {
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v int) predicate.AppConfiguration {
+func CreatedAt(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v int) predicate.AppConfiguration {
+func UpdatedAt(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
@@ -78,82 +78,82 @@ func Key(v string) predicate.AppConfiguration {
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v int) predicate.AppConfiguration {
+func CreatedAtEQ(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v int) predicate.AppConfiguration {
+func CreatedAtNEQ(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...int) predicate.AppConfiguration {
+func CreatedAtIn(vs ...int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...int) predicate.AppConfiguration {
+func CreatedAtNotIn(vs ...int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v int) predicate.AppConfiguration {
+func CreatedAtGT(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v int) predicate.AppConfiguration {
+func CreatedAtGTE(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v int) predicate.AppConfiguration {
+func CreatedAtLT(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v int) predicate.AppConfiguration {
+func CreatedAtLTE(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v int) predicate.AppConfiguration {
+func UpdatedAtEQ(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v int) predicate.AppConfiguration {
+func UpdatedAtNEQ(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...int) predicate.AppConfiguration {
+func UpdatedAtIn(vs ...int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...int) predicate.AppConfiguration {
+func UpdatedAtNotIn(vs ...int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v int) predicate.AppConfiguration {
+func UpdatedAtGT(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v int) predicate.AppConfiguration {
+func UpdatedAtGTE(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v int) predicate.AppConfiguration {
+func UpdatedAtLT(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v int) predicate.AppConfiguration {
+func UpdatedAtLTE(v int64) predicate.AppConfiguration {
 	return predicate.AppConfiguration(sql.FieldLTE(FieldUpdatedAt, v))
 }
 

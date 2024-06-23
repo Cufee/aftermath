@@ -29,21 +29,29 @@ func (vau *VehicleAverageUpdate) Where(ps ...predicate.VehicleAverage) *VehicleA
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vau *VehicleAverageUpdate) SetUpdatedAt(i int) *VehicleAverageUpdate {
+func (vau *VehicleAverageUpdate) SetUpdatedAt(i int64) *VehicleAverageUpdate {
 	vau.mutation.ResetUpdatedAt()
 	vau.mutation.SetUpdatedAt(i)
 	return vau
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (vau *VehicleAverageUpdate) AddUpdatedAt(i int) *VehicleAverageUpdate {
+func (vau *VehicleAverageUpdate) AddUpdatedAt(i int64) *VehicleAverageUpdate {
 	vau.mutation.AddUpdatedAt(i)
 	return vau
 }
 
 // SetData sets the "data" field.
-func (vau *VehicleAverageUpdate) SetData(mf map[string]frame.StatsFrame) *VehicleAverageUpdate {
-	vau.mutation.SetData(mf)
+func (vau *VehicleAverageUpdate) SetData(ff frame.StatsFrame) *VehicleAverageUpdate {
+	vau.mutation.SetData(ff)
+	return vau
+}
+
+// SetNillableData sets the "data" field if the given value is not nil.
+func (vau *VehicleAverageUpdate) SetNillableData(ff *frame.StatsFrame) *VehicleAverageUpdate {
+	if ff != nil {
+		vau.SetData(*ff)
+	}
 	return vau
 }
 
@@ -98,10 +106,10 @@ func (vau *VehicleAverageUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 	}
 	if value, ok := vau.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vau.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(vehicleaverage.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(vehicleaverage.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vau.mutation.Data(); ok {
 		_spec.SetField(vehicleaverage.FieldData, field.TypeJSON, value)
@@ -127,21 +135,29 @@ type VehicleAverageUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vauo *VehicleAverageUpdateOne) SetUpdatedAt(i int) *VehicleAverageUpdateOne {
+func (vauo *VehicleAverageUpdateOne) SetUpdatedAt(i int64) *VehicleAverageUpdateOne {
 	vauo.mutation.ResetUpdatedAt()
 	vauo.mutation.SetUpdatedAt(i)
 	return vauo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (vauo *VehicleAverageUpdateOne) AddUpdatedAt(i int) *VehicleAverageUpdateOne {
+func (vauo *VehicleAverageUpdateOne) AddUpdatedAt(i int64) *VehicleAverageUpdateOne {
 	vauo.mutation.AddUpdatedAt(i)
 	return vauo
 }
 
 // SetData sets the "data" field.
-func (vauo *VehicleAverageUpdateOne) SetData(mf map[string]frame.StatsFrame) *VehicleAverageUpdateOne {
-	vauo.mutation.SetData(mf)
+func (vauo *VehicleAverageUpdateOne) SetData(ff frame.StatsFrame) *VehicleAverageUpdateOne {
+	vauo.mutation.SetData(ff)
+	return vauo
+}
+
+// SetNillableData sets the "data" field if the given value is not nil.
+func (vauo *VehicleAverageUpdateOne) SetNillableData(ff *frame.StatsFrame) *VehicleAverageUpdateOne {
+	if ff != nil {
+		vauo.SetData(*ff)
+	}
 	return vauo
 }
 
@@ -226,10 +242,10 @@ func (vauo *VehicleAverageUpdateOne) sqlSave(ctx context.Context) (_node *Vehicl
 		}
 	}
 	if value, ok := vauo.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vauo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(vehicleaverage.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(vehicleaverage.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vauo.mutation.Data(); ok {
 		_spec.SetField(vehicleaverage.FieldData, field.TypeJSON, value)

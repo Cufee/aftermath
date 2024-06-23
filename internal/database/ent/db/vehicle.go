@@ -18,9 +18,9 @@ type Vehicle struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int `json:"created_at,omitempty"`
+	CreatedAt int64 `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int `json:"updated_at,omitempty"`
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 	// Tier holds the value of the "tier" field.
 	Tier int `json:"tier,omitempty"`
 	// LocalizedNames holds the value of the "localized_names" field.
@@ -64,13 +64,13 @@ func (v *Vehicle) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				v.CreatedAt = int(value.Int64)
+				v.CreatedAt = value.Int64
 			}
 		case vehicle.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				v.UpdatedAt = int(value.Int64)
+				v.UpdatedAt = value.Int64
 			}
 		case vehicle.FieldTier:
 			if value, ok := values[i].(*sql.NullInt64); !ok {

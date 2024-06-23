@@ -64,12 +64,12 @@ func IDContainsFold(id string) predicate.Clan {
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v int) predicate.Clan {
+func CreatedAt(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v int) predicate.Clan {
+func UpdatedAt(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
@@ -89,82 +89,82 @@ func EmblemID(v string) predicate.Clan {
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v int) predicate.Clan {
+func CreatedAtEQ(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v int) predicate.Clan {
+func CreatedAtNEQ(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...int) predicate.Clan {
+func CreatedAtIn(vs ...int64) predicate.Clan {
 	return predicate.Clan(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...int) predicate.Clan {
+func CreatedAtNotIn(vs ...int64) predicate.Clan {
 	return predicate.Clan(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v int) predicate.Clan {
+func CreatedAtGT(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v int) predicate.Clan {
+func CreatedAtGTE(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v int) predicate.Clan {
+func CreatedAtLT(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v int) predicate.Clan {
+func CreatedAtLTE(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v int) predicate.Clan {
+func UpdatedAtEQ(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v int) predicate.Clan {
+func UpdatedAtNEQ(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...int) predicate.Clan {
+func UpdatedAtIn(vs ...int64) predicate.Clan {
 	return predicate.Clan(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...int) predicate.Clan {
+func UpdatedAtNotIn(vs ...int64) predicate.Clan {
 	return predicate.Clan(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v int) predicate.Clan {
+func UpdatedAtGT(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v int) predicate.Clan {
+func UpdatedAtGTE(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v int) predicate.Clan {
+func UpdatedAtLT(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v int) predicate.Clan {
+func UpdatedAtLTE(v int64) predicate.Clan {
 	return predicate.Clan(sql.FieldLTE(FieldUpdatedAt, v))
 }
 

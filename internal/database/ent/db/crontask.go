@@ -19,21 +19,21 @@ type CronTask struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int `json:"created_at,omitempty"`
+	CreatedAt int64 `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int `json:"updated_at,omitempty"`
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
-	Type string `json:"type,omitempty"`
+	Type models.TaskType `json:"type,omitempty"`
 	// ReferenceID holds the value of the "reference_id" field.
 	ReferenceID string `json:"reference_id,omitempty"`
 	// Targets holds the value of the "targets" field.
 	Targets []string `json:"targets,omitempty"`
 	// Status holds the value of the "status" field.
-	Status string `json:"status,omitempty"`
+	Status models.TaskStatus `json:"status,omitempty"`
 	// ScheduledAfter holds the value of the "scheduled_after" field.
-	ScheduledAfter int `json:"scheduled_after,omitempty"`
+	ScheduledAfter int64 `json:"scheduled_after,omitempty"`
 	// LastRun holds the value of the "last_run" field.
-	LastRun int `json:"last_run,omitempty"`
+	LastRun int64 `json:"last_run,omitempty"`
 	// Logs holds the value of the "logs" field.
 	Logs []models.TaskLog `json:"logs,omitempty"`
 	// Data holds the value of the "data" field.
@@ -77,19 +77,19 @@ func (ct *CronTask) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ct.CreatedAt = int(value.Int64)
+				ct.CreatedAt = value.Int64
 			}
 		case crontask.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				ct.UpdatedAt = int(value.Int64)
+				ct.UpdatedAt = value.Int64
 			}
 		case crontask.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				ct.Type = value.String
+				ct.Type = models.TaskType(value.String)
 			}
 		case crontask.FieldReferenceID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -109,19 +109,19 @@ func (ct *CronTask) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				ct.Status = value.String
+				ct.Status = models.TaskStatus(value.String)
 			}
 		case crontask.FieldScheduledAfter:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field scheduled_after", values[i])
 			} else if value.Valid {
-				ct.ScheduledAfter = int(value.Int64)
+				ct.ScheduledAfter = value.Int64
 			}
 		case crontask.FieldLastRun:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field last_run", values[i])
 			} else if value.Valid {
-				ct.LastRun = int(value.Int64)
+				ct.LastRun = value.Int64
 			}
 		case crontask.FieldLogs:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -182,7 +182,7 @@ func (ct *CronTask) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ct.UpdatedAt))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
-	builder.WriteString(ct.Type)
+	builder.WriteString(fmt.Sprintf("%v", ct.Type))
 	builder.WriteString(", ")
 	builder.WriteString("reference_id=")
 	builder.WriteString(ct.ReferenceID)
@@ -191,7 +191,7 @@ func (ct *CronTask) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ct.Targets))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
-	builder.WriteString(ct.Status)
+	builder.WriteString(fmt.Sprintf("%v", ct.Status))
 	builder.WriteString(", ")
 	builder.WriteString("scheduled_after=")
 	builder.WriteString(fmt.Sprintf("%v", ct.ScheduledAfter))

@@ -30,14 +30,14 @@ func (asu *AccountSnapshotUpdate) Where(ps ...predicate.AccountSnapshot) *Accoun
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (asu *AccountSnapshotUpdate) SetUpdatedAt(i int) *AccountSnapshotUpdate {
+func (asu *AccountSnapshotUpdate) SetUpdatedAt(i int64) *AccountSnapshotUpdate {
 	asu.mutation.ResetUpdatedAt()
 	asu.mutation.SetUpdatedAt(i)
 	return asu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (asu *AccountSnapshotUpdate) AddUpdatedAt(i int) *AccountSnapshotUpdate {
+func (asu *AccountSnapshotUpdate) AddUpdatedAt(i int64) *AccountSnapshotUpdate {
 	asu.mutation.AddUpdatedAt(i)
 	return asu
 }
@@ -57,14 +57,14 @@ func (asu *AccountSnapshotUpdate) SetNillableType(mt *models.SnapshotType) *Acco
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (asu *AccountSnapshotUpdate) SetLastBattleTime(i int) *AccountSnapshotUpdate {
+func (asu *AccountSnapshotUpdate) SetLastBattleTime(i int64) *AccountSnapshotUpdate {
 	asu.mutation.ResetLastBattleTime()
 	asu.mutation.SetLastBattleTime(i)
 	return asu
 }
 
 // SetNillableLastBattleTime sets the "last_battle_time" field if the given value is not nil.
-func (asu *AccountSnapshotUpdate) SetNillableLastBattleTime(i *int) *AccountSnapshotUpdate {
+func (asu *AccountSnapshotUpdate) SetNillableLastBattleTime(i *int64) *AccountSnapshotUpdate {
 	if i != nil {
 		asu.SetLastBattleTime(*i)
 	}
@@ -72,7 +72,7 @@ func (asu *AccountSnapshotUpdate) SetNillableLastBattleTime(i *int) *AccountSnap
 }
 
 // AddLastBattleTime adds i to the "last_battle_time" field.
-func (asu *AccountSnapshotUpdate) AddLastBattleTime(i int) *AccountSnapshotUpdate {
+func (asu *AccountSnapshotUpdate) AddLastBattleTime(i int64) *AccountSnapshotUpdate {
 	asu.mutation.AddLastBattleTime(i)
 	return asu
 }
@@ -233,19 +233,19 @@ func (asu *AccountSnapshotUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 	}
 	if value, ok := asu.mutation.UpdatedAt(); ok {
-		_spec.SetField(accountsnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(accountsnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := asu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(accountsnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(accountsnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := asu.mutation.GetType(); ok {
 		_spec.SetField(accountsnapshot.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := asu.mutation.LastBattleTime(); ok {
-		_spec.SetField(accountsnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.SetField(accountsnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := asu.mutation.AddedLastBattleTime(); ok {
-		_spec.AddField(accountsnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.AddField(accountsnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := asu.mutation.ReferenceID(); ok {
 		_spec.SetField(accountsnapshot.FieldReferenceID, field.TypeString, value)
@@ -289,14 +289,14 @@ type AccountSnapshotUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (asuo *AccountSnapshotUpdateOne) SetUpdatedAt(i int) *AccountSnapshotUpdateOne {
+func (asuo *AccountSnapshotUpdateOne) SetUpdatedAt(i int64) *AccountSnapshotUpdateOne {
 	asuo.mutation.ResetUpdatedAt()
 	asuo.mutation.SetUpdatedAt(i)
 	return asuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (asuo *AccountSnapshotUpdateOne) AddUpdatedAt(i int) *AccountSnapshotUpdateOne {
+func (asuo *AccountSnapshotUpdateOne) AddUpdatedAt(i int64) *AccountSnapshotUpdateOne {
 	asuo.mutation.AddUpdatedAt(i)
 	return asuo
 }
@@ -316,14 +316,14 @@ func (asuo *AccountSnapshotUpdateOne) SetNillableType(mt *models.SnapshotType) *
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (asuo *AccountSnapshotUpdateOne) SetLastBattleTime(i int) *AccountSnapshotUpdateOne {
+func (asuo *AccountSnapshotUpdateOne) SetLastBattleTime(i int64) *AccountSnapshotUpdateOne {
 	asuo.mutation.ResetLastBattleTime()
 	asuo.mutation.SetLastBattleTime(i)
 	return asuo
 }
 
 // SetNillableLastBattleTime sets the "last_battle_time" field if the given value is not nil.
-func (asuo *AccountSnapshotUpdateOne) SetNillableLastBattleTime(i *int) *AccountSnapshotUpdateOne {
+func (asuo *AccountSnapshotUpdateOne) SetNillableLastBattleTime(i *int64) *AccountSnapshotUpdateOne {
 	if i != nil {
 		asuo.SetLastBattleTime(*i)
 	}
@@ -331,7 +331,7 @@ func (asuo *AccountSnapshotUpdateOne) SetNillableLastBattleTime(i *int) *Account
 }
 
 // AddLastBattleTime adds i to the "last_battle_time" field.
-func (asuo *AccountSnapshotUpdateOne) AddLastBattleTime(i int) *AccountSnapshotUpdateOne {
+func (asuo *AccountSnapshotUpdateOne) AddLastBattleTime(i int64) *AccountSnapshotUpdateOne {
 	asuo.mutation.AddLastBattleTime(i)
 	return asuo
 }
@@ -522,19 +522,19 @@ func (asuo *AccountSnapshotUpdateOne) sqlSave(ctx context.Context) (_node *Accou
 		}
 	}
 	if value, ok := asuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(accountsnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(accountsnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := asuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(accountsnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(accountsnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := asuo.mutation.GetType(); ok {
 		_spec.SetField(accountsnapshot.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := asuo.mutation.LastBattleTime(); ok {
-		_spec.SetField(accountsnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.SetField(accountsnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := asuo.mutation.AddedLastBattleTime(); ok {
-		_spec.AddField(accountsnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.AddField(accountsnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := asuo.mutation.ReferenceID(); ok {
 		_spec.SetField(accountsnapshot.FieldReferenceID, field.TypeString, value)

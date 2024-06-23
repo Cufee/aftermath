@@ -51,11 +51,8 @@ func UpdateGlossaryWorker(client core.Client) func() {
 		vehicles := make(map[string]models.Vehicle)
 		for id, data := range glossary {
 			vehicles[id] = models.Vehicle{
-				ID:   id,
-				Tier: data.Tier,
-				Type: data.Type,
-				// Class: ,
-				Nation:         data.Nation,
+				ID:             id,
+				Tier:           data.Tier,
 				LocalizedNames: map[string]string{language.English.String(): data.Name},
 			}
 		}

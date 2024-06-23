@@ -30,28 +30,28 @@ func (ctu *CronTaskUpdate) Where(ps ...predicate.CronTask) *CronTaskUpdate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ctu *CronTaskUpdate) SetUpdatedAt(i int) *CronTaskUpdate {
+func (ctu *CronTaskUpdate) SetUpdatedAt(i int64) *CronTaskUpdate {
 	ctu.mutation.ResetUpdatedAt()
 	ctu.mutation.SetUpdatedAt(i)
 	return ctu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (ctu *CronTaskUpdate) AddUpdatedAt(i int) *CronTaskUpdate {
+func (ctu *CronTaskUpdate) AddUpdatedAt(i int64) *CronTaskUpdate {
 	ctu.mutation.AddUpdatedAt(i)
 	return ctu
 }
 
 // SetType sets the "type" field.
-func (ctu *CronTaskUpdate) SetType(s string) *CronTaskUpdate {
-	ctu.mutation.SetType(s)
+func (ctu *CronTaskUpdate) SetType(mt models.TaskType) *CronTaskUpdate {
+	ctu.mutation.SetType(mt)
 	return ctu
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (ctu *CronTaskUpdate) SetNillableType(s *string) *CronTaskUpdate {
-	if s != nil {
-		ctu.SetType(*s)
+func (ctu *CronTaskUpdate) SetNillableType(mt *models.TaskType) *CronTaskUpdate {
+	if mt != nil {
+		ctu.SetType(*mt)
 	}
 	return ctu
 }
@@ -83,28 +83,28 @@ func (ctu *CronTaskUpdate) AppendTargets(s []string) *CronTaskUpdate {
 }
 
 // SetStatus sets the "status" field.
-func (ctu *CronTaskUpdate) SetStatus(s string) *CronTaskUpdate {
-	ctu.mutation.SetStatus(s)
+func (ctu *CronTaskUpdate) SetStatus(ms models.TaskStatus) *CronTaskUpdate {
+	ctu.mutation.SetStatus(ms)
 	return ctu
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (ctu *CronTaskUpdate) SetNillableStatus(s *string) *CronTaskUpdate {
-	if s != nil {
-		ctu.SetStatus(*s)
+func (ctu *CronTaskUpdate) SetNillableStatus(ms *models.TaskStatus) *CronTaskUpdate {
+	if ms != nil {
+		ctu.SetStatus(*ms)
 	}
 	return ctu
 }
 
 // SetScheduledAfter sets the "scheduled_after" field.
-func (ctu *CronTaskUpdate) SetScheduledAfter(i int) *CronTaskUpdate {
+func (ctu *CronTaskUpdate) SetScheduledAfter(i int64) *CronTaskUpdate {
 	ctu.mutation.ResetScheduledAfter()
 	ctu.mutation.SetScheduledAfter(i)
 	return ctu
 }
 
 // SetNillableScheduledAfter sets the "scheduled_after" field if the given value is not nil.
-func (ctu *CronTaskUpdate) SetNillableScheduledAfter(i *int) *CronTaskUpdate {
+func (ctu *CronTaskUpdate) SetNillableScheduledAfter(i *int64) *CronTaskUpdate {
 	if i != nil {
 		ctu.SetScheduledAfter(*i)
 	}
@@ -112,20 +112,20 @@ func (ctu *CronTaskUpdate) SetNillableScheduledAfter(i *int) *CronTaskUpdate {
 }
 
 // AddScheduledAfter adds i to the "scheduled_after" field.
-func (ctu *CronTaskUpdate) AddScheduledAfter(i int) *CronTaskUpdate {
+func (ctu *CronTaskUpdate) AddScheduledAfter(i int64) *CronTaskUpdate {
 	ctu.mutation.AddScheduledAfter(i)
 	return ctu
 }
 
 // SetLastRun sets the "last_run" field.
-func (ctu *CronTaskUpdate) SetLastRun(i int) *CronTaskUpdate {
+func (ctu *CronTaskUpdate) SetLastRun(i int64) *CronTaskUpdate {
 	ctu.mutation.ResetLastRun()
 	ctu.mutation.SetLastRun(i)
 	return ctu
 }
 
 // SetNillableLastRun sets the "last_run" field if the given value is not nil.
-func (ctu *CronTaskUpdate) SetNillableLastRun(i *int) *CronTaskUpdate {
+func (ctu *CronTaskUpdate) SetNillableLastRun(i *int64) *CronTaskUpdate {
 	if i != nil {
 		ctu.SetLastRun(*i)
 	}
@@ -133,7 +133,7 @@ func (ctu *CronTaskUpdate) SetNillableLastRun(i *int) *CronTaskUpdate {
 }
 
 // AddLastRun adds i to the "last_run" field.
-func (ctu *CronTaskUpdate) AddLastRun(i int) *CronTaskUpdate {
+func (ctu *CronTaskUpdate) AddLastRun(i int64) *CronTaskUpdate {
 	ctu.mutation.AddLastRun(i)
 	return ctu
 }
@@ -230,13 +230,13 @@ func (ctu *CronTaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ctu.mutation.UpdatedAt(); ok {
-		_spec.SetField(crontask.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(crontask.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ctu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(crontask.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(crontask.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ctu.mutation.GetType(); ok {
-		_spec.SetField(crontask.FieldType, field.TypeString, value)
+		_spec.SetField(crontask.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := ctu.mutation.ReferenceID(); ok {
 		_spec.SetField(crontask.FieldReferenceID, field.TypeString, value)
@@ -250,19 +250,19 @@ func (ctu *CronTaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		})
 	}
 	if value, ok := ctu.mutation.Status(); ok {
-		_spec.SetField(crontask.FieldStatus, field.TypeString, value)
+		_spec.SetField(crontask.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := ctu.mutation.ScheduledAfter(); ok {
-		_spec.SetField(crontask.FieldScheduledAfter, field.TypeInt, value)
+		_spec.SetField(crontask.FieldScheduledAfter, field.TypeInt64, value)
 	}
 	if value, ok := ctu.mutation.AddedScheduledAfter(); ok {
-		_spec.AddField(crontask.FieldScheduledAfter, field.TypeInt, value)
+		_spec.AddField(crontask.FieldScheduledAfter, field.TypeInt64, value)
 	}
 	if value, ok := ctu.mutation.LastRun(); ok {
-		_spec.SetField(crontask.FieldLastRun, field.TypeInt, value)
+		_spec.SetField(crontask.FieldLastRun, field.TypeInt64, value)
 	}
 	if value, ok := ctu.mutation.AddedLastRun(); ok {
-		_spec.AddField(crontask.FieldLastRun, field.TypeInt, value)
+		_spec.AddField(crontask.FieldLastRun, field.TypeInt64, value)
 	}
 	if value, ok := ctu.mutation.Logs(); ok {
 		_spec.SetField(crontask.FieldLogs, field.TypeJSON, value)
@@ -296,28 +296,28 @@ type CronTaskUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ctuo *CronTaskUpdateOne) SetUpdatedAt(i int) *CronTaskUpdateOne {
+func (ctuo *CronTaskUpdateOne) SetUpdatedAt(i int64) *CronTaskUpdateOne {
 	ctuo.mutation.ResetUpdatedAt()
 	ctuo.mutation.SetUpdatedAt(i)
 	return ctuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (ctuo *CronTaskUpdateOne) AddUpdatedAt(i int) *CronTaskUpdateOne {
+func (ctuo *CronTaskUpdateOne) AddUpdatedAt(i int64) *CronTaskUpdateOne {
 	ctuo.mutation.AddUpdatedAt(i)
 	return ctuo
 }
 
 // SetType sets the "type" field.
-func (ctuo *CronTaskUpdateOne) SetType(s string) *CronTaskUpdateOne {
-	ctuo.mutation.SetType(s)
+func (ctuo *CronTaskUpdateOne) SetType(mt models.TaskType) *CronTaskUpdateOne {
+	ctuo.mutation.SetType(mt)
 	return ctuo
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (ctuo *CronTaskUpdateOne) SetNillableType(s *string) *CronTaskUpdateOne {
-	if s != nil {
-		ctuo.SetType(*s)
+func (ctuo *CronTaskUpdateOne) SetNillableType(mt *models.TaskType) *CronTaskUpdateOne {
+	if mt != nil {
+		ctuo.SetType(*mt)
 	}
 	return ctuo
 }
@@ -349,28 +349,28 @@ func (ctuo *CronTaskUpdateOne) AppendTargets(s []string) *CronTaskUpdateOne {
 }
 
 // SetStatus sets the "status" field.
-func (ctuo *CronTaskUpdateOne) SetStatus(s string) *CronTaskUpdateOne {
-	ctuo.mutation.SetStatus(s)
+func (ctuo *CronTaskUpdateOne) SetStatus(ms models.TaskStatus) *CronTaskUpdateOne {
+	ctuo.mutation.SetStatus(ms)
 	return ctuo
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (ctuo *CronTaskUpdateOne) SetNillableStatus(s *string) *CronTaskUpdateOne {
-	if s != nil {
-		ctuo.SetStatus(*s)
+func (ctuo *CronTaskUpdateOne) SetNillableStatus(ms *models.TaskStatus) *CronTaskUpdateOne {
+	if ms != nil {
+		ctuo.SetStatus(*ms)
 	}
 	return ctuo
 }
 
 // SetScheduledAfter sets the "scheduled_after" field.
-func (ctuo *CronTaskUpdateOne) SetScheduledAfter(i int) *CronTaskUpdateOne {
+func (ctuo *CronTaskUpdateOne) SetScheduledAfter(i int64) *CronTaskUpdateOne {
 	ctuo.mutation.ResetScheduledAfter()
 	ctuo.mutation.SetScheduledAfter(i)
 	return ctuo
 }
 
 // SetNillableScheduledAfter sets the "scheduled_after" field if the given value is not nil.
-func (ctuo *CronTaskUpdateOne) SetNillableScheduledAfter(i *int) *CronTaskUpdateOne {
+func (ctuo *CronTaskUpdateOne) SetNillableScheduledAfter(i *int64) *CronTaskUpdateOne {
 	if i != nil {
 		ctuo.SetScheduledAfter(*i)
 	}
@@ -378,20 +378,20 @@ func (ctuo *CronTaskUpdateOne) SetNillableScheduledAfter(i *int) *CronTaskUpdate
 }
 
 // AddScheduledAfter adds i to the "scheduled_after" field.
-func (ctuo *CronTaskUpdateOne) AddScheduledAfter(i int) *CronTaskUpdateOne {
+func (ctuo *CronTaskUpdateOne) AddScheduledAfter(i int64) *CronTaskUpdateOne {
 	ctuo.mutation.AddScheduledAfter(i)
 	return ctuo
 }
 
 // SetLastRun sets the "last_run" field.
-func (ctuo *CronTaskUpdateOne) SetLastRun(i int) *CronTaskUpdateOne {
+func (ctuo *CronTaskUpdateOne) SetLastRun(i int64) *CronTaskUpdateOne {
 	ctuo.mutation.ResetLastRun()
 	ctuo.mutation.SetLastRun(i)
 	return ctuo
 }
 
 // SetNillableLastRun sets the "last_run" field if the given value is not nil.
-func (ctuo *CronTaskUpdateOne) SetNillableLastRun(i *int) *CronTaskUpdateOne {
+func (ctuo *CronTaskUpdateOne) SetNillableLastRun(i *int64) *CronTaskUpdateOne {
 	if i != nil {
 		ctuo.SetLastRun(*i)
 	}
@@ -399,7 +399,7 @@ func (ctuo *CronTaskUpdateOne) SetNillableLastRun(i *int) *CronTaskUpdateOne {
 }
 
 // AddLastRun adds i to the "last_run" field.
-func (ctuo *CronTaskUpdateOne) AddLastRun(i int) *CronTaskUpdateOne {
+func (ctuo *CronTaskUpdateOne) AddLastRun(i int64) *CronTaskUpdateOne {
 	ctuo.mutation.AddLastRun(i)
 	return ctuo
 }
@@ -526,13 +526,13 @@ func (ctuo *CronTaskUpdateOne) sqlSave(ctx context.Context) (_node *CronTask, er
 		}
 	}
 	if value, ok := ctuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(crontask.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(crontask.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ctuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(crontask.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(crontask.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ctuo.mutation.GetType(); ok {
-		_spec.SetField(crontask.FieldType, field.TypeString, value)
+		_spec.SetField(crontask.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := ctuo.mutation.ReferenceID(); ok {
 		_spec.SetField(crontask.FieldReferenceID, field.TypeString, value)
@@ -546,19 +546,19 @@ func (ctuo *CronTaskUpdateOne) sqlSave(ctx context.Context) (_node *CronTask, er
 		})
 	}
 	if value, ok := ctuo.mutation.Status(); ok {
-		_spec.SetField(crontask.FieldStatus, field.TypeString, value)
+		_spec.SetField(crontask.FieldStatus, field.TypeEnum, value)
 	}
 	if value, ok := ctuo.mutation.ScheduledAfter(); ok {
-		_spec.SetField(crontask.FieldScheduledAfter, field.TypeInt, value)
+		_spec.SetField(crontask.FieldScheduledAfter, field.TypeInt64, value)
 	}
 	if value, ok := ctuo.mutation.AddedScheduledAfter(); ok {
-		_spec.AddField(crontask.FieldScheduledAfter, field.TypeInt, value)
+		_spec.AddField(crontask.FieldScheduledAfter, field.TypeInt64, value)
 	}
 	if value, ok := ctuo.mutation.LastRun(); ok {
-		_spec.SetField(crontask.FieldLastRun, field.TypeInt, value)
+		_spec.SetField(crontask.FieldLastRun, field.TypeInt64, value)
 	}
 	if value, ok := ctuo.mutation.AddedLastRun(); ok {
-		_spec.AddField(crontask.FieldLastRun, field.TypeInt, value)
+		_spec.AddField(crontask.FieldLastRun, field.TypeInt64, value)
 	}
 	if value, ok := ctuo.mutation.Logs(); ok {
 		_spec.SetField(crontask.FieldLogs, field.TypeJSON, value)

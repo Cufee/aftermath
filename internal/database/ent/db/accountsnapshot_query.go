@@ -297,7 +297,7 @@ func (asq *AccountSnapshotQuery) WithAccount(opts ...func(*AccountQuery)) *Accou
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -320,7 +320,7 @@ func (asq *AccountSnapshotQuery) GroupBy(field string, fields ...string) *Accoun
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //	}
 //
 //	client.AccountSnapshot.Query().
