@@ -21,4 +21,4 @@ COPY --from=builder /bin/aftermath /usr/bin/
 COPY --from=builder /usr/local/go/lib/time/zoneinfo.zip /
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-ENTRYPOINT ["aftermath"]
+CMD [ "aftermath" ]
