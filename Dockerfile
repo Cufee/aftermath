@@ -2,13 +2,14 @@ FROM golang:1.22.3-alpine as builder
 
 WORKDIR /workspace
 
-COPY ./ ./
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=$GOPATH/pkg/mod go mod download
 
-RUN go mod download
+COPY ./ ./
 RUN go generate ./...
 
 # build a fully standalone binary with zero dependencies
-RUN CGO_ENABLED=0 GOOS=linux go build -o app .
+RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=0 GOOS=linux go build -o app .
 
 # Make a scratch container with required files and binary
 FROM scratch
