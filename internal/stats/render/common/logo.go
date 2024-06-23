@@ -26,8 +26,8 @@ func (opts LogoSizingOptions) Width() int {
 func DefaultLogoOptions() LogoSizingOptions {
 	return LogoSizingOptions{
 		Gap:       4,
-		Jump:      6,
-		Lines:     9,
+		Jump:      7,
+		Lines:     7,
 		LineStep:  12,
 		LineWidth: 6,
 	}
