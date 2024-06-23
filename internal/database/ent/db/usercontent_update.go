@@ -29,14 +29,14 @@ func (ucu *UserContentUpdate) Where(ps ...predicate.UserContent) *UserContentUpd
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucu *UserContentUpdate) SetUpdatedAt(i int) *UserContentUpdate {
+func (ucu *UserContentUpdate) SetUpdatedAt(i int64) *UserContentUpdate {
 	ucu.mutation.ResetUpdatedAt()
 	ucu.mutation.SetUpdatedAt(i)
 	return ucu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (ucu *UserContentUpdate) AddUpdatedAt(i int) *UserContentUpdate {
+func (ucu *UserContentUpdate) AddUpdatedAt(i int64) *UserContentUpdate {
 	ucu.mutation.AddUpdatedAt(i)
 	return ucu
 }
@@ -148,10 +148,10 @@ func (ucu *UserContentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ucu.mutation.UpdatedAt(); ok {
-		_spec.SetField(usercontent.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(usercontent.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ucu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(usercontent.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(usercontent.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ucu.mutation.GetType(); ok {
 		_spec.SetField(usercontent.FieldType, field.TypeEnum, value)
@@ -186,14 +186,14 @@ type UserContentUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucuo *UserContentUpdateOne) SetUpdatedAt(i int) *UserContentUpdateOne {
+func (ucuo *UserContentUpdateOne) SetUpdatedAt(i int64) *UserContentUpdateOne {
 	ucuo.mutation.ResetUpdatedAt()
 	ucuo.mutation.SetUpdatedAt(i)
 	return ucuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (ucuo *UserContentUpdateOne) AddUpdatedAt(i int) *UserContentUpdateOne {
+func (ucuo *UserContentUpdateOne) AddUpdatedAt(i int64) *UserContentUpdateOne {
 	ucuo.mutation.AddUpdatedAt(i)
 	return ucuo
 }
@@ -335,10 +335,10 @@ func (ucuo *UserContentUpdateOne) sqlSave(ctx context.Context) (_node *UserConte
 		}
 	}
 	if value, ok := ucuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(usercontent.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(usercontent.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ucuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(usercontent.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(usercontent.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ucuo.mutation.GetType(); ok {
 		_spec.SetField(usercontent.FieldType, field.TypeEnum, value)

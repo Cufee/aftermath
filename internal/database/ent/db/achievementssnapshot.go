@@ -21,9 +21,9 @@ type AchievementsSnapshot struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int `json:"created_at,omitempty"`
+	CreatedAt int64 `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int `json:"updated_at,omitempty"`
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.SnapshotType `json:"type,omitempty"`
 	// AccountID holds the value of the "account_id" field.
@@ -33,7 +33,7 @@ type AchievementsSnapshot struct {
 	// Battles holds the value of the "battles" field.
 	Battles int `json:"battles,omitempty"`
 	// LastBattleTime holds the value of the "last_battle_time" field.
-	LastBattleTime int `json:"last_battle_time,omitempty"`
+	LastBattleTime int64 `json:"last_battle_time,omitempty"`
 	// Data holds the value of the "data" field.
 	Data types.AchievementsFrame `json:"data,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -98,13 +98,13 @@ func (as *AchievementsSnapshot) assignValues(columns []string, values []any) err
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				as.CreatedAt = int(value.Int64)
+				as.CreatedAt = value.Int64
 			}
 		case achievementssnapshot.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				as.UpdatedAt = int(value.Int64)
+				as.UpdatedAt = value.Int64
 			}
 		case achievementssnapshot.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -134,7 +134,7 @@ func (as *AchievementsSnapshot) assignValues(columns []string, values []any) err
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field last_battle_time", values[i])
 			} else if value.Valid {
-				as.LastBattleTime = int(value.Int64)
+				as.LastBattleTime = value.Int64
 			}
 		case achievementssnapshot.FieldData:
 			if value, ok := values[i].(*[]byte); !ok {

@@ -297,7 +297,7 @@ func (usq *UserSubscriptionQuery) WithUser(opts ...func(*UserQuery)) *UserSubscr
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -320,7 +320,7 @@ func (usq *UserSubscriptionQuery) GroupBy(field string, fields ...string) *UserS
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //	}
 //
 //	client.UserSubscription.Query().

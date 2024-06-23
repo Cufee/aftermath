@@ -18,13 +18,13 @@ type Account struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int `json:"created_at,omitempty"`
+	CreatedAt int64 `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int `json:"updated_at,omitempty"`
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 	// LastBattleTime holds the value of the "last_battle_time" field.
-	LastBattleTime int `json:"last_battle_time,omitempty"`
+	LastBattleTime int64 `json:"last_battle_time,omitempty"`
 	// AccountCreatedAt holds the value of the "account_created_at" field.
-	AccountCreatedAt int `json:"account_created_at,omitempty"`
+	AccountCreatedAt int64 `json:"account_created_at,omitempty"`
 	// Realm holds the value of the "realm" field.
 	Realm string `json:"realm,omitempty"`
 	// Nickname holds the value of the "nickname" field.
@@ -128,25 +128,25 @@ func (a *Account) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				a.CreatedAt = int(value.Int64)
+				a.CreatedAt = value.Int64
 			}
 		case account.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				a.UpdatedAt = int(value.Int64)
+				a.UpdatedAt = value.Int64
 			}
 		case account.FieldLastBattleTime:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field last_battle_time", values[i])
 			} else if value.Valid {
-				a.LastBattleTime = int(value.Int64)
+				a.LastBattleTime = value.Int64
 			}
 		case account.FieldAccountCreatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field account_created_at", values[i])
 			} else if value.Valid {
-				a.AccountCreatedAt = int(value.Int64)
+				a.AccountCreatedAt = value.Int64
 			}
 		case account.FieldRealm:
 			if value, ok := values[i].(*sql.NullString); !ok {

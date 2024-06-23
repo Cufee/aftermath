@@ -29,14 +29,14 @@ func (usu *UserSubscriptionUpdate) Where(ps ...predicate.UserSubscription) *User
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (usu *UserSubscriptionUpdate) SetUpdatedAt(i int) *UserSubscriptionUpdate {
+func (usu *UserSubscriptionUpdate) SetUpdatedAt(i int64) *UserSubscriptionUpdate {
 	usu.mutation.ResetUpdatedAt()
 	usu.mutation.SetUpdatedAt(i)
 	return usu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (usu *UserSubscriptionUpdate) AddUpdatedAt(i int) *UserSubscriptionUpdate {
+func (usu *UserSubscriptionUpdate) AddUpdatedAt(i int64) *UserSubscriptionUpdate {
 	usu.mutation.AddUpdatedAt(i)
 	return usu
 }
@@ -56,14 +56,14 @@ func (usu *UserSubscriptionUpdate) SetNillableType(mt *models.SubscriptionType) 
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (usu *UserSubscriptionUpdate) SetExpiresAt(i int) *UserSubscriptionUpdate {
+func (usu *UserSubscriptionUpdate) SetExpiresAt(i int64) *UserSubscriptionUpdate {
 	usu.mutation.ResetExpiresAt()
 	usu.mutation.SetExpiresAt(i)
 	return usu
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (usu *UserSubscriptionUpdate) SetNillableExpiresAt(i *int) *UserSubscriptionUpdate {
+func (usu *UserSubscriptionUpdate) SetNillableExpiresAt(i *int64) *UserSubscriptionUpdate {
 	if i != nil {
 		usu.SetExpiresAt(*i)
 	}
@@ -71,7 +71,7 @@ func (usu *UserSubscriptionUpdate) SetNillableExpiresAt(i *int) *UserSubscriptio
 }
 
 // AddExpiresAt adds i to the "expires_at" field.
-func (usu *UserSubscriptionUpdate) AddExpiresAt(i int) *UserSubscriptionUpdate {
+func (usu *UserSubscriptionUpdate) AddExpiresAt(i int64) *UserSubscriptionUpdate {
 	usu.mutation.AddExpiresAt(i)
 	return usu
 }
@@ -181,19 +181,19 @@ func (usu *UserSubscriptionUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 	}
 	if value, ok := usu.mutation.UpdatedAt(); ok {
-		_spec.SetField(usersubscription.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(usersubscription.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := usu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(usersubscription.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(usersubscription.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := usu.mutation.GetType(); ok {
 		_spec.SetField(usersubscription.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := usu.mutation.ExpiresAt(); ok {
-		_spec.SetField(usersubscription.FieldExpiresAt, field.TypeInt, value)
+		_spec.SetField(usersubscription.FieldExpiresAt, field.TypeInt64, value)
 	}
 	if value, ok := usu.mutation.AddedExpiresAt(); ok {
-		_spec.AddField(usersubscription.FieldExpiresAt, field.TypeInt, value)
+		_spec.AddField(usersubscription.FieldExpiresAt, field.TypeInt64, value)
 	}
 	if value, ok := usu.mutation.Permissions(); ok {
 		_spec.SetField(usersubscription.FieldPermissions, field.TypeString, value)
@@ -222,14 +222,14 @@ type UserSubscriptionUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (usuo *UserSubscriptionUpdateOne) SetUpdatedAt(i int) *UserSubscriptionUpdateOne {
+func (usuo *UserSubscriptionUpdateOne) SetUpdatedAt(i int64) *UserSubscriptionUpdateOne {
 	usuo.mutation.ResetUpdatedAt()
 	usuo.mutation.SetUpdatedAt(i)
 	return usuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (usuo *UserSubscriptionUpdateOne) AddUpdatedAt(i int) *UserSubscriptionUpdateOne {
+func (usuo *UserSubscriptionUpdateOne) AddUpdatedAt(i int64) *UserSubscriptionUpdateOne {
 	usuo.mutation.AddUpdatedAt(i)
 	return usuo
 }
@@ -249,14 +249,14 @@ func (usuo *UserSubscriptionUpdateOne) SetNillableType(mt *models.SubscriptionTy
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (usuo *UserSubscriptionUpdateOne) SetExpiresAt(i int) *UserSubscriptionUpdateOne {
+func (usuo *UserSubscriptionUpdateOne) SetExpiresAt(i int64) *UserSubscriptionUpdateOne {
 	usuo.mutation.ResetExpiresAt()
 	usuo.mutation.SetExpiresAt(i)
 	return usuo
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (usuo *UserSubscriptionUpdateOne) SetNillableExpiresAt(i *int) *UserSubscriptionUpdateOne {
+func (usuo *UserSubscriptionUpdateOne) SetNillableExpiresAt(i *int64) *UserSubscriptionUpdateOne {
 	if i != nil {
 		usuo.SetExpiresAt(*i)
 	}
@@ -264,7 +264,7 @@ func (usuo *UserSubscriptionUpdateOne) SetNillableExpiresAt(i *int) *UserSubscri
 }
 
 // AddExpiresAt adds i to the "expires_at" field.
-func (usuo *UserSubscriptionUpdateOne) AddExpiresAt(i int) *UserSubscriptionUpdateOne {
+func (usuo *UserSubscriptionUpdateOne) AddExpiresAt(i int64) *UserSubscriptionUpdateOne {
 	usuo.mutation.AddExpiresAt(i)
 	return usuo
 }
@@ -404,19 +404,19 @@ func (usuo *UserSubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *User
 		}
 	}
 	if value, ok := usuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(usersubscription.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(usersubscription.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := usuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(usersubscription.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(usersubscription.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := usuo.mutation.GetType(); ok {
 		_spec.SetField(usersubscription.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := usuo.mutation.ExpiresAt(); ok {
-		_spec.SetField(usersubscription.FieldExpiresAt, field.TypeInt, value)
+		_spec.SetField(usersubscription.FieldExpiresAt, field.TypeInt64, value)
 	}
 	if value, ok := usuo.mutation.AddedExpiresAt(); ok {
-		_spec.AddField(usersubscription.FieldExpiresAt, field.TypeInt, value)
+		_spec.AddField(usersubscription.FieldExpiresAt, field.TypeInt64, value)
 	}
 	if value, ok := usuo.mutation.Permissions(); ok {
 		_spec.SetField(usersubscription.FieldPermissions, field.TypeString, value)

@@ -65,12 +65,12 @@ func IDContainsFold(id string) predicate.AchievementsSnapshot {
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v int) predicate.AchievementsSnapshot {
+func CreatedAt(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v int) predicate.AchievementsSnapshot {
+func UpdatedAt(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
@@ -90,87 +90,87 @@ func Battles(v int) predicate.AchievementsSnapshot {
 }
 
 // LastBattleTime applies equality check predicate on the "last_battle_time" field. It's identical to LastBattleTimeEQ.
-func LastBattleTime(v int) predicate.AchievementsSnapshot {
+func LastBattleTime(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldEQ(FieldLastBattleTime, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v int) predicate.AchievementsSnapshot {
+func CreatedAtEQ(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v int) predicate.AchievementsSnapshot {
+func CreatedAtNEQ(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...int) predicate.AchievementsSnapshot {
+func CreatedAtIn(vs ...int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...int) predicate.AchievementsSnapshot {
+func CreatedAtNotIn(vs ...int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v int) predicate.AchievementsSnapshot {
+func CreatedAtGT(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v int) predicate.AchievementsSnapshot {
+func CreatedAtGTE(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v int) predicate.AchievementsSnapshot {
+func CreatedAtLT(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v int) predicate.AchievementsSnapshot {
+func CreatedAtLTE(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v int) predicate.AchievementsSnapshot {
+func UpdatedAtEQ(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v int) predicate.AchievementsSnapshot {
+func UpdatedAtNEQ(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...int) predicate.AchievementsSnapshot {
+func UpdatedAtIn(vs ...int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...int) predicate.AchievementsSnapshot {
+func UpdatedAtNotIn(vs ...int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v int) predicate.AchievementsSnapshot {
+func UpdatedAtGT(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v int) predicate.AchievementsSnapshot {
+func UpdatedAtGTE(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v int) predicate.AchievementsSnapshot {
+func UpdatedAtLT(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v int) predicate.AchievementsSnapshot {
+func UpdatedAtLTE(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
@@ -375,42 +375,42 @@ func BattlesLTE(v int) predicate.AchievementsSnapshot {
 }
 
 // LastBattleTimeEQ applies the EQ predicate on the "last_battle_time" field.
-func LastBattleTimeEQ(v int) predicate.AchievementsSnapshot {
+func LastBattleTimeEQ(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldEQ(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeNEQ applies the NEQ predicate on the "last_battle_time" field.
-func LastBattleTimeNEQ(v int) predicate.AchievementsSnapshot {
+func LastBattleTimeNEQ(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldNEQ(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeIn applies the In predicate on the "last_battle_time" field.
-func LastBattleTimeIn(vs ...int) predicate.AchievementsSnapshot {
+func LastBattleTimeIn(vs ...int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldIn(FieldLastBattleTime, vs...))
 }
 
 // LastBattleTimeNotIn applies the NotIn predicate on the "last_battle_time" field.
-func LastBattleTimeNotIn(vs ...int) predicate.AchievementsSnapshot {
+func LastBattleTimeNotIn(vs ...int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldNotIn(FieldLastBattleTime, vs...))
 }
 
 // LastBattleTimeGT applies the GT predicate on the "last_battle_time" field.
-func LastBattleTimeGT(v int) predicate.AchievementsSnapshot {
+func LastBattleTimeGT(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldGT(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeGTE applies the GTE predicate on the "last_battle_time" field.
-func LastBattleTimeGTE(v int) predicate.AchievementsSnapshot {
+func LastBattleTimeGTE(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldGTE(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeLT applies the LT predicate on the "last_battle_time" field.
-func LastBattleTimeLT(v int) predicate.AchievementsSnapshot {
+func LastBattleTimeLT(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldLT(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeLTE applies the LTE predicate on the "last_battle_time" field.
-func LastBattleTimeLTE(v int) predicate.AchievementsSnapshot {
+func LastBattleTimeLTE(v int64) predicate.AchievementsSnapshot {
 	return predicate.AchievementsSnapshot(sql.FieldLTE(FieldLastBattleTime, v))
 }
 

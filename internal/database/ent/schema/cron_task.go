@@ -15,13 +15,15 @@ type CronTask struct {
 // Fields of the CronTask.
 func (CronTask) Fields() []ent.Field {
 	return append(defaultFields,
-		field.String("type").NotEmpty(),
+		field.Enum("type").
+			GoType(models.TaskType("")),
 		field.String("reference_id").NotEmpty(),
 		field.Strings("targets"),
 		//
-		field.String("status").NotEmpty(),
-		field.Int("scheduled_after"),
-		field.Int("last_run"),
+		field.Enum("status").
+			GoType(models.TaskStatus("")),
+		field.Int64("scheduled_after"),
+		field.Int64("last_run"),
 		//
 		field.JSON("logs", []models.TaskLog{}),
 		field.JSON("data", map[string]any{}),

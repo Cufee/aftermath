@@ -22,13 +22,13 @@ type UserContentCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (ucc *UserContentCreate) SetCreatedAt(i int) *UserContentCreate {
+func (ucc *UserContentCreate) SetCreatedAt(i int64) *UserContentCreate {
 	ucc.mutation.SetCreatedAt(i)
 	return ucc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ucc *UserContentCreate) SetNillableCreatedAt(i *int) *UserContentCreate {
+func (ucc *UserContentCreate) SetNillableCreatedAt(i *int64) *UserContentCreate {
 	if i != nil {
 		ucc.SetCreatedAt(*i)
 	}
@@ -36,13 +36,13 @@ func (ucc *UserContentCreate) SetNillableCreatedAt(i *int) *UserContentCreate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucc *UserContentCreate) SetUpdatedAt(i int) *UserContentCreate {
+func (ucc *UserContentCreate) SetUpdatedAt(i int64) *UserContentCreate {
 	ucc.mutation.SetUpdatedAt(i)
 	return ucc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ucc *UserContentCreate) SetNillableUpdatedAt(i *int) *UserContentCreate {
+func (ucc *UserContentCreate) SetNillableUpdatedAt(i *int64) *UserContentCreate {
 	if i != nil {
 		ucc.SetUpdatedAt(*i)
 	}
@@ -214,11 +214,11 @@ func (ucc *UserContentCreate) createSpec() (*UserContent, *sqlgraph.CreateSpec) 
 		_spec.ID.Value = id
 	}
 	if value, ok := ucc.mutation.CreatedAt(); ok {
-		_spec.SetField(usercontent.FieldCreatedAt, field.TypeInt, value)
+		_spec.SetField(usercontent.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := ucc.mutation.UpdatedAt(); ok {
-		_spec.SetField(usercontent.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(usercontent.FieldUpdatedAt, field.TypeInt64, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := ucc.mutation.GetType(); ok {

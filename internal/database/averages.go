@@ -3,78 +3,75 @@ package database
 import (
 	"context"
 
+	"github.com/cufee/aftermath/internal/database/ent/db"
+	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
 func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error {
-	// if len(averages) < 1 {
-	// 	return nil
-	// }
+	if len(averages) < 1 {
+		return nil
+	}
 
-	// var transactions []transaction.Transaction
-	// for id, data := range averages {
-	// 	encoded, err := data.Encode()
-	// 	if err != nil {
-	// 		log.Err(err).Str("id", id).Msg("failed to encode a stats frame for vehicle averages")
-	// 		continue
-	// 	}
+	var ids []string
+	for id := range averages {
+		ids = append(ids, id)
+	}
 
-	// 	transactions = append(transactions, c.prisma.VehicleAverage.
-	// 		UpsertOne(db.VehicleAverage.ID.Equals(id)).
-	// 		Create(
-	// 			db.VehicleAverage.ID.Set(id),
-	// 			db.VehicleAverage.DataEncoded.Set(encoded),
-	// 		).
-	// 		Update(
-	// 			db.VehicleAverage.DataEncoded.Set(encoded),
-	// 		).Tx(),
-	// 	)
-	// }
+	tx, err := c.db.Tx(ctx)
+	if err != nil {
+		return err
+	}
 
-	// return c.prisma.Prisma.Transaction(transactions...).Exec(ctx)
-	return nil
+	existing, err := tx.VehicleAverage.Query().Where(vehicleaverage.IDIn(ids...)).All(ctx)
+	if err != nil {
+		return rollback(tx, err)
+	}
+
+	for _, r := range existing {
+		update, ok := averages[r.ID]
+		if !ok {
+			continue // should never happen tho
+		}
+
+		err := tx.VehicleAverage.UpdateOneID(r.ID).SetData(update).Exec(ctx)
+		if err != nil {
+			return rollback(tx, err)
+		}
+
+		delete(averages, r.ID)
+	}
+
+	var inserts []*db.VehicleAverageCreate
+	for id, frame := range averages {
+		inserts = append(inserts,
+			c.db.VehicleAverage.Create().
+				SetID(id).
+				SetData(frame),
+		)
+	}
+
+	err = tx.VehicleAverage.CreateBulk(inserts...).Exec(ctx)
+	if err != nil {
+		return rollback(tx, err)
+	}
+
+	return tx.Commit()
 }
 
 func (c *libsqlClient) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {
-	// if len(ids) < 1 {
-	// 	return nil, nil
-	// }
+	if len(ids) < 1 {
+		return nil, nil
+	}
 
-	// qCtx, cancel := context.WithTimeout(ctx, time.Second)
-	// defer cancel()
-	// records, err := c.prisma.VehicleAverage.FindMany(db.VehicleAverage.ID.In(ids)).Exec(qCtx)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	records, err := c.db.VehicleAverage.Query().Where(vehicleaverage.IDIn(ids...)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	averages := make(map[string]frame.StatsFrame)
-	// var badRecords []string
-	// var lastErr error
-
-	// for _, record := range records {
-	// 	parsed, err := frame.DecodeStatsFrame(record.DataEncoded)
-	// 	lastErr = err
-	// 	if err != nil {
-	// 		badRecords = append(badRecords, record.ID)
-	// 		continue
-	// 	}
-	// 	averages[record.ID] = parsed
-	// }
-
-	// if len(badRecords) == len(ids) || len(badRecords) == 0 {
-	// 	return averages, lastErr
-	// }
-
-	// go func() {
-	// 	// one bad record should not break the whole query since this data is optional
-	// 	// we can just delete the record and move on
-	// 	ctx, cancel := context.WithCancel(context.Background())
-	// 	defer cancel()
-	// 	_, err := c.prisma.VehicleAverage.FindMany(db.VehicleAverage.ID.In(badRecords)).Delete().Exec(ctx)
-	// 	if err != nil {
-	// 		log.Err(err).Strs("ids", badRecords).Msg("failed to delete a bad vehicle average records")
-	// 	}
-	// }()
-
+	for _, a := range records {
+		averages[a.ID] = a.Data
+	}
 	return averages, nil
 }

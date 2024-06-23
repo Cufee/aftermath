@@ -32,14 +32,14 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uu *UserUpdate) SetUpdatedAt(i int) *UserUpdate {
+func (uu *UserUpdate) SetUpdatedAt(i int64) *UserUpdate {
 	uu.mutation.ResetUpdatedAt()
 	uu.mutation.SetUpdatedAt(i)
 	return uu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (uu *UserUpdate) AddUpdatedAt(i int) *UserUpdate {
+func (uu *UserUpdate) AddUpdatedAt(i int64) *UserUpdate {
 	uu.mutation.AddUpdatedAt(i)
 	return uu
 }
@@ -235,10 +235,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := uu.mutation.UpdatedAt(); ok {
-		_spec.SetField(user.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(user.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := uu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(user.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(user.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := uu.mutation.Permissions(); ok {
 		_spec.SetField(user.FieldPermissions, field.TypeString, value)
@@ -410,14 +410,14 @@ type UserUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uuo *UserUpdateOne) SetUpdatedAt(i int) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetUpdatedAt(i int64) *UserUpdateOne {
 	uuo.mutation.ResetUpdatedAt()
 	uuo.mutation.SetUpdatedAt(i)
 	return uuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (uuo *UserUpdateOne) AddUpdatedAt(i int) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddUpdatedAt(i int64) *UserUpdateOne {
 	uuo.mutation.AddUpdatedAt(i)
 	return uuo
 }
@@ -643,10 +643,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 	}
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(user.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(user.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := uuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(user.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(user.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := uuo.mutation.Permissions(); ok {
 		_spec.SetField(user.FieldPermissions, field.TypeString, value)

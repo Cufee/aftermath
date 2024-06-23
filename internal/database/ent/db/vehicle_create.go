@@ -20,13 +20,13 @@ type VehicleCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (vc *VehicleCreate) SetCreatedAt(i int) *VehicleCreate {
+func (vc *VehicleCreate) SetCreatedAt(i int64) *VehicleCreate {
 	vc.mutation.SetCreatedAt(i)
 	return vc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (vc *VehicleCreate) SetNillableCreatedAt(i *int) *VehicleCreate {
+func (vc *VehicleCreate) SetNillableCreatedAt(i *int64) *VehicleCreate {
 	if i != nil {
 		vc.SetCreatedAt(*i)
 	}
@@ -34,13 +34,13 @@ func (vc *VehicleCreate) SetNillableCreatedAt(i *int) *VehicleCreate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vc *VehicleCreate) SetUpdatedAt(i int) *VehicleCreate {
+func (vc *VehicleCreate) SetUpdatedAt(i int64) *VehicleCreate {
 	vc.mutation.SetUpdatedAt(i)
 	return vc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (vc *VehicleCreate) SetNillableUpdatedAt(i *int) *VehicleCreate {
+func (vc *VehicleCreate) SetNillableUpdatedAt(i *int64) *VehicleCreate {
 	if i != nil {
 		vc.SetUpdatedAt(*i)
 	}
@@ -165,11 +165,11 @@ func (vc *VehicleCreate) createSpec() (*Vehicle, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := vc.mutation.CreatedAt(); ok {
-		_spec.SetField(vehicle.FieldCreatedAt, field.TypeInt, value)
+		_spec.SetField(vehicle.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := vc.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeInt64, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := vc.mutation.Tier(); ok {

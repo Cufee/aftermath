@@ -18,7 +18,7 @@ func (UserSubscription) Fields() []ent.Field {
 	return append(defaultFields,
 		field.Enum("type").
 			GoType(models.SubscriptionType("")),
-		field.Int("expires_at"),
+		field.Int64("expires_at"),
 		//
 		field.String("user_id").NotEmpty().Immutable(),
 		field.String("permissions").NotEmpty(),

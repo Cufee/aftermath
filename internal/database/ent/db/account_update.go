@@ -32,27 +32,27 @@ func (au *AccountUpdate) Where(ps ...predicate.Account) *AccountUpdate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (au *AccountUpdate) SetUpdatedAt(i int) *AccountUpdate {
+func (au *AccountUpdate) SetUpdatedAt(i int64) *AccountUpdate {
 	au.mutation.ResetUpdatedAt()
 	au.mutation.SetUpdatedAt(i)
 	return au
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (au *AccountUpdate) AddUpdatedAt(i int) *AccountUpdate {
+func (au *AccountUpdate) AddUpdatedAt(i int64) *AccountUpdate {
 	au.mutation.AddUpdatedAt(i)
 	return au
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (au *AccountUpdate) SetLastBattleTime(i int) *AccountUpdate {
+func (au *AccountUpdate) SetLastBattleTime(i int64) *AccountUpdate {
 	au.mutation.ResetLastBattleTime()
 	au.mutation.SetLastBattleTime(i)
 	return au
 }
 
 // SetNillableLastBattleTime sets the "last_battle_time" field if the given value is not nil.
-func (au *AccountUpdate) SetNillableLastBattleTime(i *int) *AccountUpdate {
+func (au *AccountUpdate) SetNillableLastBattleTime(i *int64) *AccountUpdate {
 	if i != nil {
 		au.SetLastBattleTime(*i)
 	}
@@ -60,20 +60,20 @@ func (au *AccountUpdate) SetNillableLastBattleTime(i *int) *AccountUpdate {
 }
 
 // AddLastBattleTime adds i to the "last_battle_time" field.
-func (au *AccountUpdate) AddLastBattleTime(i int) *AccountUpdate {
+func (au *AccountUpdate) AddLastBattleTime(i int64) *AccountUpdate {
 	au.mutation.AddLastBattleTime(i)
 	return au
 }
 
 // SetAccountCreatedAt sets the "account_created_at" field.
-func (au *AccountUpdate) SetAccountCreatedAt(i int) *AccountUpdate {
+func (au *AccountUpdate) SetAccountCreatedAt(i int64) *AccountUpdate {
 	au.mutation.ResetAccountCreatedAt()
 	au.mutation.SetAccountCreatedAt(i)
 	return au
 }
 
 // SetNillableAccountCreatedAt sets the "account_created_at" field if the given value is not nil.
-func (au *AccountUpdate) SetNillableAccountCreatedAt(i *int) *AccountUpdate {
+func (au *AccountUpdate) SetNillableAccountCreatedAt(i *int64) *AccountUpdate {
 	if i != nil {
 		au.SetAccountCreatedAt(*i)
 	}
@@ -81,7 +81,7 @@ func (au *AccountUpdate) SetNillableAccountCreatedAt(i *int) *AccountUpdate {
 }
 
 // AddAccountCreatedAt adds i to the "account_created_at" field.
-func (au *AccountUpdate) AddAccountCreatedAt(i int) *AccountUpdate {
+func (au *AccountUpdate) AddAccountCreatedAt(i int64) *AccountUpdate {
 	au.mutation.AddAccountCreatedAt(i)
 	return au
 }
@@ -336,22 +336,22 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := au.mutation.UpdatedAt(); ok {
-		_spec.SetField(account.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(account.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := au.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(account.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(account.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := au.mutation.LastBattleTime(); ok {
-		_spec.SetField(account.FieldLastBattleTime, field.TypeInt, value)
+		_spec.SetField(account.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := au.mutation.AddedLastBattleTime(); ok {
-		_spec.AddField(account.FieldLastBattleTime, field.TypeInt, value)
+		_spec.AddField(account.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := au.mutation.AccountCreatedAt(); ok {
-		_spec.SetField(account.FieldAccountCreatedAt, field.TypeInt, value)
+		_spec.SetField(account.FieldAccountCreatedAt, field.TypeInt64, value)
 	}
 	if value, ok := au.mutation.AddedAccountCreatedAt(); ok {
-		_spec.AddField(account.FieldAccountCreatedAt, field.TypeInt, value)
+		_spec.AddField(account.FieldAccountCreatedAt, field.TypeInt64, value)
 	}
 	if value, ok := au.mutation.Realm(); ok {
 		_spec.SetField(account.FieldRealm, field.TypeString, value)
@@ -547,27 +547,27 @@ type AccountUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (auo *AccountUpdateOne) SetUpdatedAt(i int) *AccountUpdateOne {
+func (auo *AccountUpdateOne) SetUpdatedAt(i int64) *AccountUpdateOne {
 	auo.mutation.ResetUpdatedAt()
 	auo.mutation.SetUpdatedAt(i)
 	return auo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (auo *AccountUpdateOne) AddUpdatedAt(i int) *AccountUpdateOne {
+func (auo *AccountUpdateOne) AddUpdatedAt(i int64) *AccountUpdateOne {
 	auo.mutation.AddUpdatedAt(i)
 	return auo
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (auo *AccountUpdateOne) SetLastBattleTime(i int) *AccountUpdateOne {
+func (auo *AccountUpdateOne) SetLastBattleTime(i int64) *AccountUpdateOne {
 	auo.mutation.ResetLastBattleTime()
 	auo.mutation.SetLastBattleTime(i)
 	return auo
 }
 
 // SetNillableLastBattleTime sets the "last_battle_time" field if the given value is not nil.
-func (auo *AccountUpdateOne) SetNillableLastBattleTime(i *int) *AccountUpdateOne {
+func (auo *AccountUpdateOne) SetNillableLastBattleTime(i *int64) *AccountUpdateOne {
 	if i != nil {
 		auo.SetLastBattleTime(*i)
 	}
@@ -575,20 +575,20 @@ func (auo *AccountUpdateOne) SetNillableLastBattleTime(i *int) *AccountUpdateOne
 }
 
 // AddLastBattleTime adds i to the "last_battle_time" field.
-func (auo *AccountUpdateOne) AddLastBattleTime(i int) *AccountUpdateOne {
+func (auo *AccountUpdateOne) AddLastBattleTime(i int64) *AccountUpdateOne {
 	auo.mutation.AddLastBattleTime(i)
 	return auo
 }
 
 // SetAccountCreatedAt sets the "account_created_at" field.
-func (auo *AccountUpdateOne) SetAccountCreatedAt(i int) *AccountUpdateOne {
+func (auo *AccountUpdateOne) SetAccountCreatedAt(i int64) *AccountUpdateOne {
 	auo.mutation.ResetAccountCreatedAt()
 	auo.mutation.SetAccountCreatedAt(i)
 	return auo
 }
 
 // SetNillableAccountCreatedAt sets the "account_created_at" field if the given value is not nil.
-func (auo *AccountUpdateOne) SetNillableAccountCreatedAt(i *int) *AccountUpdateOne {
+func (auo *AccountUpdateOne) SetNillableAccountCreatedAt(i *int64) *AccountUpdateOne {
 	if i != nil {
 		auo.SetAccountCreatedAt(*i)
 	}
@@ -596,7 +596,7 @@ func (auo *AccountUpdateOne) SetNillableAccountCreatedAt(i *int) *AccountUpdateO
 }
 
 // AddAccountCreatedAt adds i to the "account_created_at" field.
-func (auo *AccountUpdateOne) AddAccountCreatedAt(i int) *AccountUpdateOne {
+func (auo *AccountUpdateOne) AddAccountCreatedAt(i int64) *AccountUpdateOne {
 	auo.mutation.AddAccountCreatedAt(i)
 	return auo
 }
@@ -881,22 +881,22 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 	}
 	if value, ok := auo.mutation.UpdatedAt(); ok {
-		_spec.SetField(account.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(account.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := auo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(account.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(account.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := auo.mutation.LastBattleTime(); ok {
-		_spec.SetField(account.FieldLastBattleTime, field.TypeInt, value)
+		_spec.SetField(account.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := auo.mutation.AddedLastBattleTime(); ok {
-		_spec.AddField(account.FieldLastBattleTime, field.TypeInt, value)
+		_spec.AddField(account.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := auo.mutation.AccountCreatedAt(); ok {
-		_spec.SetField(account.FieldAccountCreatedAt, field.TypeInt, value)
+		_spec.SetField(account.FieldAccountCreatedAt, field.TypeInt64, value)
 	}
 	if value, ok := auo.mutation.AddedAccountCreatedAt(); ok {
-		_spec.AddField(account.FieldAccountCreatedAt, field.TypeInt, value)
+		_spec.AddField(account.FieldAccountCreatedAt, field.TypeInt64, value)
 	}
 	if value, ok := auo.mutation.Realm(); ok {
 		_spec.SetField(account.FieldRealm, field.TypeString, value)

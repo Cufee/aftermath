@@ -297,7 +297,7 @@ func (vsq *VehicleSnapshotQuery) WithAccount(opts ...func(*AccountQuery)) *Vehic
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -320,7 +320,7 @@ func (vsq *VehicleSnapshotQuery) GroupBy(field string, fields ...string) *Vehicl
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //	}
 //
 //	client.VehicleSnapshot.Query().

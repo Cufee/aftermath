@@ -18,9 +18,9 @@ type User struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int `json:"created_at,omitempty"`
+	CreatedAt int64 `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int `json:"updated_at,omitempty"`
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 	// Permissions holds the value of the "permissions" field.
 	Permissions string `json:"permissions,omitempty"`
 	// FeatureFlags holds the value of the "feature_flags" field.
@@ -107,13 +107,13 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				u.CreatedAt = int(value.Int64)
+				u.CreatedAt = value.Int64
 			}
 		case user.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				u.UpdatedAt = int(value.Int64)
+				u.UpdatedAt = value.Int64
 			}
 		case user.FieldPermissions:
 			if value, ok := values[i].(*sql.NullString); !ok {

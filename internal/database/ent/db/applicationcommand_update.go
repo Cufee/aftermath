@@ -28,14 +28,14 @@ func (acu *ApplicationCommandUpdate) Where(ps ...predicate.ApplicationCommand) *
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acu *ApplicationCommandUpdate) SetUpdatedAt(i int) *ApplicationCommandUpdate {
+func (acu *ApplicationCommandUpdate) SetUpdatedAt(i int64) *ApplicationCommandUpdate {
 	acu.mutation.ResetUpdatedAt()
 	acu.mutation.SetUpdatedAt(i)
 	return acu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (acu *ApplicationCommandUpdate) AddUpdatedAt(i int) *ApplicationCommandUpdate {
+func (acu *ApplicationCommandUpdate) AddUpdatedAt(i int64) *ApplicationCommandUpdate {
 	acu.mutation.AddUpdatedAt(i)
 	return acu
 }
@@ -156,10 +156,10 @@ func (acu *ApplicationCommandUpdate) sqlSave(ctx context.Context) (n int, err er
 		}
 	}
 	if value, ok := acu.mutation.UpdatedAt(); ok {
-		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := acu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(applicationcommand.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(applicationcommand.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := acu.mutation.Name(); ok {
 		_spec.SetField(applicationcommand.FieldName, field.TypeString, value)
@@ -191,14 +191,14 @@ type ApplicationCommandUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acuo *ApplicationCommandUpdateOne) SetUpdatedAt(i int) *ApplicationCommandUpdateOne {
+func (acuo *ApplicationCommandUpdateOne) SetUpdatedAt(i int64) *ApplicationCommandUpdateOne {
 	acuo.mutation.ResetUpdatedAt()
 	acuo.mutation.SetUpdatedAt(i)
 	return acuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (acuo *ApplicationCommandUpdateOne) AddUpdatedAt(i int) *ApplicationCommandUpdateOne {
+func (acuo *ApplicationCommandUpdateOne) AddUpdatedAt(i int64) *ApplicationCommandUpdateOne {
 	acuo.mutation.AddUpdatedAt(i)
 	return acuo
 }
@@ -349,10 +349,10 @@ func (acuo *ApplicationCommandUpdateOne) sqlSave(ctx context.Context) (_node *Ap
 		}
 	}
 	if value, ok := acuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := acuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(applicationcommand.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(applicationcommand.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := acuo.mutation.Name(); ok {
 		_spec.SetField(applicationcommand.FieldName, field.TypeString, value)

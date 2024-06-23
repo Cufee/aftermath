@@ -23,13 +23,13 @@ type AccountSnapshotCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (asc *AccountSnapshotCreate) SetCreatedAt(i int) *AccountSnapshotCreate {
+func (asc *AccountSnapshotCreate) SetCreatedAt(i int64) *AccountSnapshotCreate {
 	asc.mutation.SetCreatedAt(i)
 	return asc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (asc *AccountSnapshotCreate) SetNillableCreatedAt(i *int) *AccountSnapshotCreate {
+func (asc *AccountSnapshotCreate) SetNillableCreatedAt(i *int64) *AccountSnapshotCreate {
 	if i != nil {
 		asc.SetCreatedAt(*i)
 	}
@@ -37,13 +37,13 @@ func (asc *AccountSnapshotCreate) SetNillableCreatedAt(i *int) *AccountSnapshotC
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (asc *AccountSnapshotCreate) SetUpdatedAt(i int) *AccountSnapshotCreate {
+func (asc *AccountSnapshotCreate) SetUpdatedAt(i int64) *AccountSnapshotCreate {
 	asc.mutation.SetUpdatedAt(i)
 	return asc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (asc *AccountSnapshotCreate) SetNillableUpdatedAt(i *int) *AccountSnapshotCreate {
+func (asc *AccountSnapshotCreate) SetNillableUpdatedAt(i *int64) *AccountSnapshotCreate {
 	if i != nil {
 		asc.SetUpdatedAt(*i)
 	}
@@ -57,7 +57,7 @@ func (asc *AccountSnapshotCreate) SetType(mt models.SnapshotType) *AccountSnapsh
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (asc *AccountSnapshotCreate) SetLastBattleTime(i int) *AccountSnapshotCreate {
+func (asc *AccountSnapshotCreate) SetLastBattleTime(i int64) *AccountSnapshotCreate {
 	asc.mutation.SetLastBattleTime(i)
 	return asc
 }
@@ -252,11 +252,11 @@ func (asc *AccountSnapshotCreate) createSpec() (*AccountSnapshot, *sqlgraph.Crea
 		_spec.ID.Value = id
 	}
 	if value, ok := asc.mutation.CreatedAt(); ok {
-		_spec.SetField(accountsnapshot.FieldCreatedAt, field.TypeInt, value)
+		_spec.SetField(accountsnapshot.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := asc.mutation.UpdatedAt(); ok {
-		_spec.SetField(accountsnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(accountsnapshot.FieldUpdatedAt, field.TypeInt64, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := asc.mutation.GetType(); ok {
@@ -264,7 +264,7 @@ func (asc *AccountSnapshotCreate) createSpec() (*AccountSnapshot, *sqlgraph.Crea
 		_node.Type = value
 	}
 	if value, ok := asc.mutation.LastBattleTime(); ok {
-		_spec.SetField(accountsnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.SetField(accountsnapshot.FieldLastBattleTime, field.TypeInt64, value)
 		_node.LastBattleTime = value
 	}
 	if value, ok := asc.mutation.ReferenceID(); ok {

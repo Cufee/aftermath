@@ -63,92 +63,92 @@ func IDContainsFold(id string) predicate.VehicleAverage {
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v int) predicate.VehicleAverage {
+func CreatedAt(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v int) predicate.VehicleAverage {
+func UpdatedAt(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v int) predicate.VehicleAverage {
+func CreatedAtEQ(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v int) predicate.VehicleAverage {
+func CreatedAtNEQ(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...int) predicate.VehicleAverage {
+func CreatedAtIn(vs ...int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...int) predicate.VehicleAverage {
+func CreatedAtNotIn(vs ...int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v int) predicate.VehicleAverage {
+func CreatedAtGT(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v int) predicate.VehicleAverage {
+func CreatedAtGTE(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v int) predicate.VehicleAverage {
+func CreatedAtLT(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v int) predicate.VehicleAverage {
+func CreatedAtLTE(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v int) predicate.VehicleAverage {
+func UpdatedAtEQ(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v int) predicate.VehicleAverage {
+func UpdatedAtNEQ(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...int) predicate.VehicleAverage {
+func UpdatedAtIn(vs ...int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...int) predicate.VehicleAverage {
+func UpdatedAtNotIn(vs ...int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v int) predicate.VehicleAverage {
+func UpdatedAtGT(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v int) predicate.VehicleAverage {
+func UpdatedAtGTE(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v int) predicate.VehicleAverage {
+func UpdatedAtLT(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v int) predicate.VehicleAverage {
+func UpdatedAtLTE(v int64) predicate.VehicleAverage {
 	return predicate.VehicleAverage(sql.FieldLTE(FieldUpdatedAt, v))
 }
 

@@ -28,14 +28,14 @@ func (acu *AppConfigurationUpdate) Where(ps ...predicate.AppConfiguration) *AppC
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acu *AppConfigurationUpdate) SetUpdatedAt(i int) *AppConfigurationUpdate {
+func (acu *AppConfigurationUpdate) SetUpdatedAt(i int64) *AppConfigurationUpdate {
 	acu.mutation.ResetUpdatedAt()
 	acu.mutation.SetUpdatedAt(i)
 	return acu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (acu *AppConfigurationUpdate) AddUpdatedAt(i int) *AppConfigurationUpdate {
+func (acu *AppConfigurationUpdate) AddUpdatedAt(i int64) *AppConfigurationUpdate {
 	acu.mutation.AddUpdatedAt(i)
 	return acu
 }
@@ -136,10 +136,10 @@ func (acu *AppConfigurationUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 	}
 	if value, ok := acu.mutation.UpdatedAt(); ok {
-		_spec.SetField(appconfiguration.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(appconfiguration.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := acu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(appconfiguration.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(appconfiguration.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := acu.mutation.Key(); ok {
 		_spec.SetField(appconfiguration.FieldKey, field.TypeString, value)
@@ -174,14 +174,14 @@ type AppConfigurationUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acuo *AppConfigurationUpdateOne) SetUpdatedAt(i int) *AppConfigurationUpdateOne {
+func (acuo *AppConfigurationUpdateOne) SetUpdatedAt(i int64) *AppConfigurationUpdateOne {
 	acuo.mutation.ResetUpdatedAt()
 	acuo.mutation.SetUpdatedAt(i)
 	return acuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (acuo *AppConfigurationUpdateOne) AddUpdatedAt(i int) *AppConfigurationUpdateOne {
+func (acuo *AppConfigurationUpdateOne) AddUpdatedAt(i int64) *AppConfigurationUpdateOne {
 	acuo.mutation.AddUpdatedAt(i)
 	return acuo
 }
@@ -312,10 +312,10 @@ func (acuo *AppConfigurationUpdateOne) sqlSave(ctx context.Context) (_node *AppC
 		}
 	}
 	if value, ok := acuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(appconfiguration.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(appconfiguration.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := acuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(appconfiguration.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(appconfiguration.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := acuo.mutation.Key(); ok {
 		_spec.SetField(appconfiguration.FieldKey, field.TypeString, value)
