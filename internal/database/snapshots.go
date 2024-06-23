@@ -85,7 +85,7 @@ func (c *libsqlClient) GetVehicleSnapshots(ctx context.Context, accountID, refer
 	if query.createdAfter != nil {
 		where = append(where, vehiclesnapshot.CreatedAtGT(query.createdAfter.Unix()))
 	}
-	if query.createdAfter != nil {
+	if query.createdBefore != nil {
 		where = append(where, vehiclesnapshot.CreatedAtLT(query.createdBefore.Unix()))
 	}
 	if query.vehicleIDs != nil {

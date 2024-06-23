@@ -29,7 +29,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		return nil, errors.Wrap(err, "failed to fetch accounts")
 	}
 
-	// existing snaphsots for accounts
+	// existing snapshots for accounts
 	existingSnapshots, err := dbClient.GetManyAccountSnapshots(ctx, accountIDs, models.SnapshotTypeDaily)
 	if err != nil && !database.IsNotFound(err) {
 		return nil, errors.Wrap(err, "failed to get existing snapshots")
@@ -40,7 +40,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	}
 
 	// make a new slice just in case some accounts were not returned/are private
-	var validAccouts []string
+	var validAccounts []string
 	for _, id := range accountIDs {
 		data, ok := accounts[id]
 		if !ok {
@@ -63,24 +63,26 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			// last snapshot is the same, we can skip it
 			continue
 		}
-		validAccouts = append(validAccouts, id)
+		validAccounts = append(validAccounts, id)
 	}
 
-	if len(validAccouts) == 0 {
+	println("validAccounts", len(validAccounts))
+
+	if len(validAccounts) < 1 {
 		return nil, nil
 	}
 
 	// clans are options-ish
-	clans, err := wgClient.BatchAccountClan(ctx, realm, validAccouts)
+	clans, err := wgClient.BatchAccountClan(ctx, realm, validAccounts)
 	if err != nil {
 		log.Err(err).Msg("failed to get batch account clans")
 		clans = make(map[string]types.ClanMember)
 	}
 
-	vehicleCh := make(chan retry.DataWithErr[vehicleResponseData], len(validAccouts))
+	vehicleCh := make(chan retry.DataWithErr[vehicleResponseData], len(validAccounts))
 	var group sync.WaitGroup
-	group.Add(len(validAccouts))
-	for _, id := range validAccouts {
+	group.Add(len(validAccounts))
+	for _, id := range validAccounts {
 		go func(id string) {
 			defer group.Done()
 			data, err := wgClient.AccountVehicles(ctx, realm, id)
@@ -161,11 +163,14 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 	}
 
+	println("account", len(snapshots))
+
 	err = dbClient.CreateAccountSnapshots(ctx, snapshots...)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to save account snapshots to database")
 	}
 
+	println("vehicles", len(vehicleSnapshots))
 	err = dbClient.CreateVehicleSnapshots(ctx, vehicleSnapshots...)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to save vehicle snapshots to database")

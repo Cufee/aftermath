@@ -36,7 +36,7 @@ func (c *libsqlClient) GetRealmAccountIDs(ctx context.Context, realm string) ([]
 }
 
 func (c *libsqlClient) GetAccountByID(ctx context.Context, id string) (models.Account, error) {
-	result, err := c.db.Account.Query().Where(account.ID(id)).WithClan().Only(ctx)
+	result, err := c.db.Account.Query().Where(account.ID(id)).WithClan().First(ctx)
 	if err != nil {
 		return models.Account{}, err
 	}

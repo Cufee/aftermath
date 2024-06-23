@@ -45,7 +45,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 		w.Write([]byte(fmt.Sprintf("working on %d accounts", len(accounts)-len(existing))))
 		log.Info().Int("count", len(accounts)-len(existing)).Msg("importing accounts")
 
-		go func() {
+		go func(accounts []string, existing []models.Account) {
 			existingMap := make(map[string]struct{})
 			for _, a := range existing {
 				existingMap[a.ID] = struct{}{}
@@ -138,6 +138,6 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 				event.Msg("some account imports failed")
 			}
 			log.Info().Int("count", len(accounts)-len(existing)).Msg("finished importing accounts")
-		}()
+		}(accounts, existing)
 	}
 }

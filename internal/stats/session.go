@@ -28,16 +28,16 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 			if err != nil {
 				return nil, meta, err
 			}
-			go func() {
+			go func(id string) {
 				// record a session in the background
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 				defer cancel()
 
-				_, err := logic.RecordAccountSnapshots(ctx, r.wargaming, r.database, r.wargaming.RealmFromAccountID(accountId), false, accountId)
+				_, err := logic.RecordAccountSnapshots(ctx, r.wargaming, r.database, r.wargaming.RealmFromAccountID(id), false, id)
 				if err != nil {
 					log.Err(err).Str("accountId", accountId).Msg("failed to record account snapshot")
 				}
-			}()
+			}(accountId)
 			return nil, meta, ErrAccountNotTracked
 		}
 		return nil, meta, err
