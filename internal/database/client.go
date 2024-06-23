@@ -111,7 +111,7 @@ func NewSQLiteClient(filePath string) (*client, error) {
 		}
 	}()
 
-	c, err := db.Open("sqlite3", fmt.Sprintf("file: %s?_fk=1", filePath))
+	c, err := db.Open("sqlite3", fmt.Sprintf("file://%s?_fk=1", filePath))
 	if err != nil {
 		return nil, err
 	}
