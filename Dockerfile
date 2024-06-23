@@ -2,10 +2,6 @@ FROM golang:1.22.3-alpine as builder
 
 WORKDIR /workspace
 
-# add go modules lockfiles
-COPY go.mod go.sum ./
-RUN go mod download
-
 COPY ./ ./
 
 RUN go mod download
