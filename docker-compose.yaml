@@ -3,9 +3,9 @@ services:
     image: aftermath-migrate
     build:
       dockerfile: Dockerfile.migrate
-    entrypoint: migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "sqlite:///data/aftermath.db?_fk=1"
+    command: migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "sqlite:///data/aftermath.db?_fk=1"
     volumes:
-      - ${DATABASE_PATH}:/data/aftermath.db
+      - ${DATABASE_PATH}:/data
     networks:
       - dokploy-network
 
@@ -20,7 +20,7 @@ services:
         condition: service_completed_successfully
     entrypoint: ["app"]
     volumes:
-      - ${DATABASE_PATH}:/data/aftermath.db
+      - ${DATABASE_PATH}:/data
 
     image: aftermath-service
     build:
@@ -32,7 +32,6 @@ services:
           memory: 512m
     networks:
       - dokploy-network
-    hostname: aftermath-service
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.aftermath-monorepo-compose.rule=Host(`${TRAEFIK_HOST}`)"

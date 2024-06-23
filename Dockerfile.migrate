@@ -1,5 +1,3 @@
 FROM arigaio/atlas:latest
 
 COPY ./internal/database/ent/migrate/migrations /migrations
-
-ENTRYPOINT ["migrate", "apply","--allow-dirty" ,"--dir" "file:///migrations", ,"--tx-mode" ,"all", "--url", "sqlite:///database.db?_fk=1"]
