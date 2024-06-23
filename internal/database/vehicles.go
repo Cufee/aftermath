@@ -54,19 +54,15 @@ func (c *libsqlClient) UpsertVehicles(ctx context.Context, vehicles map[string]m
 		delete(vehicles, v.ID)
 	}
 
-	var inserts []*db.VehicleCreate
 	for id, v := range vehicles {
-		inserts = append(inserts,
-			c.db.Vehicle.Create().
-				SetID(id).
-				SetTier(v.Tier).
-				SetLocalizedNames(v.LocalizedNames),
-		)
-	}
-
-	err = tx.Vehicle.CreateBulk(inserts...).Exec(ctx)
-	if err != nil {
-		return errors, rollback(tx, err)
+		err := tx.Vehicle.Create().
+			SetID(id).
+			SetTier(v.Tier).
+			SetLocalizedNames(v.LocalizedNames).
+			Exec(ctx)
+		if err != nil {
+			errors[id] = err
+		}
 	}
 
 	return errors, tx.Commit()
