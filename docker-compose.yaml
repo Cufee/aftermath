@@ -1,5 +1,6 @@
 services:
   aftermath-database:
+    user: root
     image: ghcr.io/tursodatabase/libsql-server:latest
     platform: linux/amd64
     restart: always
