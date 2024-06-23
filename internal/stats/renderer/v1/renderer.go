@@ -1,4 +1,4 @@
-package stats
+package renderer
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/wargaming"
-	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/render"
 	"golang.org/x/text/language"
 )

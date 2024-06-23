@@ -5,9 +5,9 @@ import (
 	"slices"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/frame"
-	"github.com/cufee/aftermath/internal/stats/prepare/common"
+	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"golang.org/x/text/language"
 )
 

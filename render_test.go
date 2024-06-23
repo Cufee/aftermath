@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cufee/aftermath/internal/stats"
 	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
+	stats "github.com/cufee/aftermath/internal/stats/renderer/v1"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/language"

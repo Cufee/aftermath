@@ -1,9 +1,9 @@
-package stats
+package renderer
 
 import (
 	"time"
 
-	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 )
 
 type Metadata struct {

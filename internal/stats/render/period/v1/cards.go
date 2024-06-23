@@ -6,11 +6,11 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/stats/fetch"
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/common"
-	"github.com/cufee/aftermath/internal/stats/prepare/period"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	"github.com/cufee/aftermath/internal/stats/render"
-	"github.com/cufee/aftermath/internal/stats/render/common"
+	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 
 	"github.com/rs/zerolog/log"
 )

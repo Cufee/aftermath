@@ -11,7 +11,7 @@ import (
 
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/semaphore"

@@ -20,10 +20,10 @@ import (
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
-	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 
 	"github.com/cufee/aftermath/internal/stats/render/assets"
-	render "github.com/cufee/aftermath/internal/stats/render/common"
+	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -57,15 +57,15 @@ func main() {
 		port := os.Getenv("PRIVATE_SERVER_PORT")
 		servePrivate := server.NewServer(port, []server.Handler{
 			{
-				Path: "POST /tasks/restart",
+				Path: "POST /v1/tasks/restart",
 				Func: private.RestartStaleTasks(cacheCoreClient),
 			},
 			{
-				Path: "POST /accounts/import",
+				Path: "POST /v1/accounts/import",
 				Func: private.LoadAccountsHandler(cacheCoreClient),
 			},
 			{
-				Path: "POST /snapshots/{realm}",
+				Path: "POST /v1/snapshots/{realm}",
 				Func: private.SaveRealmSnapshots(cacheCoreClient),
 			},
 		}...)

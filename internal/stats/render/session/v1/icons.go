@@ -3,7 +3,7 @@ package session
 import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
-	"github.com/cufee/aftermath/internal/stats/render/common"
+	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
 var iconsCache = make(map[string]common.Block, 6)

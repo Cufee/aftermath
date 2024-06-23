@@ -1,4 +1,4 @@
-package stats
+package renderer
 
 import (
 	"github.com/pkg/errors"

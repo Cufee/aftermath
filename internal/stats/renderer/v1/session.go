@@ -1,4 +1,4 @@
-package stats
+package renderer
 
 import (
 	"context"
@@ -9,11 +9,11 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
-	"github.com/cufee/aftermath/internal/stats/fetch"
-	"github.com/cufee/aftermath/internal/stats/prepare/common"
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/session"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	options "github.com/cufee/aftermath/internal/stats/render"
-	render "github.com/cufee/aftermath/internal/stats/render/session"
+	render "github.com/cufee/aftermath/internal/stats/render/session/v1"
 	"github.com/rs/zerolog/log"
 )
 

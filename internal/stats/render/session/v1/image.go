@@ -4,8 +4,8 @@ import (
 	"image"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/stats/fetch"
-	"github.com/cufee/aftermath/internal/stats/prepare/session"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/aftermath/internal/stats/render"
 )
 

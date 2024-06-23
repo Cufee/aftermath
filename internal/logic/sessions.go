@@ -10,7 +10,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/retry"
-	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"

@@ -2,7 +2,7 @@ package session
 
 import (
 	"github.com/cufee/aftermath/internal/stats/frame"
-	"github.com/cufee/aftermath/internal/stats/prepare/common"
+	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
 var unratedOverviewBlocks = [][]common.Tag{{common.TagBattles, common.TagWinrate}, {common.TagWN8}, {common.TagAvgDamage, common.TagDamageRatio}}
