@@ -13,6 +13,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/joho/godotenv v1.5.1
 	github.com/lucsky/cuid v1.2.1
+	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/nlpodyssey/gopickle v0.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0
@@ -39,7 +40,6 @@ require (
 	github.com/libsql/sqlite-antlr4-parser v0.0.0-20240327125255-dbf53b6cbf06 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
