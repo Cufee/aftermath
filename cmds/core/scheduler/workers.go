@@ -94,12 +94,11 @@ func RestartTasksWorker(core core.Client) func() {
 			log.Err(err).Msg("failed to reschedule stale tasks")
 			return
 		}
-		log.Debug().Int("count", len(staleTasks)).Msg("fetched stale tasks from database")
-
 		if len(staleTasks) < 1 {
 			log.Debug().Msg("no stale tasks found")
 			return
 		}
+		log.Debug().Int("count", len(staleTasks)).Msg("fetched stale tasks from database")
 
 		now := time.Now()
 		for i, task := range staleTasks {
