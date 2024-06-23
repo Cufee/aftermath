@@ -116,6 +116,11 @@ func startSchedulerFromEnvAsync(dbClient database.Client, wgClient wargaming.Cli
 }
 
 func coreClientsFromEnv() (core.Client, core.Client) {
+	err := os.MkdirAll(os.Getenv("DATABASE_PATH"), os.ModePerm)
+	if err != nil {
+		log.Fatal().Msgf("os#MkdirAll failed %s", err)
+	}
+
 	// Dependencies
 	dbClient, err := database.NewSQLiteClient(filepath.Join(os.Getenv("DATABASE_PATH"), os.Getenv("DATABASE_NAME")))
 	if err != nil {
