@@ -12,6 +12,6 @@ WORKDIR /migrations
 
 # copy migrations and binary
 COPY ./internal/database/ent/migrate/migrations /migrations
-COPY --from=builder /bin/atlas /bin/atlas
+COPY --from=builder /bin/atlas /bin/
 
 ENTRYPOINT ["atlas", "migrate", "apply","--allow-dirty" ,"--dir" "file:///migrations", ,"--tx-mode" ,"all", "--url", "libsql+ws://0.0.0.0:8080"]
