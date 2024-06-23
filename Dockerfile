@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go mod download
 
 COPY ./ ./
-RUN go generate ./...
+RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./...
 
 # build a fully standalone binary with zero dependencies
 RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=0 GOOS=linux go build -o app .
