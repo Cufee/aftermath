@@ -116,7 +116,7 @@ func startSchedulerFromEnvAsync(dbClient database.Client, wgClient wargaming.Cli
 
 func coreClientsFromEnv() (core.Client, core.Client) {
 	// Dependencies
-	dbClient, err := database.NewLibSQLClient(os.Getenv("DATABASE_URL"))
+	dbClient, err := database.NewSQLiteClient(os.Getenv("DATABASE_PATH"))
 	if err != nil {
 		log.Fatal().Msgf("database#NewClient failed %s", err)
 	}

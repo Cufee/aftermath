@@ -16,7 +16,7 @@ func toVehicle(record *db.Vehicle) models.Vehicle {
 	}
 }
 
-func (c *libsqlClient) UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) (map[string]error, error) {
+func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) (map[string]error, error) {
 	if len(vehicles) < 1 {
 		return nil, nil
 	}
@@ -61,7 +61,7 @@ func (c *libsqlClient) UpsertVehicles(ctx context.Context, vehicles map[string]m
 	return errors, c.db.Vehicle.CreateBulk(writes...).Exec(ctx)
 }
 
-func (c *libsqlClient) GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error) {
+func (c *client) GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error) {
 	if len(ids) < 1 {
 		return nil, nil
 	}

@@ -7,24 +7,6 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// model Clan {
-//   id        String   @id
-//   createdAt DateTime
-//   updatedAt DateTime @updatedAt
-
-//   tag      String
-//   name     String
-//   emblemId String @default("")
-
-//   accounts      Account[]
-//   membersString String
-
-//   recordUpdatedAt DateTime @updatedAt
-
-//   @@index([tag])
-//   @@map("account_clans")
-// }
-
 // Clan holds the schema definition for the Clan entity.
 type Clan struct {
 	ent.Schema

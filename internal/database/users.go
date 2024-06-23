@@ -88,7 +88,7 @@ func WithContent() userGetOption {
 Gets or creates a user with specified ID
   - assumes the ID is valid
 */
-func (c *libsqlClient) GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (models.User, error) {
+func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (models.User, error) {
 	user, err := c.GetUserByID(ctx, id, opts...)
 	if err != nil && !IsNotFound(err) {
 		return models.User{}, err
@@ -109,7 +109,7 @@ func (c *libsqlClient) GetOrCreateUserByID(ctx context.Context, id string, opts 
 Gets a user with specified ID
   - assumes the ID is valid
 */
-func (c *libsqlClient) GetUserByID(ctx context.Context, id string, opts ...userGetOption) (models.User, error) {
+func (c *client) GetUserByID(ctx context.Context, id string, opts ...userGetOption) (models.User, error) {
 	var options userGetOpts
 	for _, apply := range opts {
 		apply(&options)
@@ -134,7 +134,7 @@ func (c *libsqlClient) GetUserByID(ctx context.Context, id string, opts ...userG
 	return toUser(record, record.Edges.Connections, record.Edges.Subscriptions, record.Edges.Content), nil
 }
 
-func (c *libsqlClient) UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error) {
+func (c *client) UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error) {
 	record, err := c.db.User.UpdateOneID(userID).SetPermissions(perms.String()).Save(ctx)
 	if err != nil && !IsNotFound(err) {
 		return models.User{}, err
@@ -150,7 +150,7 @@ func (c *libsqlClient) UpsertUserWithPermissions(ctx context.Context, userID str
 	return toUser(record, nil, nil, nil), nil
 }
 
-func (c *libsqlClient) CreateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+func (c *client) CreateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	record, err := c.db.UserConnection.Create().
 		SetUser(c.db.User.GetX(ctx, connection.UserID)).
 		SetPermissions(connection.Permissions.String()).
@@ -164,7 +164,7 @@ func (c *libsqlClient) CreateConnection(ctx context.Context, connection models.U
 	return toUserConnection(record), err
 }
 
-func (c *libsqlClient) UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+func (c *client) UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	record, err := c.db.UserConnection.UpdateOneID(connection.ID).
 		SetMetadata(connection.Metadata).
 		SetPermissions(connection.Permissions.String()).
@@ -177,7 +177,7 @@ func (c *libsqlClient) UpdateConnection(ctx context.Context, connection models.U
 	return toUserConnection(record), err
 }
 
-func (c *libsqlClient) UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+func (c *client) UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	if connection.ID == "" {
 		return c.CreateConnection(ctx, connection)
 	}

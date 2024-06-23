@@ -30,7 +30,7 @@ func toCronTask(record *db.CronTask) models.Task {
 /*
 Returns up limit tasks that have TaskStatusInProgress and were last updates 1+ hours ago
 */
-func (c *libsqlClient) GetStaleTasks(ctx context.Context, limit int) ([]models.Task, error) {
+func (c *client) GetStaleTasks(ctx context.Context, limit int) ([]models.Task, error) {
 	records, err := c.db.CronTask.Query().
 		Where(
 			crontask.StatusEQ(models.TaskStatusInProgress),
@@ -54,7 +54,7 @@ func (c *libsqlClient) GetStaleTasks(ctx context.Context, limit int) ([]models.T
 /*
 Returns all tasks that were created after createdAfter, sorted by ScheduledAfter (DESC)
 */
-func (c *libsqlClient) GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...models.TaskStatus) ([]models.Task, error) {
+func (c *client) GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...models.TaskStatus) ([]models.Task, error) {
 	var where []predicate.CronTask
 	where = append(where, crontask.CreatedAtGT(createdAfter.Unix()))
 	if len(status) > 0 {
@@ -77,7 +77,7 @@ func (c *libsqlClient) GetRecentTasks(ctx context.Context, createdAfter time.Tim
 /*
 GetAndStartTasks retrieves up to limit number of tasks matching the referenceId and updates their status to in progress
 */
-func (c *libsqlClient) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task, error) {
+func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task, error) {
 	if limit < 1 {
 		return nil, nil
 	}
@@ -111,7 +111,7 @@ func (c *libsqlClient) GetAndStartTasks(ctx context.Context, limit int) ([]model
 	return tasks, tx.Commit()
 }
 
-func (c *libsqlClient) CreateTasks(ctx context.Context, tasks ...models.Task) error {
+func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
 	if len(tasks) < 1 {
 		return nil
 	}
@@ -142,7 +142,7 @@ UpdateTasks will update all tasks passed in
   - the following fields will be replaced: targets, status, leastRun, scheduleAfterm logs, data
   - this func will block until all other calls to task update funcs are done
 */
-func (c *libsqlClient) UpdateTasks(ctx context.Context, tasks ...models.Task) error {
+func (c *client) UpdateTasks(ctx context.Context, tasks ...models.Task) error {
 	if len(tasks) < 1 {
 		return nil
 	}
@@ -177,7 +177,7 @@ func (c *libsqlClient) UpdateTasks(ctx context.Context, tasks ...models.Task) er
 DeleteTasks will delete all tasks matching by ids
   - this func will block until all other calls to task update funcs are done
 */
-func (c *libsqlClient) DeleteTasks(ctx context.Context, ids ...string) error {
+func (c *client) DeleteTasks(ctx context.Context, ids ...string) error {
 	if len(ids) < 1 {
 		return nil
 	}
