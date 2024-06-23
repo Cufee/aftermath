@@ -7,7 +7,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY ./ ./
-# generate the Prisma Client Go client
+
+RUN go mod download
 RUN go generate ./...
 
 # build a fully standalone binary with zero dependencies
