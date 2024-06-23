@@ -7,7 +7,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	"github.com/cufee/aftermath/internal/stats/render"
+	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"golang.org/x/text/language"
 )
 
@@ -21,8 +21,8 @@ type renderer struct {
 }
 
 type Renderer interface {
-	Period(ctx context.Context, accountId string, from time.Time, opts ...render.Option) (Image, Metadata, error)
-	Session(ctx context.Context, accountId string, from time.Time, opts ...render.Option) (Image, Metadata, error)
+	Period(ctx context.Context, accountId string, from time.Time, opts ...common.Option) (Image, Metadata, error)
+	Session(ctx context.Context, accountId string, from time.Time, opts ...common.Option) (Image, Metadata, error)
 
 	// Replay(accountId string, from time.Time) (image.Image, error)
 }

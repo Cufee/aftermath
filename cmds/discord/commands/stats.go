@@ -10,8 +10,8 @@ import (
 	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
+	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
 func init() {
