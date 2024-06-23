@@ -24,7 +24,7 @@ func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[s
 	}
 
 	existing, err := tx.VehicleAverage.Query().Where(vehicleaverage.IDIn(ids...)).All(ctx)
-	if err != nil {
+	if err != nil && !IsNotFound(err) {
 		return rollback(tx, err)
 	}
 

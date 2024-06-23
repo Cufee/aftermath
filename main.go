@@ -54,10 +54,16 @@ func main() {
 
 	if e := os.Getenv("PRIVATE_SERVER_ENABLED"); e == "true" {
 		port := os.Getenv("PRIVATE_SERVER_PORT")
-		servePrivate := server.NewServer(port, server.Handler{
-			Path: "POST /accounts/load",
-			Func: private.LoadAccountsHandler(cacheCoreClient),
-		})
+		servePrivate := server.NewServer(port, []server.Handler{
+			{
+				Path: "POST /accounts/import",
+				Func: private.LoadAccountsHandler(cacheCoreClient),
+			},
+			{
+				Path: "POST /snapshots/{realm}",
+				Func: private.SaveRealmSnapshots(cacheCoreClient),
+			},
+		}...)
 		log.Info().Str("port", port).Msg("starting a private server")
 		go servePrivate()
 	}

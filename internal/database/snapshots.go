@@ -94,7 +94,7 @@ func (c *libsqlClient) GetVehicleSnapshots(ctx context.Context, accountID, refer
 
 	var records []*db.VehicleSnapshot
 	err := c.db.VehicleSnapshot.Query().Where(where...).GroupBy(vehiclesnapshot.FieldVehicleID).Scan(ctx, &records)
-	if err != nil && !IsNotFound(err) {
+	if err != nil {
 		return nil, err
 	}
 	var snapshots []models.VehicleSnapshot

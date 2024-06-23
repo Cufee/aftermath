@@ -32,7 +32,7 @@ func (c *libsqlClient) UpsertVehicles(ctx context.Context, vehicles map[string]m
 	}
 
 	records, err := tx.Vehicle.Query().Where(vehicle.IDIn(ids...)).All(ctx)
-	if err != nil {
+	if err != nil && !IsNotFound(err) {
 		return rollback(tx, err)
 	}
 
@@ -77,7 +77,7 @@ func (c *libsqlClient) GetVehicles(ctx context.Context, ids []string) (map[strin
 	}
 
 	records, err := c.db.Vehicle.Query().Where(vehicle.IDIn(ids...)).All(ctx)
-	if err != nil && !IsNotFound(err) {
+	if err != nil {
 		return nil, err
 	}
 

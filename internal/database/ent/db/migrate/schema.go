@@ -226,7 +226,7 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeInt64},
 		{Name: "updated_at", Type: field.TypeInt64},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"UPDATE_CLANS", "RECORD_ACCOUNT_SESSIONS", "UPDATE_ACCOUNT_WN8", "UPDATE_ACCOUNT_ACHIEVEMENTS", "CLEANUP_DATABASE"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"UPDATE_CLANS", "RECORD_SNAPSHOTS", "CLEANUP_DATABASE"}},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "targets", Type: field.TypeJSON},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"TASK_SCHEDULED", "TASK_IN_PROGRESS", "TASK_COMPLETE", "TASK_FAILED"}},

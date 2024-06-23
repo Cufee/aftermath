@@ -39,7 +39,7 @@ func (c *libsqlClient) GetStaleTasks(ctx context.Context, limit int) ([]models.T
 		Order(crontask.ByScheduledAfter(sql.OrderAsc())).
 		Limit(limit).
 		All(ctx)
-	if err != nil && !IsNotFound(err) {
+	if err != nil {
 		return nil, err
 	}
 
@@ -62,7 +62,7 @@ func (c *libsqlClient) GetRecentTasks(ctx context.Context, createdAfter time.Tim
 	}
 
 	records, err := c.db.CronTask.Query().Where(where...).All(ctx)
-	if err != nil && !IsNotFound(err) {
+	if err != nil {
 		return nil, err
 	}
 
@@ -89,9 +89,6 @@ func (c *libsqlClient) GetAndStartTasks(ctx context.Context, limit int) ([]model
 
 	records, err := tx.CronTask.Query().Where(crontask.StatusEQ(models.TaskStatusScheduled), crontask.ScheduledAfterLT(time.Now().Unix())).Order(crontask.ByScheduledAfter(sql.OrderAsc())).Limit(limit).All(ctx)
 	if err != nil {
-		if IsNotFound(err) {
-			return nil, nil
-		}
 		return nil, rollback(tx, err)
 	}
 
@@ -107,7 +104,7 @@ func (c *libsqlClient) GetAndStartTasks(ctx context.Context, limit int) ([]model
 	}
 
 	err = tx.CronTask.Update().Where(crontask.IDIn(ids...)).SetStatus(models.TaskStatusInProgress).Exec(ctx)
-	if err != nil && !IsNotFound(err) {
+	if err != nil {
 		return nil, rollback(tx, err)
 	}
 

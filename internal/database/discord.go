@@ -69,7 +69,7 @@ func (c *libsqlClient) UpsertCommands(ctx context.Context, commands ...models.Ap
 	}
 
 	existing, err := tx.ApplicationCommand.Query().Where(applicationcommand.IDIn(ids...)).All(ctx)
-	if err != nil {
+	if err != nil && !IsNotFound(err) {
 		return rollback(tx, err)
 	}
 
