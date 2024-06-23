@@ -80,15 +80,15 @@ func RunTasksWorker(queue *Queue) func() {
 	}
 }
 
-func RestartTasksWorker(queue *Queue) func() {
+func RestartTasksWorker(core core.Client) func() {
 	return func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 		defer cancel()
 
-		staleTasks, err := queue.core.Database().GetStaleTasks(ctx, 100)
+		staleTasks, err := core.Database().GetStaleTasks(ctx, 100)
 		if err != nil {
 			if database.IsNotFound(err) {
-				log.Debug().Msg("no failed tasks to reschedule found")
+				log.Debug().Msg("no stale tasks found")
 				return
 			}
 			log.Err(err).Msg("failed to reschedule stale tasks")
@@ -97,6 +97,7 @@ func RestartTasksWorker(queue *Queue) func() {
 		log.Debug().Int("count", len(staleTasks)).Msg("fetched stale tasks from database")
 
 		if len(staleTasks) < 1 {
+			log.Debug().Msg("no stale tasks found")
 			return
 		}
 
@@ -108,7 +109,7 @@ func RestartTasksWorker(queue *Queue) func() {
 		}
 
 		log.Debug().Int("count", len(staleTasks)).Msg("updating stale tasks")
-		err = queue.core.Database().UpdateTasks(ctx, staleTasks...)
+		err = core.Database().UpdateTasks(ctx, staleTasks...)
 		if err != nil {
 			log.Err(err).Msg("failed to update stale tasks")
 			return

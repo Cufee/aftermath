@@ -14,7 +14,7 @@ func (queue *Queue) StartCronJobsAsync() {
 	// Tasks
 	c.Cron("* * * * *").Do(RunTasksWorker(queue))
 	// some tasks might be stuck due to a panic or restart, restart them
-	c.Cron("0 * * * *").Do(RestartTasksWorker(queue))
+	c.Cron("0 * * * *").Do(RestartTasksWorker(queue.core))
 	c.Cron("0 5 * * *").Do(CreateCleanupTaskWorker(queue.core)) // delete expired documents
 
 	// Glossary - Do it around the same time WG releases game updates
