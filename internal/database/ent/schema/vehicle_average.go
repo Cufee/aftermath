@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
@@ -34,5 +35,7 @@ func (VehicleAverage) Edges() []ent.Edge {
 }
 
 func (VehicleAverage) Indexes() []ent.Index {
-	return nil
+	return []ent.Index{
+		index.Fields("id"),
+	}
 }

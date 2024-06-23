@@ -39,6 +39,7 @@ func (VehicleSnapshot) Edges() []ent.Edge {
 
 func (VehicleSnapshot) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("created_at"),
 		index.Fields("vehicle_id", "created_at"),
 		index.Fields("account_id", "created_at"),

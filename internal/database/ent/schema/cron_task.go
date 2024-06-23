@@ -37,6 +37,7 @@ func (CronTask) Edges() []ent.Edge {
 
 func (CronTask) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("reference_id"),
 		index.Fields("status", "last_run"),
 		index.Fields("status", "created_at"),

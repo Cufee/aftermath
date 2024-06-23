@@ -40,6 +40,7 @@ func (ApplicationCommand) Edges() []ent.Edge {
 
 func (ApplicationCommand) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("options_hash"),
 	}
 }

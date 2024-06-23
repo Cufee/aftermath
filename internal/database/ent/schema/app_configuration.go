@@ -28,6 +28,7 @@ func (AppConfiguration) Edges() []ent.Edge {
 
 func (AppConfiguration) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("key"),
 	}
 }

@@ -55,10 +55,11 @@ func (UserConnection) Edges() []ent.Edge {
 
 func (UserConnection) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("user_id"),
 		index.Fields("type", "user_id"),
 		index.Fields("reference_id"),
 		index.Fields("type", "reference_id"),
-		// index.Fields("reference_id").Edges("user").Unique(),
+		index.Fields("reference_id", "user_id", "type").Unique(),
 	}
 }

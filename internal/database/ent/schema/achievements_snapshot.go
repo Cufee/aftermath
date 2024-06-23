@@ -37,6 +37,7 @@ func (AchievementsSnapshot) Edges() []ent.Edge {
 
 func (AchievementsSnapshot) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("created_at"),
 		index.Fields("account_id", "reference_id"),
 		index.Fields("account_id", "reference_id", "created_at"),
