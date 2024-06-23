@@ -3,13 +3,12 @@ FROM golang:1.22.3-bookworm as builder
 WORKDIR /workspace
 
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=$GOPATH/pkg/mod go mod download
 
 COPY ./ ./
-RUN go generate ./...
 
 # build a fully standalone binary with zero dependencies
-RUN CGO_ENABLED=1 GOOS=linux go build -o app .
+RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux go build -o app .
 
 # Make a scratch container with required files and binary
 FROM scratch
