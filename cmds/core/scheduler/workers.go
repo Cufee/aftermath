@@ -37,7 +37,7 @@ func RotateBackgroundPresetsWorker(client core.Client) func() {
 
 func CreateSessionTasksWorker(client core.Client, realm string) func() {
 	return func() {
-		err := tasks.CreateSessionUpdateTasks(client, realm)
+		err := tasks.CreateRecordSnapshotsTasks(client, realm)
 		if err != nil {
 			log.Err(err).Str("realm", realm).Msg("failed to schedule session update tasks")
 		}

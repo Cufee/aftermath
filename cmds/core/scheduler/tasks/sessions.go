@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	defaultHandlers[models.TaskTypeRecordSessions] = TaskHandler{
+	defaultHandlers[models.TaskTypeRecordSnapshots] = TaskHandler{
 		Process: func(client core.Client, task models.Task) (string, error) {
 			if task.Data == nil {
 				return "no data provided", errors.New("no data provided")
@@ -72,10 +72,10 @@ func init() {
 	}
 }
 
-func CreateSessionUpdateTasks(client core.Client, realm string) error {
+func CreateRecordSnapshotsTasks(client core.Client, realm string) error {
 	realm = strings.ToUpper(realm)
 	task := models.Task{
-		Type:           models.TaskTypeRecordSessions,
+		Type:           models.TaskTypeRecordSnapshots,
 		ReferenceID:    "realm_" + realm,
 		ScheduledAfter: time.Now(),
 		Data: map[string]any{
@@ -92,10 +92,17 @@ func CreateSessionUpdateTasks(client core.Client, realm string) error {
 		return err
 	}
 	if len(accounts) < 1 {
-		return nil
+		return errors.New("no accounts on realm " + realm)
 	}
 	task.Targets = append(task.Targets, accounts...)
 
 	// This update requires (2 + n) requests per n players
-	return client.Database().CreateTasks(ctx, splitTaskByTargets(task, 90)...)
+	tasks := splitTaskByTargets(task, 90)
+	err = client.Database().CreateTasks(ctx, tasks...)
+	if err != nil {
+		return err
+	}
+
+	log.Debug().Int("count", len(tasks)).Msg("scheduled realm account snapshots tasks")
+	return nil
 }

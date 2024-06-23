@@ -7,10 +7,10 @@ import (
 type TaskType string
 
 const (
-	TaskTypeUpdateClans              TaskType = "UPDATE_CLANS"
-	TaskTypeRecordSessions           TaskType = "RECORD_ACCOUNT_SESSIONS"
-	TaskTypeUpdateAccountWN8         TaskType = "UPDATE_ACCOUNT_WN8"
-	TaskTypeRecordPlayerAchievements TaskType = "UPDATE_ACCOUNT_ACHIEVEMENTS"
+	TaskTypeUpdateClans     TaskType = "UPDATE_CLANS"
+	TaskTypeRecordSnapshots TaskType = "RECORD_SNAPSHOTS"
+	// TaskTypeUpdateAccountWN8         TaskType = "UPDATE_ACCOUNT_WN8"
+	// TaskTypeRecordPlayerAchievements TaskType = "UPDATE_ACCOUNT_ACHIEVEMENTS"
 
 	TaskTypeDatabaseCleanup TaskType = "CLEANUP_DATABASE"
 )
@@ -20,9 +20,9 @@ func (TaskType) Values() []string {
 	var kinds []string
 	for _, s := range []TaskType{
 		TaskTypeUpdateClans,
-		TaskTypeRecordSessions,
-		TaskTypeUpdateAccountWN8,
-		TaskTypeRecordPlayerAchievements,
+		TaskTypeRecordSnapshots,
+		// TaskTypeUpdateAccountWN8,
+		// TaskTypeRecordPlayerAchievements,
 		//
 		TaskTypeDatabaseCleanup,
 	} {

@@ -27,17 +27,12 @@ func toAccount(model *db.Account) models.Account {
 }
 
 func (c *libsqlClient) GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error) {
-	result, err := c.db.Account.Query().Where(account.Realm(strings.ToLower(realm))).Select(account.FieldID).All(ctx)
+	result, err := c.db.Account.Query().Where(account.Realm(strings.ToUpper(realm))).IDs(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	var accounts []string
-	for _, model := range result {
-		accounts = append(accounts, model.ID)
-	}
-
-	return accounts, nil
+	return result, nil
 }
 
 func (c *libsqlClient) GetAccountByID(ctx context.Context, id string) (models.Account, error) {
@@ -95,7 +90,7 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 		}
 
 		err = tx.Account.UpdateOneID(r.ID).
-			SetRealm(update.Realm).
+			SetRealm(strings.ToUpper(update.Realm)).
 			SetNickname(update.Nickname).
 			SetPrivate(update.Private).
 			SetLastBattleTime(update.LastBattleTime.Unix()).
@@ -112,7 +107,7 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 		inserts = append(inserts,
 			c.db.Account.Create().
 				SetID(a.ID).
-				SetRealm(a.Realm).
+				SetRealm(strings.ToUpper(a.Realm)).
 				SetNickname(a.Nickname).
 				SetPrivate(a.Private).
 				SetAccountCreatedAt(a.CreatedAt.Unix()).
@@ -129,7 +124,7 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 
 func (c *libsqlClient) AccountSetPrivate(ctx context.Context, id string, value bool) error {
 	err := c.db.Account.UpdateOneID(id).SetPrivate(value).Exec(ctx)
-	if err != nil && !IsNotFound(err) {
+	if err != nil {
 		return err
 	}
 	return nil
