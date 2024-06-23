@@ -59,13 +59,24 @@ func (q *Queue) Process(callback func(error), tasks ...models.Task) {
 	for _, task := range tasks {
 		wg.Add(1)
 		go func(t models.Task) {
-			q.limiter <- struct{}{}
 			defer func() {
+				if r := recover(); r != nil {
+					log.Error().Any("recover", r).Msg("panic in task handler")
+					t.Status = models.TaskStatusFailed
+					t.LogAttempt(models.TaskLog{
+						Targets:   t.Targets,
+						Timestamp: time.Now(),
+						Error:     "task handler caused a panic",
+					})
+				} else {
+					log.Debug().Msgf("finished processing task %s", t.ID)
+				}
 				processedTasks <- t
-				wg.Done()
 				<-q.limiter
-				log.Debug().Msgf("finished processing task %s", t.ID)
+				wg.Done()
 			}()
+
+			q.limiter <- struct{}{}
 			log.Debug().Msgf("processing task %s", t.ID)
 
 			handler, ok := q.handlers[t.Type]
