@@ -18,7 +18,7 @@ services:
     depends_on:
       aftermath-database:
         condition: service_started
-    command: sh -c 'migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "libsql+ws://aftermath-database:8080"'
+    command: atlas migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "libsql+ws://aftermath-database:8080"
     networks:
       - dokploy-network
 

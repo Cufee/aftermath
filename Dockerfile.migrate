@@ -11,4 +11,4 @@ RUN go mod download
 RUN go generate ./...
 RUN CGO_ENABLED=1 GOOS=linux go build -o /bin/atlas
 
-ENTRYPOINT ["sh", "-c", 'atlas migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "libsql+ws://0.0.0.0:8080']
+ENTRYPOINT ["atlas", "migrate", "apply","--allow-dirty" ,"--dir" "file:///migrations", ,"--tx-mode" ,"all", "--url", "libsql+ws://0.0.0.0:8080"]
