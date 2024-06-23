@@ -5,13 +5,12 @@ WORKDIR /workspace
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go mod download
 
-COPY ./internal/database/ent internal/database/ent
-RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/database/ent
-
 COPY ./ ./
 
+RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/workspace/internal/database/ent go generate ./internal/database/ent
+
 # build a fully standalone binary with zero dependencies
-RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux go build -o app .
+RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/workspace/internal/database/ent CGO_ENABLED=1 GOOS=linux go build -o app .
 
 # Make a scratch container with required files and binary
 FROM scratch
