@@ -7,13 +7,13 @@ RUN go mod download
 
 COPY ./ ./
 
+RUN go generate ./...
+
 # build a fully standalone binary with zero dependencies
 RUN CGO_ENABLED=1 GOOS=linux go build -o app .
 
 # Make a scratch container with required files and binary
 FROM scratch
-
-WORKDIR /app
 
 ENV TZ=Europe/Berlin
 ENV ZONEINFO=/zoneinfo.zip
