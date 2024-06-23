@@ -8,9 +8,9 @@ import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
-func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error {
+func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error) {
 	if len(averages) < 1 {
-		return nil
+		return nil, nil
 	}
 
 	var ids []string
@@ -20,14 +20,15 @@ func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[s
 
 	tx, err := c.db.Tx(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	existing, err := tx.VehicleAverage.Query().Where(vehicleaverage.IDIn(ids...)).All(ctx)
 	if err != nil && !IsNotFound(err) {
-		return rollback(tx, err)
+		return nil, rollback(tx, err)
 	}
 
+	errors := make(map[string]error)
 	for _, r := range existing {
 		update, ok := averages[r.ID]
 		if !ok {
@@ -36,7 +37,7 @@ func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[s
 
 		err := tx.VehicleAverage.UpdateOneID(r.ID).SetData(update).Exec(ctx)
 		if err != nil {
-			return rollback(tx, err)
+			errors[r.ID] = err
 		}
 
 		delete(averages, r.ID)
@@ -53,10 +54,10 @@ func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[s
 
 	err = tx.VehicleAverage.CreateBulk(inserts...).Exec(ctx)
 	if err != nil {
-		return rollback(tx, err)
+		return nil, rollback(tx, err)
 	}
 
-	return tx.Commit()
+	return nil, tx.Commit()
 }
 
 func (c *libsqlClient) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {

@@ -63,6 +63,8 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 			batchSize := 50
 			var wg sync.WaitGroup
 			sem := semaphore.NewWeighted(5)
+			errors := make(map[string]error)
+			var errorsMx sync.Mutex
 
 			for realm, accounts := range accountsByRealm {
 				for i := 0; i < len(accounts); i += batchSize {
@@ -96,16 +98,26 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 							inserts = append(inserts, fetch.WargamingToAccount(realm, account, types.ClanMember{}, false))
 						}
 
-						err = client.Database().UpsertAccounts(ctx, inserts)
+						accErr, err := client.Database().UpsertAccounts(ctx, inserts)
 						if err != nil {
 							log.Err(err).Msg("failed to upsert accounts")
-							return
+						}
+						if len(accErr) > 0 {
+							errorsMx.Lock()
+							for id, err := range accErr {
+								errors[id] = err
+							}
+							errorsMx.Unlock()
 						}
 
 					}(accounts[i:end], realm)
 				}
 			}
 			wg.Wait()
+
+			if len(errors) > 0 {
+				log.Error().Any("errors", errors).Msg("some account imports failed")
+			}
 			log.Info().Int("count", len(accounts)-len(existing)).Msg("finished importing accounts")
 		}()
 	}

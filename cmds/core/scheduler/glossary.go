@@ -24,9 +24,13 @@ func UpdateAveragesWorker(client core.Client) func() {
 			return
 		}
 
-		err = client.Database().UpsertVehicleAverages(ctx, averages)
+		aErr, err := client.Database().UpsertVehicleAverages(ctx, averages)
 		if err != nil {
 			log.Err(err).Msg("failed to update averages cache")
+			return
+		}
+		if len(aErr) > 0 {
+			log.Error().Any("errors", aErr).Msg("failed to update some average cache")
 			return
 		}
 
@@ -57,9 +61,13 @@ func UpdateGlossaryWorker(client core.Client) func() {
 			}
 		}
 
-		err = client.Database().UpsertVehicles(ctx, vehicles)
+		vErr, err := client.Database().UpsertVehicles(ctx, vehicles)
 		if err != nil {
 			log.Err(err).Msg("failed to save vehicle glossary")
+			return
+		}
+		if len(vErr) > 0 {
+			log.Error().Any("errors", vErr).Msg("failed to save some vehicle glossaries")
 			return
 		}
 

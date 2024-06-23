@@ -6,6 +6,7 @@ import (
 
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/rs/zerolog/log"
 )
@@ -48,6 +49,7 @@ func RunTasksWorker(queue *Queue) func() {
 	return func() {
 		activeWorkers := queue.ActiveWorkers()
 		if activeWorkers >= queue.concurrencyLimit {
+			log.Debug().Int("active", activeWorkers).Int("limit", queue.concurrencyLimit).Msg("no available workers to process tasks")
 			return
 		}
 
@@ -59,6 +61,10 @@ func RunTasksWorker(queue *Queue) func() {
 		batchSize := queue.concurrencyLimit - activeWorkers
 		tasks, err := queue.core.Database().GetAndStartTasks(ctx, batchSize*10)
 		if err != nil {
+			if database.IsNotFound(err) {
+				log.Debug().Msg("no scheduled tasks to process")
+				return
+			}
 			log.Err(err).Msg("failed to start scheduled tasks")
 			return
 		}
@@ -81,6 +87,10 @@ func RestartTasksWorker(queue *Queue) func() {
 
 		staleTasks, err := queue.core.Database().GetStaleTasks(ctx, 100)
 		if err != nil {
+			if database.IsNotFound(err) {
+				log.Debug().Msg("no failed tasks to reschedule found")
+				return
+			}
 			log.Err(err).Msg("failed to reschedule stale tasks")
 			return
 		}
