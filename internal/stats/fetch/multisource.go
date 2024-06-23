@@ -85,8 +85,8 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Acco
 	}
 
 	account := WargamingToAccount(realm, wgAccount.Data, clan, false)
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	go func(account models.Account) {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
 
 		aErr, err := c.database.UpsertAccounts(ctx, []models.Account{account})
@@ -96,7 +96,7 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Acco
 		if err := aErr[account.ID]; err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
-	}()
+	}(account)
 
 	return account, nil
 }
@@ -171,18 +171,18 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		stats.AddWN8(averages.Data)
 	}
 
-	go func() {
+	go func(account models.Account) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		aErr, err := c.database.UpsertAccounts(ctx, []models.Account{stats.Account})
+		aErr, err := c.database.UpsertAccounts(ctx, []models.Account{account})
 		if err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
-		if err := aErr[stats.Account.ID]; err != nil {
+		if err := aErr[account.ID]; err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
-	}()
+	}(stats.Account)
 
 	return stats, nil
 }
@@ -313,6 +313,11 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		defer group.Done()
 		s, err := c.database.GetAccountSnapshot(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
 		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s, Err: err}
+	}()
+
+	group.Add(1)
+	go func() {
+		defer group.Done()
 		v, err := c.database.GetVehicleSnapshots(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
 		vehiclesSnapshots = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
 	}()
@@ -353,9 +358,9 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	career.RatingBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, 0)
 	career.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, len(vehiclesSnapshots.Data))
 
-	snapshotsMap := make(map[string]int, len(vehiclesSnapshots.Data))
-	for i, data := range vehiclesSnapshots.Data {
-		snapshotsMap[data.VehicleID] = i
+	snapshotsMap := make(map[string]*models.VehicleSnapshot, len(vehiclesSnapshots.Data))
+	for _, data := range vehiclesSnapshots.Data {
+		snapshotsMap[data.VehicleID] = &data
 
 		career.RegularBattles.Vehicles[data.VehicleID] = frame.VehicleStatsFrame{
 			LastBattleTime: data.LastBattleTime,
@@ -365,16 +370,15 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	}
 
 	for id, current := range current.Data.RegularBattles.Vehicles {
-		snapshotIndex, exists := snapshotsMap[id]
+		snapshot, exists := snapshotsMap[id]
 		if !exists {
 			session.RegularBattles.Vehicles[id] = current
 			continue
 		}
-
-		snapshot := vehiclesSnapshots.Data[snapshotIndex]
 		if current.Battles == 0 || current.Battles == snapshot.Stats.Battles {
 			continue
 		}
+
 		current.StatsFrame.Subtract(snapshot.Stats)
 		session.RegularBattles.Vehicles[id] = current
 	}
