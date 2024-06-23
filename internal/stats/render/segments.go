@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/cufee/aftermath/internal/stats/render/common"
+	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
 type Segments struct {

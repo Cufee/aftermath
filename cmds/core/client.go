@@ -3,8 +3,8 @@ package core
 import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/wargaming"
-	"github.com/cufee/aftermath/internal/stats"
-	"github.com/cufee/aftermath/internal/stats/fetch"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	stats "github.com/cufee/aftermath/internal/stats/renderer/v1"
 	"golang.org/x/text/language"
 )
 

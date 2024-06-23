@@ -1,7 +1,7 @@
 package period
 
 import (
-	"github.com/cufee/aftermath/internal/stats/prepare/common"
+	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
 const TagAvgTier common.Tag = "avg_tier"

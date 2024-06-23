@@ -2,7 +2,7 @@ package session
 
 import (
 	"github.com/cufee/aftermath/internal/stats/frame"
-	"github.com/cufee/aftermath/internal/stats/prepare/common"
+	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
 func presetToBlock(preset common.Tag, session, career frame.StatsFrame) (common.StatsBlock[BlockData], error) {

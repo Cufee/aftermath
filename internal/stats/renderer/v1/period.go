@@ -1,4 +1,4 @@
-package stats
+package renderer
 
 import (
 	"context"
@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/localization"
-	"github.com/cufee/aftermath/internal/stats/fetch"
-	"github.com/cufee/aftermath/internal/stats/prepare/common"
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/period"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	options "github.com/cufee/aftermath/internal/stats/render"
-	render "github.com/cufee/aftermath/internal/stats/render/period"
+	render "github.com/cufee/aftermath/internal/stats/render/period/v1"
 )
 
 func (r *renderer) Period(ctx context.Context, accountId string, from time.Time, opts ...options.Option) (Image, Metadata, error) {

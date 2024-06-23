@@ -5,8 +5,8 @@ import (
 	"math"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/stats/fetch"
-	"github.com/cufee/aftermath/internal/stats/prepare/common"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
 func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Vehicle, opts ...common.Option) (Cards, error) {

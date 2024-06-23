@@ -4,10 +4,10 @@ import (
 	"image/color"
 
 	"github.com/cufee/aftermath/internal/stats/frame"
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/common"
-	"github.com/cufee/aftermath/internal/stats/prepare/session"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
-	"github.com/cufee/aftermath/internal/stats/render/common"
+	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
 )

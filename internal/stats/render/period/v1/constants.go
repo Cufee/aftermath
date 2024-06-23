@@ -1,9 +1,9 @@
 package period
 
 import (
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/common"
-	"github.com/cufee/aftermath/internal/stats/prepare/period"
-	"github.com/cufee/aftermath/internal/stats/render/common"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
+	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
 type overviewStyle struct {

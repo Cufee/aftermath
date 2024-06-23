@@ -1,6 +1,6 @@
 package replay
 
-import "github.com/cufee/aftermath/internal/stats/prepare/common"
+import "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 
 const (
 	TagDamageBlocked          common.Tag = "blocked"
