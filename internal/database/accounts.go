@@ -61,9 +61,9 @@ func (c *libsqlClient) GetAccounts(ctx context.Context, ids []string) ([]models.
 	return accounts, nil
 }
 
-func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Account) error {
+func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Account) (map[string]error, error) {
 	if len(accounts) < 1 {
-		return nil
+		return nil, nil
 	}
 
 	var ids []string
@@ -75,14 +75,15 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 
 	tx, err := c.db.Tx(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	records, err := tx.Account.Query().Where(account.IDIn(ids...)).All(ctx)
 	if err != nil && !IsNotFound(err) {
-		return rollback(tx, err)
+		return nil, rollback(tx, err)
 	}
 
+	errors := make(map[string]error)
 	for _, r := range records {
 		update, ok := accountsMap[r.ID]
 		if !ok {
@@ -96,7 +97,7 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 			SetLastBattleTime(update.LastBattleTime.Unix()).
 			Exec(ctx)
 		if err != nil {
-			return rollback(tx, err)
+			errors[r.ID] = err
 		}
 
 		delete(accountsMap, r.ID)
@@ -117,9 +118,9 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 
 	err = c.db.Account.CreateBulk(inserts...).Exec(ctx)
 	if err != nil {
-		return rollback(tx, err)
+		return errors, rollback(tx, err)
 	}
-	return tx.Commit()
+	return errors, tx.Commit()
 }
 
 func (c *libsqlClient) AccountSetPrivate(ctx context.Context, id string, value bool) error {

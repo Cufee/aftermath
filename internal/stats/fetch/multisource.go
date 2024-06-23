@@ -89,8 +89,11 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Acco
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		err := c.database.UpsertAccounts(ctx, []models.Account{account})
+		aErr, err := c.database.UpsertAccounts(ctx, []models.Account{account})
 		if err != nil {
+			log.Err(err).Msg("failed to update account cache")
+		}
+		if err := aErr[account.ID]; err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
 	}()
@@ -172,8 +175,11 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		err := c.database.UpsertAccounts(ctx, []models.Account{stats.Account})
+		aErr, err := c.database.UpsertAccounts(ctx, []models.Account{stats.Account})
 		if err != nil {
+			log.Err(err).Msg("failed to update account cache")
+		}
+		if err := aErr[stats.Account.ID]; err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
 	}()
