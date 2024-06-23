@@ -14,7 +14,8 @@ services:
       - .env
     environment:
       - PORT=3000
-      - DATABASE_PATH=sqlite:///data/aftermath.db?_fk=1
+      - DATABASE_NAME=aftermath.db
+      - DATABASE_PATH=/data
     depends_on:
       aftermath-migrate:
         condition: service_completed_successfully
