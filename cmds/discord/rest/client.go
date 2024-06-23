@@ -130,7 +130,6 @@ func (c *Client) do(req *http.Request, target any) error {
 		if message == "" {
 			message = res.Status + ", response was not valid json"
 		}
-		println(string(data))
 
 		return errors.New("discord error: " + message)
 	}

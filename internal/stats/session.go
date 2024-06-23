@@ -35,7 +35,7 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 
 				_, err := logic.RecordAccountSnapshots(ctx, r.wargaming, r.database, r.wargaming.RealmFromAccountID(id), false, id)
 				if err != nil {
-					log.Err(err).Str("accountId", accountId).Msg("failed to record account snapshot")
+					log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
 				}
 			}(accountId)
 			return nil, meta, ErrAccountNotTracked
