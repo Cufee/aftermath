@@ -152,10 +152,10 @@ func (c *libsqlClient) UpsertUserWithPermissions(ctx context.Context, userID str
 
 func (c *libsqlClient) CreateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	record, err := c.db.UserConnection.Create().
-		SetUserID(connection.UserID).
-		SetMetadata(connection.Metadata).
+		SetUser(c.db.User.GetX(ctx, connection.UserID)).
 		SetPermissions(connection.Permissions.String()).
 		SetReferenceID(connection.ReferenceID).
+		SetMetadata(connection.Metadata).
 		SetType(connection.Type).
 		Save(ctx)
 	if err != nil {
