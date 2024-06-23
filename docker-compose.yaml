@@ -42,9 +42,7 @@ services:
     deploy:
       resources:
         reservations:
-          memory: 128m
-        limits:
-          memory: 256m
+          memory: 512m
     networks:
       - dokploy-network
     hostname: aftermath-service
