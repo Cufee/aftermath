@@ -35,6 +35,7 @@ func (UserContent) Edges() []ent.Edge {
 
 func (UserContent) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("user_id"),
 		index.Fields("type", "user_id"),
 		index.Fields("reference_id"),

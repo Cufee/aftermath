@@ -59,6 +59,7 @@ func (Clan) Edges() []ent.Edge {
 
 func (Clan) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("tag"),
 		index.Fields("name"),
 	}

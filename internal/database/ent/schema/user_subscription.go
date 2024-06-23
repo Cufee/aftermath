@@ -35,6 +35,7 @@ func (UserSubscription) Edges() []ent.Edge {
 
 func (UserSubscription) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("user_id"),
 		index.Fields("type", "user_id"),
 		index.Fields("expires_at"),

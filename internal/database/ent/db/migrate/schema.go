@@ -35,6 +35,11 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
+				Name:    "account_id",
+				Unique:  false,
+				Columns: []*schema.Column{AccountsColumns[0]},
+			},
+			{
 				Name:    "account_id_last_battle_time",
 				Unique:  false,
 				Columns: []*schema.Column{AccountsColumns[0], AccountsColumns[3]},

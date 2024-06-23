@@ -41,6 +41,7 @@ func (AccountSnapshot) Edges() []ent.Edge {
 
 func (AccountSnapshot) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("created_at"),
 		index.Fields("type", "account_id", "created_at"),
 		index.Fields("type", "account_id", "reference_id"),

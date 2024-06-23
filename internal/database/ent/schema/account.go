@@ -49,6 +49,7 @@ func (Account) Edges() []ent.Edge {
 
 func (Account) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("id"),
 		index.Fields("id", "last_battle_time"),
 		index.Fields("realm"),
 		index.Fields("realm", "last_battle_time"),
