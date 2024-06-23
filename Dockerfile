@@ -1,4 +1,4 @@
-FROM golang:1.22.3-alpine as builder
+FROM golang:1.22.3-bookworm as builder
 
 WORKDIR /workspace
 
@@ -9,7 +9,7 @@ COPY ./ ./
 RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/workspace/internal/database/ent go generate ./internal/database/ent
 
 # build a fully standalone binary with zero dependencies
-RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/workspace/internal/database/ent CGO_ENABLED=0 GOOS=linux go build -o app .
+RUN --mount=type=cache,target=$GOPATH/pkg/mod --mount=type=cache,target=/workspace/internal/database/ent CGO_ENABLED=1 GOOS=linux go build -o app .
 
 # Make a scratch container with required files and binary
 FROM scratch
