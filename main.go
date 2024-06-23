@@ -56,6 +56,10 @@ func main() {
 		port := os.Getenv("PRIVATE_SERVER_PORT")
 		servePrivate := server.NewServer(port, []server.Handler{
 			{
+				Path: "POST /tasks/restart",
+				Func: private.RestartStaleTasks(cacheCoreClient),
+			},
+			{
 				Path: "POST /accounts/import",
 				Func: private.LoadAccountsHandler(cacheCoreClient),
 			},
@@ -108,10 +112,6 @@ func startSchedulerFromEnvAsync(dbClient database.Client, wgClient wargaming.Cli
 	}()
 
 	queue.StartCronJobsAsync()
-	// Some tasks should run on startup
-	// scheduler.UpdateGlossaryWorker(coreClient)()
-	// scheduler.UpdateAveragesWorker(coreClient)()
-	// scheduler.CreateSessionTasksWorker(coreClient, "AS")()
 }
 
 func coreClientsFromEnv() (core.Client, core.Client) {
