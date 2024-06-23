@@ -10,6 +10,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
+	"github.com/rs/zerolog/log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -104,7 +105,13 @@ func (c *client) txWithLock(ctx context.Context) (*db.Tx, func(), error) {
 }
 
 func NewSQLiteClient(filePath string) (*client, error) {
-	c, err := db.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared&_fk=1", filePath))
+	defer func() {
+		if r := recover(); r != nil {
+			log.Fatal().Interface("error", r).Stack().Msg("NewSQLiteClient panic")
+		}
+	}()
+
+	c, err := db.Open("sqlite3", fmt.Sprintf("file: %s?_fk=1", filePath))
 	if err != nil {
 		return nil, err
 	}

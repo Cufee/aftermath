@@ -50,7 +50,7 @@ func main() {
 
 	discordHandler, err := discord.NewRouterHandler(liveCoreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
 	if err != nil {
-		panic(err)
+		log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
 	}
 
 	if e := os.Getenv("PRIVATE_SERVER_ENABLED"); e == "true" {
