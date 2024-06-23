@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
+	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	stats "github.com/cufee/aftermath/internal/stats/renderer/v1"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -29,7 +29,7 @@ func TestRenderSession(t *testing.T) {
 	assert.True(t, ok, "failed to load a background image")
 
 	renderer := stats.NewRenderer(coreClient.Fetch(), coreClient.Database(), coreClient.Wargaming(), language.English)
-	image, _, err := renderer.Session(context.Background(), "1013072123", time.Now(), render.WithBackground(bgImage))
+	image, _, err := renderer.Session(context.Background(), "1013072123", time.Now(), common.WithBackground(bgImage))
 	assert.NoError(t, err, "failed to render a session image")
 	assert.NotNil(t, image, "image is nil")
 

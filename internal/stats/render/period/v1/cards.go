@@ -9,19 +9,18 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
-	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 
 	"github.com/rs/zerolog/log"
 )
 
-func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts render.Options) (render.Segments, error) {
+func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
 	if len(cards.Overview.Blocks) == 0 && len(cards.Highlights) == 0 {
 		log.Error().Msg("player cards slice is 0 length, this should not happen")
-		return render.Segments{}, errors.New("no cards provided")
+		return common.Segments{}, errors.New("no cards provided")
 	}
 
-	var segments render.Segments
+	var segments common.Segments
 
 	// Calculate minimal card width to fit all the content
 	var cardWidth float64

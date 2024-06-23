@@ -7,13 +7,13 @@ import (
 
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+	pcommon "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period/v1"
-	options "github.com/cufee/aftermath/internal/stats/render"
+	rcommon "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/period/v1"
 )
 
-func (r *renderer) Period(ctx context.Context, accountId string, from time.Time, opts ...options.Option) (Image, Metadata, error) {
+func (r *renderer) Period(ctx context.Context, accountId string, from time.Time, opts ...rcommon.Option) (Image, Metadata, error) {
 	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
 	printer, err := localization.NewPrinter("stats", r.locale)
@@ -47,7 +47,7 @@ func (r *renderer) Period(ctx context.Context, accountId string, from time.Time,
 	stop()
 
 	stop = meta.Timer("prepare#NewCards")
-	cards, err := prepare.NewCards(stats, glossary, common.WithPrinter(printer, r.locale))
+	cards, err := prepare.NewCards(stats, glossary, pcommon.WithPrinter(printer, r.locale))
 	stop()
 	if err != nil {
 		return nil, meta, err

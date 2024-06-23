@@ -11,8 +11,8 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	"github.com/cufee/aftermath/internal/stats/render"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
+	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	stats "github.com/cufee/aftermath/internal/stats/renderer/v1"
 	"github.com/pkg/errors"
 )

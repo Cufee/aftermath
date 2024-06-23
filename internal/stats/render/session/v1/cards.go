@@ -10,11 +10,9 @@ import (
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
-
-	"github.com/cufee/aftermath/internal/stats/render"
 )
 
-func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts render.Options) (render.Segments, error) {
+func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
 	var (
 		// primary cards
 		// when there are some unrated battles or no battles at all
@@ -28,7 +26,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		shouldRenderUnratedVehicles = len(cards.Unrated.Vehicles) > 0
 	)
 
-	var segments render.Segments
+	var segments common.Segments
 	var primaryColumn []common.Block
 	var secondaryColumn []common.Block
 
