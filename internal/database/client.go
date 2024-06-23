@@ -3,13 +3,13 @@ package database
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
-	"golang.org/x/sync/semaphore"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
@@ -22,7 +22,7 @@ type AccountsClient interface {
 	GetAccountByID(ctx context.Context, id string) (models.Account, error)
 	GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error)
 	GetAccounts(ctx context.Context, ids []string) ([]models.Account, error)
-	UpsertAccounts(ctx context.Context, accounts []models.Account) map[string]error
+	UpsertAccounts(ctx context.Context, accounts []models.Account) error
 	AccountSetPrivate(ctx context.Context, id string, value bool) error
 }
 
@@ -81,8 +81,7 @@ type Client interface {
 }
 
 type libsqlClient struct {
-	db             *db.Client
-	tasksUpdateSem *semaphore.Weighted
+	db *db.Client
 }
 
 func (c *libsqlClient) Disconnect() error {
@@ -96,9 +95,16 @@ func NewLibSQLClient(primaryUrl string) (*libsqlClient, error) {
 	}
 
 	dbClient := db.NewClient(db.Driver(entsql.OpenDB(dialect.SQLite, driver)))
-
 	return &libsqlClient{
-		db:             dbClient,
-		tasksUpdateSem: semaphore.NewWeighted(1),
+		db: dbClient,
 	}, nil
+}
+
+// rollback calls to tx.Rollback and wraps the given error
+// with the rollback error if occurred.
+func rollback(tx *db.Tx, err error) error {
+	if rerr := tx.Rollback(); rerr != nil {
+		err = fmt.Errorf("%w: %v", err, rerr)
+	}
+	return err
 }

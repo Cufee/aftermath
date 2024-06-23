@@ -65,17 +65,17 @@ func IDContainsFold(id string) predicate.UserSubscription {
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v int) predicate.UserSubscription {
+func CreatedAt(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v int) predicate.UserSubscription {
+func UpdatedAt(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // ExpiresAt applies equality check predicate on the "expires_at" field. It's identical to ExpiresAtEQ.
-func ExpiresAt(v int) predicate.UserSubscription {
+func ExpiresAt(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldEQ(FieldExpiresAt, v))
 }
 
@@ -95,82 +95,82 @@ func ReferenceID(v string) predicate.UserSubscription {
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v int) predicate.UserSubscription {
+func CreatedAtEQ(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v int) predicate.UserSubscription {
+func CreatedAtNEQ(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...int) predicate.UserSubscription {
+func CreatedAtIn(vs ...int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...int) predicate.UserSubscription {
+func CreatedAtNotIn(vs ...int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v int) predicate.UserSubscription {
+func CreatedAtGT(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v int) predicate.UserSubscription {
+func CreatedAtGTE(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v int) predicate.UserSubscription {
+func CreatedAtLT(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v int) predicate.UserSubscription {
+func CreatedAtLTE(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v int) predicate.UserSubscription {
+func UpdatedAtEQ(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v int) predicate.UserSubscription {
+func UpdatedAtNEQ(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...int) predicate.UserSubscription {
+func UpdatedAtIn(vs ...int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...int) predicate.UserSubscription {
+func UpdatedAtNotIn(vs ...int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v int) predicate.UserSubscription {
+func UpdatedAtGT(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v int) predicate.UserSubscription {
+func UpdatedAtGTE(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v int) predicate.UserSubscription {
+func UpdatedAtLT(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v int) predicate.UserSubscription {
+func UpdatedAtLTE(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
@@ -205,42 +205,42 @@ func TypeNotIn(vs ...models.SubscriptionType) predicate.UserSubscription {
 }
 
 // ExpiresAtEQ applies the EQ predicate on the "expires_at" field.
-func ExpiresAtEQ(v int) predicate.UserSubscription {
+func ExpiresAtEQ(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldEQ(FieldExpiresAt, v))
 }
 
 // ExpiresAtNEQ applies the NEQ predicate on the "expires_at" field.
-func ExpiresAtNEQ(v int) predicate.UserSubscription {
+func ExpiresAtNEQ(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldNEQ(FieldExpiresAt, v))
 }
 
 // ExpiresAtIn applies the In predicate on the "expires_at" field.
-func ExpiresAtIn(vs ...int) predicate.UserSubscription {
+func ExpiresAtIn(vs ...int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldIn(FieldExpiresAt, vs...))
 }
 
 // ExpiresAtNotIn applies the NotIn predicate on the "expires_at" field.
-func ExpiresAtNotIn(vs ...int) predicate.UserSubscription {
+func ExpiresAtNotIn(vs ...int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldNotIn(FieldExpiresAt, vs...))
 }
 
 // ExpiresAtGT applies the GT predicate on the "expires_at" field.
-func ExpiresAtGT(v int) predicate.UserSubscription {
+func ExpiresAtGT(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldGT(FieldExpiresAt, v))
 }
 
 // ExpiresAtGTE applies the GTE predicate on the "expires_at" field.
-func ExpiresAtGTE(v int) predicate.UserSubscription {
+func ExpiresAtGTE(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldGTE(FieldExpiresAt, v))
 }
 
 // ExpiresAtLT applies the LT predicate on the "expires_at" field.
-func ExpiresAtLT(v int) predicate.UserSubscription {
+func ExpiresAtLT(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldLT(FieldExpiresAt, v))
 }
 
 // ExpiresAtLTE applies the LTE predicate on the "expires_at" field.
-func ExpiresAtLTE(v int) predicate.UserSubscription {
+func ExpiresAtLTE(v int64) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldLTE(FieldExpiresAt, v))
 }
 

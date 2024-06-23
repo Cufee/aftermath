@@ -19,13 +19,13 @@ type UserSubscription struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int `json:"created_at,omitempty"`
+	CreatedAt int64 `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int `json:"updated_at,omitempty"`
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.SubscriptionType `json:"type,omitempty"`
 	// ExpiresAt holds the value of the "expires_at" field.
-	ExpiresAt int `json:"expires_at,omitempty"`
+	ExpiresAt int64 `json:"expires_at,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
 	// Permissions holds the value of the "permissions" field.
@@ -92,13 +92,13 @@ func (us *UserSubscription) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				us.CreatedAt = int(value.Int64)
+				us.CreatedAt = value.Int64
 			}
 		case usersubscription.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				us.UpdatedAt = int(value.Int64)
+				us.UpdatedAt = value.Int64
 			}
 		case usersubscription.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -110,7 +110,7 @@ func (us *UserSubscription) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
 			} else if value.Valid {
-				us.ExpiresAt = int(value.Int64)
+				us.ExpiresAt = value.Int64
 			}
 		case usersubscription.FieldUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {

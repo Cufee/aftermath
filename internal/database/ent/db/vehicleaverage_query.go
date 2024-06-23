@@ -261,7 +261,7 @@ func (vaq *VehicleAverageQuery) Clone() *VehicleAverageQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -284,7 +284,7 @@ func (vaq *VehicleAverageQuery) GroupBy(field string, fields ...string) *Vehicle
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //	}
 //
 //	client.VehicleAverage.Query().

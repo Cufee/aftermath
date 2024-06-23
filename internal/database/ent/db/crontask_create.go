@@ -21,13 +21,13 @@ type CronTaskCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (ctc *CronTaskCreate) SetCreatedAt(i int) *CronTaskCreate {
+func (ctc *CronTaskCreate) SetCreatedAt(i int64) *CronTaskCreate {
 	ctc.mutation.SetCreatedAt(i)
 	return ctc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ctc *CronTaskCreate) SetNillableCreatedAt(i *int) *CronTaskCreate {
+func (ctc *CronTaskCreate) SetNillableCreatedAt(i *int64) *CronTaskCreate {
 	if i != nil {
 		ctc.SetCreatedAt(*i)
 	}
@@ -35,13 +35,13 @@ func (ctc *CronTaskCreate) SetNillableCreatedAt(i *int) *CronTaskCreate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ctc *CronTaskCreate) SetUpdatedAt(i int) *CronTaskCreate {
+func (ctc *CronTaskCreate) SetUpdatedAt(i int64) *CronTaskCreate {
 	ctc.mutation.SetUpdatedAt(i)
 	return ctc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ctc *CronTaskCreate) SetNillableUpdatedAt(i *int) *CronTaskCreate {
+func (ctc *CronTaskCreate) SetNillableUpdatedAt(i *int64) *CronTaskCreate {
 	if i != nil {
 		ctc.SetUpdatedAt(*i)
 	}
@@ -49,8 +49,8 @@ func (ctc *CronTaskCreate) SetNillableUpdatedAt(i *int) *CronTaskCreate {
 }
 
 // SetType sets the "type" field.
-func (ctc *CronTaskCreate) SetType(s string) *CronTaskCreate {
-	ctc.mutation.SetType(s)
+func (ctc *CronTaskCreate) SetType(mt models.TaskType) *CronTaskCreate {
+	ctc.mutation.SetType(mt)
 	return ctc
 }
 
@@ -67,19 +67,19 @@ func (ctc *CronTaskCreate) SetTargets(s []string) *CronTaskCreate {
 }
 
 // SetStatus sets the "status" field.
-func (ctc *CronTaskCreate) SetStatus(s string) *CronTaskCreate {
-	ctc.mutation.SetStatus(s)
+func (ctc *CronTaskCreate) SetStatus(ms models.TaskStatus) *CronTaskCreate {
+	ctc.mutation.SetStatus(ms)
 	return ctc
 }
 
 // SetScheduledAfter sets the "scheduled_after" field.
-func (ctc *CronTaskCreate) SetScheduledAfter(i int) *CronTaskCreate {
+func (ctc *CronTaskCreate) SetScheduledAfter(i int64) *CronTaskCreate {
 	ctc.mutation.SetScheduledAfter(i)
 	return ctc
 }
 
 // SetLastRun sets the "last_run" field.
-func (ctc *CronTaskCreate) SetLastRun(i int) *CronTaskCreate {
+func (ctc *CronTaskCreate) SetLastRun(i int64) *CronTaskCreate {
 	ctc.mutation.SetLastRun(i)
 	return ctc
 }
@@ -242,15 +242,15 @@ func (ctc *CronTaskCreate) createSpec() (*CronTask, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := ctc.mutation.CreatedAt(); ok {
-		_spec.SetField(crontask.FieldCreatedAt, field.TypeInt, value)
+		_spec.SetField(crontask.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := ctc.mutation.UpdatedAt(); ok {
-		_spec.SetField(crontask.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(crontask.FieldUpdatedAt, field.TypeInt64, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := ctc.mutation.GetType(); ok {
-		_spec.SetField(crontask.FieldType, field.TypeString, value)
+		_spec.SetField(crontask.FieldType, field.TypeEnum, value)
 		_node.Type = value
 	}
 	if value, ok := ctc.mutation.ReferenceID(); ok {
@@ -262,15 +262,15 @@ func (ctc *CronTaskCreate) createSpec() (*CronTask, *sqlgraph.CreateSpec) {
 		_node.Targets = value
 	}
 	if value, ok := ctc.mutation.Status(); ok {
-		_spec.SetField(crontask.FieldStatus, field.TypeString, value)
+		_spec.SetField(crontask.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
 	if value, ok := ctc.mutation.ScheduledAfter(); ok {
-		_spec.SetField(crontask.FieldScheduledAfter, field.TypeInt, value)
+		_spec.SetField(crontask.FieldScheduledAfter, field.TypeInt64, value)
 		_node.ScheduledAfter = value
 	}
 	if value, ok := ctc.mutation.LastRun(); ok {
-		_spec.SetField(crontask.FieldLastRun, field.TypeInt, value)
+		_spec.SetField(crontask.FieldLastRun, field.TypeInt64, value)
 		_node.LastRun = value
 	}
 	if value, ok := ctc.mutation.Logs(); ok {

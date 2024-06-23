@@ -20,13 +20,13 @@ type AppConfigurationCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (acc *AppConfigurationCreate) SetCreatedAt(i int) *AppConfigurationCreate {
+func (acc *AppConfigurationCreate) SetCreatedAt(i int64) *AppConfigurationCreate {
 	acc.mutation.SetCreatedAt(i)
 	return acc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (acc *AppConfigurationCreate) SetNillableCreatedAt(i *int) *AppConfigurationCreate {
+func (acc *AppConfigurationCreate) SetNillableCreatedAt(i *int64) *AppConfigurationCreate {
 	if i != nil {
 		acc.SetCreatedAt(*i)
 	}
@@ -34,13 +34,13 @@ func (acc *AppConfigurationCreate) SetNillableCreatedAt(i *int) *AppConfiguratio
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acc *AppConfigurationCreate) SetUpdatedAt(i int) *AppConfigurationCreate {
+func (acc *AppConfigurationCreate) SetUpdatedAt(i int64) *AppConfigurationCreate {
 	acc.mutation.SetUpdatedAt(i)
 	return acc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (acc *AppConfigurationCreate) SetNillableUpdatedAt(i *int) *AppConfigurationCreate {
+func (acc *AppConfigurationCreate) SetNillableUpdatedAt(i *int64) *AppConfigurationCreate {
 	if i != nil {
 		acc.SetUpdatedAt(*i)
 	}
@@ -183,11 +183,11 @@ func (acc *AppConfigurationCreate) createSpec() (*AppConfiguration, *sqlgraph.Cr
 		_spec.ID.Value = id
 	}
 	if value, ok := acc.mutation.CreatedAt(); ok {
-		_spec.SetField(appconfiguration.FieldCreatedAt, field.TypeInt, value)
+		_spec.SetField(appconfiguration.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := acc.mutation.UpdatedAt(); ok {
-		_spec.SetField(appconfiguration.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(appconfiguration.FieldUpdatedAt, field.TypeInt64, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := acc.mutation.Key(); ok {

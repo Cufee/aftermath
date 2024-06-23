@@ -17,14 +17,14 @@ func (VehicleAverage) Fields() []ent.Field {
 		field.String("id").
 			Unique().
 			Immutable(),
-		field.Int("created_at").
+		field.Int64("created_at").
 			Immutable().
 			DefaultFunc(timeNow),
-		field.Int("updated_at").
+		field.Int64("updated_at").
 			DefaultFunc(timeNow).
 			UpdateDefault(timeNow),
 		//
-		field.JSON("data", map[string]frame.StatsFrame{}),
+		field.JSON("data", frame.StatsFrame{}),
 	}
 }
 

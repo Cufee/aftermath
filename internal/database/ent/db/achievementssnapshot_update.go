@@ -30,14 +30,14 @@ func (asu *AchievementsSnapshotUpdate) Where(ps ...predicate.AchievementsSnapsho
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (asu *AchievementsSnapshotUpdate) SetUpdatedAt(i int) *AchievementsSnapshotUpdate {
+func (asu *AchievementsSnapshotUpdate) SetUpdatedAt(i int64) *AchievementsSnapshotUpdate {
 	asu.mutation.ResetUpdatedAt()
 	asu.mutation.SetUpdatedAt(i)
 	return asu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (asu *AchievementsSnapshotUpdate) AddUpdatedAt(i int) *AchievementsSnapshotUpdate {
+func (asu *AchievementsSnapshotUpdate) AddUpdatedAt(i int64) *AchievementsSnapshotUpdate {
 	asu.mutation.AddUpdatedAt(i)
 	return asu
 }
@@ -92,14 +92,14 @@ func (asu *AchievementsSnapshotUpdate) AddBattles(i int) *AchievementsSnapshotUp
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (asu *AchievementsSnapshotUpdate) SetLastBattleTime(i int) *AchievementsSnapshotUpdate {
+func (asu *AchievementsSnapshotUpdate) SetLastBattleTime(i int64) *AchievementsSnapshotUpdate {
 	asu.mutation.ResetLastBattleTime()
 	asu.mutation.SetLastBattleTime(i)
 	return asu
 }
 
 // SetNillableLastBattleTime sets the "last_battle_time" field if the given value is not nil.
-func (asu *AchievementsSnapshotUpdate) SetNillableLastBattleTime(i *int) *AchievementsSnapshotUpdate {
+func (asu *AchievementsSnapshotUpdate) SetNillableLastBattleTime(i *int64) *AchievementsSnapshotUpdate {
 	if i != nil {
 		asu.SetLastBattleTime(*i)
 	}
@@ -107,7 +107,7 @@ func (asu *AchievementsSnapshotUpdate) SetNillableLastBattleTime(i *int) *Achiev
 }
 
 // AddLastBattleTime adds i to the "last_battle_time" field.
-func (asu *AchievementsSnapshotUpdate) AddLastBattleTime(i int) *AchievementsSnapshotUpdate {
+func (asu *AchievementsSnapshotUpdate) AddLastBattleTime(i int64) *AchievementsSnapshotUpdate {
 	asu.mutation.AddLastBattleTime(i)
 	return asu
 }
@@ -198,10 +198,10 @@ func (asu *AchievementsSnapshotUpdate) sqlSave(ctx context.Context) (n int, err 
 		}
 	}
 	if value, ok := asu.mutation.UpdatedAt(); ok {
-		_spec.SetField(achievementssnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(achievementssnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := asu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(achievementssnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(achievementssnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := asu.mutation.GetType(); ok {
 		_spec.SetField(achievementssnapshot.FieldType, field.TypeEnum, value)
@@ -216,10 +216,10 @@ func (asu *AchievementsSnapshotUpdate) sqlSave(ctx context.Context) (n int, err 
 		_spec.AddField(achievementssnapshot.FieldBattles, field.TypeInt, value)
 	}
 	if value, ok := asu.mutation.LastBattleTime(); ok {
-		_spec.SetField(achievementssnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.SetField(achievementssnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := asu.mutation.AddedLastBattleTime(); ok {
-		_spec.AddField(achievementssnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.AddField(achievementssnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := asu.mutation.Data(); ok {
 		_spec.SetField(achievementssnapshot.FieldData, field.TypeJSON, value)
@@ -245,14 +245,14 @@ type AchievementsSnapshotUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (asuo *AchievementsSnapshotUpdateOne) SetUpdatedAt(i int) *AchievementsSnapshotUpdateOne {
+func (asuo *AchievementsSnapshotUpdateOne) SetUpdatedAt(i int64) *AchievementsSnapshotUpdateOne {
 	asuo.mutation.ResetUpdatedAt()
 	asuo.mutation.SetUpdatedAt(i)
 	return asuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (asuo *AchievementsSnapshotUpdateOne) AddUpdatedAt(i int) *AchievementsSnapshotUpdateOne {
+func (asuo *AchievementsSnapshotUpdateOne) AddUpdatedAt(i int64) *AchievementsSnapshotUpdateOne {
 	asuo.mutation.AddUpdatedAt(i)
 	return asuo
 }
@@ -307,14 +307,14 @@ func (asuo *AchievementsSnapshotUpdateOne) AddBattles(i int) *AchievementsSnapsh
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (asuo *AchievementsSnapshotUpdateOne) SetLastBattleTime(i int) *AchievementsSnapshotUpdateOne {
+func (asuo *AchievementsSnapshotUpdateOne) SetLastBattleTime(i int64) *AchievementsSnapshotUpdateOne {
 	asuo.mutation.ResetLastBattleTime()
 	asuo.mutation.SetLastBattleTime(i)
 	return asuo
 }
 
 // SetNillableLastBattleTime sets the "last_battle_time" field if the given value is not nil.
-func (asuo *AchievementsSnapshotUpdateOne) SetNillableLastBattleTime(i *int) *AchievementsSnapshotUpdateOne {
+func (asuo *AchievementsSnapshotUpdateOne) SetNillableLastBattleTime(i *int64) *AchievementsSnapshotUpdateOne {
 	if i != nil {
 		asuo.SetLastBattleTime(*i)
 	}
@@ -322,7 +322,7 @@ func (asuo *AchievementsSnapshotUpdateOne) SetNillableLastBattleTime(i *int) *Ac
 }
 
 // AddLastBattleTime adds i to the "last_battle_time" field.
-func (asuo *AchievementsSnapshotUpdateOne) AddLastBattleTime(i int) *AchievementsSnapshotUpdateOne {
+func (asuo *AchievementsSnapshotUpdateOne) AddLastBattleTime(i int64) *AchievementsSnapshotUpdateOne {
 	asuo.mutation.AddLastBattleTime(i)
 	return asuo
 }
@@ -443,10 +443,10 @@ func (asuo *AchievementsSnapshotUpdateOne) sqlSave(ctx context.Context) (_node *
 		}
 	}
 	if value, ok := asuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(achievementssnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(achievementssnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := asuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(achievementssnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(achievementssnapshot.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := asuo.mutation.GetType(); ok {
 		_spec.SetField(achievementssnapshot.FieldType, field.TypeEnum, value)
@@ -461,10 +461,10 @@ func (asuo *AchievementsSnapshotUpdateOne) sqlSave(ctx context.Context) (_node *
 		_spec.AddField(achievementssnapshot.FieldBattles, field.TypeInt, value)
 	}
 	if value, ok := asuo.mutation.LastBattleTime(); ok {
-		_spec.SetField(achievementssnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.SetField(achievementssnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := asuo.mutation.AddedLastBattleTime(); ok {
-		_spec.AddField(achievementssnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.AddField(achievementssnapshot.FieldLastBattleTime, field.TypeInt64, value)
 	}
 	if value, ok := asuo.mutation.Data(); ok {
 		_spec.SetField(achievementssnapshot.FieldData, field.TypeJSON, value)

@@ -261,7 +261,7 @@ func (acq *AppConfigurationQuery) Clone() *AppConfigurationQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -284,7 +284,7 @@ func (acq *AppConfigurationQuery) GroupBy(field string, fields ...string) *AppCo
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //	}
 //
 //	client.AppConfiguration.Query().

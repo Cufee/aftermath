@@ -20,9 +20,9 @@ type UserConnection struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int `json:"created_at,omitempty"`
+	CreatedAt int64 `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int `json:"updated_at,omitempty"`
+	UpdatedAt int64 `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.ConnectionType `json:"type,omitempty"`
 	// UserID holds the value of the "user_id" field.
@@ -95,13 +95,13 @@ func (uc *UserConnection) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				uc.CreatedAt = int(value.Int64)
+				uc.CreatedAt = value.Int64
 			}
 		case userconnection.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				uc.UpdatedAt = int(value.Int64)
+				uc.UpdatedAt = value.Int64
 			}
 		case userconnection.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {

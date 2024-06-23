@@ -21,13 +21,13 @@ type ClanCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (cc *ClanCreate) SetCreatedAt(i int) *ClanCreate {
+func (cc *ClanCreate) SetCreatedAt(i int64) *ClanCreate {
 	cc.mutation.SetCreatedAt(i)
 	return cc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (cc *ClanCreate) SetNillableCreatedAt(i *int) *ClanCreate {
+func (cc *ClanCreate) SetNillableCreatedAt(i *int64) *ClanCreate {
 	if i != nil {
 		cc.SetCreatedAt(*i)
 	}
@@ -35,13 +35,13 @@ func (cc *ClanCreate) SetNillableCreatedAt(i *int) *ClanCreate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (cc *ClanCreate) SetUpdatedAt(i int) *ClanCreate {
+func (cc *ClanCreate) SetUpdatedAt(i int64) *ClanCreate {
 	cc.mutation.SetUpdatedAt(i)
 	return cc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (cc *ClanCreate) SetNillableUpdatedAt(i *int) *ClanCreate {
+func (cc *ClanCreate) SetNillableUpdatedAt(i *int64) *ClanCreate {
 	if i != nil {
 		cc.SetUpdatedAt(*i)
 	}
@@ -213,11 +213,11 @@ func (cc *ClanCreate) createSpec() (*Clan, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
-		_spec.SetField(clan.FieldCreatedAt, field.TypeInt, value)
+		_spec.SetField(clan.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := cc.mutation.UpdatedAt(); ok {
-		_spec.SetField(clan.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(clan.FieldUpdatedAt, field.TypeInt64, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := cc.mutation.Tag(); ok {

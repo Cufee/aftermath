@@ -29,14 +29,14 @@ func (ucu *UserConnectionUpdate) Where(ps ...predicate.UserConnection) *UserConn
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucu *UserConnectionUpdate) SetUpdatedAt(i int) *UserConnectionUpdate {
+func (ucu *UserConnectionUpdate) SetUpdatedAt(i int64) *UserConnectionUpdate {
 	ucu.mutation.ResetUpdatedAt()
 	ucu.mutation.SetUpdatedAt(i)
 	return ucu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (ucu *UserConnectionUpdate) AddUpdatedAt(i int) *UserConnectionUpdate {
+func (ucu *UserConnectionUpdate) AddUpdatedAt(i int64) *UserConnectionUpdate {
 	ucu.mutation.AddUpdatedAt(i)
 	return ucu
 }
@@ -168,10 +168,10 @@ func (ucu *UserConnectionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 	}
 	if value, ok := ucu.mutation.UpdatedAt(); ok {
-		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ucu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(userconnection.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(userconnection.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ucu.mutation.GetType(); ok {
 		_spec.SetField(userconnection.FieldType, field.TypeEnum, value)
@@ -212,14 +212,14 @@ type UserConnectionUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucuo *UserConnectionUpdateOne) SetUpdatedAt(i int) *UserConnectionUpdateOne {
+func (ucuo *UserConnectionUpdateOne) SetUpdatedAt(i int64) *UserConnectionUpdateOne {
 	ucuo.mutation.ResetUpdatedAt()
 	ucuo.mutation.SetUpdatedAt(i)
 	return ucuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (ucuo *UserConnectionUpdateOne) AddUpdatedAt(i int) *UserConnectionUpdateOne {
+func (ucuo *UserConnectionUpdateOne) AddUpdatedAt(i int64) *UserConnectionUpdateOne {
 	ucuo.mutation.AddUpdatedAt(i)
 	return ucuo
 }
@@ -381,10 +381,10 @@ func (ucuo *UserConnectionUpdateOne) sqlSave(ctx context.Context) (_node *UserCo
 		}
 	}
 	if value, ok := ucuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ucuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(userconnection.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(userconnection.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := ucuo.mutation.GetType(); ok {
 		_spec.SetField(userconnection.FieldType, field.TypeEnum, value)

@@ -23,13 +23,13 @@ type AchievementsSnapshotCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (asc *AchievementsSnapshotCreate) SetCreatedAt(i int) *AchievementsSnapshotCreate {
+func (asc *AchievementsSnapshotCreate) SetCreatedAt(i int64) *AchievementsSnapshotCreate {
 	asc.mutation.SetCreatedAt(i)
 	return asc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (asc *AchievementsSnapshotCreate) SetNillableCreatedAt(i *int) *AchievementsSnapshotCreate {
+func (asc *AchievementsSnapshotCreate) SetNillableCreatedAt(i *int64) *AchievementsSnapshotCreate {
 	if i != nil {
 		asc.SetCreatedAt(*i)
 	}
@@ -37,13 +37,13 @@ func (asc *AchievementsSnapshotCreate) SetNillableCreatedAt(i *int) *Achievement
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (asc *AchievementsSnapshotCreate) SetUpdatedAt(i int) *AchievementsSnapshotCreate {
+func (asc *AchievementsSnapshotCreate) SetUpdatedAt(i int64) *AchievementsSnapshotCreate {
 	asc.mutation.SetUpdatedAt(i)
 	return asc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (asc *AchievementsSnapshotCreate) SetNillableUpdatedAt(i *int) *AchievementsSnapshotCreate {
+func (asc *AchievementsSnapshotCreate) SetNillableUpdatedAt(i *int64) *AchievementsSnapshotCreate {
 	if i != nil {
 		asc.SetUpdatedAt(*i)
 	}
@@ -75,7 +75,7 @@ func (asc *AchievementsSnapshotCreate) SetBattles(i int) *AchievementsSnapshotCr
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (asc *AchievementsSnapshotCreate) SetLastBattleTime(i int) *AchievementsSnapshotCreate {
+func (asc *AchievementsSnapshotCreate) SetLastBattleTime(i int64) *AchievementsSnapshotCreate {
 	asc.mutation.SetLastBattleTime(i)
 	return asc
 }
@@ -234,11 +234,11 @@ func (asc *AchievementsSnapshotCreate) createSpec() (*AchievementsSnapshot, *sql
 		_spec.ID.Value = id
 	}
 	if value, ok := asc.mutation.CreatedAt(); ok {
-		_spec.SetField(achievementssnapshot.FieldCreatedAt, field.TypeInt, value)
+		_spec.SetField(achievementssnapshot.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := asc.mutation.UpdatedAt(); ok {
-		_spec.SetField(achievementssnapshot.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(achievementssnapshot.FieldUpdatedAt, field.TypeInt64, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := asc.mutation.GetType(); ok {
@@ -254,7 +254,7 @@ func (asc *AchievementsSnapshotCreate) createSpec() (*AchievementsSnapshot, *sql
 		_node.Battles = value
 	}
 	if value, ok := asc.mutation.LastBattleTime(); ok {
-		_spec.SetField(achievementssnapshot.FieldLastBattleTime, field.TypeInt, value)
+		_spec.SetField(achievementssnapshot.FieldLastBattleTime, field.TypeInt64, value)
 		_node.LastBattleTime = value
 	}
 	if value, ok := asc.mutation.Data(); ok {

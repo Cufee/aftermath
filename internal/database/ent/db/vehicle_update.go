@@ -28,14 +28,14 @@ func (vu *VehicleUpdate) Where(ps ...predicate.Vehicle) *VehicleUpdate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vu *VehicleUpdate) SetUpdatedAt(i int) *VehicleUpdate {
+func (vu *VehicleUpdate) SetUpdatedAt(i int64) *VehicleUpdate {
 	vu.mutation.ResetUpdatedAt()
 	vu.mutation.SetUpdatedAt(i)
 	return vu
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (vu *VehicleUpdate) AddUpdatedAt(i int) *VehicleUpdate {
+func (vu *VehicleUpdate) AddUpdatedAt(i int64) *VehicleUpdate {
 	vu.mutation.AddUpdatedAt(i)
 	return vu
 }
@@ -131,10 +131,10 @@ func (vu *VehicleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := vu.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(vehicle.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(vehicle.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vu.mutation.Tier(); ok {
 		_spec.SetField(vehicle.FieldTier, field.TypeInt, value)
@@ -166,14 +166,14 @@ type VehicleUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vuo *VehicleUpdateOne) SetUpdatedAt(i int) *VehicleUpdateOne {
+func (vuo *VehicleUpdateOne) SetUpdatedAt(i int64) *VehicleUpdateOne {
 	vuo.mutation.ResetUpdatedAt()
 	vuo.mutation.SetUpdatedAt(i)
 	return vuo
 }
 
 // AddUpdatedAt adds i to the "updated_at" field.
-func (vuo *VehicleUpdateOne) AddUpdatedAt(i int) *VehicleUpdateOne {
+func (vuo *VehicleUpdateOne) AddUpdatedAt(i int64) *VehicleUpdateOne {
 	vuo.mutation.AddUpdatedAt(i)
 	return vuo
 }
@@ -299,10 +299,10 @@ func (vuo *VehicleUpdateOne) sqlSave(ctx context.Context) (_node *Vehicle, err e
 		}
 	}
 	if value, ok := vuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(vehicle.FieldUpdatedAt, field.TypeInt, value)
+		_spec.AddField(vehicle.FieldUpdatedAt, field.TypeInt64, value)
 	}
 	if value, ok := vuo.mutation.Tier(); ok {
 		_spec.SetField(vehicle.FieldTier, field.TypeInt, value)

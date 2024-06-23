@@ -64,22 +64,22 @@ func IDContainsFold(id string) predicate.Account {
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v int) predicate.Account {
+func CreatedAt(v int64) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v int) predicate.Account {
+func UpdatedAt(v int64) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // LastBattleTime applies equality check predicate on the "last_battle_time" field. It's identical to LastBattleTimeEQ.
-func LastBattleTime(v int) predicate.Account {
+func LastBattleTime(v int64) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldLastBattleTime, v))
 }
 
 // AccountCreatedAt applies equality check predicate on the "account_created_at" field. It's identical to AccountCreatedAtEQ.
-func AccountCreatedAt(v int) predicate.Account {
+func AccountCreatedAt(v int64) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldAccountCreatedAt, v))
 }
 
@@ -104,162 +104,162 @@ func ClanID(v string) predicate.Account {
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v int) predicate.Account {
+func CreatedAtEQ(v int64) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v int) predicate.Account {
+func CreatedAtNEQ(v int64) predicate.Account {
 	return predicate.Account(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...int) predicate.Account {
+func CreatedAtIn(vs ...int64) predicate.Account {
 	return predicate.Account(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...int) predicate.Account {
+func CreatedAtNotIn(vs ...int64) predicate.Account {
 	return predicate.Account(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v int) predicate.Account {
+func CreatedAtGT(v int64) predicate.Account {
 	return predicate.Account(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v int) predicate.Account {
+func CreatedAtGTE(v int64) predicate.Account {
 	return predicate.Account(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v int) predicate.Account {
+func CreatedAtLT(v int64) predicate.Account {
 	return predicate.Account(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v int) predicate.Account {
+func CreatedAtLTE(v int64) predicate.Account {
 	return predicate.Account(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v int) predicate.Account {
+func UpdatedAtEQ(v int64) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v int) predicate.Account {
+func UpdatedAtNEQ(v int64) predicate.Account {
 	return predicate.Account(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...int) predicate.Account {
+func UpdatedAtIn(vs ...int64) predicate.Account {
 	return predicate.Account(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...int) predicate.Account {
+func UpdatedAtNotIn(vs ...int64) predicate.Account {
 	return predicate.Account(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v int) predicate.Account {
+func UpdatedAtGT(v int64) predicate.Account {
 	return predicate.Account(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v int) predicate.Account {
+func UpdatedAtGTE(v int64) predicate.Account {
 	return predicate.Account(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v int) predicate.Account {
+func UpdatedAtLT(v int64) predicate.Account {
 	return predicate.Account(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v int) predicate.Account {
+func UpdatedAtLTE(v int64) predicate.Account {
 	return predicate.Account(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
 // LastBattleTimeEQ applies the EQ predicate on the "last_battle_time" field.
-func LastBattleTimeEQ(v int) predicate.Account {
+func LastBattleTimeEQ(v int64) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeNEQ applies the NEQ predicate on the "last_battle_time" field.
-func LastBattleTimeNEQ(v int) predicate.Account {
+func LastBattleTimeNEQ(v int64) predicate.Account {
 	return predicate.Account(sql.FieldNEQ(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeIn applies the In predicate on the "last_battle_time" field.
-func LastBattleTimeIn(vs ...int) predicate.Account {
+func LastBattleTimeIn(vs ...int64) predicate.Account {
 	return predicate.Account(sql.FieldIn(FieldLastBattleTime, vs...))
 }
 
 // LastBattleTimeNotIn applies the NotIn predicate on the "last_battle_time" field.
-func LastBattleTimeNotIn(vs ...int) predicate.Account {
+func LastBattleTimeNotIn(vs ...int64) predicate.Account {
 	return predicate.Account(sql.FieldNotIn(FieldLastBattleTime, vs...))
 }
 
 // LastBattleTimeGT applies the GT predicate on the "last_battle_time" field.
-func LastBattleTimeGT(v int) predicate.Account {
+func LastBattleTimeGT(v int64) predicate.Account {
 	return predicate.Account(sql.FieldGT(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeGTE applies the GTE predicate on the "last_battle_time" field.
-func LastBattleTimeGTE(v int) predicate.Account {
+func LastBattleTimeGTE(v int64) predicate.Account {
 	return predicate.Account(sql.FieldGTE(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeLT applies the LT predicate on the "last_battle_time" field.
-func LastBattleTimeLT(v int) predicate.Account {
+func LastBattleTimeLT(v int64) predicate.Account {
 	return predicate.Account(sql.FieldLT(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeLTE applies the LTE predicate on the "last_battle_time" field.
-func LastBattleTimeLTE(v int) predicate.Account {
+func LastBattleTimeLTE(v int64) predicate.Account {
 	return predicate.Account(sql.FieldLTE(FieldLastBattleTime, v))
 }
 
 // AccountCreatedAtEQ applies the EQ predicate on the "account_created_at" field.
-func AccountCreatedAtEQ(v int) predicate.Account {
+func AccountCreatedAtEQ(v int64) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldAccountCreatedAt, v))
 }
 
 // AccountCreatedAtNEQ applies the NEQ predicate on the "account_created_at" field.
-func AccountCreatedAtNEQ(v int) predicate.Account {
+func AccountCreatedAtNEQ(v int64) predicate.Account {
 	return predicate.Account(sql.FieldNEQ(FieldAccountCreatedAt, v))
 }
 
 // AccountCreatedAtIn applies the In predicate on the "account_created_at" field.
-func AccountCreatedAtIn(vs ...int) predicate.Account {
+func AccountCreatedAtIn(vs ...int64) predicate.Account {
 	return predicate.Account(sql.FieldIn(FieldAccountCreatedAt, vs...))
 }
 
 // AccountCreatedAtNotIn applies the NotIn predicate on the "account_created_at" field.
-func AccountCreatedAtNotIn(vs ...int) predicate.Account {
+func AccountCreatedAtNotIn(vs ...int64) predicate.Account {
 	return predicate.Account(sql.FieldNotIn(FieldAccountCreatedAt, vs...))
 }
 
 // AccountCreatedAtGT applies the GT predicate on the "account_created_at" field.
-func AccountCreatedAtGT(v int) predicate.Account {
+func AccountCreatedAtGT(v int64) predicate.Account {
 	return predicate.Account(sql.FieldGT(FieldAccountCreatedAt, v))
 }
 
 // AccountCreatedAtGTE applies the GTE predicate on the "account_created_at" field.
-func AccountCreatedAtGTE(v int) predicate.Account {
+func AccountCreatedAtGTE(v int64) predicate.Account {
 	return predicate.Account(sql.FieldGTE(FieldAccountCreatedAt, v))
 }
 
 // AccountCreatedAtLT applies the LT predicate on the "account_created_at" field.
-func AccountCreatedAtLT(v int) predicate.Account {
+func AccountCreatedAtLT(v int64) predicate.Account {
 	return predicate.Account(sql.FieldLT(FieldAccountCreatedAt, v))
 }
 
 // AccountCreatedAtLTE applies the LTE predicate on the "account_created_at" field.
-func AccountCreatedAtLTE(v int) predicate.Account {
+func AccountCreatedAtLTE(v int64) predicate.Account {
 	return predicate.Account(sql.FieldLTE(FieldAccountCreatedAt, v))
 }
 

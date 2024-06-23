@@ -22,13 +22,13 @@ type UserConnectionCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (ucc *UserConnectionCreate) SetCreatedAt(i int) *UserConnectionCreate {
+func (ucc *UserConnectionCreate) SetCreatedAt(i int64) *UserConnectionCreate {
 	ucc.mutation.SetCreatedAt(i)
 	return ucc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ucc *UserConnectionCreate) SetNillableCreatedAt(i *int) *UserConnectionCreate {
+func (ucc *UserConnectionCreate) SetNillableCreatedAt(i *int64) *UserConnectionCreate {
 	if i != nil {
 		ucc.SetCreatedAt(*i)
 	}
@@ -36,13 +36,13 @@ func (ucc *UserConnectionCreate) SetNillableCreatedAt(i *int) *UserConnectionCre
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucc *UserConnectionCreate) SetUpdatedAt(i int) *UserConnectionCreate {
+func (ucc *UserConnectionCreate) SetUpdatedAt(i int64) *UserConnectionCreate {
 	ucc.mutation.SetUpdatedAt(i)
 	return ucc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ucc *UserConnectionCreate) SetNillableUpdatedAt(i *int) *UserConnectionCreate {
+func (ucc *UserConnectionCreate) SetNillableUpdatedAt(i *int64) *UserConnectionCreate {
 	if i != nil {
 		ucc.SetUpdatedAt(*i)
 	}
@@ -220,11 +220,11 @@ func (ucc *UserConnectionCreate) createSpec() (*UserConnection, *sqlgraph.Create
 		_spec.ID.Value = id
 	}
 	if value, ok := ucc.mutation.CreatedAt(); ok {
-		_spec.SetField(userconnection.FieldCreatedAt, field.TypeInt, value)
+		_spec.SetField(userconnection.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := ucc.mutation.UpdatedAt(); ok {
-		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeInt64, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := ucc.mutation.GetType(); ok {

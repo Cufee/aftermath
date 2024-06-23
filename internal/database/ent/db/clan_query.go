@@ -298,7 +298,7 @@ func (cq *ClanQuery) WithAccounts(opts ...func(*AccountQuery)) *ClanQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -321,7 +321,7 @@ func (cq *ClanQuery) GroupBy(field string, fields ...string) *ClanGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int `json:"created_at,omitempty"`
+//		CreatedAt int64 `json:"created_at,omitempty"`
 //	}
 //
 //	client.Clan.Query().

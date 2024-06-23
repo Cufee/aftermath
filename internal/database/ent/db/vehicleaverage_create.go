@@ -21,13 +21,13 @@ type VehicleAverageCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (vac *VehicleAverageCreate) SetCreatedAt(i int) *VehicleAverageCreate {
+func (vac *VehicleAverageCreate) SetCreatedAt(i int64) *VehicleAverageCreate {
 	vac.mutation.SetCreatedAt(i)
 	return vac
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (vac *VehicleAverageCreate) SetNillableCreatedAt(i *int) *VehicleAverageCreate {
+func (vac *VehicleAverageCreate) SetNillableCreatedAt(i *int64) *VehicleAverageCreate {
 	if i != nil {
 		vac.SetCreatedAt(*i)
 	}
@@ -35,13 +35,13 @@ func (vac *VehicleAverageCreate) SetNillableCreatedAt(i *int) *VehicleAverageCre
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vac *VehicleAverageCreate) SetUpdatedAt(i int) *VehicleAverageCreate {
+func (vac *VehicleAverageCreate) SetUpdatedAt(i int64) *VehicleAverageCreate {
 	vac.mutation.SetUpdatedAt(i)
 	return vac
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (vac *VehicleAverageCreate) SetNillableUpdatedAt(i *int) *VehicleAverageCreate {
+func (vac *VehicleAverageCreate) SetNillableUpdatedAt(i *int64) *VehicleAverageCreate {
 	if i != nil {
 		vac.SetUpdatedAt(*i)
 	}
@@ -49,8 +49,8 @@ func (vac *VehicleAverageCreate) SetNillableUpdatedAt(i *int) *VehicleAverageCre
 }
 
 // SetData sets the "data" field.
-func (vac *VehicleAverageCreate) SetData(mf map[string]frame.StatsFrame) *VehicleAverageCreate {
-	vac.mutation.SetData(mf)
+func (vac *VehicleAverageCreate) SetData(ff frame.StatsFrame) *VehicleAverageCreate {
+	vac.mutation.SetData(ff)
 	return vac
 }
 
@@ -152,11 +152,11 @@ func (vac *VehicleAverageCreate) createSpec() (*VehicleAverage, *sqlgraph.Create
 		_spec.ID.Value = id
 	}
 	if value, ok := vac.mutation.CreatedAt(); ok {
-		_spec.SetField(vehicleaverage.FieldCreatedAt, field.TypeInt, value)
+		_spec.SetField(vehicleaverage.FieldCreatedAt, field.TypeInt64, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := vac.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeInt, value)
+		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeInt64, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := vac.mutation.Data(); ok {

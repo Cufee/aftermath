@@ -17,10 +17,10 @@ func (User) Fields() []ent.Field {
 		field.String("id").
 			Unique().
 			Immutable(),
-		field.Int("created_at").
+		field.Int64("created_at").
 			Immutable().
 			DefaultFunc(timeNow),
-		field.Int("updated_at").
+		field.Int64("updated_at").
 			DefaultFunc(timeNow).
 			UpdateDefault(timeNow),
 		//
