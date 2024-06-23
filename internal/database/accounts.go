@@ -103,23 +103,20 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 		delete(accountsMap, r.ID)
 	}
 
-	var inserts []*db.AccountCreate
 	for _, a := range accountsMap {
-		inserts = append(inserts,
-			c.db.Account.Create().
-				SetID(a.ID).
-				SetRealm(strings.ToUpper(a.Realm)).
-				SetNickname(a.Nickname).
-				SetPrivate(a.Private).
-				SetAccountCreatedAt(a.CreatedAt.Unix()).
-				SetLastBattleTime(a.LastBattleTime.Unix()),
-		)
+		err := tx.Account.Create().
+			SetID(a.ID).
+			SetRealm(strings.ToUpper(a.Realm)).
+			SetNickname(a.Nickname).
+			SetPrivate(a.Private).
+			SetAccountCreatedAt(a.CreatedAt.Unix()).
+			SetLastBattleTime(a.LastBattleTime.Unix()).
+			Exec(ctx)
+		if err != nil {
+			errors[a.ID] = err
+		}
 	}
 
-	err = c.db.Account.CreateBulk(inserts...).Exec(ctx)
-	if err != nil {
-		return errors, rollback(tx, err)
-	}
 	return errors, tx.Commit()
 }
 

@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 
-	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
@@ -43,21 +42,17 @@ func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[s
 		delete(averages, r.ID)
 	}
 
-	var inserts []*db.VehicleAverageCreate
 	for id, frame := range averages {
-		inserts = append(inserts,
-			c.db.VehicleAverage.Create().
-				SetID(id).
-				SetData(frame),
-		)
+		err := tx.VehicleAverage.Create().
+			SetID(id).
+			SetData(frame).
+			Exec(ctx)
+		if err != nil {
+			errors[id] = err
+		}
 	}
 
-	err = tx.VehicleAverage.CreateBulk(inserts...).Exec(ctx)
-	if err != nil {
-		return nil, rollback(tx, err)
-	}
-
-	return nil, tx.Commit()
+	return errors, tx.Commit()
 }
 
 func (c *libsqlClient) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {
