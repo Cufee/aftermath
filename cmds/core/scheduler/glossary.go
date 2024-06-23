@@ -30,7 +30,11 @@ func UpdateAveragesWorker(client core.Client) func() {
 			return
 		}
 		if len(aErr) > 0 {
-			log.Error().Any("errors", aErr).Msg("failed to update some average cache")
+			event := log.Error()
+			for id, err := range aErr {
+				event.Str(id, err.Error())
+			}
+			event.Msg("failed to update some average cache")
 			return
 		}
 
@@ -67,7 +71,11 @@ func UpdateGlossaryWorker(client core.Client) func() {
 			return
 		}
 		if len(vErr) > 0 {
-			log.Error().Any("errors", vErr).Msg("failed to save some vehicle glossaries")
+			event := log.Error()
+			for id, err := range vErr {
+				event.Str(id, err.Error())
+			}
+			event.Msg("failed to save some vehicle glossaries")
 			return
 		}
 
