@@ -10,7 +10,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
 )
 
-func (c *libsqlClient) DeleteExpiredTasks(ctx context.Context, expiration time.Time) error {
+func (c *client) DeleteExpiredTasks(ctx context.Context, expiration time.Time) error {
 	tx, cancel, err := c.txWithLock(ctx)
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func (c *libsqlClient) DeleteExpiredTasks(ctx context.Context, expiration time.T
 	return tx.Commit()
 }
 
-func (c *libsqlClient) DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error {
+func (c *client) DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error {
 	_, err := c.db.AccountSnapshot.Delete().Where(accountsnapshot.CreatedAtLT(expiration.Unix())).Exec(ctx)
 	if err != nil {
 		return err

@@ -26,7 +26,7 @@ func toAccount(model *db.Account) models.Account {
 	return account
 }
 
-func (c *libsqlClient) GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error) {
+func (c *client) GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error) {
 	result, err := c.db.Account.Query().Where(account.Realm(strings.ToUpper(realm))).IDs(ctx)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (c *libsqlClient) GetRealmAccountIDs(ctx context.Context, realm string) ([]
 	return result, nil
 }
 
-func (c *libsqlClient) GetAccountByID(ctx context.Context, id string) (models.Account, error) {
+func (c *client) GetAccountByID(ctx context.Context, id string) (models.Account, error) {
 	result, err := c.db.Account.Query().Where(account.ID(id)).WithClan().First(ctx)
 	if err != nil {
 		return models.Account{}, err
@@ -43,7 +43,7 @@ func (c *libsqlClient) GetAccountByID(ctx context.Context, id string) (models.Ac
 	return toAccount(result), nil
 }
 
-func (c *libsqlClient) GetAccounts(ctx context.Context, ids []string) ([]models.Account, error) {
+func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Account, error) {
 	if len(ids) < 1 {
 		return nil, nil
 	}
@@ -61,7 +61,7 @@ func (c *libsqlClient) GetAccounts(ctx context.Context, ids []string) ([]models.
 	return accounts, nil
 }
 
-func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Account) (map[string]error, error) {
+func (c *client) UpsertAccounts(ctx context.Context, accounts []models.Account) (map[string]error, error) {
 	if len(accounts) < 1 {
 		return nil, nil
 	}
@@ -113,7 +113,7 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 	return errors, c.db.Account.CreateBulk(writes...).Exec(ctx)
 }
 
-func (c *libsqlClient) AccountSetPrivate(ctx context.Context, id string, value bool) error {
+func (c *client) AccountSetPrivate(ctx context.Context, id string, value bool) error {
 	err := c.db.Account.UpdateOneID(id).SetPrivate(value).Exec(ctx)
 	if err != nil {
 		return err

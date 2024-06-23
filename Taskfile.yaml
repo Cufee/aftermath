@@ -3,10 +3,6 @@ version: "3"
 dotenv:
   - ".env"
 
-vars:
-  ENT_CMD: go run -mod=mod entgo.io/ent/cmd/ent
-  ENT_DIRECTORY: internal/database/ent/schema
-
 tasks:
   test:
     desc: runs tests
@@ -19,10 +15,6 @@ tasks:
           go test -timeout 30s --count=1 -v -run {{ .CLI_ARGS }}
         fi
 
-  ent-new:
-    desc: init a new schema with a given name
-    cmd: '{{.ENT_CMD}} new --target {{.ENT_DIRECTORY}} {{.CLI_ARGS}}'
-
   ent-generate:
     desc: generate go code for the ent schema directory
     cmd: go generate internal/database/ent
@@ -32,7 +24,7 @@ tasks:
     cmd: atlas migrate hash --dir "file://internal/database/ent/migrate/migrations" && atlas migrate diff {{.CLI_ARGS}} --dir "file://internal/database/ent/migrate/migrations" --to "ent://internal/database/ent/schema" --dev-url "sqlite://file?mode=memory&_fk=1"
   db-migrate-apply:
     desc: apply migrations using atlas
-    cmd: ${ATLAS_TEMP_DIR} migrate apply --allow-dirty --dir "file://internal/database/ent/migrate/migrations" --tx-mode all --url "libsql+ws://0.0.0.0:8080"
+    cmd: atlas migrate apply --allow-dirty --dir "file://internal/database/ent/migrate/migrations" --tx-mode all --url "sqlite://${DATABASE_PATH}?_fk=1"
 
   dev:
     desc: Start a local dev server

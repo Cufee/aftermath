@@ -18,7 +18,7 @@ func toApplicationCommand(record *db.ApplicationCommand) models.ApplicationComma
 
 }
 
-func (c *libsqlClient) GetCommandsByID(ctx context.Context, commandIDs ...string) ([]models.ApplicationCommand, error) {
+func (c *client) GetCommandsByID(ctx context.Context, commandIDs ...string) ([]models.ApplicationCommand, error) {
 	if len(commandIDs) < 1 {
 		return nil, nil
 	}
@@ -35,7 +35,7 @@ func (c *libsqlClient) GetCommandsByID(ctx context.Context, commandIDs ...string
 	return commands, nil
 }
 
-func (c *libsqlClient) GetCommandsByHash(ctx context.Context, commandHashes ...string) ([]models.ApplicationCommand, error) {
+func (c *client) GetCommandsByHash(ctx context.Context, commandHashes ...string) ([]models.ApplicationCommand, error) {
 	if len(commandHashes) < 1 {
 		return nil, nil
 	}
@@ -51,7 +51,7 @@ func (c *libsqlClient) GetCommandsByHash(ctx context.Context, commandHashes ...s
 	return commands, nil
 }
 
-func (c *libsqlClient) UpsertCommands(ctx context.Context, commands ...models.ApplicationCommand) error {
+func (c *client) UpsertCommands(ctx context.Context, commands ...models.ApplicationCommand) error {
 	if len(commands) < 1 {
 		return nil
 	}

@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"sync"
 	"time"
@@ -12,12 +11,10 @@ import (
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
 
-	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
-	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-var _ Client = &libsqlClient{}
+var _ Client = &client{}
 
 type AccountsClient interface {
 	GetAccounts(ctx context.Context, ids []string) ([]models.Account, error)
@@ -87,16 +84,16 @@ type Client interface {
 	Disconnect() error
 }
 
-type libsqlClient struct {
+type client struct {
 	db              *db.Client
 	transactionLock *sync.Mutex
 }
 
-func (c *libsqlClient) Disconnect() error {
+func (c *client) Disconnect() error {
 	return c.db.Close()
 }
 
-func (c *libsqlClient) txWithLock(ctx context.Context) (*db.Tx, func(), error) {
+func (c *client) txWithLock(ctx context.Context) (*db.Tx, func(), error) {
 	c.transactionLock.Lock()
 	tx, err := c.db.Tx(ctx)
 	if err != nil {
@@ -106,16 +103,15 @@ func (c *libsqlClient) txWithLock(ctx context.Context) (*db.Tx, func(), error) {
 	return tx, c.transactionLock.Unlock, nil
 }
 
-func NewLibSQLClient(primaryUrl string) (*libsqlClient, error) {
-	driver, err := sql.Open("libsql", primaryUrl)
+func NewSQLiteClient(filePath string) (*client, error) {
+	c, err := db.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared&_fk=1", filePath))
 	if err != nil {
 		return nil, err
 	}
 
-	dbClient := db.NewClient(db.Driver(entsql.OpenDB(dialect.SQLite, driver)))
-	return &libsqlClient{
+	return &client{
 		transactionLock: &sync.Mutex{},
-		db:              dbClient,
+		db:              c,
 	}, nil
 }
 

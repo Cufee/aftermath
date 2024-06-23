@@ -50,7 +50,7 @@ func toVehicleSnapshot(record *db.VehicleSnapshot) models.VehicleSnapshot {
 	}
 }
 
-func (c *libsqlClient) CreateVehicleSnapshots(ctx context.Context, snapshots ...models.VehicleSnapshot) error {
+func (c *client) CreateVehicleSnapshots(ctx context.Context, snapshots ...models.VehicleSnapshot) error {
 	if len(snapshots) < 1 {
 		return nil
 	}
@@ -72,7 +72,7 @@ func (c *libsqlClient) CreateVehicleSnapshots(ctx context.Context, snapshots ...
 	return c.db.VehicleSnapshot.CreateBulk(inserts...).Exec(ctx)
 }
 
-func (c *libsqlClient) GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error) {
+func (c *client) GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error) {
 	var query getSnapshotQuery
 	for _, apply := range options {
 		apply(&query)
@@ -121,7 +121,7 @@ func toAccountSnapshot(record *db.AccountSnapshot) models.AccountSnapshot {
 	}
 }
 
-func (c *libsqlClient) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) error {
+func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) error {
 	if len(snapshots) < 1 {
 		return nil
 	}
@@ -145,7 +145,7 @@ func (c *libsqlClient) CreateAccountSnapshots(ctx context.Context, snapshots ...
 	return c.db.AccountSnapshot.CreateBulk(inserts...).Exec(ctx)
 }
 
-func (c *libsqlClient) GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]models.AccountSnapshot, error) {
+func (c *client) GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]models.AccountSnapshot, error) {
 	records, err := c.db.AccountSnapshot.Query().Where(accountsnapshot.AccountID(accountID)).Order(accountsnapshot.ByCreatedAt(sql.OrderDesc())).Limit(limit).All(ctx)
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ func (c *libsqlClient) GetLastAccountSnapshots(ctx context.Context, accountID st
 	return snapshots, nil
 }
 
-func (c *libsqlClient) GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) (models.AccountSnapshot, error) {
+func (c *client) GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) (models.AccountSnapshot, error) {
 	var query getSnapshotQuery
 	for _, apply := range options {
 		apply(&query)
@@ -184,7 +184,7 @@ func (c *libsqlClient) GetAccountSnapshot(ctx context.Context, accountID, refere
 	return toAccountSnapshot(record), nil
 }
 
-func (c *libsqlClient) GetManyAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AccountSnapshot, error) {
+func (c *client) GetManyAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AccountSnapshot, error) {
 	var query getSnapshotQuery
 	for _, apply := range options {
 		apply(&query)

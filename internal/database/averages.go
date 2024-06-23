@@ -8,7 +8,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
-func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error) {
+func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error) {
 	if len(averages) < 1 {
 		return nil, nil
 	}
@@ -49,7 +49,7 @@ func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[s
 	return errors, c.db.VehicleAverage.CreateBulk(writes...).Exec(ctx)
 }
 
-func (c *libsqlClient) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {
+func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {
 	if len(ids) < 1 {
 		return nil, nil
 	}

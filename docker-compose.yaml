@@ -1,43 +1,30 @@
 services:
-  aftermath-database:
-    user: root
-    image: ghcr.io/tursodatabase/libsql-server:latest
-    platform: linux/amd64
-    restart: always
-    environment:
-      - SQLD_NODE=primary
-    volumes:
-      - ${DATABASE_DIR}:/var/lib/sqld
-    networks:
-      - dokploy-network
-    hostname: aftermath-database
-
   aftermath-migrate:
     image: aftermath-migrate
     build:
       dockerfile: Dockerfile.migrate
-    depends_on:
-      aftermath-database:
-        condition: service_started
-    entrypoint: atlas migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "libsql+ws://aftermath-database:8080"
+    entrypoint: atlas migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "sqlite:///data/aftermath.db?_fk=1"
+    volumes:
+      - ${DATABASE_PATH}:/data/aftermath.db
     networks:
       - dokploy-network
 
   aftermath-service:
-    image: aftermath-service
-    build:
-      dockerfile: Dockerfile
     env_file:
       - .env
     environment:
       - PORT=3000
-      - DATABASE_URL=libsql://aftermath-database:8080?tls=0
+      - DATABASE_PATH=sqlite:///data/aftermath.db?_fk=1
     depends_on:
-      aftermath-database:
-        condition: service_started
       aftermath-migrate:
         condition: service_completed_successfully
     entrypoint: ["app"]
+    volumes:
+      - ${DATABASE_PATH}:/data/aftermath.db
+
+    image: aftermath-service
+    build:
+      dockerfile: Dockerfile
     restart: always
     deploy:
       resources:
