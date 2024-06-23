@@ -3,7 +3,7 @@ services:
     image: aftermath-migrate
     build:
       dockerfile: Dockerfile.migrate
-    command: migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "sqlite:///data/aftermath.db?_fk=1"
+    command: migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "sqlite:///data/${DATABASE_NAME}?_fk=1"
     volumes:
       - ${DATABASE_PATH}:/data
     networks:
@@ -14,7 +14,6 @@ services:
       - .env
     environment:
       - PORT=3000
-      - DATABASE_NAME=aftermath.db
       - DATABASE_PATH=/data
     entrypoint: ["app"]
     depends_on:
