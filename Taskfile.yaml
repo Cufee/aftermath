@@ -24,7 +24,7 @@ tasks:
     cmd: atlas migrate hash --dir "file://internal/database/ent/migrate/migrations" && atlas migrate diff {{.CLI_ARGS}} --dir "file://internal/database/ent/migrate/migrations" --to "ent://internal/database/ent/schema" --dev-url "sqlite://file?mode=memory&_fk=1"
   db-migrate-apply:
     desc: apply migrations using atlas
-    cmd: atlas migrate apply --allow-dirty --dir "file://internal/database/ent/migrate/migrations" --tx-mode all --url "sqlite://${DATABASE_PATH}?_fk=1"
+    cmd: atlas migrate apply --allow-dirty --dir "file://internal/database/ent/migrate/migrations" --tx-mode all --url "sqlite://${DATABASE_PATH}/${DATABASE_NAME}?_fk=1"
 
   dev:
     desc: Start a local dev server

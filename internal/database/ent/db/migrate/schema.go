@@ -90,6 +90,11 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
+				Name:    "accountsnapshot_id",
+				Unique:  false,
+				Columns: []*schema.Column{AccountSnapshotsColumns[0]},
+			},
+			{
 				Name:    "accountsnapshot_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{AccountSnapshotsColumns[1]},
@@ -138,6 +143,11 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
+				Name:    "achievementssnapshot_id",
+				Unique:  false,
+				Columns: []*schema.Column{AchievementsSnapshotsColumns[0]},
+			},
+			{
 				Name:    "achievementssnapshot_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{AchievementsSnapshotsColumns[1]},
@@ -170,6 +180,11 @@ var (
 		PrimaryKey: []*schema.Column{AppConfigurationsColumns[0]},
 		Indexes: []*schema.Index{
 			{
+				Name:    "appconfiguration_id",
+				Unique:  false,
+				Columns: []*schema.Column{AppConfigurationsColumns[0]},
+			},
+			{
 				Name:    "appconfiguration_key",
 				Unique:  false,
 				Columns: []*schema.Column{AppConfigurationsColumns[3]},
@@ -191,6 +206,11 @@ var (
 		Columns:    ApplicationCommandsColumns,
 		PrimaryKey: []*schema.Column{ApplicationCommandsColumns[0]},
 		Indexes: []*schema.Index{
+			{
+				Name:    "applicationcommand_id",
+				Unique:  false,
+				Columns: []*schema.Column{ApplicationCommandsColumns[0]},
+			},
 			{
 				Name:    "applicationcommand_options_hash",
 				Unique:  false,
@@ -214,6 +234,11 @@ var (
 		Columns:    ClansColumns,
 		PrimaryKey: []*schema.Column{ClansColumns[0]},
 		Indexes: []*schema.Index{
+			{
+				Name:    "clan_id",
+				Unique:  false,
+				Columns: []*schema.Column{ClansColumns[0]},
+			},
 			{
 				Name:    "clan_tag",
 				Unique:  false,
@@ -246,6 +271,11 @@ var (
 		Columns:    CronTasksColumns,
 		PrimaryKey: []*schema.Column{CronTasksColumns[0]},
 		Indexes: []*schema.Index{
+			{
+				Name:    "crontask_id",
+				Unique:  false,
+				Columns: []*schema.Column{CronTasksColumns[0]},
+			},
 			{
 				Name:    "crontask_reference_id",
 				Unique:  false,
@@ -281,6 +311,13 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_id",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[0]},
+			},
+		},
 	}
 	// UserConnectionsColumns holds the columns for the "user_connections" table.
 	UserConnectionsColumns = []*schema.Column{
@@ -308,6 +345,11 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
+				Name:    "userconnection_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserConnectionsColumns[0]},
+			},
+			{
 				Name:    "userconnection_user_id",
 				Unique:  false,
 				Columns: []*schema.Column{UserConnectionsColumns[7]},
@@ -326,6 +368,11 @@ var (
 				Name:    "userconnection_type_reference_id",
 				Unique:  false,
 				Columns: []*schema.Column{UserConnectionsColumns[3], UserConnectionsColumns[4]},
+			},
+			{
+				Name:    "userconnection_reference_id_user_id_type",
+				Unique:  true,
+				Columns: []*schema.Column{UserConnectionsColumns[4], UserConnectionsColumns[7], UserConnectionsColumns[3]},
 			},
 		},
 	}
@@ -354,6 +401,11 @@ var (
 			},
 		},
 		Indexes: []*schema.Index{
+			{
+				Name:    "usercontent_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserContentsColumns[0]},
+			},
 			{
 				Name:    "usercontent_user_id",
 				Unique:  false,
@@ -402,6 +454,11 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
+				Name:    "usersubscription_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserSubscriptionsColumns[0]},
+			},
+			{
 				Name:    "usersubscription_user_id",
 				Unique:  false,
 				Columns: []*schema.Column{UserSubscriptionsColumns[7]},
@@ -436,6 +493,13 @@ var (
 		Name:       "vehicles",
 		Columns:    VehiclesColumns,
 		PrimaryKey: []*schema.Column{VehiclesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "vehicle_id",
+				Unique:  false,
+				Columns: []*schema.Column{VehiclesColumns[0]},
+			},
+		},
 	}
 	// VehicleAveragesColumns holds the columns for the "vehicle_averages" table.
 	VehicleAveragesColumns = []*schema.Column{
@@ -449,6 +513,13 @@ var (
 		Name:       "vehicle_averages",
 		Columns:    VehicleAveragesColumns,
 		PrimaryKey: []*schema.Column{VehicleAveragesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "vehicleaverage_id",
+				Unique:  false,
+				Columns: []*schema.Column{VehicleAveragesColumns[0]},
+			},
+		},
 	}
 	// VehicleSnapshotsColumns holds the columns for the "vehicle_snapshots" table.
 	VehicleSnapshotsColumns = []*schema.Column{
@@ -477,6 +548,11 @@ var (
 			},
 		},
 		Indexes: []*schema.Index{
+			{
+				Name:    "vehiclesnapshot_id",
+				Unique:  false,
+				Columns: []*schema.Column{VehicleSnapshotsColumns[0]},
+			},
 			{
 				Name:    "vehiclesnapshot_created_at",
 				Unique:  false,

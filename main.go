@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"io/fs"
+	"path/filepath"
 
 	"os"
 	"strconv"
@@ -116,7 +117,7 @@ func startSchedulerFromEnvAsync(dbClient database.Client, wgClient wargaming.Cli
 
 func coreClientsFromEnv() (core.Client, core.Client) {
 	// Dependencies
-	dbClient, err := database.NewSQLiteClient(os.Getenv("DATABASE_PATH") + "/aftermath.db")
+	dbClient, err := database.NewSQLiteClient(filepath.Join(os.Getenv("DATABASE_PATH"), os.Getenv("DATABASE_NAME")))
 	if err != nil {
 		log.Fatal().Msgf("database#NewClient failed %s", err)
 	}
