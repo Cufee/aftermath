@@ -1,11 +1,7 @@
 package models
 
 import (
-	"encoding/json"
-	"strings"
 	"time"
-
-	"github.com/cufee/aftermath/internal/encoding"
 )
 
 type TaskType string
@@ -82,44 +78,22 @@ func (t *Task) LogAttempt(log TaskLog) {
 }
 
 func (t *Task) OnCreated() {
+	t.Status = TaskStatusScheduled
 	t.LastRun = time.Now()
 	t.CreatedAt = time.Now()
 	t.UpdatedAt = time.Now()
+	t.Logs = append(t.Logs, TaskLog{
+		Comment:   "task created",
+		Timestamp: time.Now(),
+	})
 }
 func (t *Task) OnUpdated() {
+	t.LastRun = time.Now()
 	t.UpdatedAt = time.Now()
-}
-
-func (t *Task) encodeTargets() []byte {
-	return []byte(strings.Join(t.Targets, ";"))
-}
-func (t *Task) decodeTargets(targets []byte) {
-	if string(targets) != "" {
-		t.Targets = strings.Split(string(targets), ";")
-	}
-}
-
-func (t *Task) encodeLogs() []byte {
-	if t.Logs == nil {
-		return []byte{}
-	}
-	data, _ := json.Marshal(t.Logs)
-	return data
-}
-func (t *Task) decodeLogs(logs []byte) {
-	_ = json.Unmarshal(logs, &t.Logs)
-}
-
-func (t *Task) encodeData() []byte {
-	if t.Data == nil {
-		return []byte{}
-	}
-	data, _ := encoding.EncodeGob(t.Data)
-	return data
-}
-func (t *Task) decodeData(data []byte) {
-	t.Data = make(map[string]any)
-	_ = encoding.DecodeGob(data, &t.Data)
+	t.Logs = append(t.Logs, TaskLog{
+		Comment:   "task updated",
+		Timestamp: time.Now(),
+	})
 }
 
 type TaskLog struct {
