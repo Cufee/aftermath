@@ -66,8 +66,6 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		validAccounts = append(validAccounts, id)
 	}
 
-	println("validAccounts", len(validAccounts))
-
 	if len(validAccounts) < 1 {
 		return nil, nil
 	}
@@ -163,14 +161,11 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 	}
 
-	println("account", len(snapshots))
-
 	err = dbClient.CreateAccountSnapshots(ctx, snapshots...)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to save account snapshots to database")
 	}
 
-	println("vehicles", len(vehicleSnapshots))
 	err = dbClient.CreateVehicleSnapshots(ctx, vehicleSnapshots...)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to save vehicle snapshots to database")

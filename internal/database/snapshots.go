@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
@@ -82,7 +83,9 @@ func (c *libsqlClient) GetVehicleSnapshots(ctx context.Context, accountID, refer
 	where = append(where, vehiclesnapshot.ReferenceID(referenceID))
 	where = append(where, vehiclesnapshot.TypeEQ(kind))
 
+	order := vehiclesnapshot.ByCreatedAt(sql.OrderDesc())
 	if query.createdAfter != nil {
+		order = vehiclesnapshot.ByCreatedAt(sql.OrderAsc())
 		where = append(where, vehiclesnapshot.CreatedAtGT(query.createdAfter.Unix()))
 	}
 	if query.createdBefore != nil {
@@ -92,8 +95,8 @@ func (c *libsqlClient) GetVehicleSnapshots(ctx context.Context, accountID, refer
 		where = append(where, vehiclesnapshot.VehicleIDIn(query.vehicleIDs...))
 	}
 
-	var records []*db.VehicleSnapshot
-	err := c.db.VehicleSnapshot.Query().Where(where...).GroupBy(vehiclesnapshot.FieldVehicleID).Scan(ctx, &records)
+	var records db.VehicleSnapshots
+	err := c.db.VehicleSnapshot.Query().Where(where...).Order(order).GroupBy(vehiclesnapshot.FieldVehicleID).Aggregate(func(s *sql.Selector) string { return s.Select("*").String() }).Scan(ctx, &records)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +146,7 @@ func (c *libsqlClient) CreateAccountSnapshots(ctx context.Context, snapshots ...
 }
 
 func (c *libsqlClient) GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]models.AccountSnapshot, error) {
-	records, err := c.db.AccountSnapshot.Query().Where(accountsnapshot.AccountID(accountID)).Limit(limit).All(ctx)
+	records, err := c.db.AccountSnapshot.Query().Where(accountsnapshot.AccountID(accountID)).Order(accountsnapshot.ByCreatedAt(sql.OrderDesc())).Limit(limit).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -163,15 +166,17 @@ func (c *libsqlClient) GetAccountSnapshot(ctx context.Context, accountID, refere
 	}
 
 	var where []predicate.AccountSnapshot
+	order := accountsnapshot.ByCreatedAt(sql.OrderDesc())
 	where = append(where, accountsnapshot.AccountID(accountID), accountsnapshot.ReferenceID(referenceID), accountsnapshot.TypeEQ(kind))
 	if query.createdAfter != nil {
+		order = accountsnapshot.ByCreatedAt(sql.OrderAsc())
 		where = append(where, accountsnapshot.CreatedAtGT(query.createdAfter.Unix()))
 	}
 	if query.createdBefore != nil {
 		where = append(where, accountsnapshot.CreatedAtLT(query.createdBefore.Unix()))
 	}
 
-	record, err := c.db.AccountSnapshot.Query().Where(where...).First(ctx)
+	record, err := c.db.AccountSnapshot.Query().Where(where...).Order(order).First(ctx)
 	if err != nil {
 		return models.AccountSnapshot{}, err
 	}
