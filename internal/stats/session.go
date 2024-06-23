@@ -2,6 +2,7 @@ package stats
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"time"
 
@@ -55,6 +56,18 @@ func (r *renderer) Session(ctx context.Context, accountId string, from time.Time
 	session, career, err := r.fetchClient.SessionStats(ctx, accountId, from, fetch.WithWN8())
 	stop()
 	if err != nil {
+		if errors.Is(fetch.ErrSessionNotFound, err) {
+			go func(id string) {
+				// record a session in the background
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+				defer cancel()
+
+				_, err := logic.RecordAccountSnapshots(ctx, r.wargaming, r.database, r.wargaming.RealmFromAccountID(id), false, id)
+				if err != nil {
+					log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
+				}
+			}(accountId)
+		}
 		return nil, meta, err
 	}
 	meta.Stats["career"] = career
