@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go mod download
 
 COPY ./internal/database/ent internal/database/ent
-RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate internal/database/ent
+RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/database/ent
 
 COPY ./ ./
 
