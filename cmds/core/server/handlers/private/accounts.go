@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"sync"
 
 	"github.com/cufee/aftermath/cmds/core"
@@ -94,8 +95,22 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 						}
 
 						var inserts []models.Account
-						for _, account := range data {
-							inserts = append(inserts, fetch.WargamingToAccount(realm, account, types.ClanMember{}, false))
+						for id, account := range data {
+							if id == "" && account.ID == 0 {
+								log.Warn().Str("reason", "id is blank").Msg("wargaming returned a bad account")
+								continue
+							}
+
+							var private bool
+							if account.ID == 0 {
+								account.ID, _ = strconv.Atoi(id)
+								private = true
+							}
+							if account.Nickname == "" {
+								account.Nickname = "@Hidden"
+								private = true
+							}
+							inserts = append(inserts, fetch.WargamingToAccount(realm, account, types.ClanMember{}, private))
 						}
 
 						accErr, err := client.Database().UpsertAccounts(ctx, inserts)
