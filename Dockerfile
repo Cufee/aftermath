@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY ./ ./
-RUN go generate internal/database/ent
+RUN go generate ./...
 
 # build a fully standalone binary with zero dependencies
 RUN CGO_ENABLED=1 GOOS=linux go build -o app .
