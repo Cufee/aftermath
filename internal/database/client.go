@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
@@ -87,11 +88,22 @@ type Client interface {
 }
 
 type libsqlClient struct {
-	db *db.Client
+	db              *db.Client
+	transactionLock *sync.Mutex
 }
 
 func (c *libsqlClient) Disconnect() error {
 	return c.db.Close()
+}
+
+func (c *libsqlClient) txWithLock(ctx context.Context) (*db.Tx, func(), error) {
+	c.transactionLock.Lock()
+	tx, err := c.db.Tx(ctx)
+	if err != nil {
+		c.transactionLock.Unlock()
+		return tx, func() {}, nil
+	}
+	return tx, c.transactionLock.Unlock, nil
 }
 
 func NewLibSQLClient(primaryUrl string) (*libsqlClient, error) {
@@ -102,7 +114,8 @@ func NewLibSQLClient(primaryUrl string) (*libsqlClient, error) {
 
 	dbClient := db.NewClient(db.Driver(entsql.OpenDB(dialect.SQLite, driver)))
 	return &libsqlClient{
-		db: dbClient,
+		transactionLock: &sync.Mutex{},
+		db:              dbClient,
 	}, nil
 }
 

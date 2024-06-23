@@ -26,14 +26,9 @@ func (c *libsqlClient) UpsertVehicles(ctx context.Context, vehicles map[string]m
 		ids = append(ids, id)
 	}
 
-	tx, err := c.db.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	records, err := tx.Vehicle.Query().Where(vehicle.IDIn(ids...)).All(ctx)
+	records, err := c.db.Vehicle.Query().Where(vehicle.IDIn(ids...)).All(ctx)
 	if err != nil && !IsNotFound(err) {
-		return nil, rollback(tx, err)
+		return nil, err
 	}
 
 	errors := make(map[string]error)
@@ -43,7 +38,7 @@ func (c *libsqlClient) UpsertVehicles(ctx context.Context, vehicles map[string]m
 			continue
 		}
 
-		err := tx.Vehicle.UpdateOneID(v.ID).
+		err := c.db.Vehicle.UpdateOneID(v.ID).
 			SetTier(v.Tier).
 			SetLocalizedNames(v.LocalizedNames).
 			Exec(ctx)
@@ -54,18 +49,16 @@ func (c *libsqlClient) UpsertVehicles(ctx context.Context, vehicles map[string]m
 		delete(vehicles, v.ID)
 	}
 
+	var writes []*db.VehicleCreate
 	for id, v := range vehicles {
-		err := tx.Vehicle.Create().
+		writes = append(writes, c.db.Vehicle.Create().
 			SetID(id).
 			SetTier(v.Tier).
-			SetLocalizedNames(v.LocalizedNames).
-			Exec(ctx)
-		if err != nil {
-			errors[id] = err
-		}
+			SetLocalizedNames(v.LocalizedNames),
+		)
 	}
 
-	return errors, tx.Commit()
+	return errors, c.db.Vehicle.CreateBulk(writes...).Exec(ctx)
 }
 
 func (c *libsqlClient) GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error) {

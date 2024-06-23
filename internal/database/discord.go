@@ -63,10 +63,11 @@ func (c *libsqlClient) UpsertCommands(ctx context.Context, commands ...models.Ap
 		commandsMap[c.ID] = &c
 	}
 
-	tx, err := c.db.Tx(ctx)
+	tx, cancel, err := c.txWithLock(ctx)
 	if err != nil {
 		return err
 	}
+	defer cancel()
 
 	existing, err := tx.ApplicationCommand.Query().Where(applicationcommand.IDIn(ids...)).All(ctx)
 	if err != nil && !IsNotFound(err) {

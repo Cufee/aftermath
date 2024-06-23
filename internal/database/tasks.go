@@ -82,7 +82,7 @@ func (c *libsqlClient) GetAndStartTasks(ctx context.Context, limit int) ([]model
 		return nil, nil
 	}
 
-	tx, err := c.db.Tx(ctx)
+	tx, err := c.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -147,10 +147,11 @@ func (c *libsqlClient) UpdateTasks(ctx context.Context, tasks ...models.Task) er
 		return nil
 	}
 
-	tx, err := c.db.Tx(ctx)
+	tx, cancel, err := c.txWithLock(ctx)
 	if err != nil {
 		return err
 	}
+	defer cancel()
 
 	for _, t := range tasks {
 		t.OnUpdated()
@@ -181,10 +182,11 @@ func (c *libsqlClient) DeleteTasks(ctx context.Context, ids ...string) error {
 		return nil
 	}
 
-	tx, err := c.db.Tx(ctx)
+	tx, cancel, err := c.txWithLock(ctx)
 	if err != nil {
 		return err
 	}
+	defer cancel()
 
 	_, err = tx.CronTask.Delete().Where(crontask.IDIn(ids...)).Exec(ctx)
 	if err != nil {

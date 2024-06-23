@@ -73,14 +73,9 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 		accountsMap[a.ID] = &a
 	}
 
-	tx, err := c.db.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	records, err := tx.Account.Query().Where(account.IDIn(ids...)).All(ctx)
+	records, err := c.db.Account.Query().Where(account.IDIn(ids...)).All(ctx)
 	if err != nil && !IsNotFound(err) {
-		return nil, rollback(tx, err)
+		return nil, err
 	}
 
 	errors := make(map[string]error)
@@ -90,7 +85,7 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 			continue // this should never happen tho
 		}
 
-		err = tx.Account.UpdateOneID(r.ID).
+		err = c.db.Account.UpdateOneID(r.ID).
 			SetRealm(strings.ToUpper(update.Realm)).
 			SetNickname(update.Nickname).
 			SetPrivate(update.Private).
@@ -103,21 +98,19 @@ func (c *libsqlClient) UpsertAccounts(ctx context.Context, accounts []models.Acc
 		delete(accountsMap, r.ID)
 	}
 
+	var writes []*db.AccountCreate
 	for _, a := range accountsMap {
-		err := tx.Account.Create().
+		writes = append(writes, c.db.Account.Create().
 			SetID(a.ID).
 			SetRealm(strings.ToUpper(a.Realm)).
 			SetNickname(a.Nickname).
 			SetPrivate(a.Private).
 			SetAccountCreatedAt(a.CreatedAt.Unix()).
-			SetLastBattleTime(a.LastBattleTime.Unix()).
-			Exec(ctx)
-		if err != nil {
-			errors[a.ID] = err
-		}
+			SetLastBattleTime(a.LastBattleTime.Unix()),
+		)
 	}
 
-	return errors, tx.Commit()
+	return errors, c.db.Account.CreateBulk(writes...).Exec(ctx)
 }
 
 func (c *libsqlClient) AccountSetPrivate(ctx context.Context, id string, value bool) error {

@@ -11,10 +11,11 @@ import (
 )
 
 func (c *libsqlClient) DeleteExpiredTasks(ctx context.Context, expiration time.Time) error {
-	tx, err := c.db.Tx(ctx)
+	tx, cancel, err := c.txWithLock(ctx)
 	if err != nil {
 		return err
 	}
+	defer cancel()
 
 	_, err = tx.CronTask.Delete().Where(crontask.CreatedAtLT(expiration.Unix())).Exec(ctx)
 	if err != nil {

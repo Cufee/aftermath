@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 
+	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
@@ -17,14 +18,9 @@ func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[s
 		ids = append(ids, id)
 	}
 
-	tx, err := c.db.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	existing, err := tx.VehicleAverage.Query().Where(vehicleaverage.IDIn(ids...)).All(ctx)
+	existing, err := c.db.VehicleAverage.Query().Where(vehicleaverage.IDIn(ids...)).All(ctx)
 	if err != nil && !IsNotFound(err) {
-		return nil, rollback(tx, err)
+		return nil, err
 	}
 
 	errors := make(map[string]error)
@@ -34,7 +30,7 @@ func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[s
 			continue // should never happen tho
 		}
 
-		err := tx.VehicleAverage.UpdateOneID(r.ID).SetData(update).Exec(ctx)
+		err := c.db.VehicleAverage.UpdateOneID(r.ID).SetData(update).Exec(ctx)
 		if err != nil {
 			errors[r.ID] = err
 		}
@@ -42,17 +38,15 @@ func (c *libsqlClient) UpsertVehicleAverages(ctx context.Context, averages map[s
 		delete(averages, r.ID)
 	}
 
+	var writes []*db.VehicleAverageCreate
 	for id, frame := range averages {
-		err := tx.VehicleAverage.Create().
+		writes = append(writes, c.db.VehicleAverage.Create().
 			SetID(id).
-			SetData(frame).
-			Exec(ctx)
-		if err != nil {
-			errors[id] = err
-		}
+			SetData(frame),
+		)
 	}
 
-	return errors, tx.Commit()
+	return errors, c.db.VehicleAverage.CreateBulk(writes...).Exec(ctx)
 }
 
 func (c *libsqlClient) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {
