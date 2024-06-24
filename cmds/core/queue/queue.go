@@ -36,6 +36,7 @@ func New(workerLimit int, newCoreClient func() (core.Client, error)) *queue {
 		handlers:      make(map[models.TaskType]tasks.TaskHandler),
 
 		workerLimit:   workerLimit,
+		workerTimeout: time.Second * 15,
 		workerLimiter: make(chan struct{}, workerLimit),
 
 		activeTasksMx: &sync.Mutex{},
@@ -180,23 +181,33 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 				wctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
 				defer cancel()
 
-				handler, ok := q.handlers[task.Type]
-				if !ok {
-					log.Error().Str("type", string(task.Type)).Msg("task missing a handler")
-					return
-				}
-
 				coreClient, err := q.newCoreClient()
 				if err != nil {
 					log.Err(err).Msg("failed to create a new core client for a task worker")
 					return
 				}
+
+				handler, ok := q.handlers[task.Type]
+				if !ok {
+					task.Status = models.TaskStatusFailed
+					task.LogAttempt(models.TaskLog{
+						Error:     "task missing a handler",
+						Comment:   "task missing a handler",
+						Timestamp: time.Now(),
+					})
+					err := coreClient.Database().UpdateTasks(wctx, task)
+					if err != nil {
+						log.Err(err).Msg("failed to update a task")
+					}
+					return
+				}
+
 				msg, err := handler.Process(coreClient, task)
 				task.Status = models.TaskStatusComplete
 				task.LogAttempt(models.TaskLog{
+					Error:     err.Error(),
 					Timestamp: time.Now(),
 					Comment:   msg,
-					Error:     err,
 				})
 
 				if err != nil {

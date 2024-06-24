@@ -21,7 +21,6 @@ import (
 	"github.com/cufee/aftermath/cmds/core/server/handlers/private"
 	"github.com/cufee/aftermath/cmds/discord"
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
@@ -146,11 +145,7 @@ func startQueueFromEnv(ctx context.Context, wgClient wargaming.Client) (func(), 
 		}
 		return core.NewClient(client, wgClient, dbClient), nil
 	})
-
-	go func() {
-		time.Sleep(time.Second * 5)
-		q.Enqueue(models.Task{})
-	}()
+	// q.SetHandlers(tasks.DefaultHandlers())
 
 	return q.Start(ctx)
 }
