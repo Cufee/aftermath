@@ -56,22 +56,23 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 	}
 
 	var errors = make(map[string]error)
-	for _, data := range snapshots {
-		err := c.db.VehicleSnapshot.Create().
-			SetType(data.Type).
-			SetFrame(data.Stats).
-			SetVehicleID(data.VehicleID).
-			SetReferenceID(data.ReferenceID).
-			SetBattles(int(data.Stats.Battles.Float())).
-			SetLastBattleTime(data.LastBattleTime.Unix()).
-			SetAccount(c.db.Account.GetX(ctx, accountID)).
-			Exec(ctx)
-		if err != nil {
-			errors[data.VehicleID] = err
+	return errors, c.withTx(ctx, func(tx *db.Tx) error {
+		for _, data := range snapshots {
+			err := c.db.VehicleSnapshot.Create().
+				SetType(data.Type).
+				SetFrame(data.Stats).
+				SetVehicleID(data.VehicleID).
+				SetReferenceID(data.ReferenceID).
+				SetBattles(int(data.Stats.Battles.Float())).
+				SetLastBattleTime(data.LastBattleTime.Unix()).
+				SetAccount(c.db.Account.GetX(ctx, accountID)).
+				Exec(ctx)
+			if err != nil {
+				errors[data.VehicleID] = err
+			}
 		}
-	}
-
-	return errors, nil
+		return nil
+	})
 }
 
 func (c *client) GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error) {
@@ -129,23 +130,24 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models
 	}
 
 	var errors = make(map[string]error)
-	for _, s := range snapshots {
-		err := c.db.AccountSnapshot.Create().
-			SetAccount(c.db.Account.GetX(ctx, s.AccountID)). // we assume the account exists here
-			SetCreatedAt(s.CreatedAt.Unix()).
-			SetLastBattleTime(s.LastBattleTime.Unix()).
-			SetRatingBattles(int(s.RatingBattles.Battles.Float())).
-			SetRatingFrame(s.RatingBattles).
-			SetReferenceID(s.ReferenceID).
-			SetRegularBattles(int(s.RegularBattles.Battles)).
-			SetRegularFrame(s.RegularBattles).
-			SetType(s.Type).Exec(ctx)
-		if err != nil {
-			errors[s.AccountID] = err
+	return errors, c.withTx(ctx, func(tx *db.Tx) error {
+		for _, s := range snapshots {
+			err := c.db.AccountSnapshot.Create().
+				SetAccount(c.db.Account.GetX(ctx, s.AccountID)). // we assume the account exists here
+				SetCreatedAt(s.CreatedAt.Unix()).
+				SetLastBattleTime(s.LastBattleTime.Unix()).
+				SetRatingBattles(int(s.RatingBattles.Battles.Float())).
+				SetRatingFrame(s.RatingBattles).
+				SetReferenceID(s.ReferenceID).
+				SetRegularBattles(int(s.RegularBattles.Battles)).
+				SetRegularFrame(s.RegularBattles).
+				SetType(s.Type).Exec(ctx)
+			if err != nil {
+				errors[s.AccountID] = err
+			}
 		}
-	}
-
-	return errors, nil
+		return nil
+	})
 }
 
 func (c *client) GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]models.AccountSnapshot, error) {

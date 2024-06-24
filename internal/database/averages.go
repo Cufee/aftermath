@@ -24,29 +24,31 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 	}
 
 	errors := make(map[string]error)
-	for _, r := range existing {
-		update, ok := averages[r.ID]
-		if !ok {
-			continue // should never happen tho
+	return errors, c.withTx(ctx, func(tx *db.Tx) error {
+		for _, r := range existing {
+			update, ok := averages[r.ID]
+			if !ok {
+				continue // should never happen tho
+			}
+
+			err := c.db.VehicleAverage.UpdateOneID(r.ID).SetData(update).Exec(ctx)
+			if err != nil {
+				errors[r.ID] = err
+			}
+
+			delete(averages, r.ID)
 		}
 
-		err := c.db.VehicleAverage.UpdateOneID(r.ID).SetData(update).Exec(ctx)
-		if err != nil {
-			errors[r.ID] = err
+		var writes []*db.VehicleAverageCreate
+		for id, frame := range averages {
+			writes = append(writes, c.db.VehicleAverage.Create().
+				SetID(id).
+				SetData(frame),
+			)
 		}
 
-		delete(averages, r.ID)
-	}
-
-	var writes []*db.VehicleAverageCreate
-	for id, frame := range averages {
-		writes = append(writes, c.db.VehicleAverage.Create().
-			SetID(id).
-			SetData(frame),
-		)
-	}
-
-	return errors, c.db.VehicleAverage.CreateBulk(writes...).Exec(ctx)
+		return c.db.VehicleAverage.CreateBulk(writes...).Exec(ctx)
+	})
 }
 
 func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {

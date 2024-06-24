@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"runtime/debug"
-	"sync"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
@@ -88,22 +87,34 @@ type Client interface {
 }
 
 type client struct {
-	db              *db.Client
-	transactionLock *sync.Mutex
+	db *db.Client
+}
+
+func (c *client) withTx(ctx context.Context, fn func(tx *db.Tx) error) error {
+	tx, err := c.db.Tx(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if v := recover(); v != nil {
+			tx.Rollback()
+			panic(v)
+		}
+	}()
+	if err := fn(tx); err != nil {
+		if rerr := tx.Rollback(); rerr != nil {
+			err = fmt.Errorf("%w: rolling back transaction: %v", err, rerr)
+		}
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("committing transaction: %w", err)
+	}
+	return nil
 }
 
 func (c *client) Disconnect() error {
 	return c.db.Close()
-}
-
-func (c *client) txWithLock(ctx context.Context) (*db.Tx, func(), error) {
-	c.transactionLock.Lock()
-	tx, err := c.db.Tx(ctx)
-	if err != nil {
-		c.transactionLock.Unlock()
-		return tx, func() {}, nil
-	}
-	return tx, c.transactionLock.Unlock, nil
 }
 
 func NewSQLiteClient(filePath string) (*client, error) {
@@ -118,17 +129,14 @@ func NewSQLiteClient(filePath string) (*client, error) {
 		return nil, err
 	}
 
-	return &client{
-		transactionLock: &sync.Mutex{},
-		db:              c,
-	}, nil
-}
-
-// rollback calls to tx.Rollback and wraps the given error
-// with the rollback error if occurred.
-func rollback(tx *db.Tx, err error) error {
-	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%w: %v", err, rerr)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	_, err = c.ExecContext(ctx, "PRAGMA journal_mode=WAL")
+	if err != nil {
+		return nil, err
 	}
-	return err
+
+	return &client{
+		db: c,
+	}, nil
 }

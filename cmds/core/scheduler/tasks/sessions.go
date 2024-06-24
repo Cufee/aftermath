@@ -21,15 +21,15 @@ func init() {
 			}
 			realm, ok := task.Data["realm"].(string)
 			if !ok {
-				task.Data["triesLeft"] = int(0) // do not retry
+				task.Data["triesLeft"] = int64(0) // do not retry
 				return "invalid realm", errors.New("invalid realm")
 			}
 			if len(task.Targets) > 100 {
-				task.Data["triesLeft"] = int(0) // do not retry
+				task.Data["triesLeft"] = int64(0) // do not retry
 				return "cannot process 100+ accounts at a time", errors.New("invalid targets length")
 			}
 			if len(task.Targets) < 1 {
-				task.Data["triesLeft"] = int(0) // do not retry
+				task.Data["triesLeft"] = int64(0) // do not retry
 				return "target ids cannot be left blank", errors.New("invalid targets length")
 			}
 			forceUpdate, _ := task.Data["force"].(bool)
@@ -56,7 +56,7 @@ func init() {
 			return "retrying failed accounts", errors.New("some accounts failed")
 		},
 		ShouldRetry: func(task *models.Task) bool {
-			triesLeft, ok := task.Data["triesLeft"].(int)
+			triesLeft, ok := task.Data["triesLeft"].(int64)
 			if !ok {
 				return false
 			}
@@ -80,7 +80,7 @@ func CreateRecordSnapshotsTasks(client core.Client, realm string) error {
 		ScheduledAfter: time.Now(),
 		Data: map[string]any{
 			"realm":     realm,
-			"triesLeft": int(3),
+			"triesLeft": int64(3),
 		},
 	}
 

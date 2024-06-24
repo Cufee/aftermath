@@ -79,38 +79,40 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []models.Account) 
 	}
 
 	errors := make(map[string]error)
-	for _, r := range records {
-		update, ok := accountsMap[r.ID]
-		if !ok {
-			continue // this should never happen tho
+	return errors, c.withTx(ctx, func(tx *db.Tx) error {
+		for _, r := range records {
+			update, ok := accountsMap[r.ID]
+			if !ok {
+				continue // this should never happen tho
+			}
+
+			err = c.db.Account.UpdateOneID(r.ID).
+				SetRealm(strings.ToUpper(update.Realm)).
+				SetNickname(update.Nickname).
+				SetPrivate(update.Private).
+				SetLastBattleTime(update.LastBattleTime.Unix()).
+				Exec(ctx)
+			if err != nil {
+				errors[r.ID] = err
+			}
+
+			delete(accountsMap, r.ID)
 		}
 
-		err = c.db.Account.UpdateOneID(r.ID).
-			SetRealm(strings.ToUpper(update.Realm)).
-			SetNickname(update.Nickname).
-			SetPrivate(update.Private).
-			SetLastBattleTime(update.LastBattleTime.Unix()).
-			Exec(ctx)
-		if err != nil {
-			errors[r.ID] = err
+		var writes []*db.AccountCreate
+		for _, a := range accountsMap {
+			writes = append(writes, c.db.Account.Create().
+				SetID(a.ID).
+				SetRealm(strings.ToUpper(a.Realm)).
+				SetNickname(a.Nickname).
+				SetPrivate(a.Private).
+				SetAccountCreatedAt(a.CreatedAt.Unix()).
+				SetLastBattleTime(a.LastBattleTime.Unix()),
+			)
 		}
 
-		delete(accountsMap, r.ID)
-	}
-
-	var writes []*db.AccountCreate
-	for _, a := range accountsMap {
-		writes = append(writes, c.db.Account.Create().
-			SetID(a.ID).
-			SetRealm(strings.ToUpper(a.Realm)).
-			SetNickname(a.Nickname).
-			SetPrivate(a.Private).
-			SetAccountCreatedAt(a.CreatedAt.Unix()).
-			SetLastBattleTime(a.LastBattleTime.Unix()),
-		)
-	}
-
-	return errors, c.db.Account.CreateBulk(writes...).Exec(ctx)
+		return c.db.Account.CreateBulk(writes...).Exec(ctx)
+	})
 }
 
 func (c *client) AccountSetPrivate(ctx context.Context, id string, value bool) error {
