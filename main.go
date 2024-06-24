@@ -50,9 +50,13 @@ func main() {
 	zerolog.SetGlobalLevel(level)
 
 	loadStaticAssets(static)
+	db, err := newDatabaseClientFromEnv()
+	if err != nil {
+		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
+	}
 
-	liveCoreClient, cacheCoreClient := coreClientsFromEnv()
-	stopQueue, err := startQueueFromEnv(globalCtx, cacheCoreClient.Wargaming())
+	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db)
+	stopQueue, err := startQueueFromEnv(globalCtx, db, cacheCoreClient.Wargaming())
 	if err != nil {
 		log.Fatal().Err(err).Msg("startQueueFromEnv failed")
 	}
@@ -117,18 +121,14 @@ func startSchedulerFromEnv(ctx context.Context, coreClient core.Client) (func(),
 	return s.Start(ctx)
 }
 
-func startQueueFromEnv(ctx context.Context, wgClient wargaming.Client) (func(), error) {
+func startQueueFromEnv(ctx context.Context, db database.Client, wgClient wargaming.Client) (func(), error) {
 	bsClient, err := blitzstars.NewClient(os.Getenv("BLITZ_STARS_API_URL"), time.Second*10)
 	if err != nil {
 		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
 	}
 
 	// Fetch client
-	fetchDBClient, err := newDatabaseClientFromEnv()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create a database client")
-	}
-	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, fetchDBClient)
+	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, db)
 	if err != nil {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
@@ -138,20 +138,17 @@ func startQueueFromEnv(ctx context.Context, wgClient wargaming.Client) (func(), 
 	if v, err := strconv.Atoi(os.Getenv("SCHEDULER_CONCURRENT_WORKERS")); err == nil {
 		queueWorkerLimit = v
 	}
-	q := queue.New(queueWorkerLimit, func() (core.Client, error) {
-		// make a new database client and re-use the core client deps from before
-		dbClient, err := newDatabaseClientFromEnv()
-		if err != nil {
-			return nil, err
-		}
-		return core.NewClient(client, wgClient, dbClient), nil
-	})
-	q.SetHandlers(tasks.DefaultHandlers())
 
+	coreClient := core.NewClient(client, wgClient, db)
+	q := queue.New(queueWorkerLimit, func() (core.Client, error) {
+		return coreClient, nil
+	})
+
+	q.SetHandlers(tasks.DefaultHandlers())
 	return q.Start(ctx)
 }
 
-func coreClientsFromEnv() (core.Client, core.Client) {
+func coreClientsFromEnv(db database.Client) (core.Client, core.Client) {
 	bsClient, err := blitzstars.NewClient(os.Getenv("BLITZ_STARS_API_URL"), time.Second*10)
 	if err != nil {
 		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
@@ -160,25 +157,17 @@ func coreClientsFromEnv() (core.Client, core.Client) {
 	liveClient, cacheClient := wargamingClientsFromEnv()
 
 	// Fetch client
-	liveDBClient, err := newDatabaseClientFromEnv()
-	if err != nil {
-		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
-	}
-	liveFetchClient, err := fetch.NewMultiSourceClient(liveClient, bsClient, liveDBClient)
+	liveFetchClient, err := fetch.NewMultiSourceClient(liveClient, bsClient, db)
 	if err != nil {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
 
-	cacheDBClient, err := newDatabaseClientFromEnv()
-	if err != nil {
-		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
-	}
-	cacheFetchClient, err := fetch.NewMultiSourceClient(cacheClient, bsClient, cacheDBClient)
+	cacheFetchClient, err := fetch.NewMultiSourceClient(cacheClient, bsClient, db)
 	if err != nil {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
 
-	return core.NewClient(liveFetchClient, liveClient, liveDBClient), core.NewClient(cacheFetchClient, cacheClient, cacheDBClient)
+	return core.NewClient(liveFetchClient, liveClient, db), core.NewClient(cacheFetchClient, cacheClient, db)
 }
 
 func loadStaticAssets(static fs.FS) {
