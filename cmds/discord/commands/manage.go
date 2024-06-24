@@ -1,7 +1,9 @@
 package commands
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -35,6 +37,7 @@ func init() {
 						builder.NewOption("status", discordgo.ApplicationCommandOptionString).Choices(
 							builder.NewChoice("failed", string(models.TaskStatusFailed)),
 							builder.NewChoice("complete", string(models.TaskStatusComplete)),
+							builder.NewChoice("scheduled", string(models.TaskStatusScheduled)),
 							builder.NewChoice("in-progress", string(models.TaskStatusInProgress)),
 						).Required(),
 						builder.NewOption("hours", discordgo.ApplicationCommandOptionNumber).Required(),
@@ -123,16 +126,11 @@ func init() {
 						return ctx.Reply("No recent tasks with status " + status)
 					}
 
-					var ids []string
+					ids := []string{fmt.Sprintf("total: %d", len(tasks))}
 					for _, t := range tasks {
 						ids = append(ids, t.ID)
 					}
-
-					content := strings.Join(ids, "\n")
-					if len(content) > 1990 {
-						content = content[:1990]
-					}
-					return ctx.Reply("```" + content + "```")
+					return ctx.File(bytes.NewBufferString(strings.Join(ids, "\n")), "tasks.txt")
 
 				case "tasks_details":
 					id, _ := opts.Value("id").(string)
@@ -148,15 +146,11 @@ func init() {
 						return ctx.Reply("No recent task found")
 					}
 
-					bytes, err := json.Marshal(tasks)
+					data, err := json.MarshalIndent(tasks, "", "  ")
 					if err != nil {
 						return ctx.Reply("json.Marshal: " + err.Error())
 					}
-					content := string(bytes)
-					if len(content) > 1990 {
-						content = content[:1990]
-					}
-					return ctx.Reply("```" + content + "```")
+					return ctx.File(bytes.NewReader(data), "tasks.txt")
 
 				default:
 					return ctx.Reply("invalid subcommand, thought this should never happen")
