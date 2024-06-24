@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/cufee/aftermath/cmds/core"
-	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
+	"github.com/cufee/aftermath/cmds/core/tasks"
 )
 
 var validRealms = []string{"na", "eu", "as"}

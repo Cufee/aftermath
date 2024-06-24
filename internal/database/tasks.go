@@ -103,6 +103,42 @@ func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task
 	})
 }
 
+/*
+AbandonTasks retrieves tasks by ids and marks them as scheduled, adding a log noting it was abandoned
+*/
+func (c *client) AbandonTasks(ctx context.Context, ids ...string) error {
+	if len(ids) < 1 {
+		return nil
+	}
+
+	var tasks []models.Task
+	err := c.withTx(ctx, func(tx *db.Tx) error {
+		records, err := tx.CronTask.Query().Where(crontask.IDIn(ids...)).All(ctx)
+		if err != nil {
+			return err
+		}
+
+		now := time.Now()
+		for _, r := range records {
+			t := toCronTask(r)
+			t.OnUpdated()
+
+			t.Status = models.TaskStatusScheduled
+			t.LogAttempt(models.TaskLog{
+				Comment:   "task was abandoned",
+				Timestamp: now,
+			})
+			tasks = append(tasks, t)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return c.UpdateTasks(ctx, tasks...)
+}
+
 func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
 	if len(tasks) < 1 {
 		return nil

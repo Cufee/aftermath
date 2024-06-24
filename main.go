@@ -1,22 +1,27 @@
 package main
 
 import (
+	"context"
 	"embed"
+	"fmt"
 	"io/fs"
+	"os/signal"
 	"path/filepath"
-	"runtime/debug"
+	"strconv"
+	"syscall"
 
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/cufee/aftermath/cmds/core"
+	"github.com/cufee/aftermath/cmds/core/queue"
 	"github.com/cufee/aftermath/cmds/core/scheduler"
-	"github.com/cufee/aftermath/cmds/core/scheduler/tasks"
+
 	"github.com/cufee/aftermath/cmds/core/server"
 	"github.com/cufee/aftermath/cmds/core/server/handlers/private"
 	"github.com/cufee/aftermath/cmds/discord"
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
@@ -37,6 +42,9 @@ import (
 var static embed.FS
 
 func main() {
+	globalCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// Logger
 	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
 	zerolog.SetGlobalLevel(level)
@@ -44,7 +52,17 @@ func main() {
 	loadStaticAssets(static)
 
 	liveCoreClient, cacheCoreClient := coreClientsFromEnv()
-	startSchedulerFromEnvAsync(cacheCoreClient.Wargaming())
+	stopQueue, err := startQueueFromEnv(globalCtx, cacheCoreClient.Wargaming())
+	if err != nil {
+		log.Fatal().Err(err).Msg("startQueueFromEnv failed")
+	}
+	defer stopQueue()
+
+	stopScheduler, err := startSchedulerFromEnv(globalCtx, cacheCoreClient)
+	if err != nil {
+		log.Fatal().Err(err).Msg("startSchedulerFromEnv failed")
+	}
+	defer stopScheduler()
 
 	// Load some init options to registered admin accounts and etc
 	logic.ApplyInitOptions(liveCoreClient.Database())
@@ -80,40 +98,61 @@ func main() {
 		Func: discordHandler,
 	})
 	log.Info().Str("port", port).Msg("starting a public server")
-	servePublic()
+	go servePublic()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	sig := <-c
+	cancel()
+	log.Info().Msgf("received %s, exiting", sig.String())
 }
 
-func startSchedulerFromEnvAsync(wgClient wargaming.Client) {
+func startSchedulerFromEnv(ctx context.Context, coreClient core.Client) (func(), error) {
 	if os.Getenv("SCHEDULER_ENABLED") != "true" {
-		return
+		return func() {}, nil
 	}
+	s := scheduler.New()
+	scheduler.RegisterDefaultTasks(s, coreClient)
+	return s.Start(ctx)
+}
 
+func startQueueFromEnv(ctx context.Context, wgClient wargaming.Client) (func(), error) {
 	bsClient, err := blitzstars.NewClient(os.Getenv("BLITZ_STARS_API_URL"), time.Second*10)
 	if err != nil {
 		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
 	}
 
 	// Fetch client
-	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, newDatabaseClientFromEnv())
+	fetchDBClient, err := newDatabaseClientFromEnv()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to create a database client")
+	}
+	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, fetchDBClient)
 	if err != nil {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
-	coreClient := core.NewClient(client, wgClient, newDatabaseClientFromEnv())
 
-	// Queue
-	taskQueueConcurrency := 10
+	// Queue - pulls tasks from database and runs the logic
+	queueWorkerLimit := 10
 	if v, err := strconv.Atoi(os.Getenv("SCHEDULER_CONCURRENT_WORKERS")); err == nil {
-		taskQueueConcurrency = v
+		queueWorkerLimit = v
 	}
-	queue := scheduler.NewQueue(coreClient, tasks.DefaultHandlers(), taskQueueConcurrency)
-
-	defer func() {
-		if r := recover(); r != nil {
-			log.Error().Str("stack", string(debug.Stack())).Interface("error", r).Stack().Msg("scheduler panic")
+	q := queue.New(queueWorkerLimit, func() (core.Client, error) {
+		// make a new database client and re-use the core client deps from before
+		dbClient, err := newDatabaseClientFromEnv()
+		if err != nil {
+			return nil, err
 		}
+		return core.NewClient(client, wgClient, dbClient), nil
+	})
+
+	go func() {
+		time.Sleep(time.Second * 5)
+		q.Enqueue(models.Task{})
 	}()
 
-	queue.StartCronJobsAsync()
+	return q.Start(ctx)
 }
 
 func coreClientsFromEnv() (core.Client, core.Client) {
@@ -125,12 +164,25 @@ func coreClientsFromEnv() (core.Client, core.Client) {
 	liveClient, cacheClient := wargamingClientsFromEnv()
 
 	// Fetch client
-	fetchClient, err := fetch.NewMultiSourceClient(cacheClient, bsClient, newDatabaseClientFromEnv())
+	liveDBClient, err := newDatabaseClientFromEnv()
+	if err != nil {
+		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
+	}
+	liveFetchClient, err := fetch.NewMultiSourceClient(liveClient, bsClient, liveDBClient)
 	if err != nil {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
 
-	return core.NewClient(fetchClient, liveClient, newDatabaseClientFromEnv()), core.NewClient(fetchClient, cacheClient, newDatabaseClientFromEnv())
+	cacheDBClient, err := newDatabaseClientFromEnv()
+	if err != nil {
+		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
+	}
+	cacheFetchClient, err := fetch.NewMultiSourceClient(cacheClient, bsClient, cacheDBClient)
+	if err != nil {
+		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
+	}
+
+	return core.NewClient(liveFetchClient, liveClient, liveDBClient), core.NewClient(cacheFetchClient, cacheClient, cacheDBClient)
 }
 
 func loadStaticAssets(static fs.FS) {
@@ -164,16 +216,17 @@ func wargamingClientsFromEnv() (wargaming.Client, wargaming.Client) {
 	return liveClient, cacheClient
 }
 
-func newDatabaseClientFromEnv() database.Client {
+func newDatabaseClientFromEnv() (database.Client, error) {
 	err := os.MkdirAll(os.Getenv("DATABASE_PATH"), os.ModePerm)
 	if err != nil {
-		log.Fatal().Msgf("os#MkdirAll failed %s", err)
+		return nil, fmt.Errorf("os#MkdirAll failed %w", err)
 	}
 
 	client, err := database.NewSQLiteClient(filepath.Join(os.Getenv("DATABASE_PATH"), os.Getenv("DATABASE_NAME")))
 	if err != nil {
-		log.Fatal().Msgf("database#NewClient failed %s", err)
+
+		return nil, fmt.Errorf("database#NewClient failed %w", err)
 	}
 
-	return client
+	return client, nil
 }
