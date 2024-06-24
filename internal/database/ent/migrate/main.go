@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/schema"
 	"github.com/cufee/aftermath/internal/database/ent/db/migrate"
-	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
 func main() {

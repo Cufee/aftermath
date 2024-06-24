@@ -22,7 +22,11 @@ func TestRenderSession(t *testing.T) {
 	zerolog.SetGlobalLevel(level)
 
 	loadStaticAssets(static)
-	coreClient, _ := coreClientsFromEnv()
+
+	db, err := newDatabaseClientFromEnv()
+	assert.NoError(t, err)
+
+	coreClient, _ := coreClientsFromEnv(db)
 	defer coreClient.Database().Disconnect()
 
 	bgImage, ok := assets.GetLoadedImage("bg-default")
