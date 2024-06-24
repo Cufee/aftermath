@@ -3,7 +3,6 @@ package queue
 import (
 	"context"
 	"fmt"
-	"runtime/debug"
 	"sync"
 	"time"
 
@@ -162,27 +161,27 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 				log.Debug().Str("taskId", task.ID).Msg("worker started processing a task")
 				defer log.Debug().Str("taskId", task.ID).Msg("worker finished processing a task")
 
-				defer func() {
-					if r := recover(); r != nil {
-						event := log.Error().Str("stack", string(debug.Stack())).Str("taskId", task.ID)
-						defer event.Msg("panic in queue worker")
+				// defer func() {
+				// 	if r := recover(); r != nil {
+				// 		event := log.Error().Str("stack", string(debug.Stack())).Str("taskId", task.ID)
+				// 		defer event.Msg("panic in queue worker")
 
-						coreClient, err := q.newCoreClient()
-						if err != nil {
-							event.AnErr("core", err).Str("additional", "failed to create a core client")
-							return
-						}
-						task.Status = models.TaskStatusFailed
-						task.LogAttempt(models.TaskLog{
-							Timestamp: time.Now(),
-							Comment:   "task caused a panic in worker handler",
-						})
-						err = coreClient.Database().UpdateTasks(context.Background(), task)
-						if err != nil {
-							event.AnErr("updateTasks", err).Str("additional", "failed to update a task")
-						}
-					}
-				}()
+				// 		coreClient, err := q.newCoreClient()
+				// 		if err != nil {
+				// 			event.AnErr("core", err).Str("additional", "failed to create a core client")
+				// 			return
+				// 		}
+				// 		task.Status = models.TaskStatusFailed
+				// 		task.LogAttempt(models.TaskLog{
+				// 			Timestamp: time.Now(),
+				// 			Comment:   "task caused a panic in worker handler",
+				// 		})
+				// 		err = coreClient.Database().UpdateTasks(context.Background(), task)
+				// 		if err != nil {
+				// 			event.AnErr("updateTasks", err).Str("additional", "failed to update a task")
+				// 		}
+				// 	}
+				// }()
 
 				wctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
 				defer cancel()
