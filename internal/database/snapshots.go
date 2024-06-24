@@ -50,26 +50,28 @@ func toVehicleSnapshot(record *db.VehicleSnapshot) models.VehicleSnapshot {
 	}
 }
 
-func (c *client) CreateVehicleSnapshots(ctx context.Context, snapshots ...models.VehicleSnapshot) error {
+func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) (map[string]error, error) {
 	if len(snapshots) < 1 {
-		return nil
+		return nil, nil
 	}
 
-	var inserts []*db.VehicleSnapshotCreate
+	var errors = make(map[string]error)
 	for _, data := range snapshots {
-		inserts = append(inserts,
-			c.db.VehicleSnapshot.Create().
-				SetType(data.Type).
-				SetFrame(data.Stats).
-				SetVehicleID(data.VehicleID).
-				SetReferenceID(data.ReferenceID).
-				SetBattles(int(data.Stats.Battles.Float())).
-				SetLastBattleTime(data.LastBattleTime.Unix()).
-				SetAccount(c.db.Account.GetX(ctx, data.AccountID)),
-		)
+		err := c.db.VehicleSnapshot.Create().
+			SetType(data.Type).
+			SetFrame(data.Stats).
+			SetVehicleID(data.VehicleID).
+			SetReferenceID(data.ReferenceID).
+			SetBattles(int(data.Stats.Battles.Float())).
+			SetLastBattleTime(data.LastBattleTime.Unix()).
+			SetAccount(c.db.Account.GetX(ctx, accountID)).
+			Exec(ctx)
+		if err != nil {
+			errors[data.VehicleID] = err
+		}
 	}
 
-	return c.db.VehicleSnapshot.CreateBulk(inserts...).Exec(ctx)
+	return errors, nil
 }
 
 func (c *client) GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error) {
@@ -121,28 +123,29 @@ func toAccountSnapshot(record *db.AccountSnapshot) models.AccountSnapshot {
 	}
 }
 
-func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) error {
+func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) (map[string]error, error) {
 	if len(snapshots) < 1 {
-		return nil
+		return nil, nil
 	}
 
-	var inserts []*db.AccountSnapshotCreate
+	var errors = make(map[string]error)
 	for _, s := range snapshots {
-		inserts = append(inserts,
-			c.db.AccountSnapshot.Create().
-				SetAccount(c.db.Account.GetX(ctx, s.AccountID)). // we assume the account exists here
-				SetCreatedAt(s.CreatedAt.Unix()).
-				SetLastBattleTime(s.LastBattleTime.Unix()).
-				SetRatingBattles(int(s.RatingBattles.Battles.Float())).
-				SetRatingFrame(s.RatingBattles).
-				SetReferenceID(s.ReferenceID).
-				SetRegularBattles(int(s.RegularBattles.Battles)).
-				SetRegularFrame(s.RegularBattles).
-				SetType(s.Type),
-		)
+		err := c.db.AccountSnapshot.Create().
+			SetAccount(c.db.Account.GetX(ctx, s.AccountID)). // we assume the account exists here
+			SetCreatedAt(s.CreatedAt.Unix()).
+			SetLastBattleTime(s.LastBattleTime.Unix()).
+			SetRatingBattles(int(s.RatingBattles.Battles.Float())).
+			SetRatingFrame(s.RatingBattles).
+			SetReferenceID(s.ReferenceID).
+			SetRegularBattles(int(s.RegularBattles.Battles)).
+			SetRegularFrame(s.RegularBattles).
+			SetType(s.Type).Exec(ctx)
+		if err != nil {
+			errors[s.AccountID] = err
+		}
 	}
 
-	return c.db.AccountSnapshot.CreateBulk(inserts...).Exec(ctx)
+	return errors, nil
 }
 
 func (c *client) GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]models.AccountSnapshot, error) {
