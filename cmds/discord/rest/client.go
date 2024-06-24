@@ -26,7 +26,7 @@ type Client struct {
 func NewClient(token string) (*Client, error) {
 	client := &Client{
 		token: token,
-		http:  http.Client{Timeout: time.Millisecond * 1000},
+		http:  http.Client{Timeout: time.Millisecond * 5000}, // discord is very slow sometimes
 	}
 
 	_, err := client.lookupApplicationID()

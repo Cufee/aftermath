@@ -137,6 +137,24 @@ func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
 	return c.db.CronTask.CreateBulk(inserts...).Exec(ctx)
 }
 
+func (c *client) GetTasks(ctx context.Context, ids ...string) ([]models.Task, error) {
+	if len(ids) < 1 {
+		return nil, nil
+	}
+
+	records, err := c.db.CronTask.Query().Where(crontask.IDIn(ids...)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var tasks []models.Task
+	for _, r := range records {
+		tasks = append(tasks, toCronTask(r))
+	}
+
+	return tasks, nil
+}
+
 /*
 UpdateTasks will update all tasks passed in
   - the following fields will be replaced: targets, status, leastRun, scheduleAfterm logs, data
