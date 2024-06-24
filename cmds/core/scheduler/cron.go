@@ -12,7 +12,7 @@ func (queue *Queue) StartCronJobsAsync() {
 
 	c := gocron.NewScheduler(time.UTC)
 	// Tasks
-	c.Cron("* * * * *").Do(RunTasksWorker(queue))
+	c.CronWithSeconds("*/15 * * * * *").Do(RunTasksWorker(queue))
 	// some tasks might be stuck due to a panic or restart, restart them
 	c.Cron("0 * * * *").Do(RestartTasksWorker(queue.core))
 	c.Cron("0 5 * * *").Do(CreateCleanupTaskWorker(queue.core)) // delete expired documents
