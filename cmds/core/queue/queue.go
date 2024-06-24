@@ -123,10 +123,13 @@ func (q *queue) pullAndEnqueueTasks(ctx context.Context, db database.Client) err
 	}
 	defer q.queueLock.Unlock()
 
+	log.Debug().Msg("pulling available tasks into queue")
+
 	tasks, err := db.GetAndStartTasks(ctx, q.workerLimit)
 	if err != nil && !database.IsNotFound(err) {
 		return err
 	}
+	log.Debug().Msgf("pulled %d tasks into queue", len(tasks))
 
 	go func(tasks []models.Task) {
 		for _, t := range tasks {
@@ -155,6 +158,9 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 						onComplete(task.ID)
 					}
 				}()
+
+				log.Debug().Str("taskId", task.ID).Msg("worker started processing a task")
+				defer log.Debug().Str("taskId", task.ID).Msg("worker finished processing a task")
 
 				defer func() {
 					if r := recover(); r != nil {
