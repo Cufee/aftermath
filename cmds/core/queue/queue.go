@@ -177,7 +177,11 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 							Timestamp: time.Now(),
 							Comment:   "task caused a panic in worker handler",
 						})
-						err = coreClient.Database().UpdateTasks(context.Background(), task)
+
+						uctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
+						defer cancel()
+
+						err = coreClient.Database().UpdateTasks(uctx, task)
 						if err != nil {
 							event.AnErr("updateTasks", err).Str("additional", "failed to update a task")
 						}
@@ -198,7 +202,11 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 						Comment:   "task missing a handler",
 						Timestamp: time.Now(),
 					})
-					err := coreClient.Database().UpdateTasks(ctx, task)
+
+					uctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
+					defer cancel()
+
+					err := coreClient.Database().UpdateTasks(uctx, task)
 					if err != nil {
 						log.Err(err).Msg("failed to update a task")
 					}
