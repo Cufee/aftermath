@@ -148,7 +148,7 @@ func init() {
 						return ctx.Reply("No recent task found")
 					}
 
-					bytes, err := json.MarshalIndent(tasks, "", "  ")
+					bytes, err := json.Marshal(tasks)
 					if err != nil {
 						return ctx.Reply("json.Marshal: " + err.Error())
 					}
