@@ -16,6 +16,7 @@ import (
 	"github.com/cufee/aftermath/cmds/core"
 	"github.com/cufee/aftermath/cmds/core/queue"
 	"github.com/cufee/aftermath/cmds/core/scheduler"
+	"github.com/cufee/aftermath/cmds/core/tasks"
 
 	"github.com/cufee/aftermath/cmds/core/server"
 	"github.com/cufee/aftermath/cmds/core/server/handlers/private"
@@ -145,7 +146,7 @@ func startQueueFromEnv(ctx context.Context, wgClient wargaming.Client) (func(), 
 		}
 		return core.NewClient(client, wgClient, dbClient), nil
 	})
-	// q.SetHandlers(tasks.DefaultHandlers())
+	q.SetHandlers(tasks.DefaultHandlers())
 
 	return q.Start(ctx)
 }
