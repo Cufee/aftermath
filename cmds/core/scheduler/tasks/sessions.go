@@ -97,7 +97,7 @@ func CreateRecordSnapshotsTasks(client core.Client, realm string) error {
 	task.Targets = append(task.Targets, accounts...)
 
 	// This update requires (2 + n) requests per n players
-	tasks := splitTaskByTargets(task, 90)
+	tasks := splitTaskByTargets(task, 50)
 	err = client.Database().CreateTasks(ctx, tasks...)
 	if err != nil {
 		return err
