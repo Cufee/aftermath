@@ -56,8 +56,6 @@ func RunTasksWorker(queue *Queue) func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
 
-		// each task worked handles 1 task at a time, but tasks might be very fast
-		// for now, we queue up 10 tasks per worker, this can be adjusted later/smarter
 		batchSize := queue.concurrencyLimit - activeWorkers
 		tasks, err := queue.core.Database().GetAndStartTasks(ctx, batchSize)
 		if err != nil {
@@ -68,13 +66,17 @@ func RunTasksWorker(queue *Queue) func() {
 			log.Err(err).Msg("failed to start scheduled tasks")
 			return
 		}
+		if len(tasks) < 1 {
+			log.Debug().Msg("no scheduled tasks to process")
+			return
+		}
 
 		queue.Process(func(err error) {
 			if err != nil {
 				log.Err(err).Msg("failed to process tasks")
 				return
 			}
-			// if the queue is now empty, we can run the next batch of tasks right away
+			// try to start the next task batch right away
 			RunTasksWorker(queue)
 		}, tasks...)
 	}
