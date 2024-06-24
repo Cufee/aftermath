@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"runtime/debug"
+	"sync"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
@@ -88,30 +89,37 @@ type Client interface {
 }
 
 type client struct {
-	db *db.Client
+	db        *db.Client
+	writeLock *sync.Mutex
 }
 
 func (c *client) withTx(ctx context.Context, fn func(tx *db.Tx) error) error {
+	c.writeLock.Lock()
+	defer c.writeLock.Unlock()
+
+	var err error
 	tx, err := c.db.Tx(ctx)
 	if err != nil {
 		return err
 	}
+
 	defer func() {
 		if v := recover(); v != nil {
 			tx.Rollback()
-			panic(v)
+			err = fmt.Errorf("%v", v)
 		}
 	}()
-	if err := fn(tx); err != nil {
+
+	if err = fn(tx); err != nil {
 		if rerr := tx.Rollback(); rerr != nil {
 			err = fmt.Errorf("%w: rolling back transaction: %v", err, rerr)
 		}
 		return err
 	}
-	if err := tx.Commit(); err != nil {
+	if err = tx.Commit(); err != nil {
 		return fmt.Errorf("committing transaction: %w", err)
 	}
-	return nil
+	return err
 }
 
 func (c *client) Disconnect() error {
@@ -138,6 +146,7 @@ func NewSQLiteClient(filePath string) (*client, error) {
 	}
 
 	return &client{
-		db: c,
+		writeLock: &sync.Mutex{},
+		db:        c,
 	}, nil
 }
