@@ -82,18 +82,10 @@ func (t *Task) OnCreated() {
 	t.LastRun = time.Now()
 	t.CreatedAt = time.Now()
 	t.UpdatedAt = time.Now()
-	t.Logs = append(t.Logs, TaskLog{
-		Comment:   "task created",
-		Timestamp: time.Now(),
-	})
 }
 func (t *Task) OnUpdated() {
 	t.LastRun = time.Now()
 	t.UpdatedAt = time.Now()
-	t.Logs = append(t.Logs, TaskLog{
-		Comment:   "task updated",
-		Timestamp: time.Now(),
-	})
 }
 
 type TaskLog struct {
