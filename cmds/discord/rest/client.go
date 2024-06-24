@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -110,8 +109,6 @@ func partHeader(contentDisposition string, contentType string) textproto.MIMEHea
 }
 
 func (c *Client) do(req *http.Request, target any) error {
-	log.Debug().Str("url", req.URL.String()).Str("contentType", req.Header.Get("Content-Type")).Msg("sending a request to Discord API")
-
 	res, err := c.http.Do(req)
 	if err != nil {
 		return err
@@ -140,8 +137,6 @@ func (c *Client) do(req *http.Request, target any) error {
 			return fmt.Errorf("failed to decode response body :%w", err)
 		}
 	}
-
-	log.Debug().Str("url", req.URL.String()).Str("contentType", req.Header.Get("Content-Type")).Msg("request finished successfully")
 	return nil
 }
 
