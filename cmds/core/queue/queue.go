@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"runtime/debug"
 	"sync"
@@ -12,7 +13,6 @@ import (
 	"github.com/cufee/aftermath/cmds/core/tasks"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -72,7 +72,7 @@ func (q *queue) Start(ctx context.Context) (func(), error) {
 		pctx, cancel := context.WithTimeout(qctx, time.Second*5)
 		defer cancel()
 		err := q.pullAndEnqueueTasks(pctx, coreClint.Database())
-		if err != nil {
+		if err != nil && !errors.Is(ErrQueueLocked, err) {
 			log.Err(err).Msg("failed to pull tasks")
 		}
 	})
@@ -85,7 +85,7 @@ func (q *queue) Start(ctx context.Context) (func(), error) {
 	go q.startWorkers(qctx, func(_ string) {
 		if len(q.queued) < q.workerLimit {
 			err := q.pullAndEnqueueTasks(qctx, coreClint.Database())
-			if err != nil {
+			if err != nil && !errors.Is(ErrQueueLocked, err) {
 				log.Err(err).Msg("failed to pull tasks")
 			}
 		}
@@ -119,7 +119,7 @@ func (q *queue) Enqueue(task models.Task) {
 
 func (q *queue) pullAndEnqueueTasks(ctx context.Context, db database.Client) error {
 	if ok := q.queueLock.TryLock(); !ok {
-		return errors.New("queue is locked")
+		return ErrQueueLocked
 	}
 	defer q.queueLock.Unlock()
 

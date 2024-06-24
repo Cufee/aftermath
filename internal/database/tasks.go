@@ -61,7 +61,7 @@ func (c *client) GetRecentTasks(ctx context.Context, createdAfter time.Time, sta
 		where = append(where, crontask.StatusIn(status...))
 	}
 
-	records, err := c.db.CronTask.Query().Where(where...).All(ctx)
+	records, err := c.db.CronTask.Query().Where(where...).Order(crontask.ByLastRun(sql.OrderDesc())).All(ctx)
 	if err != nil {
 		return nil, err
 	}
