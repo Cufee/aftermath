@@ -4,6 +4,7 @@ import (
 	"embed"
 	"io/fs"
 	"path/filepath"
+	"runtime/debug"
 
 	"os"
 	"strconv"
@@ -108,7 +109,7 @@ func startSchedulerFromEnvAsync(dbClient database.Client, wgClient wargaming.Cli
 
 	defer func() {
 		if r := recover(); r != nil {
-			log.Error().Interface("error", r).Stack().Msg("scheduler panic")
+			log.Error().Str("stack", string(debug.Stack())).Interface("error", r).Stack().Msg("scheduler panic")
 		}
 	}()
 

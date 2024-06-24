@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -108,7 +109,7 @@ func (c *client) txWithLock(ctx context.Context) (*db.Tx, func(), error) {
 func NewSQLiteClient(filePath string) (*client, error) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Fatal().Interface("error", r).Stack().Msg("NewSQLiteClient panic")
+			log.Fatal().Interface("error", r).Str("stack", string(debug.Stack())).Msg("NewSQLiteClient panic")
 		}
 	}()
 

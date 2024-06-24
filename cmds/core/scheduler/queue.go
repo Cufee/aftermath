@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"context"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -61,7 +62,7 @@ func (q *Queue) Process(callback func(error), tasks ...models.Task) {
 		go func(t models.Task) {
 			defer func() {
 				if r := recover(); r != nil {
-					log.Error().Any("recover", r).Msg("panic in task handler")
+					log.Error().Str("stack", string(debug.Stack())).Msg("panic in task handler")
 					t.Status = models.TaskStatusFailed
 					t.LogAttempt(models.TaskLog{
 						Targets:   t.Targets,
