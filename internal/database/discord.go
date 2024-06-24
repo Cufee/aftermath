@@ -63,50 +63,41 @@ func (c *client) UpsertCommands(ctx context.Context, commands ...models.Applicat
 		commandsMap[c.ID] = &c
 	}
 
-	tx, cancel, err := c.txWithLock(ctx)
-	if err != nil {
-		return err
-	}
-	defer cancel()
-
-	existing, err := tx.ApplicationCommand.Query().Where(applicationcommand.IDIn(ids...)).All(ctx)
-	if err != nil && !IsNotFound(err) {
-		return rollback(tx, err)
-	}
-
-	for _, c := range existing {
-		update, ok := commandsMap[c.ID]
-		if !ok {
-			continue
+	return c.withTx(ctx, func(tx *db.Tx) error {
+		existing, err := tx.ApplicationCommand.Query().Where(applicationcommand.IDIn(ids...)).All(ctx)
+		if err != nil && !IsNotFound(err) {
+			return err
 		}
 
-		err := tx.ApplicationCommand.UpdateOneID(c.ID).
-			SetName(update.Name).
-			SetVersion(update.Version).
-			SetOptionsHash(update.Hash).
-			Exec(ctx)
-		if err != nil {
-			return rollback(tx, err)
+		for _, c := range existing {
+			update, ok := commandsMap[c.ID]
+			if !ok {
+				continue
+			}
+
+			err := tx.ApplicationCommand.UpdateOneID(c.ID).
+				SetName(update.Name).
+				SetVersion(update.Version).
+				SetOptionsHash(update.Hash).
+				Exec(ctx)
+			if err != nil {
+				return err
+			}
+
+			delete(commandsMap, c.ID)
 		}
 
-		delete(commandsMap, c.ID)
-	}
+		var inserts []*db.ApplicationCommandCreate
+		for _, cmd := range commandsMap {
+			inserts = append(inserts,
+				c.db.ApplicationCommand.Create().
+					SetID(cmd.ID).
+					SetName(cmd.Name).
+					SetVersion(cmd.Version).
+					SetOptionsHash(cmd.Hash),
+			)
+		}
 
-	var inserts []*db.ApplicationCommandCreate
-	for _, cmd := range commandsMap {
-		inserts = append(inserts,
-			c.db.ApplicationCommand.Create().
-				SetID(cmd.ID).
-				SetName(cmd.Name).
-				SetVersion(cmd.Version).
-				SetOptionsHash(cmd.Hash),
-		)
-	}
-
-	err = tx.ApplicationCommand.CreateBulk(inserts...).Exec(ctx)
-	if err != nil {
-		return rollback(tx, err)
-	}
-
-	return tx.Commit()
+		return tx.ApplicationCommand.CreateBulk(inserts...).Exec(ctx)
+	})
 }

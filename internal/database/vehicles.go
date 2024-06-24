@@ -32,33 +32,35 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.
 	}
 
 	errors := make(map[string]error)
-	for _, r := range records {
-		v, ok := vehicles[r.ID]
-		if !ok {
-			continue
+	return errors, c.withTx(ctx, func(tx *db.Tx) error {
+		for _, r := range records {
+			v, ok := vehicles[r.ID]
+			if !ok {
+				continue
+			}
+
+			err := c.db.Vehicle.UpdateOneID(v.ID).
+				SetTier(v.Tier).
+				SetLocalizedNames(v.LocalizedNames).
+				Exec(ctx)
+			if err != nil {
+				errors[v.ID] = err
+			}
+
+			delete(vehicles, v.ID)
 		}
 
-		err := c.db.Vehicle.UpdateOneID(v.ID).
-			SetTier(v.Tier).
-			SetLocalizedNames(v.LocalizedNames).
-			Exec(ctx)
-		if err != nil {
-			errors[v.ID] = err
+		var writes []*db.VehicleCreate
+		for id, v := range vehicles {
+			writes = append(writes, c.db.Vehicle.Create().
+				SetID(id).
+				SetTier(v.Tier).
+				SetLocalizedNames(v.LocalizedNames),
+			)
 		}
 
-		delete(vehicles, v.ID)
-	}
-
-	var writes []*db.VehicleCreate
-	for id, v := range vehicles {
-		writes = append(writes, c.db.Vehicle.Create().
-			SetID(id).
-			SetTier(v.Tier).
-			SetLocalizedNames(v.LocalizedNames),
-		)
-	}
-
-	return errors, c.db.Vehicle.CreateBulk(writes...).Exec(ctx)
+		return c.db.Vehicle.CreateBulk(writes...).Exec(ctx)
+	})
 }
 
 func (c *client) GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error) {

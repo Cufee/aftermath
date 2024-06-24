@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
@@ -11,17 +12,11 @@ import (
 )
 
 func (c *client) DeleteExpiredTasks(ctx context.Context, expiration time.Time) error {
-	tx, cancel, err := c.txWithLock(ctx)
-	if err != nil {
+	err := c.withTx(ctx, func(tx *db.Tx) error {
+		_, err := tx.CronTask.Delete().Where(crontask.CreatedAtLT(expiration.Unix())).Exec(ctx)
 		return err
-	}
-	defer cancel()
-
-	_, err = tx.CronTask.Delete().Where(crontask.CreatedAtLT(expiration.Unix())).Exec(ctx)
-	if err != nil {
-		return rollback(tx, err)
-	}
-	return tx.Commit()
+	})
+	return err
 }
 
 func (c *client) DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error {

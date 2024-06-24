@@ -44,7 +44,7 @@ func main() {
 	loadStaticAssets(static)
 
 	liveCoreClient, cacheCoreClient := coreClientsFromEnv()
-	startSchedulerFromEnvAsync(cacheCoreClient.Database(), cacheCoreClient.Wargaming())
+	startSchedulerFromEnvAsync(cacheCoreClient.Wargaming())
 
 	// Load some init options to registered admin accounts and etc
 	logic.ApplyInitOptions(liveCoreClient.Database())
@@ -83,7 +83,7 @@ func main() {
 	servePublic()
 }
 
-func startSchedulerFromEnvAsync(dbClient database.Client, wgClient wargaming.Client) {
+func startSchedulerFromEnvAsync(wgClient wargaming.Client) {
 	if os.Getenv("SCHEDULER_ENABLED") != "true" {
 		return
 	}
@@ -94,11 +94,11 @@ func startSchedulerFromEnvAsync(dbClient database.Client, wgClient wargaming.Cli
 	}
 
 	// Fetch client
-	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, dbClient)
+	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, newDatabaseClientFromEnv())
 	if err != nil {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
-	coreClient := core.NewClient(client, wgClient, dbClient)
+	coreClient := core.NewClient(client, wgClient, newDatabaseClientFromEnv())
 
 	// Queue
 	taskQueueConcurrency := 10
@@ -117,16 +117,6 @@ func startSchedulerFromEnvAsync(dbClient database.Client, wgClient wargaming.Cli
 }
 
 func coreClientsFromEnv() (core.Client, core.Client) {
-	err := os.MkdirAll(os.Getenv("DATABASE_PATH"), os.ModePerm)
-	if err != nil {
-		log.Fatal().Msgf("os#MkdirAll failed %s", err)
-	}
-
-	// Dependencies
-	dbClient, err := database.NewSQLiteClient(filepath.Join(os.Getenv("DATABASE_PATH"), os.Getenv("DATABASE_NAME")))
-	if err != nil {
-		log.Fatal().Msgf("database#NewClient failed %s", err)
-	}
 	bsClient, err := blitzstars.NewClient(os.Getenv("BLITZ_STARS_API_URL"), time.Second*10)
 	if err != nil {
 		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
@@ -135,12 +125,12 @@ func coreClientsFromEnv() (core.Client, core.Client) {
 	liveClient, cacheClient := wargamingClientsFromEnv()
 
 	// Fetch client
-	fetchClient, err := fetch.NewMultiSourceClient(cacheClient, bsClient, dbClient)
+	fetchClient, err := fetch.NewMultiSourceClient(cacheClient, bsClient, newDatabaseClientFromEnv())
 	if err != nil {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
 
-	return core.NewClient(fetchClient, liveClient, dbClient), core.NewClient(fetchClient, cacheClient, dbClient)
+	return core.NewClient(fetchClient, liveClient, newDatabaseClientFromEnv()), core.NewClient(fetchClient, cacheClient, newDatabaseClientFromEnv())
 }
 
 func loadStaticAssets(static fs.FS) {
@@ -172,4 +162,18 @@ func wargamingClientsFromEnv() (wargaming.Client, wargaming.Client) {
 	}
 
 	return liveClient, cacheClient
+}
+
+func newDatabaseClientFromEnv() database.Client {
+	err := os.MkdirAll(os.Getenv("DATABASE_PATH"), os.ModePerm)
+	if err != nil {
+		log.Fatal().Msgf("os#MkdirAll failed %s", err)
+	}
+
+	client, err := database.NewSQLiteClient(filepath.Join(os.Getenv("DATABASE_PATH"), os.Getenv("DATABASE_NAME")))
+	if err != nil {
+		log.Fatal().Msgf("database#NewClient failed %s", err)
+	}
+
+	return client
 }
