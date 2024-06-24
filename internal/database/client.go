@@ -59,6 +59,7 @@ type TasksClient interface {
 	GetTasks(ctx context.Context, ids ...string) ([]models.Task, error)
 	UpdateTasks(ctx context.Context, tasks ...models.Task) error
 	DeleteTasks(ctx context.Context, ids ...string) error
+	AbandonTasks(ctx context.Context, ids ...string) error
 
 	GetStaleTasks(ctx context.Context, limit int) ([]models.Task, error)
 	GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...models.TaskStatus) ([]models.Task, error)

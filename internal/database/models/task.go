@@ -89,15 +89,13 @@ func (t *Task) OnUpdated() {
 }
 
 type TaskLog struct {
-	Targets   []string  `json:"targets" bson:"targets"`
 	Timestamp time.Time `json:"timestamp" bson:"timestamp"`
 	Comment   string    `json:"result" bson:"result"`
-	Error     string    `json:"error" bson:"error"`
+	Error     error     `json:"error" bson:"error"`
 }
 
-func NewAttemptLog(task Task, comment, err string) TaskLog {
+func NewAttemptLog(task Task, comment string, err error) TaskLog {
 	return TaskLog{
-		Targets:   task.Targets,
 		Timestamp: time.Now(),
 		Comment:   comment,
 		Error:     err,
