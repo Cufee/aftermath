@@ -44,12 +44,12 @@ type UsersClient interface {
 
 type SnapshotsClient interface {
 	GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) (models.AccountSnapshot, error)
-	CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) error
+	CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) (map[string]error, error)
 	GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]models.AccountSnapshot, error)
 	GetManyAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AccountSnapshot, error)
 
 	GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error)
-	CreateVehicleSnapshots(ctx context.Context, snapshots ...models.VehicleSnapshot) error
+	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) (map[string]error, error)
 
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
 }

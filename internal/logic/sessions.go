@@ -93,7 +93,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	var accountErrors = make(map[string]error)
 	var accountUpdates []models.Account
 	var snapshots []models.AccountSnapshot
-	var vehicleSnapshots []models.VehicleSnapshot
+	var vehicleSnapshots = make(map[string][]models.VehicleSnapshot)
 	for result := range vehicleCh {
 		// there is only 1 key in this map
 		for id, vehicles := range result.Data {
@@ -148,7 +148,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 					continue
 				}
 
-				vehicleSnapshots = append(vehicleSnapshots, models.VehicleSnapshot{
+				vehicleSnapshots[stats.Account.ID] = append(vehicleSnapshots[stats.Account.ID], models.VehicleSnapshot{
 					CreatedAt:      createdAt,
 					Type:           models.SnapshotTypeDaily,
 					LastBattleTime: vehicle.LastBattleTime,
@@ -161,14 +161,24 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 	}
 
-	err = dbClient.CreateAccountSnapshots(ctx, snapshots...)
+	aErr, err := dbClient.CreateAccountSnapshots(ctx, snapshots...)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to save account snapshots to database")
 	}
+	for id, err := range aErr {
+		if err != nil {
+			accountErrors[id] = err
+		}
+	}
 
-	err = dbClient.CreateVehicleSnapshots(ctx, vehicleSnapshots...)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to save vehicle snapshots to database")
+	for accountId, vehicles := range vehicleSnapshots {
+		vErr, err := dbClient.CreateAccountVehicleSnapshots(ctx, accountId, vehicles...)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to save vehicle snapshots to database")
+		}
+		if len(vErr) > 0 {
+			accountErrors[accountId] = errors.Errorf("failed to insert %d vehicle snapshots", len(vErr))
+		}
 	}
 
 	return accountErrors, nil

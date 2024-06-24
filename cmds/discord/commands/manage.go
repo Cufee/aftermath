@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -126,11 +125,24 @@ func init() {
 						return ctx.Reply("No recent tasks with status " + status)
 					}
 
-					ids := []string{fmt.Sprintf("total: %d", len(tasks))}
+					content := fmt.Sprintf("total: %d\n", len(tasks))
+					var reduced []map[string]any
 					for _, t := range tasks {
-						ids = append(ids, t.ID)
+						reduced = append(reduced, map[string]any{
+							"id":          t.ID,
+							"type":        t.Type,
+							"targets":     len(t.Targets),
+							"referenceID": t.ReferenceID,
+							"lastRun":     t.LastRun,
+						})
 					}
-					return ctx.File(bytes.NewBufferString(strings.Join(ids, "\n")), "tasks.txt")
+					data, err := json.MarshalIndent(reduced, "", "  ")
+					if err != nil {
+						return ctx.Reply("json.Marshal: " + err.Error())
+					}
+					content += string(data)
+
+					return ctx.File(bytes.NewBufferString(content), "tasks.json")
 
 				case "tasks_details":
 					id, _ := opts.Value("id").(string)
@@ -150,7 +162,7 @@ func init() {
 					if err != nil {
 						return ctx.Reply("json.Marshal: " + err.Error())
 					}
-					return ctx.File(bytes.NewReader(data), "tasks.txt")
+					return ctx.File(bytes.NewReader(data), "tasks.json")
 
 				default:
 					return ctx.Reply("invalid subcommand, thought this should never happen")
