@@ -112,18 +112,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			}
 
 			stats := fetch.WargamingToStats(realm, accounts[id], clans[id], vehicles)
-			accountUpdates = append(accountUpdates, models.Account{
-				Realm:    stats.Realm,
-				ID:       stats.Account.ID,
-				Nickname: stats.Account.Nickname,
-
-				Private:        false,
-				CreatedAt:      stats.Account.CreatedAt,
-				LastBattleTime: stats.LastBattleTime,
-
-				ClanID:  stats.Account.ClanID,
-				ClanTag: stats.Account.ClanTag,
-			})
+			accountUpdates = append(accountUpdates, stats.Account)
 			snapshots = append(snapshots, models.AccountSnapshot{
 				Type:           models.SnapshotTypeDaily,
 				CreatedAt:      createdAt,
@@ -179,6 +168,19 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		if len(vErr) > 0 {
 			accountErrors[accountId] = errors.Errorf("failed to insert %d vehicle snapshots", len(vErr))
 		}
+	}
+
+	uErr, err := dbClient.UpsertAccounts(ctx, accountUpdates)
+	// these errors are not critical, we log and continue
+	if err != nil {
+		log.Err(err).Msg("failed to upsert accounts")
+	}
+	if len(uErr) > 0 {
+		var errors = make(map[string]string)
+		for id, err := range uErr {
+			errors[id] = err.Error()
+		}
+		log.Error().Any("errors", errors).Msg("failed to upsert some accounts")
 	}
 
 	return accountErrors, nil
