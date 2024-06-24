@@ -59,7 +59,7 @@ func RunTasksWorker(queue *Queue) func() {
 		// each task worked handles 1 task at a time, but tasks might be very fast
 		// for now, we queue up 10 tasks per worker, this can be adjusted later/smarter
 		batchSize := queue.concurrencyLimit - activeWorkers
-		tasks, err := queue.core.Database().GetAndStartTasks(ctx, batchSize*10)
+		tasks, err := queue.core.Database().GetAndStartTasks(ctx, batchSize)
 		if err != nil {
 			if database.IsNotFound(err) {
 				log.Debug().Msg("no scheduled tasks to process")
