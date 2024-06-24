@@ -56,6 +56,7 @@ type SnapshotsClient interface {
 
 type TasksClient interface {
 	CreateTasks(ctx context.Context, tasks ...models.Task) error
+	GetTasks(ctx context.Context, ids ...string) ([]models.Task, error)
 	UpdateTasks(ctx context.Context, tasks ...models.Task) error
 	DeleteTasks(ctx context.Context, ids ...string) error
 

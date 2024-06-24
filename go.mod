@@ -6,7 +6,7 @@ require (
 	ariga.io/atlas v0.19.1-0.20240203083654-5948b60a8e43
 	entgo.io/ent v0.13.1
 	github.com/bwmarrin/discordgo v0.28.1
-	github.com/cufee/am-wg-proxy-next/v2 v2.1.4
+	github.com/cufee/am-wg-proxy-next/v2 v2.1.3
 	github.com/disintegration/imaging v1.6.2
 	github.com/fogleman/gg v1.3.0
 	github.com/go-co-op/gocron v1.37.0

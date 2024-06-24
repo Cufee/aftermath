@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -37,6 +38,9 @@ func init() {
 							builder.NewChoice("in-progress", string(models.TaskStatusInProgress)),
 						).Required(),
 						builder.NewOption("hours", discordgo.ApplicationCommandOptionNumber).Required(),
+					),
+					builder.NewOption("details", discordgo.ApplicationCommandOptionSubCommand).Options(
+						builder.NewOption("id", discordgo.ApplicationCommandOptionString).Required(),
 					),
 				),
 				builder.NewOption("snapshots", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
@@ -119,14 +123,40 @@ func init() {
 						return ctx.Reply("No recent tasks with status " + status)
 					}
 
+					var ids []string
+					for _, t := range tasks {
+						ids = append(ids, t.ID)
+					}
+
+					content := strings.Join(ids, "\n")
+					if len(content) > 1990 {
+						content = content[:1990]
+					}
+					return ctx.Reply("```" + content + "```")
+
+				case "tasks_details":
+					id, _ := opts.Value("id").(string)
+					if id == "" {
+						return ctx.Reply("id cannot be blank")
+					}
+
+					tasks, err := ctx.Core.Database().GetTasks(ctx.Context, id)
+					if err != nil {
+						return ctx.Reply("Database#GetTasks: " + err.Error())
+					}
+					if len(tasks) < 1 {
+						return ctx.Reply("No recent task found")
+					}
+
 					bytes, err := json.MarshalIndent(tasks, "", "  ")
 					if err != nil {
 						return ctx.Reply("json.Marshal: " + err.Error())
 					}
-					if len(string(bytes)) > 1990 {
-						return ctx.ReplyFmt("Too many tasks to show - %d", len(tasks))
+					content := string(bytes)
+					if len(content) > 1990 {
+						content = content[:1990]
 					}
-					return ctx.Reply("```" + string(bytes) + "```")
+					return ctx.Reply("```" + content + "```")
 
 				default:
 					return ctx.Reply("invalid subcommand, thought this should never happen")
