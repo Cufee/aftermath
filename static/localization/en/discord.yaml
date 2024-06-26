@@ -139,6 +139,10 @@
   value: "Aftermath does not yet have a session for this period. Try changing the number of days or using `/stats` instead."
   context: This account is being tracked, but there is no session available
 
+- key: stats_refresh_interaction_error_expired
+  value: "This refresh button has expired. Please use the command instead."
+  context: Failed to find required data in order to refresh stats/session
+
 # /background errors
 - key: background_error_payment_required
   value: "This feature of Aftermath is only available for users with an active subscription.\nYou can subscribe by using the `/subscribe` command or pick a background using `/fancy` instead."
