@@ -14,12 +14,12 @@ import (
 
 func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
 	var (
-		renderVehiclesCount = 3 // minimum number of vehicle cards
+		renderUnratedVehiclesCount = 3 // minimum number of vehicle cards
 		// primary cards
 		// when there are some unrated battles or no battles at all
 		shouldRenderUnratedOverview = session.RegularBattles.Battles > 0 || session.RatingBattles.Battles == 0
 		// when there are 3 vehicle cards and no rating overview cards or there are 6 vehicle cards and some rating battles
-		shouldRenderUnratedHighlights = (session.RegularBattles.Battles > 0 && session.RatingBattles.Battles < 1 && len(cards.Unrated.Vehicles) > renderVehiclesCount) ||
+		shouldRenderUnratedHighlights = (session.RegularBattles.Battles > 0 && session.RatingBattles.Battles < 1 && len(cards.Unrated.Vehicles) > renderUnratedVehiclesCount) ||
 			(session.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 6)
 		shouldRenderRatingOverview = session.RatingBattles.Battles > 0
 		shouldRenderRatingVehicles = len(cards.Unrated.Vehicles) == 0
@@ -28,14 +28,14 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	)
 
 	// try to make the columns height roughly similar to primary column
-	if shouldRenderUnratedHighlights && len(cards.Unrated.Highlights) > 1 {
-		renderVehiclesCount += len(cards.Unrated.Highlights)
+	if shouldRenderUnratedHighlights {
+		renderUnratedVehiclesCount += len(cards.Unrated.Highlights)
 	}
 	if shouldRenderRatingOverview {
-		renderVehiclesCount += 2
+		renderUnratedVehiclesCount += 1
 	}
 	if shouldRenderRatingVehicles {
-		renderVehiclesCount += len(cards.Rating.Vehicles)
+		renderUnratedVehiclesCount += len(cards.Rating.Vehicles)
 	}
 
 	var segments common.Segments
@@ -221,7 +221,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	if shouldRenderUnratedVehicles {
 		println("making unrated vehicles")
 		for i, vehicle := range cards.Unrated.Vehicles {
-			if i >= renderVehiclesCount {
+			if i >= renderUnratedVehiclesCount {
 				break
 			}
 			secondaryColumn = append(secondaryColumn, makeVehicleCard(vehicle, secondaryCardBlockSizes, secondaryCardWidth))
