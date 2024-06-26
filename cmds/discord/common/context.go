@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -112,11 +113,11 @@ func (c *Context) ReplyFmt(key string, args ...any) error {
 	return c.Message(fmt.Sprintf(c.Localize(key), args...))
 }
 
-func (c *Context) File(r io.Reader, name string) error {
+func (c *Context) File(r io.Reader, name string, message ...string) error {
 	if r == nil {
 		return errors.New("bad Context#File call with nil io.Reader")
 	}
-	return c.respond(discordgo.InteractionResponseData{Files: []*discordgo.File{{Reader: r, Name: name}}})
+	return c.respond(discordgo.InteractionResponseData{Files: []*discordgo.File{{Reader: r, Name: name}}, Content: strings.Join(message, "\n")})
 }
 
 func (c *Context) isCommand() bool {

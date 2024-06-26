@@ -60,7 +60,7 @@ func init() {
 					// TODO: Get user background
 				}
 
-				image, _, err := ctx.Core.Render(ctx.Locale).Period(context.Background(), accountID, options.PeriodStart, render.WithBackground(background))
+				image, meta, err := ctx.Core.Render(ctx.Locale).Period(context.Background(), accountID, options.PeriodStart, render.WithBackground(background))
 				if err != nil {
 					return ctx.Err(err)
 				}
@@ -71,7 +71,13 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				return ctx.File(&buf, "stats_command_by_aftermath.png")
+				var timings = []string{"```"}
+				for name, duration := range meta.Timings {
+					timings = append(timings, fmt.Sprintf("%s: %v", name, duration.Milliseconds()))
+				}
+				timings = append(timings, "```")
+
+				return ctx.File(&buf, "stats_command_by_aftermath.png", timings...)
 			}),
 	)
 }

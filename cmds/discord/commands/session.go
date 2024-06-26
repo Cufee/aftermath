@@ -63,7 +63,7 @@ func init() {
 					// TODO: Get user background
 				}
 
-				image, _, err := ctx.Core.Render(ctx.Locale).Session(context.Background(), accountID, options.PeriodStart, render.WithBackground(background))
+				image, meta, err := ctx.Core.Render(ctx.Locale).Session(context.Background(), accountID, options.PeriodStart, render.WithBackground(background))
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
 						return ctx.Reply("session_error_account_was_not_tracked")
@@ -80,7 +80,13 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				return ctx.File(&buf, "session_command_by_aftermath.png")
+				var timings = []string{"```"}
+				for name, duration := range meta.Timings {
+					timings = append(timings, fmt.Sprintf("%s: %v", name, duration.Milliseconds()))
+				}
+				timings = append(timings, "```")
+
+				return ctx.File(&buf, "session_command_by_aftermath.png", timings...)
 			}),
 	)
 }
