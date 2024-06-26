@@ -10,6 +10,7 @@ import (
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
+	"github.com/pkg/errors"
 )
 
 func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
@@ -199,17 +200,38 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		//
 	}
 
+	// we are done with the primary column at this point and can render it as an image in order to have access to final height
+	primaryColumnBlock := common.NewBlocksContent(overviewColumnStyle(primaryCardWidth), primaryColumn...)
+	primaryColumnImage, err := primaryColumnBlock.Render()
+	if err != nil {
+		return common.Segments{}, err
+	}
+
 	// unrated vehicles
+	var totalSecondaryCardsHeight float64
+	var primaryCardHeight = float64(primaryColumnImage.Bounds().Dy())
 	if shouldRenderUnratedVehicles {
 		for i, vehicle := range cards.Unrated.Vehicles {
-			secondaryColumn = append(secondaryColumn, makeVehicleCard(vehicle, secondaryCardBlockSizes, secondaryCardWidth))
-			if i == len(cards.Unrated.Vehicles)-1 {
-				secondaryColumn = append(secondaryColumn, makeVehicleLegendCard(cards.Unrated.Vehicles[0], secondaryCardBlockSizes, secondaryCardWidth))
+			vehicleCard := makeVehicleCard(vehicle, secondaryCardBlockSizes, secondaryCardWidth)
+			vehicleCardImage, err := vehicleCard.Render()
+			if err != nil {
+				return common.Segments{}, errors.Wrapf(err, "failed to render a vehicle card for %s", vehicle.Title)
 			}
+
+			height := float64(vehicleCardImage.Bounds().Dy())
+			// stop rendering cards when the total column height is larger than the primary column and there are at least 3 vehicles
+			if totalSecondaryCardsHeight+height > primaryCardHeight && i >= 3 {
+				break
+			}
+			secondaryColumn = append(secondaryColumn, common.NewImageContent(common.Style{}, vehicleCardImage))
+			totalSecondaryCardsHeight += height + overviewCardStyle(0).Gap
+		}
+		if len(cards.Unrated.Vehicles) > 0 {
+			secondaryColumn = append(secondaryColumn, makeVehicleLegendCard(cards.Unrated.Vehicles[0], secondaryCardBlockSizes, secondaryCardWidth))
 		}
 	}
 
-	columns := []common.Block{common.NewBlocksContent(overviewColumnStyle(primaryCardWidth), primaryColumn...)}
+	columns := []common.Block{common.NewImageContent(common.Style{}, primaryColumnImage)}
 	if len(secondaryColumn) > 0 {
 		columns = append(columns, common.NewBlocksContent(overviewColumnStyle(secondaryCardWidth), secondaryColumn...))
 	}
