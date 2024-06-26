@@ -111,7 +111,7 @@ func init() {
 					return ctx.Reply().Send("```" + string(bytes) + "```")
 
 				case "tasks_view":
-					if !ctx.User.Permissions.Has(permissions.ViewTaskLogs) {
+					if !ctx.User.HasPermission(permissions.ViewTaskLogs) {
 						ctx.Reply().Send("You do not have access to this sub-command.")
 					}
 
@@ -149,7 +149,7 @@ func init() {
 					return ctx.Reply().File(bytes.NewBufferString(content), "tasks.json").Send()
 
 				case "tasks_details":
-					if !ctx.User.Permissions.Has(permissions.ViewTaskLogs) {
+					if !ctx.User.HasPermission(permissions.ViewTaskLogs) {
 						ctx.Reply().Send("You do not have access to this sub-command.")
 					}
 

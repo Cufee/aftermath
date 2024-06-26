@@ -41,14 +41,17 @@ func init() {
 						return ctx.Reply().Send("stats_error_connection_not_found_vague")
 					}
 					accountID = defaultAccount.ReferenceID
-					// TODO: Get user background
+					background, ok := mentionedUser.Content(models.UserContentTypePersonalBackground)
+					if ok {
+						backgroundURL = background.Value
+					}
 
 				case options.Nickname != "" && options.Server != "":
 					// nickname provided and server selected - lookup the account
 					account, err := ctx.Core.Fetch().Search(ctx.Context, options.Nickname, options.Server)
 					if err != nil {
 						if err.Error() == "no results found" {
-							return ctx.Reply().Fmt("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server)).Send()
+							return ctx.Reply().Format("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server)).Send()
 						}
 						return ctx.Err(err)
 					}
@@ -61,7 +64,10 @@ func init() {
 					}
 					// command used without options, but user has a default connection
 					accountID = defaultAccount.ReferenceID
-					// TODO: Get user background
+					background, ok := ctx.User.Content(models.UserContentTypePersonalBackground)
+					if ok {
+						backgroundURL = background.Value
+					}
 				}
 
 				image, meta, err := ctx.Core.Render(ctx.Locale).Session(context.Background(), accountID, options.PeriodStart, render.WithBackground(backgroundURL))
@@ -92,7 +98,7 @@ func init() {
 				}
 
 				var timings []string
-				if ctx.User.Permissions.Has(permissions.UseDebugFeatures) {
+				if ctx.User.HasPermission(permissions.UseDebugFeatures) {
 					timings = append(timings, "```")
 					for name, duration := range meta.Timings {
 						timings = append(timings, fmt.Sprintf("%s: %v", name, duration.Milliseconds()))

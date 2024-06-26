@@ -94,7 +94,7 @@ func init() {
 				}
 
 				var timings []string
-				if ctx.User.Permissions.Has(permissions.UseDebugFeatures) {
+				if ctx.User.HasPermission(permissions.UseDebugFeatures) {
 					timings = append(timings, "```")
 					for name, duration := range meta.Timings {
 						timings = append(timings, fmt.Sprintf("%s: %v", name, duration.Milliseconds()))

@@ -21,9 +21,9 @@ func toUser(record *db.User, connections []*db.UserConnection, subscriptions []*
 	for _, s := range subscriptions {
 		user.Subscriptions = append(user.Subscriptions, toUserSubscription(s))
 	}
-	// for _, s := range content {
-	// 	user.Subscriptions = append(user.Subscriptions, toUserSubscription(s))
-	// }
+	for _, c := range content {
+		user.Uploads = append(user.Uploads, toUserContent(c))
+	}
 	return user
 }
 
@@ -49,16 +49,20 @@ func toUserSubscription(record *db.UserSubscription) models.UserSubscription {
 	}
 }
 
-// func toUserContent(record *db.UserSubscription) models.UserConnection {
-// 	return models.UserSubscription{
-// 		ID:          record.ID,
-// 		Type:        record.Type,
-// 		UserID:      record.UserID,
-// 		ReferenceID: record.ReferenceID,
-// 		ExpiresAt:   time.Unix(record.ExpiresAt, 0),
-// 		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
-// 	}
-// }
+func toUserContent(record *db.UserContent) models.UserContent {
+	return models.UserContent{
+		ID:          record.ID,
+		Type:        record.Type,
+		UserID:      record.UserID,
+		ReferenceID: record.ReferenceID,
+
+		Value: record.Value,
+		Meta:  record.Metadata,
+
+		CreatedAt: time.Unix(record.CreatedAt, 0),
+		UpdatedAt: time.Unix(record.UpdatedAt, 0),
+	}
+}
 
 type userGetOpts struct {
 	content       bool

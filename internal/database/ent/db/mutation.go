@@ -8820,7 +8820,7 @@ type UserContentMutation struct {
 	addupdated_at *int64
 	_type         *models.UserContentType
 	reference_id  *string
-	value         *any
+	value         *string
 	metadata      *map[string]interface{}
 	clearedFields map[string]struct{}
 	user          *string
@@ -9155,12 +9155,12 @@ func (m *UserContentMutation) ResetReferenceID() {
 }
 
 // SetValue sets the "value" field.
-func (m *UserContentMutation) SetValue(a any) {
-	m.value = &a
+func (m *UserContentMutation) SetValue(s string) {
+	m.value = &s
 }
 
 // Value returns the value of the "value" field in the mutation.
-func (m *UserContentMutation) Value() (r any, exists bool) {
+func (m *UserContentMutation) Value() (r string, exists bool) {
 	v := m.value
 	if v == nil {
 		return
@@ -9171,7 +9171,7 @@ func (m *UserContentMutation) Value() (r any, exists bool) {
 // OldValue returns the old "value" field's value of the UserContent entity.
 // If the UserContent object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserContentMutation) OldValue(ctx context.Context) (v any, err error) {
+func (m *UserContentMutation) OldValue(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldValue is only allowed on UpdateOne operations")
 	}
@@ -9399,7 +9399,7 @@ func (m *UserContentMutation) SetField(name string, value ent.Value) error {
 		m.SetReferenceID(v)
 		return nil
 	case usercontent.FieldValue:
-		v, ok := value.(any)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

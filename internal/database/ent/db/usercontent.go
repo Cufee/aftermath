@@ -30,7 +30,7 @@ type UserContent struct {
 	// ReferenceID holds the value of the "reference_id" field.
 	ReferenceID string `json:"reference_id,omitempty"`
 	// Value holds the value of the "value" field.
-	Value any `json:"value,omitempty"`
+	Value string `json:"value,omitempty"`
 	// Metadata holds the value of the "metadata" field.
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -64,11 +64,11 @@ func (*UserContent) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case usercontent.FieldValue, usercontent.FieldMetadata:
+		case usercontent.FieldMetadata:
 			values[i] = new([]byte)
 		case usercontent.FieldCreatedAt, usercontent.FieldUpdatedAt:
 			values[i] = new(sql.NullInt64)
-		case usercontent.FieldID, usercontent.FieldType, usercontent.FieldUserID, usercontent.FieldReferenceID:
+		case usercontent.FieldID, usercontent.FieldType, usercontent.FieldUserID, usercontent.FieldReferenceID, usercontent.FieldValue:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -122,12 +122,10 @@ func (uc *UserContent) assignValues(columns []string, values []any) error {
 				uc.ReferenceID = value.String
 			}
 		case usercontent.FieldValue:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field value", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &uc.Value); err != nil {
-					return fmt.Errorf("unmarshal field value: %w", err)
-				}
+			} else if value.Valid {
+				uc.Value = value.String
 			}
 		case usercontent.FieldMetadata:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -194,7 +192,7 @@ func (uc *UserContent) String() string {
 	builder.WriteString(uc.ReferenceID)
 	builder.WriteString(", ")
 	builder.WriteString("value=")
-	builder.WriteString(fmt.Sprintf("%v", uc.Value))
+	builder.WriteString(uc.Value)
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", uc.Metadata))

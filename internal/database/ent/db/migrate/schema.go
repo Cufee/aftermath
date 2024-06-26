@@ -436,7 +436,7 @@ var (
 		{Name: "updated_at", Type: field.TypeInt64},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"clan-background-image", "personal-background-image"}},
 		{Name: "reference_id", Type: field.TypeString},
-		{Name: "value", Type: field.TypeJSON},
+		{Name: "value", Type: field.TypeString},
 		{Name: "metadata", Type: field.TypeJSON},
 		{Name: "user_id", Type: field.TypeString},
 	}

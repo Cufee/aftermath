@@ -118,6 +118,11 @@ func ByReferenceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldReferenceID, opts...).ToFunc()
 }
 
+// ByValue orders the results by the value field.
+func ByValue(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldValue, opts...).ToFunc()
+}
+
 // ByUserField orders the results by user field.
 func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
