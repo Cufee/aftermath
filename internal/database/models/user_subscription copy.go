@@ -66,36 +66,6 @@ func (s SubscriptionType) Valid() bool {
 	return slices.Contains(AllSubscriptionTypes, s)
 }
 
-type UserContentType string
-
-const (
-	UserContentTypeClanBackground     = UserContentType("clan-background-image")
-	UserContentTypePersonalBackground = UserContentType("personal-background-image")
-)
-
-func (t UserContentType) Valid() bool {
-	switch t {
-	case UserContentTypeClanBackground:
-		return true
-	case UserContentTypePersonalBackground:
-		return true
-	default:
-		return false
-	}
-}
-
-// Values provides list valid values for Enum.
-func (UserContentType) Values() []string {
-	var kinds []string
-	for _, s := range []UserContentType{
-		UserContentTypeClanBackground,
-		UserContentTypePersonalBackground,
-	} {
-		kinds = append(kinds, string(s))
-	}
-	return kinds
-}
-
 type UserSubscription struct {
 	ID          string
 	Type        SubscriptionType

@@ -84,6 +84,11 @@ func ReferenceID(v string) predicate.UserContent {
 	return predicate.UserContent(sql.FieldEQ(FieldReferenceID, v))
 }
 
+// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
+func Value(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldEQ(FieldValue, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v int64) predicate.UserContent {
 	return predicate.UserContent(sql.FieldEQ(FieldCreatedAt, v))
@@ -322,6 +327,71 @@ func ReferenceIDEqualFold(v string) predicate.UserContent {
 // ReferenceIDContainsFold applies the ContainsFold predicate on the "reference_id" field.
 func ReferenceIDContainsFold(v string) predicate.UserContent {
 	return predicate.UserContent(sql.FieldContainsFold(FieldReferenceID, v))
+}
+
+// ValueEQ applies the EQ predicate on the "value" field.
+func ValueEQ(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldEQ(FieldValue, v))
+}
+
+// ValueNEQ applies the NEQ predicate on the "value" field.
+func ValueNEQ(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldNEQ(FieldValue, v))
+}
+
+// ValueIn applies the In predicate on the "value" field.
+func ValueIn(vs ...string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldIn(FieldValue, vs...))
+}
+
+// ValueNotIn applies the NotIn predicate on the "value" field.
+func ValueNotIn(vs ...string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldNotIn(FieldValue, vs...))
+}
+
+// ValueGT applies the GT predicate on the "value" field.
+func ValueGT(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldGT(FieldValue, v))
+}
+
+// ValueGTE applies the GTE predicate on the "value" field.
+func ValueGTE(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldGTE(FieldValue, v))
+}
+
+// ValueLT applies the LT predicate on the "value" field.
+func ValueLT(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldLT(FieldValue, v))
+}
+
+// ValueLTE applies the LTE predicate on the "value" field.
+func ValueLTE(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldLTE(FieldValue, v))
+}
+
+// ValueContains applies the Contains predicate on the "value" field.
+func ValueContains(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldContains(FieldValue, v))
+}
+
+// ValueHasPrefix applies the HasPrefix predicate on the "value" field.
+func ValueHasPrefix(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldHasPrefix(FieldValue, v))
+}
+
+// ValueHasSuffix applies the HasSuffix predicate on the "value" field.
+func ValueHasSuffix(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldHasSuffix(FieldValue, v))
+}
+
+// ValueEqualFold applies the EqualFold predicate on the "value" field.
+func ValueEqualFold(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldEqualFold(FieldValue, v))
+}
+
+// ValueContainsFold applies the ContainsFold predicate on the "value" field.
+func ValueContainsFold(v string) predicate.UserContent {
+	return predicate.UserContent(sql.FieldContainsFold(FieldValue, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

@@ -70,8 +70,16 @@ func (ucu *UserContentUpdate) SetNillableReferenceID(s *string) *UserContentUpda
 }
 
 // SetValue sets the "value" field.
-func (ucu *UserContentUpdate) SetValue(a any) *UserContentUpdate {
-	ucu.mutation.SetValue(a)
+func (ucu *UserContentUpdate) SetValue(s string) *UserContentUpdate {
+	ucu.mutation.SetValue(s)
+	return ucu
+}
+
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (ucu *UserContentUpdate) SetNillableValue(s *string) *UserContentUpdate {
+	if s != nil {
+		ucu.SetValue(*s)
+	}
 	return ucu
 }
 
@@ -160,7 +168,7 @@ func (ucu *UserContentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(usercontent.FieldReferenceID, field.TypeString, value)
 	}
 	if value, ok := ucu.mutation.Value(); ok {
-		_spec.SetField(usercontent.FieldValue, field.TypeJSON, value)
+		_spec.SetField(usercontent.FieldValue, field.TypeString, value)
 	}
 	if value, ok := ucu.mutation.Metadata(); ok {
 		_spec.SetField(usercontent.FieldMetadata, field.TypeJSON, value)
@@ -227,8 +235,16 @@ func (ucuo *UserContentUpdateOne) SetNillableReferenceID(s *string) *UserContent
 }
 
 // SetValue sets the "value" field.
-func (ucuo *UserContentUpdateOne) SetValue(a any) *UserContentUpdateOne {
-	ucuo.mutation.SetValue(a)
+func (ucuo *UserContentUpdateOne) SetValue(s string) *UserContentUpdateOne {
+	ucuo.mutation.SetValue(s)
+	return ucuo
+}
+
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (ucuo *UserContentUpdateOne) SetNillableValue(s *string) *UserContentUpdateOne {
+	if s != nil {
+		ucuo.SetValue(*s)
+	}
 	return ucuo
 }
 
@@ -347,7 +363,7 @@ func (ucuo *UserContentUpdateOne) sqlSave(ctx context.Context) (_node *UserConte
 		_spec.SetField(usercontent.FieldReferenceID, field.TypeString, value)
 	}
 	if value, ok := ucuo.mutation.Value(); ok {
-		_spec.SetField(usercontent.FieldValue, field.TypeJSON, value)
+		_spec.SetField(usercontent.FieldValue, field.TypeString, value)
 	}
 	if value, ok := ucuo.mutation.Metadata(); ok {
 		_spec.SetField(usercontent.FieldMetadata, field.TypeJSON, value)

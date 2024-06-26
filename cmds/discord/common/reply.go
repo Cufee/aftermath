@@ -22,7 +22,7 @@ func (r reply) Text(message ...string) reply {
 	return r
 }
 
-func (r reply) Fmt(format string, args ...any) reply {
+func (r reply) Format(format string, args ...any) reply {
 	r.text = append(r.text, fmt.Sprintf(format, args...))
 	return r
 }

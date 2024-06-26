@@ -45,7 +45,7 @@ func init() {
 					account, err := ctx.Core.Fetch().Search(ctx.Context, options.Nickname, options.Server)
 					if err != nil {
 						if err.Error() == "no results found" {
-							return ctx.Reply().Fmt("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server)).Send()
+							return ctx.Reply().Format("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server)).Send()
 						}
 						return ctx.Err(err)
 					}
@@ -83,7 +83,7 @@ func init() {
 				}
 
 				var timings []string
-				if ctx.User.Permissions.Has(permissions.UseDebugFeatures) {
+				if ctx.User.HasPermission(permissions.UseDebugFeatures) {
 					timings = append(timings, "```")
 					for name, duration := range meta.Timings {
 						timings = append(timings, fmt.Sprintf("%s: %v", name, duration.Milliseconds()))

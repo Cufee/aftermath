@@ -68,8 +68,8 @@ func (ucc *UserContentCreate) SetReferenceID(s string) *UserContentCreate {
 }
 
 // SetValue sets the "value" field.
-func (ucc *UserContentCreate) SetValue(a any) *UserContentCreate {
-	ucc.mutation.SetValue(a)
+func (ucc *UserContentCreate) SetValue(s string) *UserContentCreate {
+	ucc.mutation.SetValue(s)
 	return ucc
 }
 
@@ -230,7 +230,7 @@ func (ucc *UserContentCreate) createSpec() (*UserContent, *sqlgraph.CreateSpec) 
 		_node.ReferenceID = value
 	}
 	if value, ok := ucc.mutation.Value(); ok {
-		_spec.SetField(usercontent.FieldValue, field.TypeJSON, value)
+		_spec.SetField(usercontent.FieldValue, field.TypeString, value)
 		_node.Value = value
 	}
 	if value, ok := ucc.mutation.Metadata(); ok {

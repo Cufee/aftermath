@@ -21,7 +21,7 @@ func (UserContent) Fields() []ent.Field {
 		field.String("user_id").Immutable(),
 		field.String("reference_id"),
 		//
-		field.Any("value"),
+		field.String("value"),
 		field.JSON("metadata", map[string]any{}),
 	)
 }
