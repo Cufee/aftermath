@@ -34,6 +34,11 @@ func init() {
 				return "failed to delete expired tasks", err
 			}
 
+			err = client.Database().DeleteExpiredInteractions(ctx, time.Unix(taskExpiration, 0))
+			if err != nil {
+				return "failed to delete expired interactions", err
+			}
+
 			err = client.Database().DeleteExpiredSnapshots(ctx, time.Unix(snapshotExpiration, 0))
 			if err != nil {
 				return "failed to delete expired snapshots", err

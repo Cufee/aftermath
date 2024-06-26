@@ -19,7 +19,7 @@ func init() {
 	Loaded.add(
 		builder.NewCommand("manage").
 			// ExclusiveToGuilds(os.Getenv("DISCORD_PRIMARY_GUILD_ID")).
-			Middleware(middleware.RequirePermissions(permissions.ContentModerator)).
+			Middleware(middleware.RequirePermissions(permissions.UseDebugFeatures)).
 			Options(
 				builder.NewOption("users", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
 					builder.NewOption("lookup", discordgo.ApplicationCommandOptionSubCommand).Options(
@@ -59,36 +59,36 @@ func init() {
 					userID, _ := opts.Value("user").(string)
 					result, err := ctx.Core.Database().GetUserByID(ctx.Context, userID, database.WithConnections())
 					if err != nil {
-						return ctx.Reply("Database#GetUserByID: " + err.Error())
+						return ctx.Reply().Send("Database#GetUserByID: " + err.Error())
 					}
 
 					data, err := json.MarshalIndent(result, "", "  ")
 					if err != nil {
-						return ctx.Reply("MarshalIndent: " + err.Error())
+						return ctx.Reply().Send("MarshalIndent: " + err.Error())
 					}
-					return ctx.Reply("```" + string(data) + "```")
+					return ctx.Reply().Send("```" + string(data) + "```")
 
 				case "accounts_search":
 					nickname, _ := opts.Value("nickname").(string)
 					server, _ := opts.Value("server").(string)
 					result, err := ctx.Core.Fetch().Search(ctx.Context, nickname, server)
 					if err != nil {
-						return ctx.Reply("Fetch#Search: " + err.Error())
+						return ctx.Reply().Send("Fetch#Search: " + err.Error())
 					}
 					data, err := json.MarshalIndent(result, "", "  ")
 					if err != nil {
-						return ctx.Reply("MarshalIndent: " + err.Error())
+						return ctx.Reply().Send("MarshalIndent: " + err.Error())
 					}
-					return ctx.Reply("```" + string(data) + "```")
+					return ctx.Reply().Send("```" + string(data) + "```")
 
 				case "snapshots_view":
 					accountId, ok := opts.Value("account_id").(string)
 					if !ok {
-						return ctx.Reply("invalid accountId, failed to cast to string")
+						return ctx.Reply().Send("invalid accountId, failed to cast to string")
 					}
 					snapshots, err := ctx.Core.Database().GetLastAccountSnapshots(ctx.Context, accountId, 3)
 					if err != nil {
-						return ctx.Reply("GetLastAccountSnapshots: " + err.Error())
+						return ctx.Reply().Send("GetLastAccountSnapshots: " + err.Error())
 					}
 
 					var data []map[string]string
@@ -106,11 +106,15 @@ func init() {
 
 					bytes, err := json.MarshalIndent(data, "", "  ")
 					if err != nil {
-						return ctx.Reply("json.Marshal: " + err.Error())
+						return ctx.Reply().Send("json.Marshal: " + err.Error())
 					}
-					return ctx.Reply("```" + string(bytes) + "```")
+					return ctx.Reply().Send("```" + string(bytes) + "```")
 
 				case "tasks_view":
+					if !ctx.User.Permissions.Has(permissions.ViewTaskLogs) {
+						ctx.Reply().Send("You do not have access to this sub-command.")
+					}
+
 					hours, _ := opts.Value("hours").(float64)
 					status, _ := opts.Value("status").(string)
 					if hours < 1 {
@@ -119,10 +123,10 @@ func init() {
 
 					tasks, err := ctx.Core.Database().GetRecentTasks(ctx.Context, time.Now().Add(time.Hour*time.Duration(hours)*-1), models.TaskStatus(status))
 					if err != nil {
-						return ctx.Reply("Database#GetRecentTasks: " + err.Error())
+						return ctx.Reply().Send("Database#GetRecentTasks: " + err.Error())
 					}
 					if len(tasks) < 1 {
-						return ctx.Reply("No recent tasks with status " + status)
+						return ctx.Reply().Send("No recent tasks with status " + status)
 					}
 
 					content := fmt.Sprintf("total: %d\n", len(tasks))
@@ -138,34 +142,38 @@ func init() {
 					}
 					data, err := json.MarshalIndent(reduced, "", "  ")
 					if err != nil {
-						return ctx.Reply("json.Marshal: " + err.Error())
+						return ctx.Reply().Send("json.Marshal: " + err.Error())
 					}
 					content += string(data)
 
-					return ctx.File(bytes.NewBufferString(content), "tasks.json")
+					return ctx.Reply().File(bytes.NewBufferString(content), "tasks.json").Send()
 
 				case "tasks_details":
+					if !ctx.User.Permissions.Has(permissions.ViewTaskLogs) {
+						ctx.Reply().Send("You do not have access to this sub-command.")
+					}
+
 					id, _ := opts.Value("id").(string)
 					if id == "" {
-						return ctx.Reply("id cannot be blank")
+						return ctx.Reply().Send("id cannot be blank")
 					}
 
 					tasks, err := ctx.Core.Database().GetTasks(ctx.Context, id)
 					if err != nil {
-						return ctx.Reply("Database#GetTasks: " + err.Error())
+						return ctx.Reply().Send("Database#GetTasks: " + err.Error())
 					}
 					if len(tasks) < 1 {
-						return ctx.Reply("No recent task found")
+						return ctx.Reply().Send("No recent task found")
 					}
 
 					data, err := json.MarshalIndent(tasks, "", "  ")
 					if err != nil {
-						return ctx.Reply("json.Marshal: " + err.Error())
+						return ctx.Reply().Send("json.Marshal: " + err.Error())
 					}
-					return ctx.File(bytes.NewReader(data), "tasks.json")
+					return ctx.Reply().File(bytes.NewReader(data), "tasks.json").Send()
 
 				default:
-					return ctx.Reply("invalid subcommand, thought this should never happen")
+					return ctx.Reply().Send("invalid subcommand, thought this should never happen")
 				}
 			}),
 	)

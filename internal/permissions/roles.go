@@ -16,6 +16,7 @@ var (
 				Add(CreateSoftUserRestriction)
 
 	GlobalModerator = ContentModerator.
+			Add(UseDebugFeatures).
 			Add(ViewUserSubscriptions).
 			Add(CreateUserSubscription).
 			Add(ExtendUserSubscription).
@@ -30,6 +31,7 @@ var (
 			Add(CreateHardUserRestriction)
 
 	GlobalAdmin = GlobalModerator.
+			Add(DebugAccess).
 			Add(CreateGlobalBackgroundPreset).
 			Add(UpdateGlobalBackgroundPreset).
 			Add(RemoveGlobalBackgroundPreset).
@@ -50,6 +52,8 @@ var (
 			Add(UpdateSoftRestriction).
 			Add(UpdateHardRestriction).
 			Add(RemoveSoftRestriction).
-			Add(RemoveHardRestriction).
-			Add(ViewLogs)
+			Add(RemoveHardRestriction)
+
+	DebugAccess = UseDebugFeatures.
+			Add(ViewTaskLogs)
 )

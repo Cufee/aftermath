@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
@@ -74,6 +75,21 @@ func (uc *UserCreate) SetFeatureFlags(s []string) *UserCreate {
 func (uc *UserCreate) SetID(s string) *UserCreate {
 	uc.mutation.SetID(s)
 	return uc
+}
+
+// AddDiscordInteractionIDs adds the "discord_interactions" edge to the DiscordInteraction entity by IDs.
+func (uc *UserCreate) AddDiscordInteractionIDs(ids ...string) *UserCreate {
+	uc.mutation.AddDiscordInteractionIDs(ids...)
+	return uc
+}
+
+// AddDiscordInteractions adds the "discord_interactions" edges to the DiscordInteraction entity.
+func (uc *UserCreate) AddDiscordInteractions(d ...*DiscordInteraction) *UserCreate {
+	ids := make([]string, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uc.AddDiscordInteractionIDs(ids...)
 }
 
 // AddSubscriptionIDs adds the "subscriptions" edge to the UserSubscription entity by IDs.
@@ -231,6 +247,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.FeatureFlags(); ok {
 		_spec.SetField(user.FieldFeatureFlags, field.TypeJSON, value)
 		_node.FeatureFlags = value
+	}
+	if nodes := uc.mutation.DiscordInteractionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DiscordInteractionsTable,
+			Columns: []string{user.DiscordInteractionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordinteraction.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.SubscriptionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

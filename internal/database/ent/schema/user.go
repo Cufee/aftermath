@@ -33,6 +33,7 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.To("discord_interactions", DiscordInteraction.Type),
 		edge.To("subscriptions", UserSubscription.Type),
 		edge.To("connections", UserConnection.Type),
 		edge.To("content", UserContent.Type),

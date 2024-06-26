@@ -2,9 +2,6 @@ package common
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"strings"
 
 	"github.com/pkg/errors"
 
@@ -88,36 +85,22 @@ func (c *Context) respond(data discordgo.InteractionResponseData) error {
 	return nil
 }
 
-func (c *Context) Message(message string) error {
-	if message == "" {
-		return errors.New("bad reply call with blank message")
-	}
-	return c.respond(discordgo.InteractionResponseData{Content: message})
+func (c *Context) InteractionID() string {
+	return c.interaction.ID
 }
 
-func (c *Context) Reply(key string) error {
-	return c.Message(c.Localize(key))
+func (c *Context) Reply() reply {
+	return reply{ctx: c}
 }
 
 func (c *Context) Err(err error) error {
 	log.Err(err).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
-	return c.Reply("common_error_unhandled_not_reported")
+	return c.Reply().Send("common_error_unhandled_not_reported")
 }
 
 func (c *Context) Error(message string) error {
 	log.Error().Str("message", message).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
-	return c.Reply("common_error_unhandled_not_reported")
-}
-
-func (c *Context) ReplyFmt(key string, args ...any) error {
-	return c.Message(fmt.Sprintf(c.Localize(key), args...))
-}
-
-func (c *Context) File(r io.Reader, name string, message ...string) error {
-	if r == nil {
-		return errors.New("bad Context#File call with nil io.Reader")
-	}
-	return c.respond(discordgo.InteractionResponseData{Files: []*discordgo.File{{Reader: r, Name: name}}, Content: strings.Join(message, "\n")})
+	return c.Reply().Send("common_error_unhandled_not_reported")
 }
 
 func (c *Context) isCommand() bool {

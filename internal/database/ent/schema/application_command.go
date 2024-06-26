@@ -6,19 +6,6 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// model ApplicationCommand {
-//   id        String   @id
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   name        String
-//   version     String
-//   optionsHash String
-
-//   @@index([optionsHash])
-//   @@map("application_commands")
-// }
-
 // ApplicationCommand holds the schema definition for the ApplicationCommand entity.
 type ApplicationCommand struct {
 	ent.Schema

@@ -233,6 +233,29 @@ func FeatureFlagsNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldFeatureFlags))
 }
 
+// HasDiscordInteractions applies the HasEdge predicate on the "discord_interactions" edge.
+func HasDiscordInteractions() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DiscordInteractionsTable, DiscordInteractionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDiscordInteractionsWith applies the HasEdge predicate on the "discord_interactions" edge with a given conditions (other predicates).
+func HasDiscordInteractionsWith(preds ...predicate.DiscordInteraction) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newDiscordInteractionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasSubscriptions applies the HasEdge predicate on the "subscriptions" edge.
 func HasSubscriptions() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

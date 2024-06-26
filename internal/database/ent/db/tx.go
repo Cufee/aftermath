@@ -28,6 +28,8 @@ type Tx struct {
 	Clan *ClanClient
 	// CronTask is the client for interacting with the CronTask builders.
 	CronTask *CronTaskClient
+	// DiscordInteraction is the client for interacting with the DiscordInteraction builders.
+	DiscordInteraction *DiscordInteractionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserConnection is the client for interacting with the UserConnection builders.
@@ -180,6 +182,7 @@ func (tx *Tx) init() {
 	tx.ApplicationCommand = NewApplicationCommandClient(tx.config)
 	tx.Clan = NewClanClient(tx.config)
 	tx.CronTask = NewCronTaskClient(tx.config)
+	tx.DiscordInteraction = NewDiscordInteractionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserConnection = NewUserConnectionClient(tx.config)
 	tx.UserContent = NewUserContentClient(tx.config)

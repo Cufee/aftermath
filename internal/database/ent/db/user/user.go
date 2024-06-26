@@ -20,6 +20,8 @@ const (
 	FieldPermissions = "permissions"
 	// FieldFeatureFlags holds the string denoting the feature_flags field in the database.
 	FieldFeatureFlags = "feature_flags"
+	// EdgeDiscordInteractions holds the string denoting the discord_interactions edge name in mutations.
+	EdgeDiscordInteractions = "discord_interactions"
 	// EdgeSubscriptions holds the string denoting the subscriptions edge name in mutations.
 	EdgeSubscriptions = "subscriptions"
 	// EdgeConnections holds the string denoting the connections edge name in mutations.
@@ -28,6 +30,13 @@ const (
 	EdgeContent = "content"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// DiscordInteractionsTable is the table that holds the discord_interactions relation/edge.
+	DiscordInteractionsTable = "discord_interactions"
+	// DiscordInteractionsInverseTable is the table name for the DiscordInteraction entity.
+	// It exists in this package in order to avoid circular dependency with the "discordinteraction" package.
+	DiscordInteractionsInverseTable = "discord_interactions"
+	// DiscordInteractionsColumn is the table column denoting the discord_interactions relation/edge.
+	DiscordInteractionsColumn = "user_id"
 	// SubscriptionsTable is the table that holds the subscriptions relation/edge.
 	SubscriptionsTable = "user_subscriptions"
 	// SubscriptionsInverseTable is the table name for the UserSubscription entity.
@@ -104,6 +113,20 @@ func ByPermissions(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPermissions, opts...).ToFunc()
 }
 
+// ByDiscordInteractionsCount orders the results by discord_interactions count.
+func ByDiscordInteractionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDiscordInteractionsStep(), opts...)
+	}
+}
+
+// ByDiscordInteractions orders the results by discord_interactions terms.
+func ByDiscordInteractions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDiscordInteractionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // BySubscriptionsCount orders the results by subscriptions count.
 func BySubscriptionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -144,6 +167,13 @@ func ByContent(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newContentStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
+}
+func newDiscordInteractionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DiscordInteractionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DiscordInteractionsTable, DiscordInteractionsColumn),
+	)
 }
 func newSubscriptionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

@@ -10,6 +10,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
+	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
@@ -202,6 +203,34 @@ func init() {
 	crontaskDescID := crontaskFields[0].Descriptor()
 	// crontask.DefaultID holds the default value on creation for the id field.
 	crontask.DefaultID = crontaskDescID.Default.(func() string)
+	discordinteractionFields := schema.DiscordInteraction{}.Fields()
+	_ = discordinteractionFields
+	// discordinteractionDescCreatedAt is the schema descriptor for created_at field.
+	discordinteractionDescCreatedAt := discordinteractionFields[1].Descriptor()
+	// discordinteraction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	discordinteraction.DefaultCreatedAt = discordinteractionDescCreatedAt.Default.(func() int64)
+	// discordinteractionDescUpdatedAt is the schema descriptor for updated_at field.
+	discordinteractionDescUpdatedAt := discordinteractionFields[2].Descriptor()
+	// discordinteraction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	discordinteraction.DefaultUpdatedAt = discordinteractionDescUpdatedAt.Default.(func() int64)
+	// discordinteraction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	discordinteraction.UpdateDefaultUpdatedAt = discordinteractionDescUpdatedAt.UpdateDefault.(func() int64)
+	// discordinteractionDescCommand is the schema descriptor for command field.
+	discordinteractionDescCommand := discordinteractionFields[3].Descriptor()
+	// discordinteraction.CommandValidator is a validator for the "command" field. It is called by the builders before save.
+	discordinteraction.CommandValidator = discordinteractionDescCommand.Validators[0].(func(string) error)
+	// discordinteractionDescUserID is the schema descriptor for user_id field.
+	discordinteractionDescUserID := discordinteractionFields[4].Descriptor()
+	// discordinteraction.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	discordinteraction.UserIDValidator = discordinteractionDescUserID.Validators[0].(func(string) error)
+	// discordinteractionDescReferenceID is the schema descriptor for reference_id field.
+	discordinteractionDescReferenceID := discordinteractionFields[5].Descriptor()
+	// discordinteraction.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
+	discordinteraction.ReferenceIDValidator = discordinteractionDescReferenceID.Validators[0].(func(string) error)
+	// discordinteractionDescID is the schema descriptor for id field.
+	discordinteractionDescID := discordinteractionFields[0].Descriptor()
+	// discordinteraction.DefaultID holds the default value on creation for the id field.
+	discordinteraction.DefaultID = discordinteractionDescID.Default.(func() string)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.

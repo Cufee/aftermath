@@ -10,11 +10,12 @@ import (
 	"github.com/cufee/aftermath/cmds/discord/common"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	"github.com/cufee/aftermath/internal/stats/render/assets"
 	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	stats "github.com/cufee/aftermath/internal/stats/renderer/v1"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 func init() {
@@ -25,11 +26,11 @@ func init() {
 				options := getDefaultStatsOptions(ctx)
 				message, valid := options.Validate(ctx)
 				if !valid {
-					return ctx.Reply(message)
+					return ctx.Reply().Send(message)
 				}
 
 				var accountID string
-				background, _ := assets.GetLoadedImage("bg-default")
+				var backgroundURL string
 
 				switch {
 				case options.UserID != "":
@@ -37,7 +38,7 @@ func init() {
 					mentionedUser, _ := ctx.Core.Database().GetUserByID(ctx.Context, options.UserID, database.WithConnections(), database.WithSubscriptions(), database.WithContent())
 					defaultAccount, hasDefaultAccount := mentionedUser.Connection(models.ConnectionTypeWargaming)
 					if !hasDefaultAccount {
-						return ctx.Reply("stats_error_connection_not_found_vague")
+						return ctx.Reply().Send("stats_error_connection_not_found_vague")
 					}
 					accountID = defaultAccount.ReferenceID
 					// TODO: Get user background
@@ -47,7 +48,7 @@ func init() {
 					account, err := ctx.Core.Fetch().Search(ctx.Context, options.Nickname, options.Server)
 					if err != nil {
 						if err.Error() == "no results found" {
-							return ctx.ReplyFmt("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server))
+							return ctx.Reply().Fmt("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server)).Send()
 						}
 						return ctx.Err(err)
 					}
@@ -56,22 +57,32 @@ func init() {
 				default:
 					defaultAccount, hasDefaultAccount := ctx.User.Connection(models.ConnectionTypeWargaming)
 					if !hasDefaultAccount {
-						return ctx.Reply("stats_error_nickname_or_server_missing")
+						return ctx.Reply().Send("stats_error_nickname_or_server_missing")
 					}
 					// command used without options, but user has a default connection
 					accountID = defaultAccount.ReferenceID
 					// TODO: Get user background
 				}
 
-				image, meta, err := ctx.Core.Render(ctx.Locale).Session(context.Background(), accountID, options.PeriodStart, render.WithBackground(background))
+				image, meta, err := ctx.Core.Render(ctx.Locale).Session(context.Background(), accountID, options.PeriodStart, render.WithBackground(backgroundURL))
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
-						return ctx.Reply("session_error_account_was_not_tracked")
+						return ctx.Reply().Send("session_error_account_was_not_tracked")
 					}
 					if errors.Is(err, fetch.ErrSessionNotFound) {
-						return ctx.Reply("session_error_no_session_for_period")
+						return ctx.Reply().Send("session_error_no_session_for_period")
 					}
 					return ctx.Err(err)
+				}
+
+				button, saveErr := saveInteractionData(ctx, "session", models.DiscordInteractionOptions{
+					BackgroundImageURL: backgroundURL,
+					PeriodStart:        options.PeriodStart,
+					AccountID:          accountID,
+				})
+				if saveErr != nil {
+					// nil button will not cause an error and will be ignored
+					log.Err(err).Str("interactionId", ctx.ID()).Str("command", "session").Msg("failed to save discord interaction")
 				}
 
 				var buf bytes.Buffer
@@ -80,13 +91,16 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				var timings = []string{"```"}
-				for name, duration := range meta.Timings {
-					timings = append(timings, fmt.Sprintf("%s: %v", name, duration.Milliseconds()))
+				var timings []string
+				if ctx.User.Permissions.Has(permissions.UseDebugFeatures) {
+					timings = append(timings, "```")
+					for name, duration := range meta.Timings {
+						timings = append(timings, fmt.Sprintf("%s: %v", name, duration.Milliseconds()))
+					}
+					timings = append(timings, "```")
 				}
-				timings = append(timings, "```")
 
-				return ctx.File(&buf, "session_command_by_aftermath.png", timings...)
+				return ctx.Reply().File(&buf, "session_command_by_aftermath.png").Component(button).Text(timings...).Send()
 			}),
 	)
 }

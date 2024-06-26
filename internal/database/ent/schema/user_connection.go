@@ -8,27 +8,6 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 )
 
-// model UserConnection {
-//   id        String   @id @default(cuid())
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   user   User   @relation(fields: [userId], references: [id])
-//   userId String
-
-//   type        String
-//   permissions String
-//   referenceId String
-
-//   metadataEncoded Bytes
-
-//   @@index([userId])
-//   @@index([type, userId])
-//   @@index([referenceId])
-//   @@index([type, referenceId])
-//   @@map("user_connections")
-// }
-
 // UserConnection holds the schema definition for the UserConnection entity.
 type UserConnection struct {
 	ent.Schema

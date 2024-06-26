@@ -74,7 +74,7 @@ func (o statsOptions) Validate(ctx *common.Context) (string, bool) {
 	}
 	if o.UserID != "" && o.UserID == ctx.User.ID {
 		// mentioning self is redundant - this should not prevent the command from working though
-		ctx.Reply("stats_error_mentioned_self_non_blocking")
+		ctx.Reply().Send("stats_error_mentioned_self_non_blocking")
 	}
 	return "", true
 }

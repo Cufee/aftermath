@@ -72,6 +72,10 @@ type TasksClient interface {
 type DiscordDataClient interface {
 	UpsertCommands(ctx context.Context, commands ...models.ApplicationCommand) error
 	GetCommandsByID(ctx context.Context, commandIDs ...string) ([]models.ApplicationCommand, error)
+
+	CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) error
+	GetDiscordInteraction(ctx context.Context, referenceID string) (models.DiscordInteraction, error)
+	DeleteExpiredInteractions(ctx context.Context, expiration time.Time) error
 }
 
 type Client interface {

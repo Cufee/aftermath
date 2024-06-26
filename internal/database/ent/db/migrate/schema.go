@@ -298,6 +298,59 @@ var (
 			},
 		},
 	}
+	// DiscordInteractionsColumns holds the columns for the "discord_interactions" table.
+	DiscordInteractionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeInt64},
+		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "command", Type: field.TypeString},
+		{Name: "reference_id", Type: field.TypeString},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"stats"}},
+		{Name: "locale", Type: field.TypeString},
+		{Name: "options", Type: field.TypeJSON},
+		{Name: "user_id", Type: field.TypeString},
+	}
+	// DiscordInteractionsTable holds the schema information for the "discord_interactions" table.
+	DiscordInteractionsTable = &schema.Table{
+		Name:       "discord_interactions",
+		Columns:    DiscordInteractionsColumns,
+		PrimaryKey: []*schema.Column{DiscordInteractionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "discord_interactions_users_discord_interactions",
+				Columns:    []*schema.Column{DiscordInteractionsColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "discordinteraction_id",
+				Unique:  false,
+				Columns: []*schema.Column{DiscordInteractionsColumns[0]},
+			},
+			{
+				Name:    "discordinteraction_command",
+				Unique:  false,
+				Columns: []*schema.Column{DiscordInteractionsColumns[3]},
+			},
+			{
+				Name:    "discordinteraction_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{DiscordInteractionsColumns[8]},
+			},
+			{
+				Name:    "discordinteraction_user_id_type",
+				Unique:  false,
+				Columns: []*schema.Column{DiscordInteractionsColumns[8], DiscordInteractionsColumns[5]},
+			},
+			{
+				Name:    "discordinteraction_reference_id",
+				Unique:  false,
+				Columns: []*schema.Column{DiscordInteractionsColumns[4]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -584,6 +637,7 @@ var (
 		ApplicationCommandsTable,
 		ClansTable,
 		CronTasksTable,
+		DiscordInteractionsTable,
 		UsersTable,
 		UserConnectionsTable,
 		UserContentsTable,
@@ -598,6 +652,7 @@ func init() {
 	AccountsTable.ForeignKeys[0].RefTable = ClansTable
 	AccountSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
 	AchievementsSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
+	DiscordInteractionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserConnectionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserContentsTable.ForeignKeys[0].RefTable = UsersTable
 	UserSubscriptionsTable.ForeignKeys[0].RefTable = UsersTable

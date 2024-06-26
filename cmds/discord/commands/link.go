@@ -38,13 +38,13 @@ func init() {
 				options := getDefaultStatsOptions(ctx)
 				message, valid := options.Validate(ctx)
 				if !valid {
-					return ctx.Reply(message)
+					return ctx.Reply().Send(message)
 				}
 
 				account, err := ctx.Core.Fetch().Search(ctx.Context, options.Nickname, options.Server)
 				if err != nil {
 					if err.Error() == "no results found" {
-						return ctx.ReplyFmt("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server))
+						return ctx.Reply().Fmt("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server)).Send()
 					}
 					return ctx.Err(err)
 				}
@@ -64,7 +64,7 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				return ctx.ReplyFmt("command_link_linked_successfully_fmt", account.Nickname, strings.ToUpper(options.Server))
+				return ctx.Reply().Fmt("command_link_linked_successfully_fmt", account.Nickname, strings.ToUpper(options.Server)).Send()
 			}),
 	)
 }
