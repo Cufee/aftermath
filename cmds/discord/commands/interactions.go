@@ -25,7 +25,8 @@ func newStatsRefreshButton(data models.DiscordInteraction) discordgo.MessageComp
 		Components: []discordgo.MessageComponent{discordgo.Button{
 			Style: discordgo.SecondaryButton,
 			Emoji: &discordgo.ComponentEmoji{
-				Name: "🔃",
+				ID:   "1255647885723435048",
+				Name: "aftermath_refresh",
 			},
 			CustomID: fmt.Sprintf("refresh_stats_from_button_%s", data.ReferenceID),
 		}},
