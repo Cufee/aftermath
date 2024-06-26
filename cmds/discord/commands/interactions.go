@@ -34,7 +34,7 @@ func newStatsRefreshButton(data models.DiscordInteraction) discordgo.MessageComp
 }
 
 func init() {
-	Loaded.add(
+	LoadedPublic.add(
 		builder.NewCommand("refresh_stats_from_button").
 			ComponentType(func(customID string) bool {
 				return strings.HasPrefix(customID, "refresh_stats_from_button_")

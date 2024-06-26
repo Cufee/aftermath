@@ -17,6 +17,7 @@ import (
 	"github.com/cufee/aftermath/cmds/core/queue"
 	"github.com/cufee/aftermath/cmds/core/scheduler"
 	"github.com/cufee/aftermath/cmds/core/tasks"
+	"github.com/cufee/aftermath/cmds/discord/commands"
 
 	"github.com/cufee/aftermath/cmds/core/server"
 	"github.com/cufee/aftermath/cmds/core/server/handlers/private"
@@ -71,11 +72,6 @@ func main() {
 	// Load some init options to registered admin accounts and etc
 	logic.ApplyInitOptions(liveCoreClient.Database())
 
-	discordHandler, err := discord.NewRouterHandler(liveCoreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
-	if err != nil {
-		log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
-	}
-
 	if e := os.Getenv("PRIVATE_SERVER_ENABLED"); e == "true" {
 		port := os.Getenv("PRIVATE_SERVER_PORT")
 		servePrivate := server.NewServer(port, []server.Handler{
@@ -96,11 +92,12 @@ func main() {
 		go servePrivate()
 	}
 
+	discordHandlers := discordHandlersFromEnv(liveCoreClient)
+	// /discord/public/callback
+	// /discord/internal/callback
+
 	port := os.Getenv("PORT")
-	servePublic := server.NewServer(port, server.Handler{
-		Path: "POST /discord/callback",
-		Func: discordHandler,
-	})
+	servePublic := server.NewServer(port, discordHandlers...)
 	log.Info().Str("port", port).Msg("starting a public server")
 	go servePublic()
 
@@ -110,6 +107,45 @@ func main() {
 	sig := <-c
 	cancel()
 	log.Info().Msgf("received %s, exiting", sig.String())
+}
+
+func discordHandlersFromEnv(coreClient core.Client) []server.Handler {
+	var handlers []server.Handler
+
+	// main Discord with all the user-facing command
+	{
+		if os.Getenv("DISCORD_TOKEN") == "" || os.Getenv("DISCORD_PUBLIC_KEY") == "" {
+			log.Fatal().Msg("DISCORD_TOKEN and DISCORD_PUBLIC_KEY are required")
+
+		}
+		mainDiscordHandler, err := discord.NewRouterHandler(coreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"), commands.LoadedPublic.Compose()...)
+		if err != nil {
+			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
+		}
+		handlers = append(handlers, server.Handler{
+			Path: "POST /discord/public/callback",
+			Func: mainDiscordHandler,
+		})
+	}
+
+	// secondary Discord bot with mod/admin commands - permissions are still checked
+	if token := os.Getenv("INTERNAL_DISCORD_TOKEN"); token != "" {
+		publicKey := os.Getenv("INTERNAL_DISCORD_PUBLIC_KEY")
+		if publicKey == "" {
+			log.Fatal().Msg("discordHandlersFromEnv failed missing INTERNAL_DISCORD_PUBLIC_KEY")
+		}
+
+		internalDiscordHandler, err := discord.NewRouterHandler(coreClient, token, publicKey, commands.LoadedInternal.Compose()...)
+		if err != nil {
+			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
+		}
+		handlers = append(handlers, server.Handler{
+			Path: "POST /discord/internal/callback",
+			Func: internalDiscordHandler,
+		})
+	}
+
+	return handlers
 }
 
 func startSchedulerFromEnv(ctx context.Context, coreClient core.Client) (func(), error) {

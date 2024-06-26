@@ -5,20 +5,17 @@ import (
 
 	"github.com/cufee/aftermath/cmds/core"
 
-	"github.com/cufee/aftermath/cmds/discord/commands"
+	"github.com/cufee/aftermath/cmds/discord/commands/builder"
 	"github.com/cufee/aftermath/cmds/discord/router"
 )
 
-func NewRouterHandler(coreClient core.Client, token string, publicKey string) (http.HandlerFunc, error) {
+func NewRouterHandler(coreClient core.Client, token string, publicKey string, commands ...builder.Command) (http.HandlerFunc, error) {
 	rt, err := router.NewRouter(coreClient, token, publicKey)
 	if err != nil {
 		return nil, err
 	}
 
-	rt.LoadCommands(commands.Loaded.Compose()...)
-
-	// should always be loaded last
-	// rt.LoadMiddleware(middleware.FetchUser(common.ContextKeyUser, coreClient.DB))
+	rt.LoadCommands(commands...)
 
 	err = rt.UpdateLoadedCommands()
 	if err != nil {

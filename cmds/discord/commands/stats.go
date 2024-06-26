@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	Loaded.add(
+	LoadedPublic.add(
 		builder.NewCommand("stats").
 			Options(defaultStatsOptions...).
 			Handler(func(ctx *common.Context) error {

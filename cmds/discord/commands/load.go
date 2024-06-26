@@ -16,4 +16,5 @@ func (c *commandInit) Compose() []builder.Command {
 	return commands
 }
 
-var Loaded commandInit
+var LoadedPublic commandInit
+var LoadedInternal commandInit
