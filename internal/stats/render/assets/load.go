@@ -13,10 +13,9 @@ import (
 	"github.com/cufee/aftermath/internal/files"
 	"github.com/golang/freetype/truetype"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/image/font"
 )
 
-var fontsMap = make(map[string]*truetype.Font)
+var fontsMap = make(map[string][]byte)
 var imagesMap = make(map[string]image.Image)
 
 func LoadAssets(assets fs.FS, directory string) error {
@@ -38,19 +37,19 @@ func LoadAssets(assets fs.FS, directory string) error {
 	return nil
 }
 
-func loadFonts(files map[string][]byte) (map[string]*truetype.Font, error) {
-	fonts := make(map[string]*truetype.Font)
+func loadFonts(files map[string][]byte) (map[string][]byte, error) {
+	fonts := make(map[string][]byte)
 	for path, data := range files {
 		if !strings.HasSuffix(path, ".ttf") {
 			continue
 		}
 
-		font, err := truetype.Parse(data)
+		_, err := truetype.Parse(data)
 		if err != nil {
 			return nil, err
 		}
 
-		fonts[strings.Split(filepath.Base(path), ".")[0]] = font
+		fonts[strings.Split(filepath.Base(path), ".")[0]] = data
 		log.Debug().Str("path", path).Msg("loaded font")
 	}
 
@@ -79,18 +78,19 @@ func loadImages(files map[string][]byte) (map[string]image.Image, error) {
 	return imagesMap, nil
 }
 
-func GetLoadedFontFaces(name string, sizes ...float64) (map[float64]font.Face, bool) {
-	loadedFont, ok := fontsMap[name]
-	if !ok {
-		return nil, false
-	}
-	faces := make(map[float64]font.Face)
-	for _, size := range sizes {
-		faces[size] = truetype.NewFace(loadedFont, &truetype.Options{
-			Size: size,
-		})
-	}
-	return faces, true
+func GetLoadedFontFace(name string) ([]byte, bool) {
+	f, ok := fontsMap[name]
+	return f, ok
+	// if !ok {
+	// 	return nil, false
+	// }
+	// faces := make(map[float64]font.Face)
+	// for _, size := range sizes {
+	// 	faces[size] = truetype.NewFace(loadedFont, &truetype.Options{
+	// 		Size: size,
+	// 	})
+	// }
+	// return faces, true
 }
 
 func GetLoadedImage(name string) (image.Image, bool) {

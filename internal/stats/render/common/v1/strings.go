@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/fogleman/gg"
-	"golang.org/x/image/font"
 )
 
 type stringSize struct {
@@ -14,20 +13,21 @@ type stringSize struct {
 	LineHeight  float64
 }
 
-func MeasureString(text string, font font.Face) stringSize {
-	if font == nil {
+func MeasureString(text string, font Font) stringSize {
+	if !font.Valid() {
 		return stringSize{}
 	}
 	if text == "" {
 		return stringSize{}
 	}
 
+	face := font.Face()
 	measureCtx := gg.NewContext(1, 1)
-	measureCtx.SetFontFace(font)
+	measureCtx.SetFontFace(face)
 
 	var result stringSize
 	// Account for font descender height
-	result.LineOffset = float64(font.Metrics().Descent>>6) * 2
+	result.LineOffset = float64(face.Metrics().Descent>>6) * 2
 
 	for _, line := range strings.Split(text, "\n") {
 		w, h := measureCtx.MeasureString(line)

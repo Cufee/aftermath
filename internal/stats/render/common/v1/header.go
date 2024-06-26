@@ -22,7 +22,7 @@ func NewHeaderCard(width float64, subscriptions []models.UserSubscription, promo
 		// Users without a subscription get promo text
 		var textBlocks []Block
 		for _, text := range promoText {
-			textBlocks = append(textBlocks, NewTextContent(Style{Font: &FontMedium, FontColor: TextPrimary}, text))
+			textBlocks = append(textBlocks, NewTextContent(Style{Font: FontMedium, FontColor: TextPrimary}, text))
 		}
 		cards = append(cards, NewBlocksContent(Style{
 			Direction:  DirectionVertical,
