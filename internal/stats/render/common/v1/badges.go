@@ -57,7 +57,7 @@ var (
 		Style: subscriptionPillStyle{
 			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 7, PaddingY: 5, Height: 32},
 			Icon:      Style{Width: 16, Height: 16, BackgroundColor: TextSubscriptionPlus},
-			Text:      Style{Font: &FontSmall, FontColor: TextSecondary, PaddingX: 5},
+			Text:      Style{Font: FontSmall, FontColor: TextSecondary, PaddingX: 5},
 		},
 	}
 	userSubscriptionPlus = &subscriptionHeader{
@@ -66,7 +66,7 @@ var (
 		Style: subscriptionPillStyle{
 			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 5, PaddingY: 5, Height: 32},
 			Icon:      Style{Width: 24, Height: 24, BackgroundColor: TextSubscriptionPlus},
-			Text:      Style{Font: &FontSmall, FontColor: TextSecondary, PaddingX: 5},
+			Text:      Style{Font: FontSmall, FontColor: TextSecondary, PaddingX: 5},
 		},
 	}
 	userSubscriptionPro = &subscriptionHeader{
@@ -75,7 +75,7 @@ var (
 		Style: subscriptionPillStyle{
 			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 5, PaddingY: 5, Height: 32},
 			Icon:      Style{Width: 24, Height: 24, BackgroundColor: TextSubscriptionPremium},
-			Text:      Style{Font: &FontSmall, FontColor: TextSecondary, PaddingX: 5},
+			Text:      Style{Font: FontSmall, FontColor: TextSecondary, PaddingX: 5},
 		},
 	}
 	// Clans
@@ -101,7 +101,7 @@ var (
 		Style: subscriptionPillStyle{
 			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: color.RGBA{64, 32, 128, 180}, BorderRadius: 15, PaddingX: 6, PaddingY: 5, Gap: 5, Height: 32},
 			Icon:      Style{Width: 20, Height: 20, BackgroundColor: TextPrimary},
-			Text:      Style{Font: &FontSmall, FontColor: TextPrimary, PaddingX: 5},
+			Text:      Style{Font: FontSmall, FontColor: TextPrimary, PaddingX: 5},
 		},
 	}
 	subscriptionServerModerator = &subscriptionHeader{
@@ -110,7 +110,7 @@ var (
 		Style: subscriptionPillStyle{
 			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 7, PaddingY: 5, Gap: 5, Height: 32},
 			Icon:      Style{Width: 20, Height: 20},
-			Text:      Style{Font: &FontSmall, FontColor: TextSecondary, PaddingX: 2},
+			Text:      Style{Font: FontSmall, FontColor: TextSecondary, PaddingX: 2},
 		},
 	}
 	subscriptionContentModerator = &subscriptionHeader{
@@ -119,7 +119,7 @@ var (
 		Style: subscriptionPillStyle{
 			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 7, PaddingY: 5, Gap: 5, Height: 32},
 			Icon:      Style{Width: 20, Height: 20},
-			Text:      Style{Font: &FontSmall, FontColor: TextSecondary, PaddingX: 2},
+			Text:      Style{Font: FontSmall, FontColor: TextSecondary, PaddingX: 2},
 		},
 	}
 	subscriptionServerBooster = &subscriptionHeader{
@@ -128,7 +128,7 @@ var (
 		Style: subscriptionPillStyle{
 			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 10, PaddingY: 5, Gap: 5, Height: 32},
 			Icon:      Style{Width: 20, Height: 20},
-			Text:      Style{Font: &FontSmall, FontColor: TextSecondary},
+			Text:      Style{Font: FontSmall, FontColor: TextSecondary},
 		},
 	}
 	subscriptionTranslator = &subscriptionHeader{
@@ -137,7 +137,7 @@ var (
 		Style: subscriptionPillStyle{
 			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 10, PaddingY: 5, Gap: 5, Height: 32},
 			Icon:      Style{Width: 20, Height: 20, BackgroundColor: TextPrimary},
-			Text:      Style{Font: &FontSmall, FontColor: TextSecondary},
+			Text:      Style{Font: FontSmall, FontColor: TextSecondary},
 		},
 	}
 )

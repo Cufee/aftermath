@@ -29,8 +29,8 @@ func DefaultPlayerTitleStyle(containerStyle Style) TitleCardStyle {
 
 	return TitleCardStyle{
 		Container: containerStyle,
-		Nickname:  Style{Font: &FontLarge, FontColor: TextPrimary},
-		ClanTag:   Style{Font: &FontMedium, FontColor: TextSecondary, PaddingX: 10, PaddingY: 5, BackgroundColor: clanTagBackgroundColor, BorderRadius: BorderRadiusSM},
+		Nickname:  Style{Font: FontLarge, FontColor: TextPrimary},
+		ClanTag:   Style{Font: FontMedium, FontColor: TextSecondary, PaddingX: 10, PaddingY: 5, BackgroundColor: clanTagBackgroundColor, BorderRadius: BorderRadiusSM},
 	}
 }
 
@@ -71,7 +71,7 @@ func newClanTagBlock(style Style, clanTag string, subs []models.UserSubscription
 	}
 
 	var blocks []Block
-	blocks = append(blocks, NewTextContent(Style{Font: &FontMedium, FontColor: TextSecondary}, clanTag))
+	blocks = append(blocks, NewTextContent(Style{Font: FontMedium, FontColor: TextSecondary}, clanTag))
 	if sub := ClanSubscriptionsBadges(subs); sub != nil {
 		iconBlock, err := sub.Block()
 		if err == nil {

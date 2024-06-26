@@ -53,15 +53,15 @@ func NewTextContent(style Style, value string) Block {
 }
 
 func (content contentText) Render(style Style) (image.Image, error) {
-	if style.Font == nil {
+	if !style.Font.Valid() {
 		return nil, errors.New("font not set")
 	}
 
-	size := MeasureString(content.value, *style.Font)
+	size := MeasureString(content.value, style.Font)
 	ctx := gg.NewContext(int(size.TotalWidth+(style.PaddingX*2)), int(size.TotalHeight+(style.PaddingY*2)))
 
 	// Render text
-	ctx.SetFontFace(*style.Font)
+	ctx.SetFontFace(style.Font.Face())
 	ctx.SetColor(style.FontColor)
 
 	var lastX, lastY float64 = style.PaddingX, style.PaddingY + 1

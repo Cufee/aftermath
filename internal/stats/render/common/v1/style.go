@@ -2,8 +2,6 @@ package common
 
 import (
 	"image/color"
-
-	"golang.org/x/image/font"
 )
 
 type alignItemsValue int
@@ -29,7 +27,7 @@ const (
 )
 
 type Style struct {
-	Font      *font.Face
+	Font      Font
 	FontColor color.Color
 
 	JustifyContent justifyContentValue

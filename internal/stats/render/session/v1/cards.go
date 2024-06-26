@@ -10,22 +10,33 @@ import (
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
-	"github.com/pkg/errors"
 )
 
 func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
 	var (
+		renderVehiclesCount = 3 // minimum number of vehicle cards
 		// primary cards
 		// when there are some unrated battles or no battles at all
 		shouldRenderUnratedOverview = session.RegularBattles.Battles > 0 || session.RatingBattles.Battles == 0
 		// when there are 3 vehicle cards and no rating overview cards or there are 6 vehicle cards and some rating battles
-		shouldRenderUnratedHighlights = (session.RegularBattles.Battles > 0 && session.RatingBattles.Battles < 1 && len(cards.Unrated.Vehicles) > 3) ||
+		shouldRenderUnratedHighlights = (session.RegularBattles.Battles > 0 && session.RatingBattles.Battles < 1 && len(cards.Unrated.Vehicles) > renderVehiclesCount) ||
 			(session.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 6)
 		shouldRenderRatingOverview = session.RatingBattles.Battles > 0
 		shouldRenderRatingVehicles = len(cards.Unrated.Vehicles) == 0
 		// secondary cards
 		shouldRenderUnratedVehicles = len(cards.Unrated.Vehicles) > 0
 	)
+
+	// try to make the columns height roughly similar to primary column
+	if shouldRenderUnratedHighlights && len(cards.Unrated.Highlights) > 1 {
+		renderVehiclesCount += len(cards.Unrated.Highlights)
+	}
+	if shouldRenderRatingOverview {
+		renderVehiclesCount += 2
+	}
+	if shouldRenderRatingVehicles {
+		renderVehiclesCount += len(cards.Rating.Vehicles)
+	}
 
 	var segments common.Segments
 	var primaryColumn []common.Block
@@ -44,13 +55,13 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 
 	{
 		titleStyle := common.DefaultPlayerTitleStyle(playerNameCardStyle(0))
-		clanSize := common.MeasureString(session.Account.ClanTag, *titleStyle.ClanTag.Font)
-		nameSize := common.MeasureString(session.Account.Nickname, *titleStyle.Nickname.Font)
+		clanSize := common.MeasureString(session.Account.ClanTag, titleStyle.ClanTag.Font)
+		nameSize := common.MeasureString(session.Account.Nickname, titleStyle.Nickname.Font)
 		primaryCardWidth = common.Max(primaryCardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
 	}
 	{
 		for _, text := range opts.PromoText {
-			size := common.MeasureString(text, *promoTextStyle.Font)
+			size := common.MeasureString(text, promoTextStyle.Font)
 			totalFrameWidth = common.Max(size.TotalWidth, totalFrameWidth)
 		}
 	}
@@ -88,7 +99,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	if shouldRenderRatingVehicles {
 		for _, card := range cards.Rating.Vehicles {
 			// [title] [session]
-			titleSize := common.MeasureString(card.Title, *ratingVehicleCardTitleStyle.Font)
+			titleSize := common.MeasureString(card.Title, ratingVehicleCardTitleStyle.Font)
 			presetBlockWidth, contentWidth := vehicleBlocksWidth(card.Blocks, ratingVehicleBlockStyle.session, ratingVehicleBlockStyle.career, ratingVehicleBlockStyle.label, ratingVehicleBlocksRowStyle(0))
 			// add the gap and card padding, the gap here accounts for title being inline with content
 			contentWidth += ratingVehicleBlocksRowStyle(0).Gap*float64(len(card.Blocks)) + ratingVehicleCardStyle(0).PaddingX*2 + titleSize.TotalWidth
@@ -104,8 +115,8 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		for _, card := range cards.Unrated.Highlights {
 			// [card label] [session]
 			// [title]  	  [label]
-			labelSize := common.MeasureString(card.Meta, *highlightCardTitleTextStyle.Font)
-			titleSize := common.MeasureString(card.Title, *highlightVehicleNameTextStyle.Font)
+			labelSize := common.MeasureString(card.Meta, highlightCardTitleTextStyle.Font)
+			titleSize := common.MeasureString(card.Title, highlightVehicleNameTextStyle.Font)
 
 			presetBlockWidth, contentWidth := highlightedVehicleBlocksWidth(card.Blocks, vehicleBlockStyle.session, vehicleBlockStyle.career, vehicleBlockStyle.label, highlightedVehicleBlockRowStyle(0))
 			// add the gap and card padding, the gap here accounts for title/label being inline with content
@@ -131,7 +142,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 			presetBlockWidth, contentWidth := vehicleBlocksWidth(card.Blocks, styleWithIconOffset.session, styleWithIconOffset.career, styleWithIconOffset.label, vehicleBlocksRowStyle(0))
 			contentWidth += vehicleBlocksRowStyle(0).Gap*float64(len(card.Blocks)-1) + vehicleCardStyle(0).PaddingX*2
 
-			titleSize := common.MeasureString(card.Title, *vehicleCardTitleTextStyle.Font)
+			titleSize := common.MeasureString(card.Title, vehicleCardTitleTextStyle.Font)
 			secondaryCardWidth = common.Max(secondaryCardWidth, contentWidth, titleSize.TotalWidth+vehicleCardStyle(0).PaddingX*2)
 
 			for key, width := range presetBlockWidth {
@@ -200,38 +211,20 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		//
 	}
 
-	// we are done with the primary column at this point and can render it as an image in order to have access to final height
-	primaryColumnBlock := common.NewBlocksContent(overviewColumnStyle(primaryCardWidth), primaryColumn...)
-	primaryColumnImage, err := primaryColumnBlock.Render()
-	if err != nil {
-		return common.Segments{}, err
-	}
-
 	// unrated vehicles
-	var totalSecondaryCardsHeight float64
-	var primaryCardHeight = float64(primaryColumnImage.Bounds().Dy())
 	if shouldRenderUnratedVehicles {
 		for i, vehicle := range cards.Unrated.Vehicles {
-			vehicleCard := makeVehicleCard(vehicle, secondaryCardBlockSizes, secondaryCardWidth)
-			vehicleCardImage, err := vehicleCard.Render()
-			if err != nil {
-				return common.Segments{}, errors.Wrapf(err, "failed to render a vehicle card for %s", vehicle.Title)
-			}
-
-			height := float64(vehicleCardImage.Bounds().Dy())
-			// stop rendering cards when the total column height is larger than the primary column and there are at least 3 vehicles
-			if totalSecondaryCardsHeight+height > primaryCardHeight && i >= 3 {
+			if i >= renderVehiclesCount {
 				break
 			}
-			secondaryColumn = append(secondaryColumn, common.NewImageContent(common.Style{}, vehicleCardImage))
-			totalSecondaryCardsHeight += height + overviewCardStyle(0).Gap
-		}
-		if len(cards.Unrated.Vehicles) > 0 {
-			secondaryColumn = append(secondaryColumn, makeVehicleLegendCard(cards.Unrated.Vehicles[0], secondaryCardBlockSizes, secondaryCardWidth))
+			secondaryColumn = append(secondaryColumn, makeVehicleCard(vehicle, secondaryCardBlockSizes, secondaryCardWidth))
+			if i == len(cards.Unrated.Vehicles)-1 {
+				secondaryColumn = append(secondaryColumn, makeVehicleLegendCard(cards.Unrated.Vehicles[0], secondaryCardBlockSizes, secondaryCardWidth))
+			}
 		}
 	}
 
-	columns := []common.Block{common.NewImageContent(common.Style{}, primaryColumnImage)}
+	columns := []common.Block{common.NewBlocksContent(overviewColumnStyle(primaryCardWidth), primaryColumn...)}
 	if len(secondaryColumn) > 0 {
 		columns = append(columns, common.NewBlocksContent(overviewColumnStyle(secondaryCardWidth), secondaryColumn...))
 	}
@@ -247,15 +240,15 @@ func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], sessionS
 	for _, block := range blocks {
 		var width float64
 		{
-			size := common.MeasureString(block.Data.Session.String(), *sessionStyle.Font)
+			size := common.MeasureString(block.Data.Session.String(), sessionStyle.Font)
 			width = common.Max(width, size.TotalWidth+sessionStyle.PaddingX*2)
 		}
 		{
-			size := common.MeasureString(block.Data.Career.String(), *careerStyle.Font)
+			size := common.MeasureString(block.Data.Career.String(), careerStyle.Font)
 			width = common.Max(width, size.TotalWidth+careerStyle.PaddingX*2)
 		}
 		{
-			size := common.MeasureString(block.Label, *labelStyle.Font)
+			size := common.MeasureString(block.Label, labelStyle.Font)
 			width = common.Max(width, size.TotalWidth+labelStyle.PaddingX*2+vehicleLegendLabelContainer.PaddingX*2)
 		}
 		maxBlockWidth = common.Max(maxBlockWidth, width)
@@ -280,11 +273,11 @@ func highlightedVehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData
 	for _, block := range blocks {
 		var width float64
 		{
-			size := common.MeasureString(block.Data.Session.String(), *sessionStyle.Font)
+			size := common.MeasureString(block.Data.Session.String(), sessionStyle.Font)
 			width = common.Max(width, size.TotalWidth+sessionStyle.PaddingX*2)
 		}
 		{
-			size := common.MeasureString(block.Label, *labelStyle.Font)
+			size := common.MeasureString(block.Label, labelStyle.Font)
 			width = common.Max(width, size.TotalWidth+labelStyle.PaddingX*2)
 		}
 		maxBlockWidth = common.Max(maxBlockWidth, width)
@@ -307,7 +300,7 @@ func overviewColumnBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], s
 	for _, block := range blocks {
 		// adjust width if this column includes a special icon
 		if block.Tag == prepare.TagWN8 {
-			tierNameSize := common.MeasureString(common.GetWN8TierName(block.Value.Float()), *overviewSpecialRatingLabelStyle(nil).Font)
+			tierNameSize := common.MeasureString(common.GetWN8TierName(block.Value.Float()), overviewSpecialRatingLabelStyle(nil).Font)
 			tierNameWithPadding := tierNameSize.TotalWidth + overviewSpecialRatingPillStyle(nil).PaddingX*2
 			presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], specialRatingIconSize, tierNameWithPadding)
 		}

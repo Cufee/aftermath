@@ -25,7 +25,7 @@ func NewTierPercentageCard(style Style, vehicles map[string]frame.VehicleStatsFr
 			BackgroundColor: shade,
 			Width:           style.Width / float64(elements),
 			JustifyContent:  JustifyContentCenter,
-		}, NewTextContent(Style{Font: &FontMedium, FontColor: TextPrimary}, fmt.Sprint(i))))
+		}, NewTextContent(Style{Font: FontMedium, FontColor: TextPrimary}, fmt.Sprint(i))))
 	}
 
 	return NewBlocksContent(style, blocks...)

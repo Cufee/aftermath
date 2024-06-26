@@ -22,11 +22,11 @@ type highlightStyle struct {
 func (s *overviewStyle) block(block prepare.StatsBlock[period.BlockData]) (common.Style, common.Style) {
 	switch block.Data.Flavor {
 	case period.BlockFlavorSpecial:
-		return common.Style{FontColor: common.TextPrimary, Font: &common.FontXL}, common.Style{FontColor: common.TextAlt, Font: &common.FontSmall}
+		return common.Style{FontColor: common.TextPrimary, Font: common.FontXL}, common.Style{FontColor: common.TextAlt, Font: common.FontSmall}
 	case period.BlockFlavorSecondary:
-		return common.Style{FontColor: common.TextSecondary, Font: &common.FontMedium}, common.Style{FontColor: common.TextAlt, Font: &common.FontSmall}
+		return common.Style{FontColor: common.TextSecondary, Font: common.FontMedium}, common.Style{FontColor: common.TextAlt, Font: common.FontSmall}
 	default:
-		return common.Style{FontColor: common.TextPrimary, Font: &common.FontLarge}, common.Style{FontColor: common.TextAlt, Font: &common.FontSmall}
+		return common.Style{FontColor: common.TextPrimary, Font: common.FontLarge}, common.Style{FontColor: common.TextAlt, Font: common.FontSmall}
 	}
 }
 
@@ -92,9 +92,9 @@ func highlightCardStyle(containerStyle common.Style) highlightStyle {
 
 	return highlightStyle{
 		container:  container,
-		cardTitle:  common.Style{Font: &common.FontSmall, FontColor: common.TextSecondary},
-		tankName:   common.Style{Font: &common.FontMedium, FontColor: common.TextPrimary},
-		blockValue: common.Style{Font: &common.FontMedium, FontColor: common.TextPrimary},
-		blockLabel: common.Style{Font: &common.FontSmall, FontColor: common.TextAlt},
+		cardTitle:  common.Style{Font: common.FontSmall, FontColor: common.TextSecondary},
+		tankName:   common.Style{Font: common.FontMedium, FontColor: common.TextPrimary},
+		blockValue: common.Style{Font: common.FontMedium, FontColor: common.TextPrimary},
+		blockLabel: common.Style{Font: common.FontSmall, FontColor: common.TextAlt},
 	}
 }

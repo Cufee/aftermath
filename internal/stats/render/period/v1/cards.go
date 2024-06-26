@@ -28,8 +28,8 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	{
 		{
 			titleStyle := common.DefaultPlayerTitleStyle(titleCardStyle(cardWidth))
-			clanSize := common.MeasureString(stats.Account.ClanTag, *titleStyle.ClanTag.Font)
-			nameSize := common.MeasureString(stats.Account.Nickname, *titleStyle.Nickname.Font)
+			clanSize := common.MeasureString(stats.Account.ClanTag, titleStyle.ClanTag.Font)
+			nameSize := common.MeasureString(stats.Account.Nickname, titleStyle.Nickname.Font)
 			cardWidth = common.Max(cardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
 		}
 		{
@@ -42,8 +42,8 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 					if block.Tag == prepare.TagWN8 {
 						label = common.GetWN8TierName(block.Value.Float())
 					}
-					labelSize := common.MeasureString(label, *labelStyle.Font)
-					valueSize := common.MeasureString(block.Value.String(), *valueStyle.Font)
+					labelSize := common.MeasureString(label, labelStyle.Font)
+					valueSize := common.MeasureString(block.Value.String(), valueStyle.Font)
 
 					overviewColumnWidth = common.Max(overviewColumnWidth, common.Max(labelSize.TotalWidth, valueSize.TotalWidth)+(rowStyle.container.PaddingX*2))
 				}
@@ -61,15 +61,15 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 			var highlightBlocksMaxCount, highlightTitleMaxWidth, highlightBlockMaxSize float64
 			for _, highlight := range cards.Highlights {
 				// Title and tank name
-				metaSize := common.MeasureString(highlight.Meta, *highlightStyle.cardTitle.Font)
-				titleSize := common.MeasureString(highlight.Title, *highlightStyle.tankName.Font)
+				metaSize := common.MeasureString(highlight.Meta, highlightStyle.cardTitle.Font)
+				titleSize := common.MeasureString(highlight.Title, highlightStyle.tankName.Font)
 				highlightTitleMaxWidth = common.Max(highlightTitleMaxWidth, metaSize.TotalWidth, titleSize.TotalWidth)
 
 				// Blocks
 				highlightBlocksMaxCount = common.Max(highlightBlocksMaxCount, float64(len(highlight.Blocks)))
 				for _, block := range highlight.Blocks {
-					labelSize := common.MeasureString(block.Label, *highlightStyle.blockLabel.Font)
-					valueSize := common.MeasureString(block.Value.String(), *highlightStyle.blockValue.Font)
+					labelSize := common.MeasureString(block.Label, highlightStyle.blockLabel.Font)
+					valueSize := common.MeasureString(block.Value.String(), highlightStyle.blockValue.Font)
 					highlightBlockMaxSize = common.Max(highlightBlockMaxSize, valueSize.TotalWidth, labelSize.TotalWidth)
 				}
 			}
