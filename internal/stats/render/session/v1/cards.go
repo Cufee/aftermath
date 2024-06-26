@@ -190,24 +190,20 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	}
 
 	// player title
-	println("making player title")
 	primaryColumn = append(primaryColumn,
 		common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(playerNameCardStyle(primaryCardWidth)), session.Account.Nickname, session.Account.ClanTag, subs),
 	)
 
 	// overview cards
 	if shouldRenderUnratedOverview {
-		println("making unrated overview")
 		primaryColumn = append(primaryColumn, makeOverviewCard(cards.Unrated.Overview, primaryCardBlockSizes, overviewCardStyle(primaryCardWidth)))
 	}
 	if shouldRenderRatingOverview {
-		println("making rating overview")
 		primaryColumn = append(primaryColumn, makeOverviewCard(cards.Rating.Overview, primaryCardBlockSizes, overviewRatingCardStyle(primaryCardWidth)))
 	}
 
 	// highlights
 	if shouldRenderUnratedHighlights {
-		println("making highlights")
 		for _, vehicle := range cards.Unrated.Highlights {
 			primaryColumn = append(primaryColumn, makeVehicleHighlightCard(vehicle, highlightCardBlockSizes, primaryCardWidth))
 		}
@@ -219,7 +215,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 
 	// unrated vehicles
 	if shouldRenderUnratedVehicles {
-		println("making unrated vehicles")
 		for i, vehicle := range cards.Unrated.Vehicles {
 			if i >= renderUnratedVehiclesCount {
 				break
@@ -400,7 +395,6 @@ func makeOverviewCard(card session.OverviewCard, blockSizes map[string]float64, 
 	for _, column := range card.Blocks {
 		var columnContent []common.Block
 		for _, block := range column {
-			println("making block", block.Label)
 			var col common.Block
 			if block.Tag == prepare.TagWN8 || block.Tag == prepare.TagRankedRating {
 				col = makeSpecialRatingColumn(block, blockSizes[block.Tag.String()])

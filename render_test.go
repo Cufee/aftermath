@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cufee/aftermath/internal/stats/render/assets"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	stats "github.com/cufee/aftermath/internal/stats/renderer/v1"
 	"github.com/rs/zerolog"
@@ -29,11 +28,8 @@ func TestRenderSession(t *testing.T) {
 	coreClient, _ := coreClientsFromEnv(db)
 	defer coreClient.Database().Disconnect()
 
-	bgImage, ok := assets.GetLoadedImage("bg-default")
-	assert.True(t, ok, "failed to load a background image")
-
 	renderer := stats.NewRenderer(coreClient.Fetch(), coreClient.Database(), coreClient.Wargaming(), language.English)
-	image, _, err := renderer.Session(context.Background(), "1013072123", time.Now(), common.WithBackground(bgImage))
+	image, _, err := renderer.Session(context.Background(), "1013072123", time.Now(), common.WithBackground(""))
 	assert.NoError(t, err, "failed to render a session image")
 	assert.NotNil(t, image, "image is nil")
 

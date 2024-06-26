@@ -50,7 +50,7 @@ func init() {
 
 				interaction, err := ctx.Core.Database().GetDiscordInteraction(ctx.Context, interactionID)
 				if err != nil {
-					return ctx.Reply().Send("refresh_interaction_expired")
+					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
 
 				var image renderer.Image
@@ -68,7 +68,7 @@ func init() {
 					img, mt, err := ctx.Core.Render(ctx.Locale).Session(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, render.WithBackground(interaction.Options.BackgroundImageURL))
 					if err != nil {
 						if errors.Is(err, fetch.ErrSessionNotFound) || errors.Is(err, renderer.ErrAccountNotTracked) {
-							return ctx.Reply().Send("refresh_interaction_expired")
+							return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 						}
 						return ctx.Err(err)
 					}
@@ -77,7 +77,7 @@ func init() {
 
 				default:
 					log.Error().Str("customId", data.CustomID).Str("command", interaction.Command).Msg("received an unexpected component interaction callback")
-					return ctx.Reply().Send("refresh_interaction_expired")
+					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
 
 				button, saveErr := saveInteractionData(ctx, interaction.Command, interaction.Options)
