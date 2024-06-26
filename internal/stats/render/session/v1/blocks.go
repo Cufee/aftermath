@@ -13,6 +13,7 @@ import (
 )
 
 func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width float64) common.Block {
+	blockStyle := vehicleBlockStyle()
 	switch block.Tag {
 	case prepare.TagWN8:
 		ratingColors := common.GetWN8Colors(block.Value.Float())
@@ -30,13 +31,13 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width 
 			pillColor = color.Transparent
 		}
 		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
-			common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()),
+			common.NewTextContent(blockStyle.session, block.Data.Session.String()),
 			common.NewBlocksContent(
 				overviewSpecialRatingPillStyle(pillColor),
 				common.NewTextContent(overviewSpecialRatingLabelStyle(ratingColors.Content), common.GetWN8TierName(block.Value.Float())),
 			),
 		))
-		return common.NewBlocksContent(specialRatingColumnStyle, column...)
+		return common.NewBlocksContent(specialRatingColumnStyle(), column...)
 
 	case prepare.TagRankedRating:
 		var column []common.Block
@@ -45,15 +46,14 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width 
 			column = append(column, icon)
 		}
 		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
-			blockWithDoubleVehicleIcon(common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()), block.Data.Session, block.Data.Career),
+			blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session.String()), block.Data.Session, block.Data.Career),
 		))
-		return common.NewBlocksContent(specialRatingColumnStyle, column...)
+		return common.NewBlocksContent(specialRatingColumnStyle(), column...)
 
 	default:
 		return common.NewBlocksContent(statsBlockStyle(width),
-			common.NewTextContent(vehicleBlockStyle.session, block.Data.Session.String()),
-			// common.NewTextContent(vehicleBlockStyle.career, block.Data.Career.String()),
-			common.NewTextContent(vehicleBlockStyle.label, block.Label),
+			common.NewTextContent(blockStyle.session, block.Data.Session.String()),
+			common.NewTextContent(blockStyle.label, block.Label),
 		)
 	}
 }

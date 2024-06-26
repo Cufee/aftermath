@@ -81,16 +81,6 @@ func loadImages(files map[string][]byte) (map[string]image.Image, error) {
 func GetLoadedFontFace(name string) ([]byte, bool) {
 	f, ok := fontsMap[name]
 	return f, ok
-	// if !ok {
-	// 	return nil, false
-	// }
-	// faces := make(map[float64]font.Face)
-	// for _, size := range sizes {
-	// 	faces[size] = truetype.NewFace(loadedFont, &truetype.Options{
-	// 		Size: size,
-	// 	})
-	// }
-	// return faces, true
 }
 
 func GetLoadedImage(name string) (image.Image, bool) {

@@ -19,25 +19,27 @@ var (
 	minPrimaryCardWidth       = 300.0 // making the primary card too small looks bad if there are no battles in a session
 )
 
-var (
-	specialRatingColumnStyle = common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Gap: 5}
-	promoTextStyle           = common.Style{Font: common.FontMedium, FontColor: common.TextPrimary}
-)
+func specialRatingColumnStyle() common.Style {
+	return common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Gap: 5}
+}
+func promoTextStyle() common.Style {
+	return common.Style{Font: common.FontMedium(), FontColor: common.TextPrimary}
+}
 
 func frameStyle() common.Style {
 	return common.Style{Gap: 10, Direction: common.DirectionHorizontal}
 }
 
-var (
-	overviewStatsBlockStyle = blockStyle{
-		common.Style{Font: common.FontLarge, FontColor: common.TextPrimary},
-		common.Style{Font: common.FontMedium, FontColor: common.TextSecondary},
-		common.Style{Font: common.FontSmall, FontColor: common.TextAlt},
+func overviewStatsBlockStyle() blockStyle {
+	return blockStyle{
+		common.Style{Font: common.FontLarge(), FontColor: common.TextPrimary},
+		common.Style{Font: common.FontMedium(), FontColor: common.TextSecondary},
+		common.Style{Font: common.FontSmall(), FontColor: common.TextAlt},
 	}
-)
+}
 
 func overviewSpecialRatingLabelStyle(color color.Color) common.Style {
-	return common.Style{FontColor: color, Font: common.FontSmall}
+	return common.Style{FontColor: color, Font: common.FontSmall()}
 }
 
 func overviewSpecialRatingPillStyle(color color.Color) common.Style {
@@ -91,13 +93,18 @@ var (
 		PaddingY:        5,
 		PaddingX:        10,
 	}
-	vehicleCardTitleTextStyle = common.Style{Font: common.FontMedium, FontColor: common.TextAlt}
-	vehicleBlockStyle         = blockStyle{
-		common.Style{Font: common.FontLarge, FontColor: common.TextPrimary},
-		common.Style{Font: common.FontMedium, FontColor: common.TextSecondary},
-		common.Style{Font: common.FontSmall, FontColor: common.TextAlt},
-	}
 )
+
+func vehicleCardTitleTextStyle() common.Style {
+	return common.Style{Font: common.FontMedium(), FontColor: common.TextAlt}
+}
+func vehicleBlockStyle() blockStyle {
+	return blockStyle{
+		common.Style{Font: common.FontLarge(), FontColor: common.TextPrimary},
+		common.Style{Font: common.FontMedium(), FontColor: common.TextSecondary},
+		common.Style{Font: common.FontSmall(), FontColor: common.TextAlt},
+	}
+}
 
 func vehicleCardTitleContainerStyle(width float64) common.Style {
 	return common.Style{
@@ -130,15 +137,19 @@ func vehicleBlocksRowStyle(width float64) common.Style {
 	}
 }
 
-var (
-	ratingVehicleCardTitleContainerStyle = common.Style{Direction: common.DirectionHorizontal, Gap: 10, JustifyContent: common.JustifyContentSpaceBetween}
-	ratingVehicleCardTitleStyle          = common.Style{Font: common.FontMedium, FontColor: common.TextSecondary, PaddingX: 5}
-	ratingVehicleBlockStyle              = blockStyle{
-		common.Style{Font: common.FontLarge, FontColor: common.TextPrimary},
-		common.Style{Font: common.FontMedium, FontColor: common.TextSecondary},
-		common.Style{Font: common.FontSmall, FontColor: common.TextAlt},
+func ratingVehicleCardTitleContainerStyle() common.Style {
+	return common.Style{Direction: common.DirectionHorizontal, Gap: 10, JustifyContent: common.JustifyContentSpaceBetween}
+}
+func ratingVehicleCardTitleStyle() common.Style {
+	return common.Style{Font: common.FontMedium(), FontColor: common.TextSecondary, PaddingX: 5}
+}
+func ratingVehicleBlockStyle() blockStyle {
+	return blockStyle{
+		common.Style{Font: common.FontLarge(), FontColor: common.TextPrimary},
+		common.Style{Font: common.FontMedium(), FontColor: common.TextSecondary},
+		common.Style{Font: common.FontSmall(), FontColor: common.TextAlt},
 	}
-)
+}
 
 func ratingVehicleCardStyle(width float64) common.Style {
 	return defaultCardStyle(width)
@@ -148,10 +159,12 @@ func ratingVehicleBlocksRowStyle(width float64) common.Style {
 	return vehicleBlocksRowStyle(width)
 }
 
-var (
-	highlightCardTitleTextStyle   = common.Style{Font: common.FontSmall, FontColor: common.TextSecondary}
-	highlightVehicleNameTextStyle = common.Style{Font: common.FontMedium, FontColor: common.TextPrimary}
-)
+func highlightCardTitleTextStyle() common.Style {
+	return common.Style{Font: common.FontSmall(), FontColor: common.TextSecondary}
+}
+func highlightVehicleNameTextStyle() common.Style {
+	return common.Style{Font: common.FontMedium(), FontColor: common.TextPrimary}
+}
 
 func highlightedVehicleCardStyle(width float64) common.Style {
 	style := defaultCardStyle(width)
