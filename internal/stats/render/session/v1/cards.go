@@ -116,14 +116,13 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		for _, card := range cards.Unrated.Highlights {
 			// [card label] [session]
 			// [title]  	  [label]
-			titleStyle := highlightCardTitleTextStyle()
-			labelSize := common.MeasureString(card.Meta, titleStyle.Font)
-			titleSize := common.MeasureString(card.Title, titleStyle.Font)
+			labelSize := common.MeasureString(card.Meta, highlightCardTitleTextStyle().Font)
+			titleSize := common.MeasureString(card.Title, highlightVehicleNameTextStyle().Font)
 
 			style := vehicleBlockStyle()
 			presetBlockWidth, contentWidth := highlightedVehicleBlocksWidth(card.Blocks, style.session, style.career, style.label, highlightedVehicleBlockRowStyle(0))
 			// add the gap and card padding, the gap here accounts for title/label being inline with content
-			contentWidth += highlightedVehicleBlockRowStyle(0).Gap*float64(len(card.Blocks)) + highlightedVehicleCardStyle(0).Gap + highlightedVehicleCardStyle(0).PaddingX*2 + common.Max(titleSize.TotalWidth, labelSize.TotalWidth)
+			contentWidth += highlightedVehicleBlockRowStyle(0).Gap*float64(len(card.Blocks)-1) + highlightedVehicleCardStyle(0).Gap + highlightedVehicleCardStyle(0).PaddingX*2 + common.Max(titleSize.TotalWidth, labelSize.TotalWidth)
 			primaryCardWidth = common.Max(primaryCardWidth, contentWidth)
 
 			for key, width := range presetBlockWidth {
@@ -226,9 +225,9 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 				break
 			}
 			secondaryColumn = append(secondaryColumn, makeVehicleCard(vehicle, secondaryCardBlockSizes, secondaryCardWidth))
-			if i == len(cards.Unrated.Vehicles)-1 {
-				secondaryColumn = append(secondaryColumn, makeVehicleLegendCard(cards.Unrated.Vehicles[0], secondaryCardBlockSizes, secondaryCardWidth))
-			}
+		}
+		if len(cards.Unrated.Vehicles) > 0 {
+			secondaryColumn = append(secondaryColumn, makeVehicleLegendCard(cards.Unrated.Vehicles[0], secondaryCardBlockSizes, secondaryCardWidth))
 		}
 	}
 
