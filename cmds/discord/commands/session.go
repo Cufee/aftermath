@@ -19,7 +19,7 @@ import (
 )
 
 func init() {
-	Loaded.add(
+	LoadedPublic.add(
 		builder.NewCommand("session").
 			Options(defaultStatsOptions...).
 			Handler(func(ctx *common.Context) error {

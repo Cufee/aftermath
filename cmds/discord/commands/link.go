@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	Loaded.add(
+	LoadedPublic.add(
 		builder.NewCommand("link").
 			Options(
 				builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).

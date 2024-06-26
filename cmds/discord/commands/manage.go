@@ -16,9 +16,8 @@ import (
 )
 
 func init() {
-	Loaded.add(
+	LoadedInternal.add(
 		builder.NewCommand("manage").
-			// ExclusiveToGuilds(os.Getenv("DISCORD_PRIMARY_GUILD_ID")).
 			Middleware(middleware.RequirePermissions(permissions.UseDebugFeatures)).
 			Options(
 				builder.NewOption("users", discordgo.ApplicationCommandOptionSubCommandGroup).Options(

@@ -14,7 +14,7 @@ type ApplicationCommand struct {
 // Fields of the ApplicationCommand.
 func (ApplicationCommand) Fields() []ent.Field {
 	return append(defaultFields,
-		field.String("name").Unique().NotEmpty(),
+		field.String("name").NotEmpty(),
 		field.String("version").NotEmpty(),
 		field.String("options_hash").NotEmpty(),
 	)
