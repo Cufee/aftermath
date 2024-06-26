@@ -1,16 +1,24 @@
 package common
 
 import (
+	"context"
+	"fmt"
 	"image"
 	"strings"
+	"sync"
 
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
 )
 
 type blockContentType int
+
+func (t blockContentType) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("%d", t)), nil
+}
 
 const (
 	BlockContentTypeText blockContentType = iota
@@ -54,7 +62,7 @@ func NewTextContent(style Style, value string) Block {
 
 func (content contentText) Render(style Style) (image.Image, error) {
 	if !style.Font.Valid() {
-		return nil, errors.New("font not set")
+		// return nil, errors.New("font not valid")
 	}
 
 	size := MeasureString(content.value, style.Font)
@@ -94,6 +102,15 @@ func NewBlocksContent(style Style, blocks ...Block) Block {
 }
 
 func (content contentBlocks) Render(style Style) (image.Image, error) {
+	if len(content.blocks) < 1 {
+		return nil, errors.New("block content cannot be empty")
+	}
+
+	// avoid the overhead of mutex and goroutines if it is not required
+	if len(content.blocks) > 1 {
+		return content.renderAsync(style)
+	}
+
 	var images []image.Image
 	for _, block := range content.blocks {
 		img, err := block.Render()
@@ -103,6 +120,48 @@ func (content contentBlocks) Render(style Style) (image.Image, error) {
 		images = append(images, img)
 	}
 	return renderImages(images, style)
+}
+
+func (content contentBlocks) renderAsync(style Style) (image.Image, error) {
+	var mx sync.Mutex
+	var wg sync.WaitGroup
+	images := make([]image.Image, len(content.blocks))
+
+	errCh := make(chan error)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	for i, block := range content.blocks {
+		wg.Add(1)
+		go func(i int, b Block) {
+			defer wg.Done()
+
+			img, err := b.Render()
+			if err != nil {
+				select {
+				case errCh <- err:
+					cancel()
+				default:
+					log.Err(err).Any("type", b.content.Type()).Msg("unhandled error while rendering a block")
+				}
+				return
+			}
+			mx.Lock()
+			images[i] = img
+			mx.Unlock()
+		}(i, block)
+	}
+	go func() {
+		wg.Wait()
+		cancel()
+		close(errCh)
+	}()
+
+	select {
+	case <-ctx.Done():
+		return renderImages(images, style)
+	case err := <-errCh:
+		return nil, err
+	}
 }
 
 func (content contentBlocks) Type() blockContentType {
@@ -120,6 +179,10 @@ func NewImageContent(style Style, image image.Image) Block {
 }
 
 func (content contentImage) Render(style Style) (image.Image, error) {
+	if content.image == nil {
+		return nil, errors.New("image content cannot be nil")
+	}
+
 	if style.Width == 0 {
 		style.Width = float64(content.image.Bounds().Dx())
 	}

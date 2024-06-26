@@ -12,5 +12,5 @@ func NewFooterCard(text string) Block {
 		BackgroundColor: backgroundColor,
 		BorderRadius:    BorderRadiusSM,
 		// Debug:           true,
-	}, NewTextContent(Style{Font: FontSmall, FontColor: TextSecondary}, text))
+	}, NewTextContent(Style{Font: FontSmall(), FontColor: TextSecondary}, text))
 }

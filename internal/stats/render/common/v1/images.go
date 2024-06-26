@@ -34,7 +34,7 @@ func AddBackground(content, background image.Image, style Style) image.Image {
 }
 
 func renderImages(images []image.Image, style Style) (image.Image, error) {
-	if len(images) == 0 {
+	if len(images) < 1 {
 		return nil, errors.New("no images to render")
 	}
 
