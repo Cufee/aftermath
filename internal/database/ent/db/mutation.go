@@ -17,6 +17,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
+	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
@@ -46,6 +47,7 @@ const (
 	TypeApplicationCommand   = "ApplicationCommand"
 	TypeClan                 = "Clan"
 	TypeCronTask             = "CronTask"
+	TypeDiscordInteraction   = "DiscordInteraction"
 	TypeUser                 = "User"
 	TypeUserConnection       = "UserConnection"
 	TypeUserContent          = "UserContent"
@@ -6209,32 +6211,868 @@ func (m *CronTaskMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown CronTask edge %s", name)
 }
 
+// DiscordInteractionMutation represents an operation that mutates the DiscordInteraction nodes in the graph.
+type DiscordInteractionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	created_at    *int64
+	addcreated_at *int64
+	updated_at    *int64
+	addupdated_at *int64
+	command       *string
+	reference_id  *string
+	_type         *models.DiscordInteractionType
+	locale        *string
+	options       *models.DiscordInteractionOptions
+	clearedFields map[string]struct{}
+	user          *string
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*DiscordInteraction, error)
+	predicates    []predicate.DiscordInteraction
+}
+
+var _ ent.Mutation = (*DiscordInteractionMutation)(nil)
+
+// discordinteractionOption allows management of the mutation configuration using functional options.
+type discordinteractionOption func(*DiscordInteractionMutation)
+
+// newDiscordInteractionMutation creates new mutation for the DiscordInteraction entity.
+func newDiscordInteractionMutation(c config, op Op, opts ...discordinteractionOption) *DiscordInteractionMutation {
+	m := &DiscordInteractionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDiscordInteraction,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDiscordInteractionID sets the ID field of the mutation.
+func withDiscordInteractionID(id string) discordinteractionOption {
+	return func(m *DiscordInteractionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DiscordInteraction
+		)
+		m.oldValue = func(ctx context.Context) (*DiscordInteraction, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DiscordInteraction.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDiscordInteraction sets the old DiscordInteraction of the mutation.
+func withDiscordInteraction(node *DiscordInteraction) discordinteractionOption {
+	return func(m *DiscordInteractionMutation) {
+		m.oldValue = func(context.Context) (*DiscordInteraction, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DiscordInteractionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DiscordInteractionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("db: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DiscordInteraction entities.
+func (m *DiscordInteractionMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DiscordInteractionMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DiscordInteractionMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().DiscordInteraction.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *DiscordInteractionMutation) SetCreatedAt(i int64) {
+	m.created_at = &i
+	m.addcreated_at = nil
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *DiscordInteractionMutation) CreatedAt() (r int64, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldCreatedAt(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// AddCreatedAt adds i to the "created_at" field.
+func (m *DiscordInteractionMutation) AddCreatedAt(i int64) {
+	if m.addcreated_at != nil {
+		*m.addcreated_at += i
+	} else {
+		m.addcreated_at = &i
+	}
+}
+
+// AddedCreatedAt returns the value that was added to the "created_at" field in this mutation.
+func (m *DiscordInteractionMutation) AddedCreatedAt() (r int64, exists bool) {
+	v := m.addcreated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *DiscordInteractionMutation) ResetCreatedAt() {
+	m.created_at = nil
+	m.addcreated_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *DiscordInteractionMutation) SetUpdatedAt(i int64) {
+	m.updated_at = &i
+	m.addupdated_at = nil
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *DiscordInteractionMutation) UpdatedAt() (r int64, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldUpdatedAt(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// AddUpdatedAt adds i to the "updated_at" field.
+func (m *DiscordInteractionMutation) AddUpdatedAt(i int64) {
+	if m.addupdated_at != nil {
+		*m.addupdated_at += i
+	} else {
+		m.addupdated_at = &i
+	}
+}
+
+// AddedUpdatedAt returns the value that was added to the "updated_at" field in this mutation.
+func (m *DiscordInteractionMutation) AddedUpdatedAt() (r int64, exists bool) {
+	v := m.addupdated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *DiscordInteractionMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+	m.addupdated_at = nil
+}
+
+// SetCommand sets the "command" field.
+func (m *DiscordInteractionMutation) SetCommand(s string) {
+	m.command = &s
+}
+
+// Command returns the value of the "command" field in the mutation.
+func (m *DiscordInteractionMutation) Command() (r string, exists bool) {
+	v := m.command
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommand returns the old "command" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldCommand(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommand is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommand requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommand: %w", err)
+	}
+	return oldValue.Command, nil
+}
+
+// ResetCommand resets all changes to the "command" field.
+func (m *DiscordInteractionMutation) ResetCommand() {
+	m.command = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *DiscordInteractionMutation) SetUserID(s string) {
+	m.user = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *DiscordInteractionMutation) UserID() (r string, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *DiscordInteractionMutation) ResetUserID() {
+	m.user = nil
+}
+
+// SetReferenceID sets the "reference_id" field.
+func (m *DiscordInteractionMutation) SetReferenceID(s string) {
+	m.reference_id = &s
+}
+
+// ReferenceID returns the value of the "reference_id" field in the mutation.
+func (m *DiscordInteractionMutation) ReferenceID() (r string, exists bool) {
+	v := m.reference_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReferenceID returns the old "reference_id" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldReferenceID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReferenceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReferenceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReferenceID: %w", err)
+	}
+	return oldValue.ReferenceID, nil
+}
+
+// ResetReferenceID resets all changes to the "reference_id" field.
+func (m *DiscordInteractionMutation) ResetReferenceID() {
+	m.reference_id = nil
+}
+
+// SetType sets the "type" field.
+func (m *DiscordInteractionMutation) SetType(mit models.DiscordInteractionType) {
+	m._type = &mit
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *DiscordInteractionMutation) GetType() (r models.DiscordInteractionType, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldType(ctx context.Context) (v models.DiscordInteractionType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *DiscordInteractionMutation) ResetType() {
+	m._type = nil
+}
+
+// SetLocale sets the "locale" field.
+func (m *DiscordInteractionMutation) SetLocale(s string) {
+	m.locale = &s
+}
+
+// Locale returns the value of the "locale" field in the mutation.
+func (m *DiscordInteractionMutation) Locale() (r string, exists bool) {
+	v := m.locale
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLocale returns the old "locale" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldLocale(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLocale is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLocale requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLocale: %w", err)
+	}
+	return oldValue.Locale, nil
+}
+
+// ResetLocale resets all changes to the "locale" field.
+func (m *DiscordInteractionMutation) ResetLocale() {
+	m.locale = nil
+}
+
+// SetOptions sets the "options" field.
+func (m *DiscordInteractionMutation) SetOptions(mio models.DiscordInteractionOptions) {
+	m.options = &mio
+}
+
+// Options returns the value of the "options" field in the mutation.
+func (m *DiscordInteractionMutation) Options() (r models.DiscordInteractionOptions, exists bool) {
+	v := m.options
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOptions returns the old "options" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldOptions(ctx context.Context) (v models.DiscordInteractionOptions, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOptions is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOptions requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOptions: %w", err)
+	}
+	return oldValue.Options, nil
+}
+
+// ResetOptions resets all changes to the "options" field.
+func (m *DiscordInteractionMutation) ResetOptions() {
+	m.options = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *DiscordInteractionMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[discordinteraction.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *DiscordInteractionMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *DiscordInteractionMutation) UserIDs() (ids []string) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *DiscordInteractionMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the DiscordInteractionMutation builder.
+func (m *DiscordInteractionMutation) Where(ps ...predicate.DiscordInteraction) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DiscordInteractionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DiscordInteractionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DiscordInteraction, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DiscordInteractionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DiscordInteractionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (DiscordInteraction).
+func (m *DiscordInteractionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DiscordInteractionMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, discordinteraction.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, discordinteraction.FieldUpdatedAt)
+	}
+	if m.command != nil {
+		fields = append(fields, discordinteraction.FieldCommand)
+	}
+	if m.user != nil {
+		fields = append(fields, discordinteraction.FieldUserID)
+	}
+	if m.reference_id != nil {
+		fields = append(fields, discordinteraction.FieldReferenceID)
+	}
+	if m._type != nil {
+		fields = append(fields, discordinteraction.FieldType)
+	}
+	if m.locale != nil {
+		fields = append(fields, discordinteraction.FieldLocale)
+	}
+	if m.options != nil {
+		fields = append(fields, discordinteraction.FieldOptions)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DiscordInteractionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case discordinteraction.FieldCreatedAt:
+		return m.CreatedAt()
+	case discordinteraction.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case discordinteraction.FieldCommand:
+		return m.Command()
+	case discordinteraction.FieldUserID:
+		return m.UserID()
+	case discordinteraction.FieldReferenceID:
+		return m.ReferenceID()
+	case discordinteraction.FieldType:
+		return m.GetType()
+	case discordinteraction.FieldLocale:
+		return m.Locale()
+	case discordinteraction.FieldOptions:
+		return m.Options()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DiscordInteractionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case discordinteraction.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case discordinteraction.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case discordinteraction.FieldCommand:
+		return m.OldCommand(ctx)
+	case discordinteraction.FieldUserID:
+		return m.OldUserID(ctx)
+	case discordinteraction.FieldReferenceID:
+		return m.OldReferenceID(ctx)
+	case discordinteraction.FieldType:
+		return m.OldType(ctx)
+	case discordinteraction.FieldLocale:
+		return m.OldLocale(ctx)
+	case discordinteraction.FieldOptions:
+		return m.OldOptions(ctx)
+	}
+	return nil, fmt.Errorf("unknown DiscordInteraction field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DiscordInteractionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case discordinteraction.FieldCreatedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case discordinteraction.FieldUpdatedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case discordinteraction.FieldCommand:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommand(v)
+		return nil
+	case discordinteraction.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case discordinteraction.FieldReferenceID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReferenceID(v)
+		return nil
+	case discordinteraction.FieldType:
+		v, ok := value.(models.DiscordInteractionType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case discordinteraction.FieldLocale:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLocale(v)
+		return nil
+	case discordinteraction.FieldOptions:
+		v, ok := value.(models.DiscordInteractionOptions)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOptions(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DiscordInteraction field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DiscordInteractionMutation) AddedFields() []string {
+	var fields []string
+	if m.addcreated_at != nil {
+		fields = append(fields, discordinteraction.FieldCreatedAt)
+	}
+	if m.addupdated_at != nil {
+		fields = append(fields, discordinteraction.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DiscordInteractionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case discordinteraction.FieldCreatedAt:
+		return m.AddedCreatedAt()
+	case discordinteraction.FieldUpdatedAt:
+		return m.AddedUpdatedAt()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DiscordInteractionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case discordinteraction.FieldCreatedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedAt(v)
+		return nil
+	case discordinteraction.FieldUpdatedAt:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DiscordInteraction numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DiscordInteractionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DiscordInteractionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DiscordInteractionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DiscordInteraction nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DiscordInteractionMutation) ResetField(name string) error {
+	switch name {
+	case discordinteraction.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case discordinteraction.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case discordinteraction.FieldCommand:
+		m.ResetCommand()
+		return nil
+	case discordinteraction.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case discordinteraction.FieldReferenceID:
+		m.ResetReferenceID()
+		return nil
+	case discordinteraction.FieldType:
+		m.ResetType()
+		return nil
+	case discordinteraction.FieldLocale:
+		m.ResetLocale()
+		return nil
+	case discordinteraction.FieldOptions:
+		m.ResetOptions()
+		return nil
+	}
+	return fmt.Errorf("unknown DiscordInteraction field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DiscordInteractionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, discordinteraction.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DiscordInteractionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case discordinteraction.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DiscordInteractionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DiscordInteractionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DiscordInteractionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, discordinteraction.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DiscordInteractionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case discordinteraction.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DiscordInteractionMutation) ClearEdge(name string) error {
+	switch name {
+	case discordinteraction.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown DiscordInteraction unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DiscordInteractionMutation) ResetEdge(name string) error {
+	switch name {
+	case discordinteraction.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown DiscordInteraction edge %s", name)
+}
+
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *string
-	created_at           *int64
-	addcreated_at        *int64
-	updated_at           *int64
-	addupdated_at        *int64
-	permissions          *string
-	feature_flags        *[]string
-	appendfeature_flags  []string
-	clearedFields        map[string]struct{}
-	subscriptions        map[string]struct{}
-	removedsubscriptions map[string]struct{}
-	clearedsubscriptions bool
-	connections          map[string]struct{}
-	removedconnections   map[string]struct{}
-	clearedconnections   bool
-	content              map[string]struct{}
-	removedcontent       map[string]struct{}
-	clearedcontent       bool
-	done                 bool
-	oldValue             func(context.Context) (*User, error)
-	predicates           []predicate.User
+	op                          Op
+	typ                         string
+	id                          *string
+	created_at                  *int64
+	addcreated_at               *int64
+	updated_at                  *int64
+	addupdated_at               *int64
+	permissions                 *string
+	feature_flags               *[]string
+	appendfeature_flags         []string
+	clearedFields               map[string]struct{}
+	discord_interactions        map[string]struct{}
+	removeddiscord_interactions map[string]struct{}
+	cleareddiscord_interactions bool
+	subscriptions               map[string]struct{}
+	removedsubscriptions        map[string]struct{}
+	clearedsubscriptions        bool
+	connections                 map[string]struct{}
+	removedconnections          map[string]struct{}
+	clearedconnections          bool
+	content                     map[string]struct{}
+	removedcontent              map[string]struct{}
+	clearedcontent              bool
+	done                        bool
+	oldValue                    func(context.Context) (*User, error)
+	predicates                  []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -6552,6 +7390,60 @@ func (m *UserMutation) ResetFeatureFlags() {
 	m.feature_flags = nil
 	m.appendfeature_flags = nil
 	delete(m.clearedFields, user.FieldFeatureFlags)
+}
+
+// AddDiscordInteractionIDs adds the "discord_interactions" edge to the DiscordInteraction entity by ids.
+func (m *UserMutation) AddDiscordInteractionIDs(ids ...string) {
+	if m.discord_interactions == nil {
+		m.discord_interactions = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.discord_interactions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDiscordInteractions clears the "discord_interactions" edge to the DiscordInteraction entity.
+func (m *UserMutation) ClearDiscordInteractions() {
+	m.cleareddiscord_interactions = true
+}
+
+// DiscordInteractionsCleared reports if the "discord_interactions" edge to the DiscordInteraction entity was cleared.
+func (m *UserMutation) DiscordInteractionsCleared() bool {
+	return m.cleareddiscord_interactions
+}
+
+// RemoveDiscordInteractionIDs removes the "discord_interactions" edge to the DiscordInteraction entity by IDs.
+func (m *UserMutation) RemoveDiscordInteractionIDs(ids ...string) {
+	if m.removeddiscord_interactions == nil {
+		m.removeddiscord_interactions = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.discord_interactions, ids[i])
+		m.removeddiscord_interactions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDiscordInteractions returns the removed IDs of the "discord_interactions" edge to the DiscordInteraction entity.
+func (m *UserMutation) RemovedDiscordInteractionsIDs() (ids []string) {
+	for id := range m.removeddiscord_interactions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DiscordInteractionsIDs returns the "discord_interactions" edge IDs in the mutation.
+func (m *UserMutation) DiscordInteractionsIDs() (ids []string) {
+	for id := range m.discord_interactions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDiscordInteractions resets all changes to the "discord_interactions" edge.
+func (m *UserMutation) ResetDiscordInteractions() {
+	m.discord_interactions = nil
+	m.cleareddiscord_interactions = false
+	m.removeddiscord_interactions = nil
 }
 
 // AddSubscriptionIDs adds the "subscriptions" edge to the UserSubscription entity by ids.
@@ -6936,7 +7828,10 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
+	if m.discord_interactions != nil {
+		edges = append(edges, user.EdgeDiscordInteractions)
+	}
 	if m.subscriptions != nil {
 		edges = append(edges, user.EdgeSubscriptions)
 	}
@@ -6953,6 +7848,12 @@ func (m *UserMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case user.EdgeDiscordInteractions:
+		ids := make([]ent.Value, 0, len(m.discord_interactions))
+		for id := range m.discord_interactions {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeSubscriptions:
 		ids := make([]ent.Value, 0, len(m.subscriptions))
 		for id := range m.subscriptions {
@@ -6977,7 +7878,10 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
+	if m.removeddiscord_interactions != nil {
+		edges = append(edges, user.EdgeDiscordInteractions)
+	}
 	if m.removedsubscriptions != nil {
 		edges = append(edges, user.EdgeSubscriptions)
 	}
@@ -6994,6 +7898,12 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case user.EdgeDiscordInteractions:
+		ids := make([]ent.Value, 0, len(m.removeddiscord_interactions))
+		for id := range m.removeddiscord_interactions {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeSubscriptions:
 		ids := make([]ent.Value, 0, len(m.removedsubscriptions))
 		for id := range m.removedsubscriptions {
@@ -7018,7 +7928,10 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
+	if m.cleareddiscord_interactions {
+		edges = append(edges, user.EdgeDiscordInteractions)
+	}
 	if m.clearedsubscriptions {
 		edges = append(edges, user.EdgeSubscriptions)
 	}
@@ -7035,6 +7948,8 @@ func (m *UserMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
+	case user.EdgeDiscordInteractions:
+		return m.cleareddiscord_interactions
 	case user.EdgeSubscriptions:
 		return m.clearedsubscriptions
 	case user.EdgeConnections:
@@ -7057,6 +7972,9 @@ func (m *UserMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
+	case user.EdgeDiscordInteractions:
+		m.ResetDiscordInteractions()
+		return nil
 	case user.EdgeSubscriptions:
 		m.ResetSubscriptions()
 		return nil

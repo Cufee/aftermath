@@ -247,7 +247,7 @@ func (r *Router) sendInteractionReply(interaction discordgo.Interaction, state *
 	var handler func() error
 
 	switch interaction.Type {
-	case discordgo.InteractionApplicationCommand:
+	case discordgo.InteractionApplicationCommand, discordgo.InteractionMessageComponent:
 		if state.replied || state.acked {
 			// We already replied to this interaction - edit the message
 			handler = func() error {
@@ -258,6 +258,17 @@ func (r *Router) sendInteractionReply(interaction discordgo.Interaction, state *
 			handler = func() error {
 				payload := discordgo.InteractionResponse{Data: &data, Type: discordgo.InteractionResponseChannelMessageWithSource}
 				return r.restClient.SendInteractionResponse(interaction.ID, interaction.Token, payload)
+			}
+		}
+	default:
+		log.Error().Stack().Any("state", state).Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
+		if state.replied || state.acked {
+			handler = func() error {
+				return r.restClient.UpdateInteractionResponse(interaction.AppID, interaction.Token, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."})
+			}
+		} else {
+			handler = func() error {
+				return r.restClient.SendInteractionResponse(interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, Type: discordgo.InteractionResponseChannelMessageWithSource})
 			}
 		}
 	}

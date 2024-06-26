@@ -57,6 +57,7 @@ var (
 )
 
 var (
-	// Admin
-	ViewLogs Permissions = fromLsh(60)
+	// Technical / Debugging
+	UseDebugFeatures = fromLsh(61)
+	ViewTaskLogs     = fromLsh(62)
 )

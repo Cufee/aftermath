@@ -27,6 +27,9 @@ type Clan func(*sql.Selector)
 // CronTask is the predicate function for crontask builders.
 type CronTask func(*sql.Selector)
 
+// DiscordInteraction is the predicate function for discordinteraction builders.
+type DiscordInteraction func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 

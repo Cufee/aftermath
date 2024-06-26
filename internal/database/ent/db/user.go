@@ -33,6 +33,8 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
+	// DiscordInteractions holds the value of the discord_interactions edge.
+	DiscordInteractions []*DiscordInteraction `json:"discord_interactions,omitempty"`
 	// Subscriptions holds the value of the subscriptions edge.
 	Subscriptions []*UserSubscription `json:"subscriptions,omitempty"`
 	// Connections holds the value of the connections edge.
@@ -41,13 +43,22 @@ type UserEdges struct {
 	Content []*UserContent `json:"content,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
+}
+
+// DiscordInteractionsOrErr returns the DiscordInteractions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) DiscordInteractionsOrErr() ([]*DiscordInteraction, error) {
+	if e.loadedTypes[0] {
+		return e.DiscordInteractions, nil
+	}
+	return nil, &NotLoadedError{edge: "discord_interactions"}
 }
 
 // SubscriptionsOrErr returns the Subscriptions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SubscriptionsOrErr() ([]*UserSubscription, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[1] {
 		return e.Subscriptions, nil
 	}
 	return nil, &NotLoadedError{edge: "subscriptions"}
@@ -56,7 +67,7 @@ func (e UserEdges) SubscriptionsOrErr() ([]*UserSubscription, error) {
 // ConnectionsOrErr returns the Connections value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ConnectionsOrErr() ([]*UserConnection, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Connections, nil
 	}
 	return nil, &NotLoadedError{edge: "connections"}
@@ -65,7 +76,7 @@ func (e UserEdges) ConnectionsOrErr() ([]*UserConnection, error) {
 // ContentOrErr returns the Content value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ContentOrErr() ([]*UserContent, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Content, nil
 	}
 	return nil, &NotLoadedError{edge: "content"}
@@ -140,6 +151,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
+}
+
+// QueryDiscordInteractions queries the "discord_interactions" edge of the User entity.
+func (u *User) QueryDiscordInteractions() *DiscordInteractionQuery {
+	return NewUserClient(u.config).QueryDiscordInteractions(u)
 }
 
 // QuerySubscriptions queries the "subscriptions" edge of the User entity.

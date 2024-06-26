@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
@@ -76,6 +77,21 @@ func (uu *UserUpdate) ClearFeatureFlags() *UserUpdate {
 	return uu
 }
 
+// AddDiscordInteractionIDs adds the "discord_interactions" edge to the DiscordInteraction entity by IDs.
+func (uu *UserUpdate) AddDiscordInteractionIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddDiscordInteractionIDs(ids...)
+	return uu
+}
+
+// AddDiscordInteractions adds the "discord_interactions" edges to the DiscordInteraction entity.
+func (uu *UserUpdate) AddDiscordInteractions(d ...*DiscordInteraction) *UserUpdate {
+	ids := make([]string, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.AddDiscordInteractionIDs(ids...)
+}
+
 // AddSubscriptionIDs adds the "subscriptions" edge to the UserSubscription entity by IDs.
 func (uu *UserUpdate) AddSubscriptionIDs(ids ...string) *UserUpdate {
 	uu.mutation.AddSubscriptionIDs(ids...)
@@ -124,6 +140,27 @@ func (uu *UserUpdate) AddContent(u ...*UserContent) *UserUpdate {
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
+}
+
+// ClearDiscordInteractions clears all "discord_interactions" edges to the DiscordInteraction entity.
+func (uu *UserUpdate) ClearDiscordInteractions() *UserUpdate {
+	uu.mutation.ClearDiscordInteractions()
+	return uu
+}
+
+// RemoveDiscordInteractionIDs removes the "discord_interactions" edge to DiscordInteraction entities by IDs.
+func (uu *UserUpdate) RemoveDiscordInteractionIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveDiscordInteractionIDs(ids...)
+	return uu
+}
+
+// RemoveDiscordInteractions removes "discord_interactions" edges to DiscordInteraction entities.
+func (uu *UserUpdate) RemoveDiscordInteractions(d ...*DiscordInteraction) *UserUpdate {
+	ids := make([]string, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.RemoveDiscordInteractionIDs(ids...)
 }
 
 // ClearSubscriptions clears all "subscriptions" edges to the UserSubscription entity.
@@ -253,6 +290,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.FeatureFlagsCleared() {
 		_spec.ClearField(user.FieldFeatureFlags, field.TypeJSON)
+	}
+	if uu.mutation.DiscordInteractionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DiscordInteractionsTable,
+			Columns: []string{user.DiscordInteractionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordinteraction.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedDiscordInteractionsIDs(); len(nodes) > 0 && !uu.mutation.DiscordInteractionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DiscordInteractionsTable,
+			Columns: []string{user.DiscordInteractionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordinteraction.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.DiscordInteractionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DiscordInteractionsTable,
+			Columns: []string{user.DiscordInteractionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordinteraction.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if uu.mutation.SubscriptionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -454,6 +536,21 @@ func (uuo *UserUpdateOne) ClearFeatureFlags() *UserUpdateOne {
 	return uuo
 }
 
+// AddDiscordInteractionIDs adds the "discord_interactions" edge to the DiscordInteraction entity by IDs.
+func (uuo *UserUpdateOne) AddDiscordInteractionIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddDiscordInteractionIDs(ids...)
+	return uuo
+}
+
+// AddDiscordInteractions adds the "discord_interactions" edges to the DiscordInteraction entity.
+func (uuo *UserUpdateOne) AddDiscordInteractions(d ...*DiscordInteraction) *UserUpdateOne {
+	ids := make([]string, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.AddDiscordInteractionIDs(ids...)
+}
+
 // AddSubscriptionIDs adds the "subscriptions" edge to the UserSubscription entity by IDs.
 func (uuo *UserUpdateOne) AddSubscriptionIDs(ids ...string) *UserUpdateOne {
 	uuo.mutation.AddSubscriptionIDs(ids...)
@@ -502,6 +599,27 @@ func (uuo *UserUpdateOne) AddContent(u ...*UserContent) *UserUpdateOne {
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
+}
+
+// ClearDiscordInteractions clears all "discord_interactions" edges to the DiscordInteraction entity.
+func (uuo *UserUpdateOne) ClearDiscordInteractions() *UserUpdateOne {
+	uuo.mutation.ClearDiscordInteractions()
+	return uuo
+}
+
+// RemoveDiscordInteractionIDs removes the "discord_interactions" edge to DiscordInteraction entities by IDs.
+func (uuo *UserUpdateOne) RemoveDiscordInteractionIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveDiscordInteractionIDs(ids...)
+	return uuo
+}
+
+// RemoveDiscordInteractions removes "discord_interactions" edges to DiscordInteraction entities.
+func (uuo *UserUpdateOne) RemoveDiscordInteractions(d ...*DiscordInteraction) *UserUpdateOne {
+	ids := make([]string, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.RemoveDiscordInteractionIDs(ids...)
 }
 
 // ClearSubscriptions clears all "subscriptions" edges to the UserSubscription entity.
@@ -661,6 +779,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.FeatureFlagsCleared() {
 		_spec.ClearField(user.FieldFeatureFlags, field.TypeJSON)
+	}
+	if uuo.mutation.DiscordInteractionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DiscordInteractionsTable,
+			Columns: []string{user.DiscordInteractionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordinteraction.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedDiscordInteractionsIDs(); len(nodes) > 0 && !uuo.mutation.DiscordInteractionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DiscordInteractionsTable,
+			Columns: []string{user.DiscordInteractionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordinteraction.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.DiscordInteractionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DiscordInteractionsTable,
+			Columns: []string{user.DiscordInteractionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordinteraction.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if uuo.mutation.SubscriptionsCleared() {
 		edge := &sqlgraph.EdgeSpec{

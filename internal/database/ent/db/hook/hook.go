@@ -93,6 +93,18 @@ func (f CronTaskFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.CronTaskMutation", m)
 }
 
+// The DiscordInteractionFunc type is an adapter to allow the use of ordinary
+// function as DiscordInteraction mutator.
+type DiscordInteractionFunc func(context.Context, *db.DiscordInteractionMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DiscordInteractionFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.DiscordInteractionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.DiscordInteractionMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *db.UserMutation) (db.Value, error)

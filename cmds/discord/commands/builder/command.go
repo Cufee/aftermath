@@ -104,8 +104,9 @@ func (c Builder) GuildOnly() Builder {
 	return c
 }
 
-func (c Builder) ComponentType() Builder {
+func (c Builder) ComponentType(matchFn func(string) bool) Builder {
 	c.kind = CommandTypeComponent
+	c.match = matchFn
 	return c
 }
 

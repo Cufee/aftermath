@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/cufee/aftermath/cmds/core"
+
 	"github.com/cufee/aftermath/cmds/discord/commands"
 	"github.com/cufee/aftermath/cmds/discord/router"
 )
