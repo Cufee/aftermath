@@ -7,50 +7,52 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/cmd/core"
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 )
 
 func init() {
 	defaultHandlers[models.TaskTypeDatabaseCleanup] = TaskHandler{
-		Process: func(ctx context.Context, client core.Client, task models.Task) (string, error) {
+		Process: func(ctx context.Context, client core.Client, task *models.Task) error {
 			if task.Data == nil {
-				return "no data provided", errors.New("no data provided")
+				task.Data["triesLeft"] = "0" // do not retry
+				return errors.New("no data provided")
 			}
 			{
 				taskExpiration, err := time.Parse(time.RFC3339, task.Data["expiration_tasks"])
 				if err != nil {
 					task.Data["triesLeft"] = "0" // do not retry
-					return "invalid expiration_tasks", errors.Wrap(err, "failed to parse expiration_tasks to time")
+					return errors.Wrap(err, "failed to parse expiration_tasks to time")
 				}
 				err = client.Database().DeleteExpiredTasks(ctx, taskExpiration)
-				if err != nil {
-					return "failed to delete expired tasks", err
+				if err != nil && !database.IsNotFound(err) {
+					return errors.Wrap(err, "failed to delete expired tasks")
 				}
 			}
 			{
 				interactionExpiration, err := time.Parse(time.RFC3339, task.Data["expiration_interactions"])
 				if err != nil {
 					task.Data["triesLeft"] = "0" // do not retry
-					return "invalid expiration_snapshots", errors.Wrap(err, "failed to parse interactionExpiration to time")
+					return errors.Wrap(err, "failed to parse interactionExpiration to time")
 				}
 				err = client.Database().DeleteExpiredInteractions(ctx, interactionExpiration)
-				if err != nil {
-					return "failed to delete expired interactions", err
+				if err != nil && !database.IsNotFound(err) {
+					return errors.Wrap(err, "failed to delete expired interactions")
 				}
 			}
 			{
 				snapshotExpiration, err := time.Parse(time.RFC3339, task.Data["expiration_snapshots"])
 				if err != nil {
 					task.Data["triesLeft"] = "0" // do not retry
-					return "invalid expiration_snapshots", errors.Wrap(err, "failed to parse expiration_snapshots to time")
+					return errors.Wrap(err, "failed to parse expiration_snapshots to time")
 				}
 				err = client.Database().DeleteExpiredSnapshots(ctx, snapshotExpiration)
-				if err != nil {
-					return "failed to delete expired snapshots", err
+				if err != nil && !database.IsNotFound(err) {
+					return errors.Wrap(err, "failed to delete expired snapshots")
 				}
 			}
 
-			return "cleanup complete", nil
+			return nil
 		},
 		ShouldRetry: func(task *models.Task) bool {
 			return false

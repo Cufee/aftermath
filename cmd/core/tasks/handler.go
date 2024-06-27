@@ -8,7 +8,7 @@ import (
 )
 
 type TaskHandler struct {
-	Process     func(context.Context, core.Client, models.Task) (string, error)
+	Process     func(context.Context, core.Client, *models.Task) error
 	ShouldRetry func(*models.Task) bool
 }
 

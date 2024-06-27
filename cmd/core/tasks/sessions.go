@@ -16,22 +16,22 @@ import (
 
 func init() {
 	defaultHandlers[models.TaskTypeRecordSnapshots] = TaskHandler{
-		Process: func(ctx context.Context, client core.Client, task models.Task) (string, error) {
+		Process: func(ctx context.Context, client core.Client, task *models.Task) error {
 			if task.Data == nil {
-				return "no data provided", errors.New("no data provided")
+				return errors.New("no data provided")
 			}
 			realm, ok := task.Data["realm"]
 			if !ok {
 				task.Data["triesLeft"] = "0" // do not retry
-				return "invalid realm", errors.New("invalid realm")
+				return errors.New("invalid realm")
 			}
 			if len(task.Targets) > 100 {
 				task.Data["triesLeft"] = "0" // do not retry
-				return "cannot process 100+ accounts at a time", errors.New("invalid targets length")
+				return errors.New("invalid targets length")
 			}
 			if len(task.Targets) < 1 {
 				task.Data["triesLeft"] = "0" // do not retry
-				return "target ids cannot be left blank", errors.New("invalid targets length")
+				return errors.New("invalid targets length")
 			}
 			forceUpdate := task.Data["force"] == "true"
 
@@ -39,11 +39,7 @@ func init() {
 
 			accountErrors, err := logic.RecordAccountSnapshots(ctx, client.Wargaming(), client.Database(), realm, forceUpdate, task.Targets...)
 			if err != nil {
-				return "failed to record sessions", err
-			}
-
-			if len(accountErrors) == 0 {
-				return "finished session update on all accounts", nil
+				return err
 			}
 
 			// Retry failed accounts
@@ -61,7 +57,7 @@ func init() {
 			}
 			task.Targets = newTargets
 
-			return "retrying failed accounts", errors.New("some accounts failed")
+			return nil
 		},
 		ShouldRetry: func(task *models.Task) bool {
 			triesLeft, err := strconv.Atoi(task.Data["triesLeft"])

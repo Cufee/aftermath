@@ -221,11 +221,11 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 				wctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
 				defer cancel()
 
-				msg, err := handler.Process(wctx, coreClient, task)
+				err = handler.Process(wctx, coreClient, &task)
 				task.Status = models.TaskStatusComplete
 				l := models.TaskLog{
 					Timestamp: time.Now(),
-					Comment:   msg,
+					Comment:   "task handler finished",
 				}
 				if err != nil {
 					l.Error = err.Error()
