@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -20,29 +21,29 @@ type ApplicationCommandCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (acc *ApplicationCommandCreate) SetCreatedAt(i int64) *ApplicationCommandCreate {
-	acc.mutation.SetCreatedAt(i)
+func (acc *ApplicationCommandCreate) SetCreatedAt(t time.Time) *ApplicationCommandCreate {
+	acc.mutation.SetCreatedAt(t)
 	return acc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (acc *ApplicationCommandCreate) SetNillableCreatedAt(i *int64) *ApplicationCommandCreate {
-	if i != nil {
-		acc.SetCreatedAt(*i)
+func (acc *ApplicationCommandCreate) SetNillableCreatedAt(t *time.Time) *ApplicationCommandCreate {
+	if t != nil {
+		acc.SetCreatedAt(*t)
 	}
 	return acc
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acc *ApplicationCommandCreate) SetUpdatedAt(i int64) *ApplicationCommandCreate {
-	acc.mutation.SetUpdatedAt(i)
+func (acc *ApplicationCommandCreate) SetUpdatedAt(t time.Time) *ApplicationCommandCreate {
+	acc.mutation.SetUpdatedAt(t)
 	return acc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (acc *ApplicationCommandCreate) SetNillableUpdatedAt(i *int64) *ApplicationCommandCreate {
-	if i != nil {
-		acc.SetUpdatedAt(*i)
+func (acc *ApplicationCommandCreate) SetNillableUpdatedAt(t *time.Time) *ApplicationCommandCreate {
+	if t != nil {
+		acc.SetUpdatedAt(*t)
 	}
 	return acc
 }
@@ -196,11 +197,11 @@ func (acc *ApplicationCommandCreate) createSpec() (*ApplicationCommand, *sqlgrap
 		_spec.ID.Value = id
 	}
 	if value, ok := acc.mutation.CreatedAt(); ok {
-		_spec.SetField(applicationcommand.FieldCreatedAt, field.TypeInt64, value)
+		_spec.SetField(applicationcommand.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := acc.mutation.UpdatedAt(); ok {
-		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := acc.mutation.Name(); ok {

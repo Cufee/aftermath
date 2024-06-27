@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,9 +19,9 @@ type Clan struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Tag holds the value of the "tag" field.
 	Tag string `json:"tag,omitempty"`
 	// Name holds the value of the "name" field.
@@ -60,10 +61,10 @@ func (*Clan) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case clan.FieldMembers:
 			values[i] = new([]byte)
-		case clan.FieldCreatedAt, clan.FieldUpdatedAt:
-			values[i] = new(sql.NullInt64)
 		case clan.FieldID, clan.FieldTag, clan.FieldName, clan.FieldEmblemID:
 			values[i] = new(sql.NullString)
+		case clan.FieldCreatedAt, clan.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -86,16 +87,16 @@ func (c *Clan) assignValues(columns []string, values []any) error {
 				c.ID = value.String
 			}
 		case clan.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				c.CreatedAt = value.Int64
+				c.CreatedAt = value.Time
 			}
 		case clan.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				c.UpdatedAt = value.Int64
+				c.UpdatedAt = value.Time
 			}
 		case clan.FieldTag:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -165,10 +166,10 @@ func (c *Clan) String() string {
 	builder.WriteString("Clan(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", c.CreatedAt))
+	builder.WriteString(c.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", c.UpdatedAt))
+	builder.WriteString(c.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("tag=")
 	builder.WriteString(c.Tag)

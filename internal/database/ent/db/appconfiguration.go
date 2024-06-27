@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,9 +19,9 @@ type AppConfiguration struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Key holds the value of the "key" field.
 	Key string `json:"key,omitempty"`
 	// Value holds the value of the "value" field.
@@ -37,10 +38,10 @@ func (*AppConfiguration) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case appconfiguration.FieldValue, appconfiguration.FieldMetadata:
 			values[i] = new([]byte)
-		case appconfiguration.FieldCreatedAt, appconfiguration.FieldUpdatedAt:
-			values[i] = new(sql.NullInt64)
 		case appconfiguration.FieldID, appconfiguration.FieldKey:
 			values[i] = new(sql.NullString)
+		case appconfiguration.FieldCreatedAt, appconfiguration.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -63,16 +64,16 @@ func (ac *AppConfiguration) assignValues(columns []string, values []any) error {
 				ac.ID = value.String
 			}
 		case appconfiguration.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ac.CreatedAt = value.Int64
+				ac.CreatedAt = value.Time
 			}
 		case appconfiguration.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				ac.UpdatedAt = value.Int64
+				ac.UpdatedAt = value.Time
 			}
 		case appconfiguration.FieldKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -133,10 +134,10 @@ func (ac *AppConfiguration) String() string {
 	builder.WriteString("AppConfiguration(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ac.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", ac.CreatedAt))
+	builder.WriteString(ac.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", ac.UpdatedAt))
+	builder.WriteString(ac.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("key=")
 	builder.WriteString(ac.Key)

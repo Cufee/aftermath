@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -19,8 +20,9 @@ import (
 // ClanUpdate is the builder for updating Clan entities.
 type ClanUpdate struct {
 	config
-	hooks    []Hook
-	mutation *ClanMutation
+	hooks     []Hook
+	mutation  *ClanMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the ClanUpdate builder.
@@ -30,15 +32,8 @@ func (cu *ClanUpdate) Where(ps ...predicate.Clan) *ClanUpdate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (cu *ClanUpdate) SetUpdatedAt(i int64) *ClanUpdate {
-	cu.mutation.ResetUpdatedAt()
-	cu.mutation.SetUpdatedAt(i)
-	return cu
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (cu *ClanUpdate) AddUpdatedAt(i int64) *ClanUpdate {
-	cu.mutation.AddUpdatedAt(i)
+func (cu *ClanUpdate) SetUpdatedAt(t time.Time) *ClanUpdate {
+	cu.mutation.SetUpdatedAt(t)
 	return cu
 }
 
@@ -194,6 +189,12 @@ func (cu *ClanUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (cu *ClanUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ClanUpdate {
+	cu.modifiers = append(cu.modifiers, modifiers...)
+	return cu
+}
+
 func (cu *ClanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := cu.check(); err != nil {
 		return n, err
@@ -207,10 +208,7 @@ func (cu *ClanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.UpdatedAt(); ok {
-		_spec.SetField(clan.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := cu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(clan.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(clan.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := cu.mutation.Tag(); ok {
 		_spec.SetField(clan.FieldTag, field.TypeString, value)
@@ -277,6 +275,7 @@ func (cu *ClanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(cu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{clan.Label}
@@ -292,21 +291,15 @@ func (cu *ClanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // ClanUpdateOne is the builder for updating a single Clan entity.
 type ClanUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *ClanMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *ClanMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (cuo *ClanUpdateOne) SetUpdatedAt(i int64) *ClanUpdateOne {
-	cuo.mutation.ResetUpdatedAt()
-	cuo.mutation.SetUpdatedAt(i)
-	return cuo
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (cuo *ClanUpdateOne) AddUpdatedAt(i int64) *ClanUpdateOne {
-	cuo.mutation.AddUpdatedAt(i)
+func (cuo *ClanUpdateOne) SetUpdatedAt(t time.Time) *ClanUpdateOne {
+	cuo.mutation.SetUpdatedAt(t)
 	return cuo
 }
 
@@ -475,6 +468,12 @@ func (cuo *ClanUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (cuo *ClanUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ClanUpdateOne {
+	cuo.modifiers = append(cuo.modifiers, modifiers...)
+	return cuo
+}
+
 func (cuo *ClanUpdateOne) sqlSave(ctx context.Context) (_node *Clan, err error) {
 	if err := cuo.check(); err != nil {
 		return _node, err
@@ -505,10 +504,7 @@ func (cuo *ClanUpdateOne) sqlSave(ctx context.Context) (_node *Clan, err error) 
 		}
 	}
 	if value, ok := cuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(clan.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := cuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(clan.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(clan.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := cuo.mutation.Tag(); ok {
 		_spec.SetField(clan.FieldTag, field.TypeString, value)
@@ -575,6 +571,7 @@ func (cuo *ClanUpdateOne) sqlSave(ctx context.Context) (_node *Clan, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(cuo.modifiers...)
 	_node = &Clan{config: cuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

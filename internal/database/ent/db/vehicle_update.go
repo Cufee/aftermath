@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -17,8 +18,9 @@ import (
 // VehicleUpdate is the builder for updating Vehicle entities.
 type VehicleUpdate struct {
 	config
-	hooks    []Hook
-	mutation *VehicleMutation
+	hooks     []Hook
+	mutation  *VehicleMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the VehicleUpdate builder.
@@ -28,15 +30,8 @@ func (vu *VehicleUpdate) Where(ps ...predicate.Vehicle) *VehicleUpdate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vu *VehicleUpdate) SetUpdatedAt(i int64) *VehicleUpdate {
-	vu.mutation.ResetUpdatedAt()
-	vu.mutation.SetUpdatedAt(i)
-	return vu
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (vu *VehicleUpdate) AddUpdatedAt(i int64) *VehicleUpdate {
-	vu.mutation.AddUpdatedAt(i)
+func (vu *VehicleUpdate) SetUpdatedAt(t time.Time) *VehicleUpdate {
+	vu.mutation.SetUpdatedAt(t)
 	return vu
 }
 
@@ -118,6 +113,12 @@ func (vu *VehicleUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (vu *VehicleUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *VehicleUpdate {
+	vu.modifiers = append(vu.modifiers, modifiers...)
+	return vu
+}
+
 func (vu *VehicleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := vu.check(); err != nil {
 		return n, err
@@ -131,10 +132,7 @@ func (vu *VehicleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := vu.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := vu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(vehicle.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := vu.mutation.Tier(); ok {
 		_spec.SetField(vehicle.FieldTier, field.TypeInt, value)
@@ -145,6 +143,7 @@ func (vu *VehicleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := vu.mutation.LocalizedNames(); ok {
 		_spec.SetField(vehicle.FieldLocalizedNames, field.TypeJSON, value)
 	}
+	_spec.AddModifiers(vu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, vu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{vehicle.Label}
@@ -160,21 +159,15 @@ func (vu *VehicleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // VehicleUpdateOne is the builder for updating a single Vehicle entity.
 type VehicleUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *VehicleMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *VehicleMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vuo *VehicleUpdateOne) SetUpdatedAt(i int64) *VehicleUpdateOne {
-	vuo.mutation.ResetUpdatedAt()
-	vuo.mutation.SetUpdatedAt(i)
-	return vuo
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (vuo *VehicleUpdateOne) AddUpdatedAt(i int64) *VehicleUpdateOne {
-	vuo.mutation.AddUpdatedAt(i)
+func (vuo *VehicleUpdateOne) SetUpdatedAt(t time.Time) *VehicleUpdateOne {
+	vuo.mutation.SetUpdatedAt(t)
 	return vuo
 }
 
@@ -269,6 +262,12 @@ func (vuo *VehicleUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (vuo *VehicleUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *VehicleUpdateOne {
+	vuo.modifiers = append(vuo.modifiers, modifiers...)
+	return vuo
+}
+
 func (vuo *VehicleUpdateOne) sqlSave(ctx context.Context) (_node *Vehicle, err error) {
 	if err := vuo.check(); err != nil {
 		return _node, err
@@ -299,10 +298,7 @@ func (vuo *VehicleUpdateOne) sqlSave(ctx context.Context) (_node *Vehicle, err e
 		}
 	}
 	if value, ok := vuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := vuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(vehicle.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := vuo.mutation.Tier(); ok {
 		_spec.SetField(vehicle.FieldTier, field.TypeInt, value)
@@ -313,6 +309,7 @@ func (vuo *VehicleUpdateOne) sqlSave(ctx context.Context) (_node *Vehicle, err e
 	if value, ok := vuo.mutation.LocalizedNames(); ok {
 		_spec.SetField(vehicle.FieldLocalizedNames, field.TypeJSON, value)
 	}
+	_spec.AddModifiers(vuo.modifiers...)
 	_node = &Vehicle{config: vuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

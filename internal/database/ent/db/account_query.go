@@ -30,6 +30,7 @@ type AccountQuery struct {
 	withSnapshots            *AccountSnapshotQuery
 	withVehicleSnapshots     *VehicleSnapshotQuery
 	withAchievementSnapshots *AchievementsSnapshotQuery
+	modifiers                []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -406,7 +407,7 @@ func (aq *AccountQuery) WithAchievementSnapshots(opts ...func(*AchievementsSnaps
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -429,7 +430,7 @@ func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy 
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Account.Query().
@@ -493,6 +494,9 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(aq.modifiers) > 0 {
+		_spec.Modifiers = aq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -657,6 +661,9 @@ func (aq *AccountQuery) loadAchievementSnapshots(ctx context.Context, query *Ach
 
 func (aq *AccountQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := aq.querySpec()
+	if len(aq.modifiers) > 0 {
+		_spec.Modifiers = aq.modifiers
+	}
 	_spec.Node.Columns = aq.ctx.Fields
 	if len(aq.ctx.Fields) > 0 {
 		_spec.Unique = aq.ctx.Unique != nil && *aq.ctx.Unique
@@ -722,6 +729,9 @@ func (aq *AccountQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if aq.ctx.Unique != nil && *aq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range aq.modifiers {
+		m(selector)
+	}
 	for _, p := range aq.predicates {
 		p(selector)
 	}
@@ -737,6 +747,12 @@ func (aq *AccountQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (aq *AccountQuery) Modify(modifiers ...func(s *sql.Selector)) *AccountSelect {
+	aq.modifiers = append(aq.modifiers, modifiers...)
+	return aq.Select()
 }
 
 // AccountGroupBy is the group-by builder for Account entities.
@@ -827,4 +843,10 @@ func (as *AccountSelect) sqlScan(ctx context.Context, root *AccountQuery, v any)
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (as *AccountSelect) Modify(modifiers ...func(s *sql.Selector)) *AccountSelect {
+	as.modifiers = append(as.modifiers, modifiers...)
+	return as
 }

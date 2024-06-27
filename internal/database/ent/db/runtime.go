@@ -3,6 +3,8 @@
 package db
 
 import (
+	"time"
+
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
@@ -30,13 +32,13 @@ func init() {
 	// accountDescCreatedAt is the schema descriptor for created_at field.
 	accountDescCreatedAt := accountFields[1].Descriptor()
 	// account.DefaultCreatedAt holds the default value on creation for the created_at field.
-	account.DefaultCreatedAt = accountDescCreatedAt.Default.(func() int64)
+	account.DefaultCreatedAt = accountDescCreatedAt.Default.(func() time.Time)
 	// accountDescUpdatedAt is the schema descriptor for updated_at field.
 	accountDescUpdatedAt := accountFields[2].Descriptor()
 	// account.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() int64)
+	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
 	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() int64)
+	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// accountDescRealm is the schema descriptor for realm field.
 	accountDescRealm := accountFields[5].Descriptor()
 	// account.RealmValidator is a validator for the "realm" field. It is called by the builders before save.
@@ -68,13 +70,13 @@ func init() {
 	// accountsnapshotDescCreatedAt is the schema descriptor for created_at field.
 	accountsnapshotDescCreatedAt := accountsnapshotFields[1].Descriptor()
 	// accountsnapshot.DefaultCreatedAt holds the default value on creation for the created_at field.
-	accountsnapshot.DefaultCreatedAt = accountsnapshotDescCreatedAt.Default.(func() int64)
+	accountsnapshot.DefaultCreatedAt = accountsnapshotDescCreatedAt.Default.(func() time.Time)
 	// accountsnapshotDescUpdatedAt is the schema descriptor for updated_at field.
 	accountsnapshotDescUpdatedAt := accountsnapshotFields[2].Descriptor()
 	// accountsnapshot.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	accountsnapshot.DefaultUpdatedAt = accountsnapshotDescUpdatedAt.Default.(func() int64)
+	accountsnapshot.DefaultUpdatedAt = accountsnapshotDescUpdatedAt.Default.(func() time.Time)
 	// accountsnapshot.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	accountsnapshot.UpdateDefaultUpdatedAt = accountsnapshotDescUpdatedAt.UpdateDefault.(func() int64)
+	accountsnapshot.UpdateDefaultUpdatedAt = accountsnapshotDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// accountsnapshotDescAccountID is the schema descriptor for account_id field.
 	accountsnapshotDescAccountID := accountsnapshotFields[5].Descriptor()
 	// accountsnapshot.AccountIDValidator is a validator for the "account_id" field. It is called by the builders before save.
@@ -92,13 +94,13 @@ func init() {
 	// achievementssnapshotDescCreatedAt is the schema descriptor for created_at field.
 	achievementssnapshotDescCreatedAt := achievementssnapshotFields[1].Descriptor()
 	// achievementssnapshot.DefaultCreatedAt holds the default value on creation for the created_at field.
-	achievementssnapshot.DefaultCreatedAt = achievementssnapshotDescCreatedAt.Default.(func() int64)
+	achievementssnapshot.DefaultCreatedAt = achievementssnapshotDescCreatedAt.Default.(func() time.Time)
 	// achievementssnapshotDescUpdatedAt is the schema descriptor for updated_at field.
 	achievementssnapshotDescUpdatedAt := achievementssnapshotFields[2].Descriptor()
 	// achievementssnapshot.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	achievementssnapshot.DefaultUpdatedAt = achievementssnapshotDescUpdatedAt.Default.(func() int64)
+	achievementssnapshot.DefaultUpdatedAt = achievementssnapshotDescUpdatedAt.Default.(func() time.Time)
 	// achievementssnapshot.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	achievementssnapshot.UpdateDefaultUpdatedAt = achievementssnapshotDescUpdatedAt.UpdateDefault.(func() int64)
+	achievementssnapshot.UpdateDefaultUpdatedAt = achievementssnapshotDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// achievementssnapshotDescAccountID is the schema descriptor for account_id field.
 	achievementssnapshotDescAccountID := achievementssnapshotFields[4].Descriptor()
 	// achievementssnapshot.AccountIDValidator is a validator for the "account_id" field. It is called by the builders before save.
@@ -116,13 +118,13 @@ func init() {
 	// appconfigurationDescCreatedAt is the schema descriptor for created_at field.
 	appconfigurationDescCreatedAt := appconfigurationFields[1].Descriptor()
 	// appconfiguration.DefaultCreatedAt holds the default value on creation for the created_at field.
-	appconfiguration.DefaultCreatedAt = appconfigurationDescCreatedAt.Default.(func() int64)
+	appconfiguration.DefaultCreatedAt = appconfigurationDescCreatedAt.Default.(func() time.Time)
 	// appconfigurationDescUpdatedAt is the schema descriptor for updated_at field.
 	appconfigurationDescUpdatedAt := appconfigurationFields[2].Descriptor()
 	// appconfiguration.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	appconfiguration.DefaultUpdatedAt = appconfigurationDescUpdatedAt.Default.(func() int64)
+	appconfiguration.DefaultUpdatedAt = appconfigurationDescUpdatedAt.Default.(func() time.Time)
 	// appconfiguration.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	appconfiguration.UpdateDefaultUpdatedAt = appconfigurationDescUpdatedAt.UpdateDefault.(func() int64)
+	appconfiguration.UpdateDefaultUpdatedAt = appconfigurationDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// appconfigurationDescKey is the schema descriptor for key field.
 	appconfigurationDescKey := appconfigurationFields[3].Descriptor()
 	// appconfiguration.KeyValidator is a validator for the "key" field. It is called by the builders before save.
@@ -136,13 +138,13 @@ func init() {
 	// applicationcommandDescCreatedAt is the schema descriptor for created_at field.
 	applicationcommandDescCreatedAt := applicationcommandFields[1].Descriptor()
 	// applicationcommand.DefaultCreatedAt holds the default value on creation for the created_at field.
-	applicationcommand.DefaultCreatedAt = applicationcommandDescCreatedAt.Default.(func() int64)
+	applicationcommand.DefaultCreatedAt = applicationcommandDescCreatedAt.Default.(func() time.Time)
 	// applicationcommandDescUpdatedAt is the schema descriptor for updated_at field.
 	applicationcommandDescUpdatedAt := applicationcommandFields[2].Descriptor()
 	// applicationcommand.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	applicationcommand.DefaultUpdatedAt = applicationcommandDescUpdatedAt.Default.(func() int64)
+	applicationcommand.DefaultUpdatedAt = applicationcommandDescUpdatedAt.Default.(func() time.Time)
 	// applicationcommand.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	applicationcommand.UpdateDefaultUpdatedAt = applicationcommandDescUpdatedAt.UpdateDefault.(func() int64)
+	applicationcommand.UpdateDefaultUpdatedAt = applicationcommandDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// applicationcommandDescName is the schema descriptor for name field.
 	applicationcommandDescName := applicationcommandFields[3].Descriptor()
 	// applicationcommand.NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -164,13 +166,13 @@ func init() {
 	// clanDescCreatedAt is the schema descriptor for created_at field.
 	clanDescCreatedAt := clanFields[1].Descriptor()
 	// clan.DefaultCreatedAt holds the default value on creation for the created_at field.
-	clan.DefaultCreatedAt = clanDescCreatedAt.Default.(func() int64)
+	clan.DefaultCreatedAt = clanDescCreatedAt.Default.(func() time.Time)
 	// clanDescUpdatedAt is the schema descriptor for updated_at field.
 	clanDescUpdatedAt := clanFields[2].Descriptor()
 	// clan.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	clan.DefaultUpdatedAt = clanDescUpdatedAt.Default.(func() int64)
+	clan.DefaultUpdatedAt = clanDescUpdatedAt.Default.(func() time.Time)
 	// clan.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	clan.UpdateDefaultUpdatedAt = clanDescUpdatedAt.UpdateDefault.(func() int64)
+	clan.UpdateDefaultUpdatedAt = clanDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// clanDescTag is the schema descriptor for tag field.
 	clanDescTag := clanFields[3].Descriptor()
 	// clan.TagValidator is a validator for the "tag" field. It is called by the builders before save.
@@ -188,13 +190,13 @@ func init() {
 	// crontaskDescCreatedAt is the schema descriptor for created_at field.
 	crontaskDescCreatedAt := crontaskFields[1].Descriptor()
 	// crontask.DefaultCreatedAt holds the default value on creation for the created_at field.
-	crontask.DefaultCreatedAt = crontaskDescCreatedAt.Default.(func() int64)
+	crontask.DefaultCreatedAt = crontaskDescCreatedAt.Default.(func() time.Time)
 	// crontaskDescUpdatedAt is the schema descriptor for updated_at field.
 	crontaskDescUpdatedAt := crontaskFields[2].Descriptor()
 	// crontask.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	crontask.DefaultUpdatedAt = crontaskDescUpdatedAt.Default.(func() int64)
+	crontask.DefaultUpdatedAt = crontaskDescUpdatedAt.Default.(func() time.Time)
 	// crontask.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	crontask.UpdateDefaultUpdatedAt = crontaskDescUpdatedAt.UpdateDefault.(func() int64)
+	crontask.UpdateDefaultUpdatedAt = crontaskDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// crontaskDescReferenceID is the schema descriptor for reference_id field.
 	crontaskDescReferenceID := crontaskFields[4].Descriptor()
 	// crontask.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
@@ -208,13 +210,13 @@ func init() {
 	// discordinteractionDescCreatedAt is the schema descriptor for created_at field.
 	discordinteractionDescCreatedAt := discordinteractionFields[1].Descriptor()
 	// discordinteraction.DefaultCreatedAt holds the default value on creation for the created_at field.
-	discordinteraction.DefaultCreatedAt = discordinteractionDescCreatedAt.Default.(func() int64)
+	discordinteraction.DefaultCreatedAt = discordinteractionDescCreatedAt.Default.(func() time.Time)
 	// discordinteractionDescUpdatedAt is the schema descriptor for updated_at field.
 	discordinteractionDescUpdatedAt := discordinteractionFields[2].Descriptor()
 	// discordinteraction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	discordinteraction.DefaultUpdatedAt = discordinteractionDescUpdatedAt.Default.(func() int64)
+	discordinteraction.DefaultUpdatedAt = discordinteractionDescUpdatedAt.Default.(func() time.Time)
 	// discordinteraction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	discordinteraction.UpdateDefaultUpdatedAt = discordinteractionDescUpdatedAt.UpdateDefault.(func() int64)
+	discordinteraction.UpdateDefaultUpdatedAt = discordinteractionDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// discordinteractionDescCommand is the schema descriptor for command field.
 	discordinteractionDescCommand := discordinteractionFields[3].Descriptor()
 	// discordinteraction.CommandValidator is a validator for the "command" field. It is called by the builders before save.
@@ -236,13 +238,13 @@ func init() {
 	// userDescCreatedAt is the schema descriptor for created_at field.
 	userDescCreatedAt := userFields[1].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
-	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() int64)
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescUpdatedAt is the schema descriptor for updated_at field.
 	userDescUpdatedAt := userFields[2].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() int64)
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() int64)
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescPermissions is the schema descriptor for permissions field.
 	userDescPermissions := userFields[3].Descriptor()
 	// user.DefaultPermissions holds the default value on creation for the permissions field.
@@ -252,13 +254,13 @@ func init() {
 	// userconnectionDescCreatedAt is the schema descriptor for created_at field.
 	userconnectionDescCreatedAt := userconnectionFields[1].Descriptor()
 	// userconnection.DefaultCreatedAt holds the default value on creation for the created_at field.
-	userconnection.DefaultCreatedAt = userconnectionDescCreatedAt.Default.(func() int64)
+	userconnection.DefaultCreatedAt = userconnectionDescCreatedAt.Default.(func() time.Time)
 	// userconnectionDescUpdatedAt is the schema descriptor for updated_at field.
 	userconnectionDescUpdatedAt := userconnectionFields[2].Descriptor()
 	// userconnection.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	userconnection.DefaultUpdatedAt = userconnectionDescUpdatedAt.Default.(func() int64)
+	userconnection.DefaultUpdatedAt = userconnectionDescUpdatedAt.Default.(func() time.Time)
 	// userconnection.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	userconnection.UpdateDefaultUpdatedAt = userconnectionDescUpdatedAt.UpdateDefault.(func() int64)
+	userconnection.UpdateDefaultUpdatedAt = userconnectionDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userconnectionDescPermissions is the schema descriptor for permissions field.
 	userconnectionDescPermissions := userconnectionFields[6].Descriptor()
 	// userconnection.DefaultPermissions holds the default value on creation for the permissions field.
@@ -272,13 +274,13 @@ func init() {
 	// usercontentDescCreatedAt is the schema descriptor for created_at field.
 	usercontentDescCreatedAt := usercontentFields[1].Descriptor()
 	// usercontent.DefaultCreatedAt holds the default value on creation for the created_at field.
-	usercontent.DefaultCreatedAt = usercontentDescCreatedAt.Default.(func() int64)
+	usercontent.DefaultCreatedAt = usercontentDescCreatedAt.Default.(func() time.Time)
 	// usercontentDescUpdatedAt is the schema descriptor for updated_at field.
 	usercontentDescUpdatedAt := usercontentFields[2].Descriptor()
 	// usercontent.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	usercontent.DefaultUpdatedAt = usercontentDescUpdatedAt.Default.(func() int64)
+	usercontent.DefaultUpdatedAt = usercontentDescUpdatedAt.Default.(func() time.Time)
 	// usercontent.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	usercontent.UpdateDefaultUpdatedAt = usercontentDescUpdatedAt.UpdateDefault.(func() int64)
+	usercontent.UpdateDefaultUpdatedAt = usercontentDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// usercontentDescID is the schema descriptor for id field.
 	usercontentDescID := usercontentFields[0].Descriptor()
 	// usercontent.DefaultID holds the default value on creation for the id field.
@@ -288,13 +290,13 @@ func init() {
 	// usersubscriptionDescCreatedAt is the schema descriptor for created_at field.
 	usersubscriptionDescCreatedAt := usersubscriptionFields[1].Descriptor()
 	// usersubscription.DefaultCreatedAt holds the default value on creation for the created_at field.
-	usersubscription.DefaultCreatedAt = usersubscriptionDescCreatedAt.Default.(func() int64)
+	usersubscription.DefaultCreatedAt = usersubscriptionDescCreatedAt.Default.(func() time.Time)
 	// usersubscriptionDescUpdatedAt is the schema descriptor for updated_at field.
 	usersubscriptionDescUpdatedAt := usersubscriptionFields[2].Descriptor()
 	// usersubscription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	usersubscription.DefaultUpdatedAt = usersubscriptionDescUpdatedAt.Default.(func() int64)
+	usersubscription.DefaultUpdatedAt = usersubscriptionDescUpdatedAt.Default.(func() time.Time)
 	// usersubscription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	usersubscription.UpdateDefaultUpdatedAt = usersubscriptionDescUpdatedAt.UpdateDefault.(func() int64)
+	usersubscription.UpdateDefaultUpdatedAt = usersubscriptionDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// usersubscriptionDescUserID is the schema descriptor for user_id field.
 	usersubscriptionDescUserID := usersubscriptionFields[5].Descriptor()
 	// usersubscription.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
@@ -316,13 +318,13 @@ func init() {
 	// vehicleDescCreatedAt is the schema descriptor for created_at field.
 	vehicleDescCreatedAt := vehicleFields[1].Descriptor()
 	// vehicle.DefaultCreatedAt holds the default value on creation for the created_at field.
-	vehicle.DefaultCreatedAt = vehicleDescCreatedAt.Default.(func() int64)
+	vehicle.DefaultCreatedAt = vehicleDescCreatedAt.Default.(func() time.Time)
 	// vehicleDescUpdatedAt is the schema descriptor for updated_at field.
 	vehicleDescUpdatedAt := vehicleFields[2].Descriptor()
 	// vehicle.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	vehicle.DefaultUpdatedAt = vehicleDescUpdatedAt.Default.(func() int64)
+	vehicle.DefaultUpdatedAt = vehicleDescUpdatedAt.Default.(func() time.Time)
 	// vehicle.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	vehicle.UpdateDefaultUpdatedAt = vehicleDescUpdatedAt.UpdateDefault.(func() int64)
+	vehicle.UpdateDefaultUpdatedAt = vehicleDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// vehicleDescTier is the schema descriptor for tier field.
 	vehicleDescTier := vehicleFields[3].Descriptor()
 	// vehicle.TierValidator is a validator for the "tier" field. It is called by the builders before save.
@@ -346,25 +348,25 @@ func init() {
 	// vehicleaverageDescCreatedAt is the schema descriptor for created_at field.
 	vehicleaverageDescCreatedAt := vehicleaverageFields[1].Descriptor()
 	// vehicleaverage.DefaultCreatedAt holds the default value on creation for the created_at field.
-	vehicleaverage.DefaultCreatedAt = vehicleaverageDescCreatedAt.Default.(func() int64)
+	vehicleaverage.DefaultCreatedAt = vehicleaverageDescCreatedAt.Default.(func() time.Time)
 	// vehicleaverageDescUpdatedAt is the schema descriptor for updated_at field.
 	vehicleaverageDescUpdatedAt := vehicleaverageFields[2].Descriptor()
 	// vehicleaverage.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	vehicleaverage.DefaultUpdatedAt = vehicleaverageDescUpdatedAt.Default.(func() int64)
+	vehicleaverage.DefaultUpdatedAt = vehicleaverageDescUpdatedAt.Default.(func() time.Time)
 	// vehicleaverage.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	vehicleaverage.UpdateDefaultUpdatedAt = vehicleaverageDescUpdatedAt.UpdateDefault.(func() int64)
+	vehicleaverage.UpdateDefaultUpdatedAt = vehicleaverageDescUpdatedAt.UpdateDefault.(func() time.Time)
 	vehiclesnapshotFields := schema.VehicleSnapshot{}.Fields()
 	_ = vehiclesnapshotFields
 	// vehiclesnapshotDescCreatedAt is the schema descriptor for created_at field.
 	vehiclesnapshotDescCreatedAt := vehiclesnapshotFields[1].Descriptor()
 	// vehiclesnapshot.DefaultCreatedAt holds the default value on creation for the created_at field.
-	vehiclesnapshot.DefaultCreatedAt = vehiclesnapshotDescCreatedAt.Default.(func() int64)
+	vehiclesnapshot.DefaultCreatedAt = vehiclesnapshotDescCreatedAt.Default.(func() time.Time)
 	// vehiclesnapshotDescUpdatedAt is the schema descriptor for updated_at field.
 	vehiclesnapshotDescUpdatedAt := vehiclesnapshotFields[2].Descriptor()
 	// vehiclesnapshot.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	vehiclesnapshot.DefaultUpdatedAt = vehiclesnapshotDescUpdatedAt.Default.(func() int64)
+	vehiclesnapshot.DefaultUpdatedAt = vehiclesnapshotDescUpdatedAt.Default.(func() time.Time)
 	// vehiclesnapshot.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	vehiclesnapshot.UpdateDefaultUpdatedAt = vehiclesnapshotDescUpdatedAt.UpdateDefault.(func() int64)
+	vehiclesnapshot.UpdateDefaultUpdatedAt = vehiclesnapshotDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// vehiclesnapshotDescAccountID is the schema descriptor for account_id field.
 	vehiclesnapshotDescAccountID := vehiclesnapshotFields[4].Descriptor()
 	// vehiclesnapshot.AccountIDValidator is a validator for the "account_id" field. It is called by the builders before save.

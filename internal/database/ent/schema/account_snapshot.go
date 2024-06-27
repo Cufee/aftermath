@@ -19,7 +19,7 @@ func (AccountSnapshot) Fields() []ent.Field {
 	return append(defaultFields,
 		field.Enum("type").
 			GoType(models.SnapshotType("")),
-		field.Int64("last_battle_time"),
+		field.Time("last_battle_time"),
 		//
 		field.String("account_id").NotEmpty().Immutable(),
 		field.String("reference_id").NotEmpty(),

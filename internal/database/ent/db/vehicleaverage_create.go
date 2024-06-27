@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -21,29 +22,29 @@ type VehicleAverageCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (vac *VehicleAverageCreate) SetCreatedAt(i int64) *VehicleAverageCreate {
-	vac.mutation.SetCreatedAt(i)
+func (vac *VehicleAverageCreate) SetCreatedAt(t time.Time) *VehicleAverageCreate {
+	vac.mutation.SetCreatedAt(t)
 	return vac
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (vac *VehicleAverageCreate) SetNillableCreatedAt(i *int64) *VehicleAverageCreate {
-	if i != nil {
-		vac.SetCreatedAt(*i)
+func (vac *VehicleAverageCreate) SetNillableCreatedAt(t *time.Time) *VehicleAverageCreate {
+	if t != nil {
+		vac.SetCreatedAt(*t)
 	}
 	return vac
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vac *VehicleAverageCreate) SetUpdatedAt(i int64) *VehicleAverageCreate {
-	vac.mutation.SetUpdatedAt(i)
+func (vac *VehicleAverageCreate) SetUpdatedAt(t time.Time) *VehicleAverageCreate {
+	vac.mutation.SetUpdatedAt(t)
 	return vac
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (vac *VehicleAverageCreate) SetNillableUpdatedAt(i *int64) *VehicleAverageCreate {
-	if i != nil {
-		vac.SetUpdatedAt(*i)
+func (vac *VehicleAverageCreate) SetNillableUpdatedAt(t *time.Time) *VehicleAverageCreate {
+	if t != nil {
+		vac.SetUpdatedAt(*t)
 	}
 	return vac
 }
@@ -152,11 +153,11 @@ func (vac *VehicleAverageCreate) createSpec() (*VehicleAverage, *sqlgraph.Create
 		_spec.ID.Value = id
 	}
 	if value, ok := vac.mutation.CreatedAt(); ok {
-		_spec.SetField(vehicleaverage.FieldCreatedAt, field.TypeInt64, value)
+		_spec.SetField(vehicleaverage.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := vac.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := vac.mutation.Data(); ok {

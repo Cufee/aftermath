@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -21,29 +22,29 @@ type ClanCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (cc *ClanCreate) SetCreatedAt(i int64) *ClanCreate {
-	cc.mutation.SetCreatedAt(i)
+func (cc *ClanCreate) SetCreatedAt(t time.Time) *ClanCreate {
+	cc.mutation.SetCreatedAt(t)
 	return cc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (cc *ClanCreate) SetNillableCreatedAt(i *int64) *ClanCreate {
-	if i != nil {
-		cc.SetCreatedAt(*i)
+func (cc *ClanCreate) SetNillableCreatedAt(t *time.Time) *ClanCreate {
+	if t != nil {
+		cc.SetCreatedAt(*t)
 	}
 	return cc
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (cc *ClanCreate) SetUpdatedAt(i int64) *ClanCreate {
-	cc.mutation.SetUpdatedAt(i)
+func (cc *ClanCreate) SetUpdatedAt(t time.Time) *ClanCreate {
+	cc.mutation.SetUpdatedAt(t)
 	return cc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (cc *ClanCreate) SetNillableUpdatedAt(i *int64) *ClanCreate {
-	if i != nil {
-		cc.SetUpdatedAt(*i)
+func (cc *ClanCreate) SetNillableUpdatedAt(t *time.Time) *ClanCreate {
+	if t != nil {
+		cc.SetUpdatedAt(*t)
 	}
 	return cc
 }
@@ -213,11 +214,11 @@ func (cc *ClanCreate) createSpec() (*Clan, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
-		_spec.SetField(clan.FieldCreatedAt, field.TypeInt64, value)
+		_spec.SetField(clan.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := cc.mutation.UpdatedAt(); ok {
-		_spec.SetField(clan.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(clan.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := cc.mutation.Tag(); ok {

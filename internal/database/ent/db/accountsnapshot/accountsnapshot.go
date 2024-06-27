@@ -4,6 +4,7 @@ package accountsnapshot
 
 import (
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -75,11 +76,11 @@ func ValidColumn(column string) bool {
 
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() int64
+	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() int64
+	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() int64
+	UpdateDefaultUpdatedAt func() time.Time
 	// AccountIDValidator is a validator for the "account_id" field. It is called by the builders before save.
 	AccountIDValidator func(string) error
 	// ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.

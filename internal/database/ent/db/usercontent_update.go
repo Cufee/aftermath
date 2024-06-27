@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -18,8 +19,9 @@ import (
 // UserContentUpdate is the builder for updating UserContent entities.
 type UserContentUpdate struct {
 	config
-	hooks    []Hook
-	mutation *UserContentMutation
+	hooks     []Hook
+	mutation  *UserContentMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the UserContentUpdate builder.
@@ -29,15 +31,8 @@ func (ucu *UserContentUpdate) Where(ps ...predicate.UserContent) *UserContentUpd
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucu *UserContentUpdate) SetUpdatedAt(i int64) *UserContentUpdate {
-	ucu.mutation.ResetUpdatedAt()
-	ucu.mutation.SetUpdatedAt(i)
-	return ucu
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (ucu *UserContentUpdate) AddUpdatedAt(i int64) *UserContentUpdate {
-	ucu.mutation.AddUpdatedAt(i)
+func (ucu *UserContentUpdate) SetUpdatedAt(t time.Time) *UserContentUpdate {
+	ucu.mutation.SetUpdatedAt(t)
 	return ucu
 }
 
@@ -143,6 +138,12 @@ func (ucu *UserContentUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (ucu *UserContentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserContentUpdate {
+	ucu.modifiers = append(ucu.modifiers, modifiers...)
+	return ucu
+}
+
 func (ucu *UserContentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := ucu.check(); err != nil {
 		return n, err
@@ -156,10 +157,7 @@ func (ucu *UserContentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ucu.mutation.UpdatedAt(); ok {
-		_spec.SetField(usercontent.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := ucu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(usercontent.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(usercontent.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := ucu.mutation.GetType(); ok {
 		_spec.SetField(usercontent.FieldType, field.TypeEnum, value)
@@ -173,6 +171,7 @@ func (ucu *UserContentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ucu.mutation.Metadata(); ok {
 		_spec.SetField(usercontent.FieldMetadata, field.TypeJSON, value)
 	}
+	_spec.AddModifiers(ucu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, ucu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{usercontent.Label}
@@ -188,21 +187,15 @@ func (ucu *UserContentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserContentUpdateOne is the builder for updating a single UserContent entity.
 type UserContentUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *UserContentMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *UserContentMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucuo *UserContentUpdateOne) SetUpdatedAt(i int64) *UserContentUpdateOne {
-	ucuo.mutation.ResetUpdatedAt()
-	ucuo.mutation.SetUpdatedAt(i)
-	return ucuo
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (ucuo *UserContentUpdateOne) AddUpdatedAt(i int64) *UserContentUpdateOne {
-	ucuo.mutation.AddUpdatedAt(i)
+func (ucuo *UserContentUpdateOne) SetUpdatedAt(t time.Time) *UserContentUpdateOne {
+	ucuo.mutation.SetUpdatedAt(t)
 	return ucuo
 }
 
@@ -321,6 +314,12 @@ func (ucuo *UserContentUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (ucuo *UserContentUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserContentUpdateOne {
+	ucuo.modifiers = append(ucuo.modifiers, modifiers...)
+	return ucuo
+}
+
 func (ucuo *UserContentUpdateOne) sqlSave(ctx context.Context) (_node *UserContent, err error) {
 	if err := ucuo.check(); err != nil {
 		return _node, err
@@ -351,10 +350,7 @@ func (ucuo *UserContentUpdateOne) sqlSave(ctx context.Context) (_node *UserConte
 		}
 	}
 	if value, ok := ucuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(usercontent.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := ucuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(usercontent.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(usercontent.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := ucuo.mutation.GetType(); ok {
 		_spec.SetField(usercontent.FieldType, field.TypeEnum, value)
@@ -368,6 +364,7 @@ func (ucuo *UserContentUpdateOne) sqlSave(ctx context.Context) (_node *UserConte
 	if value, ok := ucuo.mutation.Metadata(); ok {
 		_spec.SetField(usercontent.FieldMetadata, field.TypeJSON, value)
 	}
+	_spec.AddModifiers(ucuo.modifiers...)
 	_node = &UserContent{config: ucuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

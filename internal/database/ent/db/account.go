@@ -5,6 +5,7 @@ package db
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,13 +19,13 @@ type Account struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// LastBattleTime holds the value of the "last_battle_time" field.
-	LastBattleTime int64 `json:"last_battle_time,omitempty"`
+	LastBattleTime time.Time `json:"last_battle_time,omitempty"`
 	// AccountCreatedAt holds the value of the "account_created_at" field.
-	AccountCreatedAt int64 `json:"account_created_at,omitempty"`
+	AccountCreatedAt time.Time `json:"account_created_at,omitempty"`
 	// Realm holds the value of the "realm" field.
 	Realm string `json:"realm,omitempty"`
 	// Nickname holds the value of the "nickname" field.
@@ -99,10 +100,10 @@ func (*Account) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case account.FieldPrivate:
 			values[i] = new(sql.NullBool)
-		case account.FieldCreatedAt, account.FieldUpdatedAt, account.FieldLastBattleTime, account.FieldAccountCreatedAt:
-			values[i] = new(sql.NullInt64)
 		case account.FieldID, account.FieldRealm, account.FieldNickname, account.FieldClanID:
 			values[i] = new(sql.NullString)
+		case account.FieldCreatedAt, account.FieldUpdatedAt, account.FieldLastBattleTime, account.FieldAccountCreatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -125,28 +126,28 @@ func (a *Account) assignValues(columns []string, values []any) error {
 				a.ID = value.String
 			}
 		case account.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				a.CreatedAt = value.Int64
+				a.CreatedAt = value.Time
 			}
 		case account.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				a.UpdatedAt = value.Int64
+				a.UpdatedAt = value.Time
 			}
 		case account.FieldLastBattleTime:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field last_battle_time", values[i])
 			} else if value.Valid {
-				a.LastBattleTime = value.Int64
+				a.LastBattleTime = value.Time
 			}
 		case account.FieldAccountCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field account_created_at", values[i])
 			} else if value.Valid {
-				a.AccountCreatedAt = value.Int64
+				a.AccountCreatedAt = value.Time
 			}
 		case account.FieldRealm:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -229,16 +230,16 @@ func (a *Account) String() string {
 	builder.WriteString("Account(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", a.CreatedAt))
+	builder.WriteString(a.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", a.UpdatedAt))
+	builder.WriteString(a.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("last_battle_time=")
-	builder.WriteString(fmt.Sprintf("%v", a.LastBattleTime))
+	builder.WriteString(a.LastBattleTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("account_created_at=")
-	builder.WriteString(fmt.Sprintf("%v", a.AccountCreatedAt))
+	builder.WriteString(a.AccountCreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("realm=")
 	builder.WriteString(a.Realm)

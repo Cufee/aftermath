@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -18,8 +19,9 @@ import (
 // UserConnectionUpdate is the builder for updating UserConnection entities.
 type UserConnectionUpdate struct {
 	config
-	hooks    []Hook
-	mutation *UserConnectionMutation
+	hooks     []Hook
+	mutation  *UserConnectionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the UserConnectionUpdate builder.
@@ -29,15 +31,8 @@ func (ucu *UserConnectionUpdate) Where(ps ...predicate.UserConnection) *UserConn
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucu *UserConnectionUpdate) SetUpdatedAt(i int64) *UserConnectionUpdate {
-	ucu.mutation.ResetUpdatedAt()
-	ucu.mutation.SetUpdatedAt(i)
-	return ucu
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (ucu *UserConnectionUpdate) AddUpdatedAt(i int64) *UserConnectionUpdate {
-	ucu.mutation.AddUpdatedAt(i)
+func (ucu *UserConnectionUpdate) SetUpdatedAt(t time.Time) *UserConnectionUpdate {
+	ucu.mutation.SetUpdatedAt(t)
 	return ucu
 }
 
@@ -155,6 +150,12 @@ func (ucu *UserConnectionUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (ucu *UserConnectionUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserConnectionUpdate {
+	ucu.modifiers = append(ucu.modifiers, modifiers...)
+	return ucu
+}
+
 func (ucu *UserConnectionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := ucu.check(); err != nil {
 		return n, err
@@ -168,10 +169,7 @@ func (ucu *UserConnectionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 	}
 	if value, ok := ucu.mutation.UpdatedAt(); ok {
-		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := ucu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(userconnection.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := ucu.mutation.GetType(); ok {
 		_spec.SetField(userconnection.FieldType, field.TypeEnum, value)
@@ -191,6 +189,7 @@ func (ucu *UserConnectionUpdate) sqlSave(ctx context.Context) (n int, err error)
 	if ucu.mutation.MetadataCleared() {
 		_spec.ClearField(userconnection.FieldMetadata, field.TypeJSON)
 	}
+	_spec.AddModifiers(ucu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, ucu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userconnection.Label}
@@ -206,21 +205,15 @@ func (ucu *UserConnectionUpdate) sqlSave(ctx context.Context) (n int, err error)
 // UserConnectionUpdateOne is the builder for updating a single UserConnection entity.
 type UserConnectionUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *UserConnectionMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *UserConnectionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucuo *UserConnectionUpdateOne) SetUpdatedAt(i int64) *UserConnectionUpdateOne {
-	ucuo.mutation.ResetUpdatedAt()
-	ucuo.mutation.SetUpdatedAt(i)
-	return ucuo
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (ucuo *UserConnectionUpdateOne) AddUpdatedAt(i int64) *UserConnectionUpdateOne {
-	ucuo.mutation.AddUpdatedAt(i)
+func (ucuo *UserConnectionUpdateOne) SetUpdatedAt(t time.Time) *UserConnectionUpdateOne {
+	ucuo.mutation.SetUpdatedAt(t)
 	return ucuo
 }
 
@@ -351,6 +344,12 @@ func (ucuo *UserConnectionUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (ucuo *UserConnectionUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserConnectionUpdateOne {
+	ucuo.modifiers = append(ucuo.modifiers, modifiers...)
+	return ucuo
+}
+
 func (ucuo *UserConnectionUpdateOne) sqlSave(ctx context.Context) (_node *UserConnection, err error) {
 	if err := ucuo.check(); err != nil {
 		return _node, err
@@ -381,10 +380,7 @@ func (ucuo *UserConnectionUpdateOne) sqlSave(ctx context.Context) (_node *UserCo
 		}
 	}
 	if value, ok := ucuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := ucuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(userconnection.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := ucuo.mutation.GetType(); ok {
 		_spec.SetField(userconnection.FieldType, field.TypeEnum, value)
@@ -404,6 +400,7 @@ func (ucuo *UserConnectionUpdateOne) sqlSave(ctx context.Context) (_node *UserCo
 	if ucuo.mutation.MetadataCleared() {
 		_spec.ClearField(userconnection.FieldMetadata, field.TypeJSON)
 	}
+	_spec.AddModifiers(ucuo.modifiers...)
 	_node = &UserConnection{config: ucuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

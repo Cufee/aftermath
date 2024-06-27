@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -19,9 +20,9 @@ type VehicleAverage struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Data holds the value of the "data" field.
 	Data         frame.StatsFrame `json:"data,omitempty"`
 	selectValues sql.SelectValues
@@ -34,10 +35,10 @@ func (*VehicleAverage) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case vehicleaverage.FieldData:
 			values[i] = new([]byte)
-		case vehicleaverage.FieldCreatedAt, vehicleaverage.FieldUpdatedAt:
-			values[i] = new(sql.NullInt64)
 		case vehicleaverage.FieldID:
 			values[i] = new(sql.NullString)
+		case vehicleaverage.FieldCreatedAt, vehicleaverage.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -60,16 +61,16 @@ func (va *VehicleAverage) assignValues(columns []string, values []any) error {
 				va.ID = value.String
 			}
 		case vehicleaverage.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				va.CreatedAt = value.Int64
+				va.CreatedAt = value.Time
 			}
 		case vehicleaverage.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				va.UpdatedAt = value.Int64
+				va.UpdatedAt = value.Time
 			}
 		case vehicleaverage.FieldData:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -116,10 +117,10 @@ func (va *VehicleAverage) String() string {
 	builder.WriteString("VehicleAverage(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", va.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", va.CreatedAt))
+	builder.WriteString(va.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", va.UpdatedAt))
+	builder.WriteString(va.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("data=")
 	builder.WriteString(fmt.Sprintf("%v", va.Data))

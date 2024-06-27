@@ -5,6 +5,7 @@ package db
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -19,13 +20,13 @@ type UserSubscription struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.SubscriptionType `json:"type,omitempty"`
 	// ExpiresAt holds the value of the "expires_at" field.
-	ExpiresAt int64 `json:"expires_at,omitempty"`
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
 	// Permissions holds the value of the "permissions" field.
@@ -63,10 +64,10 @@ func (*UserSubscription) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case usersubscription.FieldCreatedAt, usersubscription.FieldUpdatedAt, usersubscription.FieldExpiresAt:
-			values[i] = new(sql.NullInt64)
 		case usersubscription.FieldID, usersubscription.FieldType, usersubscription.FieldUserID, usersubscription.FieldPermissions, usersubscription.FieldReferenceID:
 			values[i] = new(sql.NullString)
+		case usersubscription.FieldCreatedAt, usersubscription.FieldUpdatedAt, usersubscription.FieldExpiresAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -89,16 +90,16 @@ func (us *UserSubscription) assignValues(columns []string, values []any) error {
 				us.ID = value.String
 			}
 		case usersubscription.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				us.CreatedAt = value.Int64
+				us.CreatedAt = value.Time
 			}
 		case usersubscription.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				us.UpdatedAt = value.Int64
+				us.UpdatedAt = value.Time
 			}
 		case usersubscription.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -107,10 +108,10 @@ func (us *UserSubscription) assignValues(columns []string, values []any) error {
 				us.Type = models.SubscriptionType(value.String)
 			}
 		case usersubscription.FieldExpiresAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
 			} else if value.Valid {
-				us.ExpiresAt = value.Int64
+				us.ExpiresAt = value.Time
 			}
 		case usersubscription.FieldUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -172,16 +173,16 @@ func (us *UserSubscription) String() string {
 	builder.WriteString("UserSubscription(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", us.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", us.CreatedAt))
+	builder.WriteString(us.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", us.UpdatedAt))
+	builder.WriteString(us.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", us.Type))
 	builder.WriteString(", ")
 	builder.WriteString("expires_at=")
-	builder.WriteString(fmt.Sprintf("%v", us.ExpiresAt))
+	builder.WriteString(us.ExpiresAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(us.UserID)

@@ -23,6 +23,7 @@ type AccountSnapshotQuery struct {
 	inters      []Interceptor
 	predicates  []predicate.AccountSnapshot
 	withAccount *AccountQuery
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -297,7 +298,7 @@ func (asq *AccountSnapshotQuery) WithAccount(opts ...func(*AccountQuery)) *Accou
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -320,7 +321,7 @@ func (asq *AccountSnapshotQuery) GroupBy(field string, fields ...string) *Accoun
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.AccountSnapshot.Query().
@@ -382,6 +383,9 @@ func (asq *AccountSnapshotQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(asq.modifiers) > 0 {
+		_spec.Modifiers = asq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -432,6 +436,9 @@ func (asq *AccountSnapshotQuery) loadAccount(ctx context.Context, query *Account
 
 func (asq *AccountSnapshotQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := asq.querySpec()
+	if len(asq.modifiers) > 0 {
+		_spec.Modifiers = asq.modifiers
+	}
 	_spec.Node.Columns = asq.ctx.Fields
 	if len(asq.ctx.Fields) > 0 {
 		_spec.Unique = asq.ctx.Unique != nil && *asq.ctx.Unique
@@ -497,6 +504,9 @@ func (asq *AccountSnapshotQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if asq.ctx.Unique != nil && *asq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range asq.modifiers {
+		m(selector)
+	}
 	for _, p := range asq.predicates {
 		p(selector)
 	}
@@ -512,6 +522,12 @@ func (asq *AccountSnapshotQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (asq *AccountSnapshotQuery) Modify(modifiers ...func(s *sql.Selector)) *AccountSnapshotSelect {
+	asq.modifiers = append(asq.modifiers, modifiers...)
+	return asq.Select()
 }
 
 // AccountSnapshotGroupBy is the group-by builder for AccountSnapshot entities.
@@ -602,4 +618,10 @@ func (ass *AccountSnapshotSelect) sqlScan(ctx context.Context, root *AccountSnap
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ass *AccountSnapshotSelect) Modify(modifiers ...func(s *sql.Selector)) *AccountSnapshotSelect {
+	ass.modifiers = append(ass.modifiers, modifiers...)
+	return ass
 }

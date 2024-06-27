@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -20,9 +21,9 @@ type UserConnection struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.ConnectionType `json:"type,omitempty"`
 	// UserID holds the value of the "user_id" field.
@@ -66,10 +67,10 @@ func (*UserConnection) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case userconnection.FieldMetadata:
 			values[i] = new([]byte)
-		case userconnection.FieldCreatedAt, userconnection.FieldUpdatedAt:
-			values[i] = new(sql.NullInt64)
 		case userconnection.FieldID, userconnection.FieldType, userconnection.FieldUserID, userconnection.FieldReferenceID, userconnection.FieldPermissions:
 			values[i] = new(sql.NullString)
+		case userconnection.FieldCreatedAt, userconnection.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -92,16 +93,16 @@ func (uc *UserConnection) assignValues(columns []string, values []any) error {
 				uc.ID = value.String
 			}
 		case userconnection.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				uc.CreatedAt = value.Int64
+				uc.CreatedAt = value.Time
 			}
 		case userconnection.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				uc.UpdatedAt = value.Int64
+				uc.UpdatedAt = value.Time
 			}
 		case userconnection.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -177,10 +178,10 @@ func (uc *UserConnection) String() string {
 	builder.WriteString("UserConnection(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", uc.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", uc.CreatedAt))
+	builder.WriteString(uc.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", uc.UpdatedAt))
+	builder.WriteString(uc.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", uc.Type))

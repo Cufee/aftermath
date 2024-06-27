@@ -23,6 +23,7 @@ type UserConnectionQuery struct {
 	inters     []Interceptor
 	predicates []predicate.UserConnection
 	withUser   *UserQuery
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -297,7 +298,7 @@ func (ucq *UserConnectionQuery) WithUser(opts ...func(*UserQuery)) *UserConnecti
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -320,7 +321,7 @@ func (ucq *UserConnectionQuery) GroupBy(field string, fields ...string) *UserCon
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.UserConnection.Query().
@@ -382,6 +383,9 @@ func (ucq *UserConnectionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(ucq.modifiers) > 0 {
+		_spec.Modifiers = ucq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -432,6 +436,9 @@ func (ucq *UserConnectionQuery) loadUser(ctx context.Context, query *UserQuery, 
 
 func (ucq *UserConnectionQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ucq.querySpec()
+	if len(ucq.modifiers) > 0 {
+		_spec.Modifiers = ucq.modifiers
+	}
 	_spec.Node.Columns = ucq.ctx.Fields
 	if len(ucq.ctx.Fields) > 0 {
 		_spec.Unique = ucq.ctx.Unique != nil && *ucq.ctx.Unique
@@ -497,6 +504,9 @@ func (ucq *UserConnectionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if ucq.ctx.Unique != nil && *ucq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range ucq.modifiers {
+		m(selector)
+	}
 	for _, p := range ucq.predicates {
 		p(selector)
 	}
@@ -512,6 +522,12 @@ func (ucq *UserConnectionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ucq *UserConnectionQuery) Modify(modifiers ...func(s *sql.Selector)) *UserConnectionSelect {
+	ucq.modifiers = append(ucq.modifiers, modifiers...)
+	return ucq.Select()
 }
 
 // UserConnectionGroupBy is the group-by builder for UserConnection entities.
@@ -602,4 +618,10 @@ func (ucs *UserConnectionSelect) sqlScan(ctx context.Context, root *UserConnecti
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ucs *UserConnectionSelect) Modify(modifiers ...func(s *sql.Selector)) *UserConnectionSelect {
+	ucs.modifiers = append(ucs.modifiers, modifiers...)
+	return ucs
 }

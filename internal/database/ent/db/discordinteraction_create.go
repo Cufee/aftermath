@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -22,29 +23,29 @@ type DiscordInteractionCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (dic *DiscordInteractionCreate) SetCreatedAt(i int64) *DiscordInteractionCreate {
-	dic.mutation.SetCreatedAt(i)
+func (dic *DiscordInteractionCreate) SetCreatedAt(t time.Time) *DiscordInteractionCreate {
+	dic.mutation.SetCreatedAt(t)
 	return dic
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (dic *DiscordInteractionCreate) SetNillableCreatedAt(i *int64) *DiscordInteractionCreate {
-	if i != nil {
-		dic.SetCreatedAt(*i)
+func (dic *DiscordInteractionCreate) SetNillableCreatedAt(t *time.Time) *DiscordInteractionCreate {
+	if t != nil {
+		dic.SetCreatedAt(*t)
 	}
 	return dic
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (dic *DiscordInteractionCreate) SetUpdatedAt(i int64) *DiscordInteractionCreate {
-	dic.mutation.SetUpdatedAt(i)
+func (dic *DiscordInteractionCreate) SetUpdatedAt(t time.Time) *DiscordInteractionCreate {
+	dic.mutation.SetUpdatedAt(t)
 	return dic
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (dic *DiscordInteractionCreate) SetNillableUpdatedAt(i *int64) *DiscordInteractionCreate {
-	if i != nil {
-		dic.SetUpdatedAt(*i)
+func (dic *DiscordInteractionCreate) SetNillableUpdatedAt(t *time.Time) *DiscordInteractionCreate {
+	if t != nil {
+		dic.SetUpdatedAt(*t)
 	}
 	return dic
 }
@@ -238,11 +239,11 @@ func (dic *DiscordInteractionCreate) createSpec() (*DiscordInteraction, *sqlgrap
 		_spec.ID.Value = id
 	}
 	if value, ok := dic.mutation.CreatedAt(); ok {
-		_spec.SetField(discordinteraction.FieldCreatedAt, field.TypeInt64, value)
+		_spec.SetField(discordinteraction.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := dic.mutation.UpdatedAt(); ok {
-		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := dic.mutation.Command(); ok {

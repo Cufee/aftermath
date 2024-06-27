@@ -21,6 +21,7 @@ type VehicleAverageQuery struct {
 	order      []vehicleaverage.OrderOption
 	inters     []Interceptor
 	predicates []predicate.VehicleAverage
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -261,7 +262,7 @@ func (vaq *VehicleAverageQuery) Clone() *VehicleAverageQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -284,7 +285,7 @@ func (vaq *VehicleAverageQuery) GroupBy(field string, fields ...string) *Vehicle
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.VehicleAverage.Query().
@@ -342,6 +343,9 @@ func (vaq *VehicleAverageQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
+	if len(vaq.modifiers) > 0 {
+		_spec.Modifiers = vaq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -356,6 +360,9 @@ func (vaq *VehicleAverageQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 
 func (vaq *VehicleAverageQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := vaq.querySpec()
+	if len(vaq.modifiers) > 0 {
+		_spec.Modifiers = vaq.modifiers
+	}
 	_spec.Node.Columns = vaq.ctx.Fields
 	if len(vaq.ctx.Fields) > 0 {
 		_spec.Unique = vaq.ctx.Unique != nil && *vaq.ctx.Unique
@@ -418,6 +425,9 @@ func (vaq *VehicleAverageQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if vaq.ctx.Unique != nil && *vaq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range vaq.modifiers {
+		m(selector)
+	}
 	for _, p := range vaq.predicates {
 		p(selector)
 	}
@@ -433,6 +443,12 @@ func (vaq *VehicleAverageQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (vaq *VehicleAverageQuery) Modify(modifiers ...func(s *sql.Selector)) *VehicleAverageSelect {
+	vaq.modifiers = append(vaq.modifiers, modifiers...)
+	return vaq.Select()
 }
 
 // VehicleAverageGroupBy is the group-by builder for VehicleAverage entities.
@@ -523,4 +539,10 @@ func (vas *VehicleAverageSelect) sqlScan(ctx context.Context, root *VehicleAvera
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (vas *VehicleAverageSelect) Modify(modifiers ...func(s *sql.Selector)) *VehicleAverageSelect {
+	vas.modifiers = append(vas.modifiers, modifiers...)
+	return vas
 }

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -21,9 +22,9 @@ type VehicleSnapshot struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.SnapshotType `json:"type,omitempty"`
 	// AccountID holds the value of the "account_id" field.
@@ -35,7 +36,7 @@ type VehicleSnapshot struct {
 	// Battles holds the value of the "battles" field.
 	Battles int `json:"battles,omitempty"`
 	// LastBattleTime holds the value of the "last_battle_time" field.
-	LastBattleTime int64 `json:"last_battle_time,omitempty"`
+	LastBattleTime time.Time `json:"last_battle_time,omitempty"`
 	// Frame holds the value of the "frame" field.
 	Frame frame.StatsFrame `json:"frame,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -71,10 +72,12 @@ func (*VehicleSnapshot) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case vehiclesnapshot.FieldFrame:
 			values[i] = new([]byte)
-		case vehiclesnapshot.FieldCreatedAt, vehiclesnapshot.FieldUpdatedAt, vehiclesnapshot.FieldBattles, vehiclesnapshot.FieldLastBattleTime:
+		case vehiclesnapshot.FieldBattles:
 			values[i] = new(sql.NullInt64)
 		case vehiclesnapshot.FieldID, vehiclesnapshot.FieldType, vehiclesnapshot.FieldAccountID, vehiclesnapshot.FieldVehicleID, vehiclesnapshot.FieldReferenceID:
 			values[i] = new(sql.NullString)
+		case vehiclesnapshot.FieldCreatedAt, vehiclesnapshot.FieldUpdatedAt, vehiclesnapshot.FieldLastBattleTime:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -97,16 +100,16 @@ func (vs *VehicleSnapshot) assignValues(columns []string, values []any) error {
 				vs.ID = value.String
 			}
 		case vehiclesnapshot.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				vs.CreatedAt = value.Int64
+				vs.CreatedAt = value.Time
 			}
 		case vehiclesnapshot.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				vs.UpdatedAt = value.Int64
+				vs.UpdatedAt = value.Time
 			}
 		case vehiclesnapshot.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -139,10 +142,10 @@ func (vs *VehicleSnapshot) assignValues(columns []string, values []any) error {
 				vs.Battles = int(value.Int64)
 			}
 		case vehiclesnapshot.FieldLastBattleTime:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field last_battle_time", values[i])
 			} else if value.Valid {
-				vs.LastBattleTime = value.Int64
+				vs.LastBattleTime = value.Time
 			}
 		case vehiclesnapshot.FieldFrame:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -194,10 +197,10 @@ func (vs *VehicleSnapshot) String() string {
 	builder.WriteString("VehicleSnapshot(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", vs.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", vs.CreatedAt))
+	builder.WriteString(vs.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", vs.UpdatedAt))
+	builder.WriteString(vs.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", vs.Type))
@@ -215,7 +218,7 @@ func (vs *VehicleSnapshot) String() string {
 	builder.WriteString(fmt.Sprintf("%v", vs.Battles))
 	builder.WriteString(", ")
 	builder.WriteString("last_battle_time=")
-	builder.WriteString(fmt.Sprintf("%v", vs.LastBattleTime))
+	builder.WriteString(vs.LastBattleTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("frame=")
 	builder.WriteString(fmt.Sprintf("%v", vs.Frame))

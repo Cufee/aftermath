@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -22,29 +23,29 @@ type UserConnectionCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (ucc *UserConnectionCreate) SetCreatedAt(i int64) *UserConnectionCreate {
-	ucc.mutation.SetCreatedAt(i)
+func (ucc *UserConnectionCreate) SetCreatedAt(t time.Time) *UserConnectionCreate {
+	ucc.mutation.SetCreatedAt(t)
 	return ucc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ucc *UserConnectionCreate) SetNillableCreatedAt(i *int64) *UserConnectionCreate {
-	if i != nil {
-		ucc.SetCreatedAt(*i)
+func (ucc *UserConnectionCreate) SetNillableCreatedAt(t *time.Time) *UserConnectionCreate {
+	if t != nil {
+		ucc.SetCreatedAt(*t)
 	}
 	return ucc
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ucc *UserConnectionCreate) SetUpdatedAt(i int64) *UserConnectionCreate {
-	ucc.mutation.SetUpdatedAt(i)
+func (ucc *UserConnectionCreate) SetUpdatedAt(t time.Time) *UserConnectionCreate {
+	ucc.mutation.SetUpdatedAt(t)
 	return ucc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ucc *UserConnectionCreate) SetNillableUpdatedAt(i *int64) *UserConnectionCreate {
-	if i != nil {
-		ucc.SetUpdatedAt(*i)
+func (ucc *UserConnectionCreate) SetNillableUpdatedAt(t *time.Time) *UserConnectionCreate {
+	if t != nil {
+		ucc.SetUpdatedAt(*t)
 	}
 	return ucc
 }
@@ -220,11 +221,11 @@ func (ucc *UserConnectionCreate) createSpec() (*UserConnection, *sqlgraph.Create
 		_spec.ID.Value = id
 	}
 	if value, ok := ucc.mutation.CreatedAt(); ok {
-		_spec.SetField(userconnection.FieldCreatedAt, field.TypeInt64, value)
+		_spec.SetField(userconnection.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := ucc.mutation.UpdatedAt(); ok {
-		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(userconnection.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := ucc.mutation.GetType(); ok {

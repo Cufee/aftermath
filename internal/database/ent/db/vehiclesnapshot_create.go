@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -23,29 +24,29 @@ type VehicleSnapshotCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (vsc *VehicleSnapshotCreate) SetCreatedAt(i int64) *VehicleSnapshotCreate {
-	vsc.mutation.SetCreatedAt(i)
+func (vsc *VehicleSnapshotCreate) SetCreatedAt(t time.Time) *VehicleSnapshotCreate {
+	vsc.mutation.SetCreatedAt(t)
 	return vsc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (vsc *VehicleSnapshotCreate) SetNillableCreatedAt(i *int64) *VehicleSnapshotCreate {
-	if i != nil {
-		vsc.SetCreatedAt(*i)
+func (vsc *VehicleSnapshotCreate) SetNillableCreatedAt(t *time.Time) *VehicleSnapshotCreate {
+	if t != nil {
+		vsc.SetCreatedAt(*t)
 	}
 	return vsc
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vsc *VehicleSnapshotCreate) SetUpdatedAt(i int64) *VehicleSnapshotCreate {
-	vsc.mutation.SetUpdatedAt(i)
+func (vsc *VehicleSnapshotCreate) SetUpdatedAt(t time.Time) *VehicleSnapshotCreate {
+	vsc.mutation.SetUpdatedAt(t)
 	return vsc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (vsc *VehicleSnapshotCreate) SetNillableUpdatedAt(i *int64) *VehicleSnapshotCreate {
-	if i != nil {
-		vsc.SetUpdatedAt(*i)
+func (vsc *VehicleSnapshotCreate) SetNillableUpdatedAt(t *time.Time) *VehicleSnapshotCreate {
+	if t != nil {
+		vsc.SetUpdatedAt(*t)
 	}
 	return vsc
 }
@@ -81,8 +82,8 @@ func (vsc *VehicleSnapshotCreate) SetBattles(i int) *VehicleSnapshotCreate {
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (vsc *VehicleSnapshotCreate) SetLastBattleTime(i int64) *VehicleSnapshotCreate {
-	vsc.mutation.SetLastBattleTime(i)
+func (vsc *VehicleSnapshotCreate) SetLastBattleTime(t time.Time) *VehicleSnapshotCreate {
+	vsc.mutation.SetLastBattleTime(t)
 	return vsc
 }
 
@@ -248,11 +249,11 @@ func (vsc *VehicleSnapshotCreate) createSpec() (*VehicleSnapshot, *sqlgraph.Crea
 		_spec.ID.Value = id
 	}
 	if value, ok := vsc.mutation.CreatedAt(); ok {
-		_spec.SetField(vehiclesnapshot.FieldCreatedAt, field.TypeInt64, value)
+		_spec.SetField(vehiclesnapshot.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := vsc.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehiclesnapshot.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(vehiclesnapshot.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := vsc.mutation.GetType(); ok {
@@ -272,7 +273,7 @@ func (vsc *VehicleSnapshotCreate) createSpec() (*VehicleSnapshot, *sqlgraph.Crea
 		_node.Battles = value
 	}
 	if value, ok := vsc.mutation.LastBattleTime(); ok {
-		_spec.SetField(vehiclesnapshot.FieldLastBattleTime, field.TypeInt64, value)
+		_spec.SetField(vehiclesnapshot.FieldLastBattleTime, field.TypeTime, value)
 		_node.LastBattleTime = value
 	}
 	if value, ok := vsc.mutation.Frame(); ok {

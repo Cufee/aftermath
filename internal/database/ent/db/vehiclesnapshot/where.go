@@ -3,6 +3,8 @@
 package vehiclesnapshot
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
@@ -65,12 +67,12 @@ func IDContainsFold(id string) predicate.VehicleSnapshot {
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v int64) predicate.VehicleSnapshot {
+func CreatedAt(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v int64) predicate.VehicleSnapshot {
+func UpdatedAt(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
@@ -95,87 +97,87 @@ func Battles(v int) predicate.VehicleSnapshot {
 }
 
 // LastBattleTime applies equality check predicate on the "last_battle_time" field. It's identical to LastBattleTimeEQ.
-func LastBattleTime(v int64) predicate.VehicleSnapshot {
+func LastBattleTime(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldEQ(FieldLastBattleTime, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v int64) predicate.VehicleSnapshot {
+func CreatedAtEQ(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v int64) predicate.VehicleSnapshot {
+func CreatedAtNEQ(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...int64) predicate.VehicleSnapshot {
+func CreatedAtIn(vs ...time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...int64) predicate.VehicleSnapshot {
+func CreatedAtNotIn(vs ...time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v int64) predicate.VehicleSnapshot {
+func CreatedAtGT(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v int64) predicate.VehicleSnapshot {
+func CreatedAtGTE(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v int64) predicate.VehicleSnapshot {
+func CreatedAtLT(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v int64) predicate.VehicleSnapshot {
+func CreatedAtLTE(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v int64) predicate.VehicleSnapshot {
+func UpdatedAtEQ(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v int64) predicate.VehicleSnapshot {
+func UpdatedAtNEQ(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...int64) predicate.VehicleSnapshot {
+func UpdatedAtIn(vs ...time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...int64) predicate.VehicleSnapshot {
+func UpdatedAtNotIn(vs ...time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v int64) predicate.VehicleSnapshot {
+func UpdatedAtGT(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v int64) predicate.VehicleSnapshot {
+func UpdatedAtGTE(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v int64) predicate.VehicleSnapshot {
+func UpdatedAtLT(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v int64) predicate.VehicleSnapshot {
+func UpdatedAtLTE(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
@@ -445,42 +447,42 @@ func BattlesLTE(v int) predicate.VehicleSnapshot {
 }
 
 // LastBattleTimeEQ applies the EQ predicate on the "last_battle_time" field.
-func LastBattleTimeEQ(v int64) predicate.VehicleSnapshot {
+func LastBattleTimeEQ(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldEQ(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeNEQ applies the NEQ predicate on the "last_battle_time" field.
-func LastBattleTimeNEQ(v int64) predicate.VehicleSnapshot {
+func LastBattleTimeNEQ(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldNEQ(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeIn applies the In predicate on the "last_battle_time" field.
-func LastBattleTimeIn(vs ...int64) predicate.VehicleSnapshot {
+func LastBattleTimeIn(vs ...time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldIn(FieldLastBattleTime, vs...))
 }
 
 // LastBattleTimeNotIn applies the NotIn predicate on the "last_battle_time" field.
-func LastBattleTimeNotIn(vs ...int64) predicate.VehicleSnapshot {
+func LastBattleTimeNotIn(vs ...time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldNotIn(FieldLastBattleTime, vs...))
 }
 
 // LastBattleTimeGT applies the GT predicate on the "last_battle_time" field.
-func LastBattleTimeGT(v int64) predicate.VehicleSnapshot {
+func LastBattleTimeGT(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldGT(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeGTE applies the GTE predicate on the "last_battle_time" field.
-func LastBattleTimeGTE(v int64) predicate.VehicleSnapshot {
+func LastBattleTimeGTE(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldGTE(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeLT applies the LT predicate on the "last_battle_time" field.
-func LastBattleTimeLT(v int64) predicate.VehicleSnapshot {
+func LastBattleTimeLT(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldLT(FieldLastBattleTime, v))
 }
 
 // LastBattleTimeLTE applies the LTE predicate on the "last_battle_time" field.
-func LastBattleTimeLTE(v int64) predicate.VehicleSnapshot {
+func LastBattleTimeLTE(v time.Time) predicate.VehicleSnapshot {
 	return predicate.VehicleSnapshot(sql.FieldLTE(FieldLastBattleTime, v))
 }
 

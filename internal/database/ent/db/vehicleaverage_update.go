@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -18,8 +19,9 @@ import (
 // VehicleAverageUpdate is the builder for updating VehicleAverage entities.
 type VehicleAverageUpdate struct {
 	config
-	hooks    []Hook
-	mutation *VehicleAverageMutation
+	hooks     []Hook
+	mutation  *VehicleAverageMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the VehicleAverageUpdate builder.
@@ -29,15 +31,8 @@ func (vau *VehicleAverageUpdate) Where(ps ...predicate.VehicleAverage) *VehicleA
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vau *VehicleAverageUpdate) SetUpdatedAt(i int64) *VehicleAverageUpdate {
-	vau.mutation.ResetUpdatedAt()
-	vau.mutation.SetUpdatedAt(i)
-	return vau
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (vau *VehicleAverageUpdate) AddUpdatedAt(i int64) *VehicleAverageUpdate {
-	vau.mutation.AddUpdatedAt(i)
+func (vau *VehicleAverageUpdate) SetUpdatedAt(t time.Time) *VehicleAverageUpdate {
+	vau.mutation.SetUpdatedAt(t)
 	return vau
 }
 
@@ -96,6 +91,12 @@ func (vau *VehicleAverageUpdate) defaults() {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (vau *VehicleAverageUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *VehicleAverageUpdate {
+	vau.modifiers = append(vau.modifiers, modifiers...)
+	return vau
+}
+
 func (vau *VehicleAverageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(vehicleaverage.Table, vehicleaverage.Columns, sqlgraph.NewFieldSpec(vehicleaverage.FieldID, field.TypeString))
 	if ps := vau.mutation.predicates; len(ps) > 0 {
@@ -106,14 +107,12 @@ func (vau *VehicleAverageUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 	}
 	if value, ok := vau.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := vau.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(vehicleaverage.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := vau.mutation.Data(); ok {
 		_spec.SetField(vehicleaverage.FieldData, field.TypeJSON, value)
 	}
+	_spec.AddModifiers(vau.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, vau.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{vehicleaverage.Label}
@@ -129,21 +128,15 @@ func (vau *VehicleAverageUpdate) sqlSave(ctx context.Context) (n int, err error)
 // VehicleAverageUpdateOne is the builder for updating a single VehicleAverage entity.
 type VehicleAverageUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *VehicleAverageMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *VehicleAverageMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vauo *VehicleAverageUpdateOne) SetUpdatedAt(i int64) *VehicleAverageUpdateOne {
-	vauo.mutation.ResetUpdatedAt()
-	vauo.mutation.SetUpdatedAt(i)
-	return vauo
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (vauo *VehicleAverageUpdateOne) AddUpdatedAt(i int64) *VehicleAverageUpdateOne {
-	vauo.mutation.AddUpdatedAt(i)
+func (vauo *VehicleAverageUpdateOne) SetUpdatedAt(t time.Time) *VehicleAverageUpdateOne {
+	vauo.mutation.SetUpdatedAt(t)
 	return vauo
 }
 
@@ -215,6 +208,12 @@ func (vauo *VehicleAverageUpdateOne) defaults() {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (vauo *VehicleAverageUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *VehicleAverageUpdateOne {
+	vauo.modifiers = append(vauo.modifiers, modifiers...)
+	return vauo
+}
+
 func (vauo *VehicleAverageUpdateOne) sqlSave(ctx context.Context) (_node *VehicleAverage, err error) {
 	_spec := sqlgraph.NewUpdateSpec(vehicleaverage.Table, vehicleaverage.Columns, sqlgraph.NewFieldSpec(vehicleaverage.FieldID, field.TypeString))
 	id, ok := vauo.mutation.ID()
@@ -242,14 +241,12 @@ func (vauo *VehicleAverageUpdateOne) sqlSave(ctx context.Context) (_node *Vehicl
 		}
 	}
 	if value, ok := vauo.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := vauo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(vehicleaverage.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(vehicleaverage.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := vauo.mutation.Data(); ok {
 		_spec.SetField(vehicleaverage.FieldData, field.TypeJSON, value)
 	}
+	_spec.AddModifiers(vauo.modifiers...)
 	_node = &VehicleAverage{config: vauo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

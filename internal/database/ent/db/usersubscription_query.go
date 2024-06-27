@@ -23,6 +23,7 @@ type UserSubscriptionQuery struct {
 	inters     []Interceptor
 	predicates []predicate.UserSubscription
 	withUser   *UserQuery
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -297,7 +298,7 @@ func (usq *UserSubscriptionQuery) WithUser(opts ...func(*UserQuery)) *UserSubscr
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -320,7 +321,7 @@ func (usq *UserSubscriptionQuery) GroupBy(field string, fields ...string) *UserS
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.UserSubscription.Query().
@@ -382,6 +383,9 @@ func (usq *UserSubscriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(usq.modifiers) > 0 {
+		_spec.Modifiers = usq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -432,6 +436,9 @@ func (usq *UserSubscriptionQuery) loadUser(ctx context.Context, query *UserQuery
 
 func (usq *UserSubscriptionQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := usq.querySpec()
+	if len(usq.modifiers) > 0 {
+		_spec.Modifiers = usq.modifiers
+	}
 	_spec.Node.Columns = usq.ctx.Fields
 	if len(usq.ctx.Fields) > 0 {
 		_spec.Unique = usq.ctx.Unique != nil && *usq.ctx.Unique
@@ -497,6 +504,9 @@ func (usq *UserSubscriptionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if usq.ctx.Unique != nil && *usq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range usq.modifiers {
+		m(selector)
+	}
 	for _, p := range usq.predicates {
 		p(selector)
 	}
@@ -512,6 +522,12 @@ func (usq *UserSubscriptionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (usq *UserSubscriptionQuery) Modify(modifiers ...func(s *sql.Selector)) *UserSubscriptionSelect {
+	usq.modifiers = append(usq.modifiers, modifiers...)
+	return usq.Select()
 }
 
 // UserSubscriptionGroupBy is the group-by builder for UserSubscription entities.
@@ -602,4 +618,10 @@ func (uss *UserSubscriptionSelect) sqlScan(ctx context.Context, root *UserSubscr
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (uss *UserSubscriptionSelect) Modify(modifiers ...func(s *sql.Selector)) *UserSubscriptionSelect {
+	uss.modifiers = append(uss.modifiers, modifiers...)
+	return uss
 }

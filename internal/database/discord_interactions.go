@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"time"
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
@@ -35,7 +34,7 @@ func toDiscordInteraction(record *db.DiscordInteraction) models.DiscordInteracti
 	}
 	return models.DiscordInteraction{
 		ID:        record.ID,
-		CreatedAt: time.Unix(record.CreatedAt, 0),
+		CreatedAt: record.CreatedAt,
 
 		UserID:      record.UserID,
 		Command:     record.Command,

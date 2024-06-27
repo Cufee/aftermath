@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -19,9 +20,9 @@ type CronTask struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.TaskType `json:"type,omitempty"`
 	// ReferenceID holds the value of the "reference_id" field.
@@ -31,9 +32,9 @@ type CronTask struct {
 	// Status holds the value of the "status" field.
 	Status models.TaskStatus `json:"status,omitempty"`
 	// ScheduledAfter holds the value of the "scheduled_after" field.
-	ScheduledAfter int64 `json:"scheduled_after,omitempty"`
+	ScheduledAfter time.Time `json:"scheduled_after,omitempty"`
 	// LastRun holds the value of the "last_run" field.
-	LastRun int64 `json:"last_run,omitempty"`
+	LastRun time.Time `json:"last_run,omitempty"`
 	// Logs holds the value of the "logs" field.
 	Logs []models.TaskLog `json:"logs,omitempty"`
 	// Data holds the value of the "data" field.
@@ -48,10 +49,10 @@ func (*CronTask) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case crontask.FieldTargets, crontask.FieldLogs, crontask.FieldData:
 			values[i] = new([]byte)
-		case crontask.FieldCreatedAt, crontask.FieldUpdatedAt, crontask.FieldScheduledAfter, crontask.FieldLastRun:
-			values[i] = new(sql.NullInt64)
 		case crontask.FieldID, crontask.FieldType, crontask.FieldReferenceID, crontask.FieldStatus:
 			values[i] = new(sql.NullString)
+		case crontask.FieldCreatedAt, crontask.FieldUpdatedAt, crontask.FieldScheduledAfter, crontask.FieldLastRun:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -74,16 +75,16 @@ func (ct *CronTask) assignValues(columns []string, values []any) error {
 				ct.ID = value.String
 			}
 		case crontask.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ct.CreatedAt = value.Int64
+				ct.CreatedAt = value.Time
 			}
 		case crontask.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				ct.UpdatedAt = value.Int64
+				ct.UpdatedAt = value.Time
 			}
 		case crontask.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -112,16 +113,16 @@ func (ct *CronTask) assignValues(columns []string, values []any) error {
 				ct.Status = models.TaskStatus(value.String)
 			}
 		case crontask.FieldScheduledAfter:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field scheduled_after", values[i])
 			} else if value.Valid {
-				ct.ScheduledAfter = value.Int64
+				ct.ScheduledAfter = value.Time
 			}
 		case crontask.FieldLastRun:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field last_run", values[i])
 			} else if value.Valid {
-				ct.LastRun = value.Int64
+				ct.LastRun = value.Time
 			}
 		case crontask.FieldLogs:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -176,10 +177,10 @@ func (ct *CronTask) String() string {
 	builder.WriteString("CronTask(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ct.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", ct.CreatedAt))
+	builder.WriteString(ct.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", ct.UpdatedAt))
+	builder.WriteString(ct.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", ct.Type))
@@ -194,10 +195,10 @@ func (ct *CronTask) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ct.Status))
 	builder.WriteString(", ")
 	builder.WriteString("scheduled_after=")
-	builder.WriteString(fmt.Sprintf("%v", ct.ScheduledAfter))
+	builder.WriteString(ct.ScheduledAfter.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("last_run=")
-	builder.WriteString(fmt.Sprintf("%v", ct.LastRun))
+	builder.WriteString(ct.LastRun.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("logs=")
 	builder.WriteString(fmt.Sprintf("%v", ct.Logs))

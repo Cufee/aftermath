@@ -18,11 +18,11 @@ func (User) Fields() []ent.Field {
 		field.String("id").
 			Unique().
 			Immutable(),
-		field.Int64("created_at").
+		field.Time("created_at").
 			Immutable().
-			DefaultFunc(timeNow),
-		field.Int64("updated_at").
-			DefaultFunc(timeNow).
+			Default(timeNow),
+		field.Time("updated_at").
+			Default(timeNow).
 			UpdateDefault(timeNow),
 		//
 		field.String("permissions").Default(""),

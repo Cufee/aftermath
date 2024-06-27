@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -24,42 +25,42 @@ type AccountCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (ac *AccountCreate) SetCreatedAt(i int64) *AccountCreate {
-	ac.mutation.SetCreatedAt(i)
+func (ac *AccountCreate) SetCreatedAt(t time.Time) *AccountCreate {
+	ac.mutation.SetCreatedAt(t)
 	return ac
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableCreatedAt(i *int64) *AccountCreate {
-	if i != nil {
-		ac.SetCreatedAt(*i)
+func (ac *AccountCreate) SetNillableCreatedAt(t *time.Time) *AccountCreate {
+	if t != nil {
+		ac.SetCreatedAt(*t)
 	}
 	return ac
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ac *AccountCreate) SetUpdatedAt(i int64) *AccountCreate {
-	ac.mutation.SetUpdatedAt(i)
+func (ac *AccountCreate) SetUpdatedAt(t time.Time) *AccountCreate {
+	ac.mutation.SetUpdatedAt(t)
 	return ac
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableUpdatedAt(i *int64) *AccountCreate {
-	if i != nil {
-		ac.SetUpdatedAt(*i)
+func (ac *AccountCreate) SetNillableUpdatedAt(t *time.Time) *AccountCreate {
+	if t != nil {
+		ac.SetUpdatedAt(*t)
 	}
 	return ac
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (ac *AccountCreate) SetLastBattleTime(i int64) *AccountCreate {
-	ac.mutation.SetLastBattleTime(i)
+func (ac *AccountCreate) SetLastBattleTime(t time.Time) *AccountCreate {
+	ac.mutation.SetLastBattleTime(t)
 	return ac
 }
 
 // SetAccountCreatedAt sets the "account_created_at" field.
-func (ac *AccountCreate) SetAccountCreatedAt(i int64) *AccountCreate {
-	ac.mutation.SetAccountCreatedAt(i)
+func (ac *AccountCreate) SetAccountCreatedAt(t time.Time) *AccountCreate {
+	ac.mutation.SetAccountCreatedAt(t)
 	return ac
 }
 
@@ -277,19 +278,19 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := ac.mutation.CreatedAt(); ok {
-		_spec.SetField(account.FieldCreatedAt, field.TypeInt64, value)
+		_spec.SetField(account.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := ac.mutation.UpdatedAt(); ok {
-		_spec.SetField(account.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(account.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := ac.mutation.LastBattleTime(); ok {
-		_spec.SetField(account.FieldLastBattleTime, field.TypeInt64, value)
+		_spec.SetField(account.FieldLastBattleTime, field.TypeTime, value)
 		_node.LastBattleTime = value
 	}
 	if value, ok := ac.mutation.AccountCreatedAt(); ok {
-		_spec.SetField(account.FieldAccountCreatedAt, field.TypeInt64, value)
+		_spec.SetField(account.FieldAccountCreatedAt, field.TypeTime, value)
 		_node.AccountCreatedAt = value
 	}
 	if value, ok := ac.mutation.Realm(); ok {

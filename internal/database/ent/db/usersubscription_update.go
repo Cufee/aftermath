@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -18,8 +19,9 @@ import (
 // UserSubscriptionUpdate is the builder for updating UserSubscription entities.
 type UserSubscriptionUpdate struct {
 	config
-	hooks    []Hook
-	mutation *UserSubscriptionMutation
+	hooks     []Hook
+	mutation  *UserSubscriptionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the UserSubscriptionUpdate builder.
@@ -29,15 +31,8 @@ func (usu *UserSubscriptionUpdate) Where(ps ...predicate.UserSubscription) *User
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (usu *UserSubscriptionUpdate) SetUpdatedAt(i int64) *UserSubscriptionUpdate {
-	usu.mutation.ResetUpdatedAt()
-	usu.mutation.SetUpdatedAt(i)
-	return usu
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (usu *UserSubscriptionUpdate) AddUpdatedAt(i int64) *UserSubscriptionUpdate {
-	usu.mutation.AddUpdatedAt(i)
+func (usu *UserSubscriptionUpdate) SetUpdatedAt(t time.Time) *UserSubscriptionUpdate {
+	usu.mutation.SetUpdatedAt(t)
 	return usu
 }
 
@@ -56,23 +51,16 @@ func (usu *UserSubscriptionUpdate) SetNillableType(mt *models.SubscriptionType) 
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (usu *UserSubscriptionUpdate) SetExpiresAt(i int64) *UserSubscriptionUpdate {
-	usu.mutation.ResetExpiresAt()
-	usu.mutation.SetExpiresAt(i)
+func (usu *UserSubscriptionUpdate) SetExpiresAt(t time.Time) *UserSubscriptionUpdate {
+	usu.mutation.SetExpiresAt(t)
 	return usu
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (usu *UserSubscriptionUpdate) SetNillableExpiresAt(i *int64) *UserSubscriptionUpdate {
-	if i != nil {
-		usu.SetExpiresAt(*i)
+func (usu *UserSubscriptionUpdate) SetNillableExpiresAt(t *time.Time) *UserSubscriptionUpdate {
+	if t != nil {
+		usu.SetExpiresAt(*t)
 	}
-	return usu
-}
-
-// AddExpiresAt adds i to the "expires_at" field.
-func (usu *UserSubscriptionUpdate) AddExpiresAt(i int64) *UserSubscriptionUpdate {
-	usu.mutation.AddExpiresAt(i)
 	return usu
 }
 
@@ -168,6 +156,12 @@ func (usu *UserSubscriptionUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (usu *UserSubscriptionUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserSubscriptionUpdate {
+	usu.modifiers = append(usu.modifiers, modifiers...)
+	return usu
+}
+
 func (usu *UserSubscriptionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := usu.check(); err != nil {
 		return n, err
@@ -181,19 +175,13 @@ func (usu *UserSubscriptionUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 	}
 	if value, ok := usu.mutation.UpdatedAt(); ok {
-		_spec.SetField(usersubscription.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := usu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(usersubscription.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(usersubscription.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := usu.mutation.GetType(); ok {
 		_spec.SetField(usersubscription.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := usu.mutation.ExpiresAt(); ok {
-		_spec.SetField(usersubscription.FieldExpiresAt, field.TypeInt64, value)
-	}
-	if value, ok := usu.mutation.AddedExpiresAt(); ok {
-		_spec.AddField(usersubscription.FieldExpiresAt, field.TypeInt64, value)
+		_spec.SetField(usersubscription.FieldExpiresAt, field.TypeTime, value)
 	}
 	if value, ok := usu.mutation.Permissions(); ok {
 		_spec.SetField(usersubscription.FieldPermissions, field.TypeString, value)
@@ -201,6 +189,7 @@ func (usu *UserSubscriptionUpdate) sqlSave(ctx context.Context) (n int, err erro
 	if value, ok := usu.mutation.ReferenceID(); ok {
 		_spec.SetField(usersubscription.FieldReferenceID, field.TypeString, value)
 	}
+	_spec.AddModifiers(usu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, usu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{usersubscription.Label}
@@ -216,21 +205,15 @@ func (usu *UserSubscriptionUpdate) sqlSave(ctx context.Context) (n int, err erro
 // UserSubscriptionUpdateOne is the builder for updating a single UserSubscription entity.
 type UserSubscriptionUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *UserSubscriptionMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *UserSubscriptionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (usuo *UserSubscriptionUpdateOne) SetUpdatedAt(i int64) *UserSubscriptionUpdateOne {
-	usuo.mutation.ResetUpdatedAt()
-	usuo.mutation.SetUpdatedAt(i)
-	return usuo
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (usuo *UserSubscriptionUpdateOne) AddUpdatedAt(i int64) *UserSubscriptionUpdateOne {
-	usuo.mutation.AddUpdatedAt(i)
+func (usuo *UserSubscriptionUpdateOne) SetUpdatedAt(t time.Time) *UserSubscriptionUpdateOne {
+	usuo.mutation.SetUpdatedAt(t)
 	return usuo
 }
 
@@ -249,23 +232,16 @@ func (usuo *UserSubscriptionUpdateOne) SetNillableType(mt *models.SubscriptionTy
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (usuo *UserSubscriptionUpdateOne) SetExpiresAt(i int64) *UserSubscriptionUpdateOne {
-	usuo.mutation.ResetExpiresAt()
-	usuo.mutation.SetExpiresAt(i)
+func (usuo *UserSubscriptionUpdateOne) SetExpiresAt(t time.Time) *UserSubscriptionUpdateOne {
+	usuo.mutation.SetExpiresAt(t)
 	return usuo
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (usuo *UserSubscriptionUpdateOne) SetNillableExpiresAt(i *int64) *UserSubscriptionUpdateOne {
-	if i != nil {
-		usuo.SetExpiresAt(*i)
+func (usuo *UserSubscriptionUpdateOne) SetNillableExpiresAt(t *time.Time) *UserSubscriptionUpdateOne {
+	if t != nil {
+		usuo.SetExpiresAt(*t)
 	}
-	return usuo
-}
-
-// AddExpiresAt adds i to the "expires_at" field.
-func (usuo *UserSubscriptionUpdateOne) AddExpiresAt(i int64) *UserSubscriptionUpdateOne {
-	usuo.mutation.AddExpiresAt(i)
 	return usuo
 }
 
@@ -374,6 +350,12 @@ func (usuo *UserSubscriptionUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (usuo *UserSubscriptionUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserSubscriptionUpdateOne {
+	usuo.modifiers = append(usuo.modifiers, modifiers...)
+	return usuo
+}
+
 func (usuo *UserSubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *UserSubscription, err error) {
 	if err := usuo.check(); err != nil {
 		return _node, err
@@ -404,19 +386,13 @@ func (usuo *UserSubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *User
 		}
 	}
 	if value, ok := usuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(usersubscription.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := usuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(usersubscription.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(usersubscription.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := usuo.mutation.GetType(); ok {
 		_spec.SetField(usersubscription.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := usuo.mutation.ExpiresAt(); ok {
-		_spec.SetField(usersubscription.FieldExpiresAt, field.TypeInt64, value)
-	}
-	if value, ok := usuo.mutation.AddedExpiresAt(); ok {
-		_spec.AddField(usersubscription.FieldExpiresAt, field.TypeInt64, value)
+		_spec.SetField(usersubscription.FieldExpiresAt, field.TypeTime, value)
 	}
 	if value, ok := usuo.mutation.Permissions(); ok {
 		_spec.SetField(usersubscription.FieldPermissions, field.TypeString, value)
@@ -424,6 +400,7 @@ func (usuo *UserSubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *User
 	if value, ok := usuo.mutation.ReferenceID(); ok {
 		_spec.SetField(usersubscription.FieldReferenceID, field.TypeString, value)
 	}
+	_spec.AddModifiers(usuo.modifiers...)
 	_node = &UserSubscription{config: usuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
