@@ -24,6 +24,7 @@ func (CronTask) Fields() []ent.Field {
 			GoType(models.TaskStatus("")),
 		field.Time("scheduled_after"),
 		field.Time("last_run"),
+		field.Int("tries_left"),
 		//
 		field.JSON("logs", []models.TaskLog{}),
 		field.JSON("data", map[string]string{}),

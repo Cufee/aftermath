@@ -85,6 +85,12 @@ func (ctc *CronTaskCreate) SetLastRun(t time.Time) *CronTaskCreate {
 	return ctc
 }
 
+// SetTriesLeft sets the "tries_left" field.
+func (ctc *CronTaskCreate) SetTriesLeft(i int) *CronTaskCreate {
+	ctc.mutation.SetTriesLeft(i)
+	return ctc
+}
+
 // SetLogs sets the "logs" field.
 func (ctc *CronTaskCreate) SetLogs(ml []models.TaskLog) *CronTaskCreate {
 	ctc.mutation.SetLogs(ml)
@@ -201,6 +207,9 @@ func (ctc *CronTaskCreate) check() error {
 	if _, ok := ctc.mutation.LastRun(); !ok {
 		return &ValidationError{Name: "last_run", err: errors.New(`db: missing required field "CronTask.last_run"`)}
 	}
+	if _, ok := ctc.mutation.TriesLeft(); !ok {
+		return &ValidationError{Name: "tries_left", err: errors.New(`db: missing required field "CronTask.tries_left"`)}
+	}
 	if _, ok := ctc.mutation.Logs(); !ok {
 		return &ValidationError{Name: "logs", err: errors.New(`db: missing required field "CronTask.logs"`)}
 	}
@@ -273,6 +282,10 @@ func (ctc *CronTaskCreate) createSpec() (*CronTask, *sqlgraph.CreateSpec) {
 	if value, ok := ctc.mutation.LastRun(); ok {
 		_spec.SetField(crontask.FieldLastRun, field.TypeTime, value)
 		_node.LastRun = value
+	}
+	if value, ok := ctc.mutation.TriesLeft(); ok {
+		_spec.SetField(crontask.FieldTriesLeft, field.TypeInt, value)
+		_node.TriesLeft = value
 	}
 	if value, ok := ctc.mutation.Logs(); ok {
 		_spec.SetField(crontask.FieldLogs, field.TypeJSON, value)

@@ -54,9 +54,6 @@ func init() {
 
 			return nil
 		},
-		ShouldRetry: func(task *models.Task) bool {
-			return false
-		},
 	}
 }
 

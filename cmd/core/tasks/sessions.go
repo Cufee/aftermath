@@ -20,11 +20,19 @@ func init() {
 			if task.Data == nil {
 				return errors.New("no data provided")
 			}
+
+			triesLeft, err := strconv.Atoi(task.Data["triesLeft"])
+			if err != nil {
+				return errors.Wrap(err, "failed to parse tries left")
+			}
+			task.Data["triesLeft"] = strconv.Itoa(triesLeft - 1)
+
 			realm, ok := task.Data["realm"]
 			if !ok {
 				task.Data["triesLeft"] = "0" // do not retry
 				return errors.New("invalid realm")
 			}
+
 			if len(task.Targets) > 100 {
 				task.Data["triesLeft"] = "0" // do not retry
 				return errors.New("invalid targets length")
@@ -33,6 +41,7 @@ func init() {
 				task.Data["triesLeft"] = "0" // do not retry
 				return errors.New("invalid targets length")
 			}
+
 			forceUpdate := task.Data["force"] == "true"
 
 			log.Debug().Str("taskId", task.ID).Any("targets", task.Targets).Msg("started working on a session refresh task")
@@ -58,21 +67,6 @@ func init() {
 			task.Targets = newTargets
 
 			return nil
-		},
-		ShouldRetry: func(task *models.Task) bool {
-			triesLeft, err := strconv.Atoi(task.Data["triesLeft"])
-			if err != nil {
-				log.Err(err).Str("taskId", task.ID).Msg("failed to parse task triesLeft")
-				return false
-			}
-			if triesLeft <= 0 {
-				return false
-			}
-
-			triesLeft -= 1
-			task.Data["triesLeft"] = strconv.Itoa(triesLeft)
-			task.ScheduledAfter = time.Now().Add(5 * time.Minute) // Backoff for 5 minutes to avoid spamming
-			return true
 		},
 	}
 }

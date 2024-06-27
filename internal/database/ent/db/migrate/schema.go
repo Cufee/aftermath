@@ -262,6 +262,7 @@ var (
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"TASK_SCHEDULED", "TASK_IN_PROGRESS", "TASK_COMPLETE", "TASK_FAILED"}},
 		{Name: "scheduled_after", Type: field.TypeTime},
 		{Name: "last_run", Type: field.TypeTime},
+		{Name: "tries_left", Type: field.TypeInt},
 		{Name: "logs", Type: field.TypeJSON},
 		{Name: "data", Type: field.TypeJSON},
 	}

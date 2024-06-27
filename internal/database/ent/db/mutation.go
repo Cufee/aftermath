@@ -4702,6 +4702,8 @@ type CronTaskMutation struct {
 	status          *models.TaskStatus
 	scheduled_after *time.Time
 	last_run        *time.Time
+	tries_left      *int
+	addtries_left   *int
 	logs            *[]models.TaskLog
 	appendlogs      []models.TaskLog
 	data            *map[string]string
@@ -5118,6 +5120,62 @@ func (m *CronTaskMutation) ResetLastRun() {
 	m.last_run = nil
 }
 
+// SetTriesLeft sets the "tries_left" field.
+func (m *CronTaskMutation) SetTriesLeft(i int) {
+	m.tries_left = &i
+	m.addtries_left = nil
+}
+
+// TriesLeft returns the value of the "tries_left" field in the mutation.
+func (m *CronTaskMutation) TriesLeft() (r int, exists bool) {
+	v := m.tries_left
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTriesLeft returns the old "tries_left" field's value of the CronTask entity.
+// If the CronTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CronTaskMutation) OldTriesLeft(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTriesLeft is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTriesLeft requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTriesLeft: %w", err)
+	}
+	return oldValue.TriesLeft, nil
+}
+
+// AddTriesLeft adds i to the "tries_left" field.
+func (m *CronTaskMutation) AddTriesLeft(i int) {
+	if m.addtries_left != nil {
+		*m.addtries_left += i
+	} else {
+		m.addtries_left = &i
+	}
+}
+
+// AddedTriesLeft returns the value that was added to the "tries_left" field in this mutation.
+func (m *CronTaskMutation) AddedTriesLeft() (r int, exists bool) {
+	v := m.addtries_left
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTriesLeft resets all changes to the "tries_left" field.
+func (m *CronTaskMutation) ResetTriesLeft() {
+	m.tries_left = nil
+	m.addtries_left = nil
+}
+
 // SetLogs sets the "logs" field.
 func (m *CronTaskMutation) SetLogs(ml []models.TaskLog) {
 	m.logs = &ml
@@ -5239,7 +5297,7 @@ func (m *CronTaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CronTaskMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, crontask.FieldCreatedAt)
 	}
@@ -5263,6 +5321,9 @@ func (m *CronTaskMutation) Fields() []string {
 	}
 	if m.last_run != nil {
 		fields = append(fields, crontask.FieldLastRun)
+	}
+	if m.tries_left != nil {
+		fields = append(fields, crontask.FieldTriesLeft)
 	}
 	if m.logs != nil {
 		fields = append(fields, crontask.FieldLogs)
@@ -5294,6 +5355,8 @@ func (m *CronTaskMutation) Field(name string) (ent.Value, bool) {
 		return m.ScheduledAfter()
 	case crontask.FieldLastRun:
 		return m.LastRun()
+	case crontask.FieldTriesLeft:
+		return m.TriesLeft()
 	case crontask.FieldLogs:
 		return m.Logs()
 	case crontask.FieldData:
@@ -5323,6 +5386,8 @@ func (m *CronTaskMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldScheduledAfter(ctx)
 	case crontask.FieldLastRun:
 		return m.OldLastRun(ctx)
+	case crontask.FieldTriesLeft:
+		return m.OldTriesLeft(ctx)
 	case crontask.FieldLogs:
 		return m.OldLogs(ctx)
 	case crontask.FieldData:
@@ -5392,6 +5457,13 @@ func (m *CronTaskMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLastRun(v)
 		return nil
+	case crontask.FieldTriesLeft:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTriesLeft(v)
+		return nil
 	case crontask.FieldLogs:
 		v, ok := value.([]models.TaskLog)
 		if !ok {
@@ -5413,13 +5485,21 @@ func (m *CronTaskMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CronTaskMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addtries_left != nil {
+		fields = append(fields, crontask.FieldTriesLeft)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CronTaskMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case crontask.FieldTriesLeft:
+		return m.AddedTriesLeft()
+	}
 	return nil, false
 }
 
@@ -5428,6 +5508,13 @@ func (m *CronTaskMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CronTaskMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case crontask.FieldTriesLeft:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTriesLeft(v)
+		return nil
 	}
 	return fmt.Errorf("unknown CronTask numeric field %s", name)
 }
@@ -5478,6 +5565,9 @@ func (m *CronTaskMutation) ResetField(name string) error {
 		return nil
 	case crontask.FieldLastRun:
 		m.ResetLastRun()
+		return nil
+	case crontask.FieldTriesLeft:
+		m.ResetTriesLeft()
 		return nil
 	case crontask.FieldLogs:
 		m.ResetLogs()

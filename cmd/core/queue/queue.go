@@ -199,6 +199,7 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 					return
 				}
 
+				task.TriesLeft -= 1
 				handler, ok := q.handlers[task.Type]
 				if !ok {
 					task.Status = models.TaskStatusFailed
@@ -229,8 +230,9 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 				}
 				if err != nil {
 					l.Error = err.Error()
-					if handler.ShouldRetry(&task) {
+					if task.TriesLeft > 0 {
 						task.Status = models.TaskStatusScheduled
+						task.ScheduledAfter = time.Now().Add(time.Minute * 5)
 					} else {
 						task.Status = models.TaskStatusFailed
 					}

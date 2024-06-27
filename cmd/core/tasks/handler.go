@@ -8,8 +8,7 @@ import (
 )
 
 type TaskHandler struct {
-	Process     func(context.Context, core.Client, *models.Task) error
-	ShouldRetry func(*models.Task) bool
+	Process func(context.Context, core.Client, *models.Task) error
 }
 
 var defaultHandlers = make(map[models.TaskType]TaskHandler)

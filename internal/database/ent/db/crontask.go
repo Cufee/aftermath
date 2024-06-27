@@ -35,6 +35,8 @@ type CronTask struct {
 	ScheduledAfter time.Time `json:"scheduled_after,omitempty"`
 	// LastRun holds the value of the "last_run" field.
 	LastRun time.Time `json:"last_run,omitempty"`
+	// TriesLeft holds the value of the "tries_left" field.
+	TriesLeft int `json:"tries_left,omitempty"`
 	// Logs holds the value of the "logs" field.
 	Logs []models.TaskLog `json:"logs,omitempty"`
 	// Data holds the value of the "data" field.
@@ -49,6 +51,8 @@ func (*CronTask) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case crontask.FieldTargets, crontask.FieldLogs, crontask.FieldData:
 			values[i] = new([]byte)
+		case crontask.FieldTriesLeft:
+			values[i] = new(sql.NullInt64)
 		case crontask.FieldID, crontask.FieldType, crontask.FieldReferenceID, crontask.FieldStatus:
 			values[i] = new(sql.NullString)
 		case crontask.FieldCreatedAt, crontask.FieldUpdatedAt, crontask.FieldScheduledAfter, crontask.FieldLastRun:
@@ -123,6 +127,12 @@ func (ct *CronTask) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field last_run", values[i])
 			} else if value.Valid {
 				ct.LastRun = value.Time
+			}
+		case crontask.FieldTriesLeft:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tries_left", values[i])
+			} else if value.Valid {
+				ct.TriesLeft = int(value.Int64)
 			}
 		case crontask.FieldLogs:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -199,6 +209,9 @@ func (ct *CronTask) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_run=")
 	builder.WriteString(ct.LastRun.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("tries_left=")
+	builder.WriteString(fmt.Sprintf("%v", ct.TriesLeft))
 	builder.WriteString(", ")
 	builder.WriteString("logs=")
 	builder.WriteString(fmt.Sprintf("%v", ct.Logs))

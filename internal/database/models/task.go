@@ -68,6 +68,7 @@ type Task struct {
 
 	Status         TaskStatus `json:"status"`
 	ScheduledAfter time.Time  `json:"scheduledAfter"`
+	TriesLeft      int        `json:triesLeft`
 	LastRun        time.Time  `json:"lastRun"`
 
 	Data map[string]string `json:"data"`

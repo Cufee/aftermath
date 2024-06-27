@@ -84,7 +84,11 @@ func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task
 
 	var tasks []models.Task
 	return tasks, c.withTx(ctx, func(tx *db.Tx) error {
-		records, err := tx.CronTask.Query().Where(crontask.StatusEQ(models.TaskStatusScheduled), crontask.ScheduledAfterLT(time.Now())).Order(crontask.ByScheduledAfter(sql.OrderAsc())).Limit(limit).All(ctx)
+		records, err := tx.CronTask.Query().Where(
+			crontask.TriesLeftGT(0),
+			crontask.ScheduledAfterLT(time.Now()),
+			crontask.StatusEQ(models.TaskStatusScheduled),
+		).Order(crontask.ByScheduledAfter(sql.OrderAsc())).Limit(limit).All(ctx)
 		if err != nil {
 			return err
 		}
@@ -157,6 +161,7 @@ func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
 					SetStatus(t.Status).
 					SetTargets(t.Targets).
 					SetLastRun(t.LastRun).
+					SetTriesLeft(t.TriesLeft).
 					SetReferenceID(t.ReferenceID).
 					SetScheduledAfter(t.ScheduledAfter),
 			)
