@@ -52,7 +52,7 @@ func init() {
 				if err == nil {
 					continue
 				}
-				task.Targets = append(task.Targets, id)
+				newTargets = append(newTargets, id)
 				task.LogAttempt(models.TaskLog{
 					Timestamp: time.Now(),
 					Error:     err.Error(),
