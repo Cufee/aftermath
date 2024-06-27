@@ -3,7 +3,6 @@ module github.com/cufee/aftermath
 go 1.22.3
 
 require (
-	ariga.io/atlas v0.24.0
 	entgo.io/ent v0.13.1
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/cufee/am-wg-proxy-next/v2 v2.1.5
@@ -27,6 +26,7 @@ require (
 )
 
 require (
+	ariga.io/atlas v0.24.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
