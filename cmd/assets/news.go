@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"image"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -70,13 +68,7 @@ func ScrapeNewsImages() error {
 			}
 			defer res.Body.Close()
 
-			data, err := io.ReadAll(res.Body)
-			if err != nil {
-				log.Err(err).Msg("failed to read image response body")
-				return
-			}
-
-			decoded, err := imaging.Decode(bytes.NewReader(data))
+			decoded, err := imaging.Decode(res.Body)
 			if err != nil {
 				log.Err(err).Msg("failed to decode image")
 				return
