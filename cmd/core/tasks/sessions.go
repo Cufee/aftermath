@@ -47,8 +47,11 @@ func init() {
 					Comment:   id,
 				})
 			}
-			task.Targets = newTargets
 
+			if len(newTargets) > 0 {
+				task.Targets = newTargets
+				return errors.New("some accounts failed")
+			}
 			return nil
 		},
 	}
