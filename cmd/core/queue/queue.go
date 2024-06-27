@@ -83,7 +83,7 @@ func (q *queue) Start(ctx context.Context) (func(), error) {
 	}
 
 	go q.startWorkers(qctx, func(_ string) {
-		if len(q.queued) < q.workerLimit {
+		if len(q.queued) < q.workerLimit/2 {
 			err := q.pullAndEnqueueTasks(qctx, coreClint.Database())
 			if err != nil && !errors.Is(ErrQueueLocked, err) {
 				log.Err(err).Msg("failed to pull tasks")
@@ -125,7 +125,17 @@ func (q *queue) pullAndEnqueueTasks(ctx context.Context, db database.Client) err
 
 	log.Debug().Msg("pulling available tasks into queue")
 
-	tasks, err := db.GetAndStartTasks(ctx, q.workerLimit)
+	var tasksToEnqueue int
+	currentQueue := len(q.queued)
+	if q.workerLimit > currentQueue {
+		tasksToEnqueue = q.workerLimit - currentQueue
+	}
+
+	if tasksToEnqueue < 1 {
+		return ErrQueueFull
+	}
+
+	tasks, err := db.GetAndStartTasks(ctx, tasksToEnqueue)
 	if err != nil && !database.IsNotFound(err) {
 		return err
 	}

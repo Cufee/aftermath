@@ -56,8 +56,9 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 	}
 
 	var errors = make(map[string]error)
-	err := c.withTx(ctx, func(tx *db.Tx) error {
-		for _, data := range snapshots {
+	for _, data := range snapshots {
+		// make a transaction per write to avoid locking for too long
+		err := c.withTx(ctx, func(tx *db.Tx) error {
 			err := c.db.VehicleSnapshot.Create().
 				SetType(data.Type).
 				SetFrame(data.Stats).
@@ -71,12 +72,13 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 			if err != nil {
 				errors[data.VehicleID] = err
 			}
+			return nil
+		})
+		if err != nil {
+			errors[data.VehicleID] = err
 		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
 	}
+
 	if len(errors) > 0 {
 		return errors, nil
 	}
@@ -172,26 +174,29 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models
 	}
 
 	var errors = make(map[string]error)
-	err := c.withTx(ctx, func(tx *db.Tx) error {
-		for _, s := range snapshots {
-			err := c.db.AccountSnapshot.Create().
-				SetAccount(c.db.Account.GetX(ctx, s.AccountID)). // we assume the account exists here
-				SetCreatedAt(s.CreatedAt).
-				SetLastBattleTime(s.LastBattleTime).
-				SetRatingBattles(int(s.RatingBattles.Battles.Float())).
-				SetRatingFrame(s.RatingBattles).
-				SetReferenceID(s.ReferenceID).
-				SetRegularBattles(int(s.RegularBattles.Battles)).
-				SetRegularFrame(s.RegularBattles).
-				SetType(s.Type).Exec(ctx)
-			if err != nil {
-				errors[s.AccountID] = err
+	for _, snapshot := range snapshots {
+		// make a transaction per write to avoid locking for too long
+		err := c.withTx(ctx, func(tx *db.Tx) error {
+			for _, s := range snapshots {
+				err := c.db.AccountSnapshot.Create().
+					SetAccount(c.db.Account.GetX(ctx, s.AccountID)). // we assume the account exists here
+					SetCreatedAt(s.CreatedAt).
+					SetLastBattleTime(s.LastBattleTime).
+					SetRatingBattles(int(s.RatingBattles.Battles.Float())).
+					SetRatingFrame(s.RatingBattles).
+					SetReferenceID(s.ReferenceID).
+					SetRegularBattles(int(s.RegularBattles.Battles)).
+					SetRegularFrame(s.RegularBattles).
+					SetType(s.Type).Exec(ctx)
+				if err != nil {
+					errors[s.AccountID] = err
+				}
 			}
+			return nil
+		})
+		if err != nil {
+			errors[snapshot.AccountID] = err
 		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
 	}
 	if len(errors) > 0 {
 		return errors, nil

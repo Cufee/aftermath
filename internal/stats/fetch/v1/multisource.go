@@ -313,12 +313,11 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		defer group.Done()
 		s, err := c.database.GetAccountSnapshot(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
 		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s, Err: err}
-	}()
+		if err != nil {
+			return
+		}
 
-	group.Add(1)
-	go func() {
-		defer group.Done()
-		v, err := c.database.GetVehicleSnapshots(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
+		v, err := c.database.GetVehicleSnapshots(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(s.LastBattleTime.Add(time.Second)))
 		vehiclesSnapshots = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
 	}()
 
