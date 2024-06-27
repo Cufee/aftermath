@@ -2,7 +2,6 @@ package tasks
 
 import (
 	"context"
-	"strconv"
 	"strings"
 	"time"
 
@@ -17,35 +16,19 @@ import (
 func init() {
 	defaultHandlers[models.TaskTypeRecordSnapshots] = TaskHandler{
 		Process: func(ctx context.Context, client core.Client, task *models.Task) error {
-			if task.Data == nil {
-				return errors.New("no data provided")
-			}
-
-			triesLeft, err := strconv.Atoi(task.Data["triesLeft"])
-			if err != nil {
-				return errors.Wrap(err, "failed to parse tries left")
-			}
-			task.Data["triesLeft"] = strconv.Itoa(triesLeft - 1)
-
+			forceUpdate := task.Data["force"] == "true"
 			realm, ok := task.Data["realm"]
 			if !ok {
-				task.Data["triesLeft"] = "0" // do not retry
 				return errors.New("invalid realm")
 			}
-
 			if len(task.Targets) > 100 {
-				task.Data["triesLeft"] = "0" // do not retry
 				return errors.New("invalid targets length")
 			}
 			if len(task.Targets) < 1 {
-				task.Data["triesLeft"] = "0" // do not retry
 				return errors.New("invalid targets length")
 			}
 
-			forceUpdate := task.Data["force"] == "true"
-
 			log.Debug().Str("taskId", task.ID).Any("targets", task.Targets).Msg("started working on a session refresh task")
-
 			accountErrors, err := logic.RecordAccountSnapshots(ctx, client.Wargaming(), client.Database(), realm, forceUpdate, task.Targets...)
 			if err != nil {
 				return err
