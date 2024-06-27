@@ -61,6 +61,7 @@ func CreateCleanupTasks(client core.Client) error {
 	now := time.Now()
 
 	task := models.Task{
+		TriesLeft:      1,
 		Type:           models.TaskTypeDatabaseCleanup,
 		ReferenceID:    "database_cleanup",
 		ScheduledAfter: now,
