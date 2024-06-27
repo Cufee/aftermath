@@ -17,14 +17,14 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		renderUnratedVehiclesCount = 3 // minimum number of vehicle cards
 		// primary cards
 		// when there are some unrated battles or no battles at all
-		shouldRenderUnratedOverview = session.RegularBattles.Battles > 0 || session.RatingBattles.Battles == 0
+		shouldRenderUnratedOverview = session.RegularBattles.Battles > 0 || session.RatingBattles.Battles < 1
 		// when there are 3 vehicle cards and no rating overview cards or there are 6 vehicle cards and some rating battles
 		shouldRenderUnratedHighlights = (session.RegularBattles.Battles > 0 && session.RatingBattles.Battles < 1 && len(cards.Unrated.Vehicles) > renderUnratedVehiclesCount) ||
-			(session.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 6)
+			(session.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 3)
 		shouldRenderRatingOverview = session.RatingBattles.Battles > 0
-		shouldRenderRatingVehicles = len(cards.Unrated.Vehicles) == 0
+		shouldRenderRatingVehicles = session.RatingBattles.Battles > 0 && len(cards.Rating.Vehicles) > 0 && len(cards.Unrated.Vehicles) < 1
 		// secondary cards
-		shouldRenderUnratedVehicles = len(cards.Unrated.Vehicles) > 0
+		shouldRenderUnratedVehicles = session.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 0
 	)
 
 	// try to make the columns height roughly similar to primary column
