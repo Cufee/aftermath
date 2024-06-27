@@ -4704,7 +4704,7 @@ type CronTaskMutation struct {
 	last_run        *time.Time
 	logs            *[]models.TaskLog
 	appendlogs      []models.TaskLog
-	data            *map[string]interface{}
+	data            *map[string]string
 	clearedFields   map[string]struct{}
 	done            bool
 	oldValue        func(context.Context) (*CronTask, error)
@@ -5170,12 +5170,12 @@ func (m *CronTaskMutation) ResetLogs() {
 }
 
 // SetData sets the "data" field.
-func (m *CronTaskMutation) SetData(value map[string]interface{}) {
+func (m *CronTaskMutation) SetData(value map[string]string) {
 	m.data = &value
 }
 
 // Data returns the value of the "data" field in the mutation.
-func (m *CronTaskMutation) Data() (r map[string]interface{}, exists bool) {
+func (m *CronTaskMutation) Data() (r map[string]string, exists bool) {
 	v := m.data
 	if v == nil {
 		return
@@ -5186,7 +5186,7 @@ func (m *CronTaskMutation) Data() (r map[string]interface{}, exists bool) {
 // OldData returns the old "data" field's value of the CronTask entity.
 // If the CronTask object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CronTaskMutation) OldData(ctx context.Context) (v map[string]interface{}, err error) {
+func (m *CronTaskMutation) OldData(ctx context.Context) (v map[string]string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldData is only allowed on UpdateOne operations")
 	}
@@ -5400,7 +5400,7 @@ func (m *CronTaskMutation) SetField(name string, value ent.Value) error {
 		m.SetLogs(v)
 		return nil
 	case crontask.FieldData:
-		v, ok := value.(map[string]interface{})
+		v, ok := value.(map[string]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

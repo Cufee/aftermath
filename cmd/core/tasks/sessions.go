@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"context"
+	"strconv"
 	"strings"
 	"time"
 
@@ -15,29 +16,26 @@ import (
 
 func init() {
 	defaultHandlers[models.TaskTypeRecordSnapshots] = TaskHandler{
-		Process: func(client core.Client, task models.Task) (string, error) {
+		Process: func(ctx context.Context, client core.Client, task models.Task) (string, error) {
 			if task.Data == nil {
 				return "no data provided", errors.New("no data provided")
 			}
-			realm, ok := task.Data["realm"].(string)
+			realm, ok := task.Data["realm"]
 			if !ok {
-				task.Data["triesLeft"] = int64(0) // do not retry
+				task.Data["triesLeft"] = "0" // do not retry
 				return "invalid realm", errors.New("invalid realm")
 			}
 			if len(task.Targets) > 100 {
-				task.Data["triesLeft"] = int64(0) // do not retry
+				task.Data["triesLeft"] = "0" // do not retry
 				return "cannot process 100+ accounts at a time", errors.New("invalid targets length")
 			}
 			if len(task.Targets) < 1 {
-				task.Data["triesLeft"] = int64(0) // do not retry
+				task.Data["triesLeft"] = "0" // do not retry
 				return "target ids cannot be left blank", errors.New("invalid targets length")
 			}
-			forceUpdate, _ := task.Data["force"].(bool)
+			forceUpdate := task.Data["force"] == "true"
 
 			log.Debug().Str("taskId", task.ID).Any("targets", task.Targets).Msg("started working on a session refresh task")
-
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
-			defer cancel()
 
 			accountErrors, err := logic.RecordAccountSnapshots(ctx, client.Wargaming(), client.Database(), realm, forceUpdate, task.Targets...)
 			if err != nil {
@@ -53,11 +51,16 @@ func init() {
 			for id := range accountErrors {
 				task.Targets = append(task.Targets, id)
 			}
+			task.LogAttempt(models.TaskLog{
+				Timestamp: time.Now(),
+			})
+
 			return "retrying failed accounts", errors.New("some accounts failed")
 		},
 		ShouldRetry: func(task *models.Task) bool {
-			triesLeft, ok := task.Data["triesLeft"].(int64)
-			if !ok {
+			triesLeft, err := strconv.Atoi(task.Data["triesLeft"])
+			if err != nil {
+				log.Err(err).Str("taskId", task.ID).Msg("failed to parse task triesLeft")
 				return false
 			}
 			if triesLeft <= 0 {
@@ -65,7 +68,7 @@ func init() {
 			}
 
 			triesLeft -= 1
-			task.Data["triesLeft"] = triesLeft
+			task.Data["triesLeft"] = strconv.Itoa(triesLeft)
 			task.ScheduledAfter = time.Now().Add(5 * time.Minute) // Backoff for 5 minutes to avoid spamming
 			return true
 		},
@@ -78,9 +81,9 @@ func CreateRecordSnapshotsTasks(client core.Client, realm string) error {
 		Type:           models.TaskTypeRecordSnapshots,
 		ReferenceID:    "realm_" + realm,
 		ScheduledAfter: time.Now(),
-		Data: map[string]any{
+		Data: map[string]string{
 			"realm":     realm,
-			"triesLeft": int64(3),
+			"triesLeft": "3",
 		},
 	}
 

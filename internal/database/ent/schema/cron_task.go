@@ -26,7 +26,7 @@ func (CronTask) Fields() []ent.Field {
 		field.Time("last_run"),
 		//
 		field.JSON("logs", []models.TaskLog{}),
-		field.JSON("data", map[string]any{}),
+		field.JSON("data", map[string]string{}),
 	)
 }
 

@@ -92,7 +92,7 @@ func (ctc *CronTaskCreate) SetLogs(ml []models.TaskLog) *CronTaskCreate {
 }
 
 // SetData sets the "data" field.
-func (ctc *CronTaskCreate) SetData(m map[string]interface{}) *CronTaskCreate {
+func (ctc *CronTaskCreate) SetData(m map[string]string) *CronTaskCreate {
 	ctc.mutation.SetData(m)
 	return ctc
 }

@@ -70,7 +70,7 @@ type Task struct {
 	ScheduledAfter time.Time  `json:"scheduledAfter"`
 	LastRun        time.Time  `json:"lastRun"`
 
-	Data map[string]any `json:"data"`
+	Data map[string]string `json:"data"`
 }
 
 func (t *Task) LogAttempt(log TaskLog) {

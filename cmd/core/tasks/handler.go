@@ -1,13 +1,15 @@
 package tasks
 
 import (
+	"context"
+
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/internal/database/models"
 )
 
 type TaskHandler struct {
-	Process     func(client core.Client, task models.Task) (string, error)
-	ShouldRetry func(task *models.Task) bool
+	Process     func(context.Context, core.Client, models.Task) (string, error)
+	ShouldRetry func(*models.Task) bool
 }
 
 var defaultHandlers = make(map[models.TaskType]TaskHandler)
