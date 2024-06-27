@@ -36,7 +36,7 @@ func New(workerLimit int, newCoreClient func() (core.Client, error)) *queue {
 		handlers:      make(map[models.TaskType]tasks.TaskHandler),
 
 		workerLimit:   workerLimit,
-		workerTimeout: time.Second * 30,
+		workerTimeout: time.Second * 60, // a single cron scheduler cycle
 		workerLimiter: make(chan struct{}, workerLimit),
 
 		activeTasksMx: &sync.Mutex{},
@@ -123,19 +123,14 @@ func (q *queue) pullAndEnqueueTasks(ctx context.Context, db database.Client) err
 	}
 	defer q.queueLock.Unlock()
 
-	log.Debug().Msg("pulling available tasks into queue")
-
-	var tasksToEnqueue int
 	currentQueue := len(q.queued)
-	if q.workerLimit > currentQueue {
-		tasksToEnqueue = q.workerLimit - currentQueue
-	}
-
-	if tasksToEnqueue < 1 {
+	if q.workerLimit < currentQueue {
+		log.Debug().Msg("queue is full")
 		return ErrQueueFull
 	}
 
-	tasks, err := db.GetAndStartTasks(ctx, tasksToEnqueue)
+	log.Debug().Msg("pulling available tasks into queue")
+	tasks, err := db.GetAndStartTasks(ctx, q.workerLimit-currentQueue)
 	if err != nil && !database.IsNotFound(err) {
 		return err
 	}
@@ -223,7 +218,10 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 					return
 				}
 
-				msg, err := handler.Process(coreClient, task)
+				wctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
+				defer cancel()
+
+				msg, err := handler.Process(wctx, coreClient, task)
 				task.Status = models.TaskStatusComplete
 				l := models.TaskLog{
 					Timestamp: time.Now(),
@@ -239,10 +237,10 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 				}
 				task.LogAttempt(l)
 
-				wctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
+				uctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
 				defer cancel()
 
-				err = coreClient.Database().UpdateTasks(wctx, task)
+				err = coreClient.Database().UpdateTasks(uctx, task)
 				if err != nil {
 					log.Err(err).Msg("failed to update a task")
 				}

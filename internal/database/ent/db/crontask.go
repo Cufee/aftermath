@@ -38,7 +38,7 @@ type CronTask struct {
 	// Logs holds the value of the "logs" field.
 	Logs []models.TaskLog `json:"logs,omitempty"`
 	// Data holds the value of the "data" field.
-	Data         map[string]interface{} `json:"data,omitempty"`
+	Data         map[string]string `json:"data,omitempty"`
 	selectValues sql.SelectValues
 }
 

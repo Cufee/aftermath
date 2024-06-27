@@ -132,7 +132,7 @@ func (ctu *CronTaskUpdate) AppendLogs(ml []models.TaskLog) *CronTaskUpdate {
 }
 
 // SetData sets the "data" field.
-func (ctu *CronTaskUpdate) SetData(m map[string]interface{}) *CronTaskUpdate {
+func (ctu *CronTaskUpdate) SetData(m map[string]string) *CronTaskUpdate {
 	ctu.mutation.SetData(m)
 	return ctu
 }
@@ -376,7 +376,7 @@ func (ctuo *CronTaskUpdateOne) AppendLogs(ml []models.TaskLog) *CronTaskUpdateOn
 }
 
 // SetData sets the "data" field.
-func (ctuo *CronTaskUpdateOne) SetData(m map[string]interface{}) *CronTaskUpdateOne {
+func (ctuo *CronTaskUpdateOne) SetData(m map[string]string) *CronTaskUpdateOne {
 	ctuo.mutation.SetData(m)
 	return ctuo
 }
