@@ -88,8 +88,9 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	close(vehicleCh)
 
 	var accountErrors = make(map[string]error)
-	var accountUpdates []models.Account
-	var snapshots []models.AccountSnapshot
+	var accountUpdates = make(map[string]models.Account)
+
+	var accountSnapshots []models.AccountSnapshot
 	var vehicleSnapshots = make(map[string][]models.VehicleSnapshot)
 	for result := range vehicleCh {
 		// there is only 1 key in this map
@@ -109,8 +110,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			}
 
 			stats := fetch.WargamingToStats(realm, accounts[id], clans[id], vehicles)
-			accountUpdates = append(accountUpdates, stats.Account)
-			snapshots = append(snapshots, models.AccountSnapshot{
+			accountSnapshots = append(accountSnapshots, models.AccountSnapshot{
 				Type:           models.SnapshotTypeDaily,
 				CreatedAt:      createdAt,
 				AccountID:      stats.Account.ID,
@@ -119,6 +119,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 				RatingBattles:  stats.RatingBattles.StatsFrame,
 				RegularBattles: stats.RegularBattles.StatsFrame,
 			})
+			accountUpdates[id] = stats.Account
 
 			if len(vehicles) < 1 {
 				continue
@@ -143,37 +144,40 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 	}
 
-	aErr, err := dbClient.CreateAccountSnapshots(ctx, snapshots...)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to save account snapshots to database")
-	}
-	for id, err := range aErr {
-		if err != nil {
-			accountErrors[id] = err
+	for _, accountSnapshot := range accountSnapshots {
+		vehicles, ok := vehicleSnapshots[accountSnapshot.AccountID]
+		if !ok {
+			accountErrors[accountSnapshot.AccountID] = errors.New("account missing vehicle snapshots")
+			continue
 		}
-	}
 
-	for accountId, vehicles := range vehicleSnapshots {
-		vErr, err := dbClient.CreateAccountVehicleSnapshots(ctx, accountId, vehicles...)
+		// save all vehicle snapshots
+		vErr, err := dbClient.CreateAccountVehicleSnapshots(ctx, accountSnapshot.AccountID, vehicles...)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to save vehicle snapshots to database")
+			accountErrors[accountSnapshot.AccountID] = err
+			continue
 		}
 		if len(vErr) > 0 {
-			accountErrors[accountId] = errors.Errorf("failed to insert %d vehicle snapshots", len(vErr))
+			accountErrors[accountSnapshot.AccountID] = errors.Errorf("failed to insert %d vehicle snapshots", len(vErr))
+			continue
 		}
-	}
 
-	uErr, err := dbClient.UpsertAccounts(ctx, accountUpdates)
-	// these errors are not critical, we log and continue
-	if err != nil {
-		log.Err(err).Msg("failed to upsert accounts")
-	}
-	if len(uErr) > 0 {
-		var errors = make(map[string]string)
-		for id, err := range uErr {
-			errors[id] = err.Error()
+		// save account snapshot
+		aErr, err := dbClient.CreateAccountSnapshots(ctx, accountSnapshot)
+		if err != nil {
+			accountErrors[accountSnapshot.AccountID] = errors.Wrap(err, "failed to save account snapshots to database")
+			continue
 		}
-		log.Error().Any("errors", errors).Msg("failed to upsert some accounts")
+		if err := aErr[accountSnapshot.AccountID]; err != nil {
+			accountErrors[accountSnapshot.AccountID] = errors.Wrap(err, "failed to save account snapshots to database")
+			continue
+		}
+
+		// update account cache, non critical and should not fail the flow
+		_, err = dbClient.UpsertAccounts(ctx, []models.Account{accountUpdates[accountSnapshot.AccountID]})
+		if err != nil {
+			log.Err(err).Str("accountId", accountSnapshot.AccountID).Msg("failed to upsert account")
+		}
 	}
 
 	return accountErrors, nil
