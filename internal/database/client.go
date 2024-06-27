@@ -130,14 +130,36 @@ func (c *client) Disconnect() error {
 	return c.db.Close()
 }
 
-func NewSQLiteClient(filePath string) (*client, error) {
+type clientOptions struct {
+	debug bool
+}
+
+type ClientOption func(*clientOptions)
+
+func WithDebug() func(*clientOptions) {
+	return func(opts *clientOptions) {
+		opts.debug = true
+	}
+}
+
+func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Fatal().Interface("error", r).Str("stack", string(debug.Stack())).Msg("NewSQLiteClient panic")
 		}
 	}()
 
-	c, err := db.Open("sqlite3", fmt.Sprintf("file://%s?_fk=1", filePath))
+	opts := clientOptions{}
+	for _, apply := range options {
+		apply(&opts)
+	}
+
+	var dbOptions []db.Option
+	if opts.debug {
+		dbOptions = append(dbOptions, db.Debug())
+	}
+
+	c, err := db.Open("sqlite3", fmt.Sprintf("file://%s?_fk=1", filePath), dbOptions...)
 	if err != nil {
 		return nil, err
 	}

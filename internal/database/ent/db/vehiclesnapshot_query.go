@@ -23,6 +23,7 @@ type VehicleSnapshotQuery struct {
 	inters      []Interceptor
 	predicates  []predicate.VehicleSnapshot
 	withAccount *AccountQuery
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -297,7 +298,7 @@ func (vsq *VehicleSnapshotQuery) WithAccount(opts ...func(*AccountQuery)) *Vehic
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -320,7 +321,7 @@ func (vsq *VehicleSnapshotQuery) GroupBy(field string, fields ...string) *Vehicl
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.VehicleSnapshot.Query().
@@ -382,6 +383,9 @@ func (vsq *VehicleSnapshotQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(vsq.modifiers) > 0 {
+		_spec.Modifiers = vsq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -432,6 +436,9 @@ func (vsq *VehicleSnapshotQuery) loadAccount(ctx context.Context, query *Account
 
 func (vsq *VehicleSnapshotQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := vsq.querySpec()
+	if len(vsq.modifiers) > 0 {
+		_spec.Modifiers = vsq.modifiers
+	}
 	_spec.Node.Columns = vsq.ctx.Fields
 	if len(vsq.ctx.Fields) > 0 {
 		_spec.Unique = vsq.ctx.Unique != nil && *vsq.ctx.Unique
@@ -497,6 +504,9 @@ func (vsq *VehicleSnapshotQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if vsq.ctx.Unique != nil && *vsq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range vsq.modifiers {
+		m(selector)
+	}
 	for _, p := range vsq.predicates {
 		p(selector)
 	}
@@ -512,6 +522,12 @@ func (vsq *VehicleSnapshotQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (vsq *VehicleSnapshotQuery) Modify(modifiers ...func(s *sql.Selector)) *VehicleSnapshotSelect {
+	vsq.modifiers = append(vsq.modifiers, modifiers...)
+	return vsq.Select()
 }
 
 // VehicleSnapshotGroupBy is the group-by builder for VehicleSnapshot entities.
@@ -602,4 +618,10 @@ func (vss *VehicleSnapshotSelect) sqlScan(ctx context.Context, root *VehicleSnap
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (vss *VehicleSnapshotSelect) Modify(modifiers ...func(s *sql.Selector)) *VehicleSnapshotSelect {
+	vss.modifiers = append(vss.modifiers, modifiers...)
+	return vss
 }

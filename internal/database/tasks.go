@@ -15,14 +15,14 @@ func toCronTask(record *db.CronTask) models.Task {
 	return models.Task{
 		ID:             record.ID,
 		Type:           record.Type,
-		CreatedAt:      time.Unix(record.CreatedAt, 0),
-		UpdatedAt:      time.Unix(record.UpdatedAt, 0),
+		CreatedAt:      record.CreatedAt,
+		UpdatedAt:      record.UpdatedAt,
 		ReferenceID:    record.ReferenceID,
 		Targets:        record.Targets,
 		Logs:           record.Logs,
 		Status:         record.Status,
-		ScheduledAfter: time.Unix(record.ScheduledAfter, 0),
-		LastRun:        time.Unix(record.LastRun, 0),
+		ScheduledAfter: record.ScheduledAfter,
+		LastRun:        record.LastRun,
 		Data:           record.Data,
 	}
 }
@@ -34,7 +34,7 @@ func (c *client) GetStaleTasks(ctx context.Context, limit int) ([]models.Task, e
 	records, err := c.db.CronTask.Query().
 		Where(
 			crontask.StatusEQ(models.TaskStatusInProgress),
-			crontask.LastRunLT(time.Now().Add(time.Hour*-1).Unix()),
+			crontask.LastRunLT(time.Now().Add(time.Hour*-1)),
 		).
 		Order(crontask.ByScheduledAfter(sql.OrderAsc())).
 		Limit(limit).
@@ -56,7 +56,7 @@ Returns all tasks that were created after createdAfter, sorted by ScheduledAfter
 */
 func (c *client) GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...models.TaskStatus) ([]models.Task, error) {
 	var where []predicate.CronTask
-	where = append(where, crontask.CreatedAtGT(createdAfter.Unix()))
+	where = append(where, crontask.CreatedAtGT(createdAfter))
 	if len(status) > 0 {
 		where = append(where, crontask.StatusIn(status...))
 	}
@@ -84,7 +84,7 @@ func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task
 
 	var tasks []models.Task
 	return tasks, c.withTx(ctx, func(tx *db.Tx) error {
-		records, err := tx.CronTask.Query().Where(crontask.StatusEQ(models.TaskStatusScheduled), crontask.ScheduledAfterLT(time.Now().Unix())).Order(crontask.ByScheduledAfter(sql.OrderAsc())).Limit(limit).All(ctx)
+		records, err := tx.CronTask.Query().Where(crontask.StatusEQ(models.TaskStatusScheduled), crontask.ScheduledAfterLT(time.Now())).Order(crontask.ByScheduledAfter(sql.OrderAsc())).Limit(limit).All(ctx)
 		if err != nil {
 			return err
 		}
@@ -156,9 +156,9 @@ func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
 					SetLogs(t.Logs).
 					SetStatus(t.Status).
 					SetTargets(t.Targets).
-					SetLastRun(t.LastRun.Unix()).
+					SetLastRun(t.LastRun).
 					SetReferenceID(t.ReferenceID).
-					SetScheduledAfter(t.ScheduledAfter.Unix()),
+					SetScheduledAfter(t.ScheduledAfter),
 			)
 		}
 		return c.db.CronTask.CreateBulk(inserts...).Exec(ctx)
@@ -202,8 +202,8 @@ func (c *client) UpdateTasks(ctx context.Context, tasks ...models.Task) error {
 				SetLogs(t.Logs).
 				SetStatus(t.Status).
 				SetTargets(t.Targets).
-				SetLastRun(t.LastRun.Unix()).
-				SetScheduledAfter(t.ScheduledAfter.Unix()).
+				SetLastRun(t.LastRun).
+				SetScheduledAfter(t.ScheduledAfter).
 				Exec(ctx)
 			if err != nil {
 				return err

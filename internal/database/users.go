@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"time"
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
@@ -44,7 +43,7 @@ func toUserSubscription(record *db.UserSubscription) models.UserSubscription {
 		Type:        record.Type,
 		UserID:      record.UserID,
 		ReferenceID: record.ReferenceID,
-		ExpiresAt:   time.Unix(record.ExpiresAt, 0),
+		ExpiresAt:   record.ExpiresAt,
 		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
 	}
 }
@@ -59,8 +58,8 @@ func toUserContent(record *db.UserContent) models.UserContent {
 		Value: record.Value,
 		Meta:  record.Metadata,
 
-		CreatedAt: time.Unix(record.CreatedAt, 0),
-		UpdatedAt: time.Unix(record.UpdatedAt, 0),
+		CreatedAt: record.CreatedAt,
+		UpdatedAt: record.UpdatedAt,
 	}
 }
 

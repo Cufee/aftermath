@@ -5,6 +5,7 @@ package db
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -17,9 +18,9 @@ type ApplicationCommand struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Version holds the value of the "version" field.
@@ -34,10 +35,10 @@ func (*ApplicationCommand) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case applicationcommand.FieldCreatedAt, applicationcommand.FieldUpdatedAt:
-			values[i] = new(sql.NullInt64)
 		case applicationcommand.FieldID, applicationcommand.FieldName, applicationcommand.FieldVersion, applicationcommand.FieldOptionsHash:
 			values[i] = new(sql.NullString)
+		case applicationcommand.FieldCreatedAt, applicationcommand.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -60,16 +61,16 @@ func (ac *ApplicationCommand) assignValues(columns []string, values []any) error
 				ac.ID = value.String
 			}
 		case applicationcommand.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ac.CreatedAt = value.Int64
+				ac.CreatedAt = value.Time
 			}
 		case applicationcommand.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				ac.UpdatedAt = value.Int64
+				ac.UpdatedAt = value.Time
 			}
 		case applicationcommand.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -126,10 +127,10 @@ func (ac *ApplicationCommand) String() string {
 	builder.WriteString("ApplicationCommand(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ac.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", ac.CreatedAt))
+	builder.WriteString(ac.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", ac.UpdatedAt))
+	builder.WriteString(ac.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(ac.Name)

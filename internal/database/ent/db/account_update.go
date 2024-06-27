@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -21,8 +22,9 @@ import (
 // AccountUpdate is the builder for updating Account entities.
 type AccountUpdate struct {
 	config
-	hooks    []Hook
-	mutation *AccountMutation
+	hooks     []Hook
+	mutation  *AccountMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the AccountUpdate builder.
@@ -32,57 +34,36 @@ func (au *AccountUpdate) Where(ps ...predicate.Account) *AccountUpdate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (au *AccountUpdate) SetUpdatedAt(i int64) *AccountUpdate {
-	au.mutation.ResetUpdatedAt()
-	au.mutation.SetUpdatedAt(i)
-	return au
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (au *AccountUpdate) AddUpdatedAt(i int64) *AccountUpdate {
-	au.mutation.AddUpdatedAt(i)
+func (au *AccountUpdate) SetUpdatedAt(t time.Time) *AccountUpdate {
+	au.mutation.SetUpdatedAt(t)
 	return au
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (au *AccountUpdate) SetLastBattleTime(i int64) *AccountUpdate {
-	au.mutation.ResetLastBattleTime()
-	au.mutation.SetLastBattleTime(i)
+func (au *AccountUpdate) SetLastBattleTime(t time.Time) *AccountUpdate {
+	au.mutation.SetLastBattleTime(t)
 	return au
 }
 
 // SetNillableLastBattleTime sets the "last_battle_time" field if the given value is not nil.
-func (au *AccountUpdate) SetNillableLastBattleTime(i *int64) *AccountUpdate {
-	if i != nil {
-		au.SetLastBattleTime(*i)
+func (au *AccountUpdate) SetNillableLastBattleTime(t *time.Time) *AccountUpdate {
+	if t != nil {
+		au.SetLastBattleTime(*t)
 	}
-	return au
-}
-
-// AddLastBattleTime adds i to the "last_battle_time" field.
-func (au *AccountUpdate) AddLastBattleTime(i int64) *AccountUpdate {
-	au.mutation.AddLastBattleTime(i)
 	return au
 }
 
 // SetAccountCreatedAt sets the "account_created_at" field.
-func (au *AccountUpdate) SetAccountCreatedAt(i int64) *AccountUpdate {
-	au.mutation.ResetAccountCreatedAt()
-	au.mutation.SetAccountCreatedAt(i)
+func (au *AccountUpdate) SetAccountCreatedAt(t time.Time) *AccountUpdate {
+	au.mutation.SetAccountCreatedAt(t)
 	return au
 }
 
 // SetNillableAccountCreatedAt sets the "account_created_at" field if the given value is not nil.
-func (au *AccountUpdate) SetNillableAccountCreatedAt(i *int64) *AccountUpdate {
-	if i != nil {
-		au.SetAccountCreatedAt(*i)
+func (au *AccountUpdate) SetNillableAccountCreatedAt(t *time.Time) *AccountUpdate {
+	if t != nil {
+		au.SetAccountCreatedAt(*t)
 	}
-	return au
-}
-
-// AddAccountCreatedAt adds i to the "account_created_at" field.
-func (au *AccountUpdate) AddAccountCreatedAt(i int64) *AccountUpdate {
-	au.mutation.AddAccountCreatedAt(i)
 	return au
 }
 
@@ -323,6 +304,12 @@ func (au *AccountUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (au *AccountUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AccountUpdate {
+	au.modifiers = append(au.modifiers, modifiers...)
+	return au
+}
+
 func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := au.check(); err != nil {
 		return n, err
@@ -336,22 +323,13 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := au.mutation.UpdatedAt(); ok {
-		_spec.SetField(account.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := au.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(account.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(account.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := au.mutation.LastBattleTime(); ok {
-		_spec.SetField(account.FieldLastBattleTime, field.TypeInt64, value)
-	}
-	if value, ok := au.mutation.AddedLastBattleTime(); ok {
-		_spec.AddField(account.FieldLastBattleTime, field.TypeInt64, value)
+		_spec.SetField(account.FieldLastBattleTime, field.TypeTime, value)
 	}
 	if value, ok := au.mutation.AccountCreatedAt(); ok {
-		_spec.SetField(account.FieldAccountCreatedAt, field.TypeInt64, value)
-	}
-	if value, ok := au.mutation.AddedAccountCreatedAt(); ok {
-		_spec.AddField(account.FieldAccountCreatedAt, field.TypeInt64, value)
+		_spec.SetField(account.FieldAccountCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := au.mutation.Realm(); ok {
 		_spec.SetField(account.FieldRealm, field.TypeString, value)
@@ -526,6 +504,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(au.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{account.Label}
@@ -541,63 +520,43 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // AccountUpdateOne is the builder for updating a single Account entity.
 type AccountUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *AccountMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *AccountMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (auo *AccountUpdateOne) SetUpdatedAt(i int64) *AccountUpdateOne {
-	auo.mutation.ResetUpdatedAt()
-	auo.mutation.SetUpdatedAt(i)
-	return auo
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (auo *AccountUpdateOne) AddUpdatedAt(i int64) *AccountUpdateOne {
-	auo.mutation.AddUpdatedAt(i)
+func (auo *AccountUpdateOne) SetUpdatedAt(t time.Time) *AccountUpdateOne {
+	auo.mutation.SetUpdatedAt(t)
 	return auo
 }
 
 // SetLastBattleTime sets the "last_battle_time" field.
-func (auo *AccountUpdateOne) SetLastBattleTime(i int64) *AccountUpdateOne {
-	auo.mutation.ResetLastBattleTime()
-	auo.mutation.SetLastBattleTime(i)
+func (auo *AccountUpdateOne) SetLastBattleTime(t time.Time) *AccountUpdateOne {
+	auo.mutation.SetLastBattleTime(t)
 	return auo
 }
 
 // SetNillableLastBattleTime sets the "last_battle_time" field if the given value is not nil.
-func (auo *AccountUpdateOne) SetNillableLastBattleTime(i *int64) *AccountUpdateOne {
-	if i != nil {
-		auo.SetLastBattleTime(*i)
+func (auo *AccountUpdateOne) SetNillableLastBattleTime(t *time.Time) *AccountUpdateOne {
+	if t != nil {
+		auo.SetLastBattleTime(*t)
 	}
-	return auo
-}
-
-// AddLastBattleTime adds i to the "last_battle_time" field.
-func (auo *AccountUpdateOne) AddLastBattleTime(i int64) *AccountUpdateOne {
-	auo.mutation.AddLastBattleTime(i)
 	return auo
 }
 
 // SetAccountCreatedAt sets the "account_created_at" field.
-func (auo *AccountUpdateOne) SetAccountCreatedAt(i int64) *AccountUpdateOne {
-	auo.mutation.ResetAccountCreatedAt()
-	auo.mutation.SetAccountCreatedAt(i)
+func (auo *AccountUpdateOne) SetAccountCreatedAt(t time.Time) *AccountUpdateOne {
+	auo.mutation.SetAccountCreatedAt(t)
 	return auo
 }
 
 // SetNillableAccountCreatedAt sets the "account_created_at" field if the given value is not nil.
-func (auo *AccountUpdateOne) SetNillableAccountCreatedAt(i *int64) *AccountUpdateOne {
-	if i != nil {
-		auo.SetAccountCreatedAt(*i)
+func (auo *AccountUpdateOne) SetNillableAccountCreatedAt(t *time.Time) *AccountUpdateOne {
+	if t != nil {
+		auo.SetAccountCreatedAt(*t)
 	}
-	return auo
-}
-
-// AddAccountCreatedAt adds i to the "account_created_at" field.
-func (auo *AccountUpdateOne) AddAccountCreatedAt(i int64) *AccountUpdateOne {
-	auo.mutation.AddAccountCreatedAt(i)
 	return auo
 }
 
@@ -851,6 +810,12 @@ func (auo *AccountUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (auo *AccountUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AccountUpdateOne {
+	auo.modifiers = append(auo.modifiers, modifiers...)
+	return auo
+}
+
 func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err error) {
 	if err := auo.check(); err != nil {
 		return _node, err
@@ -881,22 +846,13 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 	}
 	if value, ok := auo.mutation.UpdatedAt(); ok {
-		_spec.SetField(account.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := auo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(account.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(account.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := auo.mutation.LastBattleTime(); ok {
-		_spec.SetField(account.FieldLastBattleTime, field.TypeInt64, value)
-	}
-	if value, ok := auo.mutation.AddedLastBattleTime(); ok {
-		_spec.AddField(account.FieldLastBattleTime, field.TypeInt64, value)
+		_spec.SetField(account.FieldLastBattleTime, field.TypeTime, value)
 	}
 	if value, ok := auo.mutation.AccountCreatedAt(); ok {
-		_spec.SetField(account.FieldAccountCreatedAt, field.TypeInt64, value)
-	}
-	if value, ok := auo.mutation.AddedAccountCreatedAt(); ok {
-		_spec.AddField(account.FieldAccountCreatedAt, field.TypeInt64, value)
+		_spec.SetField(account.FieldAccountCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := auo.mutation.Realm(); ok {
 		_spec.SetField(account.FieldRealm, field.TypeString, value)
@@ -1071,6 +1027,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.AddModifiers(auo.modifiers...)
 	_node = &Account{config: auo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

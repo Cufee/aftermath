@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,9 +19,9 @@ type Vehicle struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Tier holds the value of the "tier" field.
 	Tier int `json:"tier,omitempty"`
 	// LocalizedNames holds the value of the "localized_names" field.
@@ -35,10 +36,12 @@ func (*Vehicle) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case vehicle.FieldLocalizedNames:
 			values[i] = new([]byte)
-		case vehicle.FieldCreatedAt, vehicle.FieldUpdatedAt, vehicle.FieldTier:
+		case vehicle.FieldTier:
 			values[i] = new(sql.NullInt64)
 		case vehicle.FieldID:
 			values[i] = new(sql.NullString)
+		case vehicle.FieldCreatedAt, vehicle.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -61,16 +64,16 @@ func (v *Vehicle) assignValues(columns []string, values []any) error {
 				v.ID = value.String
 			}
 		case vehicle.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				v.CreatedAt = value.Int64
+				v.CreatedAt = value.Time
 			}
 		case vehicle.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				v.UpdatedAt = value.Int64
+				v.UpdatedAt = value.Time
 			}
 		case vehicle.FieldTier:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -123,10 +126,10 @@ func (v *Vehicle) String() string {
 	builder.WriteString("Vehicle(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", v.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", v.CreatedAt))
+	builder.WriteString(v.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", v.UpdatedAt))
+	builder.WriteString(v.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("tier=")
 	builder.WriteString(fmt.Sprintf("%v", v.Tier))

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -20,29 +21,29 @@ type VehicleCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (vc *VehicleCreate) SetCreatedAt(i int64) *VehicleCreate {
-	vc.mutation.SetCreatedAt(i)
+func (vc *VehicleCreate) SetCreatedAt(t time.Time) *VehicleCreate {
+	vc.mutation.SetCreatedAt(t)
 	return vc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (vc *VehicleCreate) SetNillableCreatedAt(i *int64) *VehicleCreate {
-	if i != nil {
-		vc.SetCreatedAt(*i)
+func (vc *VehicleCreate) SetNillableCreatedAt(t *time.Time) *VehicleCreate {
+	if t != nil {
+		vc.SetCreatedAt(*t)
 	}
 	return vc
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (vc *VehicleCreate) SetUpdatedAt(i int64) *VehicleCreate {
-	vc.mutation.SetUpdatedAt(i)
+func (vc *VehicleCreate) SetUpdatedAt(t time.Time) *VehicleCreate {
+	vc.mutation.SetUpdatedAt(t)
 	return vc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (vc *VehicleCreate) SetNillableUpdatedAt(i *int64) *VehicleCreate {
-	if i != nil {
-		vc.SetUpdatedAt(*i)
+func (vc *VehicleCreate) SetNillableUpdatedAt(t *time.Time) *VehicleCreate {
+	if t != nil {
+		vc.SetUpdatedAt(*t)
 	}
 	return vc
 }
@@ -165,11 +166,11 @@ func (vc *VehicleCreate) createSpec() (*Vehicle, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := vc.mutation.CreatedAt(); ok {
-		_spec.SetField(vehicle.FieldCreatedAt, field.TypeInt64, value)
+		_spec.SetField(vehicle.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := vc.mutation.UpdatedAt(); ok {
-		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(vehicle.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := vc.mutation.Tier(); ok {

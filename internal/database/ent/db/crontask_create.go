@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -21,29 +22,29 @@ type CronTaskCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (ctc *CronTaskCreate) SetCreatedAt(i int64) *CronTaskCreate {
-	ctc.mutation.SetCreatedAt(i)
+func (ctc *CronTaskCreate) SetCreatedAt(t time.Time) *CronTaskCreate {
+	ctc.mutation.SetCreatedAt(t)
 	return ctc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ctc *CronTaskCreate) SetNillableCreatedAt(i *int64) *CronTaskCreate {
-	if i != nil {
-		ctc.SetCreatedAt(*i)
+func (ctc *CronTaskCreate) SetNillableCreatedAt(t *time.Time) *CronTaskCreate {
+	if t != nil {
+		ctc.SetCreatedAt(*t)
 	}
 	return ctc
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ctc *CronTaskCreate) SetUpdatedAt(i int64) *CronTaskCreate {
-	ctc.mutation.SetUpdatedAt(i)
+func (ctc *CronTaskCreate) SetUpdatedAt(t time.Time) *CronTaskCreate {
+	ctc.mutation.SetUpdatedAt(t)
 	return ctc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ctc *CronTaskCreate) SetNillableUpdatedAt(i *int64) *CronTaskCreate {
-	if i != nil {
-		ctc.SetUpdatedAt(*i)
+func (ctc *CronTaskCreate) SetNillableUpdatedAt(t *time.Time) *CronTaskCreate {
+	if t != nil {
+		ctc.SetUpdatedAt(*t)
 	}
 	return ctc
 }
@@ -73,14 +74,14 @@ func (ctc *CronTaskCreate) SetStatus(ms models.TaskStatus) *CronTaskCreate {
 }
 
 // SetScheduledAfter sets the "scheduled_after" field.
-func (ctc *CronTaskCreate) SetScheduledAfter(i int64) *CronTaskCreate {
-	ctc.mutation.SetScheduledAfter(i)
+func (ctc *CronTaskCreate) SetScheduledAfter(t time.Time) *CronTaskCreate {
+	ctc.mutation.SetScheduledAfter(t)
 	return ctc
 }
 
 // SetLastRun sets the "last_run" field.
-func (ctc *CronTaskCreate) SetLastRun(i int64) *CronTaskCreate {
-	ctc.mutation.SetLastRun(i)
+func (ctc *CronTaskCreate) SetLastRun(t time.Time) *CronTaskCreate {
+	ctc.mutation.SetLastRun(t)
 	return ctc
 }
 
@@ -242,11 +243,11 @@ func (ctc *CronTaskCreate) createSpec() (*CronTask, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := ctc.mutation.CreatedAt(); ok {
-		_spec.SetField(crontask.FieldCreatedAt, field.TypeInt64, value)
+		_spec.SetField(crontask.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := ctc.mutation.UpdatedAt(); ok {
-		_spec.SetField(crontask.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(crontask.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := ctc.mutation.GetType(); ok {
@@ -266,11 +267,11 @@ func (ctc *CronTaskCreate) createSpec() (*CronTask, *sqlgraph.CreateSpec) {
 		_node.Status = value
 	}
 	if value, ok := ctc.mutation.ScheduledAfter(); ok {
-		_spec.SetField(crontask.FieldScheduledAfter, field.TypeInt64, value)
+		_spec.SetField(crontask.FieldScheduledAfter, field.TypeTime, value)
 		_node.ScheduledAfter = value
 	}
 	if value, ok := ctc.mutation.LastRun(); ok {
-		_spec.SetField(crontask.FieldLastRun, field.TypeInt64, value)
+		_spec.SetField(crontask.FieldLastRun, field.TypeTime, value)
 		_node.LastRun = value
 	}
 	if value, ok := ctc.mutation.Logs(); ok {

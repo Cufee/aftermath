@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
@@ -16,8 +15,8 @@ func toAccount(model *db.Account) models.Account {
 		Realm:          model.Realm,
 		Nickname:       model.Nickname,
 		Private:        model.Private,
-		CreatedAt:      time.Unix(int64(model.AccountCreatedAt), 0),
-		LastBattleTime: time.Unix(int64(model.LastBattleTime), 0),
+		CreatedAt:      model.AccountCreatedAt,
+		LastBattleTime: model.LastBattleTime,
 	}
 	if model.Edges.Clan != nil {
 		account.ClanID = model.Edges.Clan.ID
@@ -90,7 +89,7 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []models.Account) 
 				SetRealm(strings.ToUpper(update.Realm)).
 				SetNickname(update.Nickname).
 				SetPrivate(update.Private).
-				SetLastBattleTime(update.LastBattleTime.Unix()).
+				SetLastBattleTime(update.LastBattleTime).
 				Exec(ctx)
 			if err != nil {
 				errors[r.ID] = err
@@ -106,8 +105,8 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []models.Account) 
 				SetRealm(strings.ToUpper(a.Realm)).
 				SetNickname(a.Nickname).
 				SetPrivate(a.Private).
-				SetAccountCreatedAt(a.CreatedAt.Unix()).
-				SetLastBattleTime(a.LastBattleTime.Unix()),
+				SetAccountCreatedAt(a.CreatedAt).
+				SetLastBattleTime(a.LastBattleTime),
 			)
 		}
 

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -17,8 +18,9 @@ import (
 // AppConfigurationUpdate is the builder for updating AppConfiguration entities.
 type AppConfigurationUpdate struct {
 	config
-	hooks    []Hook
-	mutation *AppConfigurationMutation
+	hooks     []Hook
+	mutation  *AppConfigurationMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the AppConfigurationUpdate builder.
@@ -28,15 +30,8 @@ func (acu *AppConfigurationUpdate) Where(ps ...predicate.AppConfiguration) *AppC
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acu *AppConfigurationUpdate) SetUpdatedAt(i int64) *AppConfigurationUpdate {
-	acu.mutation.ResetUpdatedAt()
-	acu.mutation.SetUpdatedAt(i)
-	return acu
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (acu *AppConfigurationUpdate) AddUpdatedAt(i int64) *AppConfigurationUpdate {
-	acu.mutation.AddUpdatedAt(i)
+func (acu *AppConfigurationUpdate) SetUpdatedAt(t time.Time) *AppConfigurationUpdate {
+	acu.mutation.SetUpdatedAt(t)
 	return acu
 }
 
@@ -123,6 +118,12 @@ func (acu *AppConfigurationUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (acu *AppConfigurationUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AppConfigurationUpdate {
+	acu.modifiers = append(acu.modifiers, modifiers...)
+	return acu
+}
+
 func (acu *AppConfigurationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := acu.check(); err != nil {
 		return n, err
@@ -136,10 +137,7 @@ func (acu *AppConfigurationUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 	}
 	if value, ok := acu.mutation.UpdatedAt(); ok {
-		_spec.SetField(appconfiguration.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := acu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(appconfiguration.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(appconfiguration.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := acu.mutation.Key(); ok {
 		_spec.SetField(appconfiguration.FieldKey, field.TypeString, value)
@@ -153,6 +151,7 @@ func (acu *AppConfigurationUpdate) sqlSave(ctx context.Context) (n int, err erro
 	if acu.mutation.MetadataCleared() {
 		_spec.ClearField(appconfiguration.FieldMetadata, field.TypeJSON)
 	}
+	_spec.AddModifiers(acu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, acu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{appconfiguration.Label}
@@ -168,21 +167,15 @@ func (acu *AppConfigurationUpdate) sqlSave(ctx context.Context) (n int, err erro
 // AppConfigurationUpdateOne is the builder for updating a single AppConfiguration entity.
 type AppConfigurationUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *AppConfigurationMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *AppConfigurationMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acuo *AppConfigurationUpdateOne) SetUpdatedAt(i int64) *AppConfigurationUpdateOne {
-	acuo.mutation.ResetUpdatedAt()
-	acuo.mutation.SetUpdatedAt(i)
-	return acuo
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (acuo *AppConfigurationUpdateOne) AddUpdatedAt(i int64) *AppConfigurationUpdateOne {
-	acuo.mutation.AddUpdatedAt(i)
+func (acuo *AppConfigurationUpdateOne) SetUpdatedAt(t time.Time) *AppConfigurationUpdateOne {
+	acuo.mutation.SetUpdatedAt(t)
 	return acuo
 }
 
@@ -282,6 +275,12 @@ func (acuo *AppConfigurationUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (acuo *AppConfigurationUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AppConfigurationUpdateOne {
+	acuo.modifiers = append(acuo.modifiers, modifiers...)
+	return acuo
+}
+
 func (acuo *AppConfigurationUpdateOne) sqlSave(ctx context.Context) (_node *AppConfiguration, err error) {
 	if err := acuo.check(); err != nil {
 		return _node, err
@@ -312,10 +311,7 @@ func (acuo *AppConfigurationUpdateOne) sqlSave(ctx context.Context) (_node *AppC
 		}
 	}
 	if value, ok := acuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(appconfiguration.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := acuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(appconfiguration.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(appconfiguration.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := acuo.mutation.Key(); ok {
 		_spec.SetField(appconfiguration.FieldKey, field.TypeString, value)
@@ -329,6 +325,7 @@ func (acuo *AppConfigurationUpdateOne) sqlSave(ctx context.Context) (_node *AppC
 	if acuo.mutation.MetadataCleared() {
 		_spec.ClearField(appconfiguration.FieldMetadata, field.TypeJSON)
 	}
+	_spec.AddModifiers(acuo.modifiers...)
 	_node = &AppConfiguration{config: acuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

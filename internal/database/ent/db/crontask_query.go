@@ -21,6 +21,7 @@ type CronTaskQuery struct {
 	order      []crontask.OrderOption
 	inters     []Interceptor
 	predicates []predicate.CronTask
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -261,7 +262,7 @@ func (ctq *CronTaskQuery) Clone() *CronTaskQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -284,7 +285,7 @@ func (ctq *CronTaskQuery) GroupBy(field string, fields ...string) *CronTaskGroup
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.CronTask.Query().
@@ -342,6 +343,9 @@ func (ctq *CronTaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cr
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
+	if len(ctq.modifiers) > 0 {
+		_spec.Modifiers = ctq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -356,6 +360,9 @@ func (ctq *CronTaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cr
 
 func (ctq *CronTaskQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ctq.querySpec()
+	if len(ctq.modifiers) > 0 {
+		_spec.Modifiers = ctq.modifiers
+	}
 	_spec.Node.Columns = ctq.ctx.Fields
 	if len(ctq.ctx.Fields) > 0 {
 		_spec.Unique = ctq.ctx.Unique != nil && *ctq.ctx.Unique
@@ -418,6 +425,9 @@ func (ctq *CronTaskQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if ctq.ctx.Unique != nil && *ctq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range ctq.modifiers {
+		m(selector)
+	}
 	for _, p := range ctq.predicates {
 		p(selector)
 	}
@@ -433,6 +443,12 @@ func (ctq *CronTaskQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ctq *CronTaskQuery) Modify(modifiers ...func(s *sql.Selector)) *CronTaskSelect {
+	ctq.modifiers = append(ctq.modifiers, modifiers...)
+	return ctq.Select()
 }
 
 // CronTaskGroupBy is the group-by builder for CronTask entities.
@@ -523,4 +539,10 @@ func (cts *CronTaskSelect) sqlScan(ctx context.Context, root *CronTaskQuery, v a
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (cts *CronTaskSelect) Modify(modifiers ...func(s *sql.Selector)) *CronTaskSelect {
+	cts.modifiers = append(cts.modifiers, modifiers...)
+	return cts
 }

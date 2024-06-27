@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -18,8 +19,9 @@ import (
 // DiscordInteractionUpdate is the builder for updating DiscordInteraction entities.
 type DiscordInteractionUpdate struct {
 	config
-	hooks    []Hook
-	mutation *DiscordInteractionMutation
+	hooks     []Hook
+	mutation  *DiscordInteractionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the DiscordInteractionUpdate builder.
@@ -29,15 +31,8 @@ func (diu *DiscordInteractionUpdate) Where(ps ...predicate.DiscordInteraction) *
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (diu *DiscordInteractionUpdate) SetUpdatedAt(i int64) *DiscordInteractionUpdate {
-	diu.mutation.ResetUpdatedAt()
-	diu.mutation.SetUpdatedAt(i)
-	return diu
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (diu *DiscordInteractionUpdate) AddUpdatedAt(i int64) *DiscordInteractionUpdate {
-	diu.mutation.AddUpdatedAt(i)
+func (diu *DiscordInteractionUpdate) SetUpdatedAt(t time.Time) *DiscordInteractionUpdate {
+	diu.mutation.SetUpdatedAt(t)
 	return diu
 }
 
@@ -175,6 +170,12 @@ func (diu *DiscordInteractionUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (diu *DiscordInteractionUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DiscordInteractionUpdate {
+	diu.modifiers = append(diu.modifiers, modifiers...)
+	return diu
+}
+
 func (diu *DiscordInteractionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := diu.check(); err != nil {
 		return n, err
@@ -188,10 +189,7 @@ func (diu *DiscordInteractionUpdate) sqlSave(ctx context.Context) (n int, err er
 		}
 	}
 	if value, ok := diu.mutation.UpdatedAt(); ok {
-		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := diu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(discordinteraction.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := diu.mutation.Command(); ok {
 		_spec.SetField(discordinteraction.FieldCommand, field.TypeString, value)
@@ -208,6 +206,7 @@ func (diu *DiscordInteractionUpdate) sqlSave(ctx context.Context) (n int, err er
 	if value, ok := diu.mutation.Options(); ok {
 		_spec.SetField(discordinteraction.FieldOptions, field.TypeJSON, value)
 	}
+	_spec.AddModifiers(diu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, diu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{discordinteraction.Label}
@@ -223,21 +222,15 @@ func (diu *DiscordInteractionUpdate) sqlSave(ctx context.Context) (n int, err er
 // DiscordInteractionUpdateOne is the builder for updating a single DiscordInteraction entity.
 type DiscordInteractionUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *DiscordInteractionMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *DiscordInteractionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (diuo *DiscordInteractionUpdateOne) SetUpdatedAt(i int64) *DiscordInteractionUpdateOne {
-	diuo.mutation.ResetUpdatedAt()
-	diuo.mutation.SetUpdatedAt(i)
-	return diuo
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (diuo *DiscordInteractionUpdateOne) AddUpdatedAt(i int64) *DiscordInteractionUpdateOne {
-	diuo.mutation.AddUpdatedAt(i)
+func (diuo *DiscordInteractionUpdateOne) SetUpdatedAt(t time.Time) *DiscordInteractionUpdateOne {
+	diuo.mutation.SetUpdatedAt(t)
 	return diuo
 }
 
@@ -388,6 +381,12 @@ func (diuo *DiscordInteractionUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (diuo *DiscordInteractionUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DiscordInteractionUpdateOne {
+	diuo.modifiers = append(diuo.modifiers, modifiers...)
+	return diuo
+}
+
 func (diuo *DiscordInteractionUpdateOne) sqlSave(ctx context.Context) (_node *DiscordInteraction, err error) {
 	if err := diuo.check(); err != nil {
 		return _node, err
@@ -418,10 +417,7 @@ func (diuo *DiscordInteractionUpdateOne) sqlSave(ctx context.Context) (_node *Di
 		}
 	}
 	if value, ok := diuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := diuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(discordinteraction.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := diuo.mutation.Command(); ok {
 		_spec.SetField(discordinteraction.FieldCommand, field.TypeString, value)
@@ -438,6 +434,7 @@ func (diuo *DiscordInteractionUpdateOne) sqlSave(ctx context.Context) (_node *Di
 	if value, ok := diuo.mutation.Options(); ok {
 		_spec.SetField(discordinteraction.FieldOptions, field.TypeJSON, value)
 	}
+	_spec.AddModifiers(diuo.modifiers...)
 	_node = &DiscordInteraction{config: diuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

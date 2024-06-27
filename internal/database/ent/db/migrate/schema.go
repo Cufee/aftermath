@@ -11,10 +11,10 @@ var (
 	// AccountsColumns holds the columns for the "accounts" table.
 	AccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
-		{Name: "last_battle_time", Type: field.TypeInt64},
-		{Name: "account_created_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "last_battle_time", Type: field.TypeTime},
+		{Name: "account_created_at", Type: field.TypeTime},
 		{Name: "realm", Type: field.TypeString, Size: 5},
 		{Name: "nickname", Type: field.TypeString},
 		{Name: "private", Type: field.TypeBool, Default: false},
@@ -64,10 +64,10 @@ var (
 	// AccountSnapshotsColumns holds the columns for the "account_snapshots" table.
 	AccountSnapshotsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"live", "daily"}},
-		{Name: "last_battle_time", Type: field.TypeInt64},
+		{Name: "last_battle_time", Type: field.TypeTime},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "rating_battles", Type: field.TypeInt},
 		{Name: "rating_frame", Type: field.TypeJSON},
@@ -119,12 +119,12 @@ var (
 	// AchievementsSnapshotsColumns holds the columns for the "achievements_snapshots" table.
 	AchievementsSnapshotsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"live", "daily"}},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "battles", Type: field.TypeInt},
-		{Name: "last_battle_time", Type: field.TypeInt64},
+		{Name: "last_battle_time", Type: field.TypeTime},
 		{Name: "data", Type: field.TypeJSON},
 		{Name: "account_id", Type: field.TypeString},
 	}
@@ -167,8 +167,8 @@ var (
 	// AppConfigurationsColumns holds the columns for the "app_configurations" table.
 	AppConfigurationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "key", Type: field.TypeString, Unique: true},
 		{Name: "value", Type: field.TypeJSON},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
@@ -194,8 +194,8 @@ var (
 	// ApplicationCommandsColumns holds the columns for the "application_commands" table.
 	ApplicationCommandsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
 		{Name: "version", Type: field.TypeString},
 		{Name: "options_hash", Type: field.TypeString},
@@ -221,8 +221,8 @@ var (
 	// ClansColumns holds the columns for the "clans" table.
 	ClansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "tag", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
 		{Name: "emblem_id", Type: field.TypeString, Nullable: true, Default: ""},
@@ -254,14 +254,14 @@ var (
 	// CronTasksColumns holds the columns for the "cron_tasks" table.
 	CronTasksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"UPDATE_CLANS", "RECORD_SNAPSHOTS", "CLEANUP_DATABASE"}},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "targets", Type: field.TypeJSON},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"TASK_SCHEDULED", "TASK_IN_PROGRESS", "TASK_COMPLETE", "TASK_FAILED"}},
-		{Name: "scheduled_after", Type: field.TypeInt64},
-		{Name: "last_run", Type: field.TypeInt64},
+		{Name: "scheduled_after", Type: field.TypeTime},
+		{Name: "last_run", Type: field.TypeTime},
 		{Name: "logs", Type: field.TypeJSON},
 		{Name: "data", Type: field.TypeJSON},
 	}
@@ -301,8 +301,8 @@ var (
 	// DiscordInteractionsColumns holds the columns for the "discord_interactions" table.
 	DiscordInteractionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "command", Type: field.TypeString},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"stats"}},
@@ -354,8 +354,8 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "permissions", Type: field.TypeString, Default: ""},
 		{Name: "feature_flags", Type: field.TypeJSON, Nullable: true},
 	}
@@ -375,8 +375,8 @@ var (
 	// UserConnectionsColumns holds the columns for the "user_connections" table.
 	UserConnectionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"wargaming"}},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "permissions", Type: field.TypeString, Nullable: true, Default: ""},
@@ -432,8 +432,8 @@ var (
 	// UserContentsColumns holds the columns for the "user_contents" table.
 	UserContentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"clan-background-image", "personal-background-image"}},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "value", Type: field.TypeString},
@@ -484,10 +484,10 @@ var (
 	// UserSubscriptionsColumns holds the columns for the "user_subscriptions" table.
 	UserSubscriptionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"aftermath-pro", "aftermath-pro-clan", "aftermath-plus", "supporter", "verified-clan", "server-moderator", "content-moderator", "developer", "server-booster", "content-translator"}},
-		{Name: "expires_at", Type: field.TypeInt64},
+		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "permissions", Type: field.TypeString},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "user_id", Type: field.TypeString},
@@ -536,8 +536,8 @@ var (
 	// VehiclesColumns holds the columns for the "vehicles" table.
 	VehiclesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "tier", Type: field.TypeInt},
 		{Name: "localized_names", Type: field.TypeJSON},
 	}
@@ -557,8 +557,8 @@ var (
 	// VehicleAveragesColumns holds the columns for the "vehicle_averages" table.
 	VehicleAveragesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "data", Type: field.TypeJSON},
 	}
 	// VehicleAveragesTable holds the schema information for the "vehicle_averages" table.
@@ -577,13 +577,13 @@ var (
 	// VehicleSnapshotsColumns holds the columns for the "vehicle_snapshots" table.
 	VehicleSnapshotsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeInt64},
-		{Name: "updated_at", Type: field.TypeInt64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"live", "daily"}},
 		{Name: "vehicle_id", Type: field.TypeString},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "battles", Type: field.TypeInt},
-		{Name: "last_battle_time", Type: field.TypeInt64},
+		{Name: "last_battle_time", Type: field.TypeTime},
 		{Name: "frame", Type: field.TypeJSON},
 		{Name: "account_id", Type: field.TypeString},
 	}

@@ -3,6 +3,8 @@
 package discordinteraction
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
@@ -65,12 +67,12 @@ func IDContainsFold(id string) predicate.DiscordInteraction {
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v int64) predicate.DiscordInteraction {
+func CreatedAt(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v int64) predicate.DiscordInteraction {
+func UpdatedAt(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
@@ -95,82 +97,82 @@ func Locale(v string) predicate.DiscordInteraction {
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v int64) predicate.DiscordInteraction {
+func CreatedAtEQ(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v int64) predicate.DiscordInteraction {
+func CreatedAtNEQ(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...int64) predicate.DiscordInteraction {
+func CreatedAtIn(vs ...time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...int64) predicate.DiscordInteraction {
+func CreatedAtNotIn(vs ...time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v int64) predicate.DiscordInteraction {
+func CreatedAtGT(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v int64) predicate.DiscordInteraction {
+func CreatedAtGTE(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v int64) predicate.DiscordInteraction {
+func CreatedAtLT(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v int64) predicate.DiscordInteraction {
+func CreatedAtLTE(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v int64) predicate.DiscordInteraction {
+func UpdatedAtEQ(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v int64) predicate.DiscordInteraction {
+func UpdatedAtNEQ(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...int64) predicate.DiscordInteraction {
+func UpdatedAtIn(vs ...time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...int64) predicate.DiscordInteraction {
+func UpdatedAtNotIn(vs ...time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v int64) predicate.DiscordInteraction {
+func UpdatedAtGT(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v int64) predicate.DiscordInteraction {
+func UpdatedAtGTE(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v int64) predicate.DiscordInteraction {
+func UpdatedAtLT(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v int64) predicate.DiscordInteraction {
+func UpdatedAtLTE(v time.Time) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldLTE(FieldUpdatedAt, v))
 }
 

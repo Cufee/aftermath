@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -21,13 +22,13 @@ type AccountSnapshot struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.SnapshotType `json:"type,omitempty"`
 	// LastBattleTime holds the value of the "last_battle_time" field.
-	LastBattleTime int64 `json:"last_battle_time,omitempty"`
+	LastBattleTime time.Time `json:"last_battle_time,omitempty"`
 	// AccountID holds the value of the "account_id" field.
 	AccountID string `json:"account_id,omitempty"`
 	// ReferenceID holds the value of the "reference_id" field.
@@ -73,10 +74,12 @@ func (*AccountSnapshot) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case accountsnapshot.FieldRatingFrame, accountsnapshot.FieldRegularFrame:
 			values[i] = new([]byte)
-		case accountsnapshot.FieldCreatedAt, accountsnapshot.FieldUpdatedAt, accountsnapshot.FieldLastBattleTime, accountsnapshot.FieldRatingBattles, accountsnapshot.FieldRegularBattles:
+		case accountsnapshot.FieldRatingBattles, accountsnapshot.FieldRegularBattles:
 			values[i] = new(sql.NullInt64)
 		case accountsnapshot.FieldID, accountsnapshot.FieldType, accountsnapshot.FieldAccountID, accountsnapshot.FieldReferenceID:
 			values[i] = new(sql.NullString)
+		case accountsnapshot.FieldCreatedAt, accountsnapshot.FieldUpdatedAt, accountsnapshot.FieldLastBattleTime:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -99,16 +102,16 @@ func (as *AccountSnapshot) assignValues(columns []string, values []any) error {
 				as.ID = value.String
 			}
 		case accountsnapshot.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				as.CreatedAt = value.Int64
+				as.CreatedAt = value.Time
 			}
 		case accountsnapshot.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				as.UpdatedAt = value.Int64
+				as.UpdatedAt = value.Time
 			}
 		case accountsnapshot.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -117,10 +120,10 @@ func (as *AccountSnapshot) assignValues(columns []string, values []any) error {
 				as.Type = models.SnapshotType(value.String)
 			}
 		case accountsnapshot.FieldLastBattleTime:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field last_battle_time", values[i])
 			} else if value.Valid {
-				as.LastBattleTime = value.Int64
+				as.LastBattleTime = value.Time
 			}
 		case accountsnapshot.FieldAccountID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -204,16 +207,16 @@ func (as *AccountSnapshot) String() string {
 	builder.WriteString("AccountSnapshot(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", as.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", as.CreatedAt))
+	builder.WriteString(as.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", as.UpdatedAt))
+	builder.WriteString(as.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", as.Type))
 	builder.WriteString(", ")
 	builder.WriteString("last_battle_time=")
-	builder.WriteString(fmt.Sprintf("%v", as.LastBattleTime))
+	builder.WriteString(as.LastBattleTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("account_id=")
 	builder.WriteString(as.AccountID)

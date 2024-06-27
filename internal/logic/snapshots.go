@@ -56,9 +56,6 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			}(id)
 			continue
 		}
-		if data.LastBattleTime == 0 {
-			continue
-		}
 		if s, ok := existingSnapshotsMap[id]; !force && ok && data.LastBattleTime == int(s.LastBattleTime.Unix()) {
 			// last snapshot is the same, we can skip it
 			continue
@@ -70,7 +67,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		return nil, nil
 	}
 
-	// clans are options-ish
+	// clans are optional-ish
 	clans, err := wgClient.BatchAccountClan(ctx, realm, validAccounts)
 	if err != nil {
 		log.Err(err).Msg("failed to get batch account clans")
@@ -128,10 +125,6 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			}
 			vehicleStats := fetch.WargamingVehiclesToFrame(vehicles)
 			for id, vehicle := range vehicleStats {
-				if vehicle.LastBattleTime.Unix() < 1 {
-					// vehicle was never played
-					continue
-				}
 				if s, ok := existingSnapshotsMap[id]; !force && ok && s.Stats.Battles == vehicle.Battles {
 					// last snapshot is the same, we can skip it
 					continue

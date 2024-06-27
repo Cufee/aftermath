@@ -41,8 +41,8 @@ func toVehicleSnapshot(record *db.VehicleSnapshot) models.VehicleSnapshot {
 	return models.VehicleSnapshot{
 		ID:             record.ID,
 		Type:           record.Type,
-		CreatedAt:      time.Unix(record.CreatedAt, 0),
-		LastBattleTime: time.Unix(record.LastBattleTime, 0),
+		CreatedAt:      record.CreatedAt,
+		LastBattleTime: record.LastBattleTime,
 		ReferenceID:    record.ReferenceID,
 		AccountID:      record.AccountID,
 		VehicleID:      record.VehicleID,
@@ -56,15 +56,16 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 	}
 
 	var errors = make(map[string]error)
-	return errors, c.withTx(ctx, func(tx *db.Tx) error {
+	err := c.withTx(ctx, func(tx *db.Tx) error {
 		for _, data := range snapshots {
 			err := c.db.VehicleSnapshot.Create().
 				SetType(data.Type).
 				SetFrame(data.Stats).
 				SetVehicleID(data.VehicleID).
 				SetReferenceID(data.ReferenceID).
+				SetCreatedAt(data.CreatedAt).
 				SetBattles(int(data.Stats.Battles.Float())).
-				SetLastBattleTime(data.LastBattleTime.Unix()).
+				SetLastBattleTime(data.LastBattleTime).
 				SetAccount(c.db.Account.GetX(ctx, accountID)).
 				Exec(ctx)
 			if err != nil {
@@ -73,6 +74,13 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 		}
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
+	if len(errors) > 0 {
+		return errors, nil
+	}
+	return nil, nil
 }
 
 func (c *client) GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error) {
@@ -81,31 +89,65 @@ func (c *client) GetVehicleSnapshots(ctx context.Context, accountID, referenceID
 		apply(&query)
 	}
 
-	var where []predicate.VehicleSnapshot
-	where = append(where, vehiclesnapshot.AccountID(accountID))
-	where = append(where, vehiclesnapshot.ReferenceID(referenceID))
-	where = append(where, vehiclesnapshot.TypeEQ(kind))
+	// this query is impossible to build using the db.VehicleSnapshots methods, so we do it manually
+	var innerWhere []*sql.Predicate
+	innerWhere = append(innerWhere,
+		sql.EQ(vehiclesnapshot.FieldType, kind),
+		sql.EQ(vehiclesnapshot.FieldAccountID, accountID),
+		sql.EQ(vehiclesnapshot.FieldReferenceID, referenceID),
+	)
+	innerOrder := sql.Desc(vehiclesnapshot.FieldCreatedAt)
 
-	order := vehiclesnapshot.ByCreatedAt(sql.OrderDesc())
 	if query.createdAfter != nil {
-		order = vehiclesnapshot.ByCreatedAt(sql.OrderAsc())
-		where = append(where, vehiclesnapshot.CreatedAtGT(query.createdAfter.Unix()))
+		innerWhere = append(innerWhere, sql.GT(vehiclesnapshot.FieldCreatedAt, *query.createdAfter))
+		innerOrder = sql.Asc(vehiclesnapshot.FieldCreatedAt)
 	}
 	if query.createdBefore != nil {
-		where = append(where, vehiclesnapshot.CreatedAtLT(query.createdBefore.Unix()))
+		innerWhere = append(innerWhere, sql.LT(vehiclesnapshot.FieldCreatedAt, *query.createdBefore))
+		innerOrder = sql.Desc(vehiclesnapshot.FieldCreatedAt)
 	}
-	if query.vehicleIDs != nil {
-		where = append(where, vehiclesnapshot.VehicleIDIn(query.vehicleIDs...))
+	if len(query.vehicleIDs) > 0 {
+		var ids []any
+		for _, id := range query.vehicleIDs {
+			ids = append(ids, id)
+		}
+		innerWhere = append(innerWhere, sql.In(vehiclesnapshot.FieldVehicleID, ids...))
 	}
 
-	var records db.VehicleSnapshots
-	err := c.db.VehicleSnapshot.Query().Where(where...).Order(order).GroupBy(vehiclesnapshot.FieldVehicleID).Aggregate(func(s *sql.Selector) string { return s.Select("*").String() }).Scan(ctx, &records)
+	innerQuery := sql.Select(vehiclesnapshot.Columns...).From(sql.Table(vehiclesnapshot.Table))
+	innerQuery = innerQuery.Where(sql.And(innerWhere...))
+	innerQuery = innerQuery.OrderBy(innerOrder)
+
+	innerQueryString, innerQueryArgs := innerQuery.Query()
+
+	// wrap the inner query in a GROUP BY
+	wrapper := &sql.Builder{}
+	wrapped := wrapper.Wrap(func(b *sql.Builder) { b.WriteString(innerQueryString) })
+	queryString, _ := sql.Select("*").FromExpr(wrapped).GroupBy(vehiclesnapshot.FieldVehicleID).Query()
+
+	rows, err := c.db.VehicleSnapshot.QueryContext(ctx, queryString, innerQueryArgs...)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+
 	var snapshots []models.VehicleSnapshot
-	for _, r := range records {
-		snapshots = append(snapshots, toVehicleSnapshot(r))
+	for rows.Next() {
+		var record db.VehicleSnapshot
+
+		values, err := record.ScanValues(vehiclesnapshot.Columns)
+		if err != nil {
+			return nil, err
+		}
+		if err := rows.Scan(values...); err != nil {
+			return nil, err
+		}
+
+		err = record.AssignValues(vehiclesnapshot.Columns, values)
+		if err != nil {
+			return nil, err
+		}
+		snapshots = append(snapshots, toVehicleSnapshot(&record))
 	}
 
 	return snapshots, nil
@@ -119,8 +161,8 @@ func toAccountSnapshot(record *db.AccountSnapshot) models.AccountSnapshot {
 		ReferenceID:    record.ReferenceID,
 		RatingBattles:  record.RatingFrame,
 		RegularBattles: record.RegularFrame,
-		CreatedAt:      time.Unix(record.CreatedAt, 0),
-		LastBattleTime: time.Unix(record.LastBattleTime, 0),
+		CreatedAt:      record.CreatedAt,
+		LastBattleTime: record.LastBattleTime,
 	}
 }
 
@@ -130,12 +172,12 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models
 	}
 
 	var errors = make(map[string]error)
-	return errors, c.withTx(ctx, func(tx *db.Tx) error {
+	err := c.withTx(ctx, func(tx *db.Tx) error {
 		for _, s := range snapshots {
 			err := c.db.AccountSnapshot.Create().
 				SetAccount(c.db.Account.GetX(ctx, s.AccountID)). // we assume the account exists here
-				SetCreatedAt(s.CreatedAt.Unix()).
-				SetLastBattleTime(s.LastBattleTime.Unix()).
+				SetCreatedAt(s.CreatedAt).
+				SetLastBattleTime(s.LastBattleTime).
 				SetRatingBattles(int(s.RatingBattles.Battles.Float())).
 				SetRatingFrame(s.RatingBattles).
 				SetReferenceID(s.ReferenceID).
@@ -148,6 +190,13 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models
 		}
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
+	if len(errors) > 0 {
+		return errors, nil
+	}
+	return nil, nil
 }
 
 func (c *client) GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]models.AccountSnapshot, error) {
@@ -175,10 +224,10 @@ func (c *client) GetAccountSnapshot(ctx context.Context, accountID, referenceID 
 	where = append(where, accountsnapshot.AccountID(accountID), accountsnapshot.ReferenceID(referenceID), accountsnapshot.TypeEQ(kind))
 	if query.createdAfter != nil {
 		order = accountsnapshot.ByCreatedAt(sql.OrderAsc())
-		where = append(where, accountsnapshot.CreatedAtGT(query.createdAfter.Unix()))
+		where = append(where, accountsnapshot.CreatedAtGT(*query.createdAfter))
 	}
 	if query.createdBefore != nil {
-		where = append(where, accountsnapshot.CreatedAtLT(query.createdBefore.Unix()))
+		where = append(where, accountsnapshot.CreatedAtLT(*query.createdBefore))
 	}
 
 	record, err := c.db.AccountSnapshot.Query().Where(where...).Order(order).First(ctx)
@@ -198,10 +247,10 @@ func (c *client) GetManyAccountSnapshots(ctx context.Context, accountIDs []strin
 	var where []predicate.AccountSnapshot
 	where = append(where, accountsnapshot.AccountIDIn(accountIDs...), accountsnapshot.TypeEQ(kind))
 	if query.createdAfter != nil {
-		where = append(where, accountsnapshot.CreatedAtGT(query.createdAfter.Unix()))
+		where = append(where, accountsnapshot.CreatedAtGT(*query.createdAfter))
 	}
 	if query.createdBefore != nil {
-		where = append(where, accountsnapshot.CreatedAtLT(query.createdAfter.Unix()))
+		where = append(where, accountsnapshot.CreatedAtLT(*query.createdAfter))
 	}
 
 	records, err := c.db.AccountSnapshot.Query().Where(where...).All(ctx)

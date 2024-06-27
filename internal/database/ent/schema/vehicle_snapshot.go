@@ -25,7 +25,7 @@ func (VehicleSnapshot) Fields() []ent.Field {
 		field.String("reference_id").NotEmpty(),
 		//
 		field.Int("battles"),
-		field.Int64("last_battle_time"),
+		field.Time("last_battle_time"),
 		field.JSON("frame", frame.StatsFrame{}),
 	)
 }

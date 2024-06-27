@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -22,29 +23,29 @@ type UserSubscriptionCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (usc *UserSubscriptionCreate) SetCreatedAt(i int64) *UserSubscriptionCreate {
-	usc.mutation.SetCreatedAt(i)
+func (usc *UserSubscriptionCreate) SetCreatedAt(t time.Time) *UserSubscriptionCreate {
+	usc.mutation.SetCreatedAt(t)
 	return usc
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (usc *UserSubscriptionCreate) SetNillableCreatedAt(i *int64) *UserSubscriptionCreate {
-	if i != nil {
-		usc.SetCreatedAt(*i)
+func (usc *UserSubscriptionCreate) SetNillableCreatedAt(t *time.Time) *UserSubscriptionCreate {
+	if t != nil {
+		usc.SetCreatedAt(*t)
 	}
 	return usc
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (usc *UserSubscriptionCreate) SetUpdatedAt(i int64) *UserSubscriptionCreate {
-	usc.mutation.SetUpdatedAt(i)
+func (usc *UserSubscriptionCreate) SetUpdatedAt(t time.Time) *UserSubscriptionCreate {
+	usc.mutation.SetUpdatedAt(t)
 	return usc
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (usc *UserSubscriptionCreate) SetNillableUpdatedAt(i *int64) *UserSubscriptionCreate {
-	if i != nil {
-		usc.SetUpdatedAt(*i)
+func (usc *UserSubscriptionCreate) SetNillableUpdatedAt(t *time.Time) *UserSubscriptionCreate {
+	if t != nil {
+		usc.SetUpdatedAt(*t)
 	}
 	return usc
 }
@@ -56,8 +57,8 @@ func (usc *UserSubscriptionCreate) SetType(mt models.SubscriptionType) *UserSubs
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (usc *UserSubscriptionCreate) SetExpiresAt(i int64) *UserSubscriptionCreate {
-	usc.mutation.SetExpiresAt(i)
+func (usc *UserSubscriptionCreate) SetExpiresAt(t time.Time) *UserSubscriptionCreate {
+	usc.mutation.SetExpiresAt(t)
 	return usc
 }
 
@@ -229,11 +230,11 @@ func (usc *UserSubscriptionCreate) createSpec() (*UserSubscription, *sqlgraph.Cr
 		_spec.ID.Value = id
 	}
 	if value, ok := usc.mutation.CreatedAt(); ok {
-		_spec.SetField(usersubscription.FieldCreatedAt, field.TypeInt64, value)
+		_spec.SetField(usersubscription.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := usc.mutation.UpdatedAt(); ok {
-		_spec.SetField(usersubscription.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(usersubscription.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := usc.mutation.GetType(); ok {
@@ -241,7 +242,7 @@ func (usc *UserSubscriptionCreate) createSpec() (*UserSubscription, *sqlgraph.Cr
 		_node.Type = value
 	}
 	if value, ok := usc.mutation.ExpiresAt(); ok {
-		_spec.SetField(usersubscription.FieldExpiresAt, field.TypeInt64, value)
+		_spec.SetField(usersubscription.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
 	}
 	if value, ok := usc.mutation.Permissions(); ok {

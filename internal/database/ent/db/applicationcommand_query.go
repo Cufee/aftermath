@@ -21,6 +21,7 @@ type ApplicationCommandQuery struct {
 	order      []applicationcommand.OrderOption
 	inters     []Interceptor
 	predicates []predicate.ApplicationCommand
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -261,7 +262,7 @@ func (acq *ApplicationCommandQuery) Clone() *ApplicationCommandQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -284,7 +285,7 @@ func (acq *ApplicationCommandQuery) GroupBy(field string, fields ...string) *App
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.ApplicationCommand.Query().
@@ -342,6 +343,9 @@ func (acq *ApplicationCommandQuery) sqlAll(ctx context.Context, hooks ...queryHo
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
+	if len(acq.modifiers) > 0 {
+		_spec.Modifiers = acq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -356,6 +360,9 @@ func (acq *ApplicationCommandQuery) sqlAll(ctx context.Context, hooks ...queryHo
 
 func (acq *ApplicationCommandQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := acq.querySpec()
+	if len(acq.modifiers) > 0 {
+		_spec.Modifiers = acq.modifiers
+	}
 	_spec.Node.Columns = acq.ctx.Fields
 	if len(acq.ctx.Fields) > 0 {
 		_spec.Unique = acq.ctx.Unique != nil && *acq.ctx.Unique
@@ -418,6 +425,9 @@ func (acq *ApplicationCommandQuery) sqlQuery(ctx context.Context) *sql.Selector 
 	if acq.ctx.Unique != nil && *acq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range acq.modifiers {
+		m(selector)
+	}
 	for _, p := range acq.predicates {
 		p(selector)
 	}
@@ -433,6 +443,12 @@ func (acq *ApplicationCommandQuery) sqlQuery(ctx context.Context) *sql.Selector 
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (acq *ApplicationCommandQuery) Modify(modifiers ...func(s *sql.Selector)) *ApplicationCommandSelect {
+	acq.modifiers = append(acq.modifiers, modifiers...)
+	return acq.Select()
 }
 
 // ApplicationCommandGroupBy is the group-by builder for ApplicationCommand entities.
@@ -523,4 +539,10 @@ func (acs *ApplicationCommandSelect) sqlScan(ctx context.Context, root *Applicat
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (acs *ApplicationCommandSelect) Modify(modifiers ...func(s *sql.Selector)) *ApplicationCommandSelect {
+	acs.modifiers = append(acs.modifiers, modifiers...)
+	return acs
 }

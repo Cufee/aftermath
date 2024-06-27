@@ -21,6 +21,7 @@ type VehicleQuery struct {
 	order      []vehicle.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Vehicle
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -261,7 +262,7 @@ func (vq *VehicleQuery) Clone() *VehicleQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -284,7 +285,7 @@ func (vq *VehicleQuery) GroupBy(field string, fields ...string) *VehicleGroupBy 
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Vehicle.Query().
@@ -342,6 +343,9 @@ func (vq *VehicleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Vehi
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
+	if len(vq.modifiers) > 0 {
+		_spec.Modifiers = vq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -356,6 +360,9 @@ func (vq *VehicleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Vehi
 
 func (vq *VehicleQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := vq.querySpec()
+	if len(vq.modifiers) > 0 {
+		_spec.Modifiers = vq.modifiers
+	}
 	_spec.Node.Columns = vq.ctx.Fields
 	if len(vq.ctx.Fields) > 0 {
 		_spec.Unique = vq.ctx.Unique != nil && *vq.ctx.Unique
@@ -418,6 +425,9 @@ func (vq *VehicleQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if vq.ctx.Unique != nil && *vq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range vq.modifiers {
+		m(selector)
+	}
 	for _, p := range vq.predicates {
 		p(selector)
 	}
@@ -433,6 +443,12 @@ func (vq *VehicleQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (vq *VehicleQuery) Modify(modifiers ...func(s *sql.Selector)) *VehicleSelect {
+	vq.modifiers = append(vq.modifiers, modifiers...)
+	return vq.Select()
 }
 
 // VehicleGroupBy is the group-by builder for Vehicle entities.
@@ -523,4 +539,10 @@ func (vs *VehicleSelect) sqlScan(ctx context.Context, root *VehicleQuery, v any)
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (vs *VehicleSelect) Modify(modifiers ...func(s *sql.Selector)) *VehicleSelect {
+	vs.modifiers = append(vs.modifiers, modifiers...)
+	return vs
 }

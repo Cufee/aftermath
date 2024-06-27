@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -21,9 +22,9 @@ type AchievementsSnapshot struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.SnapshotType `json:"type,omitempty"`
 	// AccountID holds the value of the "account_id" field.
@@ -33,7 +34,7 @@ type AchievementsSnapshot struct {
 	// Battles holds the value of the "battles" field.
 	Battles int `json:"battles,omitempty"`
 	// LastBattleTime holds the value of the "last_battle_time" field.
-	LastBattleTime int64 `json:"last_battle_time,omitempty"`
+	LastBattleTime time.Time `json:"last_battle_time,omitempty"`
 	// Data holds the value of the "data" field.
 	Data types.AchievementsFrame `json:"data,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -69,10 +70,12 @@ func (*AchievementsSnapshot) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case achievementssnapshot.FieldData:
 			values[i] = new([]byte)
-		case achievementssnapshot.FieldCreatedAt, achievementssnapshot.FieldUpdatedAt, achievementssnapshot.FieldBattles, achievementssnapshot.FieldLastBattleTime:
+		case achievementssnapshot.FieldBattles:
 			values[i] = new(sql.NullInt64)
 		case achievementssnapshot.FieldID, achievementssnapshot.FieldType, achievementssnapshot.FieldAccountID, achievementssnapshot.FieldReferenceID:
 			values[i] = new(sql.NullString)
+		case achievementssnapshot.FieldCreatedAt, achievementssnapshot.FieldUpdatedAt, achievementssnapshot.FieldLastBattleTime:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -95,16 +98,16 @@ func (as *AchievementsSnapshot) assignValues(columns []string, values []any) err
 				as.ID = value.String
 			}
 		case achievementssnapshot.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				as.CreatedAt = value.Int64
+				as.CreatedAt = value.Time
 			}
 		case achievementssnapshot.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				as.UpdatedAt = value.Int64
+				as.UpdatedAt = value.Time
 			}
 		case achievementssnapshot.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -131,10 +134,10 @@ func (as *AchievementsSnapshot) assignValues(columns []string, values []any) err
 				as.Battles = int(value.Int64)
 			}
 		case achievementssnapshot.FieldLastBattleTime:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field last_battle_time", values[i])
 			} else if value.Valid {
-				as.LastBattleTime = value.Int64
+				as.LastBattleTime = value.Time
 			}
 		case achievementssnapshot.FieldData:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -186,10 +189,10 @@ func (as *AchievementsSnapshot) String() string {
 	builder.WriteString("AchievementsSnapshot(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", as.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", as.CreatedAt))
+	builder.WriteString(as.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", as.UpdatedAt))
+	builder.WriteString(as.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", as.Type))
@@ -204,7 +207,7 @@ func (as *AchievementsSnapshot) String() string {
 	builder.WriteString(fmt.Sprintf("%v", as.Battles))
 	builder.WriteString(", ")
 	builder.WriteString("last_battle_time=")
-	builder.WriteString(fmt.Sprintf("%v", as.LastBattleTime))
+	builder.WriteString(as.LastBattleTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("data=")
 	builder.WriteString(fmt.Sprintf("%v", as.Data))

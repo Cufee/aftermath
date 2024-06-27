@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -20,9 +21,9 @@ type DiscordInteraction struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Command holds the value of the "command" field.
 	Command string `json:"command,omitempty"`
 	// UserID holds the value of the "user_id" field.
@@ -68,10 +69,10 @@ func (*DiscordInteraction) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case discordinteraction.FieldOptions:
 			values[i] = new([]byte)
-		case discordinteraction.FieldCreatedAt, discordinteraction.FieldUpdatedAt:
-			values[i] = new(sql.NullInt64)
 		case discordinteraction.FieldID, discordinteraction.FieldCommand, discordinteraction.FieldUserID, discordinteraction.FieldReferenceID, discordinteraction.FieldType, discordinteraction.FieldLocale:
 			values[i] = new(sql.NullString)
+		case discordinteraction.FieldCreatedAt, discordinteraction.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -94,16 +95,16 @@ func (di *DiscordInteraction) assignValues(columns []string, values []any) error
 				di.ID = value.String
 			}
 		case discordinteraction.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				di.CreatedAt = value.Int64
+				di.CreatedAt = value.Time
 			}
 		case discordinteraction.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				di.UpdatedAt = value.Int64
+				di.UpdatedAt = value.Time
 			}
 		case discordinteraction.FieldCommand:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -185,10 +186,10 @@ func (di *DiscordInteraction) String() string {
 	builder.WriteString("DiscordInteraction(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", di.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", di.CreatedAt))
+	builder.WriteString(di.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", di.UpdatedAt))
+	builder.WriteString(di.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("command=")
 	builder.WriteString(di.Command)

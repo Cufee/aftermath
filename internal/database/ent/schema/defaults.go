@@ -13,12 +13,12 @@ var defaultFields = []ent.Field{
 		Unique().
 		Immutable().
 		DefaultFunc(cuid.New),
-	field.Int64("created_at").
+	field.Time("created_at").
 		Immutable().
-		DefaultFunc(timeNow),
-	field.Int64("updated_at").
-		DefaultFunc(timeNow).
+		Default(timeNow),
+	field.Time("updated_at").
+		Default(timeNow).
 		UpdateDefault(timeNow),
 }
 
-func timeNow() int64 { return time.Now().Unix() }
+func timeNow() time.Time { return time.Now() }

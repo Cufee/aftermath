@@ -23,6 +23,7 @@ type DiscordInteractionQuery struct {
 	inters     []Interceptor
 	predicates []predicate.DiscordInteraction
 	withUser   *UserQuery
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -297,7 +298,7 @@ func (diq *DiscordInteractionQuery) WithUser(opts ...func(*UserQuery)) *DiscordI
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -320,7 +321,7 @@ func (diq *DiscordInteractionQuery) GroupBy(field string, fields ...string) *Dis
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.DiscordInteraction.Query().
@@ -382,6 +383,9 @@ func (diq *DiscordInteractionQuery) sqlAll(ctx context.Context, hooks ...queryHo
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(diq.modifiers) > 0 {
+		_spec.Modifiers = diq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -432,6 +436,9 @@ func (diq *DiscordInteractionQuery) loadUser(ctx context.Context, query *UserQue
 
 func (diq *DiscordInteractionQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := diq.querySpec()
+	if len(diq.modifiers) > 0 {
+		_spec.Modifiers = diq.modifiers
+	}
 	_spec.Node.Columns = diq.ctx.Fields
 	if len(diq.ctx.Fields) > 0 {
 		_spec.Unique = diq.ctx.Unique != nil && *diq.ctx.Unique
@@ -497,6 +504,9 @@ func (diq *DiscordInteractionQuery) sqlQuery(ctx context.Context) *sql.Selector 
 	if diq.ctx.Unique != nil && *diq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range diq.modifiers {
+		m(selector)
+	}
 	for _, p := range diq.predicates {
 		p(selector)
 	}
@@ -512,6 +522,12 @@ func (diq *DiscordInteractionQuery) sqlQuery(ctx context.Context) *sql.Selector 
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (diq *DiscordInteractionQuery) Modify(modifiers ...func(s *sql.Selector)) *DiscordInteractionSelect {
+	diq.modifiers = append(diq.modifiers, modifiers...)
+	return diq.Select()
 }
 
 // DiscordInteractionGroupBy is the group-by builder for DiscordInteraction entities.
@@ -602,4 +618,10 @@ func (dis *DiscordInteractionSelect) sqlScan(ctx context.Context, root *DiscordI
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (dis *DiscordInteractionSelect) Modify(modifiers ...func(s *sql.Selector)) *DiscordInteractionSelect {
+	dis.modifiers = append(dis.modifiers, modifiers...)
+	return dis
 }

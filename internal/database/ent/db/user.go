@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,9 +19,9 @@ type User struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt int64 `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt int64 `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Permissions holds the value of the "permissions" field.
 	Permissions string `json:"permissions,omitempty"`
 	// FeatureFlags holds the value of the "feature_flags" field.
@@ -89,10 +90,10 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldFeatureFlags:
 			values[i] = new([]byte)
-		case user.FieldCreatedAt, user.FieldUpdatedAt:
-			values[i] = new(sql.NullInt64)
 		case user.FieldID, user.FieldPermissions:
 			values[i] = new(sql.NullString)
+		case user.FieldCreatedAt, user.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -115,16 +116,16 @@ func (u *User) assignValues(columns []string, values []any) error {
 				u.ID = value.String
 			}
 		case user.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				u.CreatedAt = value.Int64
+				u.CreatedAt = value.Time
 			}
 		case user.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				u.UpdatedAt = value.Int64
+				u.UpdatedAt = value.Time
 			}
 		case user.FieldPermissions:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -197,10 +198,10 @@ func (u *User) String() string {
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(fmt.Sprintf("%v", u.CreatedAt))
+	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fmt.Sprintf("%v", u.UpdatedAt))
+	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("permissions=")
 	builder.WriteString(u.Permissions)

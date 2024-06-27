@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -17,8 +18,9 @@ import (
 // ApplicationCommandUpdate is the builder for updating ApplicationCommand entities.
 type ApplicationCommandUpdate struct {
 	config
-	hooks    []Hook
-	mutation *ApplicationCommandMutation
+	hooks     []Hook
+	mutation  *ApplicationCommandMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the ApplicationCommandUpdate builder.
@@ -28,15 +30,8 @@ func (acu *ApplicationCommandUpdate) Where(ps ...predicate.ApplicationCommand) *
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acu *ApplicationCommandUpdate) SetUpdatedAt(i int64) *ApplicationCommandUpdate {
-	acu.mutation.ResetUpdatedAt()
-	acu.mutation.SetUpdatedAt(i)
-	return acu
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (acu *ApplicationCommandUpdate) AddUpdatedAt(i int64) *ApplicationCommandUpdate {
-	acu.mutation.AddUpdatedAt(i)
+func (acu *ApplicationCommandUpdate) SetUpdatedAt(t time.Time) *ApplicationCommandUpdate {
+	acu.mutation.SetUpdatedAt(t)
 	return acu
 }
 
@@ -143,6 +138,12 @@ func (acu *ApplicationCommandUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (acu *ApplicationCommandUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ApplicationCommandUpdate {
+	acu.modifiers = append(acu.modifiers, modifiers...)
+	return acu
+}
+
 func (acu *ApplicationCommandUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := acu.check(); err != nil {
 		return n, err
@@ -156,10 +157,7 @@ func (acu *ApplicationCommandUpdate) sqlSave(ctx context.Context) (n int, err er
 		}
 	}
 	if value, ok := acu.mutation.UpdatedAt(); ok {
-		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := acu.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(applicationcommand.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := acu.mutation.Name(); ok {
 		_spec.SetField(applicationcommand.FieldName, field.TypeString, value)
@@ -170,6 +168,7 @@ func (acu *ApplicationCommandUpdate) sqlSave(ctx context.Context) (n int, err er
 	if value, ok := acu.mutation.OptionsHash(); ok {
 		_spec.SetField(applicationcommand.FieldOptionsHash, field.TypeString, value)
 	}
+	_spec.AddModifiers(acu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, acu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{applicationcommand.Label}
@@ -185,21 +184,15 @@ func (acu *ApplicationCommandUpdate) sqlSave(ctx context.Context) (n int, err er
 // ApplicationCommandUpdateOne is the builder for updating a single ApplicationCommand entity.
 type ApplicationCommandUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *ApplicationCommandMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *ApplicationCommandMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (acuo *ApplicationCommandUpdateOne) SetUpdatedAt(i int64) *ApplicationCommandUpdateOne {
-	acuo.mutation.ResetUpdatedAt()
-	acuo.mutation.SetUpdatedAt(i)
-	return acuo
-}
-
-// AddUpdatedAt adds i to the "updated_at" field.
-func (acuo *ApplicationCommandUpdateOne) AddUpdatedAt(i int64) *ApplicationCommandUpdateOne {
-	acuo.mutation.AddUpdatedAt(i)
+func (acuo *ApplicationCommandUpdateOne) SetUpdatedAt(t time.Time) *ApplicationCommandUpdateOne {
+	acuo.mutation.SetUpdatedAt(t)
 	return acuo
 }
 
@@ -319,6 +312,12 @@ func (acuo *ApplicationCommandUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (acuo *ApplicationCommandUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ApplicationCommandUpdateOne {
+	acuo.modifiers = append(acuo.modifiers, modifiers...)
+	return acuo
+}
+
 func (acuo *ApplicationCommandUpdateOne) sqlSave(ctx context.Context) (_node *ApplicationCommand, err error) {
 	if err := acuo.check(); err != nil {
 		return _node, err
@@ -349,10 +348,7 @@ func (acuo *ApplicationCommandUpdateOne) sqlSave(ctx context.Context) (_node *Ap
 		}
 	}
 	if value, ok := acuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeInt64, value)
-	}
-	if value, ok := acuo.mutation.AddedUpdatedAt(); ok {
-		_spec.AddField(applicationcommand.FieldUpdatedAt, field.TypeInt64, value)
+		_spec.SetField(applicationcommand.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := acuo.mutation.Name(); ok {
 		_spec.SetField(applicationcommand.FieldName, field.TypeString, value)
@@ -363,6 +359,7 @@ func (acuo *ApplicationCommandUpdateOne) sqlSave(ctx context.Context) (_node *Ap
 	if value, ok := acuo.mutation.OptionsHash(); ok {
 		_spec.SetField(applicationcommand.FieldOptionsHash, field.TypeString, value)
 	}
+	_spec.AddModifiers(acuo.modifiers...)
 	_node = &ApplicationCommand{config: acuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

@@ -24,6 +24,7 @@ type ClanQuery struct {
 	inters       []Interceptor
 	predicates   []predicate.Clan
 	withAccounts *AccountQuery
+	modifiers    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -298,7 +299,7 @@ func (cq *ClanQuery) WithAccounts(opts ...func(*AccountQuery)) *ClanQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -321,7 +322,7 @@ func (cq *ClanQuery) GroupBy(field string, fields ...string) *ClanGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt int64 `json:"created_at,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Clan.Query().
@@ -383,6 +384,9 @@ func (cq *ClanQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Clan, e
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(cq.modifiers) > 0 {
+		_spec.Modifiers = cq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -435,6 +439,9 @@ func (cq *ClanQuery) loadAccounts(ctx context.Context, query *AccountQuery, node
 
 func (cq *ClanQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
+	if len(cq.modifiers) > 0 {
+		_spec.Modifiers = cq.modifiers
+	}
 	_spec.Node.Columns = cq.ctx.Fields
 	if len(cq.ctx.Fields) > 0 {
 		_spec.Unique = cq.ctx.Unique != nil && *cq.ctx.Unique
@@ -497,6 +504,9 @@ func (cq *ClanQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if cq.ctx.Unique != nil && *cq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range cq.modifiers {
+		m(selector)
+	}
 	for _, p := range cq.predicates {
 		p(selector)
 	}
@@ -512,6 +522,12 @@ func (cq *ClanQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (cq *ClanQuery) Modify(modifiers ...func(s *sql.Selector)) *ClanSelect {
+	cq.modifiers = append(cq.modifiers, modifiers...)
+	return cq.Select()
 }
 
 // ClanGroupBy is the group-by builder for Clan entities.
@@ -602,4 +618,10 @@ func (cs *ClanSelect) sqlScan(ctx context.Context, root *ClanQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (cs *ClanSelect) Modify(modifiers ...func(s *sql.Selector)) *ClanSelect {
+	cs.modifiers = append(cs.modifiers, modifiers...)
+	return cs
 }

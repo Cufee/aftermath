@@ -3,6 +3,8 @@
 package crontask
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -64,12 +66,12 @@ func IDContainsFold(id string) predicate.CronTask {
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v int64) predicate.CronTask {
+func CreatedAt(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
-func UpdatedAt(v int64) predicate.CronTask {
+func UpdatedAt(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
@@ -79,92 +81,92 @@ func ReferenceID(v string) predicate.CronTask {
 }
 
 // ScheduledAfter applies equality check predicate on the "scheduled_after" field. It's identical to ScheduledAfterEQ.
-func ScheduledAfter(v int64) predicate.CronTask {
+func ScheduledAfter(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldEQ(FieldScheduledAfter, v))
 }
 
 // LastRun applies equality check predicate on the "last_run" field. It's identical to LastRunEQ.
-func LastRun(v int64) predicate.CronTask {
+func LastRun(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldEQ(FieldLastRun, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v int64) predicate.CronTask {
+func CreatedAtEQ(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v int64) predicate.CronTask {
+func CreatedAtNEQ(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...int64) predicate.CronTask {
+func CreatedAtIn(vs ...time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...int64) predicate.CronTask {
+func CreatedAtNotIn(vs ...time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v int64) predicate.CronTask {
+func CreatedAtGT(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v int64) predicate.CronTask {
+func CreatedAtGTE(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v int64) predicate.CronTask {
+func CreatedAtLT(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v int64) predicate.CronTask {
+func CreatedAtLTE(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
-func UpdatedAtEQ(v int64) predicate.CronTask {
+func UpdatedAtEQ(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
-func UpdatedAtNEQ(v int64) predicate.CronTask {
+func UpdatedAtNEQ(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
-func UpdatedAtIn(vs ...int64) predicate.CronTask {
+func UpdatedAtIn(vs ...time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
-func UpdatedAtNotIn(vs ...int64) predicate.CronTask {
+func UpdatedAtNotIn(vs ...time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
-func UpdatedAtGT(v int64) predicate.CronTask {
+func UpdatedAtGT(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
-func UpdatedAtGTE(v int64) predicate.CronTask {
+func UpdatedAtGTE(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
-func UpdatedAtLT(v int64) predicate.CronTask {
+func UpdatedAtLT(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
-func UpdatedAtLTE(v int64) predicate.CronTask {
+func UpdatedAtLTE(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
@@ -294,82 +296,82 @@ func StatusNotIn(vs ...models.TaskStatus) predicate.CronTask {
 }
 
 // ScheduledAfterEQ applies the EQ predicate on the "scheduled_after" field.
-func ScheduledAfterEQ(v int64) predicate.CronTask {
+func ScheduledAfterEQ(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldEQ(FieldScheduledAfter, v))
 }
 
 // ScheduledAfterNEQ applies the NEQ predicate on the "scheduled_after" field.
-func ScheduledAfterNEQ(v int64) predicate.CronTask {
+func ScheduledAfterNEQ(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldNEQ(FieldScheduledAfter, v))
 }
 
 // ScheduledAfterIn applies the In predicate on the "scheduled_after" field.
-func ScheduledAfterIn(vs ...int64) predicate.CronTask {
+func ScheduledAfterIn(vs ...time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldIn(FieldScheduledAfter, vs...))
 }
 
 // ScheduledAfterNotIn applies the NotIn predicate on the "scheduled_after" field.
-func ScheduledAfterNotIn(vs ...int64) predicate.CronTask {
+func ScheduledAfterNotIn(vs ...time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldNotIn(FieldScheduledAfter, vs...))
 }
 
 // ScheduledAfterGT applies the GT predicate on the "scheduled_after" field.
-func ScheduledAfterGT(v int64) predicate.CronTask {
+func ScheduledAfterGT(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldGT(FieldScheduledAfter, v))
 }
 
 // ScheduledAfterGTE applies the GTE predicate on the "scheduled_after" field.
-func ScheduledAfterGTE(v int64) predicate.CronTask {
+func ScheduledAfterGTE(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldGTE(FieldScheduledAfter, v))
 }
 
 // ScheduledAfterLT applies the LT predicate on the "scheduled_after" field.
-func ScheduledAfterLT(v int64) predicate.CronTask {
+func ScheduledAfterLT(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldLT(FieldScheduledAfter, v))
 }
 
 // ScheduledAfterLTE applies the LTE predicate on the "scheduled_after" field.
-func ScheduledAfterLTE(v int64) predicate.CronTask {
+func ScheduledAfterLTE(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldLTE(FieldScheduledAfter, v))
 }
 
 // LastRunEQ applies the EQ predicate on the "last_run" field.
-func LastRunEQ(v int64) predicate.CronTask {
+func LastRunEQ(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldEQ(FieldLastRun, v))
 }
 
 // LastRunNEQ applies the NEQ predicate on the "last_run" field.
-func LastRunNEQ(v int64) predicate.CronTask {
+func LastRunNEQ(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldNEQ(FieldLastRun, v))
 }
 
 // LastRunIn applies the In predicate on the "last_run" field.
-func LastRunIn(vs ...int64) predicate.CronTask {
+func LastRunIn(vs ...time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldIn(FieldLastRun, vs...))
 }
 
 // LastRunNotIn applies the NotIn predicate on the "last_run" field.
-func LastRunNotIn(vs ...int64) predicate.CronTask {
+func LastRunNotIn(vs ...time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldNotIn(FieldLastRun, vs...))
 }
 
 // LastRunGT applies the GT predicate on the "last_run" field.
-func LastRunGT(v int64) predicate.CronTask {
+func LastRunGT(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldGT(FieldLastRun, v))
 }
 
 // LastRunGTE applies the GTE predicate on the "last_run" field.
-func LastRunGTE(v int64) predicate.CronTask {
+func LastRunGTE(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldGTE(FieldLastRun, v))
 }
 
 // LastRunLT applies the LT predicate on the "last_run" field.
-func LastRunLT(v int64) predicate.CronTask {
+func LastRunLT(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldLT(FieldLastRun, v))
 }
 
 // LastRunLTE applies the LTE predicate on the "last_run" field.
-func LastRunLTE(v int64) predicate.CronTask {
+func LastRunLTE(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldLTE(FieldLastRun, v))
 }
 

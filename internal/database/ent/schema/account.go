@@ -17,14 +17,14 @@ func (Account) Fields() []ent.Field {
 	return []ent.Field{field.String("id").
 		Unique().
 		Immutable(),
-		field.Int64("created_at").
+		field.Time("created_at").
 			Immutable().
-			DefaultFunc(timeNow),
-		field.Int64("updated_at").
-			DefaultFunc(timeNow).
+			Default(timeNow),
+		field.Time("updated_at").
+			Default(timeNow).
 			UpdateDefault(timeNow),
-		field.Int64("last_battle_time"),
-		field.Int64("account_created_at"),
+		field.Time("last_battle_time"),
+		field.Time("account_created_at"),
 		//
 		field.String("realm").
 			MinLen(2).
