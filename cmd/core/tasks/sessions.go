@@ -47,13 +47,19 @@ func init() {
 			}
 
 			// Retry failed accounts
-			task.Targets = make([]string, len(accountErrors))
-			for id := range accountErrors {
+			newTargets := make([]string, 0, len(accountErrors))
+			for id, err := range accountErrors {
+				if err == nil {
+					continue
+				}
 				task.Targets = append(task.Targets, id)
+				task.LogAttempt(models.TaskLog{
+					Timestamp: time.Now(),
+					Error:     err.Error(),
+					Comment:   id,
+				})
 			}
-			task.LogAttempt(models.TaskLog{
-				Timestamp: time.Now(),
-			})
+			task.Targets = newTargets
 
 			return "retrying failed accounts", errors.New("some accounts failed")
 		},
