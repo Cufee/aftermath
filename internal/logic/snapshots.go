@@ -148,21 +148,18 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	}
 
 	for _, accountSnapshot := range accountSnapshots {
-		vehicles, ok := vehicleSnapshots[accountSnapshot.AccountID]
-		if !ok {
-			accountErrors[accountSnapshot.AccountID] = errors.New("account missing vehicle snapshots")
-			continue
-		}
-
-		// save all vehicle snapshots
-		vErr, err := dbClient.CreateAccountVehicleSnapshots(ctx, accountSnapshot.AccountID, vehicles...)
-		if err != nil {
-			accountErrors[accountSnapshot.AccountID] = err
-			continue
-		}
-		if len(vErr) > 0 {
-			accountErrors[accountSnapshot.AccountID] = errors.Errorf("failed to insert %d vehicle snapshots", len(vErr))
-			continue
+		vehicles := vehicleSnapshots[accountSnapshot.AccountID]
+		if len(vehicles) > 0 {
+			// save all vehicle snapshots)
+			vErr, err := dbClient.CreateAccountVehicleSnapshots(ctx, accountSnapshot.AccountID, vehicles...)
+			if err != nil {
+				accountErrors[accountSnapshot.AccountID] = err
+				continue
+			}
+			if len(vErr) > 0 {
+				accountErrors[accountSnapshot.AccountID] = errors.Errorf("failed to insert %d vehicle snapshots", len(vErr))
+				continue
+			}
 		}
 
 		// save account snapshot

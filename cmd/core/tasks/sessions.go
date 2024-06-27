@@ -34,7 +34,7 @@ func init() {
 				return err
 			}
 
-			// Retry failed accounts
+			// retry failed accounts
 			newTargets := make([]string, 0, len(accountErrors))
 			for id, err := range accountErrors {
 				if err == nil {
