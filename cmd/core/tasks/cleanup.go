@@ -55,9 +55,9 @@ func CreateCleanupTasks(client core.Client) error {
 
 	task := models.Task{
 		TriesLeft:      1,
-		Type:           models.TaskTypeDatabaseCleanup,
-		ReferenceID:    "database_cleanup",
 		ScheduledAfter: now,
+		ReferenceID:    "database_cleanup",
+		Type:           models.TaskTypeDatabaseCleanup,
 		Data: map[string]string{
 			"expiration_snapshots":    now.Add(-1 * time.Hour * 24 * 90).Format(time.RFC3339), // 90 days
 			"expiration_interactions": now.Add(-1 * time.Hour * 24 * 7).Format(time.RFC3339),  // 7 days

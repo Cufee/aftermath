@@ -57,13 +57,13 @@ func init() {
 func CreateRecordSnapshotsTasks(client core.Client, realm string) error {
 	realm = strings.ToUpper(realm)
 	task := models.Task{
-		TriesLeft:      3,
 		Type:           models.TaskTypeRecordSnapshots,
 		ReferenceID:    "realm_" + realm,
 		ScheduledAfter: time.Now(),
 		Data: map[string]string{
 			"realm": realm,
 		},
+		TriesLeft: 3,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
