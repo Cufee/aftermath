@@ -14,14 +14,9 @@ import (
 func init() {
 	defaultHandlers[models.TaskTypeDatabaseCleanup] = TaskHandler{
 		Process: func(ctx context.Context, client core.Client, task *models.Task) error {
-			if task.Data == nil {
-				task.Data["triesLeft"] = "0" // do not retry
-				return errors.New("no data provided")
-			}
 			{
 				taskExpiration, err := time.Parse(time.RFC3339, task.Data["expiration_tasks"])
 				if err != nil {
-					task.Data["triesLeft"] = "0" // do not retry
 					return errors.Wrap(err, "failed to parse expiration_tasks to time")
 				}
 				err = client.Database().DeleteExpiredTasks(ctx, taskExpiration)
@@ -32,7 +27,6 @@ func init() {
 			{
 				interactionExpiration, err := time.Parse(time.RFC3339, task.Data["expiration_interactions"])
 				if err != nil {
-					task.Data["triesLeft"] = "0" // do not retry
 					return errors.Wrap(err, "failed to parse interactionExpiration to time")
 				}
 				err = client.Database().DeleteExpiredInteractions(ctx, interactionExpiration)
@@ -43,7 +37,6 @@ func init() {
 			{
 				snapshotExpiration, err := time.Parse(time.RFC3339, task.Data["expiration_snapshots"])
 				if err != nil {
-					task.Data["triesLeft"] = "0" // do not retry
 					return errors.Wrap(err, "failed to parse expiration_snapshots to time")
 				}
 				err = client.Database().DeleteExpiredSnapshots(ctx, snapshotExpiration)
