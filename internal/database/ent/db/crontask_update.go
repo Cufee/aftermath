@@ -119,6 +119,27 @@ func (ctu *CronTaskUpdate) SetNillableLastRun(t *time.Time) *CronTaskUpdate {
 	return ctu
 }
 
+// SetTriesLeft sets the "tries_left" field.
+func (ctu *CronTaskUpdate) SetTriesLeft(i int) *CronTaskUpdate {
+	ctu.mutation.ResetTriesLeft()
+	ctu.mutation.SetTriesLeft(i)
+	return ctu
+}
+
+// SetNillableTriesLeft sets the "tries_left" field if the given value is not nil.
+func (ctu *CronTaskUpdate) SetNillableTriesLeft(i *int) *CronTaskUpdate {
+	if i != nil {
+		ctu.SetTriesLeft(*i)
+	}
+	return ctu
+}
+
+// AddTriesLeft adds i to the "tries_left" field.
+func (ctu *CronTaskUpdate) AddTriesLeft(i int) *CronTaskUpdate {
+	ctu.mutation.AddTriesLeft(i)
+	return ctu
+}
+
 // SetLogs sets the "logs" field.
 func (ctu *CronTaskUpdate) SetLogs(ml []models.TaskLog) *CronTaskUpdate {
 	ctu.mutation.SetLogs(ml)
@@ -242,6 +263,12 @@ func (ctu *CronTaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ctu.mutation.LastRun(); ok {
 		_spec.SetField(crontask.FieldLastRun, field.TypeTime, value)
 	}
+	if value, ok := ctu.mutation.TriesLeft(); ok {
+		_spec.SetField(crontask.FieldTriesLeft, field.TypeInt, value)
+	}
+	if value, ok := ctu.mutation.AddedTriesLeft(); ok {
+		_spec.AddField(crontask.FieldTriesLeft, field.TypeInt, value)
+	}
 	if value, ok := ctu.mutation.Logs(); ok {
 		_spec.SetField(crontask.FieldLogs, field.TypeJSON, value)
 	}
@@ -360,6 +387,27 @@ func (ctuo *CronTaskUpdateOne) SetNillableLastRun(t *time.Time) *CronTaskUpdateO
 	if t != nil {
 		ctuo.SetLastRun(*t)
 	}
+	return ctuo
+}
+
+// SetTriesLeft sets the "tries_left" field.
+func (ctuo *CronTaskUpdateOne) SetTriesLeft(i int) *CronTaskUpdateOne {
+	ctuo.mutation.ResetTriesLeft()
+	ctuo.mutation.SetTriesLeft(i)
+	return ctuo
+}
+
+// SetNillableTriesLeft sets the "tries_left" field if the given value is not nil.
+func (ctuo *CronTaskUpdateOne) SetNillableTriesLeft(i *int) *CronTaskUpdateOne {
+	if i != nil {
+		ctuo.SetTriesLeft(*i)
+	}
+	return ctuo
+}
+
+// AddTriesLeft adds i to the "tries_left" field.
+func (ctuo *CronTaskUpdateOne) AddTriesLeft(i int) *CronTaskUpdateOne {
+	ctuo.mutation.AddTriesLeft(i)
 	return ctuo
 }
 
@@ -515,6 +563,12 @@ func (ctuo *CronTaskUpdateOne) sqlSave(ctx context.Context) (_node *CronTask, er
 	}
 	if value, ok := ctuo.mutation.LastRun(); ok {
 		_spec.SetField(crontask.FieldLastRun, field.TypeTime, value)
+	}
+	if value, ok := ctuo.mutation.TriesLeft(); ok {
+		_spec.SetField(crontask.FieldTriesLeft, field.TypeInt, value)
+	}
+	if value, ok := ctuo.mutation.AddedTriesLeft(); ok {
+		_spec.AddField(crontask.FieldTriesLeft, field.TypeInt, value)
 	}
 	if value, ok := ctuo.mutation.Logs(); ok {
 		_spec.SetField(crontask.FieldLogs, field.TypeJSON, value)

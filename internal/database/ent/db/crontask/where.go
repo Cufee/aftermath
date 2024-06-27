@@ -90,6 +90,11 @@ func LastRun(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldEQ(FieldLastRun, v))
 }
 
+// TriesLeft applies equality check predicate on the "tries_left" field. It's identical to TriesLeftEQ.
+func TriesLeft(v int) predicate.CronTask {
+	return predicate.CronTask(sql.FieldEQ(FieldTriesLeft, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldEQ(FieldCreatedAt, v))
@@ -373,6 +378,46 @@ func LastRunLT(v time.Time) predicate.CronTask {
 // LastRunLTE applies the LTE predicate on the "last_run" field.
 func LastRunLTE(v time.Time) predicate.CronTask {
 	return predicate.CronTask(sql.FieldLTE(FieldLastRun, v))
+}
+
+// TriesLeftEQ applies the EQ predicate on the "tries_left" field.
+func TriesLeftEQ(v int) predicate.CronTask {
+	return predicate.CronTask(sql.FieldEQ(FieldTriesLeft, v))
+}
+
+// TriesLeftNEQ applies the NEQ predicate on the "tries_left" field.
+func TriesLeftNEQ(v int) predicate.CronTask {
+	return predicate.CronTask(sql.FieldNEQ(FieldTriesLeft, v))
+}
+
+// TriesLeftIn applies the In predicate on the "tries_left" field.
+func TriesLeftIn(vs ...int) predicate.CronTask {
+	return predicate.CronTask(sql.FieldIn(FieldTriesLeft, vs...))
+}
+
+// TriesLeftNotIn applies the NotIn predicate on the "tries_left" field.
+func TriesLeftNotIn(vs ...int) predicate.CronTask {
+	return predicate.CronTask(sql.FieldNotIn(FieldTriesLeft, vs...))
+}
+
+// TriesLeftGT applies the GT predicate on the "tries_left" field.
+func TriesLeftGT(v int) predicate.CronTask {
+	return predicate.CronTask(sql.FieldGT(FieldTriesLeft, v))
+}
+
+// TriesLeftGTE applies the GTE predicate on the "tries_left" field.
+func TriesLeftGTE(v int) predicate.CronTask {
+	return predicate.CronTask(sql.FieldGTE(FieldTriesLeft, v))
+}
+
+// TriesLeftLT applies the LT predicate on the "tries_left" field.
+func TriesLeftLT(v int) predicate.CronTask {
+	return predicate.CronTask(sql.FieldLT(FieldTriesLeft, v))
+}
+
+// TriesLeftLTE applies the LTE predicate on the "tries_left" field.
+func TriesLeftLTE(v int) predicate.CronTask {
+	return predicate.CronTask(sql.FieldLTE(FieldTriesLeft, v))
 }
 
 // And groups predicates with the AND operator between them.

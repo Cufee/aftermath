@@ -31,6 +31,8 @@ const (
 	FieldScheduledAfter = "scheduled_after"
 	// FieldLastRun holds the string denoting the last_run field in the database.
 	FieldLastRun = "last_run"
+	// FieldTriesLeft holds the string denoting the tries_left field in the database.
+	FieldTriesLeft = "tries_left"
 	// FieldLogs holds the string denoting the logs field in the database.
 	FieldLogs = "logs"
 	// FieldData holds the string denoting the data field in the database.
@@ -50,6 +52,7 @@ var Columns = []string{
 	FieldStatus,
 	FieldScheduledAfter,
 	FieldLastRun,
+	FieldTriesLeft,
 	FieldLogs,
 	FieldData,
 }
@@ -138,4 +141,9 @@ func ByScheduledAfter(opts ...sql.OrderTermOption) OrderOption {
 // ByLastRun orders the results by the last_run field.
 func ByLastRun(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastRun, opts...).ToFunc()
+}
+
+// ByTriesLeft orders the results by the tries_left field.
+func ByTriesLeft(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTriesLeft, opts...).ToFunc()
 }
