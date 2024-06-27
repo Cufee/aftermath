@@ -56,7 +56,10 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			}(id)
 			continue
 		}
-		if s, ok := existingSnapshotsMap[id]; !force && ok && data.LastBattleTime == int(s.LastBattleTime.Unix()) {
+		if data.LastBattleTime < 1 {
+			continue
+		}
+		if s, ok := existingSnapshotsMap[id]; !force && (ok && data.LastBattleTime == int(s.LastBattleTime.Unix())) {
 			// last snapshot is the same, we can skip it
 			continue
 		}
@@ -132,13 +135,13 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 				}
 
 				vehicleSnapshots[stats.Account.ID] = append(vehicleSnapshots[stats.Account.ID], models.VehicleSnapshot{
-					CreatedAt:      createdAt,
 					Type:           models.SnapshotTypeDaily,
 					LastBattleTime: vehicle.LastBattleTime,
-					AccountID:      stats.Account.ID,
-					VehicleID:      vehicle.VehicleID,
-					ReferenceID:    stats.Account.ID,
 					Stats:          *vehicle.StatsFrame,
+					VehicleID:      vehicle.VehicleID,
+					AccountID:      stats.Account.ID,
+					ReferenceID:    stats.Account.ID,
+					CreatedAt:      createdAt,
 				})
 			}
 		}
