@@ -129,7 +129,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			}
 			vehicleStats := fetch.WargamingVehiclesToFrame(vehicles)
 			for id, vehicle := range vehicleStats {
-				if s, ok := existingSnapshotsMap[id]; !force && ok && s.Stats.Battles == vehicle.Battles {
+				if s, ok := existingSnapshotsMap[id]; !force && ok && s.LastBattleTime.Equal(vehicle.LastBattleTime) {
 					// last snapshot is the same, we can skip it
 					continue
 				}
