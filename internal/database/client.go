@@ -35,8 +35,8 @@ type GlossaryClient interface {
 }
 
 type UsersClient interface {
-	GetUserByID(ctx context.Context, id string, opts ...userGetOption) (models.User, error)
-	GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (models.User, error)
+	GetUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error)
+	GetOrCreateUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error)
 	UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error)
 
 	UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)

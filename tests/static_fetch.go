@@ -1,0 +1,93 @@
+package tests
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/cufee/aftermath/internal/stats/frame"
+	"github.com/cufee/am-wg-proxy-next/v2/types"
+	"github.com/pkg/errors"
+)
+
+var _ fetch.Client = &staticTestingFetch{}
+
+type staticTestingFetch struct{}
+
+func StaticTestingFetch() *staticTestingFetch {
+	return &staticTestingFetch{}
+}
+
+func (c *staticTestingFetch) Account(ctx context.Context, id string) (models.Account, error) {
+	if account, ok := staticAccounts[id]; ok {
+		return account, nil
+	}
+	return models.Account{}, errors.New("account not found")
+}
+func (c *staticTestingFetch) Search(ctx context.Context, nickname, realm string) (types.Account, error) {
+	return types.Account{}, nil
+}
+func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts ...fetch.StatsOption) (fetch.AccountStatsOverPeriod, error) {
+	account, err := c.Account(ctx, id)
+	if err != nil {
+		return fetch.AccountStatsOverPeriod{}, err
+	}
+
+	var vehicles = make(map[string]frame.VehicleStatsFrame)
+	for id := range 10 {
+		vehicles[fmt.Sprint(id)] = DefaultVehicleStatsFrameBig1(fmt.Sprint(id))
+	}
+
+	return fetch.AccountStatsOverPeriod{
+		Account: account,
+		Realm:   account.Realm,
+
+		PeriodEnd:      time.Now(),
+		PeriodStart:    time.Now().Add(time.Hour * 25 * 1),
+		LastBattleTime: time.Now(),
+
+		RegularBattles: fetch.StatsWithVehicles{
+			Vehicles:   vehicles,
+			StatsFrame: DefaultStatsFrameBig1,
+		},
+		RatingBattles: fetch.StatsWithVehicles{
+			StatsFrame: DefaultStatsFrameBig2,
+		},
+	}, nil
+}
+
+func (c *staticTestingFetch) PeriodStats(ctx context.Context, id string, from time.Time, opts ...fetch.StatsOption) (fetch.AccountStatsOverPeriod, error) {
+	current, err := c.CurrentStats(ctx, id, opts...)
+	if err != nil {
+		return fetch.AccountStatsOverPeriod{}, err
+	}
+
+	current.PeriodStart = from
+	current.RegularBattles.StatsFrame.Subtract(DefaultStatsFrameSmall1)
+	current.RatingBattles.StatsFrame.Subtract(DefaultStatsFrameSmall2)
+
+	for id, stats := range current.RegularBattles.Vehicles {
+		stats.StatsFrame.Subtract(DefaultStatsFrameSmall1)
+		current.RegularBattles.Vehicles[id] = stats
+	}
+	return current, nil
+}
+func (c *staticTestingFetch) SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...fetch.StatsOption) (fetch.AccountStatsOverPeriod, fetch.AccountStatsOverPeriod, error) {
+	session, err := c.PeriodStats(ctx, id, sessionStart, opts...)
+	if err != nil {
+		return fetch.AccountStatsOverPeriod{}, fetch.AccountStatsOverPeriod{}, err
+	}
+	career, err := c.CurrentStats(ctx, id, opts...)
+	if err != nil {
+		return fetch.AccountStatsOverPeriod{}, fetch.AccountStatsOverPeriod{}, err
+	}
+
+	return session, career, nil
+}
+
+func (c *staticTestingFetch) CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error) {
+	// TODO: add some data
+	return map[string]frame.StatsFrame{}, nil
+}

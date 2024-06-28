@@ -8,6 +8,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	stats "github.com/cufee/aftermath/internal/stats/renderer/v1"
+	"github.com/cufee/aftermath/tests"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/language"
@@ -22,14 +23,8 @@ func TestRenderSession(t *testing.T) {
 
 	loadStaticAssets(static)
 
-	db, err := newDatabaseClientFromEnv()
-	assert.NoError(t, err)
-
-	coreClient, _ := coreClientsFromEnv(db)
-	defer coreClient.Database().Disconnect()
-
-	renderer := stats.NewRenderer(coreClient.Fetch(), coreClient.Database(), coreClient.Wargaming(), language.English)
-	image, _, err := renderer.Session(context.Background(), "1013072123", time.Now(), common.WithBackground(""))
+	renderer := stats.NewRenderer(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
+	image, _, err := renderer.Session(context.Background(), tests.DefaultAccountNA, time.Now(), common.WithBackground(""))
 	assert.NoError(t, err, "failed to render a session image")
 	assert.NotNil(t, image, "image is nil")
 
