@@ -8,13 +8,15 @@ import (
 )
 
 const DefaultAccountNA = "account1"
+const DefaultAccountNAShort = "account11"
 const DefaultAccountEU = "account2"
 const DefaultAccountAS = "account3"
 
 var staticAccounts = map[string]models.Account{
-	DefaultAccountNA: {ID: DefaultAccountNA, Realm: "NA", Nickname: "@test_account_na_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan1", ClanTag: "TEST1"},
-	DefaultAccountEU: {ID: DefaultAccountEU, Realm: "EU", Nickname: "@test_account_eu_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan2", ClanTag: "TEST2"},
-	DefaultAccountAS: {ID: DefaultAccountAS, Realm: "AS", Nickname: "@test_account_as_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan3", ClanTag: "TEST3"},
+	DefaultAccountNA:      {ID: DefaultAccountNA, Realm: "NA", Nickname: "@test_account_na_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan1", ClanTag: "TEST1"},
+	DefaultAccountNAShort: {ID: DefaultAccountNA, Realm: "NA", Nickname: "@test_acc", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan1", ClanTag: "TEST1"},
+	DefaultAccountEU:      {ID: DefaultAccountEU, Realm: "EU", Nickname: "@test_account_eu_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan2", ClanTag: "TEST2"},
+	DefaultAccountAS:      {ID: DefaultAccountAS, Realm: "AS", Nickname: "@test_account_as_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan3", ClanTag: "TEST3"},
 }
 
 var (
