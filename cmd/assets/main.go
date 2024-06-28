@@ -10,6 +10,8 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 )
 
+// os.Getenv("DOWNLOADER_CMD_PATH")
+
 func main() {
 	// db, err := newDatabaseClientFromEnv()
 	// if err != nil {
