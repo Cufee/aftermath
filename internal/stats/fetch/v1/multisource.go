@@ -317,7 +317,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 			return
 		}
 
-		v, err := c.database.GetVehicleSnapshots(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(s.LastBattleTime.Add(time.Second)))
+		v, err := c.database.GetVehicleSnapshots(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
 		vehiclesSnapshots = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
 	}()
 
@@ -378,8 +378,11 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 			continue
 		}
 
-		current.StatsFrame.Subtract(snapshot.Stats)
-		session.RegularBattles.Vehicles[id] = current
+		sessionFrame := current
+		stats := *current.StatsFrame
+		stats.Subtract(snapshot.Stats)
+		sessionFrame.StatsFrame = &stats
+		session.RegularBattles.Vehicles[id] = sessionFrame
 	}
 
 	if options.withWN8 {

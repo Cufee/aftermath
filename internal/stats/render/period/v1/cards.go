@@ -35,7 +35,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		{
 			rowStyle := getOverviewStyle(cardWidth)
 			for _, column := range cards.Overview.Blocks {
-				for _, block := range column {
+				for _, block := range column.Blocks {
 					valueStyle, labelStyle := rowStyle.block(block)
 
 					label := block.Label
@@ -120,7 +120,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	{
 		var overviewCardBlocks []common.Block
 		for _, column := range cards.Overview.Blocks {
-			columnBlock, err := statsBlocksToColumnBlock(getOverviewStyle(overviewColumnWidth), column)
+			columnBlock, err := statsBlocksToColumnBlock(getOverviewStyle(overviewColumnWidth), column.Blocks)
 			if err != nil {
 				return segments, err
 			}

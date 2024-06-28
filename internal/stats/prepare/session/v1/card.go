@@ -67,7 +67,7 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
 	})
 	for _, data := range ratingVehicles {
-		if len(cards.Rating.Vehicles) >= 5 {
+		if len(cards.Rating.Vehicles) >= 10 {
 			break
 		}
 
@@ -221,11 +221,11 @@ func makeHighlightCard(highlight common.Highlight, session, career frame.Vehicle
 	}, nil
 }
 
-func makeOverviewCard(columns [][]common.Tag, session, career frame.StatsFrame, label string, printer func(string) string, replace func(common.Tag) common.Tag) (OverviewCard, error) {
-	var blocks [][]common.StatsBlock[BlockData]
-	for _, presets := range columns {
+func makeOverviewCard(columns []overviewColumnBlocks, session, career frame.StatsFrame, label string, printer func(string) string, replace func(common.Tag) common.Tag) (OverviewCard, error) {
+	var blocks []OverviewColumn
+	for _, columnBlocks := range columns {
 		var column []common.StatsBlock[BlockData]
-		for _, p := range presets {
+		for _, p := range columnBlocks.blocks {
 			preset := p
 			if replace != nil {
 				preset = replace(p)
@@ -237,7 +237,10 @@ func makeOverviewCard(columns [][]common.Tag, session, career frame.StatsFrame, 
 			block.Localize(printer)
 			column = append(column, block)
 		}
-		blocks = append(blocks, column)
+		blocks = append(blocks, OverviewColumn{
+			Flavor: columnBlocks.flavor,
+			Blocks: column,
+		})
 	}
 	return OverviewCard{
 		Type:   common.CardTypeOverview,

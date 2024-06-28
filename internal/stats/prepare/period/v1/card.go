@@ -23,7 +23,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 	// Overview Card
 	for _, column := range overviewBlocks {
 		var columnBlocks []common.StatsBlock[BlockData]
-		for _, preset := range column {
+		for _, preset := range column.blocks {
 			var block common.StatsBlock[BlockData]
 			b, err := presetToBlock(preset, stats.RegularBattles.StatsFrame, stats.RegularBattles.Vehicles, glossary)
 			if err != nil {
@@ -36,7 +36,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 		}
 
 		cards.Overview.Type = common.CardTypeOverview
-		cards.Overview.Blocks = append(cards.Overview.Blocks, columnBlocks)
+		cards.Overview.Blocks = append(cards.Overview.Blocks, OverviewColumn{columnBlocks, column.flavor})
 	}
 
 	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 {

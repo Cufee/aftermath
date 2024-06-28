@@ -6,7 +6,16 @@ import (
 
 const TagAvgTier common.Tag = "avg_tier"
 
-var overviewBlocks = [][]common.Tag{{common.TagDamageRatio, common.TagAvgDamage, common.TagAccuracy}, {common.TagWN8, common.TagBattles}, {TagAvgTier, common.TagWinrate, common.TagSurvivalPercent}}
+type overviewColumnBlocks struct {
+	blocks []common.Tag
+	flavor blockFlavor
+}
+
+var overviewBlocks = []overviewColumnBlocks{
+	{[]common.Tag{common.TagDamageRatio, common.TagAvgDamage, common.TagAccuracy}, BlockFlavorDefault},
+	{[]common.Tag{common.TagWN8, common.TagBattles}, BlockFlavorSpecial},
+	{[]common.Tag{TagAvgTier, common.TagWinrate, common.TagSurvivalPercent}, BlockFlavorDefault},
+}
 var highlights = []common.Highlight{common.HighlightBattles, common.HighlightWN8, common.HighlightAvgDamage}
 
 type Cards struct {
@@ -14,7 +23,12 @@ type Cards struct {
 	Highlights []VehicleCard `json:"highlights"`
 }
 
-type OverviewCard common.StatsCard[[]common.StatsBlock[BlockData], string]
+type OverviewColumn struct {
+	Blocks []common.StatsBlock[BlockData]
+	Flavor blockFlavor
+}
+
+type OverviewCard common.StatsCard[OverviewColumn, string]
 type VehicleCard common.StatsCard[common.StatsBlock[BlockData], string]
 
 type BlockData struct {
