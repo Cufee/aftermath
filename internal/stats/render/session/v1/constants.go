@@ -63,7 +63,8 @@ func overviewColumnStyle(width float64) common.Style {
 
 func overviewCardStyle(width float64) common.Style {
 	style := defaultCardStyle(width)
-	style.JustifyContent = common.JustifyContentSpaceBetween
+	// style.JustifyContent = common.JustifyContentSpaceBetween
+	style.JustifyContent = common.JustifyContentSpaceAround
 	style.Direction = common.DirectionHorizontal
 	style.AlignItems = common.AlignItemsEnd
 	style.PaddingY = 20
