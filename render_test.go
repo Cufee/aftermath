@@ -24,7 +24,7 @@ func TestRenderSession(t *testing.T) {
 	loadStaticAssets(static)
 
 	renderer := stats.NewRenderer(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
-	image, _, err := renderer.Session(context.Background(), tests.DefaultAccountNA, time.Now(), common.WithBackground(""))
+	image, _, err := renderer.Session(context.Background(), tests.DefaultAccountNAShort, time.Now(), common.WithBackground(""))
 	assert.NoError(t, err, "failed to render a session image")
 	assert.NotNil(t, image, "image is nil")
 
