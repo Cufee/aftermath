@@ -49,10 +49,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	highlightCardBlockSizes := make(map[string]float64)
 	var primaryCardWidth float64 = minPrimaryCardWidth
 	var secondaryCardWidth, totalFrameWidth float64
-	// rating and unrated battles > 0	 	   unrated battles > 0		   rating battles > 0
-	// [title card		] | [vehicle]    [title card	  ] | [vehicle]    [title card	  	]
-	// [overview unrated] | [vehicle] OR [overview unrated] | [vehicle] OR [overview rating ]
-	// [overview rating ] | [...    ]    [highlight       ] | [...    ]    [vehicle			]
 
 	{
 		titleStyle := common.DefaultPlayerTitleStyle(playerNameCardStyle(0))
@@ -110,7 +106,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	// rating vehicle cards go on the primary block - only show if there are no unrated battles/vehicles
 	if shouldRenderRatingVehicles {
 		for _, card := range cards.Rating.Vehicles {
-			// [title] [session]
 			style := ratingVehicleBlockStyle()
 			titleSize := common.MeasureString(card.Title, ratingVehicleCardTitleStyle().Font)
 			presetBlockWidth, contentWidth := vehicleBlocksWidth(card.Blocks, style.session, style.career, style.label, ratingVehicleBlocksRowStyle(0))
@@ -126,8 +121,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	// highlighted vehicles go on the primary block
 	if shouldRenderUnratedHighlights {
 		for _, card := range cards.Unrated.Highlights {
-			// [card label] [session]
-			// [title]  	  [label]
 			labelSize := common.MeasureString(card.Meta, highlightCardTitleTextStyle().Font)
 			titleSize := common.MeasureString(card.Title, highlightVehicleNameTextStyle().Font)
 
@@ -144,10 +137,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	}
 	if shouldRenderUnratedVehicles { // unrated vehicles go on the secondary block
 		for _, card := range cards.Unrated.Vehicles {
-			// 		[ label ]
-			// [session]
-			// [career ]
-
 			styleWithIconOffset := vehicleBlockStyle()
 			// icon is only on one side, so we divide by 2
 			styleWithIconOffset.label.PaddingX += vehicleComparisonIconSize / 2
