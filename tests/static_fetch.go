@@ -71,6 +71,7 @@ func (c *staticTestingFetch) PeriodStats(ctx context.Context, id string, from ti
 	for id, stats := range current.RegularBattles.Vehicles {
 		stats.StatsFrame.Subtract(DefaultStatsFrameSmall1)
 		current.RegularBattles.Vehicles[id] = stats
+		fmt.Printf("%#v\n", stats.StatsFrame)
 	}
 	return current, nil
 }
