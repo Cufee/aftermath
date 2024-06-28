@@ -23,7 +23,7 @@ func (r reply) Text(message ...string) reply {
 }
 
 func (r reply) Format(format string, args ...any) reply {
-	r.text = append(r.text, fmt.Sprintf(format, args...))
+	r.text = append(r.text, fmt.Sprintf(r.ctx.Localize(format), args...))
 	return r
 }
 
@@ -63,7 +63,7 @@ func (r reply) Send(content ...string) error {
 func (r reply) data(localePrinter func(string) string) discordgo.InteractionResponseData {
 	var content []string
 	for _, t := range r.text {
-		content = append(content, localePrinter(t))
+		content = append(content, r.ctx.Localize(t))
 	}
 	return discordgo.InteractionResponseData{
 		Content:    strings.Join(content, "\n"),
