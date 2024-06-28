@@ -106,7 +106,7 @@ Get live account stats from wargaming
   - Each request will be retried c.retriesPerRequest times
   - This function will assume the player ID is valid and optimistically run all request concurrently, returning the first error once all request finish
 */
-func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ...statsOption) (AccountStatsOverPeriod, error) {
+func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ...StatsOption) (AccountStatsOverPeriod, error) {
 	var options statsOptions
 	for _, apply := range opts {
 		apply(&options)
@@ -187,7 +187,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 	return stats, nil
 }
 
-func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodStart time.Time, opts ...statsOption) (AccountStatsOverPeriod, error) {
+func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, error) {
 	var options statsOptions
 	for _, apply := range opts {
 		apply(&options)
@@ -271,7 +271,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	return stats, nil
 }
 
-func (c *multiSourceClient) SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...statsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error) {
+func (c *multiSourceClient) SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error) {
 	var options statsOptions
 	for _, apply := range opts {
 		apply(&options)

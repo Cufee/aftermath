@@ -69,19 +69,19 @@ type userGetOpts struct {
 	subscriptions bool
 }
 
-type userGetOption func(*userGetOpts)
+type UserGetOption func(*userGetOpts)
 
-func WithConnections() userGetOption {
+func WithConnections() UserGetOption {
 	return func(ugo *userGetOpts) {
 		ugo.connections = true
 	}
 }
-func WithSubscriptions() userGetOption {
+func WithSubscriptions() UserGetOption {
 	return func(ugo *userGetOpts) {
 		ugo.subscriptions = true
 	}
 }
-func WithContent() userGetOption {
+func WithContent() UserGetOption {
 	return func(ugo *userGetOpts) {
 		ugo.content = true
 	}
@@ -91,7 +91,7 @@ func WithContent() userGetOption {
 Gets or creates a user with specified ID
   - assumes the ID is valid
 */
-func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...userGetOption) (models.User, error) {
+func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error) {
 	user, err := c.GetUserByID(ctx, id, opts...)
 	if err != nil && !IsNotFound(err) {
 		return models.User{}, err
@@ -115,7 +115,7 @@ func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...use
 Gets a user with specified ID
   - assumes the ID is valid
 */
-func (c *client) GetUserByID(ctx context.Context, id string, opts ...userGetOption) (models.User, error) {
+func (c *client) GetUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error) {
 	var options userGetOpts
 	for _, apply := range opts {
 		apply(&options)

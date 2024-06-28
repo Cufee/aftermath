@@ -49,10 +49,10 @@ type StatsWithVehicles struct {
 type Client interface {
 	Account(ctx context.Context, id string) (models.Account, error)
 	Search(ctx context.Context, nickname, realm string) (types.Account, error)
-	CurrentStats(ctx context.Context, id string, opts ...statsOption) (AccountStatsOverPeriod, error)
+	CurrentStats(ctx context.Context, id string, opts ...StatsOption) (AccountStatsOverPeriod, error)
 
-	PeriodStats(ctx context.Context, id string, from time.Time, opts ...statsOption) (AccountStatsOverPeriod, error)
-	SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...statsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error)
+	PeriodStats(ctx context.Context, id string, from time.Time, opts ...StatsOption) (AccountStatsOverPeriod, error)
+	SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error)
 
 	CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error)
 }
@@ -61,9 +61,9 @@ type statsOptions struct {
 	withWN8 bool
 }
 
-type statsOption func(*statsOptions)
+type StatsOption func(*statsOptions)
 
-func WithWN8() statsOption {
+func WithWN8() StatsOption {
 	return func(so *statsOptions) {
 		so.withWN8 = true
 	}
