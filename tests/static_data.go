@@ -81,29 +81,33 @@ var (
 )
 
 func DefaultVehicleStatsFrameBig1(id string) frame.VehicleStatsFrame {
+	f := DefaultStatsFrameBig1
 	return frame.VehicleStatsFrame{
 		VehicleID:  id,
-		StatsFrame: &DefaultStatsFrameBig1,
+		StatsFrame: &f,
 	}
 }
 
 func DefaultVehicleStatsFrameBig2(id string) frame.VehicleStatsFrame {
+	f := DefaultStatsFrameBig2
 	return frame.VehicleStatsFrame{
 		VehicleID:  id,
-		StatsFrame: &DefaultStatsFrameBig2,
+		StatsFrame: &f,
 	}
 }
 
 func DefaultVehicleStatsFrameSmall1(id string) frame.VehicleStatsFrame {
+	f := DefaultStatsFrameSmall1
 	return frame.VehicleStatsFrame{
 		VehicleID:  id,
-		StatsFrame: &DefaultStatsFrameSmall1,
+		StatsFrame: &f,
 	}
 }
 
 func DefaultVehicleStatsFrameSmall2(id string) frame.VehicleStatsFrame {
+	f := DefaultStatsFrameSmall2
 	return frame.VehicleStatsFrame{
 		VehicleID:  id,
-		StatsFrame: &DefaultStatsFrameSmall2,
+		StatsFrame: &f,
 	}
 }
