@@ -24,14 +24,29 @@ func TestRenderSession(t *testing.T) {
 	loadStaticAssets(static)
 
 	renderer := stats.NewRenderer(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
-	image, _, err := renderer.Session(context.Background(), tests.DefaultAccountNAShort, time.Now(), common.WithBackground(""))
-	assert.NoError(t, err, "failed to render a session image")
-	assert.NotNil(t, image, "image is nil")
 
-	f, err := os.Create("tmp/render_test_session.png")
-	assert.NoError(t, err, "failed to create a file")
-	defer f.Close()
+	{
+		image, _, err := renderer.Session(context.Background(), tests.DefaultAccountNAShort, time.Now(), common.WithBackground(""))
+		assert.NoError(t, err, "failed to render a session image")
+		assert.NotNil(t, image, "image is nil")
 
-	err = image.PNG(f)
-	assert.NoError(t, err, "failed to encode a png image")
+		f, err := os.Create("tmp/render_test_session_full_small.png")
+		assert.NoError(t, err, "failed to create a file")
+		defer f.Close()
+
+		err = image.PNG(f)
+		assert.NoError(t, err, "failed to encode a png image")
+	}
+	{
+		image, _, err := renderer.Session(context.Background(), tests.DefaultAccountNA, time.Now(), common.WithBackground(""))
+		assert.NoError(t, err, "failed to render a session image")
+		assert.NotNil(t, image, "image is nil")
+
+		f, err := os.Create("tmp/render_test_session_full_large.png")
+		assert.NoError(t, err, "failed to create a file")
+		defer f.Close()
+
+		err = image.PNG(f)
+		assert.NoError(t, err, "failed to encode a png image")
+	}
 }
