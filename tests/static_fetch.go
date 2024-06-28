@@ -37,10 +37,12 @@ func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts .
 
 	var vehicles = make(map[string]frame.VehicleStatsFrame)
 	for id := range 10 {
-		vehicles[fmt.Sprint(id)] = DefaultVehicleStatsFrameBig1(fmt.Sprint(id))
+		f := DefaultVehicleStatsFrameBig1(fmt.Sprint(id))
+		f.SetWN8(9999)
+		vehicles[fmt.Sprint(id)] = f
 	}
 
-	return fetch.AccountStatsOverPeriod{
+	stats := fetch.AccountStatsOverPeriod{
 		Account: account,
 		Realm:   account.Realm,
 
@@ -55,7 +57,9 @@ func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts .
 		RatingBattles: fetch.StatsWithVehicles{
 			StatsFrame: DefaultStatsFrameBig2,
 		},
-	}, nil
+	}
+	stats.RegularBattles.SetWN8(9999)
+	return stats, nil
 }
 
 func (c *staticTestingFetch) PeriodStats(ctx context.Context, id string, from time.Time, opts ...fetch.StatsOption) (fetch.AccountStatsOverPeriod, error) {
@@ -65,10 +69,12 @@ func (c *staticTestingFetch) PeriodStats(ctx context.Context, id string, from ti
 	}
 
 	current.PeriodStart = from
+	current.RegularBattles.SetWN8(9999)
 	current.RegularBattles.StatsFrame.Subtract(DefaultStatsFrameSmall1)
 	current.RatingBattles.StatsFrame.Subtract(DefaultStatsFrameSmall2)
 
 	for id, stats := range current.RegularBattles.Vehicles {
+		stats.SetWN8(9999)
 		stats.StatsFrame.Subtract(DefaultStatsFrameSmall1)
 		current.RegularBattles.Vehicles[id] = stats
 	}
