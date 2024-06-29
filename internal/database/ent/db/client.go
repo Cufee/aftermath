@@ -449,15 +449,15 @@ func (c *AccountClient) QueryClan(a *Account) *ClanQuery {
 	return query
 }
 
-// QuerySnapshots queries the snapshots edge of a Account.
-func (c *AccountClient) QuerySnapshots(a *Account) *AccountSnapshotQuery {
+// QueryAccountSnapshots queries the account_snapshots edge of a Account.
+func (c *AccountClient) QueryAccountSnapshots(a *Account) *AccountSnapshotQuery {
 	query := (&AccountSnapshotClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(account.Table, account.FieldID, id),
 			sqlgraph.To(accountsnapshot.Table, accountsnapshot.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, account.SnapshotsTable, account.SnapshotsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.AccountSnapshotsTable, account.AccountSnapshotsColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil

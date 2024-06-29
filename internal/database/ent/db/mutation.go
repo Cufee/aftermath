@@ -74,9 +74,9 @@ type AccountMutation struct {
 	clearedFields                map[string]struct{}
 	clan                         *string
 	clearedclan                  bool
-	snapshots                    map[string]struct{}
-	removedsnapshots             map[string]struct{}
-	clearedsnapshots             bool
+	account_snapshots            map[string]struct{}
+	removedaccount_snapshots     map[string]struct{}
+	clearedaccount_snapshots     bool
 	vehicle_snapshots            map[string]struct{}
 	removedvehicle_snapshots     map[string]struct{}
 	clearedvehicle_snapshots     bool
@@ -520,58 +520,58 @@ func (m *AccountMutation) ResetClan() {
 	m.clearedclan = false
 }
 
-// AddSnapshotIDs adds the "snapshots" edge to the AccountSnapshot entity by ids.
-func (m *AccountMutation) AddSnapshotIDs(ids ...string) {
-	if m.snapshots == nil {
-		m.snapshots = make(map[string]struct{})
+// AddAccountSnapshotIDs adds the "account_snapshots" edge to the AccountSnapshot entity by ids.
+func (m *AccountMutation) AddAccountSnapshotIDs(ids ...string) {
+	if m.account_snapshots == nil {
+		m.account_snapshots = make(map[string]struct{})
 	}
 	for i := range ids {
-		m.snapshots[ids[i]] = struct{}{}
+		m.account_snapshots[ids[i]] = struct{}{}
 	}
 }
 
-// ClearSnapshots clears the "snapshots" edge to the AccountSnapshot entity.
-func (m *AccountMutation) ClearSnapshots() {
-	m.clearedsnapshots = true
+// ClearAccountSnapshots clears the "account_snapshots" edge to the AccountSnapshot entity.
+func (m *AccountMutation) ClearAccountSnapshots() {
+	m.clearedaccount_snapshots = true
 }
 
-// SnapshotsCleared reports if the "snapshots" edge to the AccountSnapshot entity was cleared.
-func (m *AccountMutation) SnapshotsCleared() bool {
-	return m.clearedsnapshots
+// AccountSnapshotsCleared reports if the "account_snapshots" edge to the AccountSnapshot entity was cleared.
+func (m *AccountMutation) AccountSnapshotsCleared() bool {
+	return m.clearedaccount_snapshots
 }
 
-// RemoveSnapshotIDs removes the "snapshots" edge to the AccountSnapshot entity by IDs.
-func (m *AccountMutation) RemoveSnapshotIDs(ids ...string) {
-	if m.removedsnapshots == nil {
-		m.removedsnapshots = make(map[string]struct{})
+// RemoveAccountSnapshotIDs removes the "account_snapshots" edge to the AccountSnapshot entity by IDs.
+func (m *AccountMutation) RemoveAccountSnapshotIDs(ids ...string) {
+	if m.removedaccount_snapshots == nil {
+		m.removedaccount_snapshots = make(map[string]struct{})
 	}
 	for i := range ids {
-		delete(m.snapshots, ids[i])
-		m.removedsnapshots[ids[i]] = struct{}{}
+		delete(m.account_snapshots, ids[i])
+		m.removedaccount_snapshots[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedSnapshots returns the removed IDs of the "snapshots" edge to the AccountSnapshot entity.
-func (m *AccountMutation) RemovedSnapshotsIDs() (ids []string) {
-	for id := range m.removedsnapshots {
+// RemovedAccountSnapshots returns the removed IDs of the "account_snapshots" edge to the AccountSnapshot entity.
+func (m *AccountMutation) RemovedAccountSnapshotsIDs() (ids []string) {
+	for id := range m.removedaccount_snapshots {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// SnapshotsIDs returns the "snapshots" edge IDs in the mutation.
-func (m *AccountMutation) SnapshotsIDs() (ids []string) {
-	for id := range m.snapshots {
+// AccountSnapshotsIDs returns the "account_snapshots" edge IDs in the mutation.
+func (m *AccountMutation) AccountSnapshotsIDs() (ids []string) {
+	for id := range m.account_snapshots {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetSnapshots resets all changes to the "snapshots" edge.
-func (m *AccountMutation) ResetSnapshots() {
-	m.snapshots = nil
-	m.clearedsnapshots = false
-	m.removedsnapshots = nil
+// ResetAccountSnapshots resets all changes to the "account_snapshots" edge.
+func (m *AccountMutation) ResetAccountSnapshots() {
+	m.account_snapshots = nil
+	m.clearedaccount_snapshots = false
+	m.removedaccount_snapshots = nil
 }
 
 // AddVehicleSnapshotIDs adds the "vehicle_snapshots" edge to the VehicleSnapshot entity by ids.
@@ -947,8 +947,8 @@ func (m *AccountMutation) AddedEdges() []string {
 	if m.clan != nil {
 		edges = append(edges, account.EdgeClan)
 	}
-	if m.snapshots != nil {
-		edges = append(edges, account.EdgeSnapshots)
+	if m.account_snapshots != nil {
+		edges = append(edges, account.EdgeAccountSnapshots)
 	}
 	if m.vehicle_snapshots != nil {
 		edges = append(edges, account.EdgeVehicleSnapshots)
@@ -967,9 +967,9 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 		if id := m.clan; id != nil {
 			return []ent.Value{*id}
 		}
-	case account.EdgeSnapshots:
-		ids := make([]ent.Value, 0, len(m.snapshots))
-		for id := range m.snapshots {
+	case account.EdgeAccountSnapshots:
+		ids := make([]ent.Value, 0, len(m.account_snapshots))
+		for id := range m.account_snapshots {
 			ids = append(ids, id)
 		}
 		return ids
@@ -992,8 +992,8 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AccountMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 4)
-	if m.removedsnapshots != nil {
-		edges = append(edges, account.EdgeSnapshots)
+	if m.removedaccount_snapshots != nil {
+		edges = append(edges, account.EdgeAccountSnapshots)
 	}
 	if m.removedvehicle_snapshots != nil {
 		edges = append(edges, account.EdgeVehicleSnapshots)
@@ -1008,9 +1008,9 @@ func (m *AccountMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case account.EdgeSnapshots:
-		ids := make([]ent.Value, 0, len(m.removedsnapshots))
-		for id := range m.removedsnapshots {
+	case account.EdgeAccountSnapshots:
+		ids := make([]ent.Value, 0, len(m.removedaccount_snapshots))
+		for id := range m.removedaccount_snapshots {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1036,8 +1036,8 @@ func (m *AccountMutation) ClearedEdges() []string {
 	if m.clearedclan {
 		edges = append(edges, account.EdgeClan)
 	}
-	if m.clearedsnapshots {
-		edges = append(edges, account.EdgeSnapshots)
+	if m.clearedaccount_snapshots {
+		edges = append(edges, account.EdgeAccountSnapshots)
 	}
 	if m.clearedvehicle_snapshots {
 		edges = append(edges, account.EdgeVehicleSnapshots)
@@ -1054,8 +1054,8 @@ func (m *AccountMutation) EdgeCleared(name string) bool {
 	switch name {
 	case account.EdgeClan:
 		return m.clearedclan
-	case account.EdgeSnapshots:
-		return m.clearedsnapshots
+	case account.EdgeAccountSnapshots:
+		return m.clearedaccount_snapshots
 	case account.EdgeVehicleSnapshots:
 		return m.clearedvehicle_snapshots
 	case account.EdgeAchievementSnapshots:
@@ -1082,8 +1082,8 @@ func (m *AccountMutation) ResetEdge(name string) error {
 	case account.EdgeClan:
 		m.ResetClan()
 		return nil
-	case account.EdgeSnapshots:
-		m.ResetSnapshots()
+	case account.EdgeAccountSnapshots:
+		m.ResetAccountSnapshots()
 		return nil
 	case account.EdgeVehicleSnapshots:
 		m.ResetVehicleSnapshots()

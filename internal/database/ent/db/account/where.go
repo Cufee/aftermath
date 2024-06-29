@@ -503,21 +503,21 @@ func HasClanWith(preds ...predicate.Clan) predicate.Account {
 	})
 }
 
-// HasSnapshots applies the HasEdge predicate on the "snapshots" edge.
-func HasSnapshots() predicate.Account {
+// HasAccountSnapshots applies the HasEdge predicate on the "account_snapshots" edge.
+func HasAccountSnapshots() predicate.Account {
 	return predicate.Account(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SnapshotsTable, SnapshotsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, AccountSnapshotsTable, AccountSnapshotsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSnapshotsWith applies the HasEdge predicate on the "snapshots" edge with a given conditions (other predicates).
-func HasSnapshotsWith(preds ...predicate.AccountSnapshot) predicate.Account {
+// HasAccountSnapshotsWith applies the HasEdge predicate on the "account_snapshots" edge with a given conditions (other predicates).
+func HasAccountSnapshotsWith(preds ...predicate.AccountSnapshot) predicate.Account {
 	return predicate.Account(func(s *sql.Selector) {
-		step := newSnapshotsStep()
+		step := newAccountSnapshotsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -16,23 +16,26 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type vehicleResponseData map[string][]types.VehicleStatsFrame
+type vehicleBattleData struct {
+	LastBattle time.Time
+	Battles    int
+}
 
-func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm string, force bool, accountIDs ...string) (map[string]error, error) {
-	if len(accountIDs) < 1 {
-		return nil, nil
-	}
-
-	createdAt := time.Now()
+/*
+Gets all accounts from WH and their respective snapshots
+  - an account is considered valid is it has played a battle since the last snapshot, or has no snapshots
+  - as side effect, invalid accounts will be set as private
+*/
+func getAndValidateAccounts(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, force bool, realm string, accountIDs ...string) (map[string]types.ExtendedAccount, []string, map[string]*models.AccountSnapshot, error) {
 	accounts, err := wgClient.BatchAccountByID(ctx, realm, accountIDs)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to fetch accounts")
+		return nil, nil, nil, errors.Wrap(err, "failed to fetch accounts")
 	}
 
 	// existing snapshots for accounts
 	existingSnapshots, err := dbClient.GetManyAccountSnapshots(ctx, accountIDs, models.SnapshotTypeDaily)
 	if err != nil && !database.IsNotFound(err) {
-		return nil, errors.Wrap(err, "failed to get existing snapshots")
+		return nil, nil, nil, errors.Wrap(err, "failed to get existing snapshots")
 	}
 	existingSnapshotsMap := make(map[string]*models.AccountSnapshot)
 	for _, snapshot := range existingSnapshots {
@@ -40,7 +43,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	}
 
 	// make a new slice just in case some accounts were not returned/are private
-	var validAccounts []string
+	var needAnUpdate []string
 	for _, id := range accountIDs {
 		data, ok := accounts[id]
 		if !ok {
@@ -63,85 +66,182 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			// last snapshot is the same, we can skip it
 			continue
 		}
-		validAccounts = append(validAccounts, id)
+		needAnUpdate = append(needAnUpdate, id)
 	}
+	return accounts, needAnUpdate, existingSnapshotsMap, nil
+}
 
-	if len(validAccounts) < 1 {
+func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm string, force bool, accountIDs ...string) (map[string]error, error) {
+	if len(accountIDs) < 1 {
+		return nil, nil
+	}
+	createdAt := time.Now()
+
+	accounts, accountsNeedAnUpdate, _, err := getAndValidateAccounts(ctx, wgClient, dbClient, force, realm, accountIDs...)
+	if err != nil {
+		return nil, err
+	}
+	if len(accountsNeedAnUpdate) < 1 {
 		return nil, nil
 	}
 
-	// clans are optional-ish
-	clans, err := wgClient.BatchAccountClan(ctx, realm, validAccounts)
-	if err != nil {
-		log.Err(err).Msg("failed to get batch account clans")
-		clans = make(map[string]types.ClanMember)
-	}
-
-	vehicleCh := make(chan retry.DataWithErr[vehicleResponseData], len(validAccounts))
 	var group sync.WaitGroup
-	group.Add(len(validAccounts))
-	for _, id := range validAccounts {
+	var clans = make(map[string]types.ClanMember)
+	var accountAchievements retry.DataWithErr[map[string]types.AchievementsFrame]
+
+	var accountVehiclesMx sync.Mutex
+	var accountVehicleAchievementsMx sync.Mutex
+	accountVehicles := make(map[string]retry.DataWithErr[[]types.VehicleStatsFrame], len(accountsNeedAnUpdate))
+	accountVehicleAchievements := make(map[string]retry.DataWithErr[map[string]types.AchievementsFrame], len(accountsNeedAnUpdate))
+
+	for _, id := range accountsNeedAnUpdate {
+		group.Add(1)
+		// get account vehicle stats
 		go func(id string) {
 			defer group.Done()
 			data, err := wgClient.AccountVehicles(ctx, realm, id)
-			vehicleCh <- retry.DataWithErr[vehicleResponseData]{Data: vehicleResponseData{id: data}, Err: err}
+
+			accountVehiclesMx.Lock()
+			accountVehicles[id] = retry.DataWithErr[[]types.VehicleStatsFrame]{Data: data, Err: err}
+			accountVehiclesMx.Unlock()
+		}(id)
+
+		group.Add(1)
+		// get account vehicle achievements
+		go func(id string) {
+			defer group.Done()
+			data, err := wgClient.AccountVehicleAchievements(ctx, realm, id)
+
+			accountVehicleAchievementsMx.Lock()
+			accountVehicleAchievements[id] = retry.DataWithErr[map[string]types.AchievementsFrame]{Data: data, Err: err}
+			accountVehicleAchievementsMx.Unlock()
 		}(id)
 	}
+
+	group.Add(1)
+	// get account clans, not critical
+	go func() {
+		defer group.Done()
+		// clans are optional-ish
+		data, err := wgClient.BatchAccountClan(ctx, realm, accountsNeedAnUpdate)
+		if err != nil {
+			log.Err(err).Msg("failed to get batch account clans")
+		}
+		clans = data
+	}()
+
+	group.Add(1)
+	// get account achievements, not critical
+	go func() {
+		defer group.Done()
+		// clans are optional-ish
+		data, err := wgClient.BatchAccountAchievements(ctx, realm, accountsNeedAnUpdate)
+		if err != nil {
+			log.Err(err).Msg("failed to get batch account achievements")
+		}
+		accountAchievements.Data = data
+		accountAchievements.Err = err
+	}()
+
 	group.Wait()
-	close(vehicleCh)
 
 	var accountErrors = make(map[string]error)
 	var accountUpdates = make(map[string]models.Account)
 
 	var accountSnapshots []models.AccountSnapshot
 	var vehicleSnapshots = make(map[string][]models.VehicleSnapshot)
-	for result := range vehicleCh {
-		// there is only 1 key in this map
-		for id, vehicles := range result.Data {
-			if result.Err != nil {
-				accountErrors[id] = result.Err
-				continue
-			}
-			existingSnapshots, err := dbClient.GetVehicleSnapshots(ctx, id, id, models.SnapshotTypeDaily)
-			if err != nil && !database.IsNotFound(err) {
-				accountErrors[id] = err
-				continue
-			}
-			existingSnapshotsMap := make(map[string]*models.VehicleSnapshot)
-			for _, snapshot := range existingSnapshots {
-				existingSnapshotsMap[snapshot.VehicleID] = &snapshot
-			}
+	var achievementsSnapshots = make(map[string][]models.AchievementsSnapshot)
 
-			stats := fetch.WargamingToStats(realm, accounts[id], clans[id], vehicles)
+	for _, accountID := range accountsNeedAnUpdate {
+		vehicles := accountVehicles[accountID]
+		if vehicles.Err != nil {
+			accountErrors[accountID] = vehicles.Err
+			continue
+		}
+
+		// get existing vehicle snapshots from db
+		existingSnapshots, err := dbClient.GetVehicleSnapshots(ctx, accountID, accountID, models.SnapshotTypeDaily)
+		if err != nil && !database.IsNotFound(err) {
+			accountErrors[accountID] = err
+			continue
+		}
+		existingSnapshotsMap := make(map[string]*models.VehicleSnapshot)
+		for _, snapshot := range existingSnapshots {
+			existingSnapshotsMap[snapshot.VehicleID] = &snapshot
+		}
+
+		snapshotStats := fetch.WargamingToStats(realm, accounts[accountID], clans[accountID], vehicles.Data)
+		{ // account snapshot
 			accountSnapshots = append(accountSnapshots, models.AccountSnapshot{
 				Type:           models.SnapshotTypeDaily,
 				CreatedAt:      createdAt,
-				AccountID:      stats.Account.ID,
-				ReferenceID:    stats.Account.ID,
-				LastBattleTime: stats.LastBattleTime,
-				RatingBattles:  stats.RatingBattles.StatsFrame,
-				RegularBattles: stats.RegularBattles.StatsFrame,
+				AccountID:      snapshotStats.Account.ID,
+				ReferenceID:    snapshotStats.Account.ID,
+				LastBattleTime: snapshotStats.LastBattleTime,
+				RatingBattles:  snapshotStats.RatingBattles.StatsFrame,
+				RegularBattles: snapshotStats.RegularBattles.StatsFrame,
 			})
-			accountUpdates[id] = stats.Account
+			accountUpdates[accountID] = snapshotStats.Account
+		}
 
-			if len(vehicles) < 1 {
-				continue
-			}
-			vehicleStats := fetch.WargamingVehiclesToFrame(vehicles)
+		// vehicle snapshots
+		var vehicleLastBattleTimes = make(map[string]vehicleBattleData)
+		vehicleStats := fetch.WargamingVehiclesToFrame(vehicles.Data)
+		if len(vehicles.Data) > 0 {
 			for id, vehicle := range vehicleStats {
 				if s, ok := existingSnapshotsMap[id]; !force && ok && s.LastBattleTime.Equal(vehicle.LastBattleTime) {
 					// last snapshot is the same, we can skip it
 					continue
 				}
-
-				vehicleSnapshots[stats.Account.ID] = append(vehicleSnapshots[stats.Account.ID], models.VehicleSnapshot{
+				vehicleLastBattleTimes[id] = vehicleBattleData{vehicle.LastBattleTime, int(vehicle.Battles.Float())}
+				vehicleSnapshots[accountID] = append(vehicleSnapshots[accountID], models.VehicleSnapshot{
 					Type:           models.SnapshotTypeDaily,
 					LastBattleTime: vehicle.LastBattleTime,
 					Stats:          *vehicle.StatsFrame,
 					VehicleID:      vehicle.VehicleID,
-					AccountID:      stats.Account.ID,
-					ReferenceID:    stats.Account.ID,
+					AccountID:      accountID,
+					ReferenceID:    accountID,
 					CreatedAt:      createdAt,
+				})
+			}
+		}
+
+		// account achievement snapshot
+		if accountAchievements.Err != nil {
+			accountErrors[accountID] = errors.Wrap(accountAchievements.Err, "failed to get account achievements")
+		}
+		if achievements, ok := accountAchievements.Data[accountID]; ok {
+			achievementsSnapshots[accountID] = append(achievementsSnapshots[accountID], models.AchievementsSnapshot{
+				Data:           achievements,
+				CreatedAt:      createdAt,
+				AccountID:      accountID,
+				ReferenceID:    accountID,
+				Type:           models.SnapshotTypeDaily,
+				LastBattleTime: snapshotStats.LastBattleTime,
+				Battles:        int(snapshotStats.RegularBattles.Battles.Float()),
+			})
+		}
+
+		// account vehicle achievement snapshots
+		if achievements, ok := accountVehicleAchievements[accountID]; ok {
+			if achievements.Err != nil {
+				accountErrors[accountID] = errors.Wrap(achievements.Err, "failed to get vehicle achievements")
+			}
+			for vehicleID, a := range achievements.Data {
+				battleData, ok := vehicleLastBattleTimes[vehicleID]
+				if !ok {
+					// vehicle was not played, no need to save achievements
+					continue
+				}
+
+				achievementsSnapshots[accountID] = append(achievementsSnapshots[accountID], models.AchievementsSnapshot{
+					Data:           a,
+					CreatedAt:      createdAt,
+					AccountID:      accountID,
+					ReferenceID:    vehicleID,
+					Battles:        battleData.Battles,
+					LastBattleTime: battleData.LastBattle,
+					Type:           models.SnapshotTypeDaily,
 				})
 			}
 		}
@@ -160,6 +260,27 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 				accountErrors[accountSnapshot.AccountID] = errors.Errorf("failed to insert %d vehicle snapshots", len(vErr))
 				continue
 			}
+		}
+
+		achievements := achievementsSnapshots[accountSnapshot.AccountID]
+		if len(achievements) > 0 {
+			achErr, err := dbClient.CreateAccountAchievementSnapshots(ctx, accountSnapshot.AccountID, achievements...)
+			if err != nil {
+				accountErrors[accountSnapshot.AccountID] = errors.Wrap(err, "failed to save account achievements to database")
+				continue
+			}
+
+			for id, e := range achErr {
+				if e != nil {
+					err = errors.Wrapf(e, "failed to save some achievement snapshots, id %s", id)
+					break
+				}
+			}
+			if err != nil {
+				accountErrors[accountSnapshot.AccountID] = err
+				continue
+			}
+
 		}
 
 		// save account snapshot

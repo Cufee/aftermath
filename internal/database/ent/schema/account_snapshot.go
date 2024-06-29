@@ -35,7 +35,7 @@ func (AccountSnapshot) Fields() []ent.Field {
 // Edges of the AccountSnapshot.
 func (AccountSnapshot) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("account", Account.Type).Ref("snapshots").Field("account_id").Required().Immutable().Unique(),
+		edge.From("account", Account.Type).Ref("account_snapshots").Field("account_id").Required().Immutable().Unique(),
 	}
 }
 

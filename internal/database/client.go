@@ -52,6 +52,9 @@ type SnapshotsClient interface {
 	GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error)
 	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) (map[string]error, error)
 
+	CreateAccountAchievementSnapshots(ctx context.Context, accountID string, snapshots ...models.AchievementsSnapshot) (map[string]error, error)
+	GetAchievementsSnapshots(ctx context.Context, accountID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AchievementsSnapshot, error)
+
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
 }
 

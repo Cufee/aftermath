@@ -201,6 +201,10 @@ func init() {
 	crontaskDescReferenceID := crontaskFields[4].Descriptor()
 	// crontask.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
 	crontask.ReferenceIDValidator = crontaskDescReferenceID.Validators[0].(func(string) error)
+	// crontaskDescTriesLeft is the schema descriptor for tries_left field.
+	crontaskDescTriesLeft := crontaskFields[9].Descriptor()
+	// crontask.DefaultTriesLeft holds the default value on creation for the tries_left field.
+	crontask.DefaultTriesLeft = crontaskDescTriesLeft.Default.(int)
 	// crontaskDescID is the schema descriptor for id field.
 	crontaskDescID := crontaskFields[0].Descriptor()
 	// crontask.DefaultID holds the default value on creation for the id field.

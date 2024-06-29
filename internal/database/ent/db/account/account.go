@@ -32,8 +32,8 @@ const (
 	FieldClanID = "clan_id"
 	// EdgeClan holds the string denoting the clan edge name in mutations.
 	EdgeClan = "clan"
-	// EdgeSnapshots holds the string denoting the snapshots edge name in mutations.
-	EdgeSnapshots = "snapshots"
+	// EdgeAccountSnapshots holds the string denoting the account_snapshots edge name in mutations.
+	EdgeAccountSnapshots = "account_snapshots"
 	// EdgeVehicleSnapshots holds the string denoting the vehicle_snapshots edge name in mutations.
 	EdgeVehicleSnapshots = "vehicle_snapshots"
 	// EdgeAchievementSnapshots holds the string denoting the achievement_snapshots edge name in mutations.
@@ -47,13 +47,13 @@ const (
 	ClanInverseTable = "clans"
 	// ClanColumn is the table column denoting the clan relation/edge.
 	ClanColumn = "clan_id"
-	// SnapshotsTable is the table that holds the snapshots relation/edge.
-	SnapshotsTable = "account_snapshots"
-	// SnapshotsInverseTable is the table name for the AccountSnapshot entity.
+	// AccountSnapshotsTable is the table that holds the account_snapshots relation/edge.
+	AccountSnapshotsTable = "account_snapshots"
+	// AccountSnapshotsInverseTable is the table name for the AccountSnapshot entity.
 	// It exists in this package in order to avoid circular dependency with the "accountsnapshot" package.
-	SnapshotsInverseTable = "account_snapshots"
-	// SnapshotsColumn is the table column denoting the snapshots relation/edge.
-	SnapshotsColumn = "account_id"
+	AccountSnapshotsInverseTable = "account_snapshots"
+	// AccountSnapshotsColumn is the table column denoting the account_snapshots relation/edge.
+	AccountSnapshotsColumn = "account_id"
 	// VehicleSnapshotsTable is the table that holds the vehicle_snapshots relation/edge.
 	VehicleSnapshotsTable = "vehicle_snapshots"
 	// VehicleSnapshotsInverseTable is the table name for the VehicleSnapshot entity.
@@ -163,17 +163,17 @@ func ByClanField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// BySnapshotsCount orders the results by snapshots count.
-func BySnapshotsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByAccountSnapshotsCount orders the results by account_snapshots count.
+func ByAccountSnapshotsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newSnapshotsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newAccountSnapshotsStep(), opts...)
 	}
 }
 
-// BySnapshots orders the results by snapshots terms.
-func BySnapshots(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByAccountSnapshots orders the results by account_snapshots terms.
+func ByAccountSnapshots(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSnapshotsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newAccountSnapshotsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -211,11 +211,11 @@ func newClanStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, ClanTable, ClanColumn),
 	)
 }
-func newSnapshotsStep() *sqlgraph.Step {
+func newAccountSnapshotsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SnapshotsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, SnapshotsTable, SnapshotsColumn),
+		sqlgraph.To(AccountSnapshotsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AccountSnapshotsTable, AccountSnapshotsColumn),
 	)
 }
 func newVehicleSnapshotsStep() *sqlgraph.Step {

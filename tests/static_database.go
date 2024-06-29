@@ -111,6 +111,12 @@ func (c *staticTestingDatabase) CreateAccountVehicleSnapshots(ctx context.Contex
 func (c *staticTestingDatabase) DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error {
 	return errors.New("DeleteExpiredSnapshots not implemented")
 }
+func (c *staticTestingDatabase) CreateAccountAchievementSnapshots(ctx context.Context, accountID string, snapshots ...models.AchievementsSnapshot) (map[string]error, error) {
+	return nil, errors.New("CreateAccountAchievementSnapshots not implemented")
+}
+func (c *staticTestingDatabase) GetAchievementsSnapshots(ctx context.Context, accountID string, kind models.SnapshotType, options ...database.SnapshotQuery) ([]models.AchievementsSnapshot, error) {
+	return nil, errors.New("GetAchievementsSnapshots not implemented")
+}
 
 func (c *staticTestingDatabase) CreateTasks(ctx context.Context, tasks ...models.Task) error {
 	return errors.New("not implemented")
