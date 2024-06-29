@@ -134,13 +134,12 @@ func (q *queue) pullAndEnqueueTasks(ctx context.Context, db database.Client) err
 	if err != nil && !database.IsNotFound(err) {
 		return err
 	}
-	log.Debug().Msgf("pulled %d tasks into queue", len(tasks))
 
-	go func(tasks []models.Task) {
-		for _, t := range tasks {
-			q.Enqueue(t)
-		}
-	}(tasks)
+	log.Debug().Msgf("adding %d tasks into queue", len(tasks))
+	for _, t := range tasks {
+		q.Enqueue(t)
+	}
+	log.Debug().Msgf("added %d tasks into queue", len(tasks))
 
 	return nil
 }
