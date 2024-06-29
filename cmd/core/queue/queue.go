@@ -25,7 +25,7 @@ type queue struct {
 	workerLimiter chan struct{}
 	workerTimeout time.Duration
 
-	activeTasks   map[string]struct{}
+	activeTasks   map[string]*struct{}
 	activeTasksMx *sync.Mutex
 	newCoreClient func() (core.Client, error)
 }
@@ -40,7 +40,7 @@ func New(workerLimit int, newCoreClient func() (core.Client, error)) *queue {
 		workerLimiter: make(chan struct{}, workerLimit),
 
 		activeTasksMx: &sync.Mutex{},
-		activeTasks:   make(map[string]struct{}),
+		activeTasks:   make(map[string]*struct{}, workerLimit*2),
 
 		queueLock: &sync.Mutex{},
 		queued:    make(chan models.Task, workerLimit*2),
@@ -152,7 +152,7 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 			go func() {
 				q.workerLimiter <- struct{}{}
 				q.activeTasksMx.Lock()
-				q.activeTasks[task.ID] = struct{}{}
+				q.activeTasks[task.ID] = &struct{}{}
 				q.activeTasksMx.Unlock()
 				defer func() {
 					<-q.workerLimiter
