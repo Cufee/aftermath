@@ -115,19 +115,19 @@ func (ac *AccountCreate) SetClan(c *Clan) *AccountCreate {
 	return ac.SetClanID(c.ID)
 }
 
-// AddSnapshotIDs adds the "snapshots" edge to the AccountSnapshot entity by IDs.
-func (ac *AccountCreate) AddSnapshotIDs(ids ...string) *AccountCreate {
-	ac.mutation.AddSnapshotIDs(ids...)
+// AddAccountSnapshotIDs adds the "account_snapshots" edge to the AccountSnapshot entity by IDs.
+func (ac *AccountCreate) AddAccountSnapshotIDs(ids ...string) *AccountCreate {
+	ac.mutation.AddAccountSnapshotIDs(ids...)
 	return ac
 }
 
-// AddSnapshots adds the "snapshots" edges to the AccountSnapshot entity.
-func (ac *AccountCreate) AddSnapshots(a ...*AccountSnapshot) *AccountCreate {
+// AddAccountSnapshots adds the "account_snapshots" edges to the AccountSnapshot entity.
+func (ac *AccountCreate) AddAccountSnapshots(a ...*AccountSnapshot) *AccountCreate {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return ac.AddSnapshotIDs(ids...)
+	return ac.AddAccountSnapshotIDs(ids...)
 }
 
 // AddVehicleSnapshotIDs adds the "vehicle_snapshots" edge to the VehicleSnapshot entity by IDs.
@@ -322,12 +322,12 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_node.ClanID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.SnapshotsIDs(); len(nodes) > 0 {
+	if nodes := ac.mutation.AccountSnapshotsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.SnapshotsTable,
-			Columns: []string{account.SnapshotsColumn},
+			Table:   account.AccountSnapshotsTable,
+			Columns: []string{account.AccountSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),

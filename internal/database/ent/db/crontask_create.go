@@ -91,6 +91,14 @@ func (ctc *CronTaskCreate) SetTriesLeft(i int) *CronTaskCreate {
 	return ctc
 }
 
+// SetNillableTriesLeft sets the "tries_left" field if the given value is not nil.
+func (ctc *CronTaskCreate) SetNillableTriesLeft(i *int) *CronTaskCreate {
+	if i != nil {
+		ctc.SetTriesLeft(*i)
+	}
+	return ctc
+}
+
 // SetLogs sets the "logs" field.
 func (ctc *CronTaskCreate) SetLogs(ml []models.TaskLog) *CronTaskCreate {
 	ctc.mutation.SetLogs(ml)
@@ -159,6 +167,10 @@ func (ctc *CronTaskCreate) defaults() {
 	if _, ok := ctc.mutation.UpdatedAt(); !ok {
 		v := crontask.DefaultUpdatedAt()
 		ctc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := ctc.mutation.TriesLeft(); !ok {
+		v := crontask.DefaultTriesLeft
+		ctc.mutation.SetTriesLeft(v)
 	}
 	if _, ok := ctc.mutation.ID(); !ok {
 		v := crontask.DefaultID()

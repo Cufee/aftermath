@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
+	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -259,5 +260,116 @@ func (c *client) GetManyAccountSnapshots(ctx context.Context, accountIDs []strin
 	}
 
 	return snapshots, nil
+}
 
+func toAchievementsSnapshot(record *db.AchievementsSnapshot) models.AchievementsSnapshot {
+	return models.AchievementsSnapshot{
+		ID:             record.ID,
+		Type:           record.Type,
+		CreatedAt:      record.CreatedAt,
+		LastBattleTime: record.LastBattleTime,
+		ReferenceID:    record.ReferenceID,
+		AccountID:      record.AccountID,
+		Battles:        record.Battles,
+		Data:           record.Data,
+	}
+}
+
+func (c *client) CreateAccountAchievementSnapshots(ctx context.Context, accountID string, snapshots ...models.AchievementsSnapshot) (map[string]error, error) {
+	if len(snapshots) < 1 {
+		return nil, nil
+	}
+
+	var errors = make(map[string]error)
+	for _, data := range snapshots {
+		// make a transaction per write to avoid locking for too long
+		err := c.withTx(ctx, func(tx *db.Tx) error {
+			return c.db.AchievementsSnapshot.Create().
+				SetType(data.Type).
+				SetData(data.Data).
+				SetBattles(data.Battles).
+				SetCreatedAt(data.CreatedAt).
+				SetReferenceID(data.ReferenceID).
+				SetLastBattleTime(data.LastBattleTime).
+				SetAccount(c.db.Account.GetX(ctx, accountID)).
+				Exec(ctx)
+		})
+		if err != nil {
+			errors[data.ReferenceID] = err
+		}
+	}
+
+	if len(errors) > 0 {
+		return errors, nil
+	}
+	return nil, nil
+}
+
+func (c *client) GetAchievementsSnapshots(ctx context.Context, accountID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AchievementsSnapshot, error) {
+	var query getSnapshotQuery
+	for _, apply := range options {
+		apply(&query)
+	}
+
+	// this query is impossible to build using the db.AchievementSnapshot methods, so we do it manually
+	var innerWhere []*sql.Predicate
+	innerWhere = append(innerWhere,
+		sql.EQ(achievementssnapshot.FieldType, kind),
+		sql.EQ(achievementssnapshot.FieldAccountID, accountID),
+	)
+	innerOrder := sql.Desc(achievementssnapshot.FieldCreatedAt)
+
+	if query.createdAfter != nil {
+		innerWhere = append(innerWhere, sql.GT(achievementssnapshot.FieldCreatedAt, *query.createdAfter))
+		innerOrder = sql.Asc(achievementssnapshot.FieldCreatedAt)
+	}
+	if query.createdBefore != nil {
+		innerWhere = append(innerWhere, sql.LT(achievementssnapshot.FieldCreatedAt, *query.createdBefore))
+		innerOrder = sql.Desc(achievementssnapshot.FieldCreatedAt)
+	}
+	if len(query.vehicleIDs) > 0 {
+		var ids []any
+		for _, id := range query.vehicleIDs {
+			ids = append(ids, id)
+		}
+		innerWhere = append(innerWhere, sql.In(achievementssnapshot.FieldReferenceID, append(ids, accountID)...))
+	}
+
+	innerQuery := sql.Select(achievementssnapshot.Columns...).From(sql.Table(achievementssnapshot.Table))
+	innerQuery = innerQuery.Where(sql.And(innerWhere...))
+	innerQuery = innerQuery.OrderBy(innerOrder)
+
+	innerQueryString, innerQueryArgs := innerQuery.Query()
+
+	// wrap the inner query in a GROUP BY
+	wrapper := &sql.Builder{}
+	wrapped := wrapper.Wrap(func(b *sql.Builder) { b.WriteString(innerQueryString) })
+	queryString, _ := sql.Select("*").FromExpr(wrapped).GroupBy(achievementssnapshot.FieldReferenceID).Query()
+
+	rows, err := c.db.AchievementsSnapshot.QueryContext(ctx, queryString, innerQueryArgs...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var snapshots []models.AchievementsSnapshot
+	for rows.Next() {
+		var record db.AchievementsSnapshot
+
+		values, err := record.ScanValues(achievementssnapshot.Columns)
+		if err != nil {
+			return nil, err
+		}
+		if err := rows.Scan(values...); err != nil {
+			return nil, err
+		}
+
+		err = record.AssignValues(achievementssnapshot.Columns, values)
+		if err != nil {
+			return nil, err
+		}
+		snapshots = append(snapshots, toAchievementsSnapshot(&record))
+	}
+
+	return snapshots, nil
 }

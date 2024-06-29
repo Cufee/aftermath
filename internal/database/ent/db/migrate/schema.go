@@ -82,7 +82,7 @@ var (
 		PrimaryKey: []*schema.Column{AccountSnapshotsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "account_snapshots_accounts_snapshots",
+				Symbol:     "account_snapshots_accounts_account_snapshots",
 				Columns:    []*schema.Column{AccountSnapshotsColumns[10]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.NoAction,
@@ -262,7 +262,7 @@ var (
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"TASK_SCHEDULED", "TASK_IN_PROGRESS", "TASK_COMPLETE", "TASK_FAILED"}},
 		{Name: "scheduled_after", Type: field.TypeTime},
 		{Name: "last_run", Type: field.TypeTime},
-		{Name: "tries_left", Type: field.TypeInt},
+		{Name: "tries_left", Type: field.TypeInt, Default: 0},
 		{Name: "logs", Type: field.TypeJSON},
 		{Name: "data", Type: field.TypeJSON},
 	}

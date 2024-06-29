@@ -9,12 +9,10 @@ import (
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
-// AchievementsSnapshot holds the schema definition for the AchievementsSnapshot entity.
 type AchievementsSnapshot struct {
 	ent.Schema
 }
 
-// Fields of the AchievementsSnapshot.
 func (AchievementsSnapshot) Fields() []ent.Field {
 	return append(defaultFields,
 		field.Enum("type").
@@ -28,7 +26,6 @@ func (AchievementsSnapshot) Fields() []ent.Field {
 	)
 }
 
-// Edges of the AchievementsSnapshot.
 func (AchievementsSnapshot) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("account", Account.Type).Ref("achievement_snapshots").Field("account_id").Required().Immutable().Unique(),

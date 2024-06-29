@@ -41,9 +41,9 @@ func (Account) Fields() []ent.Field {
 func (Account) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("clan", Clan.Type).Ref("accounts").Field("clan_id").Unique(),
-		edge.To("snapshots", AccountSnapshot.Type),
-		edge.To("vehicle_snapshots", VehicleSnapshot.Type),
 		edge.To("achievement_snapshots", AchievementsSnapshot.Type),
+		edge.To("vehicle_snapshots", VehicleSnapshot.Type),
+		edge.To("account_snapshots", AccountSnapshot.Type),
 	}
 }
 

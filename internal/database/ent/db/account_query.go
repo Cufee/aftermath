@@ -27,7 +27,7 @@ type AccountQuery struct {
 	inters                   []Interceptor
 	predicates               []predicate.Account
 	withClan                 *ClanQuery
-	withSnapshots            *AccountSnapshotQuery
+	withAccountSnapshots     *AccountSnapshotQuery
 	withVehicleSnapshots     *VehicleSnapshotQuery
 	withAchievementSnapshots *AchievementsSnapshotQuery
 	modifiers                []func(*sql.Selector)
@@ -89,8 +89,8 @@ func (aq *AccountQuery) QueryClan() *ClanQuery {
 	return query
 }
 
-// QuerySnapshots chains the current query on the "snapshots" edge.
-func (aq *AccountQuery) QuerySnapshots() *AccountSnapshotQuery {
+// QueryAccountSnapshots chains the current query on the "account_snapshots" edge.
+func (aq *AccountQuery) QueryAccountSnapshots() *AccountSnapshotQuery {
 	query := (&AccountSnapshotClient{config: aq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
@@ -103,7 +103,7 @@ func (aq *AccountQuery) QuerySnapshots() *AccountSnapshotQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(account.Table, account.FieldID, selector),
 			sqlgraph.To(accountsnapshot.Table, accountsnapshot.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, account.SnapshotsTable, account.SnapshotsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.AccountSnapshotsTable, account.AccountSnapshotsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -348,7 +348,7 @@ func (aq *AccountQuery) Clone() *AccountQuery {
 		inters:                   append([]Interceptor{}, aq.inters...),
 		predicates:               append([]predicate.Account{}, aq.predicates...),
 		withClan:                 aq.withClan.Clone(),
-		withSnapshots:            aq.withSnapshots.Clone(),
+		withAccountSnapshots:     aq.withAccountSnapshots.Clone(),
 		withVehicleSnapshots:     aq.withVehicleSnapshots.Clone(),
 		withAchievementSnapshots: aq.withAchievementSnapshots.Clone(),
 		// clone intermediate query.
@@ -368,14 +368,14 @@ func (aq *AccountQuery) WithClan(opts ...func(*ClanQuery)) *AccountQuery {
 	return aq
 }
 
-// WithSnapshots tells the query-builder to eager-load the nodes that are connected to
-// the "snapshots" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *AccountQuery) WithSnapshots(opts ...func(*AccountSnapshotQuery)) *AccountQuery {
+// WithAccountSnapshots tells the query-builder to eager-load the nodes that are connected to
+// the "account_snapshots" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *AccountQuery) WithAccountSnapshots(opts ...func(*AccountSnapshotQuery)) *AccountQuery {
 	query := (&AccountSnapshotClient{config: aq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withSnapshots = query
+	aq.withAccountSnapshots = query
 	return aq
 }
 
@@ -481,7 +481,7 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 		_spec       = aq.querySpec()
 		loadedTypes = [4]bool{
 			aq.withClan != nil,
-			aq.withSnapshots != nil,
+			aq.withAccountSnapshots != nil,
 			aq.withVehicleSnapshots != nil,
 			aq.withAchievementSnapshots != nil,
 		}
@@ -513,10 +513,10 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 			return nil, err
 		}
 	}
-	if query := aq.withSnapshots; query != nil {
-		if err := aq.loadSnapshots(ctx, query, nodes,
-			func(n *Account) { n.Edges.Snapshots = []*AccountSnapshot{} },
-			func(n *Account, e *AccountSnapshot) { n.Edges.Snapshots = append(n.Edges.Snapshots, e) }); err != nil {
+	if query := aq.withAccountSnapshots; query != nil {
+		if err := aq.loadAccountSnapshots(ctx, query, nodes,
+			func(n *Account) { n.Edges.AccountSnapshots = []*AccountSnapshot{} },
+			func(n *Account, e *AccountSnapshot) { n.Edges.AccountSnapshots = append(n.Edges.AccountSnapshots, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -568,7 +568,7 @@ func (aq *AccountQuery) loadClan(ctx context.Context, query *ClanQuery, nodes []
 	}
 	return nil
 }
-func (aq *AccountQuery) loadSnapshots(ctx context.Context, query *AccountSnapshotQuery, nodes []*Account, init func(*Account), assign func(*Account, *AccountSnapshot)) error {
+func (aq *AccountQuery) loadAccountSnapshots(ctx context.Context, query *AccountSnapshotQuery, nodes []*Account, init func(*Account), assign func(*Account, *AccountSnapshot)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*Account)
 	for i := range nodes {
@@ -582,7 +582,7 @@ func (aq *AccountQuery) loadSnapshots(ctx context.Context, query *AccountSnapsho
 		query.ctx.AppendFieldOnce(accountsnapshot.FieldAccountID)
 	}
 	query.Where(predicate.AccountSnapshot(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(account.SnapshotsColumn), fks...))
+		s.Where(sql.InValues(s.C(account.AccountSnapshotsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

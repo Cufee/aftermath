@@ -76,6 +76,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
 	ReferenceIDValidator func(string) error
+	// DefaultTriesLeft holds the default value on creation for the "tries_left" field.
+	DefaultTriesLeft int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
