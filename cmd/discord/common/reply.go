@@ -57,10 +57,10 @@ func (r reply) Embed(embeds ...*discordgo.MessageEmbed) reply {
 
 func (r reply) Send(content ...string) error {
 	r.text = append(r.text, content...)
-	return r.ctx.respond(r.data(r.ctx.Localize))
+	return r.ctx.respond(r.data())
 }
 
-func (r reply) data(localePrinter func(string) string) discordgo.InteractionResponseData {
+func (r reply) data() discordgo.InteractionResponseData {
 	var content []string
 	for _, t := range r.text {
 		content = append(content, r.ctx.Localize(t))
