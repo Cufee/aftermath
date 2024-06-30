@@ -108,27 +108,40 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 		}
 
 		// ack the interaction proactively
+		payload, err := deferredInteractionResponsePayload(data.Type, cmd.Ephemeral)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Err(err).Str("id", data.ID).Msg("failed to make an ack response payload")
+			return
+		}
+
 		res := retry.Retry(
 			func() (struct{}, error) {
-				ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*250)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
 				defer cancel()
-				return struct{}{}, router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, discordgo.InteractionResponse{Type: discordgo.InteractionResponseDeferredChannelMessageWithSource})
+				err := router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, payload)
+				return struct{}{}, err
 			},
 			3,
 			time.Millisecond*50,
-			// break if the error
+			// break if the error means we were able to ack on the last request
 			func(err error) bool { return errors.Is(err, rest.ErrInteractionAlreadyAcked) })
 		if res.Err != nil && !errors.Is(res.Err, rest.ErrInteractionAlreadyAcked) {
-			http.Error(w, res.Err.Error(), http.StatusInternalServerError)
 			log.Err(res.Err).Str("id", data.ID).Msg("failed to ack an interaction")
 			// cross our fingers and hope discord registered one of those requests, or will propagate the ack from the response body
 		}
 
-		// write the ack into response
-		err = writeDeferredInteractionResponseAck(w, data.Type, cmd.Ephemeral)
+		// write the ack into response, this typically does nothing/is flaky
+		body, err := json.Marshal(payload)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Err(err).Str("id", data.ID).Msg("failed to write an interaction ack response")
+			log.Err(err).Str("id", data.ID).Msg("failed to encode interaction ack payload")
+			return
+		}
+		_, err = w.Write(body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Err(err).Str("id", data.ID).Msg("failed to write interaction ack payload")
 			return
 		}
 
@@ -229,7 +242,7 @@ func (r *Router) sendInteractionReply(ctx context.Context, interaction discordgo
 	}
 }
 
-func writeDeferredInteractionResponseAck(w http.ResponseWriter, t discordgo.InteractionType, ephemeral bool) error {
+func deferredInteractionResponsePayload(t discordgo.InteractionType, ephemeral bool) (discordgo.InteractionResponse, error) {
 	var response discordgo.InteractionResponse
 	if ephemeral {
 		response.Data.Flags = discordgo.MessageFlagsEphemeral
@@ -242,10 +255,8 @@ func writeDeferredInteractionResponseAck(w http.ResponseWriter, t discordgo.Inte
 		response.Type = discordgo.InteractionResponseDeferredMessageUpdate
 
 	default:
-		return fmt.Errorf("interaction type %s not supported", t.String())
+		return response, fmt.Errorf("interaction type %s not supported", t.String())
 	}
 
-	body, _ := json.Marshal(response)
-	_, err := w.Write(body)
-	return err
+	return response, nil
 }
