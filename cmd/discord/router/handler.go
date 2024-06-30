@@ -119,7 +119,7 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 			func() (struct{}, error) {
 				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
 				defer cancel()
-				err := router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, payload)
+				err := router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, payload, nil)
 				return struct{}{}, err
 			},
 			3,
@@ -226,12 +226,12 @@ func (r *Router) sendInteractionReply(ctx context.Context, interaction discordgo
 	switch interaction.Type {
 	case discordgo.InteractionApplicationCommand, discordgo.InteractionMessageComponent:
 		handler = func() error {
-			return r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, data)
+			return r.restClient.UpdateOrSendInteractionResponse(ctx, interaction.AppID, interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &data, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
 		}
 	default:
 		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
 		handler = func() error {
-			return r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."})
+			return r.restClient.UpdateOrSendInteractionResponse(ctx, interaction.AppID, interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
 		}
 	}
 

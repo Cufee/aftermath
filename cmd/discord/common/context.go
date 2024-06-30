@@ -76,20 +76,20 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 	return c, nil
 }
 
-func (c *Context) respond(data discordgo.InteractionResponseData) error {
+func (c *Context) respond(data discordgo.InteractionResponseData, files []rest.File) error {
 	select {
 	case <-c.Context.Done():
 		return c.Context.Err()
 	default:
 		ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*3000)
 		defer cancel()
-		err := c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data)
+		err := c.rest.UpdateOrSendInteractionResponse(ctx, c.interaction.AppID, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionResponseChannelMessageWithSource, Data: &data}, files)
 		if os.IsTimeout(err) {
 			// request timed out, most likely a discord issue
 			log.Error().Str("id", c.ID()).Str("interactionId", c.interaction.ID).Msg("discord api: request timed out while responding to an interaction")
 			ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*1000)
 			defer cancel()
-			return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, discordgo.InteractionResponseData{Content: c.Localize("common_error_discord_outage")})
+			return c.rest.UpdateOrSendInteractionResponse(ctx, c.interaction.AppID, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Data: &discordgo.InteractionResponseData{Content: c.Localize("common_error_discord_outage")}, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
 		}
 		return err
 	}

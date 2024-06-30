@@ -2,17 +2,17 @@ package common
 
 import (
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/discord/rest"
 )
 
 type reply struct {
 	ctx *Context
 
 	text       []string
-	files      []*discordgo.File
+	files      []rest.File
 	components []discordgo.MessageComponent
 	embeds     []*discordgo.MessageEmbed
 }
@@ -27,11 +27,11 @@ func (r reply) Format(format string, args ...any) reply {
 	return r
 }
 
-func (r reply) File(reader io.Reader, name string) reply {
-	if reader == nil {
+func (r reply) File(data []byte, name string) reply {
+	if data == nil {
 		return r
 	}
-	r.files = append(r.files, &discordgo.File{Reader: reader, Name: name})
+	r.files = append(r.files, rest.File{Data: data, Name: name})
 	return r
 }
 
@@ -60,15 +60,15 @@ func (r reply) Send(content ...string) error {
 	return r.ctx.respond(r.data())
 }
 
-func (r reply) data() discordgo.InteractionResponseData {
+func (r reply) data() (discordgo.InteractionResponseData, []rest.File) {
 	var content []string
 	for _, t := range r.text {
 		content = append(content, r.ctx.Localize(t))
 	}
+
 	return discordgo.InteractionResponseData{
 		Content:    strings.Join(content, "\n"),
 		Components: r.components,
 		Embeds:     r.embeds,
-		Files:      r.files,
-	}
+	}, r.files
 }
