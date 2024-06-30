@@ -1,7 +1,9 @@
 package discord
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"github.com/cufee/aftermath/cmd/core"
 
@@ -17,7 +19,10 @@ func NewRouterHandler(coreClient core.Client, token string, publicKey string, co
 
 	rt.LoadCommands(commands...)
 
-	err = rt.UpdateLoadedCommands()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
+
+	err = rt.UpdateLoadedCommands(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -64,13 +64,13 @@ Updates all loaded commands using the Discord REST API
   - any commands that are loaded will be created/updated
   - any commands that were not loaded will be deleted
 */
-func (r *Router) UpdateLoadedCommands() error {
+func (r *Router) UpdateLoadedCommands(ctx context.Context) error {
 	var commandByName = make(map[string]command)
 	for _, cmd := range r.commands {
 		commandByName[cmd.Name] = command{requested: &cmd}
 	}
 
-	current, err := r.restClient.GetGlobalApplicationCommands()
+	current, err := r.restClient.GetGlobalApplicationCommands(ctx)
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func (r *Router) UpdateLoadedCommands() error {
 			if err != nil {
 				return err
 			}
-			command, err := r.restClient.CreateGlobalApplicationCommand(data.requested.ApplicationCommand)
+			command, err := r.restClient.CreateGlobalApplicationCommand(ctx, data.requested.ApplicationCommand)
 			if err != nil {
 				return err
 			}
@@ -115,7 +115,7 @@ func (r *Router) UpdateLoadedCommands() error {
 
 		case data.requested == nil && data.current != nil:
 			log.Debug().Str("name", data.current.Name).Str("id", data.current.ID).Msg("deleting a global command")
-			err := r.restClient.DeleteGlobalApplicationCommand(data.current.ID)
+			err := r.restClient.DeleteGlobalApplicationCommand(ctx, data.current.ID)
 			if err != nil {
 				return err
 			}
@@ -132,7 +132,7 @@ func (r *Router) UpdateLoadedCommands() error {
 				if err != nil {
 					return err
 				}
-				command, err := r.restClient.UpdateGlobalApplicationCommand(data.current.ID, data.requested.ApplicationCommand)
+				command, err := r.restClient.UpdateGlobalApplicationCommand(ctx, data.current.ID, data.requested.ApplicationCommand)
 				if err != nil {
 					return err
 				}
