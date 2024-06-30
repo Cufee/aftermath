@@ -92,7 +92,7 @@ func (c *Context) respond(data discordgo.InteractionResponseData) error {
 			func() (struct{}, error) {
 				ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*500)
 				defer cancel()
-				return struct{}{}, c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionResponseDeferredMessageUpdate, Data: &data})
+				return struct{}{}, c.rest.UpdateInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, data)
 			},
 			3, // 3 tries
 			time.Millisecond*100,
