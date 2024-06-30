@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -145,7 +144,7 @@ func init() {
 					}
 					content += string(data)
 
-					return ctx.Reply().File(bytes.NewBufferString(content), "tasks.json").Send()
+					return ctx.Reply().File([]byte(content), "tasks.json").Send()
 
 				case "tasks_details":
 					if !ctx.User.HasPermission(permissions.ViewTaskLogs) {
@@ -169,7 +168,7 @@ func init() {
 					if err != nil {
 						return ctx.Reply().Send("json.Marshal: " + err.Error())
 					}
-					return ctx.Reply().File(bytes.NewReader(data), "tasks.json").Send()
+					return ctx.Reply().File(data, "tasks.json").Send()
 
 				default:
 					return ctx.Reply().Send("invalid subcommand, thought this should never happen")

@@ -106,7 +106,7 @@ func init() {
 					timings = append(timings, "```")
 				}
 
-				return ctx.Reply().File(&buf, "session_command_by_aftermath.png").Component(button).Text(timings...).Send()
+				return ctx.Reply().File(buf.Bytes(), "session_command_by_aftermath.png").Component(button).Text(timings...).Send()
 			}),
 	)
 }
