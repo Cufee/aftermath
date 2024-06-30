@@ -1,2 +1,3 @@
 [build]
+# cmd = "go build -gcflags=-m=3 -o ./tmp/main ."
 stop_on_error = true
