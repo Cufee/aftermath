@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/cufee/am-wg-proxy-next/v2/client"
+	"github.com/rs/zerolog"
 )
 
 type Client interface {
@@ -25,5 +26,5 @@ func NewClientFromEnv(primaryAppId, primaryAppRps, requestTimeout, proxyHostList
 	}
 	timeout := time.Second * time.Duration(timeoutInt)
 
-	return client.NewEmbeddedClient(primaryAppId, primaryRps, proxyHostList, timeout)
+	return client.NewEmbeddedClient(primaryAppId, primaryRps, proxyHostList, timeout, client.WithLogLevel(zerolog.WarnLevel))
 }
