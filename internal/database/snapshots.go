@@ -56,6 +56,11 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 		return nil, nil
 	}
 
+	account, err := c.db.Account.Get(ctx, accountID)
+	if err != nil {
+		return nil, err
+	}
+
 	var errors = make(map[string]error)
 	for _, data := range snapshots {
 		// make a transaction per write to avoid locking for too long
@@ -68,7 +73,7 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 				SetCreatedAt(data.CreatedAt).
 				SetBattles(int(data.Stats.Battles.Float())).
 				SetLastBattleTime(data.LastBattleTime).
-				SetAccount(c.db.Account.GetX(ctx, accountID)).
+				SetAccount(account).
 				Exec(ctx)
 		})
 		if err != nil {
@@ -172,10 +177,15 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models
 
 	var errors = make(map[string]error)
 	for _, s := range snapshots {
+		account, err := c.db.Account.Get(ctx, s.AccountID)
+		if err != nil {
+			errors[s.AccountID] = err
+			continue
+		}
 		// make a transaction per write to avoid locking for too long
-		err := c.withTx(ctx, func(tx *db.Tx) error {
+		err = c.withTx(ctx, func(tx *db.Tx) error {
 			return c.db.AccountSnapshot.Create().
-				SetAccount(c.db.Account.GetX(ctx, s.AccountID)). // we assume the account exists here
+				SetAccount(account).
 				SetCreatedAt(s.CreatedAt).
 				SetLastBattleTime(s.LastBattleTime).
 				SetRatingBattles(int(s.RatingBattles.Battles.Float())).
@@ -280,6 +290,11 @@ func (c *client) CreateAccountAchievementSnapshots(ctx context.Context, accountI
 		return nil, nil
 	}
 
+	account, err := c.db.Account.Get(ctx, accountID)
+	if err != nil {
+		return nil, err
+	}
+
 	var errors = make(map[string]error)
 	for _, data := range snapshots {
 		// make a transaction per write to avoid locking for too long
@@ -291,7 +306,7 @@ func (c *client) CreateAccountAchievementSnapshots(ctx context.Context, accountI
 				SetCreatedAt(data.CreatedAt).
 				SetReferenceID(data.ReferenceID).
 				SetLastBattleTime(data.LastBattleTime).
-				SetAccount(c.db.Account.GetX(ctx, accountID)).
+				SetAccount(account).
 				Exec(ctx)
 		})
 		if err != nil {
