@@ -92,13 +92,14 @@ func (c *Context) respond(data discordgo.InteractionResponseData) error {
 			func() (struct{}, error) {
 				ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*500)
 				defer cancel()
-				return struct{}{}, c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Data: &data})
+				return struct{}{}, c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionResponseDeferredMessageUpdate, Data: &data})
 			},
 			3, // 3 tries
 			time.Millisecond*100,
+			// stop trying if the parent context was cancelled, or the error is not caused by a timeout and is not indicating that interaction was not acked
+			// the rest.ErrUnknownWebhook error specifically is likely caused by discord being slow and not propagating the state of out initial ack -- all interaction we handle are always acked
 			func(err error) bool {
-				// stop trying if the error is not caused by a timeout
-				return c.Context.Err() != nil || (err != nil && !os.IsTimeout(err))
+				return c.Context.Err() != nil || (!os.IsTimeout(err) && !errors.Is(err, rest.ErrUnknownWebhook))
 			},
 		)
 		return res.Err
