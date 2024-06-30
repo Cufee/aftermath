@@ -28,7 +28,7 @@ services:
     deploy:
       resources:
         reservations:
-          memory: 512m
+          memory: 128m
     networks:
       - dokploy-network
     labels:
