@@ -123,12 +123,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, target any) error {
 
 	if res.StatusCode > 299 {
 		var body discordgo.APIErrorMessage
-		data, err := io.ReadAll(res.Body)
-		if err != nil {
-			return fmt.Errorf("failed to read body: %w", err)
-		}
-
-		_ = json.Unmarshal(data, &body)
+		_ = json.NewDecoder(res.Body).Decode(&body)
 		message := body.Message
 		if message == "" {
 			message = res.Status + ", response was not valid json"

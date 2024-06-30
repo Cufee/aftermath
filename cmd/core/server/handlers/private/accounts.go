@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 	"sync"
@@ -22,15 +21,9 @@ This function is temporary and does not need to be good :D
 */
 func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		payload, err := io.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
 		defer r.Body.Close()
-
 		var accounts []string
-		err = json.Unmarshal(payload, &accounts)
+		err := json.NewDecoder(r.Body).Decode(&accounts)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
