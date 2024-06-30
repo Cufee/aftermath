@@ -123,7 +123,10 @@ func (q *queue) pullAndEnqueueTasks(ctx context.Context, db database.Client) err
 	}
 	defer q.queueLock.Unlock()
 
-	currentQueue := len(q.queued)
+	q.activeTasksMx.Lock()
+	currentQueue := len(q.activeTasks)
+	q.activeTasksMx.Unlock()
+
 	if q.workerLimit < currentQueue {
 		log.Debug().Msg("queue is full")
 		return ErrQueueFull
