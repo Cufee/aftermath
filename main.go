@@ -35,6 +35,10 @@ import (
 	"github.com/rs/zerolog/log"
 
 	_ "github.com/joho/godotenv/autoload"
+
+	"net/http"
+	"net/http/pprof"
+	//  "github.com/pkg/profile"
 )
 
 //go:generate go generate ./internal/database/ent
@@ -75,6 +79,12 @@ func main() {
 	if e := os.Getenv("PRIVATE_SERVER_ENABLED"); e == "true" {
 		port := os.Getenv("PRIVATE_SERVER_PORT")
 		servePrivate := server.NewServer(port, []server.Handler{
+			{
+				Path: "GET /debug/profile/{name}",
+				Func: func(w http.ResponseWriter, r *http.Request) {
+					pprof.Handler(r.PathValue("name")).ServeHTTP(w, r)
+				},
+			},
 			{
 				Path: "POST /v1/tasks/restart",
 				Func: private.RestartStaleTasks(cacheCoreClient),
