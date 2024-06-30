@@ -17,6 +17,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/internal/retry"
 	"github.com/rs/zerolog/log"
 )
@@ -107,12 +108,17 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 		}
 
 		// ack the interaction proactively
-		res := retry.Retry(func() (struct{}, error) {
-			ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*250)
-			defer cancel()
-			return struct{}{}, router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, discordgo.InteractionResponse{Type: discordgo.InteractionResponseDeferredChannelMessageWithSource})
-		}, 2, time.Millisecond*50)
-		if res.Err != nil {
+		res := retry.Retry(
+			func() (struct{}, error) {
+				ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*250)
+				defer cancel()
+				return struct{}{}, router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, discordgo.InteractionResponse{Type: discordgo.InteractionResponseDeferredChannelMessageWithSource})
+			},
+			3,
+			time.Millisecond*50,
+			// break if the error
+			func(err error) bool { return errors.Is(err, rest.ErrInteractionAlreadyAcked) })
+		if res.Err != nil && !errors.Is(res.Err, rest.ErrInteractionAlreadyAcked) {
 			http.Error(w, res.Err.Error(), http.StatusInternalServerError)
 			log.Err(err).Str("id", data.ID).Msg("failed to ack an interaction")
 			// cross our fingers and hope discord registered one of those requests

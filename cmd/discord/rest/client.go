@@ -133,8 +133,10 @@ func (c *Client) do(ctx context.Context, req *http.Request, target any) error {
 		if message == "" {
 			message = res.Status + ", response was not valid json"
 		}
-
-		return errors.New("discord error: " + message)
+		if err := knownError(body.Code); err != nil {
+			return err
+		}
+		return errors.New("discord api: " + message)
 	}
 
 	if target != nil {

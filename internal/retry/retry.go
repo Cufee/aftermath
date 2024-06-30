@@ -32,3 +32,9 @@ func Retry[T any](fn func() (T, error), tries int, sleepOnFail time.Duration, br
 	time.Sleep(sleepOnFail)
 	return Retry(fn, tries, sleepOnFail)
 }
+
+func IfErrNot(notErr error) func(error) bool {
+	return func(err error) bool {
+		return !errors.Is(err, notErr)
+	}
+}
