@@ -2,7 +2,7 @@ package common
 
 import (
 	"context"
-	"sync"
+	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -26,11 +26,6 @@ const (
 	ContextKeyMember
 	ContextKeyInteraction
 )
-
-type interactionState struct {
-	mx      *sync.Mutex
-	replied bool
-}
 
 type Context struct {
 	context.Context
@@ -88,7 +83,15 @@ func (c *Context) respond(data discordgo.InteractionResponseData) error {
 	default:
 		ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*3000)
 		defer cancel()
-		return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data)
+		err := c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data)
+		if os.IsTimeout(err) {
+			// request timed out, most likely a discord issue
+			log.Error().Str("id", c.ID()).Str("interactionId", c.interaction.ID).Msg("discord api: request timed out while responding to an interaction")
+			ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*1000)
+			defer cancel()
+			return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, discordgo.InteractionResponseData{Content: c.Localize("common_error_discord_outage")})
+		}
+		return err
 	}
 }
 

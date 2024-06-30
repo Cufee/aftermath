@@ -66,6 +66,9 @@
 - key: common_error_service_outage
   value: "Aftermath is currently undergoing maintenance and is temporarily unavailable. Please try again in a few moments."
   context: Failed to reach some internal service
+- key: common_error_discord_outage
+  value: "It looks like Discord is having some temporary issues. Please try again in a few seconds."
+  context: Discord request timed out for unknown reasons
 
 - key: common_error_unhandled_reported
   value: Something unexpected happened and your command failed.\n*This error was reported automatically, you can also reach out to our team on Aftermath Official*"
