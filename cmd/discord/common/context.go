@@ -2,7 +2,6 @@ package common
 
 import (
 	"context"
-	"os"
 	"sync"
 	"time"
 
@@ -15,7 +14,6 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
-	"github.com/cufee/aftermath/internal/retry"
 
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
@@ -88,21 +86,9 @@ func (c *Context) respond(data discordgo.InteractionResponseData) error {
 	case <-c.Context.Done():
 		return c.Context.Err()
 	default:
-		res := retry.Retry(
-			func() (struct{}, error) {
-				ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*500)
-				defer cancel()
-				return struct{}{}, c.rest.UpdateInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, data)
-			},
-			3, // 3 tries
-			time.Millisecond*100,
-			// stop trying if the parent context was cancelled, or the error is not caused by a timeout and is not indicating that interaction was not acked
-			// the rest.ErrUnknownWebhook error specifically is likely caused by discord being slow and not propagating the state of out initial ack -- all interaction we handle are always acked
-			func(err error) bool {
-				return c.Context.Err() != nil || (!os.IsTimeout(err) && !errors.Is(err, rest.ErrUnknownWebhook))
-			},
-		)
-		return res.Err
+		ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*3000)
+		defer cancel()
+		return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data)
 	}
 }
 
