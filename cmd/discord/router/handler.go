@@ -249,10 +249,8 @@ func deferredInteractionResponsePayload(t discordgo.InteractionType, ephemeral b
 	}
 
 	switch t {
-	case discordgo.InteractionApplicationCommand:
+	case discordgo.InteractionApplicationCommand, discordgo.InteractionMessageComponent:
 		response.Type = discordgo.InteractionResponseDeferredChannelMessageWithSource
-	case discordgo.InteractionMessageComponent:
-		response.Type = discordgo.InteractionResponseDeferredMessageUpdate
 
 	default:
 		return response, fmt.Errorf("interaction type %s not supported", t.String())
