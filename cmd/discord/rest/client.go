@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -28,7 +29,10 @@ func NewClient(token string) (*Client, error) {
 		http:  http.Client{Timeout: time.Millisecond * 5000}, // discord is very slow sometimes
 	}
 
-	_, err := client.lookupApplicationID()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
+	defer cancel()
+
+	_, err := client.lookupApplicationID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +112,9 @@ func partHeader(contentDisposition string, contentType string) textproto.MIMEHea
 	}
 }
 
-func (c *Client) do(req *http.Request, target any) error {
+func (c *Client) do(ctx context.Context, req *http.Request, target any) error {
+	req = req.WithContext(ctx)
+
 	res, err := c.http.Do(req)
 	if err != nil {
 		return err
@@ -140,14 +146,14 @@ func (c *Client) do(req *http.Request, target any) error {
 	return nil
 }
 
-func (c *Client) lookupApplicationID() (string, error) {
+func (c *Client) lookupApplicationID(ctx context.Context) (string, error) {
 	req, err := c.request("GET", discordgo.EndpointApplication("@me"), nil)
 	if err != nil {
 		return "", err
 	}
 
 	var data discordgo.Application
-	err = c.do(req, &data)
+	err = c.do(ctx, req, &data)
 	if err != nil {
 		return "", err
 	}

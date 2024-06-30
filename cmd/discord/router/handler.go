@@ -10,7 +10,6 @@ import (
 	"io"
 	"net/http"
 	"runtime/debug"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -18,14 +17,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/internal/retry"
 	"github.com/rs/zerolog/log"
 )
-
-type interactionState struct {
-	mx      *sync.Mutex
-	acked   bool
-	replied bool
-}
 
 // https://github.com/bsdlp/discord-interactions-go/blob/main/interactions/verify.go
 func verifyPublicKey(r *http.Request, key ed25519.PublicKey) bool {
@@ -105,7 +99,7 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 			return
 		}
 
-		command, err := router.routeInteraction(data)
+		cmd, err := router.routeInteraction(data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Err(err).Str("id", data.ID).Msg("failed to route interaction")
@@ -113,27 +107,31 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 		}
 
 		// ack the interaction proactively
-		err = router.restClient.SendInteractionResponse(data.ID, data.Token, discordgo.InteractionResponse{Type: discordgo.InteractionResponseDeferredChannelMessageWithSource})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		res := retry.Retry(func() (struct{}, error) {
+			ctx, cancel := context.WithTimeout(r.Context(), time.Millisecond*250)
+			defer cancel()
+			return struct{}{}, router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, discordgo.InteractionResponse{Type: discordgo.InteractionResponseDeferredChannelMessageWithSource})
+		}, 2, time.Millisecond*50)
+		if res.Err != nil {
+			http.Error(w, res.Err.Error(), http.StatusInternalServerError)
 			log.Err(err).Str("id", data.ID).Msg("failed to ack an interaction")
-			return
+			// cross our fingers and hope discord registered one of those requests
 		}
+
 		// write the ack into response
-		err = writeDeferredInteractionResponseAck(w, data.Type, command.Ephemeral)
+		err = writeDeferredInteractionResponseAck(w, data.Type, cmd.Ephemeral)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Err(err).Str("id", data.ID).Msg("failed to write an interaction ack response")
 			return
 		}
 
-		// route the interaction to a proper handler for a later reply
-		state := &interactionState{mx: &sync.Mutex{}, acked: true}
-		router.startInteractionHandlerAsync(data, state, command)
+		// run the interaction handler
+		go router.handleInteraction(data, cmd)
 	}, nil
 }
 
-func (r *Router) routeInteraction(interaction discordgo.Interaction) (*builder.Command, error) {
+func (r *Router) routeInteraction(interaction discordgo.Interaction) (builder.Command, error) {
 	var matchKey string
 
 	switch interaction.Type {
@@ -146,29 +144,27 @@ func (r *Router) routeInteraction(interaction discordgo.Interaction) (*builder.C
 	}
 
 	if matchKey == "" {
-		return nil, errors.New("match key not found")
+		return builder.Command{}, errors.New("match key not found")
 	}
 
 	for _, cmd := range r.commands {
 		if cmd.Match(matchKey) {
-			return &cmd, nil
+			return cmd, nil
 		}
 	}
-	return nil, fmt.Errorf("failed to match %s to a command handler", matchKey)
+	return builder.Command{}, fmt.Errorf("failed to match %s to a command handler", matchKey)
 }
 
-func (r *Router) handleInteraction(ctx context.Context, cancel context.CancelFunc, interaction discordgo.Interaction, command *builder.Command, reply chan<- discordgo.InteractionResponseData) {
+func (r *Router) handleInteraction(interaction discordgo.Interaction, command builder.Command) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	cCtx, err := common.NewContext(ctx, interaction, reply, r.restClient, r.core)
+	cCtx, err := common.NewContext(ctx, interaction, r.restClient, r.core)
 	if err != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
 		log.Err(err).Msg("failed to create a common.Context for a handler")
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			reply <- discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")}
-		}
+		r.sendInteractionReply(ctx, interaction, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed. Please try again in a few seconds."})
 		return
 	}
 
@@ -177,17 +173,24 @@ func (r *Router) handleInteraction(ctx context.Context, cancel context.CancelFun
 		handler = command.Middleware[i](cCtx, handler)
 	}
 
-	err = handler(cCtx)
-	if err != nil {
-		log.Err(err).Msg("handler returned an error")
-		select {
-		case <-ctx.Done():
+	func() {
+		defer func() {
+			if rec := recover(); rec != nil {
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+				log.Error().Str("stack", string(debug.Stack())).Msg("panic in interaction handler")
+				r.sendInteractionReply(ctx, interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")})
+			}
+		}()
+		err = handler(cCtx)
+		if err != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			log.Err(err).Msg("handler returned an error")
+			r.sendInteractionReply(ctx, interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")})
 			return
-		default:
-			reply <- discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")}
 		}
-		return
-	}
+	}()
 }
 
 func sendPingReply(w http.ResponseWriter) {
@@ -198,89 +201,26 @@ func sendPingReply(w http.ResponseWriter) {
 	}
 }
 
-func (router *Router) startInteractionHandlerAsync(interaction discordgo.Interaction, state *interactionState, command *builder.Command) {
-	log.Info().Str("id", interaction.ID).Msg("started handling an interaction")
-
-	// create a new context and cancel it on reply
-	// we need to respond within 15 minutes, but it's safe to assume something failed if we did not reply quickly
-	workerCtx, cancelWorker := context.WithTimeout(context.Background(), time.Second*10)
-
-	// handle the interaction
-	responseCh := make(chan discordgo.InteractionResponseData)
-
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				log.Error().Str("stack", string(debug.Stack())).Msg("panic in interaction handler")
-				state.mx.Lock()
-				router.sendInteractionReply(interaction, state, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed. Please try again in a few seconds."})
-				state.mx.Unlock()
-			}
-		}()
-		router.handleInteraction(workerCtx, cancelWorker, interaction, command, responseCh)
-	}()
-
-	go func() {
-		defer close(responseCh)
-		defer cancelWorker()
-
-		for {
-			select {
-			case <-workerCtx.Done():
-				state.mx.Lock()
-				defer state.mx.Unlock()
-				// we are done, there is nothing else we should do here
-				// lock in case responseCh is still busy sending some data over
-				log.Info().Str("id", interaction.ID).Msg("finished handling an interaction")
-				return
-
-			case data := <-responseCh:
-				state.mx.Lock()
-				log.Debug().Str("id", interaction.ID).Msg("sending an interaction reply")
-				router.sendInteractionReply(interaction, state, data)
-				state.mx.Unlock()
-			}
-		}
-	}()
-}
-
-func (r *Router) sendInteractionReply(interaction discordgo.Interaction, state *interactionState, data discordgo.InteractionResponseData) {
+func (r *Router) sendInteractionReply(ctx context.Context, interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
 	var handler func() error
 
 	switch interaction.Type {
 	case discordgo.InteractionApplicationCommand, discordgo.InteractionMessageComponent:
-		if state.replied || state.acked {
-			// We already replied to this interaction - edit the message
-			handler = func() error {
-				return r.restClient.UpdateInteractionResponse(interaction.AppID, interaction.Token, data)
-			}
-		} else {
-			// We never replied to this message, create a new reply
-			handler = func() error {
-				payload := discordgo.InteractionResponse{Data: &data, Type: discordgo.InteractionResponseChannelMessageWithSource}
-				return r.restClient.SendInteractionResponse(interaction.ID, interaction.Token, payload)
-			}
+		handler = func() error {
+			return r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, data)
 		}
 	default:
-		log.Error().Stack().Any("state", state).Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
-		if state.replied || state.acked {
-			handler = func() error {
-				return r.restClient.UpdateInteractionResponse(interaction.AppID, interaction.Token, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."})
-			}
-		} else {
-			handler = func() error {
-				return r.restClient.SendInteractionResponse(interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, Type: discordgo.InteractionResponseChannelMessageWithSource})
-			}
+		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
+		handler = func() error {
+			return r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."})
 		}
 	}
 
 	err := handler()
 	if err != nil {
-		log.Err(err).Stack().Any("state", state).Any("data", data).Str("id", interaction.ID).Msg("failed to send an interaction response")
+		log.Err(err).Stack().Any("data", data).Str("id", interaction.ID).Msg("failed to send an interaction response")
 		return
 	}
-	state.acked = true
-	state.replied = true
 }
 
 func writeDeferredInteractionResponseAck(w http.ResponseWriter, t discordgo.InteractionType, ephemeral bool) error {

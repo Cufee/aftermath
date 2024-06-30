@@ -2,6 +2,9 @@ package common
 
 import (
 	"context"
+	"os"
+	"sync"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -12,6 +15,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/retry"
 
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
@@ -25,6 +29,11 @@ const (
 	ContextKeyInteraction
 )
 
+type interactionState struct {
+	mx      *sync.Mutex
+	replied bool
+}
+
 type Context struct {
 	context.Context
 	User   models.User
@@ -37,11 +46,10 @@ type Context struct {
 
 	rest        *rest.Client
 	interaction discordgo.Interaction
-	respondCh   chan<- discordgo.InteractionResponseData
 }
 
-func NewContext(ctx context.Context, interaction discordgo.Interaction, respondCh chan<- discordgo.InteractionResponseData, rest *rest.Client, client core.Client) (*Context, error) {
-	c := &Context{Context: ctx, Locale: language.English, Core: client, rest: rest, interaction: interaction, respondCh: respondCh}
+func NewContext(ctx context.Context, interaction discordgo.Interaction, rest *rest.Client, client core.Client) (*Context, error) {
+	c := &Context{Context: ctx, Locale: language.English, Core: client, rest: rest, interaction: interaction}
 
 	if interaction.User != nil {
 		c.Member = *interaction.User
@@ -80,9 +88,21 @@ func (c *Context) respond(data discordgo.InteractionResponseData) error {
 	case <-c.Context.Done():
 		return c.Context.Err()
 	default:
-		c.respondCh <- data
+		res := retry.Retry(
+			func() (struct{}, error) {
+				ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*500)
+				defer cancel()
+				return struct{}{}, c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Data: &data})
+			},
+			3, // 3 tries
+			time.Millisecond*100,
+			func(err error) bool {
+				// stop trying if the error is not caused by a timeout
+				return c.Context.Err() != nil || (err != nil && !os.IsTimeout(err))
+			},
+		)
+		return res.Err
 	}
-	return nil
 }
 
 func (c *Context) InteractionID() string {
