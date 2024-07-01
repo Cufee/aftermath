@@ -138,11 +138,11 @@
   context: Mentioned self when checking stats, will not prevent the command from running
 
 - key: stats_error_connection_not_found_personal
-  value: "Looks like we haven't got your Blitz nickname yet. Give the `/link` command a shot."
+  value: "Looks like you don't have a Blitz account linked yet. Give the `/links` command a shot."
   context: No Blitz account linked
 
 - key: stats_error_nickname_or_server_missing
-  value: "I need both the name and server to find your account. You can also use the `/link` command to setup a default account."
+  value: "I need both the name and server to find your account. You can also use the `/links` command to setup a default account."
   context: User provided a nickname, but no server
 
 - key: stats_error_nickname_invalid
@@ -200,7 +200,7 @@
   value: "It looks like you have reached the limit for the number of Blitz accounts linked.\nTry removing an existing account with `/accounts unlink` before adding a new one."
   context: User reached their connection limit for Blitz accounts
 - key: links_error_connection_not_found
-  value: "I was not able to find your linked account with this nickname. Try adding it through `/link` instead."
+  value: "I was not able to find a linked account with this nickname. Try adding a new one with `/links add`."
   context: Nickname is invalid or failed to find a valid connection
 - key: links_error_connection_not_found_selected
   value: "I was not able to the account you have selected."
