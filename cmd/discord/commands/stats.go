@@ -33,7 +33,7 @@ func init() {
 				case options.UserID != "":
 					// mentioned another user, check if the user has an account linked
 					mentionedUser, _ := ctx.Core.Database().GetUserByID(ctx.Context, options.UserID, database.WithConnections(), database.WithSubscriptions(), database.WithContent())
-					defaultAccount, hasDefaultAccount := mentionedUser.Connection(models.ConnectionTypeWargaming)
+					defaultAccount, hasDefaultAccount := mentionedUser.Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
 					if !hasDefaultAccount {
 						return ctx.Reply().Send("stats_error_connection_not_found_vague")
 					}
@@ -52,7 +52,7 @@ func init() {
 					accountID = fmt.Sprint(account.ID)
 
 				default:
-					defaultAccount, hasDefaultAccount := ctx.User.Connection(models.ConnectionTypeWargaming)
+					defaultAccount, hasDefaultAccount := ctx.User.Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
 					if !hasDefaultAccount {
 						return ctx.Reply().Send("stats_error_nickname_or_server_missing")
 					}

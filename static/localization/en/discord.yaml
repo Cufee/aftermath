@@ -33,9 +33,15 @@
   value: linked
 - key: command_option_accounts_linked_description
   value: View your linked Blitz accounts
+- key: command_option_accounts_unlink_name
+  value: unlink
+- key: command_option_accounts_unlink_description
+  value: Unlink your Blitz account
 
 - key: command_accounts_set_default_successfully_fmt
   value: "Your default account has been updated! Aftermath will now default to **%s** on **%s** when checking stats."
+- key: command_accounts_unlinked_successfully
+  value: "Your linked account was removed."
 - key: command_accounts_verify_cta
   value: "You can also verify your account with `/verify`"
   context: A new default account was set, but it is not verified
@@ -191,6 +197,9 @@
 - key: link_error_missing_input
   value: "I need both the nickname and server to find your account."
   context: Nickname or server not provided
+- key: link_error_too_many_connections
+  value: "It looks like you have reached the limit for the number of Blitz accounts linked.\nTry removing an existing account with `/accounts unlink` before adding a new one."
+  context: User reached their connection limit for Blitz accounts
 
   # /verify errors
 - key: verify_error_missing_server
@@ -201,6 +210,9 @@
 - key: accounts_error_connection_not_found
   value: "I was not able to find your linked account with this nickname. Try adding it through `/link` instead."
   context: Nickname is invalid or failed to find a valid connection
+- key: accounts_error_connection_not_found_selected
+  value: "I was not able to the account you have selected."
+  context: Failed to find the selected account by ID
 
 
   # Wargaming specific errors

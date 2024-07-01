@@ -1,8 +1,10 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
@@ -35,6 +37,17 @@ func init() {
 					),
 			).
 			Handler(func(ctx *common.Context) error {
+				var wgConnections []models.UserConnection
+				for _, conn := range ctx.User.Connections {
+					if conn.Type != models.ConnectionTypeWargaming {
+						continue
+					}
+					wgConnections = append(wgConnections, conn)
+				}
+				if len(wgConnections) >= 3 {
+					return ctx.Reply().Send("link_error_too_many_connections")
+				}
+
 				options := getDefaultStatsOptions(ctx)
 				message, valid := options.Validate(ctx)
 				if !valid {
@@ -49,21 +62,39 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				currentConnection, exists := ctx.User.Connection(models.ConnectionTypeWargaming)
-				if !exists {
-					currentConnection.UserID = ctx.User.ID
-					currentConnection.Metadata = make(map[string]any)
-					currentConnection.Type = models.ConnectionTypeWargaming
+				var found bool
+				for _, conn := range wgConnections {
+					if conn.ReferenceID == fmt.Sprint(account.ID) {
+						conn.Metadata["verified"] = false
+						found = true
+					}
+					conn.Metadata["default"] = conn.ReferenceID == fmt.Sprint(account.ID)
+
+					_, err = ctx.Core.Database().UpsertConnection(ctx.Context, conn)
+					if err != nil {
+						return ctx.Err(err)
+					}
+				}
+				if !found {
+					meta := make(map[string]any)
+					meta["verified"] = false
+					meta["default"] = true
+					_, err = ctx.Core.Database().UpsertConnection(ctx.Context, models.UserConnection{
+						Type:        models.ConnectionTypeWargaming,
+						ReferenceID: fmt.Sprint(account.ID),
+						UserID:      ctx.User.ID,
+						Metadata:    meta,
+					})
+					if err != nil {
+						return ctx.Err(err)
+					}
 				}
 
-				currentConnection.Metadata["default"] = true
-				currentConnection.Metadata["verified"] = false
-				currentConnection.ReferenceID = fmt.Sprint(account.ID)
-
-				_, err = ctx.Core.Database().UpsertConnection(ctx.Context, currentConnection)
-				if err != nil {
-					return ctx.Err(err)
-				}
+				go func(id string) {
+					c, cancel := context.WithTimeout(context.Background(), time.Second)
+					defer cancel()
+					_, _ = ctx.Core.Fetch().Account(c, id) // Make sure the account is cached
+				}(fmt.Sprint(account.ID))
 
 				return ctx.Reply().Format("command_link_linked_successfully_fmt", account.Nickname, strings.ToUpper(options.Server)).Send()
 			}),
