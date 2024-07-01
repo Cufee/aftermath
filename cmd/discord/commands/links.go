@@ -247,12 +247,12 @@ func init() {
 
 				}
 				if len(linkedAccounts) < 1 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_connection_not_found"), Value: "error#links_error_connection_not_found"})
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"})
 				}
 
 				accounts, err := ctx.Core.Database().GetAccounts(ctx.Context, linkedAccounts)
 				if err != nil {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_connection_not_found"), Value: "error#links_error_connection_not_found"})
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"})
 				}
 
 				var longestName int

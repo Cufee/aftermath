@@ -205,6 +205,8 @@
 - key: links_error_connection_not_found_selected
   value: "I was not able to the account you have selected."
   context: Failed to find the selected account by ID
+- key: links_error_no_accounts_linked
+  value: "You don't have any linked accounts."
 
   # /verify errors
 - key: verify_error_missing_server
