@@ -20,7 +20,7 @@ Optimistically send an interaction response update request with fallback to inte
 func (c *Client) UpdateOrSendInteractionResponse(ctx context.Context, appID, interactionID, token string, data discordgo.InteractionResponse, files []File) error {
 	err := c.UpdateInteractionResponse(ctx, appID, token, *data.Data, files)
 	if err != nil {
-		if errors.Is(err, ErrUnknownWebhook) {
+		if errors.Is(err, ErrUnknownWebhook) || errors.Is(err, ErrUnknownInteraction) {
 			return c.SendInteractionResponse(ctx, interactionID, token, data, files)
 		}
 		return err

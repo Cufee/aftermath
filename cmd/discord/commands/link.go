@@ -56,6 +56,7 @@ func init() {
 					currentConnection.Type = models.ConnectionTypeWargaming
 				}
 
+				currentConnection.Metadata["default"] = true
 				currentConnection.Metadata["verified"] = false
 				currentConnection.ReferenceID = fmt.Sprint(account.ID)
 

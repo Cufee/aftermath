@@ -76,14 +76,14 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 	return c, nil
 }
 
-func (c *Context) respond(data discordgo.InteractionResponseData, files []rest.File) error {
+func (c *Context) respond(data discordgo.InteractionResponse, files []rest.File) error {
 	select {
 	case <-c.Context.Done():
 		return c.Context.Err()
 	default:
 		ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*3000)
 		defer cancel()
-		err := c.rest.UpdateOrSendInteractionResponse(ctx, c.interaction.AppID, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionResponseChannelMessageWithSource, Data: &data}, files)
+		err := c.rest.UpdateOrSendInteractionResponse(ctx, c.interaction.AppID, c.interaction.ID, c.interaction.Token, data, files)
 		if os.IsTimeout(err) {
 			// request timed out, most likely a discord issue
 			log.Error().Str("id", c.ID()).Str("interactionId", c.interaction.ID).Msg("discord api: request timed out while responding to an interaction")
@@ -105,12 +105,12 @@ func (c *Context) Reply() reply {
 
 func (c *Context) Err(err error) error {
 	log.Err(err).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
-	return c.Reply().Send("common_error_unhandled_not_reported")
+	return c.Reply().Send("common_error_unhandled_reported")
 }
 
 func (c *Context) Error(message string) error {
 	log.Error().Str("message", message).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
-	return c.Reply().Send("common_error_unhandled_not_reported")
+	return c.Reply().Send("common_error_unhandled_reported")
 }
 
 func (c *Context) isCommand() bool {
@@ -119,6 +119,14 @@ func (c *Context) isCommand() bool {
 
 func (c *Context) isComponentInteraction() bool {
 	return c.interaction.Type == discordgo.InteractionMessageComponent
+}
+
+func (c *Context) isAutocompleteInteraction() bool {
+	return c.interaction.Type == discordgo.InteractionApplicationCommandAutocomplete
+}
+
+func (c *Context) isModalSubmit() bool {
+	return c.interaction.Type == discordgo.InteractionModalSubmit
 }
 
 func (c *Context) ID() string {
@@ -134,7 +142,7 @@ func (c *Context) ID() string {
 }
 
 func (c *Context) Options() options {
-	if data, ok := c.CommandData(); ok {
+	if data, ok := c.interaction.Data.(discordgo.ApplicationCommandInteractionData); ok {
 		return data.Options
 	}
 	return options{}
@@ -191,5 +199,13 @@ func (c *Context) ComponentData() (discordgo.MessageComponentInteractionData, bo
 		return discordgo.MessageComponentInteractionData{}, false
 	}
 	data, ok := c.interaction.Data.(discordgo.MessageComponentInteractionData)
+	return data, ok
+}
+
+func (c *Context) AutocompleteData() (discordgo.ApplicationCommandInteractionData, bool) {
+	if !c.isAutocompleteInteraction() {
+		return discordgo.ApplicationCommandInteractionData{}, false
+	}
+	data, ok := c.interaction.Data.(discordgo.ApplicationCommandInteractionData)
 	return data, ok
 }
