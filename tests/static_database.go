@@ -89,6 +89,9 @@ func (c *staticTestingDatabase) UpdateConnection(ctx context.Context, connection
 func (c *staticTestingDatabase) UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	return models.UserConnection{}, errors.New("UpsertConnection not implemented")
 }
+func (c *staticTestingDatabase) DeleteConnection(ctx context.Context, connectionID string) error {
+	return errors.New("DeleteConnection not implemented")
+}
 
 func (c *staticTestingDatabase) GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...database.SnapshotQuery) (models.AccountSnapshot, error) {
 	return models.AccountSnapshot{}, errors.New("GetAccountSnapshot not implemented")

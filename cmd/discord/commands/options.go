@@ -79,14 +79,14 @@ func (o statsOptions) Validate(ctx *common.Context) (string, bool) {
 	return "", true
 }
 
-func getDefaultStatsOptions(ctx *common.Context) statsOptions {
+func getDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataOption) statsOptions {
 	var options statsOptions
 
-	options.Nickname, _ = common.GetOption[string](ctx, "nickname")
-	options.Server, _ = common.GetOption[string](ctx, "server")
-	options.UserID, _ = common.GetOption[string](ctx, "user")
+	options.Nickname, _ = common.GetOption[string](data, "nickname")
+	options.Server, _ = common.GetOption[string](data, "server")
+	options.UserID, _ = common.GetOption[string](data, "user")
 
-	if days, _ := common.GetOption[float64](ctx, "days"); days > 0 {
+	if days, _ := common.GetOption[float64](data, "days"); days > 0 {
 		options.Days = int(days)
 		options.PeriodStart = time.Now().Add(time.Hour * 24 * time.Duration(days) * -1)
 	}
