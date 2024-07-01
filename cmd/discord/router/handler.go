@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"runtime/debug"
+	"slices"
 	"time"
 
 	"github.com/pkg/errors"
@@ -21,6 +22,8 @@ import (
 	"github.com/cufee/aftermath/internal/retry"
 	"github.com/rs/zerolog/log"
 )
+
+var supportedInteractionTypes = []discordgo.InteractionType{discordgo.InteractionApplicationCommand, discordgo.InteractionMessageComponent, discordgo.InteractionApplicationCommandAutocomplete, discordgo.InteractionModalSubmit}
 
 // https://github.com/bsdlp/discord-interactions-go/blob/main/interactions/verify.go
 func verifyPublicKey(r *http.Request, key ed25519.PublicKey) bool {
@@ -108,10 +111,14 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 		}
 
 		// ack the interaction proactively
-		payload, err := deferredInteractionResponsePayload(data.Type, cmd.Ephemeral)
+		payload, needsAck, err := deferredInteractionResponsePayload(data.Type, cmd.Ephemeral)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Err(err).Str("id", data.ID).Msg("failed to make an ack response payload")
+			return
+		}
+		if !needsAck {
+			router.handleInteraction(data, cmd) // we wait for the handler to reply
 			return
 		}
 
@@ -160,6 +167,9 @@ func (r *Router) routeInteraction(interaction discordgo.Interaction) (builder.Co
 	case discordgo.InteractionMessageComponent:
 		data, _ := interaction.Data.(discordgo.MessageComponentInteractionData)
 		matchKey = data.CustomID
+	case discordgo.InteractionApplicationCommandAutocomplete:
+		data, _ := interaction.Data.(discordgo.ApplicationCommandInteractionData)
+		matchKey = "autocomplete_" + data.Name
 	}
 
 	if matchKey == "" {
@@ -223,12 +233,11 @@ func sendPingReply(w http.ResponseWriter) {
 func (r *Router) sendInteractionReply(ctx context.Context, interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
 	var handler func() error
 
-	switch interaction.Type {
-	case discordgo.InteractionApplicationCommand, discordgo.InteractionMessageComponent:
+	if slices.Contains(supportedInteractionTypes, interaction.Type) {
 		handler = func() error {
 			return r.restClient.UpdateOrSendInteractionResponse(ctx, interaction.AppID, interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &data, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
 		}
-	default:
+	} else {
 		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
 		handler = func() error {
 			return r.restClient.UpdateOrSendInteractionResponse(ctx, interaction.AppID, interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
@@ -242,19 +251,24 @@ func (r *Router) sendInteractionReply(ctx context.Context, interaction discordgo
 	}
 }
 
-func deferredInteractionResponsePayload(t discordgo.InteractionType, ephemeral bool) (discordgo.InteractionResponse, error) {
+func deferredInteractionResponsePayload(t discordgo.InteractionType, ephemeral bool) (discordgo.InteractionResponse, bool, error) {
 	var response discordgo.InteractionResponse
 	if ephemeral {
+		if response.Data == nil {
+			response.Data = &discordgo.InteractionResponseData{}
+		}
 		response.Data.Flags = discordgo.MessageFlagsEphemeral
 	}
 
 	switch t {
-	case discordgo.InteractionApplicationCommand, discordgo.InteractionMessageComponent:
+	case discordgo.InteractionApplicationCommand, discordgo.InteractionMessageComponent, discordgo.InteractionModalSubmit:
 		response.Type = discordgo.InteractionResponseDeferredChannelMessageWithSource
+	case discordgo.InteractionApplicationCommandAutocomplete:
+		return response, false, nil
 
 	default:
-		return response, fmt.Errorf("interaction type %s not supported", t.String())
+		return response, false, fmt.Errorf("interaction type %s not supported", t.String())
 	}
 
-	return response, nil
+	return response, true, nil
 }

@@ -20,6 +20,25 @@
   value: Link your Blitz account to Aftermath
 - key: command_link_linked_successfully_fmt
   value: "Your account has been linked! Aftermath will now default to **%s** on **%s** when checking stats.\nYou can also verify your account with `/verify`"
+# /accounts
+- key: command_accounts_name
+  value: accounts
+- key: command_accounts_description
+  value: View and manage your linked accounts
+- key: command_option_accounts_default_name
+  value: default
+- key: command_option_accounts_default_description
+  value: Set the default account Aftermath will check when using commands
+- key: command_option_accounts_linked_name
+  value: linked
+- key: command_option_accounts_linked_description
+  value: View your linked Blitz accounts
+
+- key: command_accounts_set_default_successfully_fmt
+  value: "Your default account has been updated! Aftermath will now default to **%s** on **%s** when checking stats."
+- key: command_accounts_verify_cta
+  value: "You can also verify your account with `/verify`"
+  context: A new default account was set, but it is not verified
 
 # Common command options
 # days
@@ -177,6 +196,12 @@
 - key: verify_error_missing_server
   value: "Please select a server your account is registered on."
   context: Server not selected
+
+  # /accounts errors
+- key: accounts_error_connection_not_found
+  value: "I was not able to find your linked account with this nickname. Try adding it through `/link` instead."
+  context: Nickname is invalid or failed to find a valid connection
+
 
   # Wargaming specific errors
 - key: wargaming_error_private_account

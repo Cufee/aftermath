@@ -67,6 +67,9 @@ Updates all loaded commands using the Discord REST API
 func (r *Router) UpdateLoadedCommands(ctx context.Context) error {
 	var commandByName = make(map[string]command)
 	for _, cmd := range r.commands {
+		if cmd.Type != builder.CommandTypeChat {
+			continue
+		}
 		commandByName[cmd.Name] = command{requested: &cmd}
 	}
 

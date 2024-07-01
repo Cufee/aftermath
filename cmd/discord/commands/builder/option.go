@@ -27,6 +27,8 @@ type Option struct {
 	choices []OptionChoice
 
 	options []Option
+
+	autocomplete bool
 }
 
 func NewOption(name string, kind discordgo.ApplicationCommandOptionType) Option {
@@ -81,6 +83,11 @@ func (o Option) Choices(choices ...OptionChoice) Option {
 	return o
 }
 
+func (o Option) Autocomplete() Option {
+	o.autocomplete = true
+	return o
+}
+
 func (o Option) Build(command string) discordgo.ApplicationCommandOption {
 	if o.kind == 0 {
 		panic("option type is not set")
@@ -104,6 +111,7 @@ func (o Option) Build(command string) discordgo.ApplicationCommandOption {
 	return discordgo.ApplicationCommandOption{
 		Name:                     strings.ToLower(stringOr(nameLocalized[discordgo.EnglishUS], o.name)),
 		Description:              stringOr(descLocalized[discordgo.EnglishUS], o.name),
+		Autocomplete:             o.autocomplete,
 		NameLocalizations:        nameLocalized,
 		DescriptionLocalizations: descLocalized,
 		MinLength:                o.minLength,
