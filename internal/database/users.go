@@ -207,3 +207,7 @@ func (c *client) UpsertConnection(ctx context.Context, connection models.UserCon
 
 	return connection, nil
 }
+
+func (c *client) DeleteConnection(ctx context.Context, connectionID string) error {
+	return c.db.UserConnection.DeleteOneID(connectionID).Exec(ctx)
+}

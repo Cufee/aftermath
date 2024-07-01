@@ -41,6 +41,7 @@ type UsersClient interface {
 
 	UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
 	UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
+	DeleteConnection(ctx context.Context, connectionID string) error
 }
 
 type SnapshotsClient interface {

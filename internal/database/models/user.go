@@ -34,9 +34,15 @@ func (u User) HasPermission(value permissions.Permissions) bool {
 	return perms.Has(value)
 }
 
-func (u User) Connection(kind ConnectionType) (UserConnection, bool) {
+func (u User) Connection(kind ConnectionType, conditions map[string]any) (UserConnection, bool) {
+outerLoop:
 	for _, connection := range u.Connections {
 		if connection.Type == kind {
+			for key, value := range conditions {
+				if connection.Metadata[key] != value {
+					continue outerLoop
+				}
+			}
 			return connection, true
 		}
 	}
