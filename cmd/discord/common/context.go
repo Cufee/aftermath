@@ -172,15 +172,12 @@ func (o options) Subcommand() (string, options, bool) {
 	return "", options{}, false
 }
 
-func GetOption[T any](c *Context, name string) (T, bool) {
+func GetOption[T any](data []*discordgo.ApplicationCommandInteractionDataOption, name string) (T, bool) {
 	var v T
-	if data, ok := c.CommandData(); ok {
-		for _, opt := range data.Options {
-			if opt.Name == name {
-				v, _ = opt.Value.(T)
-
-				return v, true
-			}
+	for _, opt := range data {
+		if opt.Name == name {
+			v, _ = opt.Value.(T)
+			return v, true
 		}
 	}
 	return v, false

@@ -19,7 +19,7 @@ func NewRouterHandler(coreClient core.Client, token string, publicKey string, co
 
 	rt.LoadCommands(commands...)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
 	err = rt.UpdateLoadedCommands(ctx)

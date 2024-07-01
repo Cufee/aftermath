@@ -23,7 +23,7 @@ func init() {
 		builder.NewCommand("session").
 			Options(defaultStatsOptions...).
 			Handler(func(ctx *common.Context) error {
-				options := getDefaultStatsOptions(ctx)
+				options := getDefaultStatsOptions(ctx.Options())
 				message, valid := options.Validate(ctx)
 				if !valid {
 					return ctx.Reply().Send(message)
