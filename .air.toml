@@ -9,3 +9,7 @@ stop_on_error = true
 enabled = true
 proxy_port = 8080
 app_port = 9092
+
+[log]
+# Only show main log (silences watcher, build, runner)
+main_only = false

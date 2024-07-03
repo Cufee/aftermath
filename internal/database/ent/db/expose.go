@@ -69,6 +69,19 @@ func (ac *ApplicationCommand) ScanValues(columns []string) ([]any, error) {
 	return ac.scanValues(columns)
 }
 
+func (an *AuthNonce) AssignValues(columns []string, values []any) error {
+	if an == nil {
+		return fmt.Errorf("AuthNonce(nil)")
+	}
+	return an.assignValues(columns, values)
+}
+func (an *AuthNonce) ScanValues(columns []string) ([]any, error) {
+	if an == nil {
+		return nil, fmt.Errorf("AuthNonce(nil)")
+	}
+	return an.scanValues(columns)
+}
+
 func (c *Clan) AssignValues(columns []string, values []any) error {
 	if c == nil {
 		return fmt.Errorf("Clan(nil)")
@@ -106,6 +119,19 @@ func (di *DiscordInteraction) ScanValues(columns []string) ([]any, error) {
 		return nil, fmt.Errorf("DiscordInteraction(nil)")
 	}
 	return di.scanValues(columns)
+}
+
+func (s *Session) AssignValues(columns []string, values []any) error {
+	if s == nil {
+		return fmt.Errorf("Session(nil)")
+	}
+	return s.assignValues(columns, values)
+}
+func (s *Session) ScanValues(columns []string) ([]any, error) {
+	if s == nil {
+		return nil, fmt.Errorf("Session(nil)")
+	}
+	return s.scanValues(columns)
 }
 
 func (u *User) AssignValues(columns []string, values []any) error {

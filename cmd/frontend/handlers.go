@@ -9,7 +9,10 @@ import (
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/core/server"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/middleware"
 	"github.com/cufee/aftermath/cmd/frontend/routes"
+	"github.com/cufee/aftermath/cmd/frontend/routes/api/auth"
+	"github.com/cufee/aftermath/cmd/frontend/routes/app"
 	"github.com/cufee/aftermath/cmd/frontend/routes/widget"
 	"github.com/pkg/errors"
 )
@@ -30,7 +33,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 	return []server.Handler{
 		// assets
 		{
-			Path: "GET /assets/{$}",
+			Path: get("/assets"),
 			Func: redirect("/"),
 		},
 		{
@@ -40,28 +43,40 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		// wildcard to catch all invalid requests
 		{
 			Path: "GET /{pathname...}",
-			Func: handler.Handler(core, routes.ErrorNotFound),
+			Func: handler.Chain(core, routes.ErrorNotFound),
 		},
 		// common routes
 		{
 			Path: get("/"),
-			Func: handler.Handler(core, routes.Index),
+			Func: handler.Chain(core, routes.Index),
 		},
 		{
 			Path: get("/error"),
-			Func: handler.Handler(core, routes.GenericError),
+			Func: handler.Chain(core, routes.GenericError),
+		},
+		{
+			Path: get("/login"),
+			Func: handler.Chain(core, routes.Login),
 		},
 		// widget
 		{
 			Path: get("/widget/{accountId}"),
-			Func: handler.Handler(core, widget.ConfigureWidget),
+			Func: handler.Chain(core, widget.ConfigureWidget),
 		},
 		{
 			Path: get("/widget/{accountId}/live"),
-			Func: handler.Handler(core, widget.LiveWidget),
+			Func: handler.Chain(core, widget.LiveWidget),
 		},
 		// app routes
-		//
+		{
+			Path: get("/app"),
+			Func: handler.Chain(core, app.Index, middleware.SessionCheck),
+		},
+		// api routes
+		{
+			Path: get("/api/auth/discord"),
+			Func: handler.Chain(core, auth.DiscordRedirect),
+		},
 	}, nil
 }
 

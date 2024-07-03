@@ -24,12 +24,16 @@ type Tx struct {
 	AppConfiguration *AppConfigurationClient
 	// ApplicationCommand is the client for interacting with the ApplicationCommand builders.
 	ApplicationCommand *ApplicationCommandClient
+	// AuthNonce is the client for interacting with the AuthNonce builders.
+	AuthNonce *AuthNonceClient
 	// Clan is the client for interacting with the Clan builders.
 	Clan *ClanClient
 	// CronTask is the client for interacting with the CronTask builders.
 	CronTask *CronTaskClient
 	// DiscordInteraction is the client for interacting with the DiscordInteraction builders.
 	DiscordInteraction *DiscordInteractionClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserConnection is the client for interacting with the UserConnection builders.
@@ -180,9 +184,11 @@ func (tx *Tx) init() {
 	tx.AchievementsSnapshot = NewAchievementsSnapshotClient(tx.config)
 	tx.AppConfiguration = NewAppConfigurationClient(tx.config)
 	tx.ApplicationCommand = NewApplicationCommandClient(tx.config)
+	tx.AuthNonce = NewAuthNonceClient(tx.config)
 	tx.Clan = NewClanClient(tx.config)
 	tx.CronTask = NewCronTaskClient(tx.config)
 	tx.DiscordInteraction = NewDiscordInteractionClient(tx.config)
+	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserConnection = NewUserConnectionClient(tx.config)
 	tx.UserContent = NewUserContentClient(tx.config)

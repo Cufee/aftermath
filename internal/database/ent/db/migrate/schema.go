@@ -85,7 +85,7 @@ var (
 				Symbol:     "account_snapshots_accounts_account_snapshots",
 				Columns:    []*schema.Column{AccountSnapshotsColumns[10]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -138,7 +138,7 @@ var (
 				Symbol:     "achievements_snapshots_accounts_achievement_snapshots",
 				Columns:    []*schema.Column{AchievementsSnapshotsColumns[8]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -215,6 +215,30 @@ var (
 				Name:    "applicationcommand_options_hash",
 				Unique:  false,
 				Columns: []*schema.Column{ApplicationCommandsColumns[5]},
+			},
+		},
+	}
+	// AuthNoncesColumns holds the columns for the "auth_nonces" table.
+	AuthNoncesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "active", Type: field.TypeBool},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "identifier", Type: field.TypeString},
+		{Name: "public_id", Type: field.TypeString, Unique: true},
+		{Name: "metadata", Type: field.TypeJSON},
+	}
+	// AuthNoncesTable holds the schema information for the "auth_nonces" table.
+	AuthNoncesTable = &schema.Table{
+		Name:       "auth_nonces",
+		Columns:    AuthNoncesColumns,
+		PrimaryKey: []*schema.Column{AuthNoncesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "authnonce_public_id_active_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{AuthNoncesColumns[6], AuthNoncesColumns[3], AuthNoncesColumns[4]},
 			},
 		},
 	}
@@ -321,7 +345,7 @@ var (
 				Symbol:     "discord_interactions_users_discord_interactions",
 				Columns:    []*schema.Column{DiscordInteractionsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -352,11 +376,43 @@ var (
 			},
 		},
 	}
+	// SessionsColumns holds the columns for the "sessions" table.
+	SessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "public_id", Type: field.TypeString, Unique: true},
+		{Name: "metadata", Type: field.TypeJSON},
+		{Name: "user_id", Type: field.TypeString},
+	}
+	// SessionsTable holds the schema information for the "sessions" table.
+	SessionsTable = &schema.Table{
+		Name:       "sessions",
+		Columns:    SessionsColumns,
+		PrimaryKey: []*schema.Column{SessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "sessions_users_sessions",
+				Columns:    []*schema.Column{SessionsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "session_public_id_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{SessionsColumns[4], SessionsColumns[3]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "username", Type: field.TypeString, Default: ""},
 		{Name: "permissions", Type: field.TypeString, Default: ""},
 		{Name: "feature_flags", Type: field.TypeJSON, Nullable: true},
 	}
@@ -370,6 +426,11 @@ var (
 				Name:    "user_id",
 				Unique:  false,
 				Columns: []*schema.Column{UsersColumns[0]},
+			},
+			{
+				Name:    "user_username",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[3]},
 			},
 		},
 	}
@@ -394,7 +455,7 @@ var (
 				Symbol:     "user_connections_users_connections",
 				Columns:    []*schema.Column{UserConnectionsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -451,7 +512,7 @@ var (
 				Symbol:     "user_contents_users_content",
 				Columns:    []*schema.Column{UserContentsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -503,7 +564,7 @@ var (
 				Symbol:     "user_subscriptions_users_subscriptions",
 				Columns:    []*schema.Column{UserSubscriptionsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -598,7 +659,7 @@ var (
 				Symbol:     "vehicle_snapshots_accounts_vehicle_snapshots",
 				Columns:    []*schema.Column{VehicleSnapshotsColumns[9]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -636,9 +697,11 @@ var (
 		AchievementsSnapshotsTable,
 		AppConfigurationsTable,
 		ApplicationCommandsTable,
+		AuthNoncesTable,
 		ClansTable,
 		CronTasksTable,
 		DiscordInteractionsTable,
+		SessionsTable,
 		UsersTable,
 		UserConnectionsTable,
 		UserContentsTable,
@@ -654,6 +717,7 @@ func init() {
 	AccountSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
 	AchievementsSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
 	DiscordInteractionsTable.ForeignKeys[0].RefTable = UsersTable
+	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserConnectionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserContentsTable.ForeignKeys[0].RefTable = UsersTable
 	UserSubscriptionsTable.ForeignKeys[0].RefTable = UsersTable

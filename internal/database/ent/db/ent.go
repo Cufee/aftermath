@@ -17,9 +17,11 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/appconfiguration"
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
+	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
@@ -92,9 +94,11 @@ func checkColumn(table, column string) error {
 			achievementssnapshot.Table: achievementssnapshot.ValidColumn,
 			appconfiguration.Table:     appconfiguration.ValidColumn,
 			applicationcommand.Table:   applicationcommand.ValidColumn,
+			authnonce.Table:            authnonce.ValidColumn,
 			clan.Table:                 clan.ValidColumn,
 			crontask.Table:             crontask.ValidColumn,
 			discordinteraction.Table:   discordinteraction.ValidColumn,
+			session.Table:              session.ValidColumn,
 			user.Table:                 user.ValidColumn,
 			userconnection.Table:       userconnection.ValidColumn,
 			usercontent.Table:          usercontent.ValidColumn,

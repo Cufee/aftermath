@@ -169,3 +169,26 @@ func (c *staticTestingDatabase) GetDiscordInteraction(ctx context.Context, refer
 func (c *staticTestingDatabase) DeleteExpiredInteractions(ctx context.Context, expiration time.Time) error {
 	return errors.New("DeleteExpiredInteractions not implemented")
 }
+
+func (c *staticTestingDatabase) CreateAuthNonce(ctx context.Context, publicID, identifier string, expiresAt time.Time, meta map[string]string) (models.AuthNonce, error) {
+	return models.AuthNonce{}, errors.New("CreateAuthNonce not implemented")
+}
+func (c *staticTestingDatabase) FindAuthNonce(ctx context.Context, publicID string) (models.AuthNonce, error) {
+	return models.AuthNonce{}, errors.New("FindAuthNonce not implemented")
+}
+func (c *staticTestingDatabase) SetAuthNonceActive(ctx context.Context, nonceID string, active bool) error {
+	return errors.New("SetAuthNonceActive not implemented")
+}
+
+func (c *staticTestingDatabase) CreateSession(ctx context.Context, publicID, userID string, expiresAt time.Time, meta map[string]string) (models.Session, error) {
+	return models.Session{}, errors.New("CreateSession not implementer")
+}
+func (c *staticTestingDatabase) SetSessionExpiresAt(ctx context.Context, sessionID string, expiresAt time.Time) error {
+	return errors.New("SetSessionExpiresAt not implementer")
+}
+func (c *staticTestingDatabase) FindSession(ctx context.Context, publicID string) (models.Session, error) {
+	return models.Session{}, errors.New("FindSession not implementer")
+}
+func (c *staticTestingDatabase) UserFromSession(ctx context.Context, publicID string) (models.User, error) {
+	return models.User{}, errors.New("UserFromSession not implementer")
+}
