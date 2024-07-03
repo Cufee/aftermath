@@ -69,7 +69,7 @@ func init() {
 					}
 				}
 
-				image, meta, err := ctx.Core.Stats(ctx.Locale).SessionImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL))
+				image, meta, err := ctx.Core.Stats(ctx.Locale).SessionImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8())
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
 						return ctx.Reply().Send("session_error_account_was_not_tracked")

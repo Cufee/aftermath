@@ -57,7 +57,7 @@ func init() {
 				var meta stats.Metadata
 				switch interaction.Command {
 				case "stats":
-					img, mt, err := ctx.Core.Stats(ctx.Locale).PeriodImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL))
+					img, mt, err := ctx.Core.Stats(ctx.Locale).PeriodImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL), stats.WithWN8())
 					if err != nil {
 						return ctx.Err(err)
 					}
@@ -65,7 +65,7 @@ func init() {
 					meta = mt
 
 				case "session":
-					img, mt, err := ctx.Core.Stats(ctx.Locale).SessionImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL))
+					img, mt, err := ctx.Core.Stats(ctx.Locale).SessionImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL), stats.WithWN8())
 					if err != nil {
 						if errors.Is(err, fetch.ErrSessionNotFound) || errors.Is(err, stats.ErrAccountNotTracked) {
 							return ctx.Reply().Send("stats_refresh_interaction_error_expired")
