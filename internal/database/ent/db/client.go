@@ -449,15 +449,15 @@ func (c *AccountClient) QueryClan(a *Account) *ClanQuery {
 	return query
 }
 
-// QueryAccountSnapshots queries the account_snapshots edge of a Account.
-func (c *AccountClient) QueryAccountSnapshots(a *Account) *AccountSnapshotQuery {
-	query := (&AccountSnapshotClient{config: c.config}).Query()
+// QueryAchievementSnapshots queries the achievement_snapshots edge of a Account.
+func (c *AccountClient) QueryAchievementSnapshots(a *Account) *AchievementsSnapshotQuery {
+	query := (&AchievementsSnapshotClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(account.Table, account.FieldID, id),
-			sqlgraph.To(accountsnapshot.Table, accountsnapshot.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, account.AccountSnapshotsTable, account.AccountSnapshotsColumn),
+			sqlgraph.To(achievementssnapshot.Table, achievementssnapshot.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.AchievementSnapshotsTable, account.AchievementSnapshotsColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
@@ -481,15 +481,15 @@ func (c *AccountClient) QueryVehicleSnapshots(a *Account) *VehicleSnapshotQuery 
 	return query
 }
 
-// QueryAchievementSnapshots queries the achievement_snapshots edge of a Account.
-func (c *AccountClient) QueryAchievementSnapshots(a *Account) *AchievementsSnapshotQuery {
-	query := (&AchievementsSnapshotClient{config: c.config}).Query()
+// QueryAccountSnapshots queries the account_snapshots edge of a Account.
+func (c *AccountClient) QueryAccountSnapshots(a *Account) *AccountSnapshotQuery {
+	query := (&AccountSnapshotClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(account.Table, account.FieldID, id),
-			sqlgraph.To(achievementssnapshot.Table, achievementssnapshot.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, account.AchievementSnapshotsTable, account.AchievementSnapshotsColumn),
+			sqlgraph.To(accountsnapshot.Table, accountsnapshot.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.AccountSnapshotsTable, account.AccountSnapshotsColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil

@@ -27,9 +27,9 @@ type AccountQuery struct {
 	inters                   []Interceptor
 	predicates               []predicate.Account
 	withClan                 *ClanQuery
-	withAccountSnapshots     *AccountSnapshotQuery
-	withVehicleSnapshots     *VehicleSnapshotQuery
 	withAchievementSnapshots *AchievementsSnapshotQuery
+	withVehicleSnapshots     *VehicleSnapshotQuery
+	withAccountSnapshots     *AccountSnapshotQuery
 	modifiers                []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -89,9 +89,9 @@ func (aq *AccountQuery) QueryClan() *ClanQuery {
 	return query
 }
 
-// QueryAccountSnapshots chains the current query on the "account_snapshots" edge.
-func (aq *AccountQuery) QueryAccountSnapshots() *AccountSnapshotQuery {
-	query := (&AccountSnapshotClient{config: aq.config}).Query()
+// QueryAchievementSnapshots chains the current query on the "achievement_snapshots" edge.
+func (aq *AccountQuery) QueryAchievementSnapshots() *AchievementsSnapshotQuery {
+	query := (&AchievementsSnapshotClient{config: aq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -102,8 +102,8 @@ func (aq *AccountQuery) QueryAccountSnapshots() *AccountSnapshotQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(account.Table, account.FieldID, selector),
-			sqlgraph.To(accountsnapshot.Table, accountsnapshot.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, account.AccountSnapshotsTable, account.AccountSnapshotsColumn),
+			sqlgraph.To(achievementssnapshot.Table, achievementssnapshot.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.AchievementSnapshotsTable, account.AchievementSnapshotsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -133,9 +133,9 @@ func (aq *AccountQuery) QueryVehicleSnapshots() *VehicleSnapshotQuery {
 	return query
 }
 
-// QueryAchievementSnapshots chains the current query on the "achievement_snapshots" edge.
-func (aq *AccountQuery) QueryAchievementSnapshots() *AchievementsSnapshotQuery {
-	query := (&AchievementsSnapshotClient{config: aq.config}).Query()
+// QueryAccountSnapshots chains the current query on the "account_snapshots" edge.
+func (aq *AccountQuery) QueryAccountSnapshots() *AccountSnapshotQuery {
+	query := (&AccountSnapshotClient{config: aq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -146,8 +146,8 @@ func (aq *AccountQuery) QueryAchievementSnapshots() *AchievementsSnapshotQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(account.Table, account.FieldID, selector),
-			sqlgraph.To(achievementssnapshot.Table, achievementssnapshot.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, account.AchievementSnapshotsTable, account.AchievementSnapshotsColumn),
+			sqlgraph.To(accountsnapshot.Table, accountsnapshot.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.AccountSnapshotsTable, account.AccountSnapshotsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -348,9 +348,9 @@ func (aq *AccountQuery) Clone() *AccountQuery {
 		inters:                   append([]Interceptor{}, aq.inters...),
 		predicates:               append([]predicate.Account{}, aq.predicates...),
 		withClan:                 aq.withClan.Clone(),
-		withAccountSnapshots:     aq.withAccountSnapshots.Clone(),
-		withVehicleSnapshots:     aq.withVehicleSnapshots.Clone(),
 		withAchievementSnapshots: aq.withAchievementSnapshots.Clone(),
+		withVehicleSnapshots:     aq.withVehicleSnapshots.Clone(),
+		withAccountSnapshots:     aq.withAccountSnapshots.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
@@ -368,14 +368,14 @@ func (aq *AccountQuery) WithClan(opts ...func(*ClanQuery)) *AccountQuery {
 	return aq
 }
 
-// WithAccountSnapshots tells the query-builder to eager-load the nodes that are connected to
-// the "account_snapshots" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *AccountQuery) WithAccountSnapshots(opts ...func(*AccountSnapshotQuery)) *AccountQuery {
-	query := (&AccountSnapshotClient{config: aq.config}).Query()
+// WithAchievementSnapshots tells the query-builder to eager-load the nodes that are connected to
+// the "achievement_snapshots" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *AccountQuery) WithAchievementSnapshots(opts ...func(*AchievementsSnapshotQuery)) *AccountQuery {
+	query := (&AchievementsSnapshotClient{config: aq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withAccountSnapshots = query
+	aq.withAchievementSnapshots = query
 	return aq
 }
 
@@ -390,14 +390,14 @@ func (aq *AccountQuery) WithVehicleSnapshots(opts ...func(*VehicleSnapshotQuery)
 	return aq
 }
 
-// WithAchievementSnapshots tells the query-builder to eager-load the nodes that are connected to
-// the "achievement_snapshots" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *AccountQuery) WithAchievementSnapshots(opts ...func(*AchievementsSnapshotQuery)) *AccountQuery {
-	query := (&AchievementsSnapshotClient{config: aq.config}).Query()
+// WithAccountSnapshots tells the query-builder to eager-load the nodes that are connected to
+// the "account_snapshots" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *AccountQuery) WithAccountSnapshots(opts ...func(*AccountSnapshotQuery)) *AccountQuery {
+	query := (&AccountSnapshotClient{config: aq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withAchievementSnapshots = query
+	aq.withAccountSnapshots = query
 	return aq
 }
 
@@ -481,9 +481,9 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 		_spec       = aq.querySpec()
 		loadedTypes = [4]bool{
 			aq.withClan != nil,
-			aq.withAccountSnapshots != nil,
-			aq.withVehicleSnapshots != nil,
 			aq.withAchievementSnapshots != nil,
+			aq.withVehicleSnapshots != nil,
+			aq.withAccountSnapshots != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -513,10 +513,12 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 			return nil, err
 		}
 	}
-	if query := aq.withAccountSnapshots; query != nil {
-		if err := aq.loadAccountSnapshots(ctx, query, nodes,
-			func(n *Account) { n.Edges.AccountSnapshots = []*AccountSnapshot{} },
-			func(n *Account, e *AccountSnapshot) { n.Edges.AccountSnapshots = append(n.Edges.AccountSnapshots, e) }); err != nil {
+	if query := aq.withAchievementSnapshots; query != nil {
+		if err := aq.loadAchievementSnapshots(ctx, query, nodes,
+			func(n *Account) { n.Edges.AchievementSnapshots = []*AchievementsSnapshot{} },
+			func(n *Account, e *AchievementsSnapshot) {
+				n.Edges.AchievementSnapshots = append(n.Edges.AchievementSnapshots, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -527,12 +529,10 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 			return nil, err
 		}
 	}
-	if query := aq.withAchievementSnapshots; query != nil {
-		if err := aq.loadAchievementSnapshots(ctx, query, nodes,
-			func(n *Account) { n.Edges.AchievementSnapshots = []*AchievementsSnapshot{} },
-			func(n *Account, e *AchievementsSnapshot) {
-				n.Edges.AchievementSnapshots = append(n.Edges.AchievementSnapshots, e)
-			}); err != nil {
+	if query := aq.withAccountSnapshots; query != nil {
+		if err := aq.loadAccountSnapshots(ctx, query, nodes,
+			func(n *Account) { n.Edges.AccountSnapshots = []*AccountSnapshot{} },
+			func(n *Account, e *AccountSnapshot) { n.Edges.AccountSnapshots = append(n.Edges.AccountSnapshots, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -568,7 +568,7 @@ func (aq *AccountQuery) loadClan(ctx context.Context, query *ClanQuery, nodes []
 	}
 	return nil
 }
-func (aq *AccountQuery) loadAccountSnapshots(ctx context.Context, query *AccountSnapshotQuery, nodes []*Account, init func(*Account), assign func(*Account, *AccountSnapshot)) error {
+func (aq *AccountQuery) loadAchievementSnapshots(ctx context.Context, query *AchievementsSnapshotQuery, nodes []*Account, init func(*Account), assign func(*Account, *AchievementsSnapshot)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*Account)
 	for i := range nodes {
@@ -579,10 +579,10 @@ func (aq *AccountQuery) loadAccountSnapshots(ctx context.Context, query *Account
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(accountsnapshot.FieldAccountID)
+		query.ctx.AppendFieldOnce(achievementssnapshot.FieldAccountID)
 	}
-	query.Where(predicate.AccountSnapshot(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(account.AccountSnapshotsColumn), fks...))
+	query.Where(predicate.AchievementsSnapshot(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(account.AchievementSnapshotsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -628,7 +628,7 @@ func (aq *AccountQuery) loadVehicleSnapshots(ctx context.Context, query *Vehicle
 	}
 	return nil
 }
-func (aq *AccountQuery) loadAchievementSnapshots(ctx context.Context, query *AchievementsSnapshotQuery, nodes []*Account, init func(*Account), assign func(*Account, *AchievementsSnapshot)) error {
+func (aq *AccountQuery) loadAccountSnapshots(ctx context.Context, query *AccountSnapshotQuery, nodes []*Account, init func(*Account), assign func(*Account, *AccountSnapshot)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*Account)
 	for i := range nodes {
@@ -639,10 +639,10 @@ func (aq *AccountQuery) loadAchievementSnapshots(ctx context.Context, query *Ach
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(achievementssnapshot.FieldAccountID)
+		query.ctx.AppendFieldOnce(accountsnapshot.FieldAccountID)
 	}
-	query.Where(predicate.AchievementsSnapshot(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(account.AchievementSnapshotsColumn), fks...))
+	query.Where(predicate.AccountSnapshot(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(account.AccountSnapshotsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

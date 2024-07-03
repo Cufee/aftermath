@@ -134,19 +134,19 @@ func (au *AccountUpdate) SetClan(c *Clan) *AccountUpdate {
 	return au.SetClanID(c.ID)
 }
 
-// AddAccountSnapshotIDs adds the "account_snapshots" edge to the AccountSnapshot entity by IDs.
-func (au *AccountUpdate) AddAccountSnapshotIDs(ids ...string) *AccountUpdate {
-	au.mutation.AddAccountSnapshotIDs(ids...)
+// AddAchievementSnapshotIDs adds the "achievement_snapshots" edge to the AchievementsSnapshot entity by IDs.
+func (au *AccountUpdate) AddAchievementSnapshotIDs(ids ...string) *AccountUpdate {
+	au.mutation.AddAchievementSnapshotIDs(ids...)
 	return au
 }
 
-// AddAccountSnapshots adds the "account_snapshots" edges to the AccountSnapshot entity.
-func (au *AccountUpdate) AddAccountSnapshots(a ...*AccountSnapshot) *AccountUpdate {
+// AddAchievementSnapshots adds the "achievement_snapshots" edges to the AchievementsSnapshot entity.
+func (au *AccountUpdate) AddAchievementSnapshots(a ...*AchievementsSnapshot) *AccountUpdate {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return au.AddAccountSnapshotIDs(ids...)
+	return au.AddAchievementSnapshotIDs(ids...)
 }
 
 // AddVehicleSnapshotIDs adds the "vehicle_snapshots" edge to the VehicleSnapshot entity by IDs.
@@ -164,19 +164,19 @@ func (au *AccountUpdate) AddVehicleSnapshots(v ...*VehicleSnapshot) *AccountUpda
 	return au.AddVehicleSnapshotIDs(ids...)
 }
 
-// AddAchievementSnapshotIDs adds the "achievement_snapshots" edge to the AchievementsSnapshot entity by IDs.
-func (au *AccountUpdate) AddAchievementSnapshotIDs(ids ...string) *AccountUpdate {
-	au.mutation.AddAchievementSnapshotIDs(ids...)
+// AddAccountSnapshotIDs adds the "account_snapshots" edge to the AccountSnapshot entity by IDs.
+func (au *AccountUpdate) AddAccountSnapshotIDs(ids ...string) *AccountUpdate {
+	au.mutation.AddAccountSnapshotIDs(ids...)
 	return au
 }
 
-// AddAchievementSnapshots adds the "achievement_snapshots" edges to the AchievementsSnapshot entity.
-func (au *AccountUpdate) AddAchievementSnapshots(a ...*AchievementsSnapshot) *AccountUpdate {
+// AddAccountSnapshots adds the "account_snapshots" edges to the AccountSnapshot entity.
+func (au *AccountUpdate) AddAccountSnapshots(a ...*AccountSnapshot) *AccountUpdate {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return au.AddAchievementSnapshotIDs(ids...)
+	return au.AddAccountSnapshotIDs(ids...)
 }
 
 // Mutation returns the AccountMutation object of the builder.
@@ -190,25 +190,25 @@ func (au *AccountUpdate) ClearClan() *AccountUpdate {
 	return au
 }
 
-// ClearAccountSnapshots clears all "account_snapshots" edges to the AccountSnapshot entity.
-func (au *AccountUpdate) ClearAccountSnapshots() *AccountUpdate {
-	au.mutation.ClearAccountSnapshots()
+// ClearAchievementSnapshots clears all "achievement_snapshots" edges to the AchievementsSnapshot entity.
+func (au *AccountUpdate) ClearAchievementSnapshots() *AccountUpdate {
+	au.mutation.ClearAchievementSnapshots()
 	return au
 }
 
-// RemoveAccountSnapshotIDs removes the "account_snapshots" edge to AccountSnapshot entities by IDs.
-func (au *AccountUpdate) RemoveAccountSnapshotIDs(ids ...string) *AccountUpdate {
-	au.mutation.RemoveAccountSnapshotIDs(ids...)
+// RemoveAchievementSnapshotIDs removes the "achievement_snapshots" edge to AchievementsSnapshot entities by IDs.
+func (au *AccountUpdate) RemoveAchievementSnapshotIDs(ids ...string) *AccountUpdate {
+	au.mutation.RemoveAchievementSnapshotIDs(ids...)
 	return au
 }
 
-// RemoveAccountSnapshots removes "account_snapshots" edges to AccountSnapshot entities.
-func (au *AccountUpdate) RemoveAccountSnapshots(a ...*AccountSnapshot) *AccountUpdate {
+// RemoveAchievementSnapshots removes "achievement_snapshots" edges to AchievementsSnapshot entities.
+func (au *AccountUpdate) RemoveAchievementSnapshots(a ...*AchievementsSnapshot) *AccountUpdate {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return au.RemoveAccountSnapshotIDs(ids...)
+	return au.RemoveAchievementSnapshotIDs(ids...)
 }
 
 // ClearVehicleSnapshots clears all "vehicle_snapshots" edges to the VehicleSnapshot entity.
@@ -232,25 +232,25 @@ func (au *AccountUpdate) RemoveVehicleSnapshots(v ...*VehicleSnapshot) *AccountU
 	return au.RemoveVehicleSnapshotIDs(ids...)
 }
 
-// ClearAchievementSnapshots clears all "achievement_snapshots" edges to the AchievementsSnapshot entity.
-func (au *AccountUpdate) ClearAchievementSnapshots() *AccountUpdate {
-	au.mutation.ClearAchievementSnapshots()
+// ClearAccountSnapshots clears all "account_snapshots" edges to the AccountSnapshot entity.
+func (au *AccountUpdate) ClearAccountSnapshots() *AccountUpdate {
+	au.mutation.ClearAccountSnapshots()
 	return au
 }
 
-// RemoveAchievementSnapshotIDs removes the "achievement_snapshots" edge to AchievementsSnapshot entities by IDs.
-func (au *AccountUpdate) RemoveAchievementSnapshotIDs(ids ...string) *AccountUpdate {
-	au.mutation.RemoveAchievementSnapshotIDs(ids...)
+// RemoveAccountSnapshotIDs removes the "account_snapshots" edge to AccountSnapshot entities by IDs.
+func (au *AccountUpdate) RemoveAccountSnapshotIDs(ids ...string) *AccountUpdate {
+	au.mutation.RemoveAccountSnapshotIDs(ids...)
 	return au
 }
 
-// RemoveAchievementSnapshots removes "achievement_snapshots" edges to AchievementsSnapshot entities.
-func (au *AccountUpdate) RemoveAchievementSnapshots(a ...*AchievementsSnapshot) *AccountUpdate {
+// RemoveAccountSnapshots removes "account_snapshots" edges to AccountSnapshot entities.
+func (au *AccountUpdate) RemoveAccountSnapshots(a ...*AccountSnapshot) *AccountUpdate {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return au.RemoveAchievementSnapshotIDs(ids...)
+	return au.RemoveAccountSnapshotIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -369,28 +369,28 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.AccountSnapshotsCleared() {
+	if au.mutation.AchievementSnapshotsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AccountSnapshotsTable,
-			Columns: []string{account.AccountSnapshotsColumn},
+			Table:   account.AchievementSnapshotsTable,
+			Columns: []string{account.AchievementSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedAccountSnapshotsIDs(); len(nodes) > 0 && !au.mutation.AccountSnapshotsCleared() {
+	if nodes := au.mutation.RemovedAchievementSnapshotsIDs(); len(nodes) > 0 && !au.mutation.AchievementSnapshotsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AccountSnapshotsTable,
-			Columns: []string{account.AccountSnapshotsColumn},
+			Table:   account.AchievementSnapshotsTable,
+			Columns: []string{account.AchievementSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -398,15 +398,15 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.AccountSnapshotsIDs(); len(nodes) > 0 {
+	if nodes := au.mutation.AchievementSnapshotsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AccountSnapshotsTable,
-			Columns: []string{account.AccountSnapshotsColumn},
+			Table:   account.AchievementSnapshotsTable,
+			Columns: []string{account.AchievementSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -459,28 +459,28 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.AchievementSnapshotsCleared() {
+	if au.mutation.AccountSnapshotsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AchievementSnapshotsTable,
-			Columns: []string{account.AchievementSnapshotsColumn},
+			Table:   account.AccountSnapshotsTable,
+			Columns: []string{account.AccountSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedAchievementSnapshotsIDs(); len(nodes) > 0 && !au.mutation.AchievementSnapshotsCleared() {
+	if nodes := au.mutation.RemovedAccountSnapshotsIDs(); len(nodes) > 0 && !au.mutation.AccountSnapshotsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AchievementSnapshotsTable,
-			Columns: []string{account.AchievementSnapshotsColumn},
+			Table:   account.AccountSnapshotsTable,
+			Columns: []string{account.AccountSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -488,15 +488,15 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.AchievementSnapshotsIDs(); len(nodes) > 0 {
+	if nodes := au.mutation.AccountSnapshotsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AchievementSnapshotsTable,
-			Columns: []string{account.AchievementSnapshotsColumn},
+			Table:   account.AccountSnapshotsTable,
+			Columns: []string{account.AccountSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -627,19 +627,19 @@ func (auo *AccountUpdateOne) SetClan(c *Clan) *AccountUpdateOne {
 	return auo.SetClanID(c.ID)
 }
 
-// AddAccountSnapshotIDs adds the "account_snapshots" edge to the AccountSnapshot entity by IDs.
-func (auo *AccountUpdateOne) AddAccountSnapshotIDs(ids ...string) *AccountUpdateOne {
-	auo.mutation.AddAccountSnapshotIDs(ids...)
+// AddAchievementSnapshotIDs adds the "achievement_snapshots" edge to the AchievementsSnapshot entity by IDs.
+func (auo *AccountUpdateOne) AddAchievementSnapshotIDs(ids ...string) *AccountUpdateOne {
+	auo.mutation.AddAchievementSnapshotIDs(ids...)
 	return auo
 }
 
-// AddAccountSnapshots adds the "account_snapshots" edges to the AccountSnapshot entity.
-func (auo *AccountUpdateOne) AddAccountSnapshots(a ...*AccountSnapshot) *AccountUpdateOne {
+// AddAchievementSnapshots adds the "achievement_snapshots" edges to the AchievementsSnapshot entity.
+func (auo *AccountUpdateOne) AddAchievementSnapshots(a ...*AchievementsSnapshot) *AccountUpdateOne {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return auo.AddAccountSnapshotIDs(ids...)
+	return auo.AddAchievementSnapshotIDs(ids...)
 }
 
 // AddVehicleSnapshotIDs adds the "vehicle_snapshots" edge to the VehicleSnapshot entity by IDs.
@@ -657,19 +657,19 @@ func (auo *AccountUpdateOne) AddVehicleSnapshots(v ...*VehicleSnapshot) *Account
 	return auo.AddVehicleSnapshotIDs(ids...)
 }
 
-// AddAchievementSnapshotIDs adds the "achievement_snapshots" edge to the AchievementsSnapshot entity by IDs.
-func (auo *AccountUpdateOne) AddAchievementSnapshotIDs(ids ...string) *AccountUpdateOne {
-	auo.mutation.AddAchievementSnapshotIDs(ids...)
+// AddAccountSnapshotIDs adds the "account_snapshots" edge to the AccountSnapshot entity by IDs.
+func (auo *AccountUpdateOne) AddAccountSnapshotIDs(ids ...string) *AccountUpdateOne {
+	auo.mutation.AddAccountSnapshotIDs(ids...)
 	return auo
 }
 
-// AddAchievementSnapshots adds the "achievement_snapshots" edges to the AchievementsSnapshot entity.
-func (auo *AccountUpdateOne) AddAchievementSnapshots(a ...*AchievementsSnapshot) *AccountUpdateOne {
+// AddAccountSnapshots adds the "account_snapshots" edges to the AccountSnapshot entity.
+func (auo *AccountUpdateOne) AddAccountSnapshots(a ...*AccountSnapshot) *AccountUpdateOne {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return auo.AddAchievementSnapshotIDs(ids...)
+	return auo.AddAccountSnapshotIDs(ids...)
 }
 
 // Mutation returns the AccountMutation object of the builder.
@@ -683,25 +683,25 @@ func (auo *AccountUpdateOne) ClearClan() *AccountUpdateOne {
 	return auo
 }
 
-// ClearAccountSnapshots clears all "account_snapshots" edges to the AccountSnapshot entity.
-func (auo *AccountUpdateOne) ClearAccountSnapshots() *AccountUpdateOne {
-	auo.mutation.ClearAccountSnapshots()
+// ClearAchievementSnapshots clears all "achievement_snapshots" edges to the AchievementsSnapshot entity.
+func (auo *AccountUpdateOne) ClearAchievementSnapshots() *AccountUpdateOne {
+	auo.mutation.ClearAchievementSnapshots()
 	return auo
 }
 
-// RemoveAccountSnapshotIDs removes the "account_snapshots" edge to AccountSnapshot entities by IDs.
-func (auo *AccountUpdateOne) RemoveAccountSnapshotIDs(ids ...string) *AccountUpdateOne {
-	auo.mutation.RemoveAccountSnapshotIDs(ids...)
+// RemoveAchievementSnapshotIDs removes the "achievement_snapshots" edge to AchievementsSnapshot entities by IDs.
+func (auo *AccountUpdateOne) RemoveAchievementSnapshotIDs(ids ...string) *AccountUpdateOne {
+	auo.mutation.RemoveAchievementSnapshotIDs(ids...)
 	return auo
 }
 
-// RemoveAccountSnapshots removes "account_snapshots" edges to AccountSnapshot entities.
-func (auo *AccountUpdateOne) RemoveAccountSnapshots(a ...*AccountSnapshot) *AccountUpdateOne {
+// RemoveAchievementSnapshots removes "achievement_snapshots" edges to AchievementsSnapshot entities.
+func (auo *AccountUpdateOne) RemoveAchievementSnapshots(a ...*AchievementsSnapshot) *AccountUpdateOne {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return auo.RemoveAccountSnapshotIDs(ids...)
+	return auo.RemoveAchievementSnapshotIDs(ids...)
 }
 
 // ClearVehicleSnapshots clears all "vehicle_snapshots" edges to the VehicleSnapshot entity.
@@ -725,25 +725,25 @@ func (auo *AccountUpdateOne) RemoveVehicleSnapshots(v ...*VehicleSnapshot) *Acco
 	return auo.RemoveVehicleSnapshotIDs(ids...)
 }
 
-// ClearAchievementSnapshots clears all "achievement_snapshots" edges to the AchievementsSnapshot entity.
-func (auo *AccountUpdateOne) ClearAchievementSnapshots() *AccountUpdateOne {
-	auo.mutation.ClearAchievementSnapshots()
+// ClearAccountSnapshots clears all "account_snapshots" edges to the AccountSnapshot entity.
+func (auo *AccountUpdateOne) ClearAccountSnapshots() *AccountUpdateOne {
+	auo.mutation.ClearAccountSnapshots()
 	return auo
 }
 
-// RemoveAchievementSnapshotIDs removes the "achievement_snapshots" edge to AchievementsSnapshot entities by IDs.
-func (auo *AccountUpdateOne) RemoveAchievementSnapshotIDs(ids ...string) *AccountUpdateOne {
-	auo.mutation.RemoveAchievementSnapshotIDs(ids...)
+// RemoveAccountSnapshotIDs removes the "account_snapshots" edge to AccountSnapshot entities by IDs.
+func (auo *AccountUpdateOne) RemoveAccountSnapshotIDs(ids ...string) *AccountUpdateOne {
+	auo.mutation.RemoveAccountSnapshotIDs(ids...)
 	return auo
 }
 
-// RemoveAchievementSnapshots removes "achievement_snapshots" edges to AchievementsSnapshot entities.
-func (auo *AccountUpdateOne) RemoveAchievementSnapshots(a ...*AchievementsSnapshot) *AccountUpdateOne {
+// RemoveAccountSnapshots removes "account_snapshots" edges to AccountSnapshot entities.
+func (auo *AccountUpdateOne) RemoveAccountSnapshots(a ...*AccountSnapshot) *AccountUpdateOne {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return auo.RemoveAchievementSnapshotIDs(ids...)
+	return auo.RemoveAccountSnapshotIDs(ids...)
 }
 
 // Where appends a list predicates to the AccountUpdate builder.
@@ -892,28 +892,28 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.AccountSnapshotsCleared() {
+	if auo.mutation.AchievementSnapshotsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AccountSnapshotsTable,
-			Columns: []string{account.AccountSnapshotsColumn},
+			Table:   account.AchievementSnapshotsTable,
+			Columns: []string{account.AchievementSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedAccountSnapshotsIDs(); len(nodes) > 0 && !auo.mutation.AccountSnapshotsCleared() {
+	if nodes := auo.mutation.RemovedAchievementSnapshotsIDs(); len(nodes) > 0 && !auo.mutation.AchievementSnapshotsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AccountSnapshotsTable,
-			Columns: []string{account.AccountSnapshotsColumn},
+			Table:   account.AchievementSnapshotsTable,
+			Columns: []string{account.AchievementSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -921,15 +921,15 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.AccountSnapshotsIDs(); len(nodes) > 0 {
+	if nodes := auo.mutation.AchievementSnapshotsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AccountSnapshotsTable,
-			Columns: []string{account.AccountSnapshotsColumn},
+			Table:   account.AchievementSnapshotsTable,
+			Columns: []string{account.AchievementSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -982,28 +982,28 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.AchievementSnapshotsCleared() {
+	if auo.mutation.AccountSnapshotsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AchievementSnapshotsTable,
-			Columns: []string{account.AchievementSnapshotsColumn},
+			Table:   account.AccountSnapshotsTable,
+			Columns: []string{account.AccountSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedAchievementSnapshotsIDs(); len(nodes) > 0 && !auo.mutation.AchievementSnapshotsCleared() {
+	if nodes := auo.mutation.RemovedAccountSnapshotsIDs(); len(nodes) > 0 && !auo.mutation.AccountSnapshotsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AchievementSnapshotsTable,
-			Columns: []string{account.AchievementSnapshotsColumn},
+			Table:   account.AccountSnapshotsTable,
+			Columns: []string{account.AccountSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1011,15 +1011,15 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.AchievementSnapshotsIDs(); len(nodes) > 0 {
+	if nodes := auo.mutation.AccountSnapshotsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AchievementSnapshotsTable,
-			Columns: []string{account.AchievementSnapshotsColumn},
+			Table:   account.AccountSnapshotsTable,
+			Columns: []string{account.AccountSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
