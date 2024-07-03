@@ -34,6 +34,9 @@ func (w widget) defaultWidget() templ.Component {
 		if i >= w.unratedVehiclesLimit {
 			break
 		}
+		if len(card.Blocks) < 1 {
+			continue
+		}
 		vehicles = append(vehicles, vehicleExtended{}.fromCard(card))
 	}
 
@@ -42,10 +45,10 @@ func (w widget) defaultWidget() templ.Component {
 
 templ (w defaultWidget) Render() {
 	<div class="flex flex-col w-full gap-2 widget">
-		if w.showRatingOverview {
+		if w.showRatingOverview && len(w.cards.Rating.Overview.Blocks) > 0 {
 			@w.overviewCard(w.cards.Rating.Overview)
 		}
-		if w.showUnratedOverview {
+		if w.showUnratedOverview && len(w.cards.Unrated.Overview.Blocks) > 0 {
 			@w.overviewCard(w.cards.Unrated.Overview)
 		}
 		for _, card := range w.vehicleCards {
