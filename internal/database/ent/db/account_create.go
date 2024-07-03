@@ -115,19 +115,19 @@ func (ac *AccountCreate) SetClan(c *Clan) *AccountCreate {
 	return ac.SetClanID(c.ID)
 }
 
-// AddAccountSnapshotIDs adds the "account_snapshots" edge to the AccountSnapshot entity by IDs.
-func (ac *AccountCreate) AddAccountSnapshotIDs(ids ...string) *AccountCreate {
-	ac.mutation.AddAccountSnapshotIDs(ids...)
+// AddAchievementSnapshotIDs adds the "achievement_snapshots" edge to the AchievementsSnapshot entity by IDs.
+func (ac *AccountCreate) AddAchievementSnapshotIDs(ids ...string) *AccountCreate {
+	ac.mutation.AddAchievementSnapshotIDs(ids...)
 	return ac
 }
 
-// AddAccountSnapshots adds the "account_snapshots" edges to the AccountSnapshot entity.
-func (ac *AccountCreate) AddAccountSnapshots(a ...*AccountSnapshot) *AccountCreate {
+// AddAchievementSnapshots adds the "achievement_snapshots" edges to the AchievementsSnapshot entity.
+func (ac *AccountCreate) AddAchievementSnapshots(a ...*AchievementsSnapshot) *AccountCreate {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return ac.AddAccountSnapshotIDs(ids...)
+	return ac.AddAchievementSnapshotIDs(ids...)
 }
 
 // AddVehicleSnapshotIDs adds the "vehicle_snapshots" edge to the VehicleSnapshot entity by IDs.
@@ -145,19 +145,19 @@ func (ac *AccountCreate) AddVehicleSnapshots(v ...*VehicleSnapshot) *AccountCrea
 	return ac.AddVehicleSnapshotIDs(ids...)
 }
 
-// AddAchievementSnapshotIDs adds the "achievement_snapshots" edge to the AchievementsSnapshot entity by IDs.
-func (ac *AccountCreate) AddAchievementSnapshotIDs(ids ...string) *AccountCreate {
-	ac.mutation.AddAchievementSnapshotIDs(ids...)
+// AddAccountSnapshotIDs adds the "account_snapshots" edge to the AccountSnapshot entity by IDs.
+func (ac *AccountCreate) AddAccountSnapshotIDs(ids ...string) *AccountCreate {
+	ac.mutation.AddAccountSnapshotIDs(ids...)
 	return ac
 }
 
-// AddAchievementSnapshots adds the "achievement_snapshots" edges to the AchievementsSnapshot entity.
-func (ac *AccountCreate) AddAchievementSnapshots(a ...*AchievementsSnapshot) *AccountCreate {
+// AddAccountSnapshots adds the "account_snapshots" edges to the AccountSnapshot entity.
+func (ac *AccountCreate) AddAccountSnapshots(a ...*AccountSnapshot) *AccountCreate {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return ac.AddAchievementSnapshotIDs(ids...)
+	return ac.AddAccountSnapshotIDs(ids...)
 }
 
 // Mutation returns the AccountMutation object of the builder.
@@ -322,15 +322,15 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_node.ClanID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.AccountSnapshotsIDs(); len(nodes) > 0 {
+	if nodes := ac.mutation.AchievementSnapshotsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AccountSnapshotsTable,
-			Columns: []string{account.AccountSnapshotsColumn},
+			Table:   account.AchievementSnapshotsTable,
+			Columns: []string{account.AchievementSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -354,15 +354,15 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.AchievementSnapshotsIDs(); len(nodes) > 0 {
+	if nodes := ac.mutation.AccountSnapshotsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   account.AchievementSnapshotsTable,
-			Columns: []string{account.AchievementSnapshotsColumn},
+			Table:   account.AccountSnapshotsTable,
+			Columns: []string{account.AccountSnapshotsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(accountsnapshot.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
