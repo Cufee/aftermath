@@ -8,6 +8,7 @@ RUN --mount=type=cache,target=$GOPATH/pkg/mod go mod download
 COPY ./ ./
 
 # build a fully standalone binary with zero dependencies
+RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./...
 RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux go build -o /bin/aftermath .
 
 # Make a scratch container with required files and binary
