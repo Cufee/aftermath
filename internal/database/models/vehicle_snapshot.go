@@ -9,8 +9,9 @@ import (
 type SnapshotType string
 
 const (
-	SnapshotTypeLive  SnapshotType = "live"
-	SnapshotTypeDaily SnapshotType = "daily"
+	SnapshotTypeLive   SnapshotType = "live"
+	SnapshotTypeDaily  SnapshotType = "daily"
+	SnapshotTypeWidget SnapshotType = "widget"
 )
 
 // Values provides list valid values for Enum.

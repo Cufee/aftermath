@@ -6,8 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cufee/aftermath/internal/stats/render/common/v1"
-	stats "github.com/cufee/aftermath/internal/stats/renderer/v1"
+	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/tests"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -23,10 +22,10 @@ func TestRenderSession(t *testing.T) {
 
 	loadStaticAssets(static)
 
-	renderer := stats.NewRenderer(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
+	stats := stats.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 
 	{
-		image, _, err := renderer.Session(context.Background(), tests.DefaultAccountNAShort, time.Now(), common.WithBackground(""))
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNAShort, time.Now())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -38,7 +37,7 @@ func TestRenderSession(t *testing.T) {
 		assert.NoError(t, err, "failed to encode a png image")
 	}
 	{
-		image, _, err := renderer.Session(context.Background(), tests.DefaultAccountNA, time.Now(), common.WithBackground(""))
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 

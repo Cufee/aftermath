@@ -1,0 +1,124 @@
+package widget
+
+import "github.com/cufee/aftermath/cmd/frontend/logic"
+import "fmt"
+import "github.com/cufee/aftermath/internal/database/models"
+import prepare "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
+
+type WidgetFlavor string
+
+const (
+	// WidgetFlavorTicker WidgetFlavor = "ticker"
+	WidgetFlavorDefault WidgetFlavor = "default"
+)
+
+type WidgetOption func(*widget)
+
+func WithAutoReload() WidgetOption {
+	return func(w *widget) { w.autoReload = true }
+}
+func WithVehicleLimit(limit int) WidgetOption {
+	return func(w *widget) { w.unratedVehiclesLimit = limit }
+}
+func WithRatingOverview(shown bool) WidgetOption {
+	return func(w *widget) { w.showRatingOverview = shown }
+}
+func WithUnratedOverview(shown bool) WidgetOption {
+	return func(w *widget) { w.showUnratedOverview = shown }
+}
+func WithFlavor(flavor WidgetFlavor) WidgetOption {
+	return func(w *widget) { w.flavor = flavor }
+}
+
+func Widget(account models.Account, cards prepare.Cards, options ...WidgetOption) templ.Component {
+	widget := widget{
+		cards:         cards,
+		account:       account,
+		flavor:        WidgetFlavorDefault,
+		autoReload:    false,
+		vehicleStyle:  styleOptions{showTitle: true},
+		overviewStyle: styleOptions{showLabel: true},
+
+		showRatingOverview:   true,
+		showUnratedOverview:  true,
+		unratedVehiclesLimit: 3,
+	}
+	for _, apply := range options {
+		apply(&widget)
+	}
+
+	return widget.Render()
+}
+
+type styleOptions struct {
+	showTitle  bool
+	showCareer bool
+	showLabel  bool
+}
+
+type widget struct {
+	cards   prepare.Cards
+	account models.Account
+
+	vehicleStyle  styleOptions
+	overviewStyle styleOptions
+
+	showRatingOverview   bool
+	showUnratedOverview  bool
+	unratedVehiclesLimit int
+
+	flavor     WidgetFlavor
+	autoReload bool
+}
+
+templ (w widget) Render() {
+	<head>
+		<title>Aftermath - { w.account.Nickname }</title>
+		<meta property="og:type" content="website"/>
+		<meta property="og:title" content="Aftermath - Streaming Widget"/>
+		<meta property="og:image" content="https://amth.one/assets/og-widget.jpg"/>
+		<meta property="og:description" content={ fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm) }/>
+		<meta name="twitter:card" content="summary_large_image"/>
+		<meta name="twitter:title" content="Aftermath - Streaming Widget"/>
+		<meta name="twitter:image:alt" content="Aftermath Streaming Widget"/>
+		<meta name="twitter:image" content="https://amth.one/assets/og-widget.jpg"/>
+		<meta name="twitter:description" content={ fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm) }/>
+	</head>
+	<div class="text-nowrap whitespace-nowrap min-w-max" id="widget-container">
+		switch w.flavor {
+			default:
+				@w.defaultWidget()
+		}
+		if w.autoReload {
+			@logic.EmbedMinifiedScript(widgetRefresh(w.account.Realm, w.account.ID, w.account.LastBattleTime.Unix()), w.account.Realm, w.account.ID, w.account.LastBattleTime.Unix())
+		}
+	</div>
+}
+
+script widgetRefresh(realm string, accountID string, lastBattle int64) {
+  let apiHost = ""
+  switch (realm.toLowerCase()) {
+    case 'na':
+      apiHost = "wotblitz.com"
+      break;
+    case 'eu':
+      apiHost = "wotblitz.eu"
+      break;
+    case 'as':
+      apiHost = "wotblitz.asia"
+      break;
+    default:
+      throw new Error("Unknown realm: " + realm)
+  }
+  const refresh = () => {
+    fetch(`https://api.${apiHost}/wotb/account/info/?application_id=f44aa6f863c9327c63ba26be3db0d07f&account_id=${accountID}&fields=last_battle_time`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.data[accountID.toString()].last_battle_time > lastBattle) {
+          location.reload()
+        }
+      })
+      .catch(error => { console.error(error); setTimeout(()=>location.reload(), 10000) })
+  }
+  setInterval(refresh, 5000)
+}

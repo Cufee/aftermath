@@ -3,15 +3,15 @@ package core
 import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/wargaming"
+	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	stats "github.com/cufee/aftermath/internal/stats/renderer/v1"
 	"golang.org/x/text/language"
 )
 
 var _ Client = &client{}
 
 type Client interface {
-	Render(locale language.Tag) stats.Renderer
+	Stats(locale language.Tag) stats.Client
 
 	Wargaming() wargaming.Client
 	Database() database.Client
@@ -36,8 +36,8 @@ func (c *client) Fetch() fetch.Client {
 	return c.fetch
 }
 
-func (c *client) Render(locale language.Tag) stats.Renderer {
-	return stats.NewRenderer(c.fetch, c.db, c.wargaming, locale)
+func (c *client) Stats(locale language.Tag) stats.Client {
+	return stats.NewClient(c.fetch, c.db, c.wargaming, locale)
 }
 
 func NewClient(fetch fetch.Client, wargaming wargaming.Client, database database.Client) *client {

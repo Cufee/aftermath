@@ -33,3 +33,7 @@ tasks:
     desc: Start a local dev server
     cmds:
       - air
+  dev-web: 
+    desc: Start a local web server for frontend only
+    cmds:
+      - air -c .air.web.toml

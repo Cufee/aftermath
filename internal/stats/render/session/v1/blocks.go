@@ -41,7 +41,7 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width 
 
 	case prepare.TagRankedRating:
 		var column []common.Block
-		icon, ok := getRatingIcon(block.Value)
+		icon, ok := common.GetRatingIcon(block.Value, specialRatingIconSize)
 		if ok {
 			column = append(column, icon)
 		}

@@ -11,7 +11,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
-	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
+	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/rs/zerolog/log"
 )
 
@@ -61,7 +61,7 @@ func init() {
 					// TODO: Get user background
 				}
 
-				image, meta, err := ctx.Core.Render(ctx.Locale).Period(context.Background(), accountID, options.PeriodStart, render.WithBackground(backgroundURL))
+				image, meta, err := ctx.Core.Stats(ctx.Locale).PeriodImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL))
 				if err != nil {
 					return ctx.Err(err)
 				}

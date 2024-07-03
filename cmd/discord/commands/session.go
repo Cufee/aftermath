@@ -11,9 +11,8 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
+	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
-	stats "github.com/cufee/aftermath/internal/stats/renderer/v1"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
@@ -70,7 +69,7 @@ func init() {
 					}
 				}
 
-				image, meta, err := ctx.Core.Render(ctx.Locale).Session(context.Background(), accountID, options.PeriodStart, render.WithBackground(backgroundURL))
+				image, meta, err := ctx.Core.Stats(ctx.Locale).SessionImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL))
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
 						return ctx.Reply().Send("session_error_account_was_not_tracked")
