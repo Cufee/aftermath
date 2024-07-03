@@ -272,7 +272,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 }
 
 func (c *multiSourceClient) SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error) {
-	var options statsOptions
+	var options = statsOptions{snapshotType: models.SnapshotTypeDaily, referenceID: id}
 	for _, apply := range opts {
 		apply(&options)
 	}
@@ -311,13 +311,13 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	group.Add(1)
 	go func() {
 		defer group.Done()
-		s, err := c.database.GetAccountSnapshot(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
+		s, err := c.database.GetAccountSnapshot(ctx, id, options.referenceID, options.snapshotType, database.WithCreatedBefore(sessionBefore))
 		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s, Err: err}
 		if err != nil {
 			return
 		}
 
-		v, err := c.database.GetVehicleSnapshots(ctx, id, id, models.SnapshotTypeDaily, database.WithCreatedBefore(sessionBefore))
+		v, err := c.database.GetVehicleSnapshots(ctx, id, options.referenceID, options.snapshotType, database.WithCreatedBefore(sessionBefore))
 		vehiclesSnapshots = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
 	}()
 

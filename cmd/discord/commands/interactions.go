@@ -12,9 +12,8 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
 
-	"github.com/cufee/aftermath/internal/stats/renderer/v1"
+	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
@@ -54,11 +53,11 @@ func init() {
 					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
 
-				var image renderer.Image
-				var meta renderer.Metadata
+				var image stats.Image
+				var meta stats.Metadata
 				switch interaction.Command {
 				case "stats":
-					img, mt, err := ctx.Core.Render(ctx.Locale).Period(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, render.WithBackground(interaction.Options.BackgroundImageURL))
+					img, mt, err := ctx.Core.Stats(ctx.Locale).PeriodImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL))
 					if err != nil {
 						return ctx.Err(err)
 					}
@@ -66,9 +65,9 @@ func init() {
 					meta = mt
 
 				case "session":
-					img, mt, err := ctx.Core.Render(ctx.Locale).Session(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, render.WithBackground(interaction.Options.BackgroundImageURL))
+					img, mt, err := ctx.Core.Stats(ctx.Locale).SessionImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL))
 					if err != nil {
-						if errors.Is(err, fetch.ErrSessionNotFound) || errors.Is(err, renderer.ErrAccountNotTracked) {
+						if errors.Is(err, fetch.ErrSessionNotFound) || errors.Is(err, stats.ErrAccountNotTracked) {
 							return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 						}
 						return ctx.Err(err)

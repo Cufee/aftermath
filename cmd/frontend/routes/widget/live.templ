@@ -1,0 +1,45 @@
+package widget
+
+import "github.com/cufee/aftermath/cmd/frontend/handler"
+import "github.com/pkg/errors"
+import "golang.org/x/text/language"
+import "time"
+import "github.com/cufee/aftermath/cmd/frontend/layouts"
+import "github.com/cufee/aftermath/cmd/frontend/components/widget"
+import "github.com/cufee/aftermath/internal/database/models"
+import "github.com/cufee/aftermath/internal/stats/client/v1"
+import "slices"
+
+var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	accountID := ctx.Req().PathValue("accountId")
+	if accountID == "" {
+		return nil, nil, errors.New("invalid account id")
+	}
+
+	account, err := ctx.Fetch().Account(ctx.Context, accountID)
+	if err != nil {
+		return nil, nil, errors.New("invalid account id")
+	}
+
+	var opts []client.RequestOption
+	if ref := ctx.Req().URL.Query().Get("ref"); ref != "" {
+		opts = append(opts, client.WithReferenceID(ref))
+	}
+	if t := ctx.Req().URL.Query().Get("type"); t != "" && slices.Contains(models.SnapshotType("").Values(), t) {
+		opts = append(opts, client.WithType(models.SnapshotType(t)))
+	}
+
+	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return layouts.Main, liveWidget(widget.Widget(account, cards, widget.WithAutoReload())), nil
+}
+
+templ liveWidget(widget templ.Component) {
+	@widget
+	<style>
+    :root { background-color: rgba(0, 0, 0, 0); white-space: nowrap; }
+  </style>
+}

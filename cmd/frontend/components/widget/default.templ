@@ -1,0 +1,141 @@
+package widget
+
+import "fmt"
+import "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
+import "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+import "github.com/cufee/aftermath/cmd/frontend/assets"
+import "github.com/cufee/aftermath/internal/stats/frame"
+
+type defaultWidget struct {
+	widget
+	vehicleCards []vehicleExtended
+}
+
+type vehicleExtended struct {
+	session.VehicleCard
+	wn8 frame.Value
+}
+
+func (v vehicleExtended) fromCard(card session.VehicleCard) vehicleExtended {
+	var wn8 frame.Value = frame.InvalidValue
+	for _, block := range card.Blocks {
+		if block.Tag == common.TagWN8 {
+			wn8 = block.Value
+			break
+		}
+	}
+
+	return vehicleExtended{card, wn8}
+}
+
+func (w widget) defaultWidget() templ.Component {
+	var vehicles []vehicleExtended
+	for i, card := range w.cards.Unrated.Vehicles {
+		if i >= w.unratedVehiclesLimit {
+			break
+		}
+		vehicles = append(vehicles, vehicleExtended{}.fromCard(card))
+	}
+
+	return defaultWidget{w, vehicles}.Render()
+}
+
+templ (w defaultWidget) Render() {
+	<div class="flex flex-col w-full gap-2 widget">
+		if w.showRatingOverview {
+			@w.overviewCard(w.cards.Rating.Overview)
+		}
+		if w.showUnratedOverview {
+			@w.overviewCard(w.cards.Unrated.Overview)
+		}
+		for _, card := range w.vehicleCards {
+			@w.vehicleCard(card)
+		}
+		if len(w.vehicleCards) > 0 {
+			@w.vehicleLegendCard(w.vehicleCards[0].Blocks)
+		}
+	</div>
+}
+
+templ (w defaultWidget) overviewCard(card session.OverviewCard) {
+	<div class="flex flex-col gap-1 card overview-card grow">
+		if w.overviewStyle.showTitle {
+			<span class="text-center text-gray-300 title">
+				{ card.Title }
+			</span>
+		}
+		<div class={ fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-1 items-center bg-black rounded-xl bg-opacity-95 p-4", len(card.Blocks)) }>
+			for _, column := range card.Blocks {
+				@w.overviewColumn(column)
+			}
+		</div>
+	</div>
+}
+
+templ (w defaultWidget) vehicleCard(card vehicleExtended) {
+	<div class="flex flex-col gap-1 card vehicle-card grow bg-black rounded-lg bg-opacity-95 p-4">
+		if w.vehicleStyle.showTitle {
+			<div class="flex flex-row gap-2 justify-between">
+				<span class="text-gray-300 title">
+					{ card.Title }
+				</span>
+				<img src={ assets.WN8IconPathSmall(card.wn8.Float()) } class="w-5 h-5"/>
+			</div>
+		}
+		<div class={ fmt.Sprintf("blocks vehicle-blocks grid grid-cols-%d gap-1 items-center", len(card.Blocks)) }>
+			for _, block := range card.Blocks {
+				@w.block(block, w.vehicleStyle)
+			}
+		</div>
+	</div>
+}
+
+templ (w defaultWidget) vehicleLegendCard(blocks []common.StatsBlock[session.BlockData]) {
+	<div class="flex flex-col gap-1 card legend-card grow">
+		<div class={ fmt.Sprintf("blocks legend-blocks grid grid-cols-%d gap-1 items-center justify-center px-4", len(blocks)) }>
+			for _, block := range blocks {
+				<div class="bg-black rounded-full bg-opacity-95 m-auto px-3 py-1">
+					{ block.Label }
+				</div>
+			}
+		</div>
+	</div>
+}
+
+templ (w defaultWidget) overviewColumn(column session.OverviewColumn) {
+	if column.Flavor == session.BlockFlavorRating || column.Flavor == session.BlockFlavorWN8 {
+		@w.specialOverviewColumn(column)
+	} else {
+		<div class="flex flex-col items-center justify-center column overview-column gap-2">
+			for _, block := range column.Blocks {
+				@w.block(block, w.overviewStyle)
+			}
+		</div>
+	}
+}
+
+templ (w defaultWidget) specialOverviewColumn(column session.OverviewColumn) {
+	<div class="flex flex-col items-center justify-center column overview-column special-overview-column gap-1">
+		for _, block := range column.Blocks {
+			if column.Flavor == session.BlockFlavorRating {
+				<img src={ assets.RatingIconPath(block.Value.Float()) } class="w-16 h-16"/>
+			}
+			if column.Flavor == session.BlockFlavorWN8 {
+				<img src={ assets.WN8IconPath(block.Value.Float()) } class="w-18 h-18"/>
+			}
+			@w.block(block, w.overviewStyle)
+		}
+	</div>
+}
+
+templ (w defaultWidget) block(block common.StatsBlock[session.BlockData], style styleOptions) {
+	<div class="flex flex-col items-center justify-between block">
+		<span class="text-2xl text-white">{ block.Data.Session.String() }</span>
+		if style.showCareer {
+			<span class="text-xl text-gray-300">{ block.Data.Career.String() }</span>
+		}
+		if style.showLabel {
+			<span class="text-sm text-gray-600">{ block.Label }</span>
+		}
+	</div>
+}

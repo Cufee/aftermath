@@ -12,7 +12,7 @@ type overviewColumnBlocks struct {
 
 var unratedOverviewBlocks = []overviewColumnBlocks{
 	{[]common.Tag{common.TagBattles, common.TagWinrate}, BlockFlavorDefault},
-	{[]common.Tag{common.TagWN8}, BlockFlavorRating},
+	{[]common.Tag{common.TagWN8}, BlockFlavorWN8},
 	{[]common.Tag{common.TagAvgDamage, common.TagDamageRatio}, BlockFlavorDefault},
 }
 
@@ -59,4 +59,5 @@ type blockFlavor string
 const (
 	BlockFlavorDefault blockFlavor = "default"
 	BlockFlavorRating  blockFlavor = "rating"
+	BlockFlavorWN8     blockFlavor = "wn8"
 )

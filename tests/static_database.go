@@ -64,8 +64,11 @@ func (c *staticTestingDatabase) GetVehicles(ctx context.Context, ids []string) (
 	return vehicles, nil
 }
 func (c *staticTestingDatabase) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {
-	// TODO: get some kind of data in
-	return map[string]frame.StatsFrame{}, nil
+	averages := make(map[string]frame.StatsFrame)
+	for _, id := range ids {
+		averages[id] = DefaultStatsFrameSmall2
+	}
+	return averages, nil
 }
 func (c *staticTestingDatabase) UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) (map[string]error, error) {
 	return nil, errors.New("UpsertVehicles not implemented")

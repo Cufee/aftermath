@@ -1,4 +1,4 @@
-package renderer
+package client
 
 import (
 	"github.com/pkg/errors"

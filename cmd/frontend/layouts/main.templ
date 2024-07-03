@@ -1,0 +1,58 @@
+package layouts
+
+import (
+	"os"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+)
+
+var appName = os.Getenv("WEBAPP_NAME")
+
+var Main handler.Layout = func(ctx *handler.Context, children ...templ.Component) (templ.Component, error) {
+	return main(children...), nil
+}
+
+templ main(children ...templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en" data-theme="dark">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="color-scheme" content="light"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<link href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css" rel="stylesheet" type="text/css"/>
+			<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+			<script src="https://unpkg.com/htmx.org/dist/ext/head-support.js"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/multi-swap.js"></script>
+			<script src="https://cdn.tailwindcss.com"></script>
+			<script>
+				tailwind.config = {
+					theme: {
+						borderRadius: {
+							"sm": "10px",
+							"md": "15px",
+							"lg": "20px",
+							"xl": "25px",
+							'full': '9999px',
+						}
+					}
+				}
+			</script>
+			<title>{ appName }</title>
+		</head>
+		<body hx-ext="multi-swap,head-support">
+			<main class="mx-auto min-h-screen max-w-7xl p-2 flex flex-col gap-2 underline-offset-4">
+				for _, render := range children {
+					@render
+				}
+			</main>
+			<script>
+				// enable swap on 422, this status code is used for validation errors and returns error messages bound to elements
+				document.body.addEventListener('htmx:beforeOnLoad', function (evt) {
+						if (evt.detail.xhr.status === 422) {
+								evt.detail.shouldSwap = true;
+								evt.detail.isError = false;
+						}
+				});
+			</script>
+		</body>
+	</html>
+}

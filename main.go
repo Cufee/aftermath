@@ -18,6 +18,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core/scheduler"
 	"github.com/cufee/aftermath/cmd/core/tasks"
 	"github.com/cufee/aftermath/cmd/discord/commands"
+	"github.com/cufee/aftermath/cmd/frontend"
 
 	"github.com/cufee/aftermath/cmd/core/server"
 	"github.com/cufee/aftermath/cmd/core/server/handlers/private"
@@ -42,6 +43,7 @@ import (
 )
 
 //go:generate go generate ./internal/database/ent
+//go:generate go generate ./cmd/frontend/assets
 
 //go:embed static/*
 var static embed.FS
@@ -102,12 +104,23 @@ func main() {
 		go servePrivate()
 	}
 
+	// will handle all GET routes with a wildcard
+	frontendHandlers, err := frontend.Handlers(liveCoreClient)
+	if err != nil {
+		log.Fatal().Err(err).Msg("frontend#Handlers failed")
+	}
+
 	discordHandlers := discordHandlersFromEnv(liveCoreClient)
-	// /discord/public/callback
-	// /discord/internal/callback
+	// POST /discord/public/callback
+	// POST /discord/internal/callback
+
+	var handlers []server.Handler
+	handlers = append(handlers, discordHandlers...)
+	handlers = append(handlers, frontendHandlers...)
+	handlers = append(handlers, redirectHandlersFromEnv()...)
 
 	port := os.Getenv("PORT")
-	servePublic := server.NewServer(port, discordHandlers...)
+	servePublic := server.NewServer(port, handlers...)
 	log.Info().Str("port", port).Msg("starting a public server")
 	go servePublic()
 
@@ -260,4 +273,21 @@ func newDatabaseClientFromEnv() (database.Client, error) {
 	}
 
 	return client, nil
+}
+
+func redirectHandlersFromEnv() []server.Handler {
+	return []server.Handler{
+		{
+			Path: "GET /invite/{$}",
+			Func: func(w http.ResponseWriter, r *http.Request) {
+				http.Redirect(w, r, os.Getenv("BOT_INVITE_LINK"), http.StatusTemporaryRedirect)
+			},
+		},
+		{
+			Path: "GET /join/{$}",
+			Func: func(w http.ResponseWriter, r *http.Request) {
+				http.Redirect(w, r, os.Getenv("PRIMARY_GUILD_INVITE_LINK"), http.StatusTemporaryRedirect)
+			},
+		},
+	}
 }

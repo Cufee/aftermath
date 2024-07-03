@@ -1,4 +1,4 @@
-package renderer
+package client
 
 import (
 	"context"
@@ -9,23 +9,27 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	pcommon "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period/v1"
-	rcommon "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/period/v1"
 )
 
-func (r *renderer) Period(ctx context.Context, accountId string, from time.Time, opts ...rcommon.Option) (Image, Metadata, error) {
+func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Time, o ...RequestOption) (prepare.Cards, Metadata, error) {
+	var opts = requestOptions{}
+	for _, apply := range o {
+		apply(&opts)
+	}
+
 	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
 	printer, err := localization.NewPrinter("stats", r.locale)
 	if err != nil {
-		return nil, meta, err
+		return prepare.Cards{}, meta, err
 	}
 
 	stop := meta.Timer("fetchClient#PeriodStats")
 	stats, err := r.fetchClient.PeriodStats(ctx, accountId, from, fetch.WithWN8())
 	stop()
 	if err != nil {
-		return nil, meta, err
+		return prepare.Cards{}, meta, err
 	}
 	meta.Stats["period"] = stats
 
@@ -42,19 +46,30 @@ func (r *renderer) Period(ctx context.Context, accountId string, from time.Time,
 
 	glossary, err := r.database.GetVehicles(ctx, vehicles)
 	if err != nil {
-		return nil, meta, err
+		return prepare.Cards{}, meta, err
 	}
 	stop()
 
 	stop = meta.Timer("prepare#NewCards")
 	cards, err := prepare.NewCards(stats, glossary, pcommon.WithPrinter(printer, r.locale))
 	stop()
+
+	return cards, meta, err
+}
+
+func (r *client) PeriodImage(ctx context.Context, accountId string, from time.Time, o ...RequestOption) (Image, Metadata, error) {
+	var opts = requestOptions{}
+	for _, apply := range o {
+		apply(&opts)
+	}
+
+	cards, meta, err := r.PeriodCards(ctx, accountId, from, o...)
 	if err != nil {
 		return nil, meta, err
 	}
 
-	stop = meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(stats, cards, nil, opts...)
+	stop := meta.Timer("render#CardsToImage")
+	image, err := render.CardsToImage(meta.Stats["period"], cards, nil, opts.RenderOpts()...)
 	stop()
 	if err != nil {
 		return nil, meta, err
