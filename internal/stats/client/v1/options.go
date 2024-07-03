@@ -37,9 +37,7 @@ func (o requestOptions) RenderOpts() []common.Option {
 	if o.promoText != nil {
 		copts = append(copts, common.WithPromoText(o.promoText...))
 	}
-	if o.backgroundURL != "" {
-		copts = append(copts, common.WithBackground(o.backgroundURL))
-	}
+	copts = append(copts, common.WithBackground(o.backgroundURL))
 	return copts
 }
 
