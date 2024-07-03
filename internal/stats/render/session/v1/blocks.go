@@ -65,7 +65,6 @@ func blankBlock(width, height float64) common.Block {
 func vehicleWN8Icon(wn8 frame.Value) common.Block {
 	ratingColors := common.GetWN8Colors(wn8.Float())
 	if wn8.Float() <= 0 {
-		ratingColors.Content = common.TextAlt
 		ratingColors.Background = common.TextAlt
 	}
 	iconTop := common.AftermathLogo(ratingColors.Background, common.SmallLogoOptions())
