@@ -44,6 +44,9 @@ func (w widget) defaultWidget() templ.Component {
 		if i >= w.unratedVehiclesLimit {
 			break
 		}
+		if len(card.Blocks) < 1 {
+			continue
+		}
 		vehicles = append(vehicles, vehicleExtended{}.fromCard(card))
 	}
 
@@ -67,13 +70,13 @@ func (w defaultWidget) Render() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if w.showRatingOverview {
+		if w.showRatingOverview && len(w.cards.Rating.Overview.Blocks) > 0 {
 			templ_7745c5c3_Err = w.overviewCard(w.cards.Rating.Overview).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if w.showUnratedOverview {
+		if w.showUnratedOverview && len(w.cards.Unrated.Overview.Blocks) > 0 {
 			templ_7745c5c3_Err = w.overviewCard(w.cards.Unrated.Overview).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -127,7 +130,7 @@ func (w defaultWidget) overviewCard(card session.OverviewCard) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(card.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 64, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 67, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -202,7 +205,7 @@ func (w defaultWidget) vehicleCard(card vehicleExtended) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(card.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 80, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 83, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -215,7 +218,7 @@ func (w defaultWidget) vehicleCard(card vehicleExtended) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(assets.WN8IconPathSmall(card.wn8.Float()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 82, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 85, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -312,7 +315,7 @@ func (w defaultWidget) vehicleLegendCard(blocks []common.StatsBlock[session.Bloc
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(block.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 98, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 101, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -401,7 +404,7 @@ func (w defaultWidget) specialOverviewColumn(column session.OverviewColumn) temp
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(assets.RatingIconPath(block.Value.Float()))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 121, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 124, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -424,7 +427,7 @@ func (w defaultWidget) specialOverviewColumn(column session.OverviewColumn) temp
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(assets.WN8IconPath(block.Value.Float()))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 124, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 127, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -475,7 +478,7 @@ func (w defaultWidget) block(block common.StatsBlock[session.BlockData], style s
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(block.Data.Session.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 133, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 136, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -493,7 +496,7 @@ func (w defaultWidget) block(block common.StatsBlock[session.BlockData], style s
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(block.Data.Career.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 135, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 138, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -512,7 +515,7 @@ func (w defaultWidget) block(block common.StatsBlock[session.BlockData], style s
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(block.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 138, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/default.templ`, Line: 141, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
