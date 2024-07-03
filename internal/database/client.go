@@ -18,6 +18,17 @@ import (
 
 var _ Client = &client{}
 
+type AuthClient interface {
+	CreateAuthNonce(ctx context.Context, publicID, identifier string, expiresAt time.Time, meta map[string]string) (models.AuthNonce, error)
+	FindAuthNonce(ctx context.Context, publicID string) (models.AuthNonce, error)
+	SetAuthNonceActive(ctx context.Context, nonceID string, active bool) error
+
+	CreateSession(ctx context.Context, publicID, userID string, expiresAt time.Time, meta map[string]string) (models.Session, error)
+	SetSessionExpiresAt(ctx context.Context, sessionID string, expiresAt time.Time) error
+	UserFromSession(ctx context.Context, publicID string) (models.User, error)
+	FindSession(ctx context.Context, publicID string) (models.Session, error)
+}
+
 type AccountsClient interface {
 	GetAccounts(ctx context.Context, ids []string) ([]models.Account, error)
 	GetAccountByID(ctx context.Context, id string) (models.Account, error)
@@ -83,6 +94,7 @@ type DiscordDataClient interface {
 }
 
 type Client interface {
+	AuthClient
 	UsersClient
 
 	GlossaryClient

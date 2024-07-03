@@ -69,6 +69,18 @@ func (f ApplicationCommandFunc) Mutate(ctx context.Context, m db.Mutation) (db.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.ApplicationCommandMutation", m)
 }
 
+// The AuthNonceFunc type is an adapter to allow the use of ordinary
+// function as AuthNonce mutator.
+type AuthNonceFunc func(context.Context, *db.AuthNonceMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AuthNonceFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.AuthNonceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.AuthNonceMutation", m)
+}
+
 // The ClanFunc type is an adapter to allow the use of ordinary
 // function as Clan mutator.
 type ClanFunc func(context.Context, *db.ClanMutation) (db.Value, error)
@@ -103,6 +115,18 @@ func (f DiscordInteractionFunc) Mutate(ctx context.Context, m db.Mutation) (db.V
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.DiscordInteractionMutation", m)
+}
+
+// The SessionFunc type is an adapter to allow the use of ordinary
+// function as Session mutator.
+type SessionFunc func(context.Context, *db.SessionMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SessionFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.SessionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.SessionMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

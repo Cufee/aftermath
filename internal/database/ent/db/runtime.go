@@ -10,9 +10,11 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/appconfiguration"
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
+	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
@@ -161,6 +163,30 @@ func init() {
 	applicationcommandDescID := applicationcommandFields[0].Descriptor()
 	// applicationcommand.DefaultID holds the default value on creation for the id field.
 	applicationcommand.DefaultID = applicationcommandDescID.Default.(func() string)
+	authnonceFields := schema.AuthNonce{}.Fields()
+	_ = authnonceFields
+	// authnonceDescCreatedAt is the schema descriptor for created_at field.
+	authnonceDescCreatedAt := authnonceFields[1].Descriptor()
+	// authnonce.DefaultCreatedAt holds the default value on creation for the created_at field.
+	authnonce.DefaultCreatedAt = authnonceDescCreatedAt.Default.(func() time.Time)
+	// authnonceDescUpdatedAt is the schema descriptor for updated_at field.
+	authnonceDescUpdatedAt := authnonceFields[2].Descriptor()
+	// authnonce.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	authnonce.DefaultUpdatedAt = authnonceDescUpdatedAt.Default.(func() time.Time)
+	// authnonce.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	authnonce.UpdateDefaultUpdatedAt = authnonceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// authnonceDescIdentifier is the schema descriptor for identifier field.
+	authnonceDescIdentifier := authnonceFields[5].Descriptor()
+	// authnonce.IdentifierValidator is a validator for the "identifier" field. It is called by the builders before save.
+	authnonce.IdentifierValidator = authnonceDescIdentifier.Validators[0].(func(string) error)
+	// authnonceDescPublicID is the schema descriptor for public_id field.
+	authnonceDescPublicID := authnonceFields[6].Descriptor()
+	// authnonce.PublicIDValidator is a validator for the "public_id" field. It is called by the builders before save.
+	authnonce.PublicIDValidator = authnonceDescPublicID.Validators[0].(func(string) error)
+	// authnonceDescID is the schema descriptor for id field.
+	authnonceDescID := authnonceFields[0].Descriptor()
+	// authnonce.DefaultID holds the default value on creation for the id field.
+	authnonce.DefaultID = authnonceDescID.Default.(func() string)
 	clanFields := schema.Clan{}.Fields()
 	_ = clanFields
 	// clanDescCreatedAt is the schema descriptor for created_at field.
@@ -237,6 +263,26 @@ func init() {
 	discordinteractionDescID := discordinteractionFields[0].Descriptor()
 	// discordinteraction.DefaultID holds the default value on creation for the id field.
 	discordinteraction.DefaultID = discordinteractionDescID.Default.(func() string)
+	sessionFields := schema.Session{}.Fields()
+	_ = sessionFields
+	// sessionDescCreatedAt is the schema descriptor for created_at field.
+	sessionDescCreatedAt := sessionFields[1].Descriptor()
+	// session.DefaultCreatedAt holds the default value on creation for the created_at field.
+	session.DefaultCreatedAt = sessionDescCreatedAt.Default.(func() time.Time)
+	// sessionDescUpdatedAt is the schema descriptor for updated_at field.
+	sessionDescUpdatedAt := sessionFields[2].Descriptor()
+	// session.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	session.DefaultUpdatedAt = sessionDescUpdatedAt.Default.(func() time.Time)
+	// session.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	session.UpdateDefaultUpdatedAt = sessionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// sessionDescPublicID is the schema descriptor for public_id field.
+	sessionDescPublicID := sessionFields[5].Descriptor()
+	// session.PublicIDValidator is a validator for the "public_id" field. It is called by the builders before save.
+	session.PublicIDValidator = sessionDescPublicID.Validators[0].(func(string) error)
+	// sessionDescID is the schema descriptor for id field.
+	sessionDescID := sessionFields[0].Descriptor()
+	// session.DefaultID holds the default value on creation for the id field.
+	session.DefaultID = sessionDescID.Default.(func() string)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
@@ -249,8 +295,12 @@ func init() {
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescUsername is the schema descriptor for username field.
+	userDescUsername := userFields[3].Descriptor()
+	// user.DefaultUsername holds the default value on creation for the username field.
+	user.DefaultUsername = userDescUsername.Default.(string)
 	// userDescPermissions is the schema descriptor for permissions field.
-	userDescPermissions := userFields[3].Descriptor()
+	userDescPermissions := userFields[4].Descriptor()
 	// user.DefaultPermissions holds the default value on creation for the permissions field.
 	user.DefaultPermissions = userDescPermissions.Default.(string)
 	userconnectionFields := schema.UserConnection{}.Fields()

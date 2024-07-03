@@ -21,6 +21,9 @@ type AppConfiguration func(*sql.Selector)
 // ApplicationCommand is the predicate function for applicationcommand builders.
 type ApplicationCommand func(*sql.Selector)
 
+// AuthNonce is the predicate function for authnonce builders.
+type AuthNonce func(*sql.Selector)
+
 // Clan is the predicate function for clan builders.
 type Clan func(*sql.Selector)
 
@@ -29,6 +32,9 @@ type CronTask func(*sql.Selector)
 
 // DiscordInteraction is the predicate function for discordinteraction builders.
 type DiscordInteraction func(*sql.Selector)
+
+// Session is the predicate function for session builders.
+type Session func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

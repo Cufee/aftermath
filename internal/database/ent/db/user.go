@@ -22,6 +22,8 @@ type User struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// Username holds the value of the "username" field.
+	Username string `json:"username,omitempty"`
 	// Permissions holds the value of the "permissions" field.
 	Permissions string `json:"permissions,omitempty"`
 	// FeatureFlags holds the value of the "feature_flags" field.
@@ -42,9 +44,11 @@ type UserEdges struct {
 	Connections []*UserConnection `json:"connections,omitempty"`
 	// Content holds the value of the content edge.
 	Content []*UserContent `json:"content,omitempty"`
+	// Sessions holds the value of the sessions edge.
+	Sessions []*Session `json:"sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // DiscordInteractionsOrErr returns the DiscordInteractions value or an error if the edge
@@ -83,6 +87,15 @@ func (e UserEdges) ContentOrErr() ([]*UserContent, error) {
 	return nil, &NotLoadedError{edge: "content"}
 }
 
+// SessionsOrErr returns the Sessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SessionsOrErr() ([]*Session, error) {
+	if e.loadedTypes[4] {
+		return e.Sessions, nil
+	}
+	return nil, &NotLoadedError{edge: "sessions"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -90,7 +103,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldFeatureFlags:
 			values[i] = new([]byte)
-		case user.FieldID, user.FieldPermissions:
+		case user.FieldID, user.FieldUsername, user.FieldPermissions:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -126,6 +139,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				u.UpdatedAt = value.Time
+			}
+		case user.FieldUsername:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field username", values[i])
+			} else if value.Valid {
+				u.Username = value.String
 			}
 		case user.FieldPermissions:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -174,6 +193,11 @@ func (u *User) QueryContent() *UserContentQuery {
 	return NewUserClient(u.config).QueryContent(u)
 }
 
+// QuerySessions queries the "sessions" edge of the User entity.
+func (u *User) QuerySessions() *SessionQuery {
+	return NewUserClient(u.config).QuerySessions(u)
+}
+
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -202,6 +226,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("username=")
+	builder.WriteString(u.Username)
 	builder.WriteString(", ")
 	builder.WriteString("permissions=")
 	builder.WriteString(u.Permissions)

@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -25,6 +26,7 @@ func (User) Fields() []ent.Field {
 			Default(timeNow).
 			UpdateDefault(timeNow),
 		//
+		field.String("username").Default(""),
 		field.String("permissions").Default(""),
 		field.Strings("feature_flags").Optional(),
 	}
@@ -33,15 +35,17 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("discord_interactions", DiscordInteraction.Type),
-		edge.To("subscriptions", UserSubscription.Type),
-		edge.To("connections", UserConnection.Type),
-		edge.To("content", UserContent.Type),
+		edge.To("discord_interactions", DiscordInteraction.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("subscriptions", UserSubscription.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("connections", UserConnection.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("content", UserContent.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("sessions", Session.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("id"),
+		index.Fields("username"),
 	}
 }
