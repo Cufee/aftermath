@@ -21,7 +21,7 @@ var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.
 		return nil, nil, errors.New("invalid account id")
 	}
 
-	var opts []client.RequestOption
+	var opts  = []client.RequestOption{client.WithWN8()}
 	if ref := ctx.Req().URL.Query().Get("ref"); ref != "" {
 		opts = append(opts, client.WithReferenceID(ref))
 	}

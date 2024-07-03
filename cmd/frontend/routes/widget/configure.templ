@@ -3,6 +3,7 @@ package widget
 import "github.com/cufee/aftermath/cmd/frontend/handler"
 import "github.com/cufee/aftermath/cmd/frontend/layouts"
 import "github.com/cufee/aftermath/cmd/frontend/components/widget"
+import "github.com/cufee/aftermath/internal/stats/client/v1"
 import "golang.org/x/text/language"
 import "time"
 import "github.com/pkg/errors"
@@ -19,7 +20,7 @@ var ConfigureWidget handler.Page = func(ctx *handler.Context) (handler.Layout, t
 		return nil, nil, errors.New("invalid account id")
 	}
 
-	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now())
+	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), client.WithWN8())
 	if err != nil {
 		return nil, nil, err
 	}

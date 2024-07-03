@@ -13,6 +13,7 @@ import "bytes"
 import "github.com/cufee/aftermath/cmd/frontend/handler"
 import "github.com/cufee/aftermath/cmd/frontend/layouts"
 import "github.com/cufee/aftermath/cmd/frontend/components/widget"
+import "github.com/cufee/aftermath/internal/stats/client/v1"
 import "golang.org/x/text/language"
 import "time"
 import "github.com/pkg/errors"
@@ -29,7 +30,7 @@ var ConfigureWidget handler.Page = func(ctx *handler.Context) (handler.Layout, t
 		return nil, nil, errors.New("invalid account id")
 	}
 
-	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now())
+	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), client.WithWN8())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -62,7 +63,7 @@ func configureWidgetPage(widget templ.Component) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/widget/configure.templ`, Line: 47, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/widget/configure.templ`, Line: 48, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
