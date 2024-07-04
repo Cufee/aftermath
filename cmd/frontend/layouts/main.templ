@@ -33,9 +33,11 @@ templ main(navbar templ.Component, children ...templ.Component) {
 			@logic.EmbedMinifiedScript(tailwindConfig())
 			<title>{ appName }</title>
 		</head>
-		<body hx-ext="multi-swap,head-support">
-			<main class="mx-auto min-h-screen max-w-7xl p-2 flex flex-col gap-2 underline-offset-4">
+		<body hx-ext="multi-swap,head-support" class="min-h-screen flex flex-col">
+			<div class="max-w-7xl w-full mx-auto">
 				@navbar
+			</div>
+			<main class="mx-auto max-w-7xl w-full grow flex flex-col gap-2 underline-offset-4 p-4">
 				for _, render := range children {
 					@render
 				}

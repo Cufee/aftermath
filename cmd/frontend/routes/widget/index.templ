@@ -1,0 +1,35 @@
+package widget
+
+import (
+	"github.com/cufee/aftermath/cmd/frontend/components"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/layouts"
+)
+
+var WidgetHome handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+
+	return layouts.Main, widgetHome(), nil
+}
+
+templ widgetHome() {
+	<div class="flex flex-row justify-center gap-4 flex-wrap">
+		<div class="flex flex-row flex-wrap md:flex-nowrap gap-4">
+			<div class="grow">
+				Amet cillum fugiat ut eu enim dolor nulla minim. Officia veniam esse exercitation elit consequat voluptate cillum ex. Ut aute nulla ipsum in sint enim et amet nisi irure. Nulla tempor enim ut reprehenderit excepteur ad aute eu fugiat cupidatat et eu magna officia. Aute aute quis ea anim. Ipsum aliqua officia qui id dolore ullamco ipsum ipsum esse laborum. Minim Lorem ex cupidatat elit Lorem consequat deserunt cillum.
+				Laboris esse do non dolor reprehenderit excepteur ea eiusmod incididunt sit eu tempor consectetur reprehenderit. Dolore est exercitation ullamco magna adipisicing dolor ea esse sit fugiat sint enim in irure. Aliquip ea ea magna irure amet dolore. Lorem anim ad enim reprehenderit officia et magna pariatur dolore ex quis sint. Quis duis aliqua do ipsum enim cillum.
+			</div>
+			<div class="flex items-center justify-center grow">
+				<div>
+					@components.OBSMockup("/assets/widget-background.jpg") {
+						<div>
+							<span class="text-white">content</span>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+		<div class="flex">
+			// account input
+		</div>
+	</div>
+}

@@ -7,28 +7,36 @@ import (
 
 var GenericError handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	message := ctx.Query("message")
-
-	// ctx.SetStatus(http.StatusInternalServerError)
-	return layouts.Main, errorPage(message), nil
+	return layouts.Main, genericErrorPage(message), nil
 }
 
-templ errorPage(message string) {
-	<div class="flex flex-col gap-2">
-		<span>Something did not work</span>
-		<span>{ message }</span>
-	</div>
+templ genericErrorPage(message string) {
+	@errorPage("500", message) {
+		Something unexpected happened while working on your request. You can reach out to our team on <a href="/join" class="link">Aftermath Official</a> to report this issue.
+	}
 }
 
 var ErrorNotFound handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
-	path := ctx.Path("pathname")
-
-	// ctx.SetStatus(http.StatusNotFound)
-	return layouts.Main, notFoundPage(path), nil
+	message := "/" + ctx.Path("pathname") + " does not exist"
+	return layouts.Main, notFoundPage(message), nil
 }
 
-templ notFoundPage(path string) {
-	<div class="flex flex-col gap-2">
-		<span>404 - Not Found</span>
-		<span>/{ path }</span>
+templ notFoundPage(message string) {
+	@errorPage("404", message) {
+		Sorry, we couldn't find this page. But don't worry, you can find plenty of other things on our <a href="/" class="link">homepage</a>.
+	}
+}
+
+templ errorPage(title string, context string) {
+	<div class="flex flex-col gap-8 items-center justify-center p-8">
+		<div class="flex flex-col items-center gap-2">
+			<span class="font-bold text-7xl">{ title }</span>
+			<span class="text-xl max-w-2xl text-center">
+				{ children... }
+			</span>
+		</div>
+		<span class="text-sm text-dark">
+			{ context }
+		</span>
 	</div>
 }

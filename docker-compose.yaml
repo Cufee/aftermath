@@ -24,6 +24,8 @@ services:
     image: aftermath-service
     build:
       dockerfile: Dockerfile
+      args:
+        - GO_MEM_LIMIT=122MiB
     restart: always
     deploy:
       resources:

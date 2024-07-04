@@ -65,11 +65,15 @@ func main(navbar templ.Component, children ...templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title></head><body hx-ext=\"multi-swap,head-support\"><main class=\"mx-auto min-h-screen max-w-7xl p-2 flex flex-col gap-2 underline-offset-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title></head><body hx-ext=\"multi-swap,head-support\" class=\"min-h-screen flex flex-col\"><div class=\"max-w-7xl w-full mx-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = navbar.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><main class=\"mx-auto max-w-7xl w-full grow flex flex-col gap-2 underline-offset-4 p-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
