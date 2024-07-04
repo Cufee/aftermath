@@ -1,0 +1,67 @@
+package components
+
+import (
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"os"
+	"strings"
+)
+
+var appName = os.Getenv("WEBAPP_NAME")
+
+type navbarProps struct {
+	authenticated bool
+	path          string
+}
+
+var Navbar handler.Partial = func(ctx *handler.Context) (templ.Component, error) {
+	var props navbarProps
+	props.path = ctx.URL().Path
+
+	user, err := ctx.SessionUser()
+	if err == nil {
+		// props.authenticated = user.ID != ""
+		_ = user
+	}
+
+	return navbar(props), nil
+}
+
+templ navbar(props navbarProps) {
+	<div class="no-animation" hx-boost="true">
+		<div class="navbar bg-base-100 gap-1">
+			<div class="navbar-start gap-1">
+				@Logo("32")
+				<div class="flex-1">
+					<a class="btn btn-ghost text-xl" href="/">Aftermath</a>
+				</div>
+			</div>
+			<div class="navbar-center">
+				<div class="form-control">
+					<input type="text" placeholder="Search Players" class="input input-bordered w-24 md:w-auto"/>
+				</div>
+			</div>
+			<ul class="navbar-end menu menu-horizontal px-1 gap-1">
+				<li><a href="/widget" class={ logic.StringIfElse("active", "", props.path == "/widget") }>Widget</a></li>
+				<li><a href="/login" class={ logic.StringIfElse("btn active", "btn", props.path == "/login") }>Login</a></li>
+			</ul>
+		</div>
+	</div>
+}
+
+templ navMenuLink(label, href, currentPath string) {
+	<a href={ templ.URL(href) } class={ navLinkClass(href, currentPath) }>{ label }</a>
+}
+
+func navLinkClass(path, requiredPath string) string {
+	base := "underline-offset-4 link"
+
+	if !strings.HasSuffix(path, "/") {
+		path += "/"
+	}
+	if path == requiredPath {
+		return base
+	}
+
+	return base + " " + "link-hover"
+}

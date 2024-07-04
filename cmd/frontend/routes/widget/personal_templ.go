@@ -20,13 +20,13 @@ import (
 	"time"
 )
 
-var ConfigureWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
-	accountID := ctx.Path("accountId")
-	if accountID == "" {
-		return nil, nil, errors.New("invalid account id")
+var PersonalWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	userID := ctx.Path("userId")
+	if userID == "" {
+		return nil, nil, errors.New("invalid user id id")
 	}
 
-	account, err := ctx.Fetch().Account(ctx.Context, accountID)
+	account, err := ctx.Fetch().Account(ctx.Context, userID)
 	if err != nil {
 		return nil, nil, errors.New("invalid account id")
 	}
@@ -36,10 +36,10 @@ var ConfigureWidget handler.Page = func(ctx *handler.Context) (handler.Layout, t
 		return nil, nil, err
 	}
 
-	return layouts.Main, configureWidgetPage(widget.Widget(account, cards)), nil
+	return layouts.Main, personalWidgetPage(widget.Widget(account, cards)), nil
 }
 
-func configureWidgetPage(widget templ.Component) templ.Component {
+func personalWidgetPage(widget templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -69,7 +69,7 @@ func configureWidgetPage(widget templ.Component) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/widget/configure.templ`, Line: 51, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/widget/personal.templ`, Line: 51, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {

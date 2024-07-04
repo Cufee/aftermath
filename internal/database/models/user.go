@@ -35,6 +35,16 @@ func (u User) HasPermission(value permissions.Permissions) bool {
 }
 
 func (u User) Connection(kind ConnectionType, conditions map[string]any) (UserConnection, bool) {
+	valid, ok := u.FilterConnections(kind, conditions)
+	if !ok {
+		return UserConnection{}, false
+	}
+	return valid[0], true
+}
+
+func (u User) FilterConnections(kind ConnectionType, conditions map[string]any) ([]UserConnection, bool) {
+	var valid []UserConnection
+
 outerLoop:
 	for _, connection := range u.Connections {
 		if connection.Type == kind {
@@ -43,26 +53,44 @@ outerLoop:
 					continue outerLoop
 				}
 			}
-			return connection, true
+			valid = append(valid, connection)
 		}
 	}
-	return UserConnection{}, false
+
+	return valid, len(valid) > 0
 }
 
 func (u User) Subscription(kind SubscriptionType) (UserSubscription, bool) {
+	valid, ok := u.FilterSubscriptions(kind)
+	if !ok {
+		return UserSubscription{}, false
+	}
+	return valid[0], true
+}
+
+func (u User) FilterSubscriptions(kind SubscriptionType) ([]UserSubscription, bool) {
+	var valid []UserSubscription
 	for _, subscription := range u.Subscriptions {
 		if subscription.Type == kind {
-			return subscription, true
+			valid = append(valid, subscription)
 		}
 	}
-	return UserSubscription{}, false
+	return valid, len(valid) > 0
 }
 
 func (u User) Content(kind UserContentType) (UserContent, bool) {
+	valid, ok := u.FilterContent(kind)
+	if !ok {
+		return UserContent{}, false
+	}
+	return valid[0], true
+}
+func (u User) FilterContent(kind UserContentType) ([]UserContent, bool) {
+	var valid []UserContent
 	for _, content := range u.Uploads {
 		if content.Type == kind {
-			return content, true
+			valid = append(valid, content)
 		}
 	}
-	return UserContent{}, false
+	return valid, len(valid) > 0
 }

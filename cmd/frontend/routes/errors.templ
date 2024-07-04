@@ -1,13 +1,14 @@
 package routes
 
-import "github.com/cufee/aftermath/cmd/frontend/handler"
-import "github.com/cufee/aftermath/cmd/frontend/layouts"
-import "net/http"
+import (
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/layouts"
+)
 
 var GenericError handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	message := ctx.Query("message")
 
-	ctx.SetStatus(http.StatusInternalServerError)
+	// ctx.SetStatus(http.StatusInternalServerError)
 	return layouts.Main, errorPage(message), nil
 }
 
@@ -21,7 +22,7 @@ templ errorPage(message string) {
 var ErrorNotFound handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	path := ctx.Path("pathname")
 
-	ctx.SetStatus(http.StatusNotFound)
+	// ctx.SetStatus(http.StatusNotFound)
 	return layouts.Main, notFoundPage(path), nil
 }
 

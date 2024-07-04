@@ -78,13 +78,18 @@ func (c *staticTestingDatabase) UpsertVehicleAverages(ctx context.Context, avera
 }
 
 func (c *staticTestingDatabase) GetUserByID(ctx context.Context, id string, opts ...database.UserGetOption) (models.User, error) {
-	return models.User{}, errors.New("GetUserByID not implemented")
+	return DefaultUserWithEdges, nil
 }
 func (c *staticTestingDatabase) GetOrCreateUserByID(ctx context.Context, id string, opts ...database.UserGetOption) (models.User, error) {
-	return models.User{}, errors.New("GetOrCreateUserByID not implemented")
+	return c.GetUserByID(ctx, id)
 }
 func (c *staticTestingDatabase) UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error) {
-	return models.User{}, errors.New("UpsertUserWithPermissions not implemented")
+	u, err := c.GetUserByID(ctx, userID)
+	if err != nil {
+		return u, err
+	}
+	u.Permissions = perms
+	return u, nil
 }
 func (c *staticTestingDatabase) UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	return models.UserConnection{}, errors.New("UpdateConnection not implemented")
@@ -171,24 +176,24 @@ func (c *staticTestingDatabase) DeleteExpiredInteractions(ctx context.Context, e
 }
 
 func (c *staticTestingDatabase) CreateAuthNonce(ctx context.Context, publicID, identifier string, expiresAt time.Time, meta map[string]string) (models.AuthNonce, error) {
-	return models.AuthNonce{}, errors.New("CreateAuthNonce not implemented")
+	return models.AuthNonce{ID: "nonce1", Active: true, PublicID: "nonce1", Identifier: "ident1", ExpiresAt: time.Date(9999, 0, 0, 0, 0, 0, 0, time.UTC)}, nil
 }
 func (c *staticTestingDatabase) FindAuthNonce(ctx context.Context, publicID string) (models.AuthNonce, error) {
-	return models.AuthNonce{}, errors.New("FindAuthNonce not implemented")
+	return models.AuthNonce{ID: "nonce1", Active: true, PublicID: "nonce1", Identifier: "ident1", ExpiresAt: time.Date(9999, 0, 0, 0, 0, 0, 0, time.UTC)}, nil
 }
 func (c *staticTestingDatabase) SetAuthNonceActive(ctx context.Context, nonceID string, active bool) error {
-	return errors.New("SetAuthNonceActive not implemented")
+	return nil
 }
 
 func (c *staticTestingDatabase) CreateSession(ctx context.Context, publicID, userID string, expiresAt time.Time, meta map[string]string) (models.Session, error) {
-	return models.Session{}, errors.New("CreateSession not implementer")
+	return models.Session{ID: "session1", UserID: "user1", PublicID: "cookie1", ExpiresAt: time.Date(9999, 0, 0, 0, 0, 0, 0, time.UTC)}, nil
 }
 func (c *staticTestingDatabase) SetSessionExpiresAt(ctx context.Context, sessionID string, expiresAt time.Time) error {
-	return errors.New("SetSessionExpiresAt not implementer")
+	return nil
 }
 func (c *staticTestingDatabase) FindSession(ctx context.Context, publicID string) (models.Session, error) {
-	return models.Session{}, errors.New("FindSession not implementer")
+	return models.Session{ID: "session1", UserID: "user1", PublicID: "cookie1", ExpiresAt: time.Date(9999, 0, 0, 0, 0, 0, 0, time.UTC)}, nil
 }
 func (c *staticTestingDatabase) UserFromSession(ctx context.Context, publicID string) (models.User, error) {
-	return models.User{}, errors.New("UserFromSession not implementer")
+	return models.User{ID: "user1"}, nil
 }

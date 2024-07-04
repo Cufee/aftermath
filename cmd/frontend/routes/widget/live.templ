@@ -1,14 +1,44 @@
 package widget
 
-import "github.com/cufee/aftermath/cmd/frontend/handler"
-import "github.com/pkg/errors"
-import "golang.org/x/text/language"
-import "time"
-import "github.com/cufee/aftermath/cmd/frontend/layouts"
-import "github.com/cufee/aftermath/cmd/frontend/components/widget"
-import "github.com/cufee/aftermath/internal/database/models"
-import "github.com/cufee/aftermath/internal/stats/client/v1"
-import "slices"
+import (
+	"context"
+	"github.com/cufee/aftermath/cmd/frontend/components/widget"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/stats/client/v1"
+	"github.com/pkg/errors"
+	"golang.org/x/text/language"
+	"slices"
+	"time"
+)
+
+var PersonalLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	userID := ctx.Path("userId")
+	if userID == "" {
+		return nil, nil, errors.New("invalid account id")
+	}
+
+	account, err := ctx.Fetch().Account(ctx.Context, userID)
+	if err != nil {
+		return nil, nil, errors.New("invalid account id")
+	}
+
+	var opts = []client.RequestOption{client.WithWN8()}
+	if ref := ctx.Query("ref"); ref != "" {
+		opts = append(opts, client.WithReferenceID(ref))
+	}
+	if t := ctx.Query("type"); t != "" && slices.Contains(models.SnapshotType("").Values(), t) {
+		opts = append(opts, client.WithType(models.SnapshotType(t)))
+	}
+
+	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return layouts.Main, liveWidget(widget.Widget(account, cards, widget.WithAutoReload())), nil
+}
 
 var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	accountID := ctx.Path("accountId")
@@ -21,7 +51,7 @@ var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.
 		return nil, nil, errors.New("invalid account id")
 	}
 
-	var opts  = []client.RequestOption{client.WithWN8()}
+	var opts = []client.RequestOption{client.WithWN8()}
 	if ref := ctx.Query("ref"); ref != "" {
 		opts = append(opts, client.WithReferenceID(ref))
 	}

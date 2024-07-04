@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -16,6 +17,8 @@ import (
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/rs/zerolog/log"
 )
+
+var devMode = os.Getenv("AUTH_DEV_MODE") == "true"
 
 type Servable interface {
 	Serve(ctx *Context) error
@@ -59,6 +62,9 @@ func (ctx *Context) Form(key string) string {
 func (ctx *Context) Path(key string) string {
 	return ctx.r.PathValue(key)
 }
+func (ctx *Context) URL() *url.URL {
+	return ctx.r.URL
+}
 func (ctx *Context) RealIP() (string, bool) {
 	if ip := ctx.r.Header.Get("X-Forwarded-For"); ip != "" {
 		return ip, true
@@ -82,6 +88,10 @@ func (ctx *Context) Identifier() (string, error) {
 func (ctx *Context) SessionUser() (*models.User, error) {
 	if ctx.user != nil {
 		return ctx.user, nil
+	}
+	if devMode {
+		user, _ := ctx.Database().UserFromSession(ctx.Context, "dev-user")
+		return &user, nil
 	}
 
 	cookie, err := ctx.Cookie(auth.SessionCookieName)
