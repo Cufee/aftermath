@@ -33,7 +33,7 @@ type queue struct {
 func New(workerLimit int, newCoreClient func() (core.Client, error)) *queue {
 	return &queue{
 		newCoreClient: newCoreClient,
-		handlers:      make(map[models.TaskType]tasks.TaskHandler),
+		handlers:      make(map[models.TaskType]tasks.TaskHandler, 10),
 
 		workerLimit:   workerLimit,
 		workerTimeout: time.Second * 60, // a single cron scheduler cycle

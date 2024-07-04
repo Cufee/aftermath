@@ -44,7 +44,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 				existingMap[a.ID] = struct{}{}
 			}
 
-			accountsByRealm := make(map[string][]string)
+			accountsByRealm := make(map[string][]string, len(accounts))
 			for _, a := range accounts {
 				if _, ok := existingMap[a]; ok {
 					continue
@@ -57,7 +57,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 			batchSize := 50
 			var wg sync.WaitGroup
 			sem := semaphore.NewWeighted(5)
-			errors := make(map[string]error)
+			errors := make(map[string]error, len(accountsByRealm))
 			var errorsMx sync.Mutex
 
 			for realm, accounts := range accountsByRealm {
