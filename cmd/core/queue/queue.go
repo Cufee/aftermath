@@ -190,11 +190,6 @@ func (q *queue) processTask(task models.Task) {
 			event := log.Error().Str("stack", string(debug.Stack())).Str("taskId", task.ID)
 			defer event.Msg("panic in queue worker")
 
-			coreClient, err := q.newCoreClient()
-			if err != nil {
-				event.AnErr("core", err).Str("additional", "failed to create a core client")
-				return
-			}
 			task.Status = models.TaskStatusFailed
 			task.LogAttempt(models.TaskLog{
 				Timestamp: time.Now(),
