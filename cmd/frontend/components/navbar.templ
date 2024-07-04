@@ -42,7 +42,7 @@ templ navbar(props navbarProps) {
 			</div>
 			<ul class="navbar-end menu menu-horizontal px-1 gap-1 hidden md:flex">
 				<li><a href="/widget" class={ logic.StringIfElse("active", "", props.path == "/widget") }>Widget</a></li>
-				<li><a href="/login" class={ logic.StringIfElse("btn active", "btn", props.path == "/login") }>Login</a></li>
+				<li><a href="/login" hx-boost="false" class={ logic.StringIfElse("btn active", "btn", props.path == "/login") }>Login</a></li>
 			</ul>
 			<ul class="navbar-end menu menu-horizontal px-1 gap-1 md:hidden">
 				<button class="btn btn-square btn-ghost">
