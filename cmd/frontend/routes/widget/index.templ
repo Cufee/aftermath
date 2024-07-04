@@ -83,6 +83,10 @@ script handlePreview() {
 	const vl = document.getElementById("widget-vl").value
 	const newQuery = `?or=${or}&ou=${ou}&vl=${vl}`
 	if (newQuery != window.location.search) {
-		window.location.search = newQuery
+		fetch("/api/widget/mock"+newQuery).then((r) => r.text()).then((html) => {
+			document.getElementById("mock-widget").outerHTML = html
+			const url = window.location.protocol + "//" + window.location.host + window.location.pathname + newQuery;
+			window.history?.pushState({path:url},'',url);
+		}).catch(e => console.log(e))
 	}
 }
