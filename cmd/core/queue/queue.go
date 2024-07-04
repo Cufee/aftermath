@@ -151,26 +151,23 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 	for {
 		select {
 		case task := <-q.queued:
-			q.workerLimiter <- struct{}{}
-			q.activeTasksMx.Lock()
-			q.activeTasks[task.ID] = &struct{}{}
-			q.activeTasksMx.Unlock()
-			defer func() {
+			go func(task models.Task) {
+				// send to limiter channel
+				q.workerLimiter <- struct{}{}
+				q.activeTasksMx.Lock()
+				q.activeTasks[task.ID] = &struct{}{}
+				q.activeTasksMx.Unlock()
+				// run task handler
+				q.processTask(task)
+				// free limiter channel
 				<-q.workerLimiter
 				q.activeTasksMx.Lock()
 				delete(q.activeTasks, task.ID)
 				q.activeTasksMx.Unlock()
 				if onComplete != nil {
-					onComplete(task.ID)
+					go onComplete(task.ID)
 				}
-			}()
-
-			coreClient, err := q.newCoreClient()
-			if err != nil {
-				log.Err(err).Msg("failed to create a new core client for a task worker")
-				return
-			}
-			go q.processTask(coreClient, task)
+			}(task)
 
 		case <-ctx.Done():
 			return
@@ -178,9 +175,15 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 	}
 }
 
-func (q *queue) processTask(coreClient core.Client, task models.Task) {
+func (q *queue) processTask(task models.Task) {
 	log.Debug().Str("taskId", task.ID).Msg("worker started processing a task")
 	defer log.Debug().Str("taskId", task.ID).Msg("worker finished processing a task")
+
+	coreClient, err := q.newCoreClient()
+	if err != nil {
+		log.Err(err).Msg("failed to create a new core client for a task worker")
+		return
+	}
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -231,7 +234,7 @@ func (q *queue) processTask(coreClient core.Client, task models.Task) {
 	wctx, cancel := context.WithTimeout(context.Background(), q.workerTimeout)
 	defer cancel()
 
-	err := handler.Process(wctx, coreClient, &task)
+	err = handler.Process(wctx, coreClient, &task)
 	task.Status = models.TaskStatusComplete
 	l := models.TaskLog{
 		Timestamp: time.Now(),
