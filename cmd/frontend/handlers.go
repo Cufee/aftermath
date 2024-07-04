@@ -67,10 +67,22 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 			Path: get("/widget/{accountId}/live"),
 			Func: handler.Chain(core, widget.LiveWidget),
 		},
+		{
+			Path: get("/widget/personal"),
+			Func: redirect("/app/widget"),
+		},
+		{
+			Path: get("/widget/personal/{widgetId}/live"),
+			Func: handler.Chain(core, widget.PersonalLiveWidget),
+		},
 		// app routes
 		{
 			Path: get("/app"),
 			Func: handler.Chain(core, app.Index, middleware.SessionCheck),
+		},
+		{
+			Path: get("/app/widgets"),
+			Func: handler.Chain(core, app.Widgets, middleware.SessionCheck),
 		},
 		// api routes
 		{

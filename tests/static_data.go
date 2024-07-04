@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/models"
@@ -111,5 +112,17 @@ func DefaultVehicleStatsFrameSmall2(id string) frame.VehicleStatsFrame {
 	return frame.VehicleStatsFrame{
 		VehicleID:  id,
 		StatsFrame: &f,
+	}
+}
+
+var (
+	DefaultUserWithEdges = models.User{ID: "user1", Connections: []models.UserConnection{Connection(models.ConnectionTypeWargaming)}}
+)
+
+func Connection(kind models.ConnectionType) models.UserConnection {
+	return models.UserConnection{
+		ID:          fmt.Sprint(time.Now().Nanosecond()),
+		ReferenceID: DefaultAccountNA,
+		Type:        kind,
 	}
 }

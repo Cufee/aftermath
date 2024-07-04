@@ -1,0 +1,102 @@
+package app 
+
+import (
+	"fmt"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/pkg/errors"
+	"net/http"
+)
+
+var Widgets handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	user, err := ctx.SessionUser()
+	if err != nil {
+		return nil, nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
+	}
+
+	extendedUser, err := ctx.Database().GetUserByID(ctx, user.ID, database.WithConnections())
+	if err != nil {
+		return nil, nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
+	}
+
+	var accountIDs []string
+	connections, _ := extendedUser.FilterConnections(models.ConnectionTypeWargaming, nil)
+	for _, conn := range connections {
+		accountIDs = append(accountIDs, conn.ReferenceID)
+	}
+
+	var accounts []models.Account
+	if len(accountIDs) > 0 {
+		accounts, err = ctx.Database().GetAccounts(ctx.Context, accountIDs)
+		if err != nil {
+			return nil, nil, errors.New("invalid account id")
+		}
+	}
+
+	return layouts.Main, widgetConfiguratorPage(accounts, "account1"), nil
+}
+
+templ widgetConfiguratorPage(accounts []models.Account, selectedId string) {
+	<div class="flex flex-row justify-center gap-4 flex-wrap min-w-max">
+		<div class="flex flex-col gap-2">
+			<ul class="menu bg-base-200 rounded-box min-w-max gap-1">
+				for _, account := range accounts {
+					<li class="group">
+						<a class={ "flex flex-row gap-2 justify-between" + logic.StringIfElse(" active", "", account.ID == selectedId) }>
+							<span>{ account.Nickname }</span>
+							<span class={ "badge group-hover:bg-gray-900 " + logic.StringIfElse("bg-gray-900", "badge-neutral", account.ID == selectedId) }>{ account.Realm }</span>
+						</a>
+					</li>
+				}
+				<li>
+					<a class={ "flex flex-row gap-1 justify-between" + logic.StringIfElse(" active", "", selectedId == "") }>
+						<span>Link</span>
+						<span>+</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+		<div class="grow flex flex-col max-w-xl gap-2">
+			@widgetOptions()
+			// @widget.Widget()
+		</div>
+	</div>
+}
+
+templ widgetOptions() {
+	<div class="flex flex-col items-center justify-center gap-4">
+		<div class="form-control w-full flex gap-2">
+			<div class="flex flex-col bg-base-200 rounded-lg p-4">
+				<span class="text-lg">Regular Battles</span>
+				<label class="label cursor-pointer">
+					<span class="label-text">Show Overview Card</span>
+					<input type="checkbox" class="toggle toggle-secondary" checked="checked"/>
+				</label>
+				<label class="label cursor-pointer flex flex-col items-start gap-1">
+					<span class="label-text">Vehicle Cards</span>
+					<input type="range" min="0" max="10" value="3" class="range" step="1"/>
+					<div class="flex w-full justify-between px-2 text-xs">
+						for i := range 11 {
+							<div class="flex flex-col items-center">
+								<span>{ fmt.Sprint(i) }</span>
+							</div>
+						}
+					</div>
+				</label>
+			</div>
+			<div class="flex flex-col bg-base-200 rounded-lg p-4">
+				<span class="text-lg">Rating Battles</span>
+				<label class="label cursor-pointer">
+					<span class="label-text">Show Overview Card</span>
+					<input type="checkbox" class="toggle toggle-secondary" checked="checked"/>
+				</label>
+			</div>
+		</div>
+		<button class="btn btn-primary">
+			copy link
+		</button>
+	</div>
+}

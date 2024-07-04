@@ -1,8 +1,9 @@
 package routes
 
-import "github.com/cufee/aftermath/cmd/frontend/handler"
-import "github.com/cufee/aftermath/cmd/frontend/layouts"
-import "github.com/cufee/aftermath/cmd/frontend/components"
+import (
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/layouts"
+)
 
 var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	return layouts.Main, index(), nil
@@ -10,27 +11,40 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 
 templ index() {
 	<div class="flex flex-col justify-center gap-8 m-auto" id="landing">
-		<div class="flex items-center justify-center">
-			@components.Logo("128")
+		<div class="flex flex-row flex-wrap">
+			@card(cardImage("/assets/promo-join.jpg"), cardActionButton("Join Aftermath Official", "/join")) {
+				<p>Aftermath is making a comeback! We've revamped everything to be faster and more beautiful. Join our community server for the latest features and updates.</p>
+			}
+			@card(cardImage("/assets/promo-invite.jpg"), cardActionButton("Add Aftermath on Discord", "/invite")) {
+				<p>The new bot is here! Add it to your server for an easier time tracking sessions. It's that simple – give Aftermath a try on your favorite server!</p>
+			}
 		</div>
-		<div class="grid gap-4 p-4 md:grid-cols-2">
-			<div class="shadow-xl card bg-base-300">
-				<figure><img src="/assets/promo-join.jpg" alt="Join Aftermath Official"/></figure>
-				<div class="card-body">
-					<p>Aftermath is making a comeback! We've revamped everything to be faster and more beautiful. Join our community server for the latest features and updates.</p>
-					<div class="justify-center card-actions">
-						<a href="/join" class="btn btn-primary">Join Aftermath Official</a>
-					</div>
+	</div>
+}
+
+templ cardImage(path string) {
+	<img src={ path } class="max-h-24 md:max-h-48 object-cover w-full" alt="Join Aftermath Official"/>
+}
+
+templ cardActionButton(label, path string) {
+	<a href={ templ.URL(path) } class="btn btn-primary">{ label }</a>
+}
+
+templ card(image templ.Component, button templ.Component) {
+	<div class="grow md:basis-1/2 p-2">
+		<div class="shadow-xl card bg-base-300 overflow-hidden h-full">
+			if image != nil {
+				<div class="overflow-hidden">
+					@image
 				</div>
-			</div>
-			<div class="shadow-xl card bg-base-300">
-				<figure><img src="/assets/promo-invite.jpg" alt="Invite Aftermath"/></figure>
-				<div class="card-body">
-					<p>The new bot is here! Add it to your server for an easier time tracking sessions. It's that simple – give Aftermath a try on your favorite server!</p>
+			}
+			<div class="card-body gap-4">
+				{ children... }
+				if button != nil {
 					<div class="justify-center card-actions">
-						<a href="/invite" class="btn btn-primary">Invite Aftermath</a>
+						@button
 					</div>
-				</div>
+				}
 			</div>
 		</div>
 	</div>
