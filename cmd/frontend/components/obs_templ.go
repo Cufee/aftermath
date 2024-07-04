@@ -26,7 +26,7 @@ func OBSMockup(backgroundURL string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mockup-window bg-base-300 rounded-xl overflow-hidden w-full\"><div class=\"flex flex-col p-4 pt-0 gap-2\"><div class=\"grow relative aspect-video rounded-md overflow-hidden\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mockup-browser bg-base-300 rounded-xl overflow-hidden w-full h-full\"><div class=\"mockup-browser-toolbar\"><div class=\"w-full text-center mr-14\">OBS Studio</div></div><div class=\"flex flex-col p-4 pt-0 gap-2\"><div class=\"grow relative rounded-md overflow-hidden\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -43,7 +43,7 @@ func OBSMockup(backgroundURL string) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(backgroundURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/obs.templ`, Line: 11, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/obs.templ`, Line: 14, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -62,7 +62,7 @@ func OBSMockup(backgroundURL string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"grow flex flex-row gap-1 text-xs\"><div class=\"grow flex flex-col gap-1 bg-base-200 p-2 rounded-md\"><div class=\"bg-gray-700 rounded-full px-2 py-1 whitespace-nowrap\">❤︎ Aftermath</div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"grow flex flex-row gap-1 text-xs\"><div class=\"grow flex flex-col gap-1 bg-base-200 p-2 rounded-md\"><div class=\"bg-gray-700 rounded-full px-2 py-1 whitespace-nowrap text-center\">❤︎ Aftermath</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -74,7 +74,7 @@ func OBSMockup(backgroundURL string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"grow flex flex-col gap-1 bg-base-200 p-2 rounded-md\"><div class=\"bg-gray-800 rounded-full px-2 py-1\"><span class=\"line-clamp-1 break-all whitespace-normal\">amth.one/widget</span></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"grow flex flex-col gap-1 bg-base-200 p-2 rounded-md\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -86,7 +86,15 @@ func OBSMockup(backgroundURL string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"grow flex flex-col gap-2 bg-base-200 p-2 rounded-md\"><div class=\"flex flex-col gap-1\"><div class=\"h-1 min-w-12 w-full bg-gray-700 rounded-full\"><div class=\"w-2/3 h-1 rounded-full bg-green-600\"></div></div><div class=\"h-1 flex flex-row gap-1\"><div class=\"grow rounded-full bg-blue-600\"></div><div class=\"w-1 h-1 rounded-full bg-red-600\"></div></div></div><div class=\"flex flex-col gap-1\"><div class=\"h-1 min-w-12 w-full bg-gray-700 rounded-full\"><div class=\"w-1/4 h-1 rounded-full bg-green-600\"></div></div><div class=\"h-1 flex flex-row gap-1\"><div class=\"grow rounded-full bg-blue-600\"></div><div class=\"w-1 h-1 rounded-full bg-red-600\"></div></div></div></div><div class=\"grow hidden sm:flex flex-col gap-1 bg-base-200 p-2 rounded-md text-center max-w-24\"><div class=\"h-4 min-w-12 w-full bg-gray-800 rounded-full flex flex-row gap-1 items-center px-1\"><div class=\"h-2 w-2 rounded-full bg-red-500\"></div><div class=\"h-1 min-w-8 grow bg-gray-500 rounded-full\"></div></div>")
+		templ_7745c5c3_Err = buttonMockup().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = buttonMockup().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"grow flex flex-col gap-2 bg-base-200 p-2 rounded-md\"><div class=\"flex flex-col gap-1\"><div class=\"h-1 min-w-12 w-full bg-gray-700 rounded-full\"><div class=\"w-2/3 h-1 rounded-full bg-green-600\"></div></div><div class=\"h-1 flex flex-row gap-1\"><div class=\"grow rounded-full bg-blue-600\"></div><div class=\"w-1 h-1 rounded-full bg-red-600\"></div></div></div><div class=\"flex flex-col gap-1\"><div class=\"h-1 min-w-12 w-full bg-gray-700 rounded-full\"><div class=\"w-1/4 h-1 rounded-full bg-green-600\"></div></div><div class=\"h-1 flex flex-row gap-1\"><div class=\"grow rounded-full bg-blue-600\"></div><div class=\"w-1 h-1 rounded-full bg-red-600\"></div></div></div></div><div class=\"grow hidden sm:flex flex-col gap-1 bg-base-200 p-2 rounded-md text-center\"><div class=\"h-4 min-w-12 w-full bg-gray-800 rounded-full flex flex-row gap-1 items-center px-1\"><div class=\"h-2 w-2 rounded-full bg-red-500\"></div><div class=\"h-1 min-w-8 grow bg-gray-500 rounded-full\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

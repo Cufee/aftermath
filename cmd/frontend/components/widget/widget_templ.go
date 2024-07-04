@@ -8,10 +8,12 @@ package widget
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/cufee/aftermath/cmd/frontend/logic"
-import "fmt"
-import "github.com/cufee/aftermath/internal/database/models"
-import prepare "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
+import (
+	"fmt"
+	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/database/models"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
+)
 
 type WidgetFlavor string
 
@@ -44,7 +46,7 @@ func Widget(account models.Account, cards prepare.Cards, options ...WidgetOption
 		account:       account,
 		flavor:        WidgetFlavorDefault,
 		autoReload:    false,
-		vehicleStyle:  styleOptions{showTitle: true},
+		vehicleStyle:  styleOptions{showTitle: true, showLabel: true},
 		overviewStyle: styleOptions{showLabel: true},
 
 		showRatingOverview:   true,
@@ -104,7 +106,7 @@ func (w widget) Render() templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(w.account.Nickname)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 76, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 78, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -117,7 +119,7 @@ func (w widget) Render() templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 80, Col: 134}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 82, Col: 134}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -130,13 +132,13 @@ func (w widget) Render() templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 85, Col: 135}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 87, Col: 135}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></head><div class=\"text-nowrap whitespace-nowrap min-w-max\" id=\"widget-container\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></head><div class=\"text-nowrap whitespace-nowrap\" id=\"widget-container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

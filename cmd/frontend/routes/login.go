@@ -12,6 +12,11 @@ import (
 )
 
 var Login handler.Endpoint = func(ctx *handler.Context) error {
+	user, err := ctx.SessionUser()
+	if err == nil && user.ID != "" {
+		return ctx.Redirect("/app", http.StatusTemporaryRedirect)
+	}
+
 	nonceID, err := logic.RandomString(32)
 	if err != nil {
 		return ctx.Error(err, "failed to authenticate")

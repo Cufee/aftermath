@@ -35,7 +35,7 @@ func index() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col justify-center gap-8 m-auto\" id=\"landing\"><div class=\"flex flex-row flex-wrap\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col justify-center\" id=\"landing\"><div class=\"flex flex-row flex-wrap\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -122,7 +122,7 @@ func cardImage(path string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"max-h-24 md:max-h-48 object-cover w-full\" alt=\"Join Aftermath Official\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"object-cover w-full h-full\" alt=\"Join Aftermath Official\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -201,7 +201,7 @@ func card(image templ.Component, button templ.Component) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if image != nil {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"overflow-hidden\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"overflow-hidden h-24 sm:h-48\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

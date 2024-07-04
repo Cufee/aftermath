@@ -1,0 +1,28 @@
+package widget
+
+import (
+	"github.com/cufee/aftermath/cmd/frontend/assets"
+	"github.com/cufee/aftermath/cmd/frontend/components/widget"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"strconv"
+)
+
+var MockWidget handler.Partial = func(ctx *handler.Context) (templ.Component, error) {
+	var opts []widget.WidgetOption
+	if v, err := strconv.Atoi(ctx.Query("vl")); err == nil && v >= 0 && v <= 10 {
+		opts = append(opts, widget.WithVehicleLimit(int(v)))
+	}
+	if v := ctx.Query("or"); v != "" {
+		opts = append(opts, widget.WithRatingOverview(v == "1"))
+	}
+	if v := ctx.Query("ou"); v != "" {
+		opts = append(opts, widget.WithUnratedOverview(v == "1"))
+	}
+	return mockWidget(widget.Widget(assets.MockWidgetData().Account, assets.MockWidgetData().Cards, opts...)), nil
+}
+
+templ mockWidget(widget templ.Component) {
+	<div id="mock-widget">
+		@widget
+	</div>
+}

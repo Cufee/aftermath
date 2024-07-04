@@ -1,21 +1,32 @@
 package app
 
-import "net/http"
-import "github.com/cufee/aftermath/internal/database/models"
-import "github.com/cufee/aftermath/cmd/frontend/handler"
-import "github.com/cufee/aftermath/cmd/frontend/layouts"
+import (
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"github.com/cufee/aftermath/internal/database/models"
+	"net/http"
+)
 
 var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
-  user, err := ctx.SessionUser()
-  if err != nil {
-    return nil, nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
-  }
+	user, err := ctx.SessionUser()
+	if err != nil {
+		return nil, nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
+	}
 	return layouts.Main, index(user), nil
 }
 
 templ index(user *models.User) {
-	<div class="flex flex-col justify-center gap-8 m-auto" id="landing">
-		App page
-    {user.ID}
+	<div class="flex flex-col items-center gap-4">
+		<div class="text-3xl font-bold">
+			🎉 You are logged in! 🎉
+		</div>
+		<div class="flex flex-col items-center">
+			<span class="text-xl">
+				But we did not add any features here just yet.
+			</span>
+			<span>
+				Here is your user id instead - { user.ID }
+			</span>
+		</div>
 	</div>
 }

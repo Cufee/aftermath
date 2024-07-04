@@ -1,9 +1,11 @@
 package widget
 
-import "github.com/cufee/aftermath/cmd/frontend/logic"
-import "fmt"
-import "github.com/cufee/aftermath/internal/database/models"
-import prepare "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
+import (
+	"fmt"
+	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/database/models"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
+)
 
 type WidgetFlavor string
 
@@ -36,7 +38,7 @@ func Widget(account models.Account, cards prepare.Cards, options ...WidgetOption
 		account:       account,
 		flavor:        WidgetFlavorDefault,
 		autoReload:    false,
-		vehicleStyle:  styleOptions{showTitle: true},
+		vehicleStyle:  styleOptions{showTitle: true, showLabel: true},
 		overviewStyle: styleOptions{showLabel: true},
 
 		showRatingOverview:   true,
@@ -84,7 +86,7 @@ templ (w widget) Render() {
 		<meta name="twitter:image" content="https://amth.one/assets/og-widget.jpg"/>
 		<meta name="twitter:description" content={ fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm) }/>
 	</head>
-	<div class="text-nowrap whitespace-nowrap min-w-max" id="widget-container">
+	<div class="text-nowrap whitespace-nowrap" id="widget-container">
 		switch w.flavor {
 			default:
 				@w.defaultWidget()
