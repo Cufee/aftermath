@@ -39,7 +39,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 		log.Info().Int("count", len(accounts)-len(existing)).Msg("importing accounts")
 
 		go func(accounts []string, existing []models.Account) {
-			existingMap := make(map[string]struct{})
+			existingMap := make(map[string]struct{}, len(existing))
 			for _, a := range existing {
 				existingMap[a.ID] = struct{}{}
 			}
