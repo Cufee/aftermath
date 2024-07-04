@@ -62,7 +62,7 @@ func NewTextContent(style Style, value string) Block {
 
 func (content contentText) Render(style Style) (image.Image, error) {
 	if !style.Font.Valid() {
-		// return nil, errors.New("font not valid")
+		return nil, errors.New("font not valid")
 	}
 
 	size := MeasureString(content.value, style.Font)
