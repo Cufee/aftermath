@@ -157,6 +157,10 @@ func getDetailedSize(images []image.Image, style Style) imageSize {
 	var totalHeight float64
 	maxWidth, maxHeight := 0.0, 0.0
 	for _, img := range images {
+		if img == nil {
+			continue
+		}
+
 		imgX := float64(img.Bounds().Dx())
 		maxWidth = max(maxWidth, imgX)
 
