@@ -1,0 +1,31 @@
+package layouts
+
+import (
+	"github.com/cufee/aftermath/cmd/frontend/components"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+)
+
+var StyleOnly handler.Layout = func(ctx *handler.Context, children ...templ.Component) (templ.Component, error) {
+	return styleOnly(children...), nil
+}
+
+templ styleOnly(children ...templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en" data-theme="dark">
+		@components.Head()
+		<body hx-ext="multi-swap,head-support" class="flex flex-col">
+			for _, render := range children {
+				@render
+			}
+			<script>
+				// enable swap on 422, this status code is used for validation errors and returns error messages bound to elements
+				document.body.addEventListener('htmx:beforeOnLoad', function (evt) {
+						if (evt.detail.xhr.status === 422) {
+								evt.detail.shouldSwap = true;
+								evt.detail.isError = false;
+						}
+				});
+			</script>
+		</body>
+	</html>
+}

@@ -76,11 +76,24 @@ var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.
 		return nil, nil, err
 	}
 
-	return layouts.Main, liveWidget(widget.Widget(account, cards, widget.WithAutoReload())), nil
+	var wopts = []widget.WidgetOption{widget.WithAutoReload()}
+	if v, err := strconv.Atoi(ctx.Query("vl")); err == nil && v >= 0 && v <= 10 {
+		wopts = append(wopts, widget.WithVehicleLimit(int(v)))
+	}
+	if v := ctx.Query("or"); v != "" {
+		wopts = append(wopts, widget.WithRatingOverview(v == "1"))
+	}
+	if v := ctx.Query("ou"); v != "" {
+		wopts = append(wopts, widget.WithUnratedOverview(v == "1"))
+	}
+
+	return layouts.StyleOnly, liveWidget(widget.Widget(account, cards, wopts...)), nil
 }
 
 templ liveWidget(widget templ.Component) {
-	@widget
+	<div class="min-w-max">
+		@widget
+	</div>
 	<style>
     :root { background-color: rgba(0, 0, 0, 0); white-space: nowrap; }
   </style>

@@ -1,0 +1,58 @@
+package widget
+
+import (
+	"context"
+	"github.com/cufee/aftermath/cmd/frontend/components/widget"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/stats/client/v1"
+	"golang.org/x/text/language"
+	"net/http"
+	"slices"
+	"strconv"
+	"time"
+)
+
+var AccountWidget handler.Partial = func(ctx *handler.Context) (templ.Component, error) {
+	accountID := ctx.Path("accountId")
+	if accountID == "" {
+		return nil, ctx.Redirect("/widget", http.StatusTemporaryRedirect)
+	}
+
+	account, err := ctx.Fetch().Account(ctx.Context, accountID)
+	if err != nil {
+		return nil, ctx.Redirect("/widget", http.StatusTemporaryRedirect)
+	}
+
+	var opts = []client.RequestOption{client.WithWN8()}
+	if ref := ctx.Query("ref"); ref != "" {
+		opts = append(opts, client.WithReferenceID(ref))
+	}
+	if t := ctx.Query("type"); t != "" && slices.Contains(models.SnapshotType("").Values(), t) {
+		opts = append(opts, client.WithType(models.SnapshotType(t)))
+	}
+
+	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	var wopts []widget.WidgetOption
+	if v, err := strconv.Atoi(ctx.Query("vl")); err == nil && v >= 0 && v <= 10 {
+		wopts = append(wopts, widget.WithVehicleLimit(int(v)))
+	}
+	if v := ctx.Query("or"); v != "" {
+		wopts = append(wopts, widget.WithRatingOverview(v == "1"))
+	}
+	if v := ctx.Query("ou"); v != "" {
+		wopts = append(wopts, widget.WithUnratedOverview(v == "1"))
+	}
+
+	return accountWidget(widget.Widget(account, cards, wopts...)), nil
+}
+
+templ accountWidget(widget templ.Component) {
+	<div id="account-widget">
+		@widget
+	</div>
+}

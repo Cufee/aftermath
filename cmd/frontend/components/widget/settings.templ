@@ -1,0 +1,33 @@
+package widget
+
+import "fmt"
+
+templ Settings(onChange templ.ComponentScript, or, ou bool, vl int) {
+	<div class="form-control flex gap-2">
+		<div class="flex flex-col bg-base-200 rounded-lg p-4">
+			<span class="text-lg">Rating Battles</span>
+			<label class="label cursor-pointer">
+				<span class="label-text">Show Overview Card</span>
+				<input id="widget-settings-or" type="checkbox" class="toggle toggle-secondary" checked?={ or } onchange={ onChange }/>
+			</label>
+		</div>
+		<div class="flex flex-col bg-base-200 rounded-lg p-4">
+			<span class="text-lg">Regular Battles</span>
+			<label class="label cursor-pointer">
+				<span class="label-text">Show Overview Card</span>
+				<input id="widget-settings-ou" type="checkbox" class="toggle toggle-secondary" checked?={ ou } onchange={ onChange }/>
+			</label>
+			<label class="label cursor-pointer flex flex-col items-start gap-1">
+				<span class="label-text">Vehicle Cards</span>
+				<input id="widget-settings-vl" type="range" min="0" max="10" value={ fmt.Sprint(vl) } class="range" step="1" onchange={ onChange }/>
+				<div class="flex w-full justify-between px-2 text-xs">
+					for i := range 11 {
+						<div class="flex flex-col items-center">
+							<span>{ fmt.Sprint(i) }</span>
+						</div>
+					}
+				</div>
+			</label>
+		</div>
+	</div>
+}

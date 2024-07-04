@@ -17,10 +17,13 @@ import (
 	"strconv"
 )
 
-var WidgetHome handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
-	widget, err := widget.MockWidget(ctx)
+var WidgetPreview handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	widget, err := widget.AccountWidget(ctx)
 	if err != nil {
 		return layouts.Main, nil, ctx.Error(err, "failed to generate a widget preview")
+	}
+	if widget == nil {
+		return nil, nil, nil
 	}
 
 	var withUnrated = ctx.Query("ou") != "0"
@@ -30,10 +33,10 @@ var WidgetHome handler.Page = func(ctx *handler.Context) (handler.Layout, templ.
 		vehicles = v
 	}
 
-	return layouts.Main, widgetHome(widget, withRating, withUnrated, vehicles), nil
+	return layouts.Main, widgetPreview(ctx.Path("accountId"), widget, withRating, withUnrated, vehicles), nil
 }
 
-func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
+func widgetPreview(accountID string, widget templ.Component, or, ou bool, vl int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -55,15 +58,28 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = cwidget.Settings(handlePreviewOnHome(), or, ou, vl).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = cwidget.Settings(handlePreview(accountID), or, ou, vl).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button disabled type=\"button\" id=\"preview-widget\" class=\"btn btn-primary w-full\">Create Your Widget</button></div><div class=\"flex items-center justify-center grow\"><div class=\"max-w-4xl w-full\">")
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, copyButtonAction())
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button type=\"button\" id=\"copy-widget-link\" class=\"btn btn-primary w-full\" onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 templ.ComponentScript = copyButtonAction()
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">Copy Link</button></div><div class=\"flex items-center justify-center grow\"><div class=\"max-w-4xl w-full\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var3 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -89,7 +105,7 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = components.OBSMockup("/assets/widget-background.jpg").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.OBSMockup("/assets/widget-background.jpg").Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -101,13 +117,25 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 	})
 }
 
-func handlePreviewOnHome() templ.ComponentScript {
+func copyButtonAction() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_handlePreviewOnHome_85e3`,
-		Function: `function __templ_handlePreviewOnHome_85e3(){const ouEl = document.getElementById("widget-settings-ou")
+		Name: `__templ_copyButtonAction_1df6`,
+		Function: `function __templ_copyButtonAction_1df6(){const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "/live" + window.location.search
+	navigator.clipboard.writeText(url);
+}`,
+		Call:       templ.SafeScript(`__templ_copyButtonAction_1df6`),
+		CallInline: templ.SafeScriptInline(`__templ_copyButtonAction_1df6`),
+	}
+}
+
+func handlePreview(id string) templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_handlePreview_7995`,
+		Function: `function __templ_handlePreview_7995(id){const ouEl = document.getElementById("widget-settings-ou")
 	const orEl = document.getElementById("widget-settings-or")
 	const vlEl = document.getElementById("widget-settings-vl")
-
+	const button = document.getElementById("copy-widget-link")
+	
 	const ou = ouEl.checked ? "1" : "0"
 	const or = orEl.checked ? "1" : "0"
 	const vl = vlEl.value
@@ -116,20 +144,21 @@ func handlePreviewOnHome() templ.ComponentScript {
 		ouEl.disabled = true
 		orEl.disabled = true
 		vlEl.disabled = true
-		fetch("/api/widget/mock"+newQuery).then((r) => r.text()).then((html) => {
-			document.getElementById("mock-widget").outerHTML = html
+		button.disabled = true
+
+		fetch("/api/widget/"+id+newQuery).then((r) => r.text()).then((html) => {
+			document.getElementById("account-widget").outerHTML = html
 			const url = window.location.protocol + "//" + window.location.host + window.location.pathname + newQuery;
 			window.history?.pushState({path:url},'',url);
 		}).catch(e => console.log(e)).finally(() => {
-			setTimeout(() => {
-				ouEl.disabled = false
-				orEl.disabled = false
-				vlEl.disabled = false
-			}, 250)
+			ouEl.disabled = false
+			orEl.disabled = false
+			vlEl.disabled = false
+			button.disabled = false
 		})
 	}
 }`,
-		Call:       templ.SafeScript(`__templ_handlePreviewOnHome_85e3`),
-		CallInline: templ.SafeScriptInline(`__templ_handlePreviewOnHome_85e3`),
+		Call:       templ.SafeScript(`__templ_handlePreview_7995`, id),
+		CallInline: templ.SafeScriptInline(`__templ_handlePreview_7995`, id),
 	}
 }
