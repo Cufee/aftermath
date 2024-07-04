@@ -103,8 +103,8 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 
 func handlePreviewOnHome() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_handlePreviewOnHome_85e3`,
-		Function: `function __templ_handlePreviewOnHome_85e3(){const ouEl = document.getElementById("widget-settings-ou")
+		Name: `__templ_handlePreviewOnHome_66f0`,
+		Function: `function __templ_handlePreviewOnHome_66f0(){const ouEl = document.getElementById("widget-settings-ou")
 	const orEl = document.getElementById("widget-settings-or")
 	const vlEl = document.getElementById("widget-settings-vl")
 
@@ -125,11 +125,11 @@ func handlePreviewOnHome() templ.ComponentScript {
 				ouEl.disabled = false
 				orEl.disabled = false
 				vlEl.disabled = false
-			}, 250)
+			}, 500)
 		})
 	}
 }`,
-		Call:       templ.SafeScript(`__templ_handlePreviewOnHome_85e3`),
-		CallInline: templ.SafeScriptInline(`__templ_handlePreviewOnHome_85e3`),
+		Call:       templ.SafeScript(`__templ_handlePreviewOnHome_66f0`),
+		CallInline: templ.SafeScriptInline(`__templ_handlePreviewOnHome_66f0`),
 	}
 }
