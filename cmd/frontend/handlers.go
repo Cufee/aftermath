@@ -60,6 +60,10 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		},
 		// widget
 		{
+			Path: get("/widget"),
+			Func: handler.Chain(core, widget.WidgetHome),
+		},
+		{
 			Path: get("/widget/{accountId}"),
 			Func: handler.Chain(core, widget.ConfigureWidget),
 		},

@@ -151,107 +151,109 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 	for {
 		select {
 		case task := <-q.queued:
-			go func() {
-				q.workerLimiter <- struct{}{}
+			q.workerLimiter <- struct{}{}
+			q.activeTasksMx.Lock()
+			q.activeTasks[task.ID] = &struct{}{}
+			q.activeTasksMx.Unlock()
+			defer func() {
+				<-q.workerLimiter
 				q.activeTasksMx.Lock()
-				q.activeTasks[task.ID] = &struct{}{}
+				delete(q.activeTasks, task.ID)
 				q.activeTasksMx.Unlock()
-				defer func() {
-					<-q.workerLimiter
-					q.activeTasksMx.Lock()
-					delete(q.activeTasks, task.ID)
-					q.activeTasksMx.Unlock()
-					if onComplete != nil {
-						onComplete(task.ID)
-					}
-				}()
-
-				log.Debug().Str("taskId", task.ID).Msg("worker started processing a task")
-				defer log.Debug().Str("taskId", task.ID).Msg("worker finished processing a task")
-
-				defer func() {
-					if r := recover(); r != nil {
-						event := log.Error().Str("stack", string(debug.Stack())).Str("taskId", task.ID)
-						defer event.Msg("panic in queue worker")
-
-						coreClient, err := q.newCoreClient()
-						if err != nil {
-							event.AnErr("core", err).Str("additional", "failed to create a core client")
-							return
-						}
-						task.Status = models.TaskStatusFailed
-						task.LogAttempt(models.TaskLog{
-							Timestamp: time.Now(),
-							Comment:   "task caused a panic in worker handler",
-						})
-
-						uctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
-						defer cancel()
-
-						err = coreClient.Database().UpdateTasks(uctx, task)
-						if err != nil {
-							event.AnErr("updateTasks", err).Str("additional", "failed to update a task")
-						}
-					}
-				}()
-
-				coreClient, err := q.newCoreClient()
-				if err != nil {
-					log.Err(err).Msg("failed to create a new core client for a task worker")
-					return
-				}
-
-				task.TriesLeft -= 1
-				handler, ok := q.handlers[task.Type]
-				if !ok {
-					task.Status = models.TaskStatusFailed
-					task.LogAttempt(models.TaskLog{
-						Error:     "task missing a handler",
-						Comment:   "task missing a handler",
-						Timestamp: time.Now(),
-					})
-
-					uctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
-					defer cancel()
-
-					err := coreClient.Database().UpdateTasks(uctx, task)
-					if err != nil {
-						log.Err(err).Msg("failed to update a task")
-					}
-					return
-				}
-
-				wctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
-				defer cancel()
-
-				err = handler.Process(wctx, coreClient, &task)
-				task.Status = models.TaskStatusComplete
-				l := models.TaskLog{
-					Timestamp: time.Now(),
-					Comment:   "task handler finished",
-				}
-				if err != nil {
-					l.Error = err.Error()
-					if task.TriesLeft > 0 {
-						task.Status = models.TaskStatusScheduled
-						task.ScheduledAfter = time.Now().Add(time.Minute * 5)
-					} else {
-						task.Status = models.TaskStatusFailed
-					}
-				}
-				task.LogAttempt(l)
-
-				uctx, cancel := context.WithTimeout(ctx, q.workerTimeout)
-				defer cancel()
-
-				err = coreClient.Database().UpdateTasks(uctx, task)
-				if err != nil {
-					log.Err(err).Msg("failed to update a task")
+				if onComplete != nil {
+					onComplete(task.ID)
 				}
 			}()
+
+			coreClient, err := q.newCoreClient()
+			if err != nil {
+				log.Err(err).Msg("failed to create a new core client for a task worker")
+				return
+			}
+			go q.processTask(coreClient, task)
 
 		case <-ctx.Done():
 			return
 		}
 	}
+}
+
+func (q *queue) processTask(coreClient core.Client, task models.Task) {
+	log.Debug().Str("taskId", task.ID).Msg("worker started processing a task")
+	defer log.Debug().Str("taskId", task.ID).Msg("worker finished processing a task")
+
+	defer func() {
+		if r := recover(); r != nil {
+			event := log.Error().Str("stack", string(debug.Stack())).Str("taskId", task.ID)
+			defer event.Msg("panic in queue worker")
+
+			coreClient, err := q.newCoreClient()
+			if err != nil {
+				event.AnErr("core", err).Str("additional", "failed to create a core client")
+				return
+			}
+			task.Status = models.TaskStatusFailed
+			task.LogAttempt(models.TaskLog{
+				Timestamp: time.Now(),
+				Comment:   "task caused a panic in worker handler",
+			})
+
+			uctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+			defer cancel()
+
+			err = coreClient.Database().UpdateTasks(uctx, task)
+			if err != nil {
+				event.AnErr("updateTasks", err).Str("additional", "failed to update a task")
+			}
+		}
+	}()
+
+	task.TriesLeft -= 1
+	handler, ok := q.handlers[task.Type]
+	if !ok {
+		task.Status = models.TaskStatusFailed
+		task.LogAttempt(models.TaskLog{
+			Error:     "task missing a handler",
+			Comment:   "task missing a handler",
+			Timestamp: time.Now(),
+		})
+
+		uctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		defer cancel()
+
+		err := coreClient.Database().UpdateTasks(uctx, task)
+		if err != nil {
+			log.Err(err).Msg("failed to update a task")
+		}
+		return
+	}
+
+	wctx, cancel := context.WithTimeout(context.Background(), q.workerTimeout)
+	defer cancel()
+
+	err := handler.Process(wctx, coreClient, &task)
+	task.Status = models.TaskStatusComplete
+	l := models.TaskLog{
+		Timestamp: time.Now(),
+		Comment:   "task handler finished",
+	}
+	if err != nil {
+		l.Error = err.Error()
+		if task.TriesLeft > 0 {
+			task.Status = models.TaskStatusScheduled
+			task.ScheduledAfter = time.Now().Add(time.Minute * 5)
+		} else {
+			task.Status = models.TaskStatusFailed
+		}
+	}
+	task.LogAttempt(l)
+
+	uctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
+
+	err = coreClient.Database().UpdateTasks(uctx, task)
+	if err != nil {
+		log.Err(err).Msg("failed to update a task")
+	}
+
 }

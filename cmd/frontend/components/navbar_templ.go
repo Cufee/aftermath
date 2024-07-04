@@ -53,7 +53,7 @@ func navbar(props navbarProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"no-animation\" hx-boost=\"true\"><div class=\"navbar bg-base-100 gap-1\"><div class=\"navbar-start gap-1\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"no-animation\" hx-boost=\"true\"><div class=\"navbar bg-base-100 gap-1\"><div class=\"navbar-start gap-1\"><a href=\"/\" class=\"px-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -61,7 +61,7 @@ func navbar(props navbarProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex-1\"><a class=\"btn btn-ghost text-xl\" href=\"/\">Aftermath</a></div></div><div class=\"navbar-center\"><div class=\"form-control\"><input type=\"text\" placeholder=\"Search Players\" class=\"input input-bordered w-24 md:w-auto\"></div></div><ul class=\"navbar-end menu menu-horizontal px-1 gap-1\"><li>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div><div class=\"navbar-center\"><div class=\"form-control\"><input type=\"text\" placeholder=\"Search Players\" class=\"input input-bordered w-48 md:w-auto placeholder:text-center\"></div></div><ul class=\"navbar-end menu menu-horizontal px-1 gap-1 hidden md:flex\"><li>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -105,7 +105,7 @@ func navbar(props navbarProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">Login</a></li></ul></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">Login</a></li></ul><ul class=\"navbar-end menu menu-horizontal px-1 gap-1 md:hidden\"><button class=\"btn btn-square btn-ghost\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" class=\"inline-block h-5 w-5 stroke-current\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h16M4 18h16\"></path></svg></button></ul></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -165,7 +165,7 @@ func navMenuLink(label, href, currentPath string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/navbar.templ`, Line: 53, Col: 78}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/navbar.templ`, Line: 69, Col: 78}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
