@@ -66,7 +66,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		},
 		{
 			Path: get("/widget/{accountId}"),
-			Func: handler.Chain(core, widget.ConfigureWidget),
+			Func: handler.Chain(core, widget.WidgetPreview),
 		},
 		{
 			Path: get("/widget/{accountId}/live"),
@@ -97,6 +97,10 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		{
 			Path: get("/api/widget/mock"),
 			Func: handler.Chain(core, aWidget.MockWidget),
+		},
+		{
+			Path: get("/api/widget/{accountId}"),
+			Func: handler.Chain(core, aWidget.AccountWidget),
 		},
 	}, nil
 }

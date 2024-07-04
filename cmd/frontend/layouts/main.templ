@@ -3,11 +3,7 @@ package layouts
 import (
 	"github.com/cufee/aftermath/cmd/frontend/components"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
-	"github.com/cufee/aftermath/cmd/frontend/logic"
-	"os"
 )
-
-var appName = os.Getenv("WEBAPP_NAME")
 
 var Main handler.Layout = func(ctx *handler.Context, children ...templ.Component) (templ.Component, error) {
 	navbar, err := components.Navbar(ctx)
@@ -21,18 +17,7 @@ var Main handler.Layout = func(ctx *handler.Context, children ...templ.Component
 templ main(navbar templ.Component, children ...templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en" data-theme="dark">
-		<head>
-			<meta charset="utf-8"/>
-			<meta name="color-scheme" content="light"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1"/>
-			<link href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css" rel="stylesheet" type="text/css"/>
-			<script src="https://unpkg.com/htmx.org@1.9.12"></script>
-			<script src="https://unpkg.com/htmx.org/dist/ext/head-support.js"></script>
-			<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/multi-swap.js"></script>
-			<script src="https://cdn.tailwindcss.com"></script>
-			@logic.EmbedMinifiedScript(tailwindConfig())
-			<title>{ appName }</title>
-		</head>
+		@components.Head()
 		<body hx-ext="multi-swap,head-support" class="min-h-screen flex flex-col">
 			<div class="max-w-7xl w-full mx-auto">
 				@navbar
@@ -53,18 +38,4 @@ templ main(navbar templ.Component, children ...templ.Component) {
 			</script>
 		</body>
 	</html>
-}
-
-script tailwindConfig() {
-	tailwind.config = {
-		theme: {
-			borderRadius: {
-				"sm": "10px",
-				"md": "15px",
-				"lg": "20px",
-				"xl": "25px",
-				'full': '9999px',
-			}
-		}
-	}
 }
