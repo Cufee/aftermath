@@ -168,16 +168,20 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 
 func handlePreview() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_handlePreview_9417`,
-		Function: `function __templ_handlePreview_9417(){const ou = document.getElementById("widget-ou").checked ? "1" : "0"
+		Name: `__templ_handlePreview_f919`,
+		Function: `function __templ_handlePreview_f919(){const ou = document.getElementById("widget-ou").checked ? "1" : "0"
 	const or = document.getElementById("widget-or").checked ? "1" : "0"
 	const vl = document.getElementById("widget-vl").value
 	const newQuery = ` + "`" + `?or=${or}&ou=${ou}&vl=${vl}` + "`" + `
 	if (newQuery != window.location.search) {
-		window.location.search = newQuery
+		fetch("/api/widget/mock"+newQuery).then((r) => r.text()).then((html) => {
+			document.getElementById("mock-widget").outerHTML = html
+			const url = window.location.protocol + "//" + window.location.host + window.location.pathname + newQuery;
+			window.history?.pushState({path:url},'',url);
+		}).catch(e => console.log(e))
 	}
 }`,
-		Call:       templ.SafeScript(`__templ_handlePreview_9417`),
-		CallInline: templ.SafeScriptInline(`__templ_handlePreview_9417`),
+		Call:       templ.SafeScript(`__templ_handlePreview_f919`),
+		CallInline: templ.SafeScriptInline(`__templ_handlePreview_f919`),
 	}
 }

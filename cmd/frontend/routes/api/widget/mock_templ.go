@@ -12,6 +12,7 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/assets"
 	"github.com/cufee/aftermath/cmd/frontend/components/widget"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"net/http"
 	"strconv"
 )
 
@@ -26,6 +27,8 @@ var MockWidget handler.Partial = func(ctx *handler.Context) (templ.Component, er
 	if v := ctx.Query("ou"); v != "" {
 		opts = append(opts, widget.WithUnratedOverview(v == "1"))
 	}
+
+	ctx.SetStatus(http.StatusBadRequest)
 	return mockWidget(widget.Widget(assets.MockWidgetData().Account, assets.MockWidgetData().Cards, opts...)), nil
 }
 
