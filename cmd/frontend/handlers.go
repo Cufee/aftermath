@@ -12,6 +12,7 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/middleware"
 	"github.com/cufee/aftermath/cmd/frontend/routes"
 	"github.com/cufee/aftermath/cmd/frontend/routes/api/auth"
+	aWidget "github.com/cufee/aftermath/cmd/frontend/routes/api/widget"
 	"github.com/cufee/aftermath/cmd/frontend/routes/app"
 	"github.com/cufee/aftermath/cmd/frontend/routes/widget"
 	"github.com/pkg/errors"
@@ -92,6 +93,10 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		{
 			Path: get("/api/auth/discord"),
 			Func: handler.Chain(core, auth.DiscordRedirect),
+		},
+		{
+			Path: get("/api/widget/mock"),
+			Func: handler.Chain(core, aWidget.MockWidget),
 		},
 	}, nil
 }

@@ -9,17 +9,31 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"fmt"
 	"github.com/cufee/aftermath/cmd/frontend/components"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"github.com/cufee/aftermath/cmd/frontend/routes/api/widget"
+	"strconv"
 )
 
 var WidgetHome handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	widget, err := widget.MockWidget(ctx)
+	if err != nil {
+		return layouts.Main, nil, ctx.Error(err, "failed to generate a widget preview")
+	}
 
-	return layouts.Main, widgetHome(), nil
+	var withUnrated = ctx.Query("ou") != "0"
+	var withRating = ctx.Query("or") != "0"
+	var vehicles int = 3
+	if v, err := strconv.Atoi(ctx.Query("vl")); err == nil && v >= 0 && v <= 10 {
+		vehicles = v
+	}
+
+	return layouts.Main, widgetHome(widget, withRating, withUnrated, vehicles), nil
 }
 
-func widgetHome() templ.Component {
+func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -37,11 +51,84 @@ func widgetHome() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-row justify-center gap-4 flex-wrap\"><div class=\"flex flex-row flex-wrap md:flex-nowrap gap-4\"><div class=\"grow\">Amet cillum fugiat ut eu enim dolor nulla minim. Officia veniam esse exercitation elit consequat voluptate cillum ex. Ut aute nulla ipsum in sint enim et amet nisi irure. Nulla tempor enim ut reprehenderit excepteur ad aute eu fugiat cupidatat et eu magna officia. Aute aute quis ea anim. Ipsum aliqua officia qui id dolore ullamco ipsum ipsum esse laborum. Minim Lorem ex cupidatat elit Lorem consequat deserunt cillum. Laboris esse do non dolor reprehenderit excepteur ea eiusmod incididunt sit eu tempor consectetur reprehenderit. Dolore est exercitation ullamco magna adipisicing dolor ea esse sit fugiat sint enim in irure. Aliquip ea ea magna irure amet dolore. Lorem anim ad enim reprehenderit officia et magna pariatur dolore ex quis sint. Quis duis aliqua do ipsum enim cillum.</div><div class=\"flex items-center justify-center grow\"><div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-row flex-wrap gap-4\"><div class=\"flex flex-col gap-4 basis-1/2 grow\"><div class=\"flex flex-col gap-2 items-center\"><div class=\"text-3xl font-bold\">Aftermath Streaming Widget</div><p>Level up your stream with a real-time stats widget!</p></div><div class=\"form-control flex gap-2 grow\"><div class=\"flex flex-col bg-base-200 rounded-lg p-4\"><span class=\"text-lg\">Rating Battles</span> <label class=\"label cursor-pointer\"><span class=\"label-text\">Show Overview Card</span> <input id=\"widget-or\" type=\"checkbox\" class=\"toggle toggle-secondary\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		if or {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("></label></div><div class=\"flex flex-col bg-base-200 rounded-lg p-4\"><span class=\"text-lg\">Regular Battles</span> <label class=\"label cursor-pointer\"><span class=\"label-text\">Show Overview Card</span> <input id=\"widget-ou\" type=\"checkbox\" class=\"toggle toggle-secondary\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if ou {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("></label> <label class=\"label cursor-pointer flex flex-col items-start gap-1\"><span class=\"label-text\">Vehicle Cards</span> <input id=\"widget-vl\" type=\"range\" min=\"0\" max=\"10\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(vl))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/widget/index.templ`, Line: 55, Col: 80}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"range\" step=\"1\"><div class=\"flex w-full justify-between px-2 text-xs\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for i := range 11 {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col items-center\"><span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/widget/index.templ`, Line: 59, Col: 30}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></label></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, handlePreview())
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 templ.ComponentScript = handlePreview()
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" type=\"button\" id=\"preview-widget\" class=\"btn btn-primary w-full\">Preview</button></div></div><div class=\"flex items-center justify-center grow\"><div class=\"max-w-4xl w-full\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -53,20 +140,44 @@ func widgetHome() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div><span class=\"text-white\">content</span></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-max p-8 min-h-96\" style=\"zoom: 0.5;\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = widget.Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = components.OBSMockup("/assets/widget-background.jpg").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.OBSMockup("/assets/widget-background.jpg").Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div><div class=\"flex\"></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func handlePreview() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_handlePreview_9417`,
+		Function: `function __templ_handlePreview_9417(){const ou = document.getElementById("widget-ou").checked ? "1" : "0"
+	const or = document.getElementById("widget-or").checked ? "1" : "0"
+	const vl = document.getElementById("widget-vl").value
+	const newQuery = ` + "`" + `?or=${or}&ou=${ou}&vl=${vl}` + "`" + `
+	if (newQuery != window.location.search) {
+		window.location.search = newQuery
+	}
+}`,
+		Call:       templ.SafeScript(`__templ_handlePreview_9417`),
+		CallInline: templ.SafeScriptInline(`__templ_handlePreview_9417`),
+	}
 }

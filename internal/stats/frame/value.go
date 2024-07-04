@@ -4,6 +4,8 @@ import "fmt"
 
 type ValueInt int
 
+var _ Value = ValueInt(0)
+
 func (value ValueInt) String() string {
 	return fmt.Sprintf("%d", value)
 }
@@ -13,6 +15,8 @@ func (value ValueInt) Float() float32 {
 }
 
 type ValueFloatDecimal float32
+
+var _ Value = ValueFloatDecimal(0)
 
 func (value ValueFloatDecimal) String() string {
 	return fmt.Sprintf("%.2f", value)
@@ -24,6 +28,8 @@ func (value ValueFloatDecimal) Float() float32 {
 
 type ValueFloatPercent float32
 
+var _ Value = ValueFloatPercent(0)
+
 func (value ValueFloatPercent) String() string {
 	return fmt.Sprintf("%.2f%%", value)
 }
@@ -33,6 +39,8 @@ func (value ValueFloatPercent) Float() float32 {
 }
 
 type valueInvalid struct{}
+
+var _ Value = InvalidValue
 
 func (value valueInvalid) String() string {
 	return "-"
@@ -53,6 +61,8 @@ func (value valueInvalid) MarshalJSON() ([]byte, error) {
 var InvalidValue = valueInvalid{}
 
 type ValueSpecialRating float32
+
+var _ Value = ValueSpecialRating(0)
 
 func (value ValueSpecialRating) int() int {
 	if value > 0 {

@@ -18,6 +18,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/text/language"
 	"slices"
+	"strconv"
 	"time"
 )
 
@@ -45,7 +46,18 @@ var PersonalLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout
 		return nil, nil, err
 	}
 
-	return layouts.Main, liveWidget(widget.Widget(account, cards, widget.WithAutoReload())), nil
+	var wopts = []widget.WidgetOption{widget.WithAutoReload()}
+	if v, err := strconv.Atoi(ctx.Query("vl")); err == nil && v >= 0 && v <= 10 {
+		wopts = append(wopts, widget.WithVehicleLimit(int(v)))
+	}
+	if v := ctx.Query("or"); v != "" {
+		wopts = append(wopts, widget.WithRatingOverview(v == "1"))
+	}
+	if v := ctx.Query("ou"); v != "" {
+		wopts = append(wopts, widget.WithUnratedOverview(v == "1"))
+	}
+
+	return layouts.Main, liveWidget(widget.Widget(account, cards, wopts...)), nil
 }
 
 var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {

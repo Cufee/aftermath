@@ -31,27 +31,27 @@ type Cards struct {
 }
 
 type UnratedCards struct {
-	Overview   OverviewCard
-	Vehicles   []VehicleCard
-	Highlights []VehicleCard
+	Overview   OverviewCard  `json:"overview"`
+	Vehicles   []VehicleCard `json:"vehicles"`
+	Highlights []VehicleCard `json:"highlights"`
 }
 
 type RatingCards struct {
-	Overview OverviewCard
-	Vehicles []VehicleCard
+	Overview OverviewCard  `json:"overview"`
+	Vehicles []VehicleCard `json:"vehicles"`
 }
 
 type OverviewColumn struct {
-	Blocks []common.StatsBlock[BlockData]
-	Flavor blockFlavor
+	Blocks []common.StatsBlock[BlockData] `json:"blocks"`
+	Flavor blockFlavor                    `json:"flavor"`
 }
 
 type OverviewCard common.StatsCard[OverviewColumn, string]
 type VehicleCard common.StatsCard[common.StatsBlock[BlockData], string]
 
 type BlockData struct {
-	Session frame.Value
-	Career  frame.Value
+	Session frame.Value `json:"session"`
+	Career  frame.Value `json:"career"`
 }
 
 type blockFlavor string
