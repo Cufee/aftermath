@@ -4,7 +4,7 @@ exclude_regex = [".*_templ.go"]
 pre_cmd = ["templ generate"]
 send_interrupt = true
 stop_on_error = true
-cmd = "go build -o ./tmp/web dev_web.go"
+cmd = "go build -gcflags '-m' -o ./tmp/main ."
 bin = "tmp/web"
 
 [proxy]

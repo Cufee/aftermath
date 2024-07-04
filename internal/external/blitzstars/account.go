@@ -17,7 +17,7 @@ type TankHistoryEntry struct {
 	Stats           types.StatsFrame `json:"all"`
 }
 
-func (c *client) AccountTankHistories(ctx context.Context, accountId string) (map[int][]TankHistoryEntry, error) {
+func (c client) AccountTankHistories(ctx context.Context, accountId string) (map[int][]TankHistoryEntry, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/tankhistories/for/%s", c.apiURL, accountId), nil)
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func (c *client) AccountTankHistories(ctx context.Context, accountId string) (ma
 		return nil, err
 	}
 
-	var historiesMap = make(map[int][]TankHistoryEntry)
+	var historiesMap = make(map[int][]TankHistoryEntry, len(histories))
 	for _, entry := range histories {
 		historiesMap[entry.TankID] = append(historiesMap[entry.TankID], entry)
 	}

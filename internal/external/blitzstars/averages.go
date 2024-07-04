@@ -33,7 +33,7 @@ type VehicleAverages struct {
 	} `json:"special,omitempty"`
 }
 
-func (c *client) CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error) {
+func (c client) CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error) {
 	req, err := http.NewRequest("GET", c.apiURL+"/tankaverages.json", nil)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (c *client) CurrentTankAverages(ctx context.Context) (map[string]frame.Stat
 		return nil, err
 	}
 
-	averagesMap := make(map[string]frame.StatsFrame)
+	averagesMap := make(map[string]frame.StatsFrame, len(averages))
 	for _, average := range averages {
 		battles := average.All.AvgBattles * float32(average.Players)
 

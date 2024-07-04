@@ -21,8 +21,8 @@ type client struct {
 	requestTimeout time.Duration
 }
 
-func NewClient(apiURL string, requestTimeout time.Duration) (*client, error) {
-	return &client{
+func NewClient(apiURL string, requestTimeout time.Duration) (client, error) {
+	return client{
 		apiURL:         apiURL,
 		requestTimeout: requestTimeout,
 		http:           http.Client{Timeout: requestTimeout},
