@@ -53,6 +53,10 @@ func navbar(props navbarProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = navProgressAnimated().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"no-animation\" hx-boost=\"true\"><div class=\"navbar bg-base-100 gap-1\"><div class=\"navbar-start gap-1\"><a href=\"/\" class=\"p-2 aspect-square\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -175,7 +179,7 @@ func navMenuLink(label, href, currentPath string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/navbar.templ`, Line: 71, Col: 78}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/navbar.templ`, Line: 72, Col: 78}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -200,4 +204,99 @@ func navLinkClass(path, requiredPath string) string {
 	}
 
 	return base + " " + "link-hover"
+}
+
+func navProgressAnimated(...templ.Component) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-full h-fit sticky top-0 rounded-b-box overflow-hidden\"><div id=\"nav-progress\" class=\"invisible h-1 transition-all bg-primary rounded-r-full duration-[50ms] ease-in\" style=\"width: 0%\"></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = logic.EmbedMinifiedScript(animateNavProgress()).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func animateNavProgress() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_animateNavProgress_cbe4`,
+		Function: `function __templ_animateNavProgress_cbe4(){const progressBar = document.getElementById('nav-progress');
+	const progressBaseStep = 5;
+
+	const progressRandomStep = () => {
+		return Math.floor(progressBaseStep * Math.random()) + progressBaseStep;
+	}
+	const progressSlowStep = () => {
+		return Math.floor(Math.random() * 2);
+	}
+	
+	document.body.addEventListener('load', () => {
+		progressBar.value = 0;
+		progressBar.style.width = progressBar.value + "%"
+		progressBar.classList.add('invisible');
+		document.querySelectorAll('.nav-btn').forEach((btn) => {
+			btn.removeAttribute('disabled');
+		});
+		if (stopAnimation) {
+			clearInterval(stopAnimation);
+			stopAnimation = null;
+		}
+	});
+	
+	document.body.addEventListener('htmx:afterRequest', () => {
+		setTimeout(() => {
+			progressBar.classList.add('invisible');
+			progressBar.value = 0;
+			progressBar.style.width = progressBar.value + "%"
+		}, 250);
+		progressBar.value = 100;
+		progressBar.style.width = progressBar.value + "%"
+		if (stopAnimation) {
+			clearInterval(stopAnimation);
+			stopAnimation = null;
+		}
+	});
+
+	let stopAnimation;
+	document.body.addEventListener('htmx:beforeSend', () => {
+		progressBar.value = progressRandomStep()
+		progressBar.style.width = progressBar.value + "%"
+		progressBar.classList.remove('invisible');
+
+		stopAnimation = setInterval(() => {
+			if (progressBar.value <= 65) {
+				progressBar.value += progressRandomStep()
+				progressBar.style.width = progressBar.value + "%"
+			} else if (progressBar.value <= 85) {
+				progressBar.value += progressSlowStep()
+				progressBar.style.width = progressBar.value + "%"
+			} else if (progressBar.value <= 95){
+				progressBar.value += 1
+				progressBar.style.width = progressBar.value + "%"
+			}
+		}, 50);
+	});
+}`,
+		Call:       templ.SafeScript(`__templ_animateNavProgress_cbe4`),
+		CallInline: templ.SafeScriptInline(`__templ_animateNavProgress_cbe4`),
+	}
 }
