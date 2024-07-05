@@ -202,9 +202,14 @@ func onNicknameInput() templ.ComponentScript {
 
 func searchEventHandler(appId string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_searchEventHandler_f59f`,
-		Function: `function __templ_searchEventHandler_f59f(appId){const results = document.getElementById("player-search-results");
+		Name: `__templ_searchEventHandler_c17b`,
+		Function: `function __templ_searchEventHandler_c17b(appId){const results = document.getElementById("player-search-results");
 	const nickname = document.getElementById("player-search-nickname");
+
+	const setResultsLoading = () => {
+		results.innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
+	}
+	window.setResultsLoading = setResultsLoading
 
 	const getApiUrl = (realm, query) => {
 		let baseUrl = "";
@@ -232,7 +237,7 @@ func searchEventHandler(appId string) templ.ComponentScript {
 		(evt) => {
 			clearTimeout(debounceTimeout);
 			debounceTimeout = setTimeout(() => {
-				results.innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
+				setResultsLoading()
 				
 				const { query, realm } = evt.detail;
 				const url = getApiUrl(realm, query);
@@ -247,7 +252,7 @@ func searchEventHandler(appId string) templ.ComponentScript {
 					const elements = []
 					for (const account of data.data || []) {
 						if (!account.account_id || !account.nickname) continue;
-						elements.push(` + "`" + `<li><a href="/widget/${account.account_id}">${account.nickname}</a></li>` + "`" + `);
+						elements.push(` + "`" + `<li><a onclick="window.setResultsLoading()" href="/widget/${account.account_id}">${account.nickname}</a></li>` + "`" + `);
 					}
 					if (elements.length == 0) {
 						results.innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
@@ -266,8 +271,8 @@ func searchEventHandler(appId string) templ.ComponentScript {
 		false,
 	);
 }`,
-		Call:       templ.SafeScript(`__templ_searchEventHandler_f59f`, appId),
-		CallInline: templ.SafeScriptInline(`__templ_searchEventHandler_f59f`, appId),
+		Call:       templ.SafeScript(`__templ_searchEventHandler_c17b`, appId),
+		CallInline: templ.SafeScriptInline(`__templ_searchEventHandler_c17b`, appId),
 	}
 }
 
