@@ -202,8 +202,8 @@ func onNicknameInput() templ.ComponentScript {
 
 func searchEventHandler(appId string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_searchEventHandler_0220`,
-		Function: `function __templ_searchEventHandler_0220(appId){const results = document.getElementById("player-search-results");
+		Name: `__templ_searchEventHandler_0d98`,
+		Function: `function __templ_searchEventHandler_0d98(appId){const results = document.getElementById("player-search-results");
 	const nickname = document.getElementById("player-search-nickname");
 
 	const setResultsLoading = () => {
@@ -252,7 +252,7 @@ func searchEventHandler(appId string) templ.ComponentScript {
 					const elements = []
 					for (const account of data.data || []) {
 						if (!account.account_id || !account.nickname) continue;
-						elements.push(` + "`" + `<li><a onclick="window.setResultsLoading();htmx.trigger('body','htmx:beforeSend');" href="/widget/${account.account_id}">${account.nickname}</a></li>` + "`" + `);
+						elements.push(` + "`" + `<li><a onclick="window.setResultsLoading();htmx.trigger('body','htmx:beforeSend');" href="/widget/${account.account_id}${window.location.search}">${account.nickname}</a></li>` + "`" + `);
 					}
 					if (elements.length == 0) {
 						results.innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
@@ -271,8 +271,8 @@ func searchEventHandler(appId string) templ.ComponentScript {
 		false,
 	);
 }`,
-		Call:       templ.SafeScript(`__templ_searchEventHandler_0220`, appId),
-		CallInline: templ.SafeScriptInline(`__templ_searchEventHandler_0220`, appId),
+		Call:       templ.SafeScript(`__templ_searchEventHandler_0d98`, appId),
+		CallInline: templ.SafeScriptInline(`__templ_searchEventHandler_0d98`, appId),
 	}
 }
 
