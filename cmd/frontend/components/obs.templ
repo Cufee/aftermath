@@ -1,7 +1,7 @@
 package components
 
 templ OBSMockup(backgroundURL string) {
-	<div class="mockup-browser bg-base-300 rounded-xl overflow-hidden w-full h-full">
+	<div class="mockup-browser bg-base-300 rounded-xl overflow-hidden w-full">
 		<div class="mockup-browser-toolbar">
 			<div class="w-full text-center mr-14">OBS Studio</div>
 		</div>
@@ -13,7 +13,7 @@ templ OBSMockup(backgroundURL string) {
 				} else {
 					<img src={ backgroundURL } class="object-cover absolute laft-0 top-0 z-0 w-full h-full"/>
 				}
-				<div class="relative z-10 p-2 flex items-center justify-center h-full">
+				<div class="relative z-10 flex items-center justify-center h-full">
 					{ children... }
 				</div>
 			</div>

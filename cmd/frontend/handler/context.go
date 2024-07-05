@@ -149,6 +149,9 @@ func (partial Partial) Serve(ctx *Context) error {
 	if err != nil {
 		return ctx.Error(err)
 	}
+	if content == nil {
+		return nil
+	}
 
 	err = content.Render(ctx.Context, ctx.w)
 	if err != nil {
@@ -169,12 +172,15 @@ func (page Page) Serve(ctx *Context) error {
 		return body.Render(ctx.Context, ctx.w)
 	}
 
-	content, err := layout(ctx, body)
+	withLayout, err := layout(ctx, body)
 	if err != nil {
 		return ctx.Error(err, "failed to render the layout")
 	}
+	if withLayout == nil {
+		return nil
+	}
 
-	err = content.Render(ctx.Context, ctx.w)
+	err = withLayout.Render(ctx.Context, ctx.w)
 	if err != nil {
 		return ctx.Error(err, "failed to render content")
 	}

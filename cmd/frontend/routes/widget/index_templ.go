@@ -97,7 +97,7 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><ul hx-boost=\"true\" id=\"player-search-results\" tabindex=\"0\" class=\"dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-t-box flex-nowrap overflow-auto w-full\"><span class=\"text-xs text-center cursor-default\">Start typing to search</span></ul></div></div></div><div class=\"flex items-center justify-center grow\"><div class=\"max-w-4xl w-full\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><ul hx-boost=\"true\" id=\"player-search-results\" tabindex=\"0\" class=\"dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-t-box flex-nowrap overflow-auto w-full\"><span class=\"text-xs text-center cursor-default\">Start typing to search</span></ul></div></div></div><div class=\"flex flex-col items-center justify-center grow overflow-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -113,7 +113,7 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-max p-8 min-w-[500px] min-h-[100vh]\" style=\"zoom: 0.5;\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"h-96 w-full overflow-auto p-2 relative\"><div class=\"w-max mx-auto h-1/2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -121,7 +121,7 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -131,7 +131,7 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
