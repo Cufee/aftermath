@@ -50,7 +50,7 @@ templ widgetHome(widget templ.Component, or, ou bool, vl int) {
 				</select>
 				<div class="dropdown dropdown-top grow">
 					<input id="player-search-nickname" type="text" placeholder="Nickname" class="join-item input input-bordered placeholder:text-center w-full" disabled oninput={ onNicknameInput() }/>
-					<ul id="player-search-results" tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-t-box flex-nowrap overflow-auto w-full">
+					<ul hx-boost="true" id="player-search-results" tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-t-box flex-nowrap overflow-auto w-full">
 						<span class="text-xs text-center cursor-default">Start typing to search</span>
 					</ul>
 				</div>
@@ -164,7 +164,7 @@ script searchEventHandler(appId string) {
 					const elements = []
 					for (const account of data.data || []) {
 						if (!account.account_id || !account.nickname) continue;
-						elements.push(`<li><a onclick="window.setResultsLoading()" href="/widget/${account.account_id}">${account.nickname}</a></li>`);
+						elements.push(`<li><a onclick="window.setResultsLoading();htmx.trigger('body','htmx:beforeSend');" href="/widget/${account.account_id}">${account.nickname}</a></li>`);
 					}
 					if (elements.length == 0) {
 						results.innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';

@@ -102,8 +102,8 @@ script animateNavProgress() {
 	const progressSlowStep = () => {
 		return Math.floor(Math.random() * 2);
 	}
-	
-	document.body.addEventListener('load', () => {
+
+	const resetProgress = () => {
 		progressBar.value = 0;
 		progressBar.style.width = progressBar.value + "%"
 		progressBar.classList.add('invisible');
@@ -114,7 +114,12 @@ script animateNavProgress() {
 			clearInterval(stopAnimation);
 			stopAnimation = null;
 		}
-	});
+	}
+
+	document.body.addEventListener('load', resetProgress);
+	document.body.addEventListener('popstate', resetProgress);
+	document.body.addEventListener('hashchange', resetProgress);
+	document.body.addEventListener('beforeunload', resetProgress);
 	
 	document.body.addEventListener('htmx:afterRequest', () => {
 		setTimeout(() => {
