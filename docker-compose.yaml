@@ -30,9 +30,9 @@ services:
     deploy:
       resources:
         reservations:
-          memory: 64m
+          memory: 128m
         limits:
-          memory: 156m
+          memory: 256m
     networks:
       - dokploy-network
     labels:
