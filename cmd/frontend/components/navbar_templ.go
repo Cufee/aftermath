@@ -224,7 +224,7 @@ func navProgressAnimated(...templ.Component) templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-full h-fit sticky top-0 rounded-b-box overflow-hidden\"><div id=\"nav-progress\" class=\"invisible h-1 transition-all bg-primary rounded-r-full duration-[50ms] ease-in\" style=\"width: 0%\"></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-full h-fit fixed top-0 rounded-b-box overflow-hidden\"><div id=\"nav-progress\" class=\"invisible h-1 transition-all bg-primary rounded-r-full duration-[50ms] ease-in\" style=\"width: 0%\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
