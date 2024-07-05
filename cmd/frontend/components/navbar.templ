@@ -86,7 +86,7 @@ func navLinkClass(path, requiredPath string) string {
 }
 
 templ navProgressAnimated(...templ.Component) {
-	<div class="w-full h-fit sticky top-0 rounded-b-box overflow-hidden">
+	<div class="w-full h-fit fixed top-0 rounded-b-box overflow-hidden">
 		<div id="nav-progress" class="invisible h-1 transition-all bg-primary rounded-r-full duration-[50ms] ease-in" style="width: 0%"></div>
 	</div>
 	@logic.EmbedMinifiedScript(animateNavProgress())
