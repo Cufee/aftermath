@@ -20,8 +20,7 @@ var Navbar handler.Partial = func(ctx *handler.Context) (templ.Component, error)
 
 	user, err := ctx.SessionUser()
 	if err == nil {
-		// props.authenticated = user.ID != ""
-		_ = user
+		props.authenticated = user.ID != ""
 	}
 
 	return navbar(props), nil
@@ -30,7 +29,7 @@ var Navbar handler.Partial = func(ctx *handler.Context) (templ.Component, error)
 templ navbar(props navbarProps) {
 	@navProgressAnimated()
 	<div class="no-animation" hx-boost="true">
-		<div class="navbar bg-base-100 gap-1">
+		<div class="navbar bg-base-100 gap-1 h-6">
 			<div class="navbar-start gap-1">
 				<a href="/" class="p-2 aspect-square">
 					@Logo("32")
@@ -45,7 +44,11 @@ templ navbar(props navbarProps) {
 			</div>
 			<ul class="navbar-end menu menu-horizontal px-1 gap-1 hidden md:flex">
 				<li><a href="/widget" class={ logic.StringIfElse("active", "", props.path == "/widget") }>Widget</a></li>
-				<li><a href="/login" hx-boost="false" class={ logic.StringIfElse("btn active", "btn", props.path == "/login") }>Login</a></li>
+				if !props.authenticated {
+					<li><a href="/login" hx-boost="false" class={ logic.StringIfElse("btn active", "btn", props.path == "/login") }>Login</a></li>
+				} else {
+					<li><a href="/app" class={ logic.StringIfElse("btn active", "btn", props.path == "/app") }>Profile</a></li>
+				}
 			</ul>
 			<ul class="navbar-end menu menu-horizontal px-1 gap-1 md:hidden">
 				<div class="drawer drawer-end">
@@ -71,7 +74,11 @@ templ navbar(props navbarProps) {
 						<label for="menu-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
 						<ul class="menu bg-base-300 min-h-full min-w-64 p-4 gap-2">
 							<li><a href="/widget" class={ "btn btn-neutral" + logic.StringIfElse(" active", "", props.path == "/widget") }>Widget</a></li>
-							<li><a href="/login" hx-boost="false" class={ "btn btn-primary" + logic.StringIfElse(" active", "", props.path == "/login") }>Login</a></li>
+							if !props.authenticated {
+								<li><a href="/login" hx-boost="false" onclick="htmx.trigger('body','htmx:beforeSend');" class={ "btn btn-primary" + logic.StringIfElse(" active", "", props.path == "/login") }>Login</a></li>
+							} else {
+								<li><a href="/app" class={ logic.StringIfElse("btn active", "btn", props.path == "/app") }>Profile</a></li>
+							}
 						</ul>
 					</div>
 				</div>
