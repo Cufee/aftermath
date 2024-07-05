@@ -22,8 +22,7 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 
 	var cards Cards
 
-	// Rating battles overview
-	if session.RatingBattles.Battles > 0 {
+	{ // Rating battles overview
 		card, err := makeOverviewCard(
 			ratingOverviewBlocks,
 			session.RatingBattles.StatsFrame,
@@ -42,8 +41,7 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		}
 		cards.Rating.Overview = card
 	}
-	// Regular battles overview
-	if session.RegularBattles.Battles > 0 || session.RatingBattles.Battles == 0 {
+	{ // Regular battles overview
 		card, err := makeOverviewCard(
 			unratedOverviewBlocks,
 			session.RegularBattles.StatsFrame,
