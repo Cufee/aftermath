@@ -54,7 +54,7 @@ func AftermathLogo(fillColor color.Color, opts LogoSizingOptions) image.Image {
 			offset = float64(opts.Height() - height - ((opts.Lines - line - 1) * int(opts.Jump)))
 		}
 
-		ctx.DrawRoundedRectangle((opts.Gap/2)+float64(line*(int(opts.LineWidth+opts.Gap))), offset, opts.LineWidth, float64(height), opts.Jump/2)
+		ctx.DrawRoundedRectangle((opts.Gap/2)+float64(line*(int(opts.LineWidth+opts.Gap))), offset, opts.LineWidth, float64(height), opts.LineWidth/2)
 		ctx.SetColor(fillColor)
 		ctx.Fill()
 		ctx.ClearPath()
