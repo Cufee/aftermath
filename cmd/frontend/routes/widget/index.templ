@@ -118,6 +118,11 @@ script searchEventHandler(appId string) {
 	const results = document.getElementById("player-search-results");
 	const nickname = document.getElementById("player-search-nickname");
 
+	const setResultsLoading = () => {
+		results.innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
+	}
+	window.setResultsLoading = setResultsLoading
+
 	const getApiUrl = (realm, query) => {
 		let baseUrl = "";
 		switch (realm) {
@@ -144,7 +149,7 @@ script searchEventHandler(appId string) {
 		(evt) => {
 			clearTimeout(debounceTimeout);
 			debounceTimeout = setTimeout(() => {
-				results.innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
+				setResultsLoading()
 				
 				const { query, realm } = evt.detail;
 				const url = getApiUrl(realm, query);
@@ -159,7 +164,7 @@ script searchEventHandler(appId string) {
 					const elements = []
 					for (const account of data.data || []) {
 						if (!account.account_id || !account.nickname) continue;
-						elements.push(`<li><a href="/widget/${account.account_id}">${account.nickname}</a></li>`);
+						elements.push(`<li><a onclick="window.setResultsLoading()" href="/widget/${account.account_id}">${account.nickname}</a></li>`);
 					}
 					if (elements.length == 0) {
 						results.innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
