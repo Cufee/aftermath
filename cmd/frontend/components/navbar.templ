@@ -36,9 +36,11 @@ templ navbar(props navbarProps) {
 				</a>
 			</div>
 			<div class="navbar-center">
-				<div class="form-control">
-					<input type="text" placeholder="Search Players" class="input input-bordered w-48 md:w-auto placeholder:text-center"/>
-				</div>
+				if props.path == "/" {
+					<div class="form-control">
+						<input type="text" placeholder="Search Players" class="input input-bordered w-48 md:w-auto placeholder:text-center" disabled/>
+					</div>
+				}
 			</div>
 			<ul class="navbar-end menu menu-horizontal px-1 gap-1 hidden md:flex">
 				<li><a href="/widget" class={ logic.StringIfElse("active", "", props.path == "/widget") }>Widget</a></li>
