@@ -113,7 +113,7 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"h-96 w-full overflow-auto p-2 relative\"><div class=\"w-max mx-auto h-1/2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"min-h-96 w-full overflow-auto p-2 relative\"><div class=\"min-w-[400px] w-max mx-auto h-1/2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
