@@ -23,7 +23,7 @@ var ratingOverviewBlocks = []overviewColumnBlocks{
 }
 
 var vehicleBlocks = []common.Tag{common.TagBattles, common.TagWinrate, common.TagAvgDamage, common.TagWN8}
-var highlights = []common.Highlight{common.HighlightBattles, common.HighlightWN8, common.HighlightAvgDamage}
+var highlights = []common.Highlight{common.HighlightWN8, common.HighlightAvgDamage, common.HighlightBattles}
 
 type Cards struct {
 	Unrated UnratedCards `json:"unrated"`

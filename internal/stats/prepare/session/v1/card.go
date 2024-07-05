@@ -122,11 +122,11 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	}
 
 	// Vehicle Highlights
-	var minimumBattles float64 = 5
 	periodDays := session.PeriodEnd.Sub(session.PeriodStart).Hours() / 24
 	withFallback := func(battles float64) float64 {
 		return math.Min(battles, float64(session.RegularBattles.Battles.Float())/float64(len(highlights)))
 	}
+	var minimumBattles float64 = withFallback(5)
 	if periodDays > 90 {
 		minimumBattles = withFallback(100)
 	} else if periodDays > 60 {
