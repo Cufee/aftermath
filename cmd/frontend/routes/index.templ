@@ -12,11 +12,11 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 templ index() {
 	<div class="flex flex-col justify-center" id="landing">
 		<div class="flex flex-row flex-wrap">
+			@card(cardImage("/assets/promo-invite.jpg"), cardActionButton("Add Aftermath on Discord", "/invite")) {
+				<p>Add Aftermath to your favorite server for an easier time tracking sessions!</p>
+			}
 			@card(cardImage("/assets/promo-join.jpg"), cardActionButton("Join Aftermath Official", "/join")) {
 				<p>Aftermath is making a comeback! We've revamped everything to be faster and more beautiful. Join our community server for the latest features and updates.</p>
-			}
-			@card(cardImage("/assets/promo-invite.jpg"), cardActionButton("Add Aftermath on Discord", "/invite")) {
-				<p>The new bot is here! Add it to your server for an easier time tracking sessions. It's that simple – give Aftermath a try on your favorite server!</p>
 			}
 		</div>
 	</div>

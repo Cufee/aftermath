@@ -51,13 +51,13 @@ func index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>Aftermath is making a comeback! We've revamped everything to be faster and more beautiful. Join our community server for the latest features and updates.</p>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>Add Aftermath to your favorite server for an easier time tracking sessions!</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = card(cardImage("/assets/promo-join.jpg"), cardActionButton("Join Aftermath Official", "/join")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = card(cardImage("/assets/promo-invite.jpg"), cardActionButton("Add Aftermath on Discord", "/invite")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -73,13 +73,13 @@ func index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>The new bot is here! Add it to your server for an easier time tracking sessions. It's that simple – give Aftermath a try on your favorite server!</p>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>Aftermath is making a comeback! We've revamped everything to be faster and more beautiful. Join our community server for the latest features and updates.</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = card(cardImage("/assets/promo-invite.jpg"), cardActionButton("Add Aftermath on Discord", "/invite")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = card(cardImage("/assets/promo-join.jpg"), cardActionButton("Join Aftermath Official", "/join")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

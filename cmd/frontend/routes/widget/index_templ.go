@@ -71,7 +71,7 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<select id=\"player-search-realm\" class=\"select select-bordered\" onchange=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<select id=\"player-search-realm\" class=\"select select-bordered grow\" onchange=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
