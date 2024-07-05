@@ -238,8 +238,8 @@ func navProgressAnimated(...templ.Component) templ.Component {
 
 func animateNavProgress() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_animateNavProgress_cbe4`,
-		Function: `function __templ_animateNavProgress_cbe4(){const progressBar = document.getElementById('nav-progress');
+		Name: `__templ_animateNavProgress_7b6b`,
+		Function: `function __templ_animateNavProgress_7b6b(){const progressBar = document.getElementById('nav-progress');
 	const progressBaseStep = 5;
 
 	const progressRandomStep = () => {
@@ -248,8 +248,8 @@ func animateNavProgress() templ.ComponentScript {
 	const progressSlowStep = () => {
 		return Math.floor(Math.random() * 2);
 	}
-	
-	document.body.addEventListener('load', () => {
+
+	const resetProgress = () => {
 		progressBar.value = 0;
 		progressBar.style.width = progressBar.value + "%"
 		progressBar.classList.add('invisible');
@@ -260,7 +260,12 @@ func animateNavProgress() templ.ComponentScript {
 			clearInterval(stopAnimation);
 			stopAnimation = null;
 		}
-	});
+	}
+
+	document.body.addEventListener('load', resetProgress);
+	document.body.addEventListener('popstate', resetProgress);
+	document.body.addEventListener('hashchange', resetProgress);
+	document.body.addEventListener('beforeunload', resetProgress);
 	
 	document.body.addEventListener('htmx:afterRequest', () => {
 		setTimeout(() => {
@@ -296,7 +301,7 @@ func animateNavProgress() templ.ComponentScript {
 		}, 50);
 	});
 }`,
-		Call:       templ.SafeScript(`__templ_animateNavProgress_cbe4`),
-		CallInline: templ.SafeScriptInline(`__templ_animateNavProgress_cbe4`),
+		Call:       templ.SafeScript(`__templ_animateNavProgress_7b6b`),
+		CallInline: templ.SafeScriptInline(`__templ_animateNavProgress_7b6b`),
 	}
 }
