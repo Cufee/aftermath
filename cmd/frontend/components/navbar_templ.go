@@ -68,7 +68,7 @@ func navbar(props navbarProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.path == "/" {
+		if !strings.HasPrefix(props.path, "/widget") {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"form-control\"><input type=\"text\" placeholder=\"Search Players\" class=\"input input-bordered w-48 md:w-auto placeholder:text-center\" disabled></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -78,7 +78,7 @@ func navbar(props navbarProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 = []any{logic.StringIfElse("active", "", props.path == "/widget")}
+		var templ_7745c5c3_Var2 = []any{logic.StringIfElse("active", "", strings.HasPrefix(props.path, "/widget"))}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
