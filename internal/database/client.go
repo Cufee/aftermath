@@ -23,7 +23,6 @@ type AuthClient interface {
 	FindAuthNonce(ctx context.Context, publicID string) (models.AuthNonce, error)
 	SetAuthNonceActive(ctx context.Context, nonceID string, active bool) error
 
-	UserFromSession(ctx context.Context, publicID string, opts ...UserGetOption) (models.User, error)
 	CreateSession(ctx context.Context, publicID, userID string, expiresAt time.Time, meta map[string]string) (models.Session, error)
 	SetSessionExpiresAt(ctx context.Context, sessionID string, expiresAt time.Time) error
 	FindSession(ctx context.Context, publicID string) (models.Session, error)

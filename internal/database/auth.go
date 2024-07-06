@@ -91,31 +91,6 @@ func (c *client) FindSession(ctx context.Context, publicID string) (models.Sessi
 	return session, session.Valid()
 }
 
-func (c *client) UserFromSession(ctx context.Context, publicID string, opts ...UserGetOption) (models.User, error) {
-	var options userGetOpts
-	for _, apply := range opts {
-		apply(&options)
-	}
-
-	query := c.db.Session.Query().Where(session.PublicID(publicID), session.ExpiresAtGT(time.Now())).QueryUser()
-	if options.subscriptions {
-		query = query.WithSubscriptions()
-	}
-	if options.connections {
-		query = query.WithConnections()
-	}
-	if options.content {
-		query.WithContent()
-	}
-
-	record, err := query.First(ctx)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	return toUser(record, nil, nil, nil), nil
-}
-
 func (c *client) SetSessionExpiresAt(ctx context.Context, sessionID string, expiresAt time.Time) error {
 	err := c.db.Session.UpdateOneID(sessionID).SetExpiresAt(expiresAt).Exec(ctx)
 	if err != nil {

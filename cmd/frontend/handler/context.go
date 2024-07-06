@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/cufee/aftermath/cmd/core"
@@ -30,7 +31,8 @@ type Context struct {
 	core.Client
 	context.Context
 
-	user *models.User
+	user        *models.User
+	userOptions database.UserGetOptions
 
 	w http.ResponseWriter
 	r *http.Request
@@ -85,15 +87,20 @@ func (ctx *Context) Identifier() (string, error) {
 	return "", errors.New("failed to extract ip address")
 }
 
-func (ctx *Context) SessionUser() (*models.User, error) {
+func (ctx *Context) SessionUser(o ...database.UserGetOption) (*models.User, error) {
+	var opts database.UserGetOptions = o
+
 	// if dev mode is on, we just grab a pre-defined user from the database, expecting it to exist
 	if devMode {
-		user, _ := ctx.Database().UserFromSession(ctx.Context, "dev-user")
+		user, err := ctx.Database().GetUserByID(ctx.Context, "dev-user", opts...)
+		if err != nil {
+			panic(err)
+		}
 		return &user, nil
 	}
 
-	// // if the user already exists and options are equal, return cached user
-	if ctx.user != nil {
+	// if the user already exists and options are equal, return cached user
+	if ctx.user != nil && ctx.userOptions.ToOptions() == opts.ToOptions() {
 		return ctx.user, nil
 	}
 
@@ -105,7 +112,18 @@ func (ctx *Context) SessionUser() (*models.User, error) {
 		return nil, ErrSessionNotFound
 	}
 
-	user, err := ctx.Database().UserFromSession(ctx.Context, cookie.Value, database.WithConnections(), database.WithContent(), database.WithSubscriptions())
+	session, err := ctx.Database().FindSession(ctx.Context, cookie.Value)
+	if err != nil {
+		if database.IsNotFound(err) {
+			return nil, ErrSessionNotFound
+		}
+		return nil, err
+	}
+	if session.ExpiresAt.Before(time.Now()) {
+		return nil, ErrSessionNotFound
+	}
+
+	user, err := ctx.Database().GetUserByID(ctx.Context, session.UserID, opts...)
 	if err != nil {
 		if database.IsNotFound(err) {
 			return nil, ErrSessionNotFound
@@ -114,6 +132,7 @@ func (ctx *Context) SessionUser() (*models.User, error) {
 	}
 
 	ctx.user = &user
+	ctx.userOptions = opts
 	return ctx.user, nil
 }
 
