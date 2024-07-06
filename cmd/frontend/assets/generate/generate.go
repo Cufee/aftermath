@@ -16,13 +16,24 @@ import (
 	"github.com/rs/zerolog/log"
 
 	ico "github.com/Kodeworks/golang-image-ico"
+	"github.com/joho/godotenv"
 )
 
 var outDirPath = "../../public"
+var brandColor color.RGBA
 
 var cardColor = color.RGBA{17, 17, 17, 255}
 
 func main() {
+	godotenv.Load("../../../../.env")
+
+	switch os.Getenv("BRAND_FLAVOR") {
+	default:
+		brandColor = common.ColorAftermathRed
+	case "blue":
+		brandColor = common.ColorAftermathBlue
+	}
+
 	generateWN8Icons()
 	generateLogoOptions()
 	generateOGImages()
@@ -71,7 +82,7 @@ func generateLogoOptions() {
 	log.Debug().Msg("generating logo options")
 
 	for _, size := range []int{16, 32, 64, 128, 256, 512} {
-		filename := fmt.Sprintf("icon-%d.png", size)
+		filename := fmt.Sprintf("icon/%d.png", size)
 
 		opts := common.DefaultLogoOptions()
 		opts.Gap *= 10
@@ -79,7 +90,7 @@ func generateLogoOptions() {
 		opts.LineStep *= 10
 		opts.LineWidth *= 10
 
-		img := common.AftermathLogo(common.ColorAftermathRed, opts)
+		img := common.AftermathLogo(brandColor, opts)
 		f, err := os.Create(filepath.Join(outDirPath, filename))
 		if err != nil {
 			panic(err)
@@ -118,14 +129,14 @@ func generateOGImages() {
 	}
 
 	{
-		filename := "og-widget.jpg"
+		filename := "og/widget.jpg"
 		opts := common.DefaultLogoOptions()
 		opts.Gap *= 10
 		opts.Jump *= 10
 		opts.LineStep *= 10
 		opts.LineWidth *= 10
 
-		logo := common.AftermathLogo(common.ColorAftermathRed, opts)
+		logo := common.AftermathLogo(brandColor, opts)
 		ctx := gg.NewContext(imageWidth, imageHeight)
 
 		ctx.DrawImage(imaging.Blur(imaging.Fill(bg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 30), 0, 0)
@@ -148,14 +159,14 @@ func generateOGImages() {
 	}
 
 	{
-		filename := "og.jpg"
+		filename := "og/default.jpg"
 		opts := common.DefaultLogoOptions()
 		opts.Gap *= 10
 		opts.Jump *= 10
 		opts.LineStep *= 10
 		opts.LineWidth *= 10
 
-		logo := common.AftermathLogo(common.ColorAftermathRed, opts)
+		logo := common.AftermathLogo(brandColor, opts)
 		ctx := gg.NewContext(imageWidth, imageHeight)
 
 		ctx.DrawImage(imaging.Blur(imaging.Fill(bg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 30), 0, 0)
@@ -178,14 +189,14 @@ func generateOGImages() {
 	}
 
 	{
-		filename := "og-verify.jpg"
+		filename := "og/verify.jpg"
 		opts := common.DefaultLogoOptions()
 		opts.Gap *= 10
 		opts.Jump *= 10
 		opts.LineStep *= 10
 		opts.LineWidth *= 10
 
-		logo := common.AftermathLogo(common.ColorAftermathRed, opts)
+		logo := common.AftermathLogo(brandColor, opts)
 		ctx := gg.NewContext(imageWidth, imageHeight)
 
 		linkIcon, err := imaging.Open("./link.png")

@@ -10,6 +10,15 @@ templ Head(additional ...templ.Component) {
 		<meta charset="utf-8"/>
 		<meta name="color-scheme" content="light"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<meta property="og:type" content="website"/>
+		<meta property="og:title" content={ constants.FrontendAppName }/>
+		<meta property="og:image" content={ constants.FrontendURL + "/assets/og/dafeult.jpg" }/>
+		<meta property="og:description" content="Fastest and most beautiful way to view Blitz stats!"/>
+		<meta name="twitter:card" content="summary_large_image"/>
+		<meta name="twitter:title" content={ constants.FrontendAppName }/>
+		<meta name="twitter:image:alt" content={ constants.FrontendAppName + " Logo" }/>
+		<meta name="twitter:image" content={ constants.FrontendURL + "/assets/og/dafeult.jpg" }/>
+		<meta name="twitter:description" content="Fastest and most beautiful way to view Blitz stats!"/>
 		<link href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css" rel="stylesheet" type="text/css"/>
 		<script src="https://unpkg.com/htmx.org@1.9.12"></script>
 		<script src="https://unpkg.com/htmx.org/dist/ext/head-support.js"></script>

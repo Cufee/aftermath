@@ -79,12 +79,12 @@ templ (w widget) Render() {
 		<title>Aftermath - { w.account.Nickname }</title>
 		<meta property="og:type" content="website"/>
 		<meta property="og:title" content="Aftermath - Streaming Widget"/>
-		<meta property="og:image" content={ constants.FrontendURL + "/assets/og-widget.jpg" }/>
+		<meta property="og:image" content={ constants.FrontendURL + "/assets/og/widget.jpg" }/>
 		<meta property="og:description" content={ fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm) }/>
 		<meta name="twitter:card" content="summary_large_image"/>
 		<meta name="twitter:title" content="Aftermath - Streaming Widget"/>
 		<meta name="twitter:image:alt" content="Aftermath Streaming Widget"/>
-		<meta name="twitter:image" content={ constants.FrontendURL + "/assets/og-widget.jpg" }/>
+		<meta name="twitter:image" content={ constants.FrontendURL + "/assets/og/widget.jpg" }/>
 		<meta name="twitter:description" content={ fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm) }/>
 	</head>
 	<div class="text-nowrap whitespace-nowrap" id="widget-container">
