@@ -69,6 +69,16 @@ type userGetOpts struct {
 	subscriptions bool
 }
 
+type UserGetOptions []UserGetOption
+
+func (o UserGetOptions) ToOptions() userGetOpts {
+	var opts userGetOpts
+	for _, apply := range o {
+		apply(&opts)
+	}
+	return opts
+}
+
 type UserGetOption func(*userGetOpts)
 
 func WithConnections() UserGetOption {
