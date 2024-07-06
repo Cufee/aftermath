@@ -53,28 +53,32 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 	}
 
 	connections, _ := user.FilterConnections(models.ConnectionTypeWargaming, nil)
+	var found bool
 	for _, conn := range connections {
+		conn.Metadata["default"] = conn.ReferenceID == accountID
 		if conn.ReferenceID == accountID {
-			conn.Metadata["default"] = true
 			conn.Metadata["verified"] = true
-			_, err := ctx.Database().UpsertConnection(ctx.Context, conn)
-			if err != nil {
-				return ctx.Error(err, "failed to update user connection")
-			}
-			return ctx.Redirect("/app?linked="+ctx.Query("nickname"), http.StatusTemporaryRedirect)
+			found = true
+		}
+
+		_, err := ctx.Database().UpdateConnection(ctx.Context, conn)
+		if err != nil {
+			return ctx.Error(err, "failed to update user connection")
+		}
+	}
+	if !found {
+		conn := models.UserConnection{
+			Type:        models.ConnectionTypeWargaming,
+			UserID:      user.ID,
+			ReferenceID: accountID,
+			Metadata:    map[string]any{"verified": true, "default": true},
+		}
+		_, err := ctx.Database().UpsertConnection(ctx.Context, conn)
+		if err != nil {
+			return ctx.Error(err, "failed to update user connection")
 		}
 	}
 
-	conn := models.UserConnection{
-		Type:        models.ConnectionTypeWargaming,
-		UserID:      user.ID,
-		ReferenceID: accountID,
-		Metadata:    map[string]any{"verified": true, "default": true},
-	}
-	_, err = ctx.Database().UpsertConnection(ctx.Context, conn)
-	if err != nil {
-		return ctx.Error(err, "failed to update user connection")
-	}
 	return ctx.Redirect("/app?linked="+ctx.Query("nickname"), http.StatusTemporaryRedirect)
 }
 
