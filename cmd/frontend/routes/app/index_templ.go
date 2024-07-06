@@ -39,7 +39,10 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 		ids = append(ids, conn.ReferenceID)
 	}
 	if len(ids) > 0 {
-		accounts, _ := ctx.Database().GetAccounts(ctx.Context, ids)
+		accounts, err := ctx.Database().GetAccounts(ctx.Context, ids)
+		if err != nil {
+			return nil, nil, ctx.Error(err, "failed to get account information")
+		}
 		for _, acc := range accounts {
 			connections = append(connections, connectionWithAccount{
 				UserConnection: accountToConnection[acc.ID],
@@ -76,7 +79,7 @@ func index(connections []connectionWithAccount, linkLimit int) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d/%d", len(connections), linkLimit))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/index.templ`, Line: 49, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/index.templ`, Line: 52, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -135,7 +138,7 @@ func connectionCard(connection connectionWithAccount) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(connection.Account.Realm)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/index.templ`, Line: 95, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/index.templ`, Line: 98, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -148,7 +151,7 @@ func connectionCard(connection connectionWithAccount) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(connection.Account.Nickname)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/index.templ`, Line: 102, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/index.templ`, Line: 105, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
