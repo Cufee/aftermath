@@ -59,7 +59,7 @@ templ index(connections []connectionWithAccount, linkLimit int) {
 					<button tabindex="0" class="verify-button verify-button-large no-animation btn h-full rounded-md w-full">Link a new account</button>
 					<ul hx-boost="false" tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] p-2 shadow w-full gap-1">
 						<li>
-							<a class="verify-button bg-base-200 flex flex-row align-center justify-between gap-1" href="/api/auth/wargaming/na">
+							<a class="verify-button bg-base-200 flex flex-row align-center justify-between gap-1" href="/api/auth/wargaming/login/na">
 								<span>North America</span>
 								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
@@ -67,7 +67,7 @@ templ index(connections []connectionWithAccount, linkLimit int) {
 							</a>
 						</li>
 						<li>
-							<a class="verify-button bg-base-200 flex flex-row align-center justify-between gap-1" href="/api/auth/wargaming/eu">
+							<a class="verify-button bg-base-200 flex flex-row align-center justify-between gap-1" href="/api/auth/wargaming/login/eu">
 								<span>Europe</span>
 								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
@@ -75,7 +75,7 @@ templ index(connections []connectionWithAccount, linkLimit int) {
 							</a>
 						</li>
 						<li>
-							<a class="verify-button bg-base-200 flex flex-row align-center justify-between gap-1" href="/api/auth/wargaming/as">
+							<a class="verify-button bg-base-200 flex flex-row align-center justify-between gap-1" href="/api/auth/wargaming/login/as">
 								<span>Asia</span>
 								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
@@ -112,7 +112,7 @@ templ connectionCard(connection connectionWithAccount) {
 				</div>
 			</div>
 			if connection.Metadata["verified"] != true {
-				<form action={ templ.URL("/api/auth/wargaming/" + connection.Account.Realm) }>
+				<form action={ templ.URL("/api/auth/wargaming/login/" + connection.Account.Realm) }>
 					<button type="submit" class="verify-button btn btn-sm btn-info flex flex-row flex-nowrap items-center justify-between gap-1 font-normal">
 						<span>Verify</span>
 						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
