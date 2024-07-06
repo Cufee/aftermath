@@ -2,6 +2,7 @@ package wargaming
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -28,3 +29,5 @@ func NewClientFromEnv(primaryAppId, primaryAppRps, requestTimeout, proxyHostList
 
 	return client.NewEmbeddedClient(primaryAppId, primaryRps, proxyHostList, timeout, client.WithLogLevel(zerolog.WarnLevel))
 }
+
+var PublicAppID = os.Getenv("WG_AUTH_APP_ID")

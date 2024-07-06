@@ -59,10 +59,11 @@ func Head() templ.Component {
 
 func tailwindConfig() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_tailwindConfig_0472`,
-		Function: `function __templ_tailwindConfig_0472(){tailwind.config = {
+		Name: `__templ_tailwindConfig_bf3d`,
+		Function: `function __templ_tailwindConfig_bf3d(){tailwind.config = {
 		theme: {
 			borderRadius: {
+				"none": "0px",
 				"sm": "10px",
 				"md": "15px",
 				"lg": "20px",
@@ -72,7 +73,7 @@ func tailwindConfig() templ.ComponentScript {
 		}
 	}
 }`,
-		Call:       templ.SafeScript(`__templ_tailwindConfig_0472`),
-		CallInline: templ.SafeScriptInline(`__templ_tailwindConfig_0472`),
+		Call:       templ.SafeScript(`__templ_tailwindConfig_bf3d`),
+		CallInline: templ.SafeScriptInline(`__templ_tailwindConfig_bf3d`),
 	}
 }

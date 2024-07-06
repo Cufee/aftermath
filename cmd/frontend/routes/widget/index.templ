@@ -43,7 +43,7 @@ templ widgetHome(widget templ.Component, or, ou bool, vl int) {
 			@cwidget.Settings(handlePreviewOnHome(), or, ou, vl)
 			<div class="flex flex-row flex-wrap gap-2">
 				<select id="player-search-realm" class="select select-bordered grow" onchange={ onRealmSelect() }>
-					<option disabled selected class="text-center">Pick a Server</option>
+					<option disabled selected class="text-center">Select a Server</option>
 					<option value="NA">North America</option>
 					<option value="EU">Europe</option>
 					<option value="AS">Asia</option>
@@ -162,7 +162,7 @@ script searchEventHandler(appId string) {
 						return;
 					}
 					const elements = []
-					for (const account of data.data || []) {
+					for (const account of data.data?.reverse() || []) {
 						if (!account.account_id || !account.nickname) continue;
 						elements.push(`<li><a onclick="window.setResultsLoading();htmx.trigger('body','htmx:beforeSend');" href="/widget/${account.account_id}${window.location.search}">${account.nickname}</a></li>`);
 					}

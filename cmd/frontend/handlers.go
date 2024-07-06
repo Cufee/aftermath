@@ -95,6 +95,14 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 			Func: handler.Chain(core, auth.DiscordRedirect),
 		},
 		{
+			Path: get("/api/auth/wargaming/{realm}"),
+			Func: handler.Chain(core, auth.WargamingBegin),
+		},
+		{
+			Path: get("/api/auth/wargaming/redirect/{token}"),
+			Func: handler.Chain(core, auth.WargamingRedirect),
+		},
+		{
 			Path: get("/api/widget/mock"),
 			Func: handler.Chain(core, aWidget.MockWidget),
 		},

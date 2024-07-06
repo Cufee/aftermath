@@ -80,7 +80,7 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><option disabled selected class=\"text-center\">Pick a Server</option> <option value=\"NA\">North America</option> <option value=\"EU\">Europe</option> <option value=\"AS\">Asia</option></select><div class=\"dropdown dropdown-top grow\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><option disabled selected class=\"text-center\">Select a Server</option> <option value=\"NA\">North America</option> <option value=\"EU\">Europe</option> <option value=\"AS\">Asia</option></select><div class=\"dropdown dropdown-top grow\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -202,8 +202,8 @@ func onNicknameInput() templ.ComponentScript {
 
 func searchEventHandler(appId string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_searchEventHandler_0d98`,
-		Function: `function __templ_searchEventHandler_0d98(appId){const results = document.getElementById("player-search-results");
+		Name: `__templ_searchEventHandler_3147`,
+		Function: `function __templ_searchEventHandler_3147(appId){const results = document.getElementById("player-search-results");
 	const nickname = document.getElementById("player-search-nickname");
 
 	const setResultsLoading = () => {
@@ -250,7 +250,7 @@ func searchEventHandler(appId string) templ.ComponentScript {
 						return;
 					}
 					const elements = []
-					for (const account of data.data || []) {
+					for (const account of data.data?.reverse() || []) {
 						if (!account.account_id || !account.nickname) continue;
 						elements.push(` + "`" + `<li><a onclick="window.setResultsLoading();htmx.trigger('body','htmx:beforeSend');" href="/widget/${account.account_id}${window.location.search}">${account.nickname}</a></li>` + "`" + `);
 					}
@@ -271,8 +271,8 @@ func searchEventHandler(appId string) templ.ComponentScript {
 		false,
 	);
 }`,
-		Call:       templ.SafeScript(`__templ_searchEventHandler_0d98`, appId),
-		CallInline: templ.SafeScriptInline(`__templ_searchEventHandler_0d98`, appId),
+		Call:       templ.SafeScript(`__templ_searchEventHandler_3147`, appId),
+		CallInline: templ.SafeScriptInline(`__templ_searchEventHandler_3147`, appId),
 	}
 }
 

@@ -194,6 +194,6 @@ func (c *staticTestingDatabase) SetSessionExpiresAt(ctx context.Context, session
 func (c *staticTestingDatabase) FindSession(ctx context.Context, publicID string) (models.Session, error) {
 	return models.Session{ID: "session1", UserID: "user1", PublicID: "cookie1", ExpiresAt: time.Date(9999, 0, 0, 0, 0, 0, 0, time.UTC)}, nil
 }
-func (c *staticTestingDatabase) UserFromSession(ctx context.Context, publicID string) (models.User, error) {
-	return models.User{ID: "user1"}, nil
+func (c *staticTestingDatabase) UserFromSession(ctx context.Context, publicID string, opts ...database.UserGetOption) (models.User, error) {
+	return DefaultUserWithEdges, nil
 }

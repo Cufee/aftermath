@@ -116,13 +116,17 @@ func DefaultVehicleStatsFrameSmall2(id string) frame.VehicleStatsFrame {
 }
 
 var (
-	DefaultUserWithEdges = models.User{ID: "user1", Connections: []models.UserConnection{Connection(models.ConnectionTypeWargaming)}}
+	DefaultUserWithEdges = models.User{ID: "user1", Connections: []models.UserConnection{
+		Connection(DefaultAccountNA, models.ConnectionTypeWargaming, map[string]any{"verified": false}),
+		Connection(DefaultAccountEU, models.ConnectionTypeWargaming, map[string]any{"default": true}),
+	}}
 )
 
-func Connection(kind models.ConnectionType) models.UserConnection {
+func Connection(id string, kind models.ConnectionType, meta map[string]any) models.UserConnection {
 	return models.UserConnection{
 		ID:          fmt.Sprint(time.Now().Nanosecond()),
-		ReferenceID: DefaultAccountNA,
+		ReferenceID: id,
 		Type:        kind,
+		Metadata:    meta,
 	}
 }
