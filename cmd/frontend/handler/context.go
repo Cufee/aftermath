@@ -95,10 +95,10 @@ func (ctx *Context) SessionUser(o ...database.UserGetOption) (*models.User, erro
 		return &user, nil
 	}
 
-	// if the user already exists and options are equal, return cached user
-	if ctx.user != nil && ctx.userOptions.ToOptions() == opts.ToOptions() {
-		return ctx.user, nil
-	}
+	// // if the user already exists and options are equal, return cached user
+	// if ctx.user != nil && ctx.userOptions.ToOptions() == opts.ToOptions() {
+	// 	return ctx.user, nil
+	// }
 
 	cookie, err := ctx.Cookie(auth.SessionCookieName)
 	if err != nil || cookie == nil {
@@ -108,7 +108,7 @@ func (ctx *Context) SessionUser(o ...database.UserGetOption) (*models.User, erro
 		return nil, ErrSessionNotFound
 	}
 
-	user, err := ctx.Database().UserFromSession(ctx.Context, cookie.Value, opts...)
+	user, err := ctx.Database().UserFromSession(ctx.Context, cookie.Value, o...)
 	if err != nil {
 		if database.IsNotFound(err) {
 			return nil, ErrSessionNotFound
