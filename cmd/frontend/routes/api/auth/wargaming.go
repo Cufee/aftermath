@@ -27,11 +27,13 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 
 	token := ctx.Path("token")
 	if token == "" {
+		log.Debug().Msg("missing token")
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
 	session, err := ctx.Database().FindSession(ctx.Context, token)
 	if err != nil {
+		log.Debug().Err(err).Msg("failed to find session")
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 	if session.Meta["flow"] != "wargaming-redirect" {
@@ -40,6 +42,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 
 	user, err := ctx.Database().GetUserByID(ctx.Context, session.UserID, database.WithConnections())
 	if err != nil {
+		log.Debug().Err(err).Msg("failed to find user")
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
@@ -91,13 +94,13 @@ var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=failed to start a new session", http.StatusTemporaryRedirect)
 	}
 
-	verifySession, err := ctx.Database().CreateSession(ctx.Context, verifySessionID, user.ID, time.Now().Add(time.Minute), map[string]string{"flow": "wargaming-redirect"})
+	verifySession, err := ctx.Database().CreateSession(ctx.Context, verifySessionID, user.ID, time.Now().Add(time.Minute*5), map[string]string{"flow": "wargaming-redirect"})
 	if err != nil {
 		log.Err(err).Str("userId", user.ID).Msg("failed to create a new user session for wargaming auth flow")
 		return ctx.Redirect("/error?message=failed to start a new session", http.StatusTemporaryRedirect)
 	}
 
-	redirectURL := fmt.Sprintf("%s?application_id=%s&redirect_uri=%s", baseWgURL, wargaming.PublicAppID, auth.NewWargamingAuthRedirectURL(verifySession.ID))
+	redirectURL := fmt.Sprintf("%s?application_id=%s&redirect_uri=%s", baseWgURL, wargaming.PublicAppID, auth.NewWargamingAuthRedirectURL(verifySession.PublicID))
 	return ctx.Redirect(redirectURL, http.StatusTemporaryRedirect)
 }
 
