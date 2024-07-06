@@ -10,6 +10,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/core/server"
 	"github.com/cufee/aftermath/cmd/frontend"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
@@ -60,13 +61,13 @@ func redirectHandlersFromEnv() []server.Handler {
 		{
 			Path: "GET /invite/{$}",
 			Func: func(w http.ResponseWriter, r *http.Request) {
-				http.Redirect(w, r, os.Getenv("BOT_INVITE_LINK"), http.StatusTemporaryRedirect)
+				http.Redirect(w, r, constants.DiscordBotInviteURL, http.StatusTemporaryRedirect)
 			},
 		},
 		{
 			Path: "GET /join/{$}",
 			Func: func(w http.ResponseWriter, r *http.Request) {
-				http.Redirect(w, r, os.Getenv("PRIMARY_GUILD_INVITE_LINK"), http.StatusTemporaryRedirect)
+				http.Redirect(w, r, constants.DiscordPrimaryGuildInviteURL, http.StatusTemporaryRedirect)
 			},
 		},
 	}

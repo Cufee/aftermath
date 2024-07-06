@@ -11,13 +11,13 @@ var Main handler.Layout = func(ctx *handler.Context, children ...templ.Component
 		return nil, ctx.Error(err, "failed to render a page")
 	}
 
-	return main(navbar, children...), nil
+	return main(components.Head(), navbar, children...), nil
 }
 
-templ main(navbar templ.Component, children ...templ.Component) {
+templ main(head templ.Component, navbar templ.Component, children ...templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en" data-theme="dark">
-		@components.Head()
+		@head
 		<body hx-ext="multi-swap,head-support" class="min-h-screen flex flex-col">
 			<div class="max-w-7xl w-full mx-auto">
 				@navbar

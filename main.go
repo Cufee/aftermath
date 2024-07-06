@@ -7,7 +7,6 @@ import (
 	"io/fs"
 	"os/signal"
 	"path/filepath"
-	"strconv"
 	"syscall"
 
 	"os"
@@ -23,6 +22,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core/server"
 	"github.com/cufee/aftermath/cmd/core/server/handlers/private"
 	"github.com/cufee/aftermath/cmd/discord"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
@@ -41,7 +41,7 @@ import (
 	"net/http/pprof"
 )
 
-//go:generate go generate ./cmd/frontend/assets
+//go:generate go generate ./cmd/frontend/assets/generate
 
 //go:embed static/*
 var static embed.FS
@@ -76,9 +76,8 @@ func main() {
 	// Load some init options to registered admin accounts and etc
 	logic.ApplyInitOptions(liveCoreClient.Database())
 
-	if e := os.Getenv("PRIVATE_SERVER_ENABLED"); e == "true" {
-		port := os.Getenv("PRIVATE_SERVER_PORT")
-		servePrivate := server.NewServer(port, []server.Handler{
+	if constants.ServePrivateEndpointsEnabled {
+		servePrivate := server.NewServer(constants.ServePrivateEndpointsPort, []server.Handler{
 			{
 				Path: "GET /debug/profile/{name}",
 				Func: func(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +97,7 @@ func main() {
 				Func: private.SaveRealmSnapshots(cacheCoreClient),
 			},
 		}...)
-		log.Info().Str("port", port).Msg("starting a private server")
+		log.Info().Str("port", constants.ServePrivateEndpointsPort).Msg("starting a private server")
 		go servePrivate()
 	}
 
@@ -135,11 +134,7 @@ func discordHandlersFromEnv(coreClient core.Client) []server.Handler {
 
 	// main Discord with all the user-facing command
 	{
-		if os.Getenv("DISCORD_TOKEN") == "" || os.Getenv("DISCORD_PUBLIC_KEY") == "" {
-			log.Fatal().Msg("DISCORD_TOKEN and DISCORD_PUBLIC_KEY are required")
-
-		}
-		mainDiscordHandler, err := discord.NewRouterHandler(coreClient, os.Getenv("DISCORD_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"), commands.LoadedPublic.Compose()...)
+		mainDiscordHandler, err := discord.NewRouterHandler(coreClient, constants.DiscordPrimaryToken, constants.DiscordPrimaryPublicKey, commands.LoadedPublic.Compose()...)
 		if err != nil {
 			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
 		}
@@ -150,13 +145,8 @@ func discordHandlersFromEnv(coreClient core.Client) []server.Handler {
 	}
 
 	// secondary Discord bot with mod/admin commands - permissions are still checked
-	if token := os.Getenv("INTERNAL_DISCORD_TOKEN"); token != "" {
-		publicKey := os.Getenv("INTERNAL_DISCORD_PUBLIC_KEY")
-		if publicKey == "" {
-			log.Fatal().Msg("discordHandlersFromEnv failed missing INTERNAL_DISCORD_PUBLIC_KEY")
-		}
-
-		internalDiscordHandler, err := discord.NewRouterHandler(coreClient, token, publicKey, commands.LoadedInternal.Compose()...)
+	if constants.DiscordPrivateBotEnabled {
+		internalDiscordHandler, err := discord.NewRouterHandler(coreClient, constants.DiscordPrivateToken, constants.DiscordPrivatePublicKey, commands.LoadedInternal.Compose()...)
 		if err != nil {
 			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
 		}
@@ -170,7 +160,7 @@ func discordHandlersFromEnv(coreClient core.Client) []server.Handler {
 }
 
 func startSchedulerFromEnv(ctx context.Context, coreClient core.Client) (func(), error) {
-	if os.Getenv("SCHEDULER_ENABLED") != "true" {
+	if !constants.SchedulerEnabled {
 		return func() {}, nil
 	}
 	s := scheduler.New()
@@ -179,7 +169,7 @@ func startSchedulerFromEnv(ctx context.Context, coreClient core.Client) (func(),
 }
 
 func startQueueFromEnv(ctx context.Context, db database.Client, wgClient wargaming.Client) (func(), error) {
-	bsClient, err := blitzstars.NewClient(os.Getenv("BLITZ_STARS_API_URL"), time.Second*10)
+	bsClient, err := blitzstars.NewClient(constants.BlitzStarsApiURL, time.Second*10)
 	if err != nil {
 		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
 	}
@@ -191,13 +181,8 @@ func startQueueFromEnv(ctx context.Context, db database.Client, wgClient wargami
 	}
 
 	// Queue - pulls tasks from database and runs the logic
-	queueWorkerLimit := 10
-	if v, err := strconv.Atoi(os.Getenv("SCHEDULER_CONCURRENT_WORKERS")); err == nil {
-		queueWorkerLimit = v
-	}
-
 	coreClient := core.NewClient(client, wgClient, db)
-	q := queue.New(queueWorkerLimit, func() (core.Client, error) {
+	q := queue.New(constants.SchedulerConcurrentWorkers, func() (core.Client, error) {
 		return coreClient, nil
 	})
 
@@ -206,7 +191,7 @@ func startQueueFromEnv(ctx context.Context, db database.Client, wgClient wargami
 }
 
 func coreClientsFromEnv(db database.Client) (core.Client, core.Client) {
-	bsClient, err := blitzstars.NewClient(os.Getenv("BLITZ_STARS_API_URL"), time.Second*10)
+	bsClient, err := blitzstars.NewClient(constants.BlitzStarsApiURL, time.Second*10)
 	if err != nil {
 		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
 	}
@@ -244,13 +229,13 @@ func loadStaticAssets(static fs.FS) {
 }
 
 func wargamingClientsFromEnv() (wargaming.Client, wargaming.Client) {
-	liveClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_PRIMARY_APP_ID"), os.Getenv("WG_PRIMARY_APP_RPS"), os.Getenv("WG_PRIMARY_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_PROXY_HOST_LIST"))
+	liveClient, err := wargaming.NewClientFromEnv(constants.WargamingPrimaryAppID, constants.WargamingPrimaryAppRPS, constants.WargamingPrimaryAppRequestTimeout, constants.WargamingPrimaryAppProxyHostList)
 	if err != nil {
 		log.Fatal().Msgf("wargamingClientsFromEnv#NewClientFromEnv failed %s", err)
 	}
 
 	// This wargaming client is using a different proxy as it needs a lot higher rps, but can be slow
-	cacheClient, err := wargaming.NewClientFromEnv(os.Getenv("WG_CACHE_APP_ID"), os.Getenv("WG_CACHE_APP_RPS"), os.Getenv("WG_CACHE_REQUEST_TIMEOUT_SEC"), os.Getenv("WG_CACHE_PROXY_HOST_LIST"))
+	cacheClient, err := wargaming.NewClientFromEnv(constants.WargamingCacheAppID, constants.WargamingCacheAppRPS, constants.WargamingCacheAppRequestTimeout, constants.WargamingCacheAppProxyHostList)
 	if err != nil {
 		log.Fatal().Msgf("wargamingClientsFromEnv#NewClientFromEnv failed %s", err)
 	}
@@ -259,12 +244,12 @@ func wargamingClientsFromEnv() (wargaming.Client, wargaming.Client) {
 }
 
 func newDatabaseClientFromEnv() (database.Client, error) {
-	err := os.MkdirAll(os.Getenv("DATABASE_PATH"), os.ModePerm)
+	err := os.MkdirAll(constants.DatabasePath, os.ModePerm)
 	if err != nil {
 		return nil, fmt.Errorf("os#MkdirAll failed %w", err)
 	}
 
-	client, err := database.NewSQLiteClient(filepath.Join(os.Getenv("DATABASE_PATH"), os.Getenv("DATABASE_NAME")))
+	client, err := database.NewSQLiteClient(filepath.Join(constants.DatabasePath, constants.DatabaseName))
 	if err != nil {
 
 		return nil, fmt.Errorf("database#NewClient failed %w", err)
@@ -278,13 +263,13 @@ func redirectHandlersFromEnv() []server.Handler {
 		{
 			Path: "GET /invite/{$}",
 			Func: func(w http.ResponseWriter, r *http.Request) {
-				http.Redirect(w, r, os.Getenv("BOT_INVITE_LINK"), http.StatusTemporaryRedirect)
+				http.Redirect(w, r, constants.DiscordBotInviteURL, http.StatusTemporaryRedirect)
 			},
 		},
 		{
 			Path: "GET /join/{$}",
 			Func: func(w http.ResponseWriter, r *http.Request) {
-				http.Redirect(w, r, os.Getenv("PRIMARY_GUILD_INVITE_LINK"), http.StatusTemporaryRedirect)
+				http.Redirect(w, r, constants.DiscordPrimaryGuildInviteURL, http.StatusTemporaryRedirect)
 			},
 		},
 	}

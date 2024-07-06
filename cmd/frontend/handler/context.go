@@ -33,6 +33,7 @@ type Context struct {
 
 	user        *models.User
 	userOptions database.UserGetOptions
+	session     *models.Session
 
 	w http.ResponseWriter
 	r *http.Request
@@ -87,21 +88,9 @@ func (ctx *Context) Identifier() (string, error) {
 	return "", errors.New("failed to extract ip address")
 }
 
-func (ctx *Context) SessionUser(o ...database.UserGetOption) (*models.User, error) {
-	var opts database.UserGetOptions = o
-
-	// if dev mode is on, we just grab a pre-defined user from the database, expecting it to exist
-	if devMode {
-		user, err := ctx.Database().GetUserByID(ctx.Context, "dev-user", opts...)
-		if err != nil {
-			panic(err)
-		}
-		return &user, nil
-	}
-
-	// if the user already exists and options are equal, return cached user
-	if ctx.user != nil && ctx.userOptions.ToOptions() == opts.ToOptions() {
-		return ctx.user, nil
+func (ctx *Context) Session() (*models.Session, error) {
+	if ctx.session != nil {
+		return ctx.session, nil
 	}
 
 	cookie, err := ctx.Cookie(auth.SessionCookieName)
@@ -121,6 +110,30 @@ func (ctx *Context) SessionUser(o ...database.UserGetOption) (*models.User, erro
 	}
 	if session.ExpiresAt.Before(time.Now()) {
 		return nil, ErrSessionNotFound
+	}
+	return &session, nil
+}
+
+func (ctx *Context) SessionUser(o ...database.UserGetOption) (*models.User, error) {
+	var opts database.UserGetOptions = o
+
+	// if dev mode is on, we just grab a pre-defined user from the database, expecting it to exist
+	if devMode {
+		user, err := ctx.Database().GetUserByID(ctx.Context, "dev-user", opts...)
+		if err != nil {
+			panic(err)
+		}
+		return &user, nil
+	}
+
+	// if the user already exists and options are equal, return cached user
+	if ctx.user != nil && ctx.userOptions.ToOptions() == opts.ToOptions() {
+		return ctx.user, nil
+	}
+
+	session, err := ctx.Session()
+	if err != nil {
+		return nil, err
 	}
 
 	user, err := ctx.Database().GetUserByID(ctx.Context, session.UserID, opts...)
@@ -202,12 +215,14 @@ func (page Page) Serve(ctx *Context) error {
 		return nil
 	}
 
-	err = withLayout.Render(ctx.Context, ctx.w)
+	buf := templ.GetBuffer()
+	err = withLayout.Render(ctx.Context, buf)
 	if err != nil {
 		return ctx.Error(err, "failed to render content")
 	}
 
-	return nil
+	// find head tags that were included in the body and merge them into layout head
+	return mergeBodyHeadTags(buf, ctx.w)
 }
 
 func (endpoint Endpoint) Serve(ctx *Context) error {

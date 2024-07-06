@@ -84,7 +84,7 @@ var DiscordRedirect handler.Endpoint = func(ctx *handler.Context) error {
 	ctx.SetCookie(auth.NewSessionCookie(sess.PublicID, sess.ExpiresAt))
 
 	defer log.Debug().Msg("finished handling a discord redirect")
-	if path, ok := nonce.Meta["redirect"]; ok && strings.HasPrefix(path, "/") {
+	if path, ok := nonce.Meta["from"]; ok && !strings.HasPrefix(path, "http://") && !strings.HasPrefix(path, "https://") {
 		return ctx.Redirect(path, http.StatusTemporaryRedirect)
 	}
 	return ctx.Redirect("/app", http.StatusTemporaryRedirect)

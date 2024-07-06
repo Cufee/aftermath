@@ -36,6 +36,12 @@
   value: View your linked Blitz accounts
 - key: command_links_linked_successfully_fmt
   value: "Your account has been linked! Aftermath will now default to **%s** on **%s** when checking stats.\nYou can also verify your account with `/verify`"
+- key: command_option_links_verify_name
+  value: "verify"
+- key: command_option_links_verify_desc
+  value: "Link and verify your Blitz account to unlock more features!"
+- key: command_links_verify_response_fmt
+  value: "## Here is your verification link!\n### You will need to log in using the Discord account you are currently using in order to link your Blitz account.\n_This link is specific to %s. It does not contain any personal information._\n:link: %s"
 
 - key: command_links_set_default_successfully_fmt
   value: "Your default account has been updated! Aftermath will now default to **%s** on **%s** when checking stats."

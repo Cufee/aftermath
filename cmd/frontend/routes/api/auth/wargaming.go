@@ -8,9 +8,9 @@ import (
 
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/logic/auth"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
@@ -79,7 +79,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		}
 	}
 
-	return ctx.Redirect("/app?linked="+ctx.Query("nickname"), http.StatusTemporaryRedirect)
+	return ctx.Redirect("/linked?nickname="+ctx.Query("nickname"), http.StatusTemporaryRedirect)
 }
 
 var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
@@ -104,7 +104,7 @@ var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=failed to start a new session", http.StatusTemporaryRedirect)
 	}
 
-	redirectURL := fmt.Sprintf("%s?application_id=%s&redirect_uri=%s", baseWgURL, wargaming.PublicAppID, auth.NewWargamingAuthRedirectURL(verifySession.PublicID))
+	redirectURL := fmt.Sprintf("%s?application_id=%s&redirect_uri=%s", baseWgURL, constants.WargamingPublicAppID, auth.NewWargamingAuthRedirectURL(verifySession.PublicID))
 	return ctx.Redirect(redirectURL, http.StatusTemporaryRedirect)
 }
 

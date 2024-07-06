@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"image/png"
 	"os"
 	"path/filepath"
@@ -14,6 +15,10 @@ import (
 	"github.com/fogleman/gg"
 	"github.com/rs/zerolog/log"
 )
+
+var outDirPath = "../../public"
+
+var cardColor = color.RGBA{17, 17, 17, 255}
 
 func main() {
 	generateWN8Icons()
@@ -34,7 +39,7 @@ func generateWN8Icons() {
 		{
 			filename := assets.WN8IconFilename(float32(tier))
 			img := common.AftermathLogo(color, common.DefaultLogoOptions())
-			f, err := os.Create(filepath.Join("../public", "wn8", filename))
+			f, err := os.Create(filepath.Join(outDirPath, "wn8", filename))
 			if err != nil {
 				panic(err)
 			}
@@ -47,7 +52,7 @@ func generateWN8Icons() {
 		{
 			filename := "small_" + assets.WN8IconFilename(float32(tier))
 			img := common.AftermathLogo(color, common.SmallLogoOptions())
-			f, err := os.Create(filepath.Join("../public", "wn8", filename))
+			f, err := os.Create(filepath.Join(outDirPath, "wn8", filename))
 			if err != nil {
 				panic(err)
 			}
@@ -73,7 +78,7 @@ func generateLogoOptions() {
 		opts.LineWidth *= 10
 
 		img := common.AftermathLogo(common.ColorAftermathRed, opts)
-		f, err := os.Create(filepath.Join("../public", filename))
+		f, err := os.Create(filepath.Join(outDirPath, filename))
 		if err != nil {
 			panic(err)
 		}
@@ -89,9 +94,14 @@ func generateOGImages() {
 	log.Debug().Msg("generating og images")
 
 	imageWidth := 512
-	imageHeight := imageWidth * 2 / 3
-	logoSize := imageHeight * 2 / 3
+	imageHeight := imageWidth * 2 / 4
+	logoSize := imageHeight * 1 / 2
 	borderWidth := 2
+
+	bg, err := imaging.Open("./bg-default.jpg")
+	if err != nil {
+		panic(err)
+	}
 
 	{
 		filename := "og-widget.jpg"
@@ -104,19 +114,14 @@ func generateOGImages() {
 		logo := common.AftermathLogo(common.ColorAftermathRed, opts)
 		ctx := gg.NewContext(imageWidth, imageHeight)
 
-		bg, err := imaging.Open("./bg-default.jpg")
-		if err != nil {
-			panic(err)
-		}
-
 		ctx.DrawImage(imaging.Blur(imaging.Fill(bg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 30), 0, 0)
 		ctx.DrawRoundedRectangle(float64(borderWidth), float64(borderWidth), float64(imageWidth-borderWidth*2), float64(imageHeight-borderWidth*2), 20)
-		ctx.SetColor(common.DefaultCardColorNoAlpha)
+		ctx.SetColor(cardColor)
 		ctx.Fill()
 
 		ctx.DrawImageAnchored(imaging.Fit(logo, logoSize, logoSize, imaging.Linear), imageWidth/2, imageHeight/2, 0.5, 0.5)
 
-		f, err := os.Create(filepath.Join("../public", filename))
+		f, err := os.Create(filepath.Join(outDirPath, filename))
 		if err != nil {
 			panic(err)
 		}
@@ -139,19 +144,65 @@ func generateOGImages() {
 		logo := common.AftermathLogo(common.ColorAftermathRed, opts)
 		ctx := gg.NewContext(imageWidth, imageHeight)
 
-		bg, err := imaging.Open("./bg-default.jpg")
-		if err != nil {
-			panic(err)
-		}
-
 		ctx.DrawImage(imaging.Blur(imaging.Fill(bg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 30), 0, 0)
 		ctx.DrawRoundedRectangle(float64(borderWidth), float64(borderWidth), float64(imageWidth-borderWidth*2), float64(imageHeight-borderWidth*2), 20)
-		ctx.SetColor(common.DefaultCardColorNoAlpha)
+		ctx.SetColor(cardColor)
 		ctx.Fill()
 
 		ctx.DrawImageAnchored(imaging.Fit(logo, logoSize, logoSize, imaging.Linear), imageWidth/2, imageHeight/2, 0.5, 0.5)
 
-		f, err := os.Create(filepath.Join("../public", filename))
+		f, err := os.Create(filepath.Join(outDirPath, filename))
+		if err != nil {
+			panic(err)
+		}
+
+		err = imaging.Encode(f, ctx.Image(), imaging.JPEG)
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+	}
+
+	{
+		filename := "og-verify.jpg"
+		opts := common.DefaultLogoOptions()
+		opts.Gap *= 10
+		opts.Jump *= 10
+		opts.LineStep *= 10
+		opts.LineWidth *= 10
+
+		logo := common.AftermathLogo(common.ColorAftermathRed, opts)
+		ctx := gg.NewContext(imageWidth, imageHeight)
+
+		linkIcon, err := imaging.Open("./link.png")
+		if err != nil {
+			panic(err)
+		}
+		blitzLogo, err := imaging.Open("./blitz-logo.png")
+		if err != nil {
+			panic(err)
+		}
+
+		// each logo should take 1/3 of the total height available
+		heightAvailable := imageHeight - borderWidth*2
+		widthAvailable := imageWidth - borderWidth*2
+		singleLogoSize := heightAvailable / 3
+		// link icon should be centered, other icons should be moved a specific distance away from it
+		linkIconSize := 32 // px
+		imageGap := 32     // px
+		padding := (widthAvailable-linkIconSize-singleLogoSize*2-imageGap*2)/2 + borderWidth*2
+		// we can now draw padding - logo - gap - link - gap - logo
+
+		ctx.DrawImage(imaging.Blur(imaging.Fill(bg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 30), 0, 0)
+		ctx.DrawRoundedRectangle(float64(borderWidth), float64(borderWidth), float64(imageWidth-borderWidth*2), float64(imageHeight-borderWidth*2), 20)
+		ctx.SetColor(cardColor)
+		ctx.Fill()
+
+		ctx.DrawImage(imaging.Fill(logo, singleLogoSize, singleLogoSize, imaging.Center, imaging.Lanczos), padding, imageHeight/2-singleLogoSize/2)
+		ctx.DrawImage(imaging.Fill(linkIcon, linkIconSize, linkIconSize, imaging.Center, imaging.Lanczos), padding+singleLogoSize+imageGap, imageHeight/2-linkIconSize/2)
+		ctx.DrawImage(imaging.Fill(blitzLogo, singleLogoSize, singleLogoSize, imaging.Center, imaging.Lanczos), padding+singleLogoSize+imageGap+linkIconSize+imageGap, imageHeight/2-singleLogoSize/2)
+
+		f, err := os.Create(filepath.Join(outDirPath, filename))
 		if err != nil {
 			panic(err)
 		}

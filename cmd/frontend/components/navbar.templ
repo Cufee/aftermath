@@ -3,11 +3,8 @@ package components
 import (
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/logic"
-	"os"
 	"strings"
 )
-
-var appName = os.Getenv("WEBAPP_NAME")
 
 type navbarProps struct {
 	authenticated bool
