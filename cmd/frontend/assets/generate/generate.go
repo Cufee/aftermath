@@ -14,6 +14,8 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
 	"github.com/rs/zerolog/log"
+
+	ico "github.com/Kodeworks/golang-image-ico"
 )
 
 var outDirPath = "../../public"
@@ -87,6 +89,18 @@ func generateLogoOptions() {
 			panic(err)
 		}
 		f.Close()
+
+		if size == 16 {
+			f, err := os.Create(filepath.Join(outDirPath, "favicon.ico"))
+			if err != nil {
+				panic(err)
+			}
+			err = ico.Encode(f, imaging.Fit(img, size, size, imaging.Linear))
+			if err != nil {
+				panic(err)
+			}
+			f.Close()
+		}
 	}
 }
 
