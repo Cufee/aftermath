@@ -15,11 +15,9 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
 	"github.com/cufee/aftermath/cmd/frontend/logic"
 	"github.com/cufee/aftermath/cmd/frontend/routes/api/widget"
-	"os"
+	"github.com/cufee/aftermath/internal/constants"
 	"strconv"
 )
-
-var publicWgAppID = os.Getenv("WG_AUTH_APP_ID")
 
 var WidgetHome handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	widget, err := widget.MockWidget(ctx)
@@ -135,7 +133,7 @@ func widgetHome(widget templ.Component, or, ou bool, vl int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = logic.EmbedMinifiedScript(searchEventHandler(publicWgAppID), publicWgAppID).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = logic.EmbedMinifiedScript(searchEventHandler(constants.WargamingPublicAppID), constants.WargamingPublicAppID).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

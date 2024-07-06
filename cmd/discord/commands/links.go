@@ -10,6 +10,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 )
@@ -49,6 +50,21 @@ func init() {
 							Autocomplete().
 							Required(),
 					),
+				builder.NewOption("verify", discordgo.ApplicationCommandOptionSubCommand).
+					Params(builder.SetNameKey("command_option_links_verify_name"), builder.SetDescKey("command_option_links_verify_desc")).
+					Options(
+						builder.NewOption("server", discordgo.ApplicationCommandOptionString).
+							Required().
+							Params(
+								builder.SetNameKey("common_option_stats_realm_name"),
+								builder.SetDescKey("common_option_stats_realm_description"),
+							).
+							Choices(
+								builder.NewChoice("realm_na", "NA").Params(builder.SetNameKey("common_label_realm_na")),
+								builder.NewChoice("realm_eu", "EU").Params(builder.SetNameKey("common_label_realm_eu")),
+								builder.NewChoice("realm_as", "AS").Params(builder.SetNameKey("common_label_realm_as")),
+							),
+					),
 
 				builder.NewOption("view", discordgo.ApplicationCommandOptionSubCommand).
 					Params(builder.SetNameKey("command_option_links_view_name"), builder.SetDescKey("command_option_links_view_desc")),
@@ -66,6 +82,12 @@ func init() {
 				switch subcommand {
 				default:
 					return ctx.Error("received an unexpected subcommand: " + subcommand)
+
+				case "verify":
+					options := getDefaultStatsOptions(subOptions)
+					realm := strings.ToLower(options.Server)
+					loginURL := fmt.Sprintf("%s/r/verify/%s", constants.FrontendURL, realm)
+					return ctx.Reply().Format("command_links_verify_response_fmt", ctx.Localize("common_label_realm_"+realm), loginURL).Send()
 
 				case "favorite":
 					value, _ := subOptions.Value("selected").(string)

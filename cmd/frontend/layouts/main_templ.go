@@ -19,10 +19,10 @@ var Main handler.Layout = func(ctx *handler.Context, children ...templ.Component
 		return nil, ctx.Error(err, "failed to render a page")
 	}
 
-	return main(navbar, children...), nil
+	return main(components.Head(), navbar, children...), nil
 }
 
-func main(navbar templ.Component, children ...templ.Component) templ.Component {
+func main(head templ.Component, navbar templ.Component, children ...templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -44,7 +44,7 @@ func main(navbar templ.Component, children ...templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.Head().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = head.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

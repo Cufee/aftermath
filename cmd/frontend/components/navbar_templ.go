@@ -11,11 +11,8 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/logic"
-	"os"
 	"strings"
 )
-
-var appName = os.Getenv("WEBAPP_NAME")
 
 type navbarProps struct {
 	authenticated bool
@@ -296,7 +293,7 @@ func navMenuLink(label, href, currentPath string) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/navbar.templ`, Line: 91, Col: 78}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/navbar.templ`, Line: 88, Col: 78}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {

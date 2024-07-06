@@ -5,11 +5,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
@@ -30,12 +30,6 @@ var defaultClient = http.Client{
 
 const baseURL = "https://discord.com/oauth2"
 
-var defaultClientID = os.Getenv("DISCORD_AUTH_CLIENT_ID")
-var defaultClientSecret = os.Getenv("DISCORD_AUTH_CLIENT_SECRET")
-
-var defaultScopes = os.Getenv("DISCORD_AUTH_DEFAULT_SCOPES")
-var defaultRedirectURL = os.Getenv("DISCORD_AUTH_REDIRECT_URL")
-
 type oAuthURL struct {
 	scope        string
 	state        string
@@ -49,9 +43,9 @@ func NewOAuthURL(state string) oAuthURL {
 	url := oAuthURL{
 		prompt:       "none",
 		state:        state,
-		scope:        defaultScopes,
-		clientID:     defaultClientID,
-		redirectURL:  defaultRedirectURL,
+		scope:        constants.DiscordAuthDefaultScopes,
+		clientID:     constants.DiscordAuthClientID,
+		redirectURL:  constants.DiscordAuthRedirectURL,
 		responseType: "code",
 	}
 	return url
@@ -74,7 +68,7 @@ func ExchangeOAuthCode(code, redirectURL string) (authToken, error) {
 	base := discordgo.EndpointOAuth2 + "token"
 	query := url.Values{}
 	query.Set("code", code)
-	query.Set("redirect_uri", defaultRedirectURL)
+	query.Set("redirect_uri", constants.DiscordAuthRedirectURL)
 	query.Set("grant_type", "authorization_code")
 
 	req, err := http.NewRequest("POST", base, strings.NewReader(query.Encode()))
@@ -83,7 +77,7 @@ func ExchangeOAuthCode(code, redirectURL string) (authToken, error) {
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.SetBasicAuth(defaultClientID, defaultClientSecret)
+	req.SetBasicAuth(constants.DiscordAuthClientID, constants.DiscordAuthClientSecret)
 
 	res, err := defaultClient.Do(req)
 	if err != nil {

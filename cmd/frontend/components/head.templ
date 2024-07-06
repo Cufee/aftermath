@@ -1,8 +1,11 @@
 package components
 
-import "github.com/cufee/aftermath/cmd/frontend/logic"
+import (
+	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/constants"
+)
 
-templ Head() {
+templ Head(additional ...templ.Component) {
 	<head>
 		<meta charset="utf-8"/>
 		<meta name="color-scheme" content="light"/>
@@ -13,7 +16,10 @@ templ Head() {
 		<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/multi-swap.js"></script>
 		<script src="https://cdn.tailwindcss.com"></script>
 		@logic.EmbedMinifiedScript(tailwindConfig())
-		<title>{ appName }</title>
+		<title>{ constants.FrontendAppName }</title>
+		for _, component := range additional {
+			@component
+		}
 	</head>
 }
 

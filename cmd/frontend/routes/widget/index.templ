@@ -7,11 +7,9 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
 	"github.com/cufee/aftermath/cmd/frontend/logic"
 	"github.com/cufee/aftermath/cmd/frontend/routes/api/widget"
-	"os"
+	"github.com/cufee/aftermath/internal/constants"
 	"strconv"
 )
-
-var publicWgAppID = os.Getenv("WG_AUTH_APP_ID")
 
 var WidgetHome handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	widget, err := widget.MockWidget(ctx)
@@ -66,7 +64,7 @@ templ widgetHome(widget templ.Component, or, ou bool, vl int) {
 			}
 		</div>
 	</div>
-	@logic.EmbedMinifiedScript(searchEventHandler(publicWgAppID), publicWgAppID)
+	@logic.EmbedMinifiedScript(searchEventHandler(constants.WargamingPublicAppID), constants.WargamingPublicAppID)
 }
 
 script onRealmSelect() {

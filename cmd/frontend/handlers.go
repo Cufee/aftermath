@@ -14,6 +14,7 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/routes/api/auth"
 	aWidget "github.com/cufee/aftermath/cmd/frontend/routes/api/widget"
 	"github.com/cufee/aftermath/cmd/frontend/routes/app"
+	r "github.com/cufee/aftermath/cmd/frontend/routes/redirect"
 	"github.com/cufee/aftermath/cmd/frontend/routes/widget"
 	"github.com/pkg/errors"
 )
@@ -58,6 +59,10 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		{
 			Path: get("/login"),
 			Func: handler.Chain(core, routes.Login),
+		},
+		{
+			Path: get("/linked"),
+			Func: handler.Chain(core, routes.AccountLinked),
 		},
 		// widget
 		{
@@ -109,6 +114,11 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		{
 			Path: get("/api/widget/{accountId}"),
 			Func: handler.Chain(core, aWidget.AccountWidget),
+		},
+		// redirects
+		{
+			Path: get("/r/verify/{realm}"),
+			Func: handler.Chain(core, r.VerifyFromDiscord),
 		},
 	}, nil
 }

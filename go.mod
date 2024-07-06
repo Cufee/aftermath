@@ -4,6 +4,7 @@ go 1.22.3
 
 require (
 	entgo.io/ent v0.13.1
+	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/a-h/templ v0.2.731
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/cufee/am-wg-proxy-next/v2 v2.1.7
@@ -31,6 +32,7 @@ require (
 require (
 	ariga.io/atlas v0.24.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-openapi/inflect v0.21.0 // indirect
@@ -48,6 +50,7 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.24.0 // indirect
 	golang.org/x/mod v0.18.0 // indirect
+	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
 )

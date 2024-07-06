@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database/models"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 )
@@ -106,35 +107,61 @@ func (w widget) Render() templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(w.account.Nickname)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 78, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 79, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><meta property=\"og:type\" content=\"website\"><meta property=\"og:title\" content=\"Aftermath - Streaming Widget\"><meta property=\"og:image\" content=\"https://amth.one/assets/og-widget.jpg\"><meta property=\"og:description\" content=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><meta property=\"og:type\" content=\"website\"><meta property=\"og:title\" content=\"Aftermath - Streaming Widget\"><meta property=\"og:image\" content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(constants.FrontendURL + "/assets/og-widget.jpg")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 82, Col: 134}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 82, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><meta name=\"twitter:card\" content=\"summary_large_image\"><meta name=\"twitter:title\" content=\"Aftermath - Streaming Widget\"><meta name=\"twitter:image:alt\" content=\"Aftermath Streaming Widget\"><meta name=\"twitter:image\" content=\"https://amth.one/assets/og-widget.jpg\"><meta name=\"twitter:description\" content=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><meta property=\"og:description\" content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 87, Col: 135}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 83, Col: 134}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><meta name=\"twitter:card\" content=\"summary_large_image\"><meta name=\"twitter:title\" content=\"Aftermath - Streaming Widget\"><meta name=\"twitter:image:alt\" content=\"Aftermath Streaming Widget\"><meta name=\"twitter:image\" content=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(constants.FrontendURL + "/assets/og-widget.jpg")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 87, Col: 86}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><meta name=\"twitter:description\" content=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/widget.templ`, Line: 88, Col: 135}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
