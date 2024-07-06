@@ -30,12 +30,20 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
-	user, err := ctx.Database().UserFromSession(ctx.Context, token, database.WithConnections())
+	session, err := ctx.Database().FindSession(ctx.Context, token)
+	if err != nil {
+		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
+	}
+	if session.Meta["flow"] != "wargaming-redirect" {
+		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
+	}
+
+	user, err := ctx.Database().GetUserByID(ctx.Context, session.UserID, database.WithConnections())
 	if err != nil {
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
-	err = ctx.Database().SetSessionExpiresAt(ctx.Context, token, time.Time{})
+	err = ctx.Database().SetSessionExpiresAt(ctx.Context, session.ID, time.Time{})
 	if err != nil {
 		log.Err(err).Msg("failed to set session expiration")
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
@@ -46,11 +54,11 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		if conn.ReferenceID == accountID {
 			conn.Metadata["default"] = true
 			conn.Metadata["verified"] = true
-			_, err := ctx.Database().UpdateConnection(ctx.Context, conn)
+			_, err := ctx.Database().UpsertConnection(ctx.Context, conn)
 			if err != nil {
 				return ctx.Error(err, "failed to update user connection")
 			}
-			return ctx.Redirect("/app#links", http.StatusTemporaryRedirect)
+			return ctx.Redirect("/app?linked="+ctx.Query("nickname"), http.StatusTemporaryRedirect)
 		}
 	}
 
@@ -64,7 +72,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 	if err != nil {
 		return ctx.Error(err, "failed to update user connection")
 	}
-	return ctx.Redirect("/app#links", http.StatusTemporaryRedirect)
+	return ctx.Redirect("/app?linked="+ctx.Query("nickname"), http.StatusTemporaryRedirect)
 }
 
 var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
