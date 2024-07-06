@@ -31,7 +31,10 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 		ids = append(ids, conn.ReferenceID)
 	}
 	if len(ids) > 0 {
-		accounts, _ := ctx.Database().GetAccounts(ctx.Context, ids)
+		accounts, err := ctx.Database().GetAccounts(ctx.Context, ids)
+		if err != nil {
+			return nil, nil, ctx.Error(err, "failed to get account information")
+		}
 		for _, acc := range accounts {
 			connections = append(connections, connectionWithAccount{
 				UserConnection: accountToConnection[acc.ID],
