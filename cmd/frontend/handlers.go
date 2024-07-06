@@ -95,7 +95,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 			Func: handler.Chain(core, auth.DiscordRedirect),
 		},
 		{
-			Path: get("/api/auth/wargaming/{realm}"),
+			Path: get("/api/auth/wargaming/login/{realm}"),
 			Func: handler.Chain(core, auth.WargamingBegin),
 		},
 		{
