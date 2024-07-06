@@ -17,6 +17,7 @@ templ Head(additional ...templ.Component) {
 		<script src="https://cdn.tailwindcss.com"></script>
 		@logic.EmbedMinifiedScript(tailwindConfig())
 		<title>{ constants.FrontendAppName }</title>
+		<link rel="icon" type="image/x-icon" href="/assets/favicon.ico"/>
 		for _, component := range additional {
 			@component
 		}
