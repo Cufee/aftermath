@@ -5,7 +5,6 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
 	"github.com/cufee/aftermath/cmd/frontend/logic"
-	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"net/http"
 	"time"
@@ -17,7 +16,7 @@ type connectionWithAccount struct {
 }
 
 var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
-	user, err := ctx.SessionUser(database.WithConnections())
+	user, err := ctx.SessionUser()
 	if err != nil {
 		return nil, nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
 	}

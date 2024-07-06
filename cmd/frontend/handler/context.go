@@ -30,8 +30,7 @@ type Context struct {
 	core.Client
 	context.Context
 
-	user        *models.User
-	userOptions database.UserGetOptions
+	user *models.User
 
 	w http.ResponseWriter
 	r *http.Request
@@ -86,19 +85,17 @@ func (ctx *Context) Identifier() (string, error) {
 	return "", errors.New("failed to extract ip address")
 }
 
-func (ctx *Context) SessionUser(o ...database.UserGetOption) (*models.User, error) {
-	var opts database.UserGetOptions = o
-
+func (ctx *Context) SessionUser() (*models.User, error) {
 	// if dev mode is on, we just grab a pre-defined user from the database, expecting it to exist
 	if devMode {
-		user, _ := ctx.Database().UserFromSession(ctx.Context, "dev-user", opts...)
+		user, _ := ctx.Database().UserFromSession(ctx.Context, "dev-user")
 		return &user, nil
 	}
 
 	// // if the user already exists and options are equal, return cached user
-	// if ctx.user != nil && ctx.userOptions.ToOptions() == opts.ToOptions() {
-	// 	return ctx.user, nil
-	// }
+	if ctx.user != nil {
+		return ctx.user, nil
+	}
 
 	cookie, err := ctx.Cookie(auth.SessionCookieName)
 	if err != nil || cookie == nil {
@@ -108,7 +105,7 @@ func (ctx *Context) SessionUser(o ...database.UserGetOption) (*models.User, erro
 		return nil, ErrSessionNotFound
 	}
 
-	user, err := ctx.Database().UserFromSession(ctx.Context, cookie.Value, o...)
+	user, err := ctx.Database().UserFromSession(ctx.Context, cookie.Value, database.WithConnections(), database.WithContent(), database.WithSubscriptions())
 	if err != nil {
 		if database.IsNotFound(err) {
 			return nil, ErrSessionNotFound
@@ -117,7 +114,6 @@ func (ctx *Context) SessionUser(o ...database.UserGetOption) (*models.User, erro
 	}
 
 	ctx.user = &user
-	ctx.userOptions = opts
 	return ctx.user, nil
 }
 
