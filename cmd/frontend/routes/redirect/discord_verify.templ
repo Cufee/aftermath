@@ -30,7 +30,7 @@ templ discordVerifyRedirect(realm string) {
 		<meta name="twitter:image" content={ constants.FrontendURL + "/assets/og/verify.jpg" }/>
 		<meta name="twitter:description" content="Link your Blitz account to Aftermath!"/>
 	</head>
-	@logic.EmbedScript(discordVerifyRedirectScript(realm))
+	@logic.EmbedScript(discordVerifyRedirectScript(realm), realm)
 }
 
 script discordVerifyRedirectScript(realm string) {
