@@ -1,0 +1,14 @@
+package components
+
+import "github.com/cufee/aftermath/cmd/frontend/logic"
+
+templ RemoteContentPage(url string) {
+	<div id="page-content" class="px-4">
+		JavaScript is required to load this page.
+	</div>
+	@logic.EmbedScript(loadContent(url), url)
+}
+
+script loadContent(url string) {
+	fetch(url).then(res=>res.text()).then(html=>document.getElementById('page-content').innerHTML=html);
+}

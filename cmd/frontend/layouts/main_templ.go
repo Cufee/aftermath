@@ -66,7 +66,15 @@ func main(head templ.Component, navbar templ.Component, children ...templ.Compon
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</main><script>\n\t\t\t\t// enable swap on 422, this status code is used for validation errors and returns error messages bound to elements\n\t\t\t\tdocument.body.addEventListener('htmx:beforeOnLoad', function (evt) {\n\t\t\t\t\t\tif (evt.detail.xhr.status === 422) {\n\t\t\t\t\t\t\t\tevt.detail.shouldSwap = true;\n\t\t\t\t\t\t\t\tevt.detail.isError = false;\n\t\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t</script></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</main>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.Footer().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script>\n\t\t\t\t// enable swap on 422, this status code is used for validation errors and returns error messages bound to elements\n\t\t\t\tdocument.body.addEventListener('htmx:beforeOnLoad', function (evt) {\n\t\t\t\t\t\tif (evt.detail.xhr.status === 422) {\n\t\t\t\t\t\t\t\tevt.detail.shouldSwap = true;\n\t\t\t\t\t\t\t\tevt.detail.isError = false;\n\t\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
