@@ -74,7 +74,7 @@ func discordVerifyRedirect(realm string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(constants.FrontendURL + "/assets/og-verify.jpg")
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(constants.FrontendURL + "/assets/og/verify.jpg")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/redirect/discord_verify.templ`, Line: 25, Col: 85}
 		}
@@ -100,7 +100,7 @@ func discordVerifyRedirect(realm string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(constants.FrontendURL + "/assets/og-verify.jpg")
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(constants.FrontendURL + "/assets/og/verify.jpg")
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/redirect/discord_verify.templ`, Line: 30, Col: 86}
 		}

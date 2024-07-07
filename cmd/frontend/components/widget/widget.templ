@@ -32,9 +32,13 @@ func WithUnratedOverview(shown bool) WidgetOption {
 func WithFlavor(flavor WidgetFlavor) WidgetOption {
 	return func(w *widget) { w.flavor = flavor }
 }
+func WithHead(componeent templ.Component) WidgetOption {
+	return func(w *widget) { w.head = componeent }
+}
 
 func Widget(account models.Account, cards prepare.Cards, options ...WidgetOption) templ.Component {
 	widget := widget{
+		head:          widgetHead(account.Nickname, account.Realm),
 		cards:         cards,
 		account:       account,
 		flavor:        WidgetFlavorDefault,
@@ -70,23 +74,13 @@ type widget struct {
 	showUnratedOverview  bool
 	unratedVehiclesLimit int
 
+	head       templ.Component
 	flavor     WidgetFlavor
 	autoReload bool
 }
 
 templ (w widget) Render() {
-	<head>
-		<title>Aftermath - { w.account.Nickname }</title>
-		<meta property="og:type" content="website"/>
-		<meta property="og:title" content="Aftermath - Streaming Widget"/>
-		<meta property="og:image" content={ constants.FrontendURL + "/assets/og/widget.jpg" }/>
-		<meta property="og:description" content={ fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm) }/>
-		<meta name="twitter:card" content="summary_large_image"/>
-		<meta name="twitter:title" content="Aftermath - Streaming Widget"/>
-		<meta name="twitter:image:alt" content="Aftermath Streaming Widget"/>
-		<meta name="twitter:image" content={ constants.FrontendURL + "/assets/og/widget.jpg" }/>
-		<meta name="twitter:description" content={ fmt.Sprintf("Aftermath streaming widget for %s [%s]", w.account.Nickname, w.account.Realm) }/>
-	</head>
+	@w.head
 	<div class="text-nowrap whitespace-nowrap" id="widget-container">
 		switch w.flavor {
 			default:
@@ -96,6 +90,21 @@ templ (w widget) Render() {
 			@logic.EmbedMinifiedScript(widgetRefresh(w.account.Realm, w.account.ID, w.account.LastBattleTime.Unix()), w.account.Realm, w.account.ID, w.account.LastBattleTime.Unix())
 		}
 	</div>
+}
+
+templ widgetHead(nickname, realm string) {
+	<head>
+		<title>Aftermath - { nickname }</title>
+		<meta property="og:type" content="website"/>
+		<meta property="og:title" content="Aftermath - Streaming Widget"/>
+		<meta property="og:image" content={ constants.FrontendURL + "/assets/og/widget.jpg" }/>
+		<meta property="og:description" content={ fmt.Sprintf("Aftermath streaming widget for %s [%s]", nickname, realm) }/>
+		<meta name="twitter:card" content="summary_large_image"/>
+		<meta name="twitter:title" content="Aftermath - Streaming Widget"/>
+		<meta name="twitter:image:alt" content="Aftermath Streaming Widget"/>
+		<meta name="twitter:image" content={ constants.FrontendURL + "/assets/og/widget.jpg" }/>
+		<meta name="twitter:description" content={ fmt.Sprintf("Aftermath streaming widget for %s [%s]", nickname, realm) }/>
+	</head>
 }
 
 script widgetRefresh(realm string, accountID string, lastBattle int64) {
