@@ -26,6 +26,7 @@ services:
       dockerfile: Dockerfile
       args:
         - GO_MEM_LIMIT=122MiB
+        - BRAND_FLAVOR=${BRAND_FLAVOR}
     restart: always
     deploy:
       resources:
