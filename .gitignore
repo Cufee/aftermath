@@ -4,5 +4,4 @@ tmp
 .vscode
 **/.DS_Store
 
-**/.env
-**/.env.test
+**/.env*

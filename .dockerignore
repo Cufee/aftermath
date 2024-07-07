@@ -1,13 +1,14 @@
 tmp
 .git
 .github
+*/**.gitignore
 .task
 .vscode
 **/.DS_Store
 
-.env*
+**/.env*
 
-.air.*
+**/.air.*
 dev_web.go
 
 README.md
