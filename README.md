@@ -22,3 +22,6 @@ Deploying Aftermath is relatively simple. You can build the binary manually, use
 - Head over to General and click on Deploy.
 - Once the app is deployed and everything looks good in Logs, set the INTERACTIONS ENDPOINT URL under General Information in Discord Application settings to `https://yourdomain/discord/callback`. For example, `https://amth.one/discord/callback`.
 - You can start using Discord commands now!
+
+## On Source Code and Licensing
+Aftermath is a **source-available** project, **not** open source. Please note that this means you are not permitted to freely modify and redistribute any part of this codebase. For more information, refer to the specific licensing terms provided in the LICENSE file.

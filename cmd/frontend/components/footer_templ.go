@@ -26,7 +26,7 @@ func Footer() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"footer bg-base-300 text-base-content p-4 flex flex-row flex-wrap justify-between gap-4\"><aside class=\"flex flex-row flex-wrap\">Aftermath - <span class=\"italic\">Blazingly</span> fast stats since 2020</aside><aside class=\"flex flex-row flex-wrap gap-4\"><a href=\"/legal/terms-of-service\" class=\"link link-hover\">Terms of Service</a> <a href=\"/legal/privacy-policy\" class=\"link link-hover\">Privacy Policy</a></aside></footer>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"footer bg-base-300 text-base-content p-4 flex flex-row flex-wrap justify-between gap-2\"><aside class=\"flex flex-row flex-wrap justify-center sm:justify-start grow\">Aftermath - <span class=\"italic\">Blazingly</span> fast stats since 2020</aside><aside class=\"flex flex-row flex-wrap gap-4 justify-center sm:justify-end grow\"><a href=\"https://github.com/Cufee/aftermath\" class=\"link link-hover\">GitHub Repository</a> <a href=\"/legal/terms-of-service\" class=\"link link-hover\">Terms of Service</a> <a href=\"/legal/privacy-policy\" class=\"link link-hover\">Privacy Policy</a></aside></footer>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
