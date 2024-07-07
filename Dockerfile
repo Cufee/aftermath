@@ -1,6 +1,8 @@
 FROM golang:1.22.3-bookworm as builder
 
 ARG GO_MEM_LIMIT=122MiB
+ARG BRAND_FLAVOR=red
+ENV BRAND_FLAVOR $BRAND_FLAVOR
 
 WORKDIR /workspace
 
