@@ -22,7 +22,7 @@ import (
 var outDirPath = "../../public"
 var brandColor color.RGBA
 
-var cardColor = color.RGBA{17, 17, 17, 255}
+var cardColor = color.RGBA{7, 7, 7, 200}
 
 func main() {
 	godotenv.Load("../../../../.env")
@@ -175,7 +175,7 @@ func generateOGImages() {
 		ctx := gg.NewContext(imageWidth, imageHeight)
 
 		ctx.DrawImage(imaging.Blur(imaging.Fill(bg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 30), 0, 0)
-		ctx.DrawRoundedRectangle(float64(borderWidth), float64(borderWidth), float64(imageWidth-borderWidth*2), float64(imageHeight-borderWidth*2), 20)
+		ctx.DrawRectangle(0, 0, float64(imageWidth), float64(imageHeight))
 		ctx.SetColor(cardColor)
 		ctx.Fill()
 
@@ -204,15 +204,6 @@ func generateOGImages() {
 		logo := common.AftermathLogo(brandColor, opts)
 		ctx := gg.NewContext(imageWidth, imageHeight)
 
-		linkIcon, err := imaging.Open("./link.png")
-		if err != nil {
-			panic(err)
-		}
-		blitzLogo, err := imaging.Open("./blitz-logo.png")
-		if err != nil {
-			panic(err)
-		}
-
 		// each logo should take 1/3 of the total height available
 		heightAvailable := imageHeight - borderWidth*2
 		widthAvailable := imageWidth - borderWidth*2
@@ -223,13 +214,27 @@ func generateOGImages() {
 		padding := (widthAvailable-linkIconSize-singleLogoSize*2-imageGap*2)/2 + borderWidth*2
 		// we can now draw padding - logo - gap - link - gap - logo
 
+		linkIcon, err := imaging.Open("./link.png")
+		if err != nil {
+			panic(err)
+		}
+		blitzLogo, err := imaging.Open("./blitz-logo.png")
+		if err != nil {
+			panic(err)
+		}
+		linkBlock := common.NewImageContent(common.Style{Width: float64(linkIconSize), Height: float64(linkIconSize), BackgroundColor: common.TextAlt}, linkIcon)
+		linkColored, err := linkBlock.Render()
+		if err != nil {
+			panic(err)
+		}
+
 		ctx.DrawImage(imaging.Blur(imaging.Fill(bg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 30), 0, 0)
-		ctx.DrawRoundedRectangle(float64(borderWidth), float64(borderWidth), float64(imageWidth-borderWidth*2), float64(imageHeight-borderWidth*2), 20)
+		ctx.DrawRectangle(0, 0, float64(imageWidth), float64(imageHeight))
 		ctx.SetColor(cardColor)
 		ctx.Fill()
 
 		ctx.DrawImage(imaging.Fill(logo, singleLogoSize, singleLogoSize, imaging.Center, imaging.Lanczos), padding, imageHeight/2-singleLogoSize/2)
-		ctx.DrawImage(imaging.Fill(linkIcon, linkIconSize, linkIconSize, imaging.Center, imaging.Lanczos), padding+singleLogoSize+imageGap, imageHeight/2-linkIconSize/2)
+		ctx.DrawImage(imaging.Fill(linkColored, linkIconSize, linkIconSize, imaging.Center, imaging.Lanczos), padding+singleLogoSize+imageGap, imageHeight/2-linkIconSize/2)
 		ctx.DrawImage(imaging.Fill(blitzLogo, singleLogoSize, singleLogoSize, imaging.Center, imaging.Lanczos), padding+singleLogoSize+imageGap+linkIconSize+imageGap, imageHeight/2-singleLogoSize/2)
 
 		f, err := os.Create(filepath.Join(outDirPath, filename))

@@ -61,9 +61,9 @@ func discordVerifyRedirect(realm string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("Aftermath 🔗 Wargaming -" + strings.ToUpper(realm))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("Aftermath 🔗 Wargaming - " + strings.ToUpper(realm))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/redirect/discord_verify.templ`, Line: 24, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/redirect/discord_verify.templ`, Line: 24, Col: 92}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -87,9 +87,9 @@ func discordVerifyRedirect(realm string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("Aftermath 🔗 Wargaming -" + strings.ToUpper(realm))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("Aftermath 🔗 Wargaming - " + strings.ToUpper(realm))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/redirect/discord_verify.templ`, Line: 28, Col: 92}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/redirect/discord_verify.templ`, Line: 28, Col: 93}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
