@@ -139,9 +139,14 @@ func generateOGImages() {
 		logo := common.AftermathLogo(brandColor, opts)
 		ctx := gg.NewContext(imageWidth, imageHeight)
 
-		ctx.DrawImage(imaging.Blur(imaging.Fill(bg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 30), 0, 0)
-		ctx.DrawRoundedRectangle(float64(borderWidth), float64(borderWidth), float64(imageWidth-borderWidth*2), float64(imageHeight-borderWidth*2), 20)
-		ctx.SetColor(cardColor)
+		obsBg, err := imaging.Open("./obs-splash.png")
+		if err != nil {
+			panic(err)
+		}
+
+		ctx.DrawImage(imaging.Fill(obsBg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 0, 0)
+		ctx.DrawRectangle(0, 0, float64(imageWidth), float64(imageHeight))
+		ctx.SetColor(color.RGBA{7, 7, 7, 200})
 		ctx.Fill()
 
 		ctx.DrawImageAnchored(imaging.Fit(logo, logoSize, logoSize, imaging.Linear), imageWidth/2, imageHeight/2, 0.5, 0.5)

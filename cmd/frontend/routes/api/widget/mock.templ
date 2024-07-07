@@ -4,11 +4,12 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/assets"
 	"github.com/cufee/aftermath/cmd/frontend/components/widget"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/internal/constants"
 	"strconv"
 )
 
 var MockWidget handler.Partial = func(ctx *handler.Context) (templ.Component, error) {
-	var opts []widget.WidgetOption
+	var opts = []widget.WidgetOption{widget.WithHead(mockWidgetHead())}
 	if v, err := strconv.Atoi(ctx.Query("vl")); err == nil && v >= 0 && v <= 10 {
 		opts = append(opts, widget.WithVehicleLimit(int(v)))
 	}
@@ -26,4 +27,19 @@ templ mockWidget(widget templ.Component) {
 	<div id="mock-widget">
 		@widget
 	</div>
+}
+
+templ mockWidgetHead() {
+	<head>
+		<title>Aftermath - Create your widget</title>
+		<meta property="og:type" content="website"/>
+		<meta property="og:title" content="Aftermath - Create Your Streaming Widget"/>
+		<meta property="og:image" content={ constants.FrontendURL + "/assets/og/widget.jpg" }/>
+		<meta property="og:description" content="Create a unique streaming widget just for you!"/>
+		<meta name="twitter:card" content="summary_large_image"/>
+		<meta name="twitter:title" content="Aftermath - Create Your Streaming Widget"/>
+		<meta name="twitter:image:alt" content="Aftermath Streaming Widget"/>
+		<meta name="twitter:image" content={ constants.FrontendURL + "/assets/og/widget.jpg" }/>
+		<meta name="twitter:description" content="Create a unique streaming widget just for you!"/>
+	</head>
 }
