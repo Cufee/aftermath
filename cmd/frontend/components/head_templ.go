@@ -57,7 +57,7 @@ func Head(additional ...templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><meta property=\"og:description\" content=\"Fastest and most beautiful way to view Blitz stats!\"><meta name=\"twitter:card\" content=\"summary_large_image\"><meta name=\"twitter:title\" content=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><meta property=\"og:description\" content=\"The Fastest and Most Beautifudl way to view Blitz stats!\"><meta name=\"twitter:card\" content=\"summary_large_image\"><meta name=\"twitter:title\" content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -96,7 +96,7 @@ func Head(additional ...templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><meta name=\"twitter:description\" content=\"Fastest and most beautiful way to view Blitz stats!\"><link href=\"https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css\" rel=\"stylesheet\" type=\"text/css\"><script src=\"https://unpkg.com/htmx.org@1.9.12\"></script><script src=\"https://unpkg.com/htmx.org/dist/ext/head-support.js\"></script><script src=\"https://unpkg.com/htmx.org@1.9.12/dist/ext/multi-swap.js\"></script><script src=\"https://cdn.tailwindcss.com\"></script>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><meta name=\"twitter:description\" content=\"The Fastest and Most Beautifudl way to view Blitz stats!\"><link href=\"https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css\" rel=\"stylesheet\" type=\"text/css\"><script src=\"https://unpkg.com/htmx.org@1.9.12\"></script><script src=\"https://unpkg.com/htmx.org/dist/ext/head-support.js\"></script><script src=\"https://unpkg.com/htmx.org@1.9.12/dist/ext/multi-swap.js\"></script><script src=\"https://cdn.tailwindcss.com\"></script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

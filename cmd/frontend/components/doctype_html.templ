@@ -1,0 +1,16 @@
+package components
+
+templ DoctypeHTML(head templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en" data-theme="dark">
+		@head
+		<body>
+			<style>
+				:root {
+					background-color: black
+				}
+			</style>
+			{ children... }
+		</body>
+	</html>
+}

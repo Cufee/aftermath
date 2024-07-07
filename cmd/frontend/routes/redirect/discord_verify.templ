@@ -1,6 +1,7 @@
 package redirect
 
 import (
+	"github.com/cufee/aftermath/cmd/frontend/components"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/logic"
 	"github.com/cufee/aftermath/internal/constants"
@@ -18,21 +19,27 @@ var VerifyFromDiscord handler.Partial = func(ctx *handler.Context) (templ.Compon
 }
 
 templ discordVerifyRedirect(realm string) {
+	@components.DoctypeHTML(discordVerifyHead(realm)) {
+		@logic.EmbedScript(discordVerifyRedirectScript(realm), realm)
+		@components.ManualRedirect("/api/login?from=/api/auth/wargaming/login/" + realm)
+	}
+}
+
+templ discordVerifyHead(realm string) {
 	<head>
 		<title>Aftermath 🔗 Wargaming - { strings.ToUpper(realm) }</title>
 		<meta property="og:type" content="website"/>
 		<meta property="og:title" content={ "Aftermath 🔗 Wargaming - " + strings.ToUpper(realm) }/>
 		<meta property="og:image" content={ constants.FrontendURL + "/assets/og/verify.jpg" }/>
-		<meta property="og:description" content="Link your Blitz account to Aftermath!"/>
+		<meta property="og:description" content="Link your Blitz account to Aftermath and unlock even more features!"/>
 		<meta name="twitter:card" content="summary_large_image"/>
 		<meta name="twitter:title" content={ "Aftermath 🔗 Wargaming - " + strings.ToUpper(realm) }/>
-		<meta name="twitter:image:alt" content="Link your Blitz account to Aftermath"/>
+		<meta name="twitter:image:alt" content="Link your Blitz account to Aftermath and unlock even more features"/>
 		<meta name="twitter:image" content={ constants.FrontendURL + "/assets/og/verify.jpg" }/>
-		<meta name="twitter:description" content="Link your Blitz account to Aftermath!"/>
+		<meta name="twitter:description" content="Link your Blitz account to Aftermath and unlock even more features!"/>
 	</head>
-	@logic.EmbedScript(discordVerifyRedirectScript(realm), realm)
 }
 
 script discordVerifyRedirectScript(realm string) {
-	window.location.href="/login?from=/api/auth/wargaming/login/"+realm;
+	window.location.href="/api/login?from=/api/auth/wargaming/login/"+realm;
 }

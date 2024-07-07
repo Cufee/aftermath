@@ -1,0 +1,38 @@
+package routes
+
+import (
+	"github.com/cufee/aftermath/cmd/frontend/components"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/constants"
+)
+
+var LoginStatic handler.Partial = func(ctx *handler.Context) (templ.Component, error) {
+	return loginStaticPage(ctx.URL().RawQuery), nil
+}
+
+templ loginStaticPage(query string) {
+	@components.DoctypeHTML(loginStaticHead()) {
+		@logic.EmbedScript(loginPageRedirectScript(query))
+		@components.ManualRedirect("/api/login?" + query)
+	}
+}
+
+templ loginStaticHead() {
+	<head>
+		<title>Aftermath - Login</title>
+		<meta property="og:type" content="website"/>
+		<meta property="og:title" content="Aftermath - Login"/>
+		<meta property="og:image" content={ constants.FrontendURL + "/assets/og/default.jpg" }/>
+		<meta property="og:description" content="The Fastest and Most Beautifudl way to view Blitz stats!"/>
+		<meta name="twitter:card" content="summary_large_image"/>
+		<meta name="twitter:title" content="Aftermath - Login"/>
+		<meta name="twitter:image:alt" content="Link your Blitz account to Aftermath"/>
+		<meta name="twitter:image" content={ constants.FrontendURL + "/assets/og/default.jpg" }/>
+		<meta name="twitter:description" content="The Fastest and Most Beautifudl way to view Blitz stats!"/>
+	</head>
+}
+
+script loginPageRedirectScript(query string) {
+	window.location.href="/api/login?"+query;
+}
