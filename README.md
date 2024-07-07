@@ -11,7 +11,6 @@ Deploying Aftermath is relatively simple. You can build the binary manually, use
 - Create a new Project and add a new Compose service.
 - In Service settings > General > Provider, select your forked repository or Git > `git@github.com:Cufee/aftermath.git`. The branch should be `master`, but you can pick something different.
 - Change the Compose Path to `./docker-compose.yaml`.
-- If you are using your own repository, [setup a webhook under Deployments](https://docs.dokploy.com/application/overview#github).
 - Add your environment configuration under Environment, you can start by copying `.env.example`.
   - Set `TRAEFIK_HOST` to your domain. For example, `amth.one`.
   - Add a Discord Bot token and public key
