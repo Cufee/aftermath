@@ -11,6 +11,7 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/middleware"
 	"github.com/cufee/aftermath/cmd/frontend/routes"
+	"github.com/cufee/aftermath/cmd/frontend/routes/api"
 	"github.com/cufee/aftermath/cmd/frontend/routes/api/auth"
 	aWidget "github.com/cufee/aftermath/cmd/frontend/routes/api/widget"
 	"github.com/cufee/aftermath/cmd/frontend/routes/app"
@@ -58,7 +59,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		},
 		{
 			Path: get("/login"),
-			Func: handler.Chain(core, routes.Login),
+			Func: handler.Chain(core, routes.LoginStatic),
 		},
 		{
 			Path: get("/linked"),
@@ -95,6 +96,10 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 			Func: handler.Chain(core, app.Widgets, middleware.SessionCheck),
 		},
 		// api routes
+		{
+			Path: get("/api/login"),
+			Func: handler.Chain(core, api.Login),
+		},
 		{
 			Path: get("/api/auth/discord"),
 			Func: handler.Chain(core, auth.DiscordRedirect),

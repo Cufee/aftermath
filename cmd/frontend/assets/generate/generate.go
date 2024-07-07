@@ -32,6 +32,8 @@ func main() {
 		brandColor = common.ColorAftermathRed
 	case "blue":
 		brandColor = common.ColorAftermathBlue
+	case "gold":
+		brandColor = common.TextSubscriptionPremium
 	}
 
 	generateWN8Icons()

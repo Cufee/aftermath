@@ -1,0 +1,9 @@
+package components
+
+templ ManualRedirect(target string) {
+	<div style="height: 50vh; display: flex; align-items: center; justify-content: center;">
+		<div style="color: gray; text-align: center; font-weight: bold;">
+			Page not redirecting? <a style="color: white;" href={ templ.URL(target) }>Click here</a> to open the next page manually.
+		</div>
+	</div>
+}
