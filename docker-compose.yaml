@@ -21,7 +21,7 @@ services:
       - ${DATABASE_PATH}:/data
 
     pull_policy: always
-    image: ghcr.io/cufee/aftermath-canary:latest-${ENVIRONMENT}
+    image: ghcr.io/cufee/aftermath:latest-${ENVIRONMENT}
     restart: always
     deploy:
       resources:
