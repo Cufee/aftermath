@@ -27,6 +27,7 @@ templ main(head templ.Component, navbar templ.Component, children ...templ.Compo
 					@render
 				}
 			</main>
+			@components.Footer()
 			<script>
 				// enable swap on 422, this status code is used for validation errors and returns error messages bound to elements
 				document.body.addEventListener('htmx:beforeOnLoad', function (evt) {

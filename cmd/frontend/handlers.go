@@ -48,6 +48,15 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 			Path: "GET /{pathname...}",
 			Func: handler.Chain(core, routes.ErrorNotFound),
 		},
+		// legal
+		{
+			Path: get("/legal/terms-of-service"),
+			Func: handler.Chain(core, routes.TermsOfService),
+		},
+		{
+			Path: get("/legal/privacy-policy"),
+			Func: handler.Chain(core, routes.PrivacyPolicy),
+		},
 		// common routes
 		{
 			Path: get("/"),
