@@ -19,7 +19,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-//go:generate go generate ./cmd/frontend/assets
+//go:generate go generate ./cmd/frontend/assets/generate
 
 //go:embed static/*
 var static embed.FS
