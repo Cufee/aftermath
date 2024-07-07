@@ -103,9 +103,9 @@ jobs:
           subject-digest: ${{ steps.push-service.outputs.digest }}
           push-to-registry: true
 
-      # - name: Redeploy the application using the latest image
-      #   uses: distributhor/workflow-webhook@v3
-      #   with:
-      #     webhook_url: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
+      - name: Redeploy the application using the latest image
+        uses: distributhor/workflow-webhook@v3
+        with:
+          webhook_url: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
             
         

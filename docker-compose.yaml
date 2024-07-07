@@ -1,7 +1,7 @@
 services:
   aftermath-migrate:
     pull_policy: always
-    image: ghcr.io/cufee/aftermath-canary-migrate:latest
+    image: ghcr.io/cufee/aftermath-migrate:latest-${ENVIRONMENT}
     command: migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "sqlite:///data/${DATABASE_NAME}?_fk=1"
     volumes:
       - ${DATABASE_PATH}:/data
@@ -21,7 +21,7 @@ services:
       - ${DATABASE_PATH}:/data
 
     pull_policy: always
-    image: ghcr.io/cufee/aftermath-canary:latest
+    image: ghcr.io/cufee/aftermath-canary:latest-${ENVIRONMENT}
     restart: always
     deploy:
       resources:
