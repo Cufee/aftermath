@@ -397,3 +397,19 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 func (c *multiSourceClient) CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error) {
 	return c.blitzstars.CurrentTankAverages(ctx)
 }
+
+func (c *multiSourceClient) PlayersAchievementsLeaderboard(ctx context.Context, playerID string, from time.Time, opts ...StatsOption) (any, error) {
+	// achievement snapshots are stored for overall stats and per vehicle
+	// for overall snapshot, reference ID should be accountID. for vehicles, reference should be vehicleID
+
+	var options = statsOptions{snapshotType: models.SnapshotTypeDaily}
+	for _, apply := range opts {
+		apply(&options)
+	}
+
+	if days := time.Since(from).Hours() / 24; from.IsZero() || days > 90 {
+		return nil, ErrInvalidSessionStart
+	}
+
+	return nil, nil
+}

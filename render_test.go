@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	stats "github.com/cufee/aftermath/internal/stats/client/v1"
+	client "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/tests"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +22,7 @@ func TestRenderSession(t *testing.T) {
 
 	loadStaticAssets(static)
 
-	stats := stats.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
+	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 
 	{
 		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNAShort, time.Now())
@@ -37,7 +37,7 @@ func TestRenderSession(t *testing.T) {
 		assert.NoError(t, err, "failed to encode a png image")
 	}
 	{
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL("static://bg-default"))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 

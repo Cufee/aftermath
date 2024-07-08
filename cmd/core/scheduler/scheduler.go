@@ -43,15 +43,16 @@ func RegisterDefaultTasks(s *scheduler, coreClient core.Client) {
 	// Averages - Update averages once daily
 	s.Add("0 0 * * *", UpdateAveragesWorker(coreClient))
 
-	// Sessions
-	s.Add("0 9 * * *", CreateSessionTasksWorker(coreClient, "NA"))  // NA
-	s.Add("0 1 * * *", CreateSessionTasksWorker(coreClient, "EU"))  // EU
-	s.Add("0 18 * * *", CreateSessionTasksWorker(coreClient, "AS")) // Asia
+	// Snapshots
+	s.Add("0 9 * * *", CreateSnapshotTasksWorker(coreClient, "NA"))  // NA
+	s.Add("0 1 * * *", CreateSnapshotTasksWorker(coreClient, "EU"))  // EU
+	s.Add("0 18 * * *", CreateSnapshotTasksWorker(coreClient, "AS")) // Asia
 
-	// Refresh WN8
-	// "45 9 * * *" 	// NA
-	// "45 1 * * *" 	// EU
-	// "45 18 * * *" 	// Asia
+	// Achievement leaderboards
+	// ideally, this should not delay snapshots
+	s.Add("25 * * * *", CreateSnapshotTasksWorker(coreClient, "NA")) // NA
+	s.Add("30 * * * *", CreateSnapshotTasksWorker(coreClient, "EU")) // EU
+	s.Add("35 * * * *", CreateSnapshotTasksWorker(coreClient, "AS")) // Asia
 
 	// Configurations
 	s.Add("0 0 */7 * *", RotateBackgroundPresetsWorker(coreClient))

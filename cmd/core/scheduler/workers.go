@@ -38,7 +38,7 @@ func RotateBackgroundPresetsWorker(client core.Client) func() {
 	}
 }
 
-func CreateSessionTasksWorker(client core.Client, realm string) func() {
+func CreateSnapshotTasksWorker(client core.Client, realm string) func() {
 	return func() {
 		err := tasks.CreateRecordSnapshotsTasks(client, realm)
 		if err != nil {
@@ -154,5 +154,14 @@ func UpdateGlossaryWorker(client core.Client) func() {
 		}
 
 		log.Info().Msg("glossary cache updated")
+	}
+}
+
+func CreateAchievementLeaderboardTasksWorker(client core.Client, realm string) func() {
+	return func() {
+		err := tasks.CreateRecordSnapshotsTasks(client, realm)
+		if err != nil {
+			log.Err(err).Str("realm", realm).Msg("failed to schedule session update tasks")
+		}
 	}
 }
