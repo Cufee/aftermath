@@ -1,43 +1,15 @@
 services:
   aftermath-migrate:
-    pull_policy: always
-    image: ghcr.io/cufee/aftermath-migrations:latest-${ENVIRONMENT}
-    command: migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "sqlite:///data/${DATABASE_NAME}?_fk=1"
-    volumes:
-      - ${DATABASE_PATH}:/data
-    networks:
-      - dokploy-network
+    extends:
+      file: docker-compose.base.yaml
+      service: aftermath-migrate-base
+    network_mode: "host"
 
   aftermath-service:
-    env_file:
-      - .env
+    extends:
+      file: docker-compose.base.yaml
+      service: aftermath-service-base
     environment:
       - PORT=3000
       - DATABASE_PATH=/data
-    depends_on:
-      aftermath-migrate:
-        condition: service_completed_successfully
-    volumes:
-      - ${DATABASE_PATH}:/data
-
-    pull_policy: always
-    image: ghcr.io/cufee/aftermath:latest-${ENVIRONMENT}
-    restart: always
-    deploy:
-      resources:
-        reservations:
-          memory: 128m
-        limits:
-          memory: 256m
-    networks:
-      - dokploy-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.aftermath-monorepo-compose.rule=Host(`${TRAEFIK_HOST}`)"
-      - "traefik.http.routers.aftermath-monorepo-compose.entrypoints=websecure"
-      - "traefik.http.routers.aftermath-monorepo-compose.tls.certResolver=letsencrypt"
-      - "traefik.http.services.aftermath-monorepo-compose.loadbalancer.server.port=3000"
-
-networks:
-  dokploy-network:
-    external: true
+    network_mode: "host"

@@ -13,4 +13,4 @@ dev_web.go
 
 README.md
 Taskfile.yaml
-docker-compose.yaml
+docker-compose.*
