@@ -10,6 +10,6 @@ services:
       file: docker-compose.base.yaml
       service: aftermath-service-base
     environment:
-      - PORT=3000
-      - DATABASE_PATH=/data
+      # use the default port from .env
+      - DATABASE_PATH=/data # this is the path inside a contianer and needs to match the volume mount
     network_mode: "host"
