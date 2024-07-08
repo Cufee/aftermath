@@ -15,7 +15,7 @@ Deploying Aftermath is relatively simple. You can build the binary manually, use
   - Set `TRAEFIK_HOST` to your domain. For example, `amth.one`.
   - Add a Discord Bot token and public key
   - Ensure the `DATABASE_DIR` and `DATABASE_NAME` are set correctly, this will be the path **on your host**. If this is misconfigured, you will lose data on restart.
-  - Add Wargaming App IDs, not that one of them will be public.
+  - Add Wargaming App IDs, note that one of them will be public.
   - If you are planning to track a lot of users, add proxies for Wargaming API in the following format: `user:password@host:port?wgAppId=your_app_id&maxRps=20`
   - Read through all variables prefixed with `INIT_`. Those will allow you to create admin user accounts and etc.
 - Head over to General and click on Deploy.
@@ -23,13 +23,13 @@ Deploying Aftermath is relatively simple. You can build the binary manually, use
 - You can start using Discord commands now!
 
 ### Locally with Docker Compose
+- Setup a reverse proxy for your machine, or use something like [ngrok](https://ngrok.com/docs/getting-started/)
 - Create a new Bot Application in Discord
-- [Install Docker](https://docs.docker.com/engine/install/).
+- [Install Docker](https://docs.docker.com/engine/install/)
 - Add your environment configuration under Environment, you can start by copying `.env.example`.
-  - Set `TRAEFIK_HOST` to your domain. For example, `amth.one`.
   - Add a Discord Bot token and public key
   - Ensure the `DATABASE_DIR` and `DATABASE_NAME` are set correctly, this will be the path **on your host**. If this is misconfigured, you will lose data on restart.
-  - Add Wargaming App IDs, not that one of them will be public.
+  - Add Wargaming App IDs, note that one of them will be public.
   - If you are planning to track a lot of users, add proxies for Wargaming API in the following format: `user:password@host:port?wgAppId=your_app_id&maxRps=20`
   - Read through all variables prefixed with `INIT_`. Those will allow you to create admin user accounts and etc.
 - Start all services with `docker compose up -d`
