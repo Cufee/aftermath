@@ -1,3 +1,5 @@
+# This file defines the base services that will be extended from in order for us to support multiple platforms/deployment options
+# While it is fine to import .env files through `env_file` option here, `environment` should never be defined in this file - it will be overwritten
 services:
   aftermath-migrate-base:
     pull_policy: always
@@ -18,6 +20,7 @@ services:
       aftermath-migrate:
         condition: service_completed_successfully
     deploy:
+      # the resource limits are setup during build step and should generally not be adjusted here without changing the build pipeline first
       resources:
         reservations:
           memory: 128m
