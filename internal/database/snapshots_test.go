@@ -98,31 +98,31 @@ func TestGetVehicleSnapshots(t *testing.T) {
 		assert.Nil(t, aErr, "insert returned some errors")
 	}
 	{ // when we check created after, vehicles need to be ordered by createdAt ASC, so we expect to get vehicle2 back
-		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", "r1", models.SnapshotTypeDaily, WithCreatedAfter(createdAtVehicle1))
+		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", nil, models.SnapshotTypeDaily, WithCreatedAfter(createdAtVehicle1), WithReferenceIDIn("r1"))
 		assert.NoError(t, err, "get vehicle snapshot error")
 		assert.Len(t, vehicles, 1, "should return exactly 1 snapshot")
 		assert.True(t, vehicles[0].CreatedAt.Equal(createdAtVehicle2), "wrong vehicle snapshot returned\nvehicles:%#v\nexpected:%#v", vehicles, createdAtVehicle2)
 	}
 	{ // when we check created before, vehicles need to be ordered by createdAt DESC, so we expect to get vehicle2 back
-		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", "r1", models.SnapshotTypeDaily, WithCreatedBefore(createdAtVehicle3))
+		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", nil, models.SnapshotTypeDaily, WithCreatedBefore(createdAtVehicle3), WithReferenceIDIn("r1"))
 		assert.NoError(t, err, "get vehicle snapshot error")
 		assert.Len(t, vehicles, 1, "should return exactly 1 snapshot")
 		assert.True(t, vehicles[0].CreatedAt.Equal(createdAtVehicle2), "wrong vehicle snapshot returned\nvehicles:%#v\nexpected:%#v", vehicles, createdAtVehicle2)
 	}
 	{ // make sure only 1 vehicle is returned per ID
-		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", "r2", models.SnapshotTypeDaily, WithCreatedBefore(createdAtVehicle5.Add(time.Hour)))
+		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", nil, models.SnapshotTypeDaily, WithCreatedBefore(createdAtVehicle5.Add(time.Hour)), WithReferenceIDIn("r2"))
 		assert.NoError(t, err, "get vehicle snapshot error")
 		assert.Len(t, vehicles, 2, "should return exactly 2 snapshot")
 		assert.NotEqual(t, vehicles[0].ID, vehicles[1].ID, "each vehicle id should only be returned once\nvehicles:%#v", vehicles)
 	}
 	{ // get a vehicle with a specific id
-		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", "r2", models.SnapshotTypeDaily, WithVehicleIDs([]string{"v5"}))
+		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", []string{"v5"}, models.SnapshotTypeDaily, WithReferenceIDIn("r2"))
 		assert.NoError(t, err, "get vehicle snapshot error")
 		assert.Len(t, vehicles, 1, "should return exactly 1 snapshot")
 		assert.NotEqual(t, vehicles[0].ID, "v5", "incorrect vehicle returned\nvehicles:%#v", vehicles)
 	}
 	{ // this should return no result
-		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", "r1", models.SnapshotTypeDaily, WithCreatedBefore(createdAtVehicle1))
+		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", nil, models.SnapshotTypeDaily, WithCreatedBefore(createdAtVehicle1), WithReferenceIDIn("r1"))
 		assert.NoError(t, err, "no results from a raw query does not trigger an error")
 		assert.Len(t, vehicles, 0, "return should have no results\nvehicles:%#v", vehicles)
 	}

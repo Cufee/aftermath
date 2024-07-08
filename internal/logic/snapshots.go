@@ -26,20 +26,16 @@ Gets all accounts from WH and their respective snapshots
   - an account is considered valid is it has played a battle since the last snapshot, or has no snapshots
   - as side effect, invalid accounts will be set as private
 */
-func getAndValidateAccounts(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, force bool, realm string, accountIDs ...string) (map[string]types.ExtendedAccount, []string, map[string]*models.AccountSnapshot, error) {
+func getAndValidateAccounts(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, force bool, realm string, accountIDs ...string) (map[string]types.ExtendedAccount, []string, error) {
 	accounts, err := wgClient.BatchAccountByID(ctx, realm, accountIDs)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "failed to fetch accounts")
+		return nil, nil, errors.Wrap(err, "failed to fetch accounts")
 	}
 
 	// existing snapshots for accounts
-	existingSnapshots, err := dbClient.GetManyAccountSnapshots(ctx, accountIDs, models.SnapshotTypeDaily)
+	existingLastBattleTimes, err := dbClient.GetAccountLastBattleTimes(ctx, accountIDs, models.SnapshotTypeDaily)
 	if err != nil && !database.IsNotFound(err) {
-		return nil, nil, nil, errors.Wrap(err, "failed to get existing snapshots")
-	}
-	existingSnapshotsMap := make(map[string]*models.AccountSnapshot)
-	for _, snapshot := range existingSnapshots {
-		existingSnapshotsMap[snapshot.AccountID] = &snapshot
+		return nil, nil, errors.Wrap(err, "failed to get existing snapshots")
 	}
 
 	// make a new slice just in case some accounts were not returned/are private
@@ -62,13 +58,13 @@ func getAndValidateAccounts(ctx context.Context, wgClient wargaming.Client, dbCl
 		if data.LastBattleTime < 1 {
 			continue
 		}
-		if s, ok := existingSnapshotsMap[id]; !force && (ok && data.LastBattleTime == int(s.LastBattleTime.Unix())) {
+		if s, ok := existingLastBattleTimes[id]; !force && (ok && data.LastBattleTime == int(s.Unix())) {
 			// last snapshot is the same, we can skip it
 			continue
 		}
 		needAnUpdate = append(needAnUpdate, id)
 	}
-	return accounts, needAnUpdate, existingSnapshotsMap, nil
+	return accounts, needAnUpdate, nil
 }
 
 func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm string, force bool, accountIDs ...string) (map[string]error, error) {
@@ -77,7 +73,10 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	}
 	createdAt := time.Now()
 
-	accounts, accountsNeedAnUpdate, _, err := getAndValidateAccounts(ctx, wgClient, dbClient, force, realm, accountIDs...)
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	accounts, accountsNeedAnUpdate, err := getAndValidateAccounts(ctx, wgClient, dbClient, force, realm, accountIDs...)
 	if err != nil {
 		return nil, err
 	}
@@ -160,14 +159,10 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 
 		// get existing vehicle snapshots from db
-		existingSnapshots, err := dbClient.GetVehicleSnapshots(ctx, accountID, accountID, models.SnapshotTypeDaily)
+		existingLastBattleTimes, err := dbClient.GetVehicleLastBattleTimes(ctx, accountID, nil, models.SnapshotTypeDaily)
 		if err != nil && !database.IsNotFound(err) {
 			accountErrors[accountID] = err
 			continue
-		}
-		existingSnapshotsMap := make(map[string]*models.VehicleSnapshot)
-		for _, snapshot := range existingSnapshots {
-			existingSnapshotsMap[snapshot.VehicleID] = &snapshot
 		}
 
 		snapshotStats := fetch.WargamingToStats(realm, accounts[accountID], clans[accountID], vehicles.Data)
@@ -189,7 +184,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		vehicleStats := fetch.WargamingVehiclesToFrame(vehicles.Data)
 		if len(vehicles.Data) > 0 {
 			for id, vehicle := range vehicleStats {
-				if s, ok := existingSnapshotsMap[id]; !force && ok && s.LastBattleTime.Equal(vehicle.LastBattleTime) {
+				if s, ok := existingLastBattleTimes[id]; !force && ok && s.Equal(vehicle.LastBattleTime) {
 					// last snapshot is the same, we can skip it
 					continue
 				}

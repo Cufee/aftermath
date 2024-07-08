@@ -55,16 +55,17 @@ type UsersClient interface {
 }
 
 type SnapshotsClient interface {
-	GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) (models.AccountSnapshot, error)
+	GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AccountSnapshot, error)
+	GetAchievementSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AchievementsSnapshot, error)
+	GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error)
+
+	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) (map[string]time.Time, error)
+	GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...SnapshotQuery) (map[string]time.Time, error)
+	// last battle times for achievements would be equivalent to account/vehicle ones
+
 	CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) (map[string]error, error)
-	GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]models.AccountSnapshot, error)
-	GetManyAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AccountSnapshot, error)
-
-	GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error)
 	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) (map[string]error, error)
-
 	CreateAccountAchievementSnapshots(ctx context.Context, accountID string, snapshots ...models.AchievementsSnapshot) (map[string]error, error)
-	GetAchievementsSnapshots(ctx context.Context, accountID string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AchievementsSnapshot, error)
 
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
 }
@@ -190,4 +191,12 @@ func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) 
 		writeLock: &sync.Mutex{},
 		db:        c,
 	}, nil
+}
+
+func toAnySlice[T any](s ...T) []any {
+	var a []any
+	for _, i := range s {
+		a = append(a, i)
+	}
+	return a
 }

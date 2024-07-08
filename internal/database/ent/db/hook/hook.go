@@ -117,6 +117,18 @@ func (f DiscordInteractionFunc) Mutate(ctx context.Context, m db.Mutation) (db.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.DiscordInteractionMutation", m)
 }
 
+// The LeaderboardScoreFunc type is an adapter to allow the use of ordinary
+// function as LeaderboardScore mutator.
+type LeaderboardScoreFunc func(context.Context, *db.LeaderboardScoreMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LeaderboardScoreFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.LeaderboardScoreMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.LeaderboardScoreMutation", m)
+}
+
 // The SessionFunc type is an adapter to allow the use of ordinary
 // function as Session mutator.
 type SessionFunc func(context.Context, *db.SessionMutation) (db.Value, error)
