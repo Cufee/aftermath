@@ -121,6 +121,19 @@ func (di *DiscordInteraction) ScanValues(columns []string) ([]any, error) {
 	return di.scanValues(columns)
 }
 
+func (ls *LeaderboardScore) AssignValues(columns []string, values []any) error {
+	if ls == nil {
+		return fmt.Errorf("LeaderboardScore(nil)")
+	}
+	return ls.assignValues(columns, values)
+}
+func (ls *LeaderboardScore) ScanValues(columns []string) ([]any, error) {
+	if ls == nil {
+		return nil, fmt.Errorf("LeaderboardScore(nil)")
+	}
+	return ls.scanValues(columns)
+}
+
 func (s *Session) AssignValues(columns []string, values []any) error {
 	if s == nil {
 		return fmt.Errorf("Session(nil)")

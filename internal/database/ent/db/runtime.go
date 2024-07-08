@@ -14,6 +14,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
@@ -263,6 +264,22 @@ func init() {
 	discordinteractionDescID := discordinteractionFields[0].Descriptor()
 	// discordinteraction.DefaultID holds the default value on creation for the id field.
 	discordinteraction.DefaultID = discordinteractionDescID.Default.(func() string)
+	leaderboardscoreFields := schema.LeaderboardScore{}.Fields()
+	_ = leaderboardscoreFields
+	// leaderboardscoreDescCreatedAt is the schema descriptor for created_at field.
+	leaderboardscoreDescCreatedAt := leaderboardscoreFields[1].Descriptor()
+	// leaderboardscore.DefaultCreatedAt holds the default value on creation for the created_at field.
+	leaderboardscore.DefaultCreatedAt = leaderboardscoreDescCreatedAt.Default.(func() time.Time)
+	// leaderboardscoreDescUpdatedAt is the schema descriptor for updated_at field.
+	leaderboardscoreDescUpdatedAt := leaderboardscoreFields[2].Descriptor()
+	// leaderboardscore.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	leaderboardscore.DefaultUpdatedAt = leaderboardscoreDescUpdatedAt.Default.(func() time.Time)
+	// leaderboardscore.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	leaderboardscore.UpdateDefaultUpdatedAt = leaderboardscoreDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// leaderboardscoreDescID is the schema descriptor for id field.
+	leaderboardscoreDescID := leaderboardscoreFields[0].Descriptor()
+	// leaderboardscore.DefaultID holds the default value on creation for the id field.
+	leaderboardscore.DefaultID = leaderboardscoreDescID.Default.(func() string)
 	sessionFields := schema.Session{}.Fields()
 	_ = sessionFields
 	// sessionDescCreatedAt is the schema descriptor for created_at field.

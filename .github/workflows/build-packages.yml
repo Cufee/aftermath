@@ -88,6 +88,9 @@ jobs:
           tags: ${{ steps.meta-service.outputs.tags }}
           labels: ${{ steps.meta-service.outputs.labels }}
           file: Dockerfile
+          build-args: |
+            BRAND_FLAVOR=${{ env.BRAND_FLAVOR }}
+            GO_MEM_LIMIT=${{ env.GO_MEM_LIMIT }}
       
       # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built. It increases supply chain security for people who consume the image. For more information, see "[AUTOTITLE](/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)." 
       - name: Generate migrations artifact attestation

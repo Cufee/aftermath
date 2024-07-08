@@ -43,11 +43,6 @@ func init() {
 						builder.NewOption("id", discordgo.ApplicationCommandOptionString).Required(),
 					),
 				),
-				builder.NewOption("snapshots", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
-					builder.NewOption("view", discordgo.ApplicationCommandOptionSubCommand).Options(
-						builder.NewOption("account_id", discordgo.ApplicationCommandOptionString).Required(),
-					),
-				),
 			).
 			Handler(func(ctx *common.Context) error {
 				command, opts, _ := ctx.Options().Subcommand()
@@ -78,35 +73,6 @@ func init() {
 						return ctx.Reply().Send("MarshalIndent: " + err.Error())
 					}
 					return ctx.Reply().Send("```" + string(data) + "```")
-
-				case "snapshots_view":
-					accountId, ok := opts.Value("account_id").(string)
-					if !ok {
-						return ctx.Reply().Send("invalid accountId, failed to cast to string")
-					}
-					snapshots, err := ctx.Core.Database().GetLastAccountSnapshots(ctx.Context, accountId, 3)
-					if err != nil {
-						return ctx.Reply().Send("GetLastAccountSnapshots: " + err.Error())
-					}
-
-					var data []map[string]string
-					for _, snapshot := range snapshots {
-						data = append(data, map[string]string{
-							"id":             snapshot.ID,
-							"type":           string(snapshot.Type),
-							"referenceId":    snapshot.ReferenceID,
-							"createdAt":      snapshot.CreatedAt.String(),
-							"lastBattleTime": snapshot.LastBattleTime.String(),
-							"battlesRating":  snapshot.RatingBattles.Battles.String(),
-							"battlesRegular": snapshot.RegularBattles.Battles.String(),
-						})
-					}
-
-					bytes, err := json.MarshalIndent(data, "", "  ")
-					if err != nil {
-						return ctx.Reply().Send("json.Marshal: " + err.Error())
-					}
-					return ctx.Reply().Send("```" + string(bytes) + "```")
 
 				case "tasks_view":
 					if !ctx.User.HasPermission(permissions.ViewTaskLogs) {

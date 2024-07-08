@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
 
 	"github.com/cufee/aftermath/internal/external/blitzstars"
@@ -310,14 +311,24 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 
 	group.Add(1)
 	go func() {
-		defer group.Done()
-		s, err := c.database.GetAccountSnapshot(ctx, id, options.referenceID, options.snapshotType, database.WithCreatedBefore(sessionBefore))
-		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s, Err: err}
-		if err != nil {
-			return
+		var opts = []database.SnapshotQuery{database.WithCreatedBefore(sessionBefore)}
+		if options.referenceID != "" {
+			opts = append(opts, database.WithReferenceIDIn(options.referenceID))
 		}
 
-		v, err := c.database.GetVehicleSnapshots(ctx, id, options.referenceID, options.snapshotType, database.WithCreatedBefore(sessionBefore))
+		defer group.Done()
+		s, err := c.database.GetAccountSnapshots(ctx, []string{id}, options.snapshotType, opts...)
+		if err != nil {
+			accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Err: err}
+			return
+		}
+		if len(s) < 1 {
+			accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Err: new(db.NotFoundError)}
+			return
+		}
+		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s[0]}
+
+		v, err := c.database.GetVehicleSnapshots(ctx, id, nil, options.snapshotType, opts...)
 		vehiclesSnapshots = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
 	}()
 

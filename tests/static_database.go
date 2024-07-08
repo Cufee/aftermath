@@ -101,23 +101,23 @@ func (c *staticTestingDatabase) DeleteConnection(ctx context.Context, connection
 	return errors.New("DeleteConnection not implemented")
 }
 
-func (c *staticTestingDatabase) GetAccountSnapshot(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...database.SnapshotQuery) (models.AccountSnapshot, error) {
-	return models.AccountSnapshot{}, errors.New("GetAccountSnapshot not implemented")
+func (c *staticTestingDatabase) GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.SnapshotQuery) ([]models.AccountSnapshot, error) {
+	return nil, errors.New("GetAccountSnapshots not implemented")
 }
 func (c *staticTestingDatabase) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) (map[string]error, error) {
 	return nil, errors.New("CreateAccountSnapshots not implemented")
 }
-func (c *staticTestingDatabase) GetLastAccountSnapshots(ctx context.Context, accountID string, limit int) ([]models.AccountSnapshot, error) {
-	return nil, errors.New("GetLastAccountSnapshots not implemented")
+func (c *staticTestingDatabase) GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.SnapshotQuery) (map[string]time.Time, error) {
+	return nil, errors.New("GetAccountLastBattleTimes not implemented")
 }
-func (c *staticTestingDatabase) GetManyAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.SnapshotQuery) ([]models.AccountSnapshot, error) {
-	return nil, errors.New("GetManyAccountSnapshots not implemented")
-}
-func (c *staticTestingDatabase) GetVehicleSnapshots(ctx context.Context, accountID, referenceID string, kind models.SnapshotType, options ...database.SnapshotQuery) ([]models.VehicleSnapshot, error) {
+func (c *staticTestingDatabase) GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.SnapshotQuery) ([]models.VehicleSnapshot, error) {
 	return nil, errors.New("GetVehicleSnapshots not implemented")
 }
 func (c *staticTestingDatabase) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) (map[string]error, error) {
 	return nil, errors.New("CreateAccountVehicleSnapshots not implemented")
+}
+func (c *staticTestingDatabase) GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.SnapshotQuery) (map[string]time.Time, error) {
+	return nil, errors.New("GetVehicleLastBattleTimes not implemented")
 }
 func (c *staticTestingDatabase) DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error {
 	return errors.New("DeleteExpiredSnapshots not implemented")
@@ -125,7 +125,7 @@ func (c *staticTestingDatabase) DeleteExpiredSnapshots(ctx context.Context, expi
 func (c *staticTestingDatabase) CreateAccountAchievementSnapshots(ctx context.Context, accountID string, snapshots ...models.AchievementsSnapshot) (map[string]error, error) {
 	return nil, errors.New("CreateAccountAchievementSnapshots not implemented")
 }
-func (c *staticTestingDatabase) GetAchievementsSnapshots(ctx context.Context, accountID string, kind models.SnapshotType, options ...database.SnapshotQuery) ([]models.AchievementsSnapshot, error) {
+func (c *staticTestingDatabase) GetAchievementSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.SnapshotQuery) ([]models.AchievementsSnapshot, error) {
 	return nil, errors.New("GetAchievementsSnapshots not implemented")
 }
 

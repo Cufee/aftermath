@@ -85,7 +85,7 @@ var (
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type models.TaskType) error {
 	switch _type {
-	case "UPDATE_CLANS", "RECORD_SNAPSHOTS", "CLEANUP_DATABASE":
+	case "UPDATE_CLANS", "RECORD_SNAPSHOTS", "ACHIEVEMENT_LEADERBOARDS", "CLEANUP_DATABASE":
 		return nil
 	default:
 		return fmt.Errorf("crontask: invalid enum value for type field: %q", _type)

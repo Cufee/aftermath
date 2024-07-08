@@ -20,6 +20,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
@@ -52,6 +53,7 @@ const (
 	TypeClan                 = "Clan"
 	TypeCronTask             = "CronTask"
 	TypeDiscordInteraction   = "DiscordInteraction"
+	TypeLeaderboardScore     = "LeaderboardScore"
 	TypeSession              = "Session"
 	TypeUser                 = "User"
 	TypeUserConnection       = "UserConnection"
@@ -7049,6 +7051,698 @@ func (m *DiscordInteractionMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown DiscordInteraction edge %s", name)
+}
+
+// LeaderboardScoreMutation represents an operation that mutates the LeaderboardScore nodes in the graph.
+type LeaderboardScoreMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *string
+	created_at     *time.Time
+	updated_at     *time.Time
+	_type          *models.ScoreType
+	score          *float32
+	addscore       *float32
+	reference_id   *string
+	leaderboard_id *models.LeaderboardID
+	meta           *map[string]interface{}
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*LeaderboardScore, error)
+	predicates     []predicate.LeaderboardScore
+}
+
+var _ ent.Mutation = (*LeaderboardScoreMutation)(nil)
+
+// leaderboardscoreOption allows management of the mutation configuration using functional options.
+type leaderboardscoreOption func(*LeaderboardScoreMutation)
+
+// newLeaderboardScoreMutation creates new mutation for the LeaderboardScore entity.
+func newLeaderboardScoreMutation(c config, op Op, opts ...leaderboardscoreOption) *LeaderboardScoreMutation {
+	m := &LeaderboardScoreMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLeaderboardScore,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLeaderboardScoreID sets the ID field of the mutation.
+func withLeaderboardScoreID(id string) leaderboardscoreOption {
+	return func(m *LeaderboardScoreMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LeaderboardScore
+		)
+		m.oldValue = func(ctx context.Context) (*LeaderboardScore, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LeaderboardScore.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLeaderboardScore sets the old LeaderboardScore of the mutation.
+func withLeaderboardScore(node *LeaderboardScore) leaderboardscoreOption {
+	return func(m *LeaderboardScoreMutation) {
+		m.oldValue = func(context.Context) (*LeaderboardScore, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LeaderboardScoreMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LeaderboardScoreMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("db: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LeaderboardScore entities.
+func (m *LeaderboardScoreMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LeaderboardScoreMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LeaderboardScoreMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LeaderboardScore.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LeaderboardScoreMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LeaderboardScoreMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LeaderboardScore entity.
+// If the LeaderboardScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeaderboardScoreMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LeaderboardScoreMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *LeaderboardScoreMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *LeaderboardScoreMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the LeaderboardScore entity.
+// If the LeaderboardScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeaderboardScoreMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *LeaderboardScoreMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetType sets the "type" field.
+func (m *LeaderboardScoreMutation) SetType(mt models.ScoreType) {
+	m._type = &mt
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *LeaderboardScoreMutation) GetType() (r models.ScoreType, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the LeaderboardScore entity.
+// If the LeaderboardScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeaderboardScoreMutation) OldType(ctx context.Context) (v models.ScoreType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *LeaderboardScoreMutation) ResetType() {
+	m._type = nil
+}
+
+// SetScore sets the "score" field.
+func (m *LeaderboardScoreMutation) SetScore(f float32) {
+	m.score = &f
+	m.addscore = nil
+}
+
+// Score returns the value of the "score" field in the mutation.
+func (m *LeaderboardScoreMutation) Score() (r float32, exists bool) {
+	v := m.score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScore returns the old "score" field's value of the LeaderboardScore entity.
+// If the LeaderboardScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeaderboardScoreMutation) OldScore(ctx context.Context) (v float32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScore: %w", err)
+	}
+	return oldValue.Score, nil
+}
+
+// AddScore adds f to the "score" field.
+func (m *LeaderboardScoreMutation) AddScore(f float32) {
+	if m.addscore != nil {
+		*m.addscore += f
+	} else {
+		m.addscore = &f
+	}
+}
+
+// AddedScore returns the value that was added to the "score" field in this mutation.
+func (m *LeaderboardScoreMutation) AddedScore() (r float32, exists bool) {
+	v := m.addscore
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetScore resets all changes to the "score" field.
+func (m *LeaderboardScoreMutation) ResetScore() {
+	m.score = nil
+	m.addscore = nil
+}
+
+// SetReferenceID sets the "reference_id" field.
+func (m *LeaderboardScoreMutation) SetReferenceID(s string) {
+	m.reference_id = &s
+}
+
+// ReferenceID returns the value of the "reference_id" field in the mutation.
+func (m *LeaderboardScoreMutation) ReferenceID() (r string, exists bool) {
+	v := m.reference_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReferenceID returns the old "reference_id" field's value of the LeaderboardScore entity.
+// If the LeaderboardScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeaderboardScoreMutation) OldReferenceID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReferenceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReferenceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReferenceID: %w", err)
+	}
+	return oldValue.ReferenceID, nil
+}
+
+// ResetReferenceID resets all changes to the "reference_id" field.
+func (m *LeaderboardScoreMutation) ResetReferenceID() {
+	m.reference_id = nil
+}
+
+// SetLeaderboardID sets the "leaderboard_id" field.
+func (m *LeaderboardScoreMutation) SetLeaderboardID(mi models.LeaderboardID) {
+	m.leaderboard_id = &mi
+}
+
+// LeaderboardID returns the value of the "leaderboard_id" field in the mutation.
+func (m *LeaderboardScoreMutation) LeaderboardID() (r models.LeaderboardID, exists bool) {
+	v := m.leaderboard_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLeaderboardID returns the old "leaderboard_id" field's value of the LeaderboardScore entity.
+// If the LeaderboardScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeaderboardScoreMutation) OldLeaderboardID(ctx context.Context) (v models.LeaderboardID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLeaderboardID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLeaderboardID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLeaderboardID: %w", err)
+	}
+	return oldValue.LeaderboardID, nil
+}
+
+// ResetLeaderboardID resets all changes to the "leaderboard_id" field.
+func (m *LeaderboardScoreMutation) ResetLeaderboardID() {
+	m.leaderboard_id = nil
+}
+
+// SetMeta sets the "meta" field.
+func (m *LeaderboardScoreMutation) SetMeta(value map[string]interface{}) {
+	m.meta = &value
+}
+
+// Meta returns the value of the "meta" field in the mutation.
+func (m *LeaderboardScoreMutation) Meta() (r map[string]interface{}, exists bool) {
+	v := m.meta
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMeta returns the old "meta" field's value of the LeaderboardScore entity.
+// If the LeaderboardScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeaderboardScoreMutation) OldMeta(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMeta is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMeta requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMeta: %w", err)
+	}
+	return oldValue.Meta, nil
+}
+
+// ResetMeta resets all changes to the "meta" field.
+func (m *LeaderboardScoreMutation) ResetMeta() {
+	m.meta = nil
+}
+
+// Where appends a list predicates to the LeaderboardScoreMutation builder.
+func (m *LeaderboardScoreMutation) Where(ps ...predicate.LeaderboardScore) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LeaderboardScoreMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LeaderboardScoreMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LeaderboardScore, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LeaderboardScoreMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LeaderboardScoreMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LeaderboardScore).
+func (m *LeaderboardScoreMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LeaderboardScoreMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, leaderboardscore.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, leaderboardscore.FieldUpdatedAt)
+	}
+	if m._type != nil {
+		fields = append(fields, leaderboardscore.FieldType)
+	}
+	if m.score != nil {
+		fields = append(fields, leaderboardscore.FieldScore)
+	}
+	if m.reference_id != nil {
+		fields = append(fields, leaderboardscore.FieldReferenceID)
+	}
+	if m.leaderboard_id != nil {
+		fields = append(fields, leaderboardscore.FieldLeaderboardID)
+	}
+	if m.meta != nil {
+		fields = append(fields, leaderboardscore.FieldMeta)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LeaderboardScoreMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case leaderboardscore.FieldCreatedAt:
+		return m.CreatedAt()
+	case leaderboardscore.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case leaderboardscore.FieldType:
+		return m.GetType()
+	case leaderboardscore.FieldScore:
+		return m.Score()
+	case leaderboardscore.FieldReferenceID:
+		return m.ReferenceID()
+	case leaderboardscore.FieldLeaderboardID:
+		return m.LeaderboardID()
+	case leaderboardscore.FieldMeta:
+		return m.Meta()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LeaderboardScoreMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case leaderboardscore.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case leaderboardscore.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case leaderboardscore.FieldType:
+		return m.OldType(ctx)
+	case leaderboardscore.FieldScore:
+		return m.OldScore(ctx)
+	case leaderboardscore.FieldReferenceID:
+		return m.OldReferenceID(ctx)
+	case leaderboardscore.FieldLeaderboardID:
+		return m.OldLeaderboardID(ctx)
+	case leaderboardscore.FieldMeta:
+		return m.OldMeta(ctx)
+	}
+	return nil, fmt.Errorf("unknown LeaderboardScore field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LeaderboardScoreMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case leaderboardscore.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case leaderboardscore.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case leaderboardscore.FieldType:
+		v, ok := value.(models.ScoreType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case leaderboardscore.FieldScore:
+		v, ok := value.(float32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScore(v)
+		return nil
+	case leaderboardscore.FieldReferenceID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReferenceID(v)
+		return nil
+	case leaderboardscore.FieldLeaderboardID:
+		v, ok := value.(models.LeaderboardID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLeaderboardID(v)
+		return nil
+	case leaderboardscore.FieldMeta:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMeta(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LeaderboardScore field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LeaderboardScoreMutation) AddedFields() []string {
+	var fields []string
+	if m.addscore != nil {
+		fields = append(fields, leaderboardscore.FieldScore)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LeaderboardScoreMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case leaderboardscore.FieldScore:
+		return m.AddedScore()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LeaderboardScoreMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case leaderboardscore.FieldScore:
+		v, ok := value.(float32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScore(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LeaderboardScore numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LeaderboardScoreMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LeaderboardScoreMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LeaderboardScoreMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown LeaderboardScore nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LeaderboardScoreMutation) ResetField(name string) error {
+	switch name {
+	case leaderboardscore.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case leaderboardscore.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case leaderboardscore.FieldType:
+		m.ResetType()
+		return nil
+	case leaderboardscore.FieldScore:
+		m.ResetScore()
+		return nil
+	case leaderboardscore.FieldReferenceID:
+		m.ResetReferenceID()
+		return nil
+	case leaderboardscore.FieldLeaderboardID:
+		m.ResetLeaderboardID()
+		return nil
+	case leaderboardscore.FieldMeta:
+		m.ResetMeta()
+		return nil
+	}
+	return fmt.Errorf("unknown LeaderboardScore field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LeaderboardScoreMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LeaderboardScoreMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LeaderboardScoreMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LeaderboardScoreMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LeaderboardScoreMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LeaderboardScoreMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LeaderboardScoreMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LeaderboardScore unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LeaderboardScoreMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LeaderboardScore edge %s", name)
 }
 
 // SessionMutation represents an operation that mutates the Session nodes in the graph.

@@ -3,11 +3,17 @@ version: "3"
 dotenv:
   - ".env"
 
+vars:
+  DATABASE_PATH: $DATABASE_PATH
+  DATABASE_NAME: $DATABASE_NAME
+
 tasks:
   test:
+    dotenv:
+      - ".env.test"
     desc: runs tests
     cmds:
-      - go run {{ .PRISMA_CLIENT }} db push {{ .PRISMA_SCHEMA }}
+      - task: db-migrate-apply-test
       - |
         if [ -z "{{ .CLI_ARGS }}" ]; then
           go test -timeout 30s --count=1 -v ./...
@@ -24,10 +30,17 @@ tasks:
     cmd: atlas migrate hash --dir "file://internal/database/ent/migrations" && atlas migrate diff {{.CLI_ARGS}} --dir "file://internal/database/ent/migrations" --to "ent://internal/database/ent/schema" --dev-url "sqlite://file?mode=memory&_fk=1"
   db-migrate-apply:
     desc: apply migrations using atlas
-    cmd: atlas migrate apply --allow-dirty --dir "file://internal/database/ent/migrations" --tx-mode all --url "sqlite://${DATABASE_PATH}/${DATABASE_NAME}?_fk=1"
+    cmds: 
+      # variables will be pulled from global vars declaration unless overwritten in the task call
+      - echo "Applying migrations to {{.DATABASE_PATH}}/{{.DATABASE_NAME}}"
+      - atlas migrate apply --allow-dirty --dir "file://internal/database/ent/migrations" --tx-mode all --url "sqlite://{{.DATABASE_PATH}}/{{.DATABASE_NAME}}?_fk=1"
   db-migrate-apply-test:
     desc: apply migrations to the tests database using atlas
-    cmd: atlas migrate apply --allow-dirty --dir "file://internal/database/ent/migrations" --tx-mode all --url "sqlite://${DATABASE_PATH}/tests.db?_fk=1"
+    cmds:
+      - task: db-migrate-apply
+        vars:
+          DATABASE_PATH: $DATABASE_PATH
+          DATABASE_NAME: tests.db
 
   dev:
     desc: Start a local dev server

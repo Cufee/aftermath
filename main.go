@@ -251,7 +251,6 @@ func newDatabaseClientFromEnv() (database.Client, error) {
 
 	client, err := database.NewSQLiteClient(filepath.Join(constants.DatabasePath, constants.DatabaseName))
 	if err != nil {
-
 		return nil, fmt.Errorf("database#NewClient failed %w", err)
 	}
 

@@ -33,6 +33,9 @@ type CronTask func(*sql.Selector)
 // DiscordInteraction is the predicate function for discordinteraction builders.
 type DiscordInteraction func(*sql.Selector)
 
+// LeaderboardScore is the predicate function for leaderboardscore builders.
+type LeaderboardScore func(*sql.Selector)
+
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
 
