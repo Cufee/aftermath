@@ -7,8 +7,9 @@ import (
 type TaskType string
 
 const (
-	TaskTypeUpdateClans     TaskType = "UPDATE_CLANS"
-	TaskTypeRecordSnapshots TaskType = "RECORD_SNAPSHOTS"
+	TaskTypeUpdateClans                   TaskType = "UPDATE_CLANS"
+	TaskTypeRecordSnapshots               TaskType = "RECORD_SNAPSHOTS"
+	TaskTypeAchievementsLeaderboardUpdate TaskType = "ACHIEVEMENT_LEADERBOARDS"
 
 	TaskTypeDatabaseCleanup TaskType = "CLEANUP_DATABASE"
 )
@@ -19,6 +20,7 @@ func (TaskType) Values() []string {
 	for _, s := range []TaskType{
 		TaskTypeUpdateClans,
 		TaskTypeRecordSnapshots,
+		TaskTypeAchievementsLeaderboardUpdate,
 		TaskTypeDatabaseCleanup,
 	} {
 		kinds = append(kinds, string(s))

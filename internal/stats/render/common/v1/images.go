@@ -16,13 +16,13 @@ func AddBackground(content, background image.Image, style Style) image.Image {
 	}
 
 	// Fill background with black and round the corners
-	frameCtx := gg.NewContextForImage(content)
+	frameCtx := gg.NewContext(content.Bounds().Dx(), content.Bounds().Dy())
 	if style.BackgroundColor != nil {
 		frameCtx.SetColor(style.BackgroundColor)
 		frameCtx.Clear()
 	}
-	frameCtx.DrawRoundedRectangle(0, 0, float64(frameCtx.Width()), float64(frameCtx.Height()), style.BorderRadius)
-	frameCtx.Clip()
+
+	clipRoundedRect(frameCtx, style.BorderRadius)
 
 	// Resize the background image to fit the cards
 	bgImage := imaging.Fill(background, frameCtx.Width(), frameCtx.Height(), imaging.Center, imaging.NearestNeighbor)
@@ -74,10 +74,8 @@ func renderImages(images []image.Image, style Style) (image.Image, error) {
 
 	ctx := gg.NewContext(int(math.Ceil(imageSize.width)), int(math.Ceil(imageSize.height)))
 
-	if style.BorderRadius > 0 {
-		ctx.DrawRoundedRectangle(0, 0, float64(ctx.Width()), float64(ctx.Height()), style.BorderRadius)
-		ctx.Clip()
-	}
+	clipRoundedRect(ctx, style.BorderRadius)
+
 	if style.BackgroundColor != nil {
 		ctx.DrawRectangle(0, 0, imageSize.width, imageSize.height)
 		ctx.SetColor(style.BackgroundColor)
@@ -213,4 +211,25 @@ func max(a, b float64) float64 {
 		return a
 	}
 	return b
+}
+
+func clipRoundedRect(ctx *gg.Context, borderRadius float64) {
+	if borderRadius <= 0 {
+		return
+	}
+
+	width, height := float64(ctx.Width()), float64(ctx.Height())
+	// top left
+	ctx.DrawEllipticalArc(borderRadius, borderRadius, borderRadius, borderRadius, gg.Radians(270), gg.Radians(180))
+	// bottom left
+	ctx.LineTo(0, height-borderRadius)
+	ctx.DrawEllipticalArc(borderRadius, height-borderRadius, borderRadius, borderRadius, gg.Radians(180), gg.Radians(90))
+	// bottom right
+	ctx.LineTo(width-borderRadius, height)
+	ctx.DrawEllipticalArc(width-borderRadius, height-borderRadius, borderRadius, borderRadius, gg.Radians(90), gg.Radians(0))
+	// top right
+	ctx.LineTo(width, borderRadius)
+	ctx.DrawEllipticalArc(width-borderRadius, borderRadius, borderRadius, borderRadius, gg.Radians(0), gg.Radians(-90))
+	// clip final path
+	ctx.Clip()
 }
