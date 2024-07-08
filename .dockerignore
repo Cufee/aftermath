@@ -11,6 +11,6 @@ tmp
 **/.air.*
 dev_web.go
 
-README.md
+**/*.md
 Taskfile.yaml
 docker-compose.*
