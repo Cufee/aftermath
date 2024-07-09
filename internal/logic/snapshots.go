@@ -113,7 +113,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		defer group.Done()
 		// clans are optional-ish
 		data, err := wgClient.BatchAccountClan(ctx, realm, accountsNeedAnUpdate)
-		if err != nil {
+		if err != nil && err.Error() != "SOURCE_NOT_AVAILABLE" {
 			log.Err(err).Msg("failed to get batch account clans")
 		}
 		clans = data
