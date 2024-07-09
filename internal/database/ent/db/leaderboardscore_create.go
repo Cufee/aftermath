@@ -61,12 +61,6 @@ func (lsc *LeaderboardScoreCreate) SetScore(f float32) *LeaderboardScoreCreate {
 	return lsc
 }
 
-// SetAccountID sets the "account_id" field.
-func (lsc *LeaderboardScoreCreate) SetAccountID(s string) *LeaderboardScoreCreate {
-	lsc.mutation.SetAccountID(s)
-	return lsc
-}
-
 // SetReferenceID sets the "reference_id" field.
 func (lsc *LeaderboardScoreCreate) SetReferenceID(s string) *LeaderboardScoreCreate {
 	lsc.mutation.SetReferenceID(s)
@@ -167,9 +161,6 @@ func (lsc *LeaderboardScoreCreate) check() error {
 	if _, ok := lsc.mutation.Score(); !ok {
 		return &ValidationError{Name: "score", err: errors.New(`db: missing required field "LeaderboardScore.score"`)}
 	}
-	if _, ok := lsc.mutation.AccountID(); !ok {
-		return &ValidationError{Name: "account_id", err: errors.New(`db: missing required field "LeaderboardScore.account_id"`)}
-	}
 	if _, ok := lsc.mutation.ReferenceID(); !ok {
 		return &ValidationError{Name: "reference_id", err: errors.New(`db: missing required field "LeaderboardScore.reference_id"`)}
 	}
@@ -229,10 +220,6 @@ func (lsc *LeaderboardScoreCreate) createSpec() (*LeaderboardScore, *sqlgraph.Cr
 	if value, ok := lsc.mutation.Score(); ok {
 		_spec.SetField(leaderboardscore.FieldScore, field.TypeFloat32, value)
 		_node.Score = value
-	}
-	if value, ok := lsc.mutation.AccountID(); ok {
-		_spec.SetField(leaderboardscore.FieldAccountID, field.TypeString, value)
-		_node.AccountID = value
 	}
 	if value, ok := lsc.mutation.ReferenceID(); ok {
 		_spec.SetField(leaderboardscore.FieldReferenceID, field.TypeString, value)

@@ -71,20 +71,6 @@ func (lsu *LeaderboardScoreUpdate) AddScore(f float32) *LeaderboardScoreUpdate {
 	return lsu
 }
 
-// SetAccountID sets the "account_id" field.
-func (lsu *LeaderboardScoreUpdate) SetAccountID(s string) *LeaderboardScoreUpdate {
-	lsu.mutation.SetAccountID(s)
-	return lsu
-}
-
-// SetNillableAccountID sets the "account_id" field if the given value is not nil.
-func (lsu *LeaderboardScoreUpdate) SetNillableAccountID(s *string) *LeaderboardScoreUpdate {
-	if s != nil {
-		lsu.SetAccountID(*s)
-	}
-	return lsu
-}
-
 // SetReferenceID sets the "reference_id" field.
 func (lsu *LeaderboardScoreUpdate) SetReferenceID(s string) *LeaderboardScoreUpdate {
 	lsu.mutation.SetReferenceID(s)
@@ -200,9 +186,6 @@ func (lsu *LeaderboardScoreUpdate) sqlSave(ctx context.Context) (n int, err erro
 	if value, ok := lsu.mutation.AddedScore(); ok {
 		_spec.AddField(leaderboardscore.FieldScore, field.TypeFloat32, value)
 	}
-	if value, ok := lsu.mutation.AccountID(); ok {
-		_spec.SetField(leaderboardscore.FieldAccountID, field.TypeString, value)
-	}
 	if value, ok := lsu.mutation.ReferenceID(); ok {
 		_spec.SetField(leaderboardscore.FieldReferenceID, field.TypeString, value)
 	}
@@ -272,20 +255,6 @@ func (lsuo *LeaderboardScoreUpdateOne) SetNillableScore(f *float32) *Leaderboard
 // AddScore adds f to the "score" field.
 func (lsuo *LeaderboardScoreUpdateOne) AddScore(f float32) *LeaderboardScoreUpdateOne {
 	lsuo.mutation.AddScore(f)
-	return lsuo
-}
-
-// SetAccountID sets the "account_id" field.
-func (lsuo *LeaderboardScoreUpdateOne) SetAccountID(s string) *LeaderboardScoreUpdateOne {
-	lsuo.mutation.SetAccountID(s)
-	return lsuo
-}
-
-// SetNillableAccountID sets the "account_id" field if the given value is not nil.
-func (lsuo *LeaderboardScoreUpdateOne) SetNillableAccountID(s *string) *LeaderboardScoreUpdateOne {
-	if s != nil {
-		lsuo.SetAccountID(*s)
-	}
 	return lsuo
 }
 
@@ -433,9 +402,6 @@ func (lsuo *LeaderboardScoreUpdateOne) sqlSave(ctx context.Context) (_node *Lead
 	}
 	if value, ok := lsuo.mutation.AddedScore(); ok {
 		_spec.AddField(leaderboardscore.FieldScore, field.TypeFloat32, value)
-	}
-	if value, ok := lsuo.mutation.AccountID(); ok {
-		_spec.SetField(leaderboardscore.FieldAccountID, field.TypeString, value)
 	}
 	if value, ok := lsuo.mutation.ReferenceID(); ok {
 		_spec.SetField(leaderboardscore.FieldReferenceID, field.TypeString, value)

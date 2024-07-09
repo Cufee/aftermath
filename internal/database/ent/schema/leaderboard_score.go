@@ -17,7 +17,6 @@ func (LeaderboardScore) Fields() []ent.Field {
 		field.Enum("type").
 			GoType(models.ScoreType("")),
 		field.Float32("score"),
-		field.String("account_id"),
 		field.String("reference_id"),
 		field.String("leaderboard_id"),
 		field.JSON("meta", map[string]any{}),
@@ -32,9 +31,7 @@ func (LeaderboardScore) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("id"),
 		index.Fields("created_at"),
-		index.Fields("account_id"),
 		index.Fields("reference_id"),
-		index.Fields("leaderboard_id", "type", "account_id"),
 		index.Fields("leaderboard_id", "type", "reference_id"),
 	}
 }

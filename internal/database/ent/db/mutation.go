@@ -7064,7 +7064,6 @@ type LeaderboardScoreMutation struct {
 	_type          *models.ScoreType
 	score          *float32
 	addscore       *float32
-	account_id     *string
 	reference_id   *string
 	leaderboard_id *string
 	meta           *map[string]interface{}
@@ -7342,42 +7341,6 @@ func (m *LeaderboardScoreMutation) ResetScore() {
 	m.addscore = nil
 }
 
-// SetAccountID sets the "account_id" field.
-func (m *LeaderboardScoreMutation) SetAccountID(s string) {
-	m.account_id = &s
-}
-
-// AccountID returns the value of the "account_id" field in the mutation.
-func (m *LeaderboardScoreMutation) AccountID() (r string, exists bool) {
-	v := m.account_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAccountID returns the old "account_id" field's value of the LeaderboardScore entity.
-// If the LeaderboardScore object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LeaderboardScoreMutation) OldAccountID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAccountID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
-	}
-	return oldValue.AccountID, nil
-}
-
-// ResetAccountID resets all changes to the "account_id" field.
-func (m *LeaderboardScoreMutation) ResetAccountID() {
-	m.account_id = nil
-}
-
 // SetReferenceID sets the "reference_id" field.
 func (m *LeaderboardScoreMutation) SetReferenceID(s string) {
 	m.reference_id = &s
@@ -7520,7 +7483,7 @@ func (m *LeaderboardScoreMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LeaderboardScoreMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, leaderboardscore.FieldCreatedAt)
 	}
@@ -7532,9 +7495,6 @@ func (m *LeaderboardScoreMutation) Fields() []string {
 	}
 	if m.score != nil {
 		fields = append(fields, leaderboardscore.FieldScore)
-	}
-	if m.account_id != nil {
-		fields = append(fields, leaderboardscore.FieldAccountID)
 	}
 	if m.reference_id != nil {
 		fields = append(fields, leaderboardscore.FieldReferenceID)
@@ -7561,8 +7521,6 @@ func (m *LeaderboardScoreMutation) Field(name string) (ent.Value, bool) {
 		return m.GetType()
 	case leaderboardscore.FieldScore:
 		return m.Score()
-	case leaderboardscore.FieldAccountID:
-		return m.AccountID()
 	case leaderboardscore.FieldReferenceID:
 		return m.ReferenceID()
 	case leaderboardscore.FieldLeaderboardID:
@@ -7586,8 +7544,6 @@ func (m *LeaderboardScoreMutation) OldField(ctx context.Context, name string) (e
 		return m.OldType(ctx)
 	case leaderboardscore.FieldScore:
 		return m.OldScore(ctx)
-	case leaderboardscore.FieldAccountID:
-		return m.OldAccountID(ctx)
 	case leaderboardscore.FieldReferenceID:
 		return m.OldReferenceID(ctx)
 	case leaderboardscore.FieldLeaderboardID:
@@ -7630,13 +7586,6 @@ func (m *LeaderboardScoreMutation) SetField(name string, value ent.Value) error 
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetScore(v)
-		return nil
-	case leaderboardscore.FieldAccountID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAccountID(v)
 		return nil
 	case leaderboardscore.FieldReferenceID:
 		v, ok := value.(string)
@@ -7734,9 +7683,6 @@ func (m *LeaderboardScoreMutation) ResetField(name string) error {
 		return nil
 	case leaderboardscore.FieldScore:
 		m.ResetScore()
-		return nil
-	case leaderboardscore.FieldAccountID:
-		m.ResetAccountID()
 		return nil
 	case leaderboardscore.FieldReferenceID:
 		m.ResetReferenceID()

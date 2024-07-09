@@ -16,7 +16,6 @@ func toScore(r *db.LeaderboardScore) models.LeaderboardScore {
 		Type:          r.Type,
 		CreatedAt:     r.CreatedAt,
 		UpdatedAt:     r.UpdatedAt,
-		AccountID:     r.AccountID,
 		ReferenceID:   r.ReferenceID,
 		LeaderboardID: r.LeaderboardID,
 		Score:         r.Score,
@@ -82,7 +81,7 @@ func (c *client) GetLeaderboardScores(ctx context.Context, leaderboardID string,
 	}
 
 	selectFields := leaderboardscore.Columns
-	if fields := query.selectFields(leaderboardscore.FieldAccountID); fields != nil {
+	if fields := query.selectFields(leaderboardscore.FieldReferenceID); fields != nil {
 		selectFields = fields
 	}
 
@@ -91,7 +90,7 @@ func (c *client) GetLeaderboardScores(ctx context.Context, leaderboardID string,
 	q = q.OrderBy(orderBy)
 
 	innerQueryString, queryArgs := q.Query()
-	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(leaderboardscore.FieldAccountID).Query()
+	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(leaderboardscore.FieldReferenceID).Query()
 	rows, err := c.db.LeaderboardScore.QueryContext(ctx, queryString, queryArgs...)
 	if err != nil {
 		return nil, err
