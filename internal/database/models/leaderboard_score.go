@@ -32,7 +32,6 @@ type LeaderboardScore struct {
 	UpdatedAt time.Time
 
 	Type          ScoreType
-	AccountID     string
 	ReferenceID   string
 	LeaderboardID string
 

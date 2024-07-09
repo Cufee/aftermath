@@ -27,8 +27,6 @@ type LeaderboardScore struct {
 	Type models.ScoreType `json:"type,omitempty"`
 	// Score holds the value of the "score" field.
 	Score float32 `json:"score,omitempty"`
-	// AccountID holds the value of the "account_id" field.
-	AccountID string `json:"account_id,omitempty"`
 	// ReferenceID holds the value of the "reference_id" field.
 	ReferenceID string `json:"reference_id,omitempty"`
 	// LeaderboardID holds the value of the "leaderboard_id" field.
@@ -47,7 +45,7 @@ func (*LeaderboardScore) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case leaderboardscore.FieldScore:
 			values[i] = new(sql.NullFloat64)
-		case leaderboardscore.FieldID, leaderboardscore.FieldType, leaderboardscore.FieldAccountID, leaderboardscore.FieldReferenceID, leaderboardscore.FieldLeaderboardID:
+		case leaderboardscore.FieldID, leaderboardscore.FieldType, leaderboardscore.FieldReferenceID, leaderboardscore.FieldLeaderboardID:
 			values[i] = new(sql.NullString)
 		case leaderboardscore.FieldCreatedAt, leaderboardscore.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -95,12 +93,6 @@ func (ls *LeaderboardScore) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field score", values[i])
 			} else if value.Valid {
 				ls.Score = float32(value.Float64)
-			}
-		case leaderboardscore.FieldAccountID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field account_id", values[i])
-			} else if value.Valid {
-				ls.AccountID = value.String
 			}
 		case leaderboardscore.FieldReferenceID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -169,9 +161,6 @@ func (ls *LeaderboardScore) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("score=")
 	builder.WriteString(fmt.Sprintf("%v", ls.Score))
-	builder.WriteString(", ")
-	builder.WriteString("account_id=")
-	builder.WriteString(ls.AccountID)
 	builder.WriteString(", ")
 	builder.WriteString("reference_id=")
 	builder.WriteString(ls.ReferenceID)

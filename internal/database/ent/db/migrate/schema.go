@@ -383,7 +383,6 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"hourly", "daily"}},
 		{Name: "score", Type: field.TypeFloat32},
-		{Name: "account_id", Type: field.TypeString},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "leaderboard_id", Type: field.TypeString},
 		{Name: "meta", Type: field.TypeJSON},
@@ -405,24 +404,14 @@ var (
 				Columns: []*schema.Column{LeaderboardScoresColumns[1]},
 			},
 			{
-				Name:    "leaderboardscore_account_id",
+				Name:    "leaderboardscore_reference_id",
 				Unique:  false,
 				Columns: []*schema.Column{LeaderboardScoresColumns[5]},
 			},
 			{
-				Name:    "leaderboardscore_reference_id",
-				Unique:  false,
-				Columns: []*schema.Column{LeaderboardScoresColumns[6]},
-			},
-			{
-				Name:    "leaderboardscore_leaderboard_id_type_account_id",
-				Unique:  false,
-				Columns: []*schema.Column{LeaderboardScoresColumns[7], LeaderboardScoresColumns[3], LeaderboardScoresColumns[5]},
-			},
-			{
 				Name:    "leaderboardscore_leaderboard_id_type_reference_id",
 				Unique:  false,
-				Columns: []*schema.Column{LeaderboardScoresColumns[7], LeaderboardScoresColumns[3], LeaderboardScoresColumns[6]},
+				Columns: []*schema.Column{LeaderboardScoresColumns[6], LeaderboardScoresColumns[3], LeaderboardScoresColumns[5]},
 			},
 		},
 	}

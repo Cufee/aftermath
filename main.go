@@ -71,8 +71,6 @@ func main() {
 		alertClient.Reader(pr, zerolog.ErrorLevel)
 	}
 
-	log.Error().Msg("test")
-
 	loadStaticAssets(static)
 	db, err := newDatabaseClientFromEnv()
 	if err != nil {

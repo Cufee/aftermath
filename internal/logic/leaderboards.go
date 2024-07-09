@@ -35,7 +35,7 @@ func RecordCurrentAchievementsLeaderboards(ctx context.Context, wgClient wargami
 		}
 		leaderboardMap := make(map[string]models.LeaderboardScore)
 		for _, score := range leaderboard {
-			leaderboardMap[score.AccountID] = score
+			leaderboardMap[score.ReferenceID] = score
 		}
 		playerLeaderboard = retry.DataWithErr[map[string]models.LeaderboardScore]{Data: leaderboardMap}
 	}()
@@ -112,7 +112,6 @@ func RecordCurrentAchievementsLeaderboards(ctx context.Context, wgClient wargami
 
 		playerScore := models.LeaderboardScore{
 			Type:          scoreType,
-			AccountID:     id,
 			ReferenceID:   id,
 			LeaderboardID: models.LeaderboardsMasteryWeightedPlayers,
 			Score:         masteryAchievementsScore(achievements),
