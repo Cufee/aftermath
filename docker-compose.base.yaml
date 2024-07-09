@@ -20,9 +20,9 @@ services:
       aftermath-migrate:
         condition: service_completed_successfully
     deploy:
-      # the resource limits are setup during build step and should generally not be adjusted here without changing the build pipeline first
+      # go runtime will try to keep memory usage right under the container limit
       resources:
         reservations:
-          memory: 128m
+          memory: 256m
         limits:
           memory: 256m
