@@ -24,7 +24,7 @@ func TestGetVehicleSnapshots(t *testing.T) {
 	defer cancel()
 
 	client.db.VehicleSnapshot.Delete().Where().Exec(ctx)
-	// defer client.db.VehicleSnapshot.Delete().Exec(ctx)
+	defer client.db.VehicleSnapshot.Delete().Exec(ctx)
 
 	_, err = client.UpsertAccounts(ctx, []models.Account{{ID: "a1", Realm: "test", Nickname: "test_account"}})
 	assert.NoError(t, err, "failed to upsert an account")
