@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"io"
 	"io/fs"
 	"os/signal"
 	"path/filepath"
@@ -62,11 +63,15 @@ func main() {
 		if err != nil {
 			log.Fatal().Err(err).Msg("alerts#NewClient failed")
 		}
-		hook := alerts.NewHook(alertClient)
+
+		pr, pw := io.Pipe()
 		log.SetupGlobalLogger(func(l zerolog.Logger) zerolog.Logger {
-			return l.Hook(hook)
+			return l.Output(zerolog.MultiLevelWriter(os.Stderr, pw))
 		})
+		alertClient.Reader(pr, zerolog.ErrorLevel)
 	}
+
+	log.Error().Msg("test")
 
 	loadStaticAssets(static)
 	db, err := newDatabaseClientFromEnv()
