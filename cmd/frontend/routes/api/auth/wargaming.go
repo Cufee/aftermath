@@ -11,9 +11,9 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 )
 
 var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {

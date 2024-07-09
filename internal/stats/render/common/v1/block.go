@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"

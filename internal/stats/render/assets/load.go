@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/cufee/aftermath/internal/files"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/golang/freetype/truetype"
-	"github.com/rs/zerolog/log"
 )
 
 var fontsMap = make(map[string][]byte)

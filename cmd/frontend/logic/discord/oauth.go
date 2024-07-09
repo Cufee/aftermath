@@ -10,8 +10,8 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/internal/constants"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 )
 
 type authToken struct {

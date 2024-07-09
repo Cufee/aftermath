@@ -15,7 +15,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
 
-	"github.com/rs/zerolog/log"
+	"github.com/cufee/aftermath/internal/log"
 	"golang.org/x/text/language"
 )
 

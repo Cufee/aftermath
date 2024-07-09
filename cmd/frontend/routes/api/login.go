@@ -8,8 +8,8 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/logic/auth"
 	"github.com/cufee/aftermath/cmd/frontend/logic/discord"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
-	"github.com/rs/zerolog/log"
 )
 
 var Login handler.Endpoint = func(ctx *handler.Context) error {

@@ -10,8 +10,8 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
-	"github.com/rs/zerolog/log"
 )
 
 func NewRouter(coreClient core.Client, token, publicKey string) (*Router, error) {

@@ -3,7 +3,7 @@ package files
 import (
 	"io/fs"
 
-	"github.com/rs/zerolog/log"
+	"github.com/cufee/aftermath/internal/log"
 )
 
 func ReadDirFiles(dir fs.FS, path string) (map[string][]byte, error) {

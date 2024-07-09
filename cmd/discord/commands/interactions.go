@@ -15,8 +15,8 @@ import (
 
 	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 )
 
 func newStatsRefreshButton(data models.DiscordInteraction) discordgo.MessageComponent {

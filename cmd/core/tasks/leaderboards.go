@@ -8,9 +8,9 @@ import (
 
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 )
 
 func init() {

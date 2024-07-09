@@ -4,7 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/internal/localization"
 
-	"github.com/rs/zerolog/log"
+	"github.com/cufee/aftermath/internal/log"
 	"golang.org/x/text/language"
 )
 

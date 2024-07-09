@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 
 	"github.com/cufee/aftermath/cmd/frontend/assets"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
-	"github.com/rs/zerolog/log"
 
 	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/joho/godotenv"
