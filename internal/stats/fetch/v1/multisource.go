@@ -311,7 +311,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 
 	group.Add(1)
 	go func() {
-		var opts = []database.SnapshotQuery{database.WithCreatedBefore(sessionBefore)}
+		var opts = []database.Query{database.WithCreatedBefore(sessionBefore)}
 		if options.referenceID != "" {
 			opts = append(opts, database.WithReferenceIDIn(options.referenceID))
 		}

@@ -13,142 +13,6 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 )
 
-type getSnapshotQuery struct {
-	referenceIDIn    map[string]struct{}
-	referenceIDNotIn map[string]struct{}
-
-	createdAfter  *time.Time
-	createdBefore *time.Time
-
-	fields []string
-}
-
-type SnapshotQuery func(*getSnapshotQuery)
-
-// --- snapshot query options ---
-
-/*
-Constrain referenceID field for the query
-  - if the final list of reference IDs is > 0, reference_id in (ids) will be added to the query
-*/
-func WithReferenceIDIn(ids ...string) SnapshotQuery {
-	return func(q *getSnapshotQuery) {
-		if q.referenceIDIn == nil {
-			q.referenceIDIn = make(map[string]struct{})
-		}
-		for _, id := range ids {
-			q.referenceIDIn[id] = struct{}{}
-		}
-	}
-}
-
-/*
-Constrain referenceID field for the query
-  - if the final list of reference IDs is > 0, reference_id not in (ids) will be added to the query
-*/
-func WithReferenceIDNotIn(ids ...string) SnapshotQuery {
-	return func(q *getSnapshotQuery) {
-		if q.referenceIDNotIn == nil {
-			q.referenceIDNotIn = make(map[string]struct{})
-		}
-		for _, id := range ids {
-			q.referenceIDNotIn[id] = struct{}{}
-		}
-	}
-}
-
-/*
-Adds a created_at lt constraint
-  - if this constraint is set, records will be sorted by created_at ASC
-*/
-func WithCreatedAfter(after time.Time) SnapshotQuery {
-	return func(q *getSnapshotQuery) {
-		q.createdAfter = &after
-	}
-}
-
-/*
-Adds a created_at gt constraint
-  - if this constraint is set, records will be sorted by created_at DESC
-*/
-func WithCreatedBefore(before time.Time) SnapshotQuery {
-	return func(q *getSnapshotQuery) {
-		q.createdBefore = &before
-	}
-}
-
-/*
-Set fields that will be selected.
-  - Some fields like id, created_at, updated_at will always be selected
-  - Passing 0 length fields will result in select *
-*/
-func WithSelect(fields ...string) SnapshotQuery {
-	return func(q *getSnapshotQuery) {
-		// make sure fields are unique
-		fieldsSet := make(map[string]struct{})
-		for _, field := range append(q.fields, fields...) {
-			fieldsSet[field] = struct{}{}
-		}
-
-		// passing 0 length fields will result in select *
-		q.fields = nil
-		for field := range fieldsSet {
-			q.fields = append(q.fields, field)
-		}
-	}
-}
-
-/*
-Returns a slice of fields for a select statement with all duplicates removed and required fields added
-  - if query.fields is nil, returns a nil slice
-*/
-func (q *getSnapshotQuery) selectFields(required ...string) []string {
-	if q.fields == nil {
-		return nil
-	}
-
-	// maker sure all required fields are part of the slice
-	var requiredFields = make(map[string]struct{})
-	for _, field := range required {
-		requiredFields[field] = struct{}{}
-	}
-
-	for _, field := range q.fields {
-		for required := range requiredFields {
-			if field == required {
-				delete(requiredFields, required)
-			}
-		}
-	}
-	for field := range requiredFields {
-		q.fields = append(q.fields, field)
-	}
-
-	return q.fields
-}
-
-func (q *getSnapshotQuery) refIDIn() []any {
-	if len(q.referenceIDIn) == 0 {
-		return nil
-	}
-	var ids []any
-	for id := range q.referenceIDIn {
-		ids = append(ids, id)
-	}
-	return ids
-}
-
-func (q *getSnapshotQuery) refIDNotIn() []any {
-	if len(q.referenceIDNotIn) == 0 {
-		return nil
-	}
-	var ids []any
-	for id := range q.referenceIDNotIn {
-		ids = append(ids, id)
-	}
-	return ids
-}
-
 // --- record to model ---
 
 func toVehicleSnapshot(record *db.VehicleSnapshot) models.VehicleSnapshot {
@@ -196,8 +60,8 @@ func toAchievementsSnapshot(record *db.AchievementsSnapshot) models.Achievements
 Get complete vehicle snapshots fot each vehicle ID in vehicle IDs for a specific account
   - passing nil vehicleIDs will return all vehicles available
 */
-func (c *client) GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error) {
-	var query getSnapshotQuery
+func (c *client) GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) ([]models.VehicleSnapshot, error) {
+	var query baseQueryOptions
 	for _, apply := range options {
 		apply(&query)
 	}
@@ -209,25 +73,15 @@ func (c *client) GetVehicleSnapshots(ctx context.Context, accountID string, vehi
 	}
 	defer rows.Close()
 
-	var snapshots []models.VehicleSnapshot
-	for rows.Next() {
-		var record db.VehicleSnapshot
-
-		values, err := record.ScanValues(vehiclesnapshot.Columns)
-		if err != nil {
-			return nil, err
-		}
-		if err := rows.Scan(values...); err != nil {
-			return nil, err
-		}
-
-		err = record.AssignValues(vehiclesnapshot.Columns, values)
-		if err != nil {
-			return nil, err
-		}
-		snapshots = append(snapshots, toVehicleSnapshot(&record))
+	records, err := rowsToRecords[*db.VehicleSnapshot](rows, vehiclesnapshot.Columns)
+	if err != nil {
+		return nil, err
 	}
 
+	var snapshots []models.VehicleSnapshot
+	for _, r := range records {
+		snapshots = append(snapshots, toVehicleSnapshot(r))
+	}
 	return snapshots, nil
 }
 
@@ -235,8 +89,8 @@ func (c *client) GetVehicleSnapshots(ctx context.Context, accountID string, vehi
 get last battle times for each vehicle in vehicle IDs for a specific account
   - passing nil vehicleIDs will return all vehicles available
 */
-func (c *client) GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...SnapshotQuery) (map[string]time.Time, error) {
-	var query getSnapshotQuery
+func (c *client) GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error) {
+	var query baseQueryOptions
 	for _, apply := range options {
 		apply(&query)
 	}
@@ -249,23 +103,14 @@ func (c *client) GetVehicleLastBattleTimes(ctx context.Context, accountID string
 	}
 	defer rows.Close()
 
+	records, err := rowsToRecords[*db.VehicleSnapshot](rows, []string{vehiclesnapshot.FieldVehicleID, vehiclesnapshot.FieldLastBattleTime})
+	if err != nil {
+		return nil, err
+	}
+
 	var lastBattleTimes = make(map[string]time.Time)
-	for rows.Next() {
-		var record db.VehicleSnapshot
-
-		values, err := record.ScanValues([]string{vehiclesnapshot.FieldVehicleID, vehiclesnapshot.FieldLastBattleTime})
-		if err != nil {
-			return nil, err
-		}
-		if err := rows.Scan(values...); err != nil {
-			return nil, err
-		}
-
-		err = record.AssignValues([]string{vehiclesnapshot.FieldVehicleID, vehiclesnapshot.FieldLastBattleTime}, values)
-		if err != nil {
-			return nil, err
-		}
-		lastBattleTimes[record.VehicleID] = record.LastBattleTime
+	for _, r := range records {
+		lastBattleTimes[r.VehicleID] = r.LastBattleTime
 	}
 
 	return lastBattleTimes, nil
@@ -274,7 +119,7 @@ func (c *client) GetVehicleLastBattleTimes(ctx context.Context, accountID string
 // create vehicle snapshots for a specific account
 func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) (map[string]error, error) {
 	if len(snapshots) < 1 {
-		return nil, new(db.NotFoundError)
+		return nil, nil
 	}
 
 	account, err := c.db.Account.Get(ctx, accountID)
@@ -309,7 +154,7 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 }
 
 // build a complete query for vehicle snapshots
-func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy string, query getSnapshotQuery) (string, []any) {
+func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy string, query baseQueryOptions) (string, []any) {
 	// required where constraints
 	var innerWhere []*sql.Predicate
 	innerWhere = append(innerWhere, sql.EQ(vehiclesnapshot.FieldType, kind), sql.EQ(vehiclesnapshot.FieldAccountID, accountID))
@@ -336,22 +181,18 @@ func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotTy
 		innerOrder = sql.Desc(vehiclesnapshot.FieldCreatedAt)
 	}
 
-	innerQuery := sql.Select(vehiclesnapshot.Columns...).From(sql.Table(vehiclesnapshot.Table))
+	selectFields := vehiclesnapshot.Columns
+	if fields := query.selectFields(groupBy); fields != nil {
+		selectFields = fields
+	}
+
+	innerQuery := sql.Select(selectFields...).From(sql.Table(vehiclesnapshot.Table))
 	innerQuery = innerQuery.Where(sql.And(innerWhere...))
 	innerQuery = innerQuery.OrderBy(innerOrder)
 
 	innerQueryString, innerQueryArgs := innerQuery.Query()
 
-	// wrap the inner query in a GROUP BY
-	wrapper := &sql.Builder{}
-	wrapped := wrapper.Wrap(func(b *sql.Builder) { b.WriteString(innerQueryString) })
-
-	selector := sql.Select("*")
-	if fields := query.selectFields(groupBy); fields != nil {
-		// make sure FieldVehicleID is selected, we need it for Group By
-		selector = sql.Select(fields...)
-	}
-	queryString, _ := selector.FromExpr(wrapped).GroupBy(groupBy).Query()
+	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(groupBy).Query()
 	return queryString, innerQueryArgs
 }
 
@@ -361,12 +202,12 @@ func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotTy
 Get complete snapshots for accounts by ID, grouped by account ID
   - there are no use cases where all accounts should be returned for now, so nil slice of ids will return an error
 */
-func (c *client) GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AccountSnapshot, error) {
+func (c *client) GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AccountSnapshot, error) {
 	if len(accountIDs) < 1 {
 		return nil, new(db.NotFoundError)
 	}
 
-	var query getSnapshotQuery
+	var query baseQueryOptions
 	for _, apply := range options {
 		apply(&query)
 	}
@@ -378,37 +219,26 @@ func (c *client) GetAccountSnapshots(ctx context.Context, accountIDs []string, k
 	}
 	defer rows.Close()
 
-	var snapshots []models.AccountSnapshot
-	for rows.Next() {
-		var record db.AccountSnapshot
-
-		values, err := record.ScanValues(accountsnapshot.Columns)
-		if err != nil {
-			return nil, err
-		}
-		if err := rows.Scan(values...); err != nil {
-			return nil, err
-		}
-
-		err = record.AssignValues(accountsnapshot.Columns, values)
-		if err != nil {
-			return nil, err
-		}
-		snapshots = append(snapshots, toAccountSnapshot(&record))
+	records, err := rowsToRecords[*db.AccountSnapshot](rows, accountsnapshot.Columns)
+	if err != nil {
+		return nil, err
 	}
-
+	var snapshots []models.AccountSnapshot
+	for _, r := range records {
+		snapshots = append(snapshots, toAccountSnapshot(r))
+	}
 	return snapshots, nil
 }
 
 /*
 Get last battle times for accounts by ID, grouped by account ID
 */
-func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) (map[string]time.Time, error) {
+func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error) {
 	if len(accountIDs) < 1 {
 		return nil, new(db.NotFoundError)
 	}
 
-	var query getSnapshotQuery
+	var query baseQueryOptions
 	for _, apply := range options {
 		apply(&query)
 	}
@@ -420,32 +250,21 @@ func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []str
 		return nil, err
 	}
 
-	var lastBattles = make(map[string]time.Time)
-	for rows.Next() {
-		var record db.AccountSnapshot
-
-		values, err := record.ScanValues([]string{accountsnapshot.FieldAccountID, accountsnapshot.FieldLastBattleTime})
-		if err != nil {
-			return nil, err
-		}
-		if err := rows.Scan(values...); err != nil {
-			return nil, err
-		}
-
-		err = record.AssignValues([]string{accountsnapshot.FieldAccountID, accountsnapshot.FieldLastBattleTime}, values)
-		if err != nil {
-			return nil, err
-		}
-
-		lastBattles[record.ReferenceID] = record.LastBattleTime
+	records, err := rowsToRecords[*db.AccountSnapshot](rows, accountsnapshot.Columns)
+	if err != nil {
+		return nil, err
 	}
 
+	var lastBattles = make(map[string]time.Time)
+	for _, r := range records {
+		lastBattles[r.AccountID] = r.LastBattleTime
+	}
 	return lastBattles, nil
 }
 
 func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) (map[string]error, error) {
 	if len(snapshots) < 1 {
-		return nil, new(db.NotFoundError)
+		return nil, nil
 	}
 
 	var errors = make(map[string]error)
@@ -479,7 +298,7 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models
 }
 
 // build a complete query for account snapshot
-func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy string, query getSnapshotQuery) (string, []any) {
+func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy string, query baseQueryOptions) (string, []any) {
 	// required where constraints
 	var innerWhere []*sql.Predicate
 	innerWhere = append(innerWhere, sql.EQ(accountsnapshot.FieldType, kind), sql.In(accountsnapshot.FieldAccountID, toAnySlice(accountIDs...)...))
@@ -503,47 +322,47 @@ func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy string
 		innerOrder = sql.Desc(accountsnapshot.FieldCreatedAt)
 	}
 
-	innerQuery := sql.Select(accountsnapshot.Columns...).From(sql.Table(accountsnapshot.Table))
+	selectFields := accountsnapshot.Columns
+	if fields := query.selectFields(groupBy); fields != nil {
+		selectFields = fields
+	}
+
+	innerQuery := sql.Select(selectFields...).From(sql.Table(accountsnapshot.Table))
 	innerQuery = innerQuery.Where(sql.And(innerWhere...))
 	innerQuery = innerQuery.OrderBy(innerOrder)
 
 	innerQueryString, innerQueryArgs := innerQuery.Query()
-
-	// wrap the inner query in a GROUP BY
-	wrapper := &sql.Builder{}
-	wrapped := wrapper.Wrap(func(b *sql.Builder) { b.WriteString(innerQueryString) })
-
-	selector := sql.Select("*")
-	if fields := query.selectFields(groupBy); fields != nil {
-		// make sure FieldVehicleID is selected, we need it for Group By
-		selector = sql.Select(fields...)
-	}
-	queryString, _ := selector.FromExpr(wrapped).GroupBy(groupBy).Query()
+	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(groupBy).Query()
 	return queryString, innerQueryArgs
 }
 
 // --- achievement snapshots ---
 
-func (c *client) GetAchievementSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AchievementsSnapshot, error) {
+func (c *client) GetAchievementSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AchievementsSnapshot, error) {
 	if len(accountIDs) < 1 {
 		return nil, new(db.NotFoundError)
 	}
 
-	var query getSnapshotQuery
+	var query baseQueryOptions
 	for _, apply := range options {
 		apply(&query)
 	}
 
 	var where []predicate.AchievementsSnapshot
+	var orderBy achievementssnapshot.OrderOption
+	orderBy = achievementssnapshot.ByCreatedAt(sql.OrderDesc())
 	where = append(where, achievementssnapshot.AccountIDIn(accountIDs...), achievementssnapshot.TypeEQ(kind))
+
 	if query.createdAfter != nil {
 		where = append(where, achievementssnapshot.CreatedAtGT(*query.createdAfter))
+		orderBy = achievementssnapshot.ByCreatedAt(sql.OrderAsc())
 	}
 	if query.createdBefore != nil {
 		where = append(where, achievementssnapshot.CreatedAtLT(*query.createdAfter))
+		orderBy = achievementssnapshot.ByCreatedAt(sql.OrderDesc())
 	}
 
-	records, err := c.db.AchievementsSnapshot.Query().Select(query.selectFields()...).Where(where...).All(ctx)
+	records, err := c.db.AchievementsSnapshot.Query().Select(query.selectFields()...).Order(orderBy).Where(where...).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -558,7 +377,7 @@ func (c *client) GetAchievementSnapshots(ctx context.Context, accountIDs []strin
 
 func (c *client) CreateAccountAchievementSnapshots(ctx context.Context, accountID string, snapshots ...models.AchievementsSnapshot) (map[string]error, error) {
 	if len(snapshots) < 1 {
-		return nil, new(db.NotFoundError)
+		return nil, nil
 	}
 
 	account, err := c.db.Account.Get(ctx, accountID)
