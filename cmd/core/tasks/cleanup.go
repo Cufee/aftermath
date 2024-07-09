@@ -44,6 +44,16 @@ func init() {
 					return errors.Wrap(err, "failed to delete expired snapshots")
 				}
 			}
+			{
+				leaderboardsExpiration, err := time.Parse(time.RFC3339, task.Data["expiration_leaderboards"])
+				if err != nil {
+					return errors.Wrap(err, "failed to parse expiration_snapshots to time")
+				}
+				err = client.Database().DeleteExpiredLeaderboardScores(ctx, leaderboardsExpiration)
+				if err != nil && !database.IsNotFound(err) {
+					return errors.Wrap(err, "failed to delete expired leaderboard scores")
+				}
+			}
 
 			return nil
 		},
@@ -60,6 +70,7 @@ func CreateCleanupTasks(client core.Client) error {
 		Type:           models.TaskTypeDatabaseCleanup,
 		Data: map[string]string{
 			"expiration_snapshots":    now.Add(-1 * time.Hour * 24 * 90).Format(time.RFC3339), // 90 days
+			"expiration_leaderboards": now.Add(-1 * time.Hour * 24 * 30).Format(time.RFC3339), // 30 days
 			"expiration_interactions": now.Add(-1 * time.Hour * 24 * 7).Format(time.RFC3339),  // 7 days
 			"expiration_tasks":        now.Add(-1 * time.Hour * 24 * 7).Format(time.RFC3339),  // 7 days
 		},

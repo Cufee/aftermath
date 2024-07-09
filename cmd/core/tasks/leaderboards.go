@@ -26,7 +26,7 @@ func init() {
 				return errors.New("invalid targets length")
 			}
 
-			accountErrors, err := logic.UpdateAchievementLeaderboardScores(ctx, client.Wargaming(), client.Database(), realm, false, task.Targets...)
+			accountErrors, err := logic.UpdateAccountAchievementsLeaderboardScores(ctx, client.Wargaming(), client.Database(), realm, false, task.Targets...)
 			if err != nil {
 				return err
 			}
