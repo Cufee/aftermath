@@ -58,7 +58,7 @@ func main() {
 	})
 
 	if constants.DiscordAlertsEnabled {
-		alertClient, err := alerts.NewClient(constants.DiscordAlertsWebhookURL)
+		alertClient, err := alerts.NewClient(constants.DiscordPrimaryToken, constants.DiscordAlertsWebhookURL)
 		if err != nil {
 			log.Fatal().Err(err).Msg("alerts#NewClient failed")
 		}

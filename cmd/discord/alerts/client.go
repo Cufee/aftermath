@@ -21,8 +21,8 @@ type alertClient struct {
 	webhookURL string
 }
 
-func NewClient(webhookURL string) (*alertClient, error) {
-	client, err := rest.NewClient("")
+func NewClient(token string, webhookURL string) (*alertClient, error) {
+	client, err := rest.NewClient(token)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a rest client")
 	}
