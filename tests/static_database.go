@@ -201,9 +201,9 @@ func (c *staticTestingDatabase) UserFromSession(ctx context.Context, publicID st
 func (c *staticTestingDatabase) CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) (map[string]error, error) {
 	return nil, errors.New("CreateLeaderboardScores not implemented")
 }
-func (c *staticTestingDatabase) GetLeaderboardScores(ctx context.Context, leaderboard models.LeaderboardID, scoreType models.ScoreType, options ...database.Query) ([]models.LeaderboardScore, error) {
+func (c *staticTestingDatabase) GetLeaderboardScores(ctx context.Context, leaderboard string, scoreType models.ScoreType, options ...database.Query) ([]models.LeaderboardScore, error) {
 	return nil, errors.New("GetLeaderboardScores not implemented")
 }
-func (c *staticTestingDatabase) DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time) error {
+func (c *staticTestingDatabase) DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time, kind models.ScoreType) error {
 	return errors.New("DeleteExpiredLeaderboardScores not implemented")
 }

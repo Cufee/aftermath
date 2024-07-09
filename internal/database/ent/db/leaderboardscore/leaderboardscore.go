@@ -23,6 +23,8 @@ const (
 	FieldType = "type"
 	// FieldScore holds the string denoting the score field in the database.
 	FieldScore = "score"
+	// FieldAccountID holds the string denoting the account_id field in the database.
+	FieldAccountID = "account_id"
 	// FieldReferenceID holds the string denoting the reference_id field in the database.
 	FieldReferenceID = "reference_id"
 	// FieldLeaderboardID holds the string denoting the leaderboard_id field in the database.
@@ -40,6 +42,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldType,
 	FieldScore,
+	FieldAccountID,
 	FieldReferenceID,
 	FieldLeaderboardID,
 	FieldMeta,
@@ -69,20 +72,10 @@ var (
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type models.ScoreType) error {
 	switch _type {
-	case "custom", "hourly", "daily":
+	case "hourly", "daily":
 		return nil
 	default:
 		return fmt.Errorf("leaderboardscore: invalid enum value for type field: %q", _type)
-	}
-}
-
-// LeaderboardIDValidator is a validator for the "leaderboard_id" field enum values. It is called by the builders before save.
-func LeaderboardIDValidator(li models.LeaderboardID) error {
-	switch li {
-	case "mastery-weighted-players", "mastery-weighted-clans":
-		return nil
-	default:
-		return fmt.Errorf("leaderboardscore: invalid enum value for leaderboard_id field: %q", li)
 	}
 }
 
@@ -112,6 +105,11 @@ func ByType(opts ...sql.OrderTermOption) OrderOption {
 // ByScore orders the results by the score field.
 func ByScore(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldScore, opts...).ToFunc()
+}
+
+// ByAccountID orders the results by the account_id field.
+func ByAccountID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAccountID, opts...).ToFunc()
 }
 
 // ByReferenceID orders the results by the reference_id field.

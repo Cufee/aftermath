@@ -73,9 +73,9 @@ type SnapshotsClient interface {
 
 type LeaderboardsClient interface {
 	CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) (map[string]error, error)
-	GetLeaderboardScores(ctx context.Context, leaderboard models.LeaderboardID, scoreType models.ScoreType, options ...Query) ([]models.LeaderboardScore, error)
+	GetLeaderboardScores(ctx context.Context, leaderboardID string, scoreType models.ScoreType, options ...Query) ([]models.LeaderboardScore, error)
 
-	DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time) error
+	DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time, scoreType models.ScoreType) error
 }
 
 type TasksClient interface {

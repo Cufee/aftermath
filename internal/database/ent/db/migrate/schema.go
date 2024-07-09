@@ -381,10 +381,11 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"custom", "hourly", "daily"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"hourly", "daily"}},
 		{Name: "score", Type: field.TypeFloat32},
+		{Name: "account_id", Type: field.TypeString},
 		{Name: "reference_id", Type: field.TypeString},
-		{Name: "leaderboard_id", Type: field.TypeEnum, Enums: []string{"mastery-weighted-players", "mastery-weighted-clans"}},
+		{Name: "leaderboard_id", Type: field.TypeString},
 		{Name: "meta", Type: field.TypeJSON},
 	}
 	// LeaderboardScoresTable holds the schema information for the "leaderboard_scores" table.
@@ -404,34 +405,24 @@ var (
 				Columns: []*schema.Column{LeaderboardScoresColumns[1]},
 			},
 			{
-				Name:    "leaderboardscore_created_at_type",
+				Name:    "leaderboardscore_account_id",
 				Unique:  false,
-				Columns: []*schema.Column{LeaderboardScoresColumns[1], LeaderboardScoresColumns[3]},
+				Columns: []*schema.Column{LeaderboardScoresColumns[5]},
 			},
 			{
-				Name:    "leaderboardscore_score_type",
+				Name:    "leaderboardscore_reference_id",
 				Unique:  false,
-				Columns: []*schema.Column{LeaderboardScoresColumns[4], LeaderboardScoresColumns[3]},
+				Columns: []*schema.Column{LeaderboardScoresColumns[6]},
 			},
 			{
-				Name:    "leaderboardscore_leaderboard_id_type",
+				Name:    "leaderboardscore_leaderboard_id_type_account_id",
 				Unique:  false,
-				Columns: []*schema.Column{LeaderboardScoresColumns[6], LeaderboardScoresColumns[3]},
+				Columns: []*schema.Column{LeaderboardScoresColumns[7], LeaderboardScoresColumns[3], LeaderboardScoresColumns[5]},
 			},
 			{
-				Name:    "leaderboardscore_leaderboard_id_score_type",
+				Name:    "leaderboardscore_leaderboard_id_type_reference_id",
 				Unique:  false,
-				Columns: []*schema.Column{LeaderboardScoresColumns[6], LeaderboardScoresColumns[4], LeaderboardScoresColumns[3]},
-			},
-			{
-				Name:    "leaderboardscore_leaderboard_id_reference_id_type",
-				Unique:  false,
-				Columns: []*schema.Column{LeaderboardScoresColumns[6], LeaderboardScoresColumns[5], LeaderboardScoresColumns[3]},
-			},
-			{
-				Name:    "leaderboardscore_leaderboard_id_reference_id_score_type",
-				Unique:  false,
-				Columns: []*schema.Column{LeaderboardScoresColumns[6], LeaderboardScoresColumns[5], LeaderboardScoresColumns[4], LeaderboardScoresColumns[3]},
+				Columns: []*schema.Column{LeaderboardScoresColumns[7], LeaderboardScoresColumns[3], LeaderboardScoresColumns[6]},
 			},
 		},
 	}
