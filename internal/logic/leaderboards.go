@@ -9,10 +9,10 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/wargaming"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/retry"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 )
 
 func RecordCurrentAchievementsLeaderboards(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, scoreType models.ScoreType, realm string, force bool, accountIDs ...string) (map[string]error, error) {

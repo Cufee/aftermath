@@ -12,11 +12,11 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/cufee/aftermath/tests"
 	"github.com/joho/godotenv"
-	"github.com/rs/zerolog/log"
 )
 
 //go:generate go generate ./cmd/frontend/assets/generate

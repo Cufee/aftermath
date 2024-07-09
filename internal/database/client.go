@@ -10,9 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
-	"github.com/rs/zerolog/log"
 
 	_ "github.com/mattn/go-sqlite3"
 )

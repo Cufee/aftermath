@@ -11,7 +11,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 
-	"github.com/rs/zerolog/log"
+	"github.com/cufee/aftermath/internal/log"
 )
 
 func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {

@@ -9,7 +9,7 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/logic/auth"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/rs/zerolog/log"
+	"github.com/cufee/aftermath/internal/log"
 )
 
 var SessionCheck handler.Middleware = func(ctx *handler.Context, next func(ctx *handler.Context) error) func(ctx *handler.Context) error {

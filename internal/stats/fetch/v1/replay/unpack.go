@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/rs/zerolog/log"
+	"github.com/cufee/aftermath/internal/log"
 )
 
 func UnpackRemote(link string) (*UnpackedReplay, error) {

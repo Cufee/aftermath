@@ -15,8 +15,8 @@ import (
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
-	"github.com/rs/zerolog/log"
 )
 
 var devMode = os.Getenv("AUTH_DEV_MODE") == "true"

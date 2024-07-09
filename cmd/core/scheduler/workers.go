@@ -10,7 +10,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/rs/zerolog/log"
+	"github.com/cufee/aftermath/internal/log"
 )
 
 func CreateCleanupTaskWorker(client core.Client) func() {

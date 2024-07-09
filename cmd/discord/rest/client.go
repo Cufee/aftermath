@@ -60,7 +60,18 @@ func (c *Client) request(method string, url string, payload any) (*http.Request,
 	return req, nil
 }
 
-func (c *Client) requestWithFiles(method string, url string, payload any, files []*discordgo.File) (*http.Request, error) {
+func (c *Client) requestWithFiles(method string, url string, payload any, files []File) (*http.Request, error) {
+	if len(files) > 0 {
+		var df []*discordgo.File
+		for _, f := range files {
+			df = append(df, &discordgo.File{Name: f.Name, Reader: bytes.NewReader(f.Data)})
+		}
+		return c.requestWithFormData(method, url, payload, df)
+	}
+	return c.request(method, url, payload)
+}
+
+func (c *Client) requestWithFormData(method string, url string, payload any, files []*discordgo.File) (*http.Request, error) {
 	buffer := &bytes.Buffer{}
 	writer := multipart.NewWriter(buffer)
 	writer.FormDataContentType()

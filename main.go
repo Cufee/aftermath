@@ -16,6 +16,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core/queue"
 	"github.com/cufee/aftermath/cmd/core/scheduler"
 	"github.com/cufee/aftermath/cmd/core/tasks"
+	"github.com/cufee/aftermath/cmd/discord/alerts"
 	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/frontend"
 
@@ -30,10 +31,10 @@ import (
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 
 	_ "github.com/joho/godotenv/autoload"
 
@@ -52,7 +53,20 @@ func main() {
 
 	// Logger
 	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
-	zerolog.SetGlobalLevel(level)
+	log.SetupGlobalLogger(func(l zerolog.Logger) zerolog.Logger {
+		return l.Level(level)
+	})
+
+	if constants.DiscordAlertsEnabled {
+		alertClient, err := alerts.NewClient(constants.DiscordAlertsWebhookURL)
+		if err != nil {
+			log.Fatal().Err(err).Msg("alerts#NewClient failed")
+		}
+		hook := alerts.NewHook(alertClient)
+		log.SetupGlobalLogger(func(l zerolog.Logger) zerolog.Logger {
+			return l.Hook(hook)
+		})
+	}
 
 	loadStaticAssets(static)
 	db, err := newDatabaseClientFromEnv()

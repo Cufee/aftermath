@@ -13,7 +13,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core/tasks"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/rs/zerolog/log"
+	"github.com/cufee/aftermath/internal/log"
 )
 
 type queue struct {

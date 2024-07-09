@@ -79,7 +79,7 @@ func CreateCleanupTasks(client core.Client) error {
 		ReferenceID:    "database_cleanup",
 		Type:           models.TaskTypeDatabaseCleanup,
 		Data: map[string]string{
-			"expiration_leaderboards_hourly": now.Add(-1 * time.Hour * 24).Format(time.RFC3339),      // 1 day
+			"expiration_leaderboards_hourly": now.Add(-1 * time.Hour * 3).Format(time.RFC3339),       // 3 hours
 			"expiration_leaderboards_daily":  now.Add(-1 * time.Hour * 24 * 90).Format(time.RFC3339), // 90 days
 			"expiration_snapshots":           now.Add(-1 * time.Hour * 24 * 90).Format(time.RFC3339), // 90 days
 			"expiration_interactions":        now.Add(-1 * time.Hour * 24 * 7).Format(time.RFC3339),  // 7 days

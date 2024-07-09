@@ -4,7 +4,7 @@ import (
 	"image/color"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/rs/zerolog/log"
+	"github.com/cufee/aftermath/internal/log"
 )
 
 type TitleCardStyle struct {

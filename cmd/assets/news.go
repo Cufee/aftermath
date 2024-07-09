@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/disintegration/imaging"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 
 	_ "github.com/joho/godotenv/autoload"
 )
