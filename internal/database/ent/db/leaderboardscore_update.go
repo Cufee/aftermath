@@ -71,6 +71,20 @@ func (lsu *LeaderboardScoreUpdate) AddScore(f float32) *LeaderboardScoreUpdate {
 	return lsu
 }
 
+// SetAccountID sets the "account_id" field.
+func (lsu *LeaderboardScoreUpdate) SetAccountID(s string) *LeaderboardScoreUpdate {
+	lsu.mutation.SetAccountID(s)
+	return lsu
+}
+
+// SetNillableAccountID sets the "account_id" field if the given value is not nil.
+func (lsu *LeaderboardScoreUpdate) SetNillableAccountID(s *string) *LeaderboardScoreUpdate {
+	if s != nil {
+		lsu.SetAccountID(*s)
+	}
+	return lsu
+}
+
 // SetReferenceID sets the "reference_id" field.
 func (lsu *LeaderboardScoreUpdate) SetReferenceID(s string) *LeaderboardScoreUpdate {
 	lsu.mutation.SetReferenceID(s)
@@ -86,15 +100,15 @@ func (lsu *LeaderboardScoreUpdate) SetNillableReferenceID(s *string) *Leaderboar
 }
 
 // SetLeaderboardID sets the "leaderboard_id" field.
-func (lsu *LeaderboardScoreUpdate) SetLeaderboardID(mi models.LeaderboardID) *LeaderboardScoreUpdate {
-	lsu.mutation.SetLeaderboardID(mi)
+func (lsu *LeaderboardScoreUpdate) SetLeaderboardID(s string) *LeaderboardScoreUpdate {
+	lsu.mutation.SetLeaderboardID(s)
 	return lsu
 }
 
 // SetNillableLeaderboardID sets the "leaderboard_id" field if the given value is not nil.
-func (lsu *LeaderboardScoreUpdate) SetNillableLeaderboardID(mi *models.LeaderboardID) *LeaderboardScoreUpdate {
-	if mi != nil {
-		lsu.SetLeaderboardID(*mi)
+func (lsu *LeaderboardScoreUpdate) SetNillableLeaderboardID(s *string) *LeaderboardScoreUpdate {
+	if s != nil {
+		lsu.SetLeaderboardID(*s)
 	}
 	return lsu
 }
@@ -153,11 +167,6 @@ func (lsu *LeaderboardScoreUpdate) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`db: validator failed for field "LeaderboardScore.type": %w`, err)}
 		}
 	}
-	if v, ok := lsu.mutation.LeaderboardID(); ok {
-		if err := leaderboardscore.LeaderboardIDValidator(v); err != nil {
-			return &ValidationError{Name: "leaderboard_id", err: fmt.Errorf(`db: validator failed for field "LeaderboardScore.leaderboard_id": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -191,11 +200,14 @@ func (lsu *LeaderboardScoreUpdate) sqlSave(ctx context.Context) (n int, err erro
 	if value, ok := lsu.mutation.AddedScore(); ok {
 		_spec.AddField(leaderboardscore.FieldScore, field.TypeFloat32, value)
 	}
+	if value, ok := lsu.mutation.AccountID(); ok {
+		_spec.SetField(leaderboardscore.FieldAccountID, field.TypeString, value)
+	}
 	if value, ok := lsu.mutation.ReferenceID(); ok {
 		_spec.SetField(leaderboardscore.FieldReferenceID, field.TypeString, value)
 	}
 	if value, ok := lsu.mutation.LeaderboardID(); ok {
-		_spec.SetField(leaderboardscore.FieldLeaderboardID, field.TypeEnum, value)
+		_spec.SetField(leaderboardscore.FieldLeaderboardID, field.TypeString, value)
 	}
 	if value, ok := lsu.mutation.Meta(); ok {
 		_spec.SetField(leaderboardscore.FieldMeta, field.TypeJSON, value)
@@ -263,6 +275,20 @@ func (lsuo *LeaderboardScoreUpdateOne) AddScore(f float32) *LeaderboardScoreUpda
 	return lsuo
 }
 
+// SetAccountID sets the "account_id" field.
+func (lsuo *LeaderboardScoreUpdateOne) SetAccountID(s string) *LeaderboardScoreUpdateOne {
+	lsuo.mutation.SetAccountID(s)
+	return lsuo
+}
+
+// SetNillableAccountID sets the "account_id" field if the given value is not nil.
+func (lsuo *LeaderboardScoreUpdateOne) SetNillableAccountID(s *string) *LeaderboardScoreUpdateOne {
+	if s != nil {
+		lsuo.SetAccountID(*s)
+	}
+	return lsuo
+}
+
 // SetReferenceID sets the "reference_id" field.
 func (lsuo *LeaderboardScoreUpdateOne) SetReferenceID(s string) *LeaderboardScoreUpdateOne {
 	lsuo.mutation.SetReferenceID(s)
@@ -278,15 +304,15 @@ func (lsuo *LeaderboardScoreUpdateOne) SetNillableReferenceID(s *string) *Leader
 }
 
 // SetLeaderboardID sets the "leaderboard_id" field.
-func (lsuo *LeaderboardScoreUpdateOne) SetLeaderboardID(mi models.LeaderboardID) *LeaderboardScoreUpdateOne {
-	lsuo.mutation.SetLeaderboardID(mi)
+func (lsuo *LeaderboardScoreUpdateOne) SetLeaderboardID(s string) *LeaderboardScoreUpdateOne {
+	lsuo.mutation.SetLeaderboardID(s)
 	return lsuo
 }
 
 // SetNillableLeaderboardID sets the "leaderboard_id" field if the given value is not nil.
-func (lsuo *LeaderboardScoreUpdateOne) SetNillableLeaderboardID(mi *models.LeaderboardID) *LeaderboardScoreUpdateOne {
-	if mi != nil {
-		lsuo.SetLeaderboardID(*mi)
+func (lsuo *LeaderboardScoreUpdateOne) SetNillableLeaderboardID(s *string) *LeaderboardScoreUpdateOne {
+	if s != nil {
+		lsuo.SetLeaderboardID(*s)
 	}
 	return lsuo
 }
@@ -358,11 +384,6 @@ func (lsuo *LeaderboardScoreUpdateOne) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`db: validator failed for field "LeaderboardScore.type": %w`, err)}
 		}
 	}
-	if v, ok := lsuo.mutation.LeaderboardID(); ok {
-		if err := leaderboardscore.LeaderboardIDValidator(v); err != nil {
-			return &ValidationError{Name: "leaderboard_id", err: fmt.Errorf(`db: validator failed for field "LeaderboardScore.leaderboard_id": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -413,11 +434,14 @@ func (lsuo *LeaderboardScoreUpdateOne) sqlSave(ctx context.Context) (_node *Lead
 	if value, ok := lsuo.mutation.AddedScore(); ok {
 		_spec.AddField(leaderboardscore.FieldScore, field.TypeFloat32, value)
 	}
+	if value, ok := lsuo.mutation.AccountID(); ok {
+		_spec.SetField(leaderboardscore.FieldAccountID, field.TypeString, value)
+	}
 	if value, ok := lsuo.mutation.ReferenceID(); ok {
 		_spec.SetField(leaderboardscore.FieldReferenceID, field.TypeString, value)
 	}
 	if value, ok := lsuo.mutation.LeaderboardID(); ok {
-		_spec.SetField(leaderboardscore.FieldLeaderboardID, field.TypeEnum, value)
+		_spec.SetField(leaderboardscore.FieldLeaderboardID, field.TypeString, value)
 	}
 	if value, ok := lsuo.mutation.Meta(); ok {
 		_spec.SetField(leaderboardscore.FieldMeta, field.TypeJSON, value)

@@ -29,7 +29,7 @@ func NewClient(token string) (*Client, error) {
 		http:  http.Client{Timeout: time.Millisecond * 5000}, // discord is very slow sometimes
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
 	_, err := client.lookupApplicationID(ctx)

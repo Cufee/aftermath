@@ -13,9 +13,10 @@ import (
 func toScore(r *db.LeaderboardScore) models.LeaderboardScore {
 	return models.LeaderboardScore{
 		ID:            r.ID,
+		Type:          r.Type,
 		CreatedAt:     r.CreatedAt,
 		UpdatedAt:     r.UpdatedAt,
-		Type:          r.Type,
+		AccountID:     r.AccountID,
 		ReferenceID:   r.ReferenceID,
 		LeaderboardID: r.LeaderboardID,
 		Score:         r.Score,
@@ -53,7 +54,7 @@ func (c *client) CreateLeaderboardScores(ctx context.Context, scores ...models.L
 	return nil, nil
 }
 
-func (c *client) GetLeaderboardScores(ctx context.Context, leaderboard models.LeaderboardID, scoreType models.ScoreType, opts ...Query) ([]models.LeaderboardScore, error) {
+func (c *client) GetLeaderboardScores(ctx context.Context, leaderboardID string, scoreType models.ScoreType, opts ...Query) ([]models.LeaderboardScore, error) {
 	var query baseQueryOptions
 	for _, apply := range opts {
 		apply(&query)
@@ -61,7 +62,7 @@ func (c *client) GetLeaderboardScores(ctx context.Context, leaderboard models.Le
 
 	var where []*sql.Predicate
 	where = append(where, sql.EQ(leaderboardscore.FieldType, scoreType))
-	where = append(where, sql.EQ(leaderboardscore.FieldLeaderboardID, leaderboard))
+	where = append(where, sql.EQ(leaderboardscore.FieldLeaderboardID, leaderboardID))
 
 	orderBy := sql.Desc(leaderboardscore.FieldCreatedAt)
 	if query.createdAfter != nil {
@@ -80,8 +81,8 @@ func (c *client) GetLeaderboardScores(ctx context.Context, leaderboard models.Le
 		where = append(where, sql.NotIn(leaderboardscore.FieldReferenceID, nin...))
 	}
 
-	selectFields := []string{"*"}
-	if fields := query.selectFields(leaderboardscore.FieldReferenceID); fields != nil {
+	selectFields := leaderboardscore.Columns
+	if fields := query.selectFields(leaderboardscore.FieldAccountID); fields != nil {
 		selectFields = fields
 	}
 
@@ -90,13 +91,13 @@ func (c *client) GetLeaderboardScores(ctx context.Context, leaderboard models.Le
 	q = q.OrderBy(orderBy)
 
 	innerQueryString, queryArgs := q.Query()
-	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(leaderboardscore.FieldReferenceID).Query()
+	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(leaderboardscore.FieldAccountID).Query()
 	rows, err := c.db.LeaderboardScore.QueryContext(ctx, queryString, queryArgs...)
 	if err != nil {
 		return nil, err
 	}
 
-	records, err := rowsToRecords[*db.LeaderboardScore](rows, leaderboardscore.Columns)
+	records, err := rowsToRecords[*db.LeaderboardScore](rows, selectFields)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +109,7 @@ func (c *client) GetLeaderboardScores(ctx context.Context, leaderboard models.Le
 	return scores, nil
 }
 
-func (c *client) DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time) error {
-	_, err := c.db.LeaderboardScore.Delete().Where(leaderboardscore.CreatedAtLT(expiration)).Exec(ctx)
+func (c *client) DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time, scoreType models.ScoreType) error {
+	_, err := c.db.LeaderboardScore.Delete().Where(leaderboardscore.CreatedAtLT(expiration), leaderboardscore.TypeEQ(scoreType)).Exec(ctx)
 	return err
 }

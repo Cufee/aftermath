@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/cmd/core"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/go-co-op/gocron"
 )
 
@@ -49,9 +50,14 @@ func RegisterDefaultTasks(s *scheduler, coreClient core.Client) {
 	s.Add("0 18 * * *", CreateSnapshotTasksWorker(coreClient, "AS")) // Asia
 
 	// Achievement leaderboards. ideally, this should not delay snapshots
-	s.Add("25 * * * *", CreateLeaderboardTasksWorker(coreClient, "NA")) // NA
-	s.Add("30 * * * *", CreateLeaderboardTasksWorker(coreClient, "EU")) // EU
-	s.Add("35 * * * *", CreateLeaderboardTasksWorker(coreClient, "AS")) // Asia
+	// hourly
+	s.Add("25 * * * *", CreateLeaderboardTasksWorker(coreClient, "NA", models.LeaderboardScoreHourly)) // NA
+	s.Add("30 * * * *", CreateLeaderboardTasksWorker(coreClient, "EU", models.LeaderboardScoreHourly)) // EU
+	s.Add("35 * * * *", CreateLeaderboardTasksWorker(coreClient, "AS", models.LeaderboardScoreHourly)) // Asia
+	// daily
+	s.Add("0 8 * * *", CreateLeaderboardTasksWorker(coreClient, "NA", models.LeaderboardScoreDaily))  // NA
+	s.Add("0 0 * * *", CreateLeaderboardTasksWorker(coreClient, "EU", models.LeaderboardScoreDaily))  // EU
+	s.Add("0 17 * * *", CreateLeaderboardTasksWorker(coreClient, "AS", models.LeaderboardScoreDaily)) // Asia
 
 	// Configurations
 	s.Add("0 0 */7 * *", RotateBackgroundPresetsWorker(coreClient))

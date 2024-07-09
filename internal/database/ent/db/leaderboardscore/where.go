@@ -80,9 +80,19 @@ func Score(v float32) predicate.LeaderboardScore {
 	return predicate.LeaderboardScore(sql.FieldEQ(FieldScore, v))
 }
 
+// AccountID applies equality check predicate on the "account_id" field. It's identical to AccountIDEQ.
+func AccountID(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldEQ(FieldAccountID, v))
+}
+
 // ReferenceID applies equality check predicate on the "reference_id" field. It's identical to ReferenceIDEQ.
 func ReferenceID(v string) predicate.LeaderboardScore {
 	return predicate.LeaderboardScore(sql.FieldEQ(FieldReferenceID, v))
+}
+
+// LeaderboardID applies equality check predicate on the "leaderboard_id" field. It's identical to LeaderboardIDEQ.
+func LeaderboardID(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldEQ(FieldLeaderboardID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -235,6 +245,71 @@ func ScoreLTE(v float32) predicate.LeaderboardScore {
 	return predicate.LeaderboardScore(sql.FieldLTE(FieldScore, v))
 }
 
+// AccountIDEQ applies the EQ predicate on the "account_id" field.
+func AccountIDEQ(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldEQ(FieldAccountID, v))
+}
+
+// AccountIDNEQ applies the NEQ predicate on the "account_id" field.
+func AccountIDNEQ(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldNEQ(FieldAccountID, v))
+}
+
+// AccountIDIn applies the In predicate on the "account_id" field.
+func AccountIDIn(vs ...string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldIn(FieldAccountID, vs...))
+}
+
+// AccountIDNotIn applies the NotIn predicate on the "account_id" field.
+func AccountIDNotIn(vs ...string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldNotIn(FieldAccountID, vs...))
+}
+
+// AccountIDGT applies the GT predicate on the "account_id" field.
+func AccountIDGT(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldGT(FieldAccountID, v))
+}
+
+// AccountIDGTE applies the GTE predicate on the "account_id" field.
+func AccountIDGTE(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldGTE(FieldAccountID, v))
+}
+
+// AccountIDLT applies the LT predicate on the "account_id" field.
+func AccountIDLT(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldLT(FieldAccountID, v))
+}
+
+// AccountIDLTE applies the LTE predicate on the "account_id" field.
+func AccountIDLTE(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldLTE(FieldAccountID, v))
+}
+
+// AccountIDContains applies the Contains predicate on the "account_id" field.
+func AccountIDContains(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldContains(FieldAccountID, v))
+}
+
+// AccountIDHasPrefix applies the HasPrefix predicate on the "account_id" field.
+func AccountIDHasPrefix(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldHasPrefix(FieldAccountID, v))
+}
+
+// AccountIDHasSuffix applies the HasSuffix predicate on the "account_id" field.
+func AccountIDHasSuffix(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldHasSuffix(FieldAccountID, v))
+}
+
+// AccountIDEqualFold applies the EqualFold predicate on the "account_id" field.
+func AccountIDEqualFold(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldEqualFold(FieldAccountID, v))
+}
+
+// AccountIDContainsFold applies the ContainsFold predicate on the "account_id" field.
+func AccountIDContainsFold(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldContainsFold(FieldAccountID, v))
+}
+
 // ReferenceIDEQ applies the EQ predicate on the "reference_id" field.
 func ReferenceIDEQ(v string) predicate.LeaderboardScore {
 	return predicate.LeaderboardScore(sql.FieldEQ(FieldReferenceID, v))
@@ -301,33 +376,68 @@ func ReferenceIDContainsFold(v string) predicate.LeaderboardScore {
 }
 
 // LeaderboardIDEQ applies the EQ predicate on the "leaderboard_id" field.
-func LeaderboardIDEQ(v models.LeaderboardID) predicate.LeaderboardScore {
-	vc := v
-	return predicate.LeaderboardScore(sql.FieldEQ(FieldLeaderboardID, vc))
+func LeaderboardIDEQ(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldEQ(FieldLeaderboardID, v))
 }
 
 // LeaderboardIDNEQ applies the NEQ predicate on the "leaderboard_id" field.
-func LeaderboardIDNEQ(v models.LeaderboardID) predicate.LeaderboardScore {
-	vc := v
-	return predicate.LeaderboardScore(sql.FieldNEQ(FieldLeaderboardID, vc))
+func LeaderboardIDNEQ(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldNEQ(FieldLeaderboardID, v))
 }
 
 // LeaderboardIDIn applies the In predicate on the "leaderboard_id" field.
-func LeaderboardIDIn(vs ...models.LeaderboardID) predicate.LeaderboardScore {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.LeaderboardScore(sql.FieldIn(FieldLeaderboardID, v...))
+func LeaderboardIDIn(vs ...string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldIn(FieldLeaderboardID, vs...))
 }
 
 // LeaderboardIDNotIn applies the NotIn predicate on the "leaderboard_id" field.
-func LeaderboardIDNotIn(vs ...models.LeaderboardID) predicate.LeaderboardScore {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.LeaderboardScore(sql.FieldNotIn(FieldLeaderboardID, v...))
+func LeaderboardIDNotIn(vs ...string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldNotIn(FieldLeaderboardID, vs...))
+}
+
+// LeaderboardIDGT applies the GT predicate on the "leaderboard_id" field.
+func LeaderboardIDGT(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldGT(FieldLeaderboardID, v))
+}
+
+// LeaderboardIDGTE applies the GTE predicate on the "leaderboard_id" field.
+func LeaderboardIDGTE(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldGTE(FieldLeaderboardID, v))
+}
+
+// LeaderboardIDLT applies the LT predicate on the "leaderboard_id" field.
+func LeaderboardIDLT(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldLT(FieldLeaderboardID, v))
+}
+
+// LeaderboardIDLTE applies the LTE predicate on the "leaderboard_id" field.
+func LeaderboardIDLTE(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldLTE(FieldLeaderboardID, v))
+}
+
+// LeaderboardIDContains applies the Contains predicate on the "leaderboard_id" field.
+func LeaderboardIDContains(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldContains(FieldLeaderboardID, v))
+}
+
+// LeaderboardIDHasPrefix applies the HasPrefix predicate on the "leaderboard_id" field.
+func LeaderboardIDHasPrefix(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldHasPrefix(FieldLeaderboardID, v))
+}
+
+// LeaderboardIDHasSuffix applies the HasSuffix predicate on the "leaderboard_id" field.
+func LeaderboardIDHasSuffix(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldHasSuffix(FieldLeaderboardID, v))
+}
+
+// LeaderboardIDEqualFold applies the EqualFold predicate on the "leaderboard_id" field.
+func LeaderboardIDEqualFold(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldEqualFold(FieldLeaderboardID, v))
+}
+
+// LeaderboardIDContainsFold applies the ContainsFold predicate on the "leaderboard_id" field.
+func LeaderboardIDContainsFold(v string) predicate.LeaderboardScore {
+	return predicate.LeaderboardScore(sql.FieldContainsFold(FieldLeaderboardID, v))
 }
 
 // And groups predicates with the AND operator between them.

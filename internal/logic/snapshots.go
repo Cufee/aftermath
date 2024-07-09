@@ -25,7 +25,7 @@ type vehicleBattleData struct {
 Filter passed in accounts and return active account ids
   - an account is considered active if it has played a battle since the last snapshot, or has no snapshots
 */
-func filterActiveAccounts(ctx context.Context, dbClient database.Client, realm string, accounts map[string]types.ExtendedAccount, force bool) ([]string, error) {
+func filterActiveAccounts(ctx context.Context, dbClient database.Client, accounts map[string]types.ExtendedAccount, force bool) ([]string, error) {
 	var ids []string
 	for id := range accounts {
 		ids = append(ids, id)
@@ -66,7 +66,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		return nil, errors.Wrap(err, "failed to fetch accounts")
 	}
 
-	accountsNeedAnUpdate, err := filterActiveAccounts(ctx, dbClient, realm, accounts, false)
+	accountsNeedAnUpdate, err := filterActiveAccounts(ctx, dbClient, accounts, false)
 	if err != nil {
 		return nil, err
 	}
@@ -119,18 +119,19 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		clans = data
 	}()
 
-	group.Add(1)
-	// get account achievements, not critical
-	go func() {
-		defer group.Done()
-		// clans are optional-ish
-		data, err := wgClient.BatchAccountAchievements(ctx, realm, accountsNeedAnUpdate)
-		if err != nil {
-			log.Err(err).Msg("failed to get batch account achievements")
-		}
-		accountAchievements.Data = data
-		accountAchievements.Err = err
-	}()
+	// disabled for now as this data is unused
+	// group.Add(1)
+	// // get account achievements, not critical
+	// go func() {
+	// 	defer group.Done()
+	// 	// clans are optional-ish
+	// 	data, err := wgClient.BatchAccountAchievements(ctx, realm, accountsNeedAnUpdate)
+	// 	if err != nil {
+	// 		log.Err(err).Msg("failed to get batch account achievements")
+	// 	}
+	// 	accountAchievements.Data = data
+	// 	accountAchievements.Err = err
+	// }()
 
 	group.Wait()
 

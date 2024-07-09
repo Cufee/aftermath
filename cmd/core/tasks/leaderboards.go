@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"time"
 
@@ -19,6 +20,11 @@ func init() {
 			if !ok {
 				return errors.New("invalid realm")
 			}
+			scoreType, ok := task.Data["type"]
+			if !ok || !slices.Contains(models.ScoreType("").Values(), scoreType) {
+				return errors.New("invalid score type")
+			}
+
 			if len(task.Targets) > 100 {
 				return errors.New("invalid targets length")
 			}
@@ -26,9 +32,9 @@ func init() {
 				return errors.New("invalid targets length")
 			}
 
-			accountErrors, err := logic.UpdateAccountAchievementsLeaderboardScores(ctx, client.Wargaming(), client.Database(), realm, false, task.Targets...)
+			accountErrors, err := logic.RecordCurrentAchievementsLeaderboards(ctx, client.Wargaming(), client.Database(), models.ScoreType(scoreType), realm, false, task.Targets...)
 			if err != nil {
-				return err
+				return err // implicitly retry all targets
 			}
 
 			// retry failed accounts
@@ -50,17 +56,19 @@ func init() {
 				return errors.New("some accounts failed")
 			}
 			return nil
+
 		},
 	}
 }
 
-func CreateUpdateLeaderboardsTasks(client core.Client, realm string) error {
+func CreateUpdateLeaderboardsTasks(client core.Client, realm string, scoreType models.ScoreType) error {
 	realm = strings.ToUpper(realm)
 	task := models.Task{
 		Type:           models.TaskTypeAchievementsLeaderboardUpdate,
 		ReferenceID:    "realm_" + realm,
 		ScheduledAfter: time.Now(),
 		Data: map[string]string{
+			"type":  string(scoreType),
 			"realm": realm,
 		},
 		TriesLeft: 3,
@@ -82,7 +90,7 @@ func CreateUpdateLeaderboardsTasks(client core.Client, realm string) error {
 	// 1 - get all accounts last battle time
 	// 1 - get all account achievements
 	// n - get vehicle achievements for each account
-	tasks := splitTaskByTargets(task, 75)
+	tasks := splitTaskByTargets(task, 50)
 	err = client.Database().CreateTasks(ctx, tasks...)
 	if err != nil {
 		return err
