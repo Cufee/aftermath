@@ -79,7 +79,6 @@ jobs:
           file: Dockerfile
           build-args: |
             BRAND_FLAVOR=${{ env.BRAND_FLAVOR }}
-            GO_MEM_LIMIT=${{ env.GO_MEM_LIMIT }}
       - name: Build and push migrations Docker image
         id: push-migrations
         uses: docker/build-push-action@v6

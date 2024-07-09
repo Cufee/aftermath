@@ -1,6 +1,5 @@
 FROM golang:1.22.3-bookworm as builder
 
-ARG GO_MEM_LIMIT=122MiB
 ARG BRAND_FLAVOR=red
 ENV BRAND_FLAVOR $BRAND_FLAVOR
 
@@ -13,7 +12,7 @@ COPY ./ ./
 
 # build a fully standalone binary with zero dependencies
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate main.go
-RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux GOMEMLIMIT=$GO_MEM_LIMIT go build -o /bin/aftermath .
+RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux go build -o /bin/aftermath .
 
 # Make a scratch container with required files and binary
 FROM debian:stable-slim
