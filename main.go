@@ -110,7 +110,7 @@ func main() {
 				Path: "POST /v1/snapshots/{realm}",
 				Func: private.SaveRealmSnapshots(cacheCoreClient),
 			},
-		}...)
+		}, log.NewMiddleware(log.Logger()))
 		log.Info().Str("port", constants.ServePrivateEndpointsPort).Msg("starting a private server")
 		go servePrivate()
 	}
@@ -131,7 +131,7 @@ func main() {
 	handlers = append(handlers, redirectHandlersFromEnv()...)
 
 	port := os.Getenv("PORT")
-	servePublic := server.NewServer(port, handlers...)
+	servePublic := server.NewServer(port, handlers, log.NewMiddleware(log.Logger()))
 	log.Info().Str("port", port).Msg("starting a public server")
 	go servePublic()
 
