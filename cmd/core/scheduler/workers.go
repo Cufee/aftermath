@@ -157,11 +157,11 @@ func UpdateGlossaryWorker(client core.Client) func() {
 	}
 }
 
-func CreateAchievementLeaderboardTasksWorker(client core.Client, realm string) func() {
+func CreateLeaderboardTasksWorker(client core.Client, realm string) func() {
 	return func() {
-		err := tasks.CreateRecordSnapshotsTasks(client, realm)
+		err := tasks.CreateUpdateLeaderboardsTasks(client, realm)
 		if err != nil {
-			log.Err(err).Str("realm", realm).Msg("failed to schedule session update tasks")
+			log.Err(err).Str("realm", realm).Msg("failed to schedule leaderboard update tasks")
 		}
 	}
 }

@@ -55,8 +55,13 @@ func UpdateAccountAchievementsLeaderboardScores(ctx context.Context, wgClient wa
 		})
 	}
 
-	// save scores to database
-	_ = scores
+	sErrors, err := dbClient.CreateLeaderboardScores(ctx, scores...)
+	if err != nil {
+		return nil, err
+	}
+	if len(sErrors) > 0 {
+		return sErrors, nil
+	}
 
 	return nil, nil
 }

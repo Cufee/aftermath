@@ -197,3 +197,13 @@ func (c *staticTestingDatabase) FindSession(ctx context.Context, publicID string
 func (c *staticTestingDatabase) UserFromSession(ctx context.Context, publicID string, opts ...database.UserGetOption) (models.User, error) {
 	return DefaultUserWithEdges, nil
 }
+
+func (c *staticTestingDatabase) CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) (map[string]error, error) {
+	return nil, errors.New("CreateLeaderboardScores not implemented")
+}
+func (c *staticTestingDatabase) GetLeaderboardScores(ctx context.Context, leaderboard models.LeaderboardID, scoreType models.ScoreType, options ...database.Query) ([]models.LeaderboardScore, error) {
+	return nil, errors.New("GetLeaderboardScores not implemented")
+}
+func (c *staticTestingDatabase) DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time) error {
+	return errors.New("DeleteExpiredLeaderboardScores not implemented")
+}

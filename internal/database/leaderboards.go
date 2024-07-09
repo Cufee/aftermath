@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
@@ -105,4 +106,9 @@ func (c *client) GetLeaderboardScores(ctx context.Context, leaderboard models.Le
 		scores = append(scores, toScore(r))
 	}
 	return scores, nil
+}
+
+func (c *client) DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time) error {
+	_, err := c.db.LeaderboardScore.Delete().Where(leaderboardscore.CreatedAtLT(expiration)).Exec(ctx)
+	return err
 }

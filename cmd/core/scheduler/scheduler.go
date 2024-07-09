@@ -48,11 +48,10 @@ func RegisterDefaultTasks(s *scheduler, coreClient core.Client) {
 	s.Add("0 1 * * *", CreateSnapshotTasksWorker(coreClient, "EU"))  // EU
 	s.Add("0 18 * * *", CreateSnapshotTasksWorker(coreClient, "AS")) // Asia
 
-	// Achievement leaderboards
-	// ideally, this should not delay snapshots
-	s.Add("25 * * * *", CreateSnapshotTasksWorker(coreClient, "NA")) // NA
-	s.Add("30 * * * *", CreateSnapshotTasksWorker(coreClient, "EU")) // EU
-	s.Add("35 * * * *", CreateSnapshotTasksWorker(coreClient, "AS")) // Asia
+	// Achievement leaderboards. ideally, this should not delay snapshots
+	s.Add("25 * * * *", CreateLeaderboardTasksWorker(coreClient, "NA")) // NA
+	s.Add("30 * * * *", CreateLeaderboardTasksWorker(coreClient, "EU")) // EU
+	s.Add("35 * * * *", CreateLeaderboardTasksWorker(coreClient, "AS")) // Asia
 
 	// Configurations
 	s.Add("0 0 */7 * *", RotateBackgroundPresetsWorker(coreClient))
