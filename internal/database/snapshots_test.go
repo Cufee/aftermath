@@ -24,7 +24,7 @@ func TestGetVehicleSnapshots(t *testing.T) {
 	defer cancel()
 
 	client.db.VehicleSnapshot.Delete().Where().Exec(ctx)
-	defer client.db.VehicleSnapshot.Delete().Exec(ctx)
+	// defer client.db.VehicleSnapshot.Delete().Exec(ctx)
 
 	_, err = client.UpsertAccounts(ctx, []models.Account{{ID: "a1", Realm: "test", Nickname: "test_account"}})
 	assert.NoError(t, err, "failed to upsert an account")
@@ -125,5 +125,13 @@ func TestGetVehicleSnapshots(t *testing.T) {
 		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", nil, models.SnapshotTypeDaily, WithCreatedBefore(createdAtVehicle1), WithReferenceIDIn("r1"))
 		assert.NoError(t, err, "no results from a raw query does not trigger an error")
 		assert.Len(t, vehicles, 0, "return should have no results\nvehicles:%#v", vehicles)
+	}
+	{ // this should return 3 results
+		lastBattles, err := client.GetVehicleLastBattleTimes(ctx, "a1", nil, models.SnapshotTypeDaily)
+		assert.NoError(t, err, "no results from a raw query does not trigger an error")
+		assert.Len(t, lastBattles, 3, "return should have 3 results\nvehicles:%#v", lastBattles)
+		assert.Equal(t, createdAtVehicle3, lastBattles["v1"])
+		assert.Equal(t, createdAtVehicle4, lastBattles["v4"])
+		assert.Equal(t, createdAtVehicle5, lastBattles["v5"])
 	}
 }

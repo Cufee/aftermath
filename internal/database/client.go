@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
@@ -55,12 +56,12 @@ type UsersClient interface {
 }
 
 type SnapshotsClient interface {
-	GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AccountSnapshot, error)
-	GetAchievementSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.AchievementsSnapshot, error)
-	GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...SnapshotQuery) ([]models.VehicleSnapshot, error)
+	GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AccountSnapshot, error)
+	GetAchievementSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AchievementsSnapshot, error)
+	GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) ([]models.VehicleSnapshot, error)
 
-	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...SnapshotQuery) (map[string]time.Time, error)
-	GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...SnapshotQuery) (map[string]time.Time, error)
+	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
+	GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
 	// last battle times for achievements would be equivalent to account/vehicle ones
 
 	CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) (map[string]error, error)
@@ -68,6 +69,11 @@ type SnapshotsClient interface {
 	CreateAccountAchievementSnapshots(ctx context.Context, accountID string, snapshots ...models.AchievementsSnapshot) (map[string]error, error)
 
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
+}
+
+type LeaderboardsClient interface {
+	CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) (map[string]error, error)
+	GetLeaderboardScores(ctx context.Context, leaderboard models.LeaderboardID, scoreType models.ScoreType, options ...Query) ([]models.LeaderboardScore, error)
 }
 
 type TasksClient interface {
@@ -100,6 +106,7 @@ type Client interface {
 	GlossaryClient
 	AccountsClient
 	SnapshotsClient
+	LeaderboardsClient
 
 	TasksClient
 
@@ -199,4 +206,9 @@ func toAnySlice[T any](s ...T) []any {
 		a = append(a, i)
 	}
 	return a
+}
+
+func wrap(query string) *sql.Builder {
+	wrapper := &sql.Builder{}
+	return wrapper.Wrap(func(b *sql.Builder) { b.WriteString(query) })
 }

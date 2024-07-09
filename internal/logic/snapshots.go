@@ -22,39 +22,24 @@ type vehicleBattleData struct {
 }
 
 /*
-Gets all accounts from WH and their respective snapshots
-  - an account is considered valid is it has played a battle since the last snapshot, or has no snapshots
-  - as side effect, invalid accounts will be set as private
+Filter passed in accounts and return active account ids
+  - an account is considered active if it has played a battle since the last snapshot, or has no snapshots
 */
-func getAndValidateAccounts(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, force bool, realm string, accountIDs ...string) (map[string]types.ExtendedAccount, []string, error) {
-	accounts, err := wgClient.BatchAccountByID(ctx, realm, accountIDs)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to fetch accounts")
+func filterActiveAccounts(ctx context.Context, dbClient database.Client, realm string, accounts map[string]types.ExtendedAccount, force bool) ([]string, error) {
+	var ids []string
+	for id := range accounts {
+		ids = append(ids, id)
 	}
 
 	// existing snapshots for accounts
-	existingLastBattleTimes, err := dbClient.GetAccountLastBattleTimes(ctx, accountIDs, models.SnapshotTypeDaily)
+	existingLastBattleTimes, err := dbClient.GetAccountLastBattleTimes(ctx, ids, models.SnapshotTypeDaily)
 	if err != nil && !database.IsNotFound(err) {
-		return nil, nil, errors.Wrap(err, "failed to get existing snapshots")
+		return nil, errors.Wrap(err, "failed to get existing snapshots")
 	}
 
 	// make a new slice just in case some accounts were not returned/are private
 	var needAnUpdate []string
-	for _, id := range accountIDs {
-		data, ok := accounts[id]
-		if !ok {
-			go func(id string) {
-				log.Debug().Str("accountId", id).Msg("account is private")
-				// update account cache (if it exists) to set account as private
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-				defer cancel()
-				err := dbClient.AccountSetPrivate(ctx, id, true)
-				if err != nil {
-					log.Err(err).Str("accountId", id).Msg("failed to set account status as private")
-				}
-			}(id)
-			continue
-		}
+	for id, data := range accounts {
 		if data.LastBattleTime < 1 {
 			continue
 		}
@@ -64,7 +49,7 @@ func getAndValidateAccounts(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 		needAnUpdate = append(needAnUpdate, id)
 	}
-	return accounts, needAnUpdate, nil
+	return needAnUpdate, nil
 }
 
 func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm string, force bool, accountIDs ...string) (map[string]error, error) {
@@ -76,7 +61,12 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	accounts, accountsNeedAnUpdate, err := getAndValidateAccounts(ctx, wgClient, dbClient, force, realm, accountIDs...)
+	accounts, err := wgClient.BatchAccountByID(ctx, realm, accountIDs)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to fetch accounts")
+	}
+
+	accountsNeedAnUpdate, err := filterActiveAccounts(ctx, dbClient, realm, accounts, false)
 	if err != nil {
 		return nil, err
 	}
