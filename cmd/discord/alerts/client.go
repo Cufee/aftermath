@@ -2,7 +2,12 @@ package alerts
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -29,29 +34,55 @@ func NewClient(token string, webhookURL string) (*alertClient, error) {
 	return &alertClient{rest: client, webhookURL: webhookURL}, nil
 }
 
-func (c *alertClient) Error(ctx context.Context, header, codeBlock string) error {
-	content := fmt.Sprintf("### An error was logged through zerolog\n%s\n```%s```", header, codeBlock)
+func (c *alertClient) Error(ctx context.Context, message, codeBlock string) error {
+	content := fmt.Sprintf("%s\n```%s```", message, codeBlock)
 	return c.rest.PostWebhookMessage(ctx, c.webhookURL, discordgo.WebhookParams{
 		Content:  content,
 		Username: constants.FrontendAppName + " Error Report",
 	}, nil)
-
 }
 
-type zerologHook struct {
-	client DiscordAlertClient
-}
-
-func (h *zerologHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-
-	switch level {
-	case zerolog.ErrorLevel:
-		h.client.Error(ctx, msg, fmt.Sprintf("%v", e.GetCtx().Err()))
+func (c *alertClient) Reader(r io.ReadCloser, levels ...zerolog.Level) {
+	var levelSlice []string
+	for _, l := range levels {
+		levelSlice = append(levelSlice, l.String())
 	}
-}
+	if len(levelSlice) < 1 {
+		return
+	}
 
-func NewHook(c DiscordAlertClient) *zerologHook {
-	return &zerologHook{client: c}
+	go func() {
+		dec := json.NewDecoder(r)
+
+		for {
+			var e = make(map[string]any)
+			err := dec.Decode(&e)
+			if err == io.EOF {
+				return
+			}
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "unmarshaling log failed: %v\n", err)
+				continue
+			}
+
+			level, ok := e["level"].(string)
+			if !ok || !slices.Contains(levelSlice, level) {
+				continue
+			}
+			data, err := json.MarshalIndent(e, "", "  ")
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "marshaling log failed: %v\n", err)
+				continue
+			}
+			message, _ := e["message"].(string)
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			err = c.Error(ctx, "**["+strings.ToUpper(level)+"]**: "+message, string(data))
+			cancel()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to report an error: %v\n", err)
+				continue
+			}
+		}
+	}()
 }
