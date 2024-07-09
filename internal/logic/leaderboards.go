@@ -92,7 +92,8 @@ func RecordCurrentAchievementsLeaderboards(ctx context.Context, wgClient wargami
 	if currentAchievements.Err != nil {
 		return nil, currentAchievements.Err
 	}
-	if accountClans.Err != nil { // this error is not critical, but it will delay the leaderboard update for clans
+	// this error is not critical, but it will delay the leaderboard update for clans
+	if accountClans.Err != nil && accountClans.Err.Error() != "SOURCE_NOT_AVAILABLE" {
 		log.Err(accountClans.Err).Msg("failed to get account clans")
 	}
 
