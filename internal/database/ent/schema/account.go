@@ -42,7 +42,6 @@ func (Account) Fields() []ent.Field {
 func (Account) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("clan", Clan.Type).Ref("accounts").Field("clan_id").Unique(),
-		edge.To("achievement_snapshots", AchievementsSnapshot.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("vehicle_snapshots", VehicleSnapshot.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("account_snapshots", AccountSnapshot.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}

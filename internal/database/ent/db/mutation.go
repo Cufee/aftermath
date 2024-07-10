@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/appconfiguration"
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
 	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
@@ -32,7 +31,6 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/frame"
-	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
 const (
@@ -44,54 +42,50 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAccount              = "Account"
-	TypeAccountSnapshot      = "AccountSnapshot"
-	TypeAchievementsSnapshot = "AchievementsSnapshot"
-	TypeAppConfiguration     = "AppConfiguration"
-	TypeApplicationCommand   = "ApplicationCommand"
-	TypeAuthNonce            = "AuthNonce"
-	TypeClan                 = "Clan"
-	TypeCronTask             = "CronTask"
-	TypeDiscordInteraction   = "DiscordInteraction"
-	TypeLeaderboardScore     = "LeaderboardScore"
-	TypeSession              = "Session"
-	TypeUser                 = "User"
-	TypeUserConnection       = "UserConnection"
-	TypeUserContent          = "UserContent"
-	TypeUserSubscription     = "UserSubscription"
-	TypeVehicle              = "Vehicle"
-	TypeVehicleAverage       = "VehicleAverage"
-	TypeVehicleSnapshot      = "VehicleSnapshot"
+	TypeAccount            = "Account"
+	TypeAccountSnapshot    = "AccountSnapshot"
+	TypeAppConfiguration   = "AppConfiguration"
+	TypeApplicationCommand = "ApplicationCommand"
+	TypeAuthNonce          = "AuthNonce"
+	TypeClan               = "Clan"
+	TypeCronTask           = "CronTask"
+	TypeDiscordInteraction = "DiscordInteraction"
+	TypeLeaderboardScore   = "LeaderboardScore"
+	TypeSession            = "Session"
+	TypeUser               = "User"
+	TypeUserConnection     = "UserConnection"
+	TypeUserContent        = "UserContent"
+	TypeUserSubscription   = "UserSubscription"
+	TypeVehicle            = "Vehicle"
+	TypeVehicleAverage     = "VehicleAverage"
+	TypeVehicleSnapshot    = "VehicleSnapshot"
 )
 
 // AccountMutation represents an operation that mutates the Account nodes in the graph.
 type AccountMutation struct {
 	config
-	op                           Op
-	typ                          string
-	id                           *string
-	created_at                   *time.Time
-	updated_at                   *time.Time
-	last_battle_time             *time.Time
-	account_created_at           *time.Time
-	realm                        *string
-	nickname                     *string
-	private                      *bool
-	clearedFields                map[string]struct{}
-	clan                         *string
-	clearedclan                  bool
-	achievement_snapshots        map[string]struct{}
-	removedachievement_snapshots map[string]struct{}
-	clearedachievement_snapshots bool
-	vehicle_snapshots            map[string]struct{}
-	removedvehicle_snapshots     map[string]struct{}
-	clearedvehicle_snapshots     bool
-	account_snapshots            map[string]struct{}
-	removedaccount_snapshots     map[string]struct{}
-	clearedaccount_snapshots     bool
-	done                         bool
-	oldValue                     func(context.Context) (*Account, error)
-	predicates                   []predicate.Account
+	op                       Op
+	typ                      string
+	id                       *string
+	created_at               *time.Time
+	updated_at               *time.Time
+	last_battle_time         *time.Time
+	account_created_at       *time.Time
+	realm                    *string
+	nickname                 *string
+	private                  *bool
+	clearedFields            map[string]struct{}
+	clan                     *string
+	clearedclan              bool
+	vehicle_snapshots        map[string]struct{}
+	removedvehicle_snapshots map[string]struct{}
+	clearedvehicle_snapshots bool
+	account_snapshots        map[string]struct{}
+	removedaccount_snapshots map[string]struct{}
+	clearedaccount_snapshots bool
+	done                     bool
+	oldValue                 func(context.Context) (*Account, error)
+	predicates               []predicate.Account
 }
 
 var _ ent.Mutation = (*AccountMutation)(nil)
@@ -526,60 +520,6 @@ func (m *AccountMutation) ResetClan() {
 	m.clearedclan = false
 }
 
-// AddAchievementSnapshotIDs adds the "achievement_snapshots" edge to the AchievementsSnapshot entity by ids.
-func (m *AccountMutation) AddAchievementSnapshotIDs(ids ...string) {
-	if m.achievement_snapshots == nil {
-		m.achievement_snapshots = make(map[string]struct{})
-	}
-	for i := range ids {
-		m.achievement_snapshots[ids[i]] = struct{}{}
-	}
-}
-
-// ClearAchievementSnapshots clears the "achievement_snapshots" edge to the AchievementsSnapshot entity.
-func (m *AccountMutation) ClearAchievementSnapshots() {
-	m.clearedachievement_snapshots = true
-}
-
-// AchievementSnapshotsCleared reports if the "achievement_snapshots" edge to the AchievementsSnapshot entity was cleared.
-func (m *AccountMutation) AchievementSnapshotsCleared() bool {
-	return m.clearedachievement_snapshots
-}
-
-// RemoveAchievementSnapshotIDs removes the "achievement_snapshots" edge to the AchievementsSnapshot entity by IDs.
-func (m *AccountMutation) RemoveAchievementSnapshotIDs(ids ...string) {
-	if m.removedachievement_snapshots == nil {
-		m.removedachievement_snapshots = make(map[string]struct{})
-	}
-	for i := range ids {
-		delete(m.achievement_snapshots, ids[i])
-		m.removedachievement_snapshots[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedAchievementSnapshots returns the removed IDs of the "achievement_snapshots" edge to the AchievementsSnapshot entity.
-func (m *AccountMutation) RemovedAchievementSnapshotsIDs() (ids []string) {
-	for id := range m.removedachievement_snapshots {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// AchievementSnapshotsIDs returns the "achievement_snapshots" edge IDs in the mutation.
-func (m *AccountMutation) AchievementSnapshotsIDs() (ids []string) {
-	for id := range m.achievement_snapshots {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetAchievementSnapshots resets all changes to the "achievement_snapshots" edge.
-func (m *AccountMutation) ResetAchievementSnapshots() {
-	m.achievement_snapshots = nil
-	m.clearedachievement_snapshots = false
-	m.removedachievement_snapshots = nil
-}
-
 // AddVehicleSnapshotIDs adds the "vehicle_snapshots" edge to the VehicleSnapshot entity by ids.
 func (m *AccountMutation) AddVehicleSnapshotIDs(ids ...string) {
 	if m.vehicle_snapshots == nil {
@@ -949,12 +889,9 @@ func (m *AccountMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AccountMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 3)
 	if m.clan != nil {
 		edges = append(edges, account.EdgeClan)
-	}
-	if m.achievement_snapshots != nil {
-		edges = append(edges, account.EdgeAchievementSnapshots)
 	}
 	if m.vehicle_snapshots != nil {
 		edges = append(edges, account.EdgeVehicleSnapshots)
@@ -973,12 +910,6 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 		if id := m.clan; id != nil {
 			return []ent.Value{*id}
 		}
-	case account.EdgeAchievementSnapshots:
-		ids := make([]ent.Value, 0, len(m.achievement_snapshots))
-		for id := range m.achievement_snapshots {
-			ids = append(ids, id)
-		}
-		return ids
 	case account.EdgeVehicleSnapshots:
 		ids := make([]ent.Value, 0, len(m.vehicle_snapshots))
 		for id := range m.vehicle_snapshots {
@@ -997,10 +928,7 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AccountMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m.removedachievement_snapshots != nil {
-		edges = append(edges, account.EdgeAchievementSnapshots)
-	}
+	edges := make([]string, 0, 3)
 	if m.removedvehicle_snapshots != nil {
 		edges = append(edges, account.EdgeVehicleSnapshots)
 	}
@@ -1014,12 +942,6 @@ func (m *AccountMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case account.EdgeAchievementSnapshots:
-		ids := make([]ent.Value, 0, len(m.removedachievement_snapshots))
-		for id := range m.removedachievement_snapshots {
-			ids = append(ids, id)
-		}
-		return ids
 	case account.EdgeVehicleSnapshots:
 		ids := make([]ent.Value, 0, len(m.removedvehicle_snapshots))
 		for id := range m.removedvehicle_snapshots {
@@ -1038,12 +960,9 @@ func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AccountMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 3)
 	if m.clearedclan {
 		edges = append(edges, account.EdgeClan)
-	}
-	if m.clearedachievement_snapshots {
-		edges = append(edges, account.EdgeAchievementSnapshots)
 	}
 	if m.clearedvehicle_snapshots {
 		edges = append(edges, account.EdgeVehicleSnapshots)
@@ -1060,8 +979,6 @@ func (m *AccountMutation) EdgeCleared(name string) bool {
 	switch name {
 	case account.EdgeClan:
 		return m.clearedclan
-	case account.EdgeAchievementSnapshots:
-		return m.clearedachievement_snapshots
 	case account.EdgeVehicleSnapshots:
 		return m.clearedvehicle_snapshots
 	case account.EdgeAccountSnapshots:
@@ -1087,9 +1004,6 @@ func (m *AccountMutation) ResetEdge(name string) error {
 	switch name {
 	case account.EdgeClan:
 		m.ResetClan()
-		return nil
-	case account.EdgeAchievementSnapshots:
-		m.ResetAchievementSnapshots()
 		return nil
 	case account.EdgeVehicleSnapshots:
 		m.ResetVehicleSnapshots()
@@ -2040,806 +1954,6 @@ func (m *AccountSnapshotMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown AccountSnapshot edge %s", name)
-}
-
-// AchievementsSnapshotMutation represents an operation that mutates the AchievementsSnapshot nodes in the graph.
-type AchievementsSnapshotMutation struct {
-	config
-	op               Op
-	typ              string
-	id               *string
-	created_at       *time.Time
-	updated_at       *time.Time
-	_type            *models.SnapshotType
-	reference_id     *string
-	battles          *int
-	addbattles       *int
-	last_battle_time *time.Time
-	data             *types.AchievementsFrame
-	clearedFields    map[string]struct{}
-	account          *string
-	clearedaccount   bool
-	done             bool
-	oldValue         func(context.Context) (*AchievementsSnapshot, error)
-	predicates       []predicate.AchievementsSnapshot
-}
-
-var _ ent.Mutation = (*AchievementsSnapshotMutation)(nil)
-
-// achievementssnapshotOption allows management of the mutation configuration using functional options.
-type achievementssnapshotOption func(*AchievementsSnapshotMutation)
-
-// newAchievementsSnapshotMutation creates new mutation for the AchievementsSnapshot entity.
-func newAchievementsSnapshotMutation(c config, op Op, opts ...achievementssnapshotOption) *AchievementsSnapshotMutation {
-	m := &AchievementsSnapshotMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeAchievementsSnapshot,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withAchievementsSnapshotID sets the ID field of the mutation.
-func withAchievementsSnapshotID(id string) achievementssnapshotOption {
-	return func(m *AchievementsSnapshotMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *AchievementsSnapshot
-		)
-		m.oldValue = func(ctx context.Context) (*AchievementsSnapshot, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().AchievementsSnapshot.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withAchievementsSnapshot sets the old AchievementsSnapshot of the mutation.
-func withAchievementsSnapshot(node *AchievementsSnapshot) achievementssnapshotOption {
-	return func(m *AchievementsSnapshotMutation) {
-		m.oldValue = func(context.Context) (*AchievementsSnapshot, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m AchievementsSnapshotMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m AchievementsSnapshotMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("db: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of AchievementsSnapshot entities.
-func (m *AchievementsSnapshotMutation) SetID(id string) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *AchievementsSnapshotMutation) ID() (id string, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *AchievementsSnapshotMutation) IDs(ctx context.Context) ([]string, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []string{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().AchievementsSnapshot.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *AchievementsSnapshotMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *AchievementsSnapshotMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the AchievementsSnapshot entity.
-// If the AchievementsSnapshot object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AchievementsSnapshotMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *AchievementsSnapshotMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *AchievementsSnapshotMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *AchievementsSnapshotMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the AchievementsSnapshot entity.
-// If the AchievementsSnapshot object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AchievementsSnapshotMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *AchievementsSnapshotMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetType sets the "type" field.
-func (m *AchievementsSnapshotMutation) SetType(mt models.SnapshotType) {
-	m._type = &mt
-}
-
-// GetType returns the value of the "type" field in the mutation.
-func (m *AchievementsSnapshotMutation) GetType() (r models.SnapshotType, exists bool) {
-	v := m._type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldType returns the old "type" field's value of the AchievementsSnapshot entity.
-// If the AchievementsSnapshot object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AchievementsSnapshotMutation) OldType(ctx context.Context) (v models.SnapshotType, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldType: %w", err)
-	}
-	return oldValue.Type, nil
-}
-
-// ResetType resets all changes to the "type" field.
-func (m *AchievementsSnapshotMutation) ResetType() {
-	m._type = nil
-}
-
-// SetAccountID sets the "account_id" field.
-func (m *AchievementsSnapshotMutation) SetAccountID(s string) {
-	m.account = &s
-}
-
-// AccountID returns the value of the "account_id" field in the mutation.
-func (m *AchievementsSnapshotMutation) AccountID() (r string, exists bool) {
-	v := m.account
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAccountID returns the old "account_id" field's value of the AchievementsSnapshot entity.
-// If the AchievementsSnapshot object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AchievementsSnapshotMutation) OldAccountID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAccountID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
-	}
-	return oldValue.AccountID, nil
-}
-
-// ResetAccountID resets all changes to the "account_id" field.
-func (m *AchievementsSnapshotMutation) ResetAccountID() {
-	m.account = nil
-}
-
-// SetReferenceID sets the "reference_id" field.
-func (m *AchievementsSnapshotMutation) SetReferenceID(s string) {
-	m.reference_id = &s
-}
-
-// ReferenceID returns the value of the "reference_id" field in the mutation.
-func (m *AchievementsSnapshotMutation) ReferenceID() (r string, exists bool) {
-	v := m.reference_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldReferenceID returns the old "reference_id" field's value of the AchievementsSnapshot entity.
-// If the AchievementsSnapshot object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AchievementsSnapshotMutation) OldReferenceID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldReferenceID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldReferenceID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldReferenceID: %w", err)
-	}
-	return oldValue.ReferenceID, nil
-}
-
-// ResetReferenceID resets all changes to the "reference_id" field.
-func (m *AchievementsSnapshotMutation) ResetReferenceID() {
-	m.reference_id = nil
-}
-
-// SetBattles sets the "battles" field.
-func (m *AchievementsSnapshotMutation) SetBattles(i int) {
-	m.battles = &i
-	m.addbattles = nil
-}
-
-// Battles returns the value of the "battles" field in the mutation.
-func (m *AchievementsSnapshotMutation) Battles() (r int, exists bool) {
-	v := m.battles
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldBattles returns the old "battles" field's value of the AchievementsSnapshot entity.
-// If the AchievementsSnapshot object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AchievementsSnapshotMutation) OldBattles(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldBattles is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldBattles requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldBattles: %w", err)
-	}
-	return oldValue.Battles, nil
-}
-
-// AddBattles adds i to the "battles" field.
-func (m *AchievementsSnapshotMutation) AddBattles(i int) {
-	if m.addbattles != nil {
-		*m.addbattles += i
-	} else {
-		m.addbattles = &i
-	}
-}
-
-// AddedBattles returns the value that was added to the "battles" field in this mutation.
-func (m *AchievementsSnapshotMutation) AddedBattles() (r int, exists bool) {
-	v := m.addbattles
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetBattles resets all changes to the "battles" field.
-func (m *AchievementsSnapshotMutation) ResetBattles() {
-	m.battles = nil
-	m.addbattles = nil
-}
-
-// SetLastBattleTime sets the "last_battle_time" field.
-func (m *AchievementsSnapshotMutation) SetLastBattleTime(t time.Time) {
-	m.last_battle_time = &t
-}
-
-// LastBattleTime returns the value of the "last_battle_time" field in the mutation.
-func (m *AchievementsSnapshotMutation) LastBattleTime() (r time.Time, exists bool) {
-	v := m.last_battle_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLastBattleTime returns the old "last_battle_time" field's value of the AchievementsSnapshot entity.
-// If the AchievementsSnapshot object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AchievementsSnapshotMutation) OldLastBattleTime(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLastBattleTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLastBattleTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLastBattleTime: %w", err)
-	}
-	return oldValue.LastBattleTime, nil
-}
-
-// ResetLastBattleTime resets all changes to the "last_battle_time" field.
-func (m *AchievementsSnapshotMutation) ResetLastBattleTime() {
-	m.last_battle_time = nil
-}
-
-// SetData sets the "data" field.
-func (m *AchievementsSnapshotMutation) SetData(tf types.AchievementsFrame) {
-	m.data = &tf
-}
-
-// Data returns the value of the "data" field in the mutation.
-func (m *AchievementsSnapshotMutation) Data() (r types.AchievementsFrame, exists bool) {
-	v := m.data
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldData returns the old "data" field's value of the AchievementsSnapshot entity.
-// If the AchievementsSnapshot object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AchievementsSnapshotMutation) OldData(ctx context.Context) (v types.AchievementsFrame, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldData is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldData requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldData: %w", err)
-	}
-	return oldValue.Data, nil
-}
-
-// ResetData resets all changes to the "data" field.
-func (m *AchievementsSnapshotMutation) ResetData() {
-	m.data = nil
-}
-
-// ClearAccount clears the "account" edge to the Account entity.
-func (m *AchievementsSnapshotMutation) ClearAccount() {
-	m.clearedaccount = true
-	m.clearedFields[achievementssnapshot.FieldAccountID] = struct{}{}
-}
-
-// AccountCleared reports if the "account" edge to the Account entity was cleared.
-func (m *AchievementsSnapshotMutation) AccountCleared() bool {
-	return m.clearedaccount
-}
-
-// AccountIDs returns the "account" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// AccountID instead. It exists only for internal usage by the builders.
-func (m *AchievementsSnapshotMutation) AccountIDs() (ids []string) {
-	if id := m.account; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetAccount resets all changes to the "account" edge.
-func (m *AchievementsSnapshotMutation) ResetAccount() {
-	m.account = nil
-	m.clearedaccount = false
-}
-
-// Where appends a list predicates to the AchievementsSnapshotMutation builder.
-func (m *AchievementsSnapshotMutation) Where(ps ...predicate.AchievementsSnapshot) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the AchievementsSnapshotMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *AchievementsSnapshotMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.AchievementsSnapshot, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *AchievementsSnapshotMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *AchievementsSnapshotMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (AchievementsSnapshot).
-func (m *AchievementsSnapshotMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *AchievementsSnapshotMutation) Fields() []string {
-	fields := make([]string, 0, 8)
-	if m.created_at != nil {
-		fields = append(fields, achievementssnapshot.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, achievementssnapshot.FieldUpdatedAt)
-	}
-	if m._type != nil {
-		fields = append(fields, achievementssnapshot.FieldType)
-	}
-	if m.account != nil {
-		fields = append(fields, achievementssnapshot.FieldAccountID)
-	}
-	if m.reference_id != nil {
-		fields = append(fields, achievementssnapshot.FieldReferenceID)
-	}
-	if m.battles != nil {
-		fields = append(fields, achievementssnapshot.FieldBattles)
-	}
-	if m.last_battle_time != nil {
-		fields = append(fields, achievementssnapshot.FieldLastBattleTime)
-	}
-	if m.data != nil {
-		fields = append(fields, achievementssnapshot.FieldData)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *AchievementsSnapshotMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case achievementssnapshot.FieldCreatedAt:
-		return m.CreatedAt()
-	case achievementssnapshot.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case achievementssnapshot.FieldType:
-		return m.GetType()
-	case achievementssnapshot.FieldAccountID:
-		return m.AccountID()
-	case achievementssnapshot.FieldReferenceID:
-		return m.ReferenceID()
-	case achievementssnapshot.FieldBattles:
-		return m.Battles()
-	case achievementssnapshot.FieldLastBattleTime:
-		return m.LastBattleTime()
-	case achievementssnapshot.FieldData:
-		return m.Data()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *AchievementsSnapshotMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case achievementssnapshot.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case achievementssnapshot.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case achievementssnapshot.FieldType:
-		return m.OldType(ctx)
-	case achievementssnapshot.FieldAccountID:
-		return m.OldAccountID(ctx)
-	case achievementssnapshot.FieldReferenceID:
-		return m.OldReferenceID(ctx)
-	case achievementssnapshot.FieldBattles:
-		return m.OldBattles(ctx)
-	case achievementssnapshot.FieldLastBattleTime:
-		return m.OldLastBattleTime(ctx)
-	case achievementssnapshot.FieldData:
-		return m.OldData(ctx)
-	}
-	return nil, fmt.Errorf("unknown AchievementsSnapshot field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *AchievementsSnapshotMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case achievementssnapshot.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case achievementssnapshot.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case achievementssnapshot.FieldType:
-		v, ok := value.(models.SnapshotType)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetType(v)
-		return nil
-	case achievementssnapshot.FieldAccountID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAccountID(v)
-		return nil
-	case achievementssnapshot.FieldReferenceID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetReferenceID(v)
-		return nil
-	case achievementssnapshot.FieldBattles:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetBattles(v)
-		return nil
-	case achievementssnapshot.FieldLastBattleTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLastBattleTime(v)
-		return nil
-	case achievementssnapshot.FieldData:
-		v, ok := value.(types.AchievementsFrame)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetData(v)
-		return nil
-	}
-	return fmt.Errorf("unknown AchievementsSnapshot field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *AchievementsSnapshotMutation) AddedFields() []string {
-	var fields []string
-	if m.addbattles != nil {
-		fields = append(fields, achievementssnapshot.FieldBattles)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *AchievementsSnapshotMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case achievementssnapshot.FieldBattles:
-		return m.AddedBattles()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *AchievementsSnapshotMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case achievementssnapshot.FieldBattles:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddBattles(v)
-		return nil
-	}
-	return fmt.Errorf("unknown AchievementsSnapshot numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *AchievementsSnapshotMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *AchievementsSnapshotMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *AchievementsSnapshotMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown AchievementsSnapshot nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *AchievementsSnapshotMutation) ResetField(name string) error {
-	switch name {
-	case achievementssnapshot.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case achievementssnapshot.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case achievementssnapshot.FieldType:
-		m.ResetType()
-		return nil
-	case achievementssnapshot.FieldAccountID:
-		m.ResetAccountID()
-		return nil
-	case achievementssnapshot.FieldReferenceID:
-		m.ResetReferenceID()
-		return nil
-	case achievementssnapshot.FieldBattles:
-		m.ResetBattles()
-		return nil
-	case achievementssnapshot.FieldLastBattleTime:
-		m.ResetLastBattleTime()
-		return nil
-	case achievementssnapshot.FieldData:
-		m.ResetData()
-		return nil
-	}
-	return fmt.Errorf("unknown AchievementsSnapshot field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *AchievementsSnapshotMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.account != nil {
-		edges = append(edges, achievementssnapshot.EdgeAccount)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *AchievementsSnapshotMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case achievementssnapshot.EdgeAccount:
-		if id := m.account; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *AchievementsSnapshotMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *AchievementsSnapshotMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *AchievementsSnapshotMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedaccount {
-		edges = append(edges, achievementssnapshot.EdgeAccount)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *AchievementsSnapshotMutation) EdgeCleared(name string) bool {
-	switch name {
-	case achievementssnapshot.EdgeAccount:
-		return m.clearedaccount
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *AchievementsSnapshotMutation) ClearEdge(name string) error {
-	switch name {
-	case achievementssnapshot.EdgeAccount:
-		m.ClearAccount()
-		return nil
-	}
-	return fmt.Errorf("unknown AchievementsSnapshot unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *AchievementsSnapshotMutation) ResetEdge(name string) error {
-	switch name {
-	case achievementssnapshot.EdgeAccount:
-		m.ResetAccount()
-		return nil
-	}
-	return fmt.Errorf("unknown AchievementsSnapshot edge %s", name)
 }
 
 // AppConfigurationMutation represents an operation that mutates the AppConfiguration nodes in the graph.

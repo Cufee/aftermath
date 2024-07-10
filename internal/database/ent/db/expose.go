@@ -30,19 +30,6 @@ func (as *AccountSnapshot) ScanValues(columns []string) ([]any, error) {
 	return as.scanValues(columns)
 }
 
-func (as *AchievementsSnapshot) AssignValues(columns []string, values []any) error {
-	if as == nil {
-		return fmt.Errorf("AchievementsSnapshot(nil)")
-	}
-	return as.assignValues(columns, values)
-}
-func (as *AchievementsSnapshot) ScanValues(columns []string) ([]any, error) {
-	if as == nil {
-		return nil, fmt.Errorf("AchievementsSnapshot(nil)")
-	}
-	return as.scanValues(columns)
-}
-
 func (ac *AppConfiguration) AssignValues(columns []string, values []any) error {
 	if ac == nil {
 		return fmt.Errorf("AppConfiguration(nil)")

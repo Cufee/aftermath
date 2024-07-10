@@ -33,18 +33,6 @@ func (f AccountSnapshotFunc) Mutate(ctx context.Context, m db.Mutation) (db.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.AccountSnapshotMutation", m)
 }
 
-// The AchievementsSnapshotFunc type is an adapter to allow the use of ordinary
-// function as AchievementsSnapshot mutator.
-type AchievementsSnapshotFunc func(context.Context, *db.AchievementsSnapshotMutation) (db.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f AchievementsSnapshotFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
-	if mv, ok := m.(*db.AchievementsSnapshotMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.AchievementsSnapshotMutation", m)
-}
-
 // The AppConfigurationFunc type is an adapter to allow the use of ordinary
 // function as AppConfiguration mutator.
 type AppConfigurationFunc func(context.Context, *db.AppConfigurationMutation) (db.Value, error)

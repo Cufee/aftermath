@@ -503,29 +503,6 @@ func HasClanWith(preds ...predicate.Clan) predicate.Account {
 	})
 }
 
-// HasAchievementSnapshots applies the HasEdge predicate on the "achievement_snapshots" edge.
-func HasAchievementSnapshots() predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, AchievementSnapshotsTable, AchievementSnapshotsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasAchievementSnapshotsWith applies the HasEdge predicate on the "achievement_snapshots" edge with a given conditions (other predicates).
-func HasAchievementSnapshotsWith(preds ...predicate.AchievementsSnapshot) predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		step := newAchievementSnapshotsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasVehicleSnapshots applies the HasEdge predicate on the "vehicle_snapshots" edge.
 func HasVehicleSnapshots() predicate.Account {
 	return predicate.Account(func(s *sql.Selector) {

@@ -116,54 +116,6 @@ var (
 			},
 		},
 	}
-	// AchievementsSnapshotsColumns holds the columns for the "achievements_snapshots" table.
-	AchievementsSnapshotsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"live", "daily"}},
-		{Name: "reference_id", Type: field.TypeString},
-		{Name: "battles", Type: field.TypeInt},
-		{Name: "last_battle_time", Type: field.TypeTime},
-		{Name: "data", Type: field.TypeJSON},
-		{Name: "account_id", Type: field.TypeString},
-	}
-	// AchievementsSnapshotsTable holds the schema information for the "achievements_snapshots" table.
-	AchievementsSnapshotsTable = &schema.Table{
-		Name:       "achievements_snapshots",
-		Columns:    AchievementsSnapshotsColumns,
-		PrimaryKey: []*schema.Column{AchievementsSnapshotsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "achievements_snapshots_accounts_achievement_snapshots",
-				Columns:    []*schema.Column{AchievementsSnapshotsColumns[8]},
-				RefColumns: []*schema.Column{AccountsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "achievementssnapshot_id",
-				Unique:  false,
-				Columns: []*schema.Column{AchievementsSnapshotsColumns[0]},
-			},
-			{
-				Name:    "achievementssnapshot_created_at",
-				Unique:  false,
-				Columns: []*schema.Column{AchievementsSnapshotsColumns[1]},
-			},
-			{
-				Name:    "achievementssnapshot_account_id_reference_id",
-				Unique:  false,
-				Columns: []*schema.Column{AchievementsSnapshotsColumns[8], AchievementsSnapshotsColumns[4]},
-			},
-			{
-				Name:    "achievementssnapshot_account_id_reference_id_created_at",
-				Unique:  false,
-				Columns: []*schema.Column{AchievementsSnapshotsColumns[8], AchievementsSnapshotsColumns[4], AchievementsSnapshotsColumns[1]},
-			},
-		},
-	}
 	// AppConfigurationsColumns holds the columns for the "app_configurations" table.
 	AppConfigurationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -733,7 +685,6 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		AccountSnapshotsTable,
-		AchievementsSnapshotsTable,
 		AppConfigurationsTable,
 		ApplicationCommandsTable,
 		AuthNoncesTable,
@@ -755,7 +706,6 @@ var (
 func init() {
 	AccountsTable.ForeignKeys[0].RefTable = ClansTable
 	AccountSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
-	AchievementsSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
 	DiscordInteractionsTable.ForeignKeys[0].RefTable = UsersTable
 	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserConnectionsTable.ForeignKeys[0].RefTable = UsersTable

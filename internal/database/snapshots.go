@@ -7,8 +7,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
 	"github.com/cufee/aftermath/internal/database/models"
 )
@@ -38,19 +36,6 @@ func toAccountSnapshot(record *db.AccountSnapshot) models.AccountSnapshot {
 		RegularBattles: record.RegularFrame,
 		CreatedAt:      record.CreatedAt,
 		LastBattleTime: record.LastBattleTime,
-	}
-}
-
-func toAchievementsSnapshot(record *db.AchievementsSnapshot) models.AchievementsSnapshot {
-	return models.AchievementsSnapshot{
-		ID:             record.ID,
-		Type:           record.Type,
-		CreatedAt:      record.CreatedAt,
-		LastBattleTime: record.LastBattleTime,
-		ReferenceID:    record.ReferenceID,
-		AccountID:      record.AccountID,
-		Battles:        record.Battles,
-		Data:           record.Data,
 	}
 }
 
@@ -334,78 +319,4 @@ func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy string
 	innerQueryString, innerQueryArgs := innerQuery.Query()
 	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(groupBy).Query()
 	return queryString, innerQueryArgs
-}
-
-// --- achievement snapshots ---
-
-func (c *client) GetAchievementSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AchievementsSnapshot, error) {
-	if len(accountIDs) < 1 {
-		return nil, new(db.NotFoundError)
-	}
-
-	var query baseQueryOptions
-	for _, apply := range options {
-		apply(&query)
-	}
-
-	var where []predicate.AchievementsSnapshot
-	var orderBy achievementssnapshot.OrderOption
-	orderBy = achievementssnapshot.ByCreatedAt(sql.OrderDesc())
-	where = append(where, achievementssnapshot.AccountIDIn(accountIDs...), achievementssnapshot.TypeEQ(kind))
-
-	if query.createdAfter != nil {
-		where = append(where, achievementssnapshot.CreatedAtGT(*query.createdAfter))
-		orderBy = achievementssnapshot.ByCreatedAt(sql.OrderAsc())
-	}
-	if query.createdBefore != nil {
-		where = append(where, achievementssnapshot.CreatedAtLT(*query.createdAfter))
-		orderBy = achievementssnapshot.ByCreatedAt(sql.OrderDesc())
-	}
-
-	records, err := c.db.AchievementsSnapshot.Query().Select(query.selectFields()...).Order(orderBy).Where(where...).All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var snapshots []models.AchievementsSnapshot
-	for _, r := range records {
-		snapshots = append(snapshots, toAchievementsSnapshot(r))
-	}
-
-	return snapshots, nil
-}
-
-func (c *client) CreateAccountAchievementSnapshots(ctx context.Context, accountID string, snapshots ...models.AchievementsSnapshot) (map[string]error, error) {
-	if len(snapshots) < 1 {
-		return nil, nil
-	}
-
-	account, err := c.db.Account.Get(ctx, accountID)
-	if err != nil {
-		return nil, err
-	}
-
-	var errors = make(map[string]error)
-	for _, data := range snapshots {
-		// make a transaction per write to avoid locking for too long
-		err := c.withTx(ctx, func(tx *db.Tx) error {
-			return c.db.AchievementsSnapshot.Create().
-				SetType(data.Type).
-				SetData(data.Data).
-				SetBattles(data.Battles).
-				SetCreatedAt(data.CreatedAt).
-				SetReferenceID(data.ReferenceID).
-				SetLastBattleTime(data.LastBattleTime).
-				SetAccount(account).
-				Exec(ctx)
-		})
-		if err != nil {
-			errors[data.ReferenceID] = err
-		}
-	}
-
-	if len(errors) > 0 {
-		return errors, nil
-	}
-	return nil, nil
 }

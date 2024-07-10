@@ -18,8 +18,6 @@ type Tx struct {
 	Account *AccountClient
 	// AccountSnapshot is the client for interacting with the AccountSnapshot builders.
 	AccountSnapshot *AccountSnapshotClient
-	// AchievementsSnapshot is the client for interacting with the AchievementsSnapshot builders.
-	AchievementsSnapshot *AchievementsSnapshotClient
 	// AppConfiguration is the client for interacting with the AppConfiguration builders.
 	AppConfiguration *AppConfigurationClient
 	// ApplicationCommand is the client for interacting with the ApplicationCommand builders.
@@ -183,7 +181,6 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.AccountSnapshot = NewAccountSnapshotClient(tx.config)
-	tx.AchievementsSnapshot = NewAchievementsSnapshotClient(tx.config)
 	tx.AppConfiguration = NewAppConfigurationClient(tx.config)
 	tx.ApplicationCommand = NewApplicationCommandClient(tx.config)
 	tx.AuthNonce = NewAuthNonceClient(tx.config)

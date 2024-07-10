@@ -32,8 +32,6 @@ const (
 	FieldClanID = "clan_id"
 	// EdgeClan holds the string denoting the clan edge name in mutations.
 	EdgeClan = "clan"
-	// EdgeAchievementSnapshots holds the string denoting the achievement_snapshots edge name in mutations.
-	EdgeAchievementSnapshots = "achievement_snapshots"
 	// EdgeVehicleSnapshots holds the string denoting the vehicle_snapshots edge name in mutations.
 	EdgeVehicleSnapshots = "vehicle_snapshots"
 	// EdgeAccountSnapshots holds the string denoting the account_snapshots edge name in mutations.
@@ -47,13 +45,6 @@ const (
 	ClanInverseTable = "clans"
 	// ClanColumn is the table column denoting the clan relation/edge.
 	ClanColumn = "clan_id"
-	// AchievementSnapshotsTable is the table that holds the achievement_snapshots relation/edge.
-	AchievementSnapshotsTable = "achievements_snapshots"
-	// AchievementSnapshotsInverseTable is the table name for the AchievementsSnapshot entity.
-	// It exists in this package in order to avoid circular dependency with the "achievementssnapshot" package.
-	AchievementSnapshotsInverseTable = "achievements_snapshots"
-	// AchievementSnapshotsColumn is the table column denoting the achievement_snapshots relation/edge.
-	AchievementSnapshotsColumn = "account_id"
 	// VehicleSnapshotsTable is the table that holds the vehicle_snapshots relation/edge.
 	VehicleSnapshotsTable = "vehicle_snapshots"
 	// VehicleSnapshotsInverseTable is the table name for the VehicleSnapshot entity.
@@ -163,20 +154,6 @@ func ByClanField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByAchievementSnapshotsCount orders the results by achievement_snapshots count.
-func ByAchievementSnapshotsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newAchievementSnapshotsStep(), opts...)
-	}
-}
-
-// ByAchievementSnapshots orders the results by achievement_snapshots terms.
-func ByAchievementSnapshots(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAchievementSnapshotsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByVehicleSnapshotsCount orders the results by vehicle_snapshots count.
 func ByVehicleSnapshotsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -209,13 +186,6 @@ func newClanStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ClanInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, ClanTable, ClanColumn),
-	)
-}
-func newAchievementSnapshotsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AchievementSnapshotsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, AchievementSnapshotsTable, AchievementSnapshotsColumn),
 	)
 }
 func newVehicleSnapshotsStep() *sqlgraph.Step {

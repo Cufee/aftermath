@@ -7,7 +7,6 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/appconfiguration"
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
 	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
@@ -92,30 +91,6 @@ func init() {
 	accountsnapshotDescID := accountsnapshotFields[0].Descriptor()
 	// accountsnapshot.DefaultID holds the default value on creation for the id field.
 	accountsnapshot.DefaultID = accountsnapshotDescID.Default.(func() string)
-	achievementssnapshotFields := schema.AchievementsSnapshot{}.Fields()
-	_ = achievementssnapshotFields
-	// achievementssnapshotDescCreatedAt is the schema descriptor for created_at field.
-	achievementssnapshotDescCreatedAt := achievementssnapshotFields[1].Descriptor()
-	// achievementssnapshot.DefaultCreatedAt holds the default value on creation for the created_at field.
-	achievementssnapshot.DefaultCreatedAt = achievementssnapshotDescCreatedAt.Default.(func() time.Time)
-	// achievementssnapshotDescUpdatedAt is the schema descriptor for updated_at field.
-	achievementssnapshotDescUpdatedAt := achievementssnapshotFields[2].Descriptor()
-	// achievementssnapshot.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	achievementssnapshot.DefaultUpdatedAt = achievementssnapshotDescUpdatedAt.Default.(func() time.Time)
-	// achievementssnapshot.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	achievementssnapshot.UpdateDefaultUpdatedAt = achievementssnapshotDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// achievementssnapshotDescAccountID is the schema descriptor for account_id field.
-	achievementssnapshotDescAccountID := achievementssnapshotFields[4].Descriptor()
-	// achievementssnapshot.AccountIDValidator is a validator for the "account_id" field. It is called by the builders before save.
-	achievementssnapshot.AccountIDValidator = achievementssnapshotDescAccountID.Validators[0].(func(string) error)
-	// achievementssnapshotDescReferenceID is the schema descriptor for reference_id field.
-	achievementssnapshotDescReferenceID := achievementssnapshotFields[5].Descriptor()
-	// achievementssnapshot.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
-	achievementssnapshot.ReferenceIDValidator = achievementssnapshotDescReferenceID.Validators[0].(func(string) error)
-	// achievementssnapshotDescID is the schema descriptor for id field.
-	achievementssnapshotDescID := achievementssnapshotFields[0].Descriptor()
-	// achievementssnapshot.DefaultID holds the default value on creation for the id field.
-	achievementssnapshot.DefaultID = achievementssnapshotDescID.Default.(func() string)
 	appconfigurationFields := schema.AppConfiguration{}.Fields()
 	_ = appconfigurationFields
 	// appconfigurationDescCreatedAt is the schema descriptor for created_at field.

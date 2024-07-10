@@ -6,7 +6,6 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
@@ -35,11 +34,6 @@ func (c *client) DeleteExpiredSnapshots(ctx context.Context, expiration time.Tim
 	}
 
 	_, err = c.db.VehicleSnapshot.Delete().Where(vehiclesnapshot.CreatedAtLT(expiration)).Exec(ctx)
-	if err != nil {
-		return err
-	}
-
-	_, err = c.db.AchievementsSnapshot.Delete().Where(achievementssnapshot.CreatedAtLT(expiration)).Exec(ctx)
 	if err != nil {
 		return err
 	}

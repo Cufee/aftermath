@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
@@ -22,15 +21,14 @@ import (
 // AccountQuery is the builder for querying Account entities.
 type AccountQuery struct {
 	config
-	ctx                      *QueryContext
-	order                    []account.OrderOption
-	inters                   []Interceptor
-	predicates               []predicate.Account
-	withClan                 *ClanQuery
-	withAchievementSnapshots *AchievementsSnapshotQuery
-	withVehicleSnapshots     *VehicleSnapshotQuery
-	withAccountSnapshots     *AccountSnapshotQuery
-	modifiers                []func(*sql.Selector)
+	ctx                  *QueryContext
+	order                []account.OrderOption
+	inters               []Interceptor
+	predicates           []predicate.Account
+	withClan             *ClanQuery
+	withVehicleSnapshots *VehicleSnapshotQuery
+	withAccountSnapshots *AccountSnapshotQuery
+	modifiers            []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -82,28 +80,6 @@ func (aq *AccountQuery) QueryClan() *ClanQuery {
 			sqlgraph.From(account.Table, account.FieldID, selector),
 			sqlgraph.To(clan.Table, clan.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, account.ClanTable, account.ClanColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryAchievementSnapshots chains the current query on the "achievement_snapshots" edge.
-func (aq *AccountQuery) QueryAchievementSnapshots() *AchievementsSnapshotQuery {
-	query := (&AchievementsSnapshotClient{config: aq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := aq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(account.Table, account.FieldID, selector),
-			sqlgraph.To(achievementssnapshot.Table, achievementssnapshot.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, account.AchievementSnapshotsTable, account.AchievementSnapshotsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -342,15 +318,14 @@ func (aq *AccountQuery) Clone() *AccountQuery {
 		return nil
 	}
 	return &AccountQuery{
-		config:                   aq.config,
-		ctx:                      aq.ctx.Clone(),
-		order:                    append([]account.OrderOption{}, aq.order...),
-		inters:                   append([]Interceptor{}, aq.inters...),
-		predicates:               append([]predicate.Account{}, aq.predicates...),
-		withClan:                 aq.withClan.Clone(),
-		withAchievementSnapshots: aq.withAchievementSnapshots.Clone(),
-		withVehicleSnapshots:     aq.withVehicleSnapshots.Clone(),
-		withAccountSnapshots:     aq.withAccountSnapshots.Clone(),
+		config:               aq.config,
+		ctx:                  aq.ctx.Clone(),
+		order:                append([]account.OrderOption{}, aq.order...),
+		inters:               append([]Interceptor{}, aq.inters...),
+		predicates:           append([]predicate.Account{}, aq.predicates...),
+		withClan:             aq.withClan.Clone(),
+		withVehicleSnapshots: aq.withVehicleSnapshots.Clone(),
+		withAccountSnapshots: aq.withAccountSnapshots.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
@@ -365,17 +340,6 @@ func (aq *AccountQuery) WithClan(opts ...func(*ClanQuery)) *AccountQuery {
 		opt(query)
 	}
 	aq.withClan = query
-	return aq
-}
-
-// WithAchievementSnapshots tells the query-builder to eager-load the nodes that are connected to
-// the "achievement_snapshots" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *AccountQuery) WithAchievementSnapshots(opts ...func(*AchievementsSnapshotQuery)) *AccountQuery {
-	query := (&AchievementsSnapshotClient{config: aq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	aq.withAchievementSnapshots = query
 	return aq
 }
 
@@ -479,9 +443,8 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 	var (
 		nodes       = []*Account{}
 		_spec       = aq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [3]bool{
 			aq.withClan != nil,
-			aq.withAchievementSnapshots != nil,
 			aq.withVehicleSnapshots != nil,
 			aq.withAccountSnapshots != nil,
 		}
@@ -510,15 +473,6 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 	if query := aq.withClan; query != nil {
 		if err := aq.loadClan(ctx, query, nodes, nil,
 			func(n *Account, e *Clan) { n.Edges.Clan = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := aq.withAchievementSnapshots; query != nil {
-		if err := aq.loadAchievementSnapshots(ctx, query, nodes,
-			func(n *Account) { n.Edges.AchievementSnapshots = []*AchievementsSnapshot{} },
-			func(n *Account, e *AchievementsSnapshot) {
-				n.Edges.AchievementSnapshots = append(n.Edges.AchievementSnapshots, e)
-			}); err != nil {
 			return nil, err
 		}
 	}
@@ -565,36 +519,6 @@ func (aq *AccountQuery) loadClan(ctx context.Context, query *ClanQuery, nodes []
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
-	}
-	return nil
-}
-func (aq *AccountQuery) loadAchievementSnapshots(ctx context.Context, query *AchievementsSnapshotQuery, nodes []*Account, init func(*Account), assign func(*Account, *AchievementsSnapshot)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*Account)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(achievementssnapshot.FieldAccountID)
-	}
-	query.Where(predicate.AchievementsSnapshot(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(account.AchievementSnapshotsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.AccountID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "account_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }
