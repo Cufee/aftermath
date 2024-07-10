@@ -12,9 +12,6 @@ type Account func(*sql.Selector)
 // AccountSnapshot is the predicate function for accountsnapshot builders.
 type AccountSnapshot func(*sql.Selector)
 
-// AchievementsSnapshot is the predicate function for achievementssnapshot builders.
-type AchievementsSnapshot func(*sql.Selector)
-
 // AppConfiguration is the predicate function for appconfiguration builders.
 type AppConfiguration func(*sql.Selector)
 

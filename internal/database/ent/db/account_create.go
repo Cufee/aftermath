@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/achievementssnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
 )
@@ -113,21 +112,6 @@ func (ac *AccountCreate) SetID(s string) *AccountCreate {
 // SetClan sets the "clan" edge to the Clan entity.
 func (ac *AccountCreate) SetClan(c *Clan) *AccountCreate {
 	return ac.SetClanID(c.ID)
-}
-
-// AddAchievementSnapshotIDs adds the "achievement_snapshots" edge to the AchievementsSnapshot entity by IDs.
-func (ac *AccountCreate) AddAchievementSnapshotIDs(ids ...string) *AccountCreate {
-	ac.mutation.AddAchievementSnapshotIDs(ids...)
-	return ac
-}
-
-// AddAchievementSnapshots adds the "achievement_snapshots" edges to the AchievementsSnapshot entity.
-func (ac *AccountCreate) AddAchievementSnapshots(a ...*AchievementsSnapshot) *AccountCreate {
-	ids := make([]string, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return ac.AddAchievementSnapshotIDs(ids...)
 }
 
 // AddVehicleSnapshotIDs adds the "vehicle_snapshots" edge to the VehicleSnapshot entity by IDs.
@@ -320,22 +304,6 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ClanID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := ac.mutation.AchievementSnapshotsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   account.AchievementSnapshotsTable,
-			Columns: []string{account.AchievementSnapshotsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(achievementssnapshot.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := ac.mutation.VehicleSnapshotsIDs(); len(nodes) > 0 {

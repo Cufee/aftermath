@@ -44,15 +44,13 @@ type Account struct {
 type AccountEdges struct {
 	// Clan holds the value of the clan edge.
 	Clan *Clan `json:"clan,omitempty"`
-	// AchievementSnapshots holds the value of the achievement_snapshots edge.
-	AchievementSnapshots []*AchievementsSnapshot `json:"achievement_snapshots,omitempty"`
 	// VehicleSnapshots holds the value of the vehicle_snapshots edge.
 	VehicleSnapshots []*VehicleSnapshot `json:"vehicle_snapshots,omitempty"`
 	// AccountSnapshots holds the value of the account_snapshots edge.
 	AccountSnapshots []*AccountSnapshot `json:"account_snapshots,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [3]bool
 }
 
 // ClanOrErr returns the Clan value or an error if the edge
@@ -66,19 +64,10 @@ func (e AccountEdges) ClanOrErr() (*Clan, error) {
 	return nil, &NotLoadedError{edge: "clan"}
 }
 
-// AchievementSnapshotsOrErr returns the AchievementSnapshots value or an error if the edge
-// was not loaded in eager-loading.
-func (e AccountEdges) AchievementSnapshotsOrErr() ([]*AchievementsSnapshot, error) {
-	if e.loadedTypes[1] {
-		return e.AchievementSnapshots, nil
-	}
-	return nil, &NotLoadedError{edge: "achievement_snapshots"}
-}
-
 // VehicleSnapshotsOrErr returns the VehicleSnapshots value or an error if the edge
 // was not loaded in eager-loading.
 func (e AccountEdges) VehicleSnapshotsOrErr() ([]*VehicleSnapshot, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.VehicleSnapshots, nil
 	}
 	return nil, &NotLoadedError{edge: "vehicle_snapshots"}
@@ -87,7 +76,7 @@ func (e AccountEdges) VehicleSnapshotsOrErr() ([]*VehicleSnapshot, error) {
 // AccountSnapshotsOrErr returns the AccountSnapshots value or an error if the edge
 // was not loaded in eager-loading.
 func (e AccountEdges) AccountSnapshotsOrErr() ([]*AccountSnapshot, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[2] {
 		return e.AccountSnapshots, nil
 	}
 	return nil, &NotLoadedError{edge: "account_snapshots"}
@@ -189,11 +178,6 @@ func (a *Account) Value(name string) (ent.Value, error) {
 // QueryClan queries the "clan" edge of the Account entity.
 func (a *Account) QueryClan() *ClanQuery {
 	return NewAccountClient(a.config).QueryClan(a)
-}
-
-// QueryAchievementSnapshots queries the "achievement_snapshots" edge of the Account entity.
-func (a *Account) QueryAchievementSnapshots() *AchievementsSnapshotQuery {
-	return NewAccountClient(a.config).QueryAchievementSnapshots(a)
 }
 
 // QueryVehicleSnapshots queries the "vehicle_snapshots" edge of the Account entity.
