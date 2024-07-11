@@ -85,7 +85,7 @@ func overviewCardStyle() common.Style {
 
 func overviewCardBlocksStyle(width float64) common.Style {
 	style := defaultCardStyle(width)
-	style.AlignItems = common.AlignItemsEnd
+	style.AlignItems = common.AlignItemsCenter
 	style.Direction = common.DirectionHorizontal
 	style.JustifyContent = common.JustifyContentSpaceAround
 	style.PaddingY = 25
