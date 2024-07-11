@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"golang.org/x/text/language"
 )
 
 // Vehicle holds the schema definition for the Vehicle entity.
@@ -27,7 +28,7 @@ func (Vehicle) Fields() []ent.Field {
 		field.Int("tier").
 			Min(0). // vehicle that does not exist in official glossary has tier set to 0
 			Max(10),
-		field.JSON("localized_names", map[string]string{}),
+		field.JSON("localized_names", map[language.Tag]string{}),
 	}
 
 }

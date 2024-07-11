@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
+	"golang.org/x/text/language"
 )
 
 // VehicleCreate is the builder for creating a Vehicle entity.
@@ -55,7 +56,7 @@ func (vc *VehicleCreate) SetTier(i int) *VehicleCreate {
 }
 
 // SetLocalizedNames sets the "localized_names" field.
-func (vc *VehicleCreate) SetLocalizedNames(m map[string]string) *VehicleCreate {
+func (vc *VehicleCreate) SetLocalizedNames(m map[language.Tag]string) *VehicleCreate {
 	vc.mutation.SetLocalizedNames(m)
 	return vc
 }

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
+	"golang.org/x/text/language"
 )
 
 // Vehicle is the model entity for the Vehicle schema.
@@ -25,7 +26,7 @@ type Vehicle struct {
 	// Tier holds the value of the "tier" field.
 	Tier int `json:"tier,omitempty"`
 	// LocalizedNames holds the value of the "localized_names" field.
-	LocalizedNames map[string]string `json:"localized_names,omitempty"`
+	LocalizedNames map[language.Tag]string `json:"localized_names,omitempty"`
 	selectValues   sql.SelectValues
 }
 

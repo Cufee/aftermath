@@ -90,6 +90,9 @@ func main() {
 	}
 	defer stopScheduler()
 
+	// update vehicle cache in the background on start
+	go scheduler.UpdateGlossaryWorker(cacheCoreClient)()
+
 	// Load some init options to registered admin accounts and etc
 	logic.ApplyInitOptions(liveCoreClient.Database())
 

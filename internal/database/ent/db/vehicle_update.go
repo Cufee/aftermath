@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
+	"golang.org/x/text/language"
 )
 
 // VehicleUpdate is the builder for updating Vehicle entities.
@@ -57,7 +58,7 @@ func (vu *VehicleUpdate) AddTier(i int) *VehicleUpdate {
 }
 
 // SetLocalizedNames sets the "localized_names" field.
-func (vu *VehicleUpdate) SetLocalizedNames(m map[string]string) *VehicleUpdate {
+func (vu *VehicleUpdate) SetLocalizedNames(m map[language.Tag]string) *VehicleUpdate {
 	vu.mutation.SetLocalizedNames(m)
 	return vu
 }
@@ -193,7 +194,7 @@ func (vuo *VehicleUpdateOne) AddTier(i int) *VehicleUpdateOne {
 }
 
 // SetLocalizedNames sets the "localized_names" field.
-func (vuo *VehicleUpdateOne) SetLocalizedNames(m map[string]string) *VehicleUpdateOne {
+func (vuo *VehicleUpdateOne) SetLocalizedNames(m map[language.Tag]string) *VehicleUpdateOne {
 	vuo.mutation.SetLocalizedNames(m)
 	return vuo
 }
