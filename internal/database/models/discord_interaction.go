@@ -48,4 +48,5 @@ type DiscordInteractionOptions struct {
 	BackgroundImageURL string
 	PeriodStart        time.Time
 	AccountID          string
+	VehicleID          string
 }
