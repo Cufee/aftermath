@@ -3,8 +3,10 @@ package rest
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/internal/retry"
 )
 
 type File struct {
@@ -16,14 +18,17 @@ type File struct {
 Optimistically send an interaction response update request with fallback to interaction response send request
 */
 func (c *Client) UpdateOrSendInteractionResponse(ctx context.Context, appID, interactionID, token string, data discordgo.InteractionResponse, files []File) error {
-	err := c.UpdateInteractionResponse(ctx, appID, token, *data.Data, files)
-	if err != nil {
-		if errors.Is(err, ErrUnknownWebhook) || errors.Is(err, ErrUnknownInteraction) {
-			return c.SendInteractionResponse(ctx, interactionID, token, data, files)
+	res := retry.Retry(func() (struct{}, error) {
+		err := c.UpdateInteractionResponse(ctx, appID, token, *data.Data, files)
+		if err != nil {
+			if errors.Is(err, ErrUnknownWebhook) || errors.Is(err, ErrUnknownInteraction) {
+				return struct{}{}, c.SendInteractionResponse(ctx, interactionID, token, data, files)
+			}
+			return struct{}{}, err
 		}
-		return err
-	}
-	return nil
+		return struct{}{}, nil
+	}, 3, time.Millisecond*250)
+	return res.Err
 }
 
 func (c *Client) SendInteractionResponse(ctx context.Context, interactionID, token string, data discordgo.InteractionResponse, files []File) error {

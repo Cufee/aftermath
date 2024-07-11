@@ -134,7 +134,7 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 			// break if the error means we were able to ack on the last request
 			func(err error) bool { return errors.Is(err, rest.ErrInteractionAlreadyAcked) })
 		if res.Err != nil && !errors.Is(res.Err, rest.ErrInteractionAlreadyAcked) {
-			log.Err(res.Err).Str("id", data.ID).Msg("failed to ack an interaction")
+			log.Warn().Err(res.Err).Str("id", data.ID).Msg("failed to ack an interaction")
 			// cross our fingers and hope discord registered one of those requests, or will propagate the ack from the response body
 		}
 
