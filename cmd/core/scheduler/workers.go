@@ -1,15 +1,19 @@
 package scheduler
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
+	"encoding/json"
+	"io"
 	"time"
 
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/core/tasks"
-	"golang.org/x/text/language"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/external/github"
 	"github.com/cufee/aftermath/internal/log"
 )
 
@@ -121,38 +125,49 @@ func UpdateGlossaryWorker(client core.Client) func() {
 	return func() {
 		log.Info().Msg("updating glossary cache")
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		dctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 		defer cancel()
 
-		glossary, err := client.Wargaming().CompleteVehicleGlossary(ctx, "eu", "en")
+		rc, size, err := github.GetLatestGameAssets(dctx)
 		if err != nil {
-			log.Err(err).Msg("failed to get vehicle glossary")
+			log.Err(err).Msg("failed to download latest game assets")
 			return
 		}
 
-		vehicles := make(map[string]models.Vehicle)
-		for id, data := range glossary {
-			vehicles[id] = models.Vehicle{
-				ID:             id,
-				Tier:           data.Tier,
-				LocalizedNames: map[string]string{language.English.String(): data.Name},
+		data, err := io.ReadAll(rc)
+		rc.Close()
+		if err != nil {
+			log.Err(err).Msg("failed to read assets data")
+			return
+		}
+
+		zr, err := zip.NewReader(bytes.NewReader(data), size)
+		if err != nil {
+			log.Err(err).Msg("failed to read assets as zip")
+			return
+		}
+
+		vf, err := zr.Open("assets/vehicles.json")
+		if err != nil {
+			log.Err(err).Msg("failed to open vehicles.json in assets.zip")
+			return
+		} else {
+			var vehicles map[string]models.Vehicle
+			err := json.NewDecoder(vf).Decode(&vehicles)
+			if err != nil {
+				log.Err(err).Msg("failed to decode vehicles.json")
+				return
+			}
+
+			vctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+			defer cancel()
+
+			_, err = client.Database().UpsertVehicles(vctx, vehicles)
+			if err != nil {
+				log.Err(err).Msg("failed to save vehicle glossary")
+				return
 			}
 		}
-
-		vErr, err := client.Database().UpsertVehicles(ctx, vehicles)
-		if err != nil {
-			log.Err(err).Msg("failed to save vehicle glossary")
-			return
-		}
-		if len(vErr) > 0 {
-			event := log.Error()
-			for id, err := range vErr {
-				event.Str(id, err.Error())
-			}
-			event.Msg("failed to save some vehicle glossaries")
-			return
-		}
-
 		log.Info().Msg("glossary cache updated")
 	}
 }

@@ -31,6 +31,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/frame"
+	"golang.org/x/text/language"
 )
 
 const (
@@ -10708,7 +10709,7 @@ type VehicleMutation struct {
 	updated_at      *time.Time
 	tier            *int
 	addtier         *int
-	localized_names *map[string]string
+	localized_names *map[language.Tag]string
 	clearedFields   map[string]struct{}
 	done            bool
 	oldValue        func(context.Context) (*Vehicle, error)
@@ -10948,12 +10949,12 @@ func (m *VehicleMutation) ResetTier() {
 }
 
 // SetLocalizedNames sets the "localized_names" field.
-func (m *VehicleMutation) SetLocalizedNames(value map[string]string) {
+func (m *VehicleMutation) SetLocalizedNames(value map[language.Tag]string) {
 	m.localized_names = &value
 }
 
 // LocalizedNames returns the value of the "localized_names" field in the mutation.
-func (m *VehicleMutation) LocalizedNames() (r map[string]string, exists bool) {
+func (m *VehicleMutation) LocalizedNames() (r map[language.Tag]string, exists bool) {
 	v := m.localized_names
 	if v == nil {
 		return
@@ -10964,7 +10965,7 @@ func (m *VehicleMutation) LocalizedNames() (r map[string]string, exists bool) {
 // OldLocalizedNames returns the old "localized_names" field's value of the Vehicle entity.
 // If the Vehicle object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *VehicleMutation) OldLocalizedNames(ctx context.Context) (v map[string]string, err error) {
+func (m *VehicleMutation) OldLocalizedNames(ctx context.Context) (v map[language.Tag]string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldLocalizedNames is only allowed on UpdateOne operations")
 	}
@@ -11094,7 +11095,7 @@ func (m *VehicleMutation) SetField(name string, value ent.Value) error {
 		m.SetTier(v)
 		return nil
 	case vehicle.FieldLocalizedNames:
-		v, ok := value.(map[string]string)
+		v, ok := value.(map[language.Tag]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

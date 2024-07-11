@@ -10,6 +10,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
+	"golang.org/x/text/language"
 )
 
 var ErrNotFound = &db.NotFoundError{}
@@ -59,7 +60,7 @@ func (c *staticTestingDatabase) UpsertAccounts(ctx context.Context, accounts []m
 func (c *staticTestingDatabase) GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error) {
 	vehicles := make(map[string]models.Vehicle)
 	for _, id := range ids {
-		vehicles[id] = models.Vehicle{ID: id, Tier: 10, LocalizedNames: map[string]string{"en": "Test Vehicle " + id}}
+		vehicles[id] = models.Vehicle{ID: id, Tier: 10, LocalizedNames: map[language.Tag]string{language.English: "Test Vehicle " + id}}
 	}
 	return vehicles, nil
 }

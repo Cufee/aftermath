@@ -37,8 +37,8 @@ func RegisterDefaultTasks(s *scheduler, coreClient core.Client) {
 	s.Add("0 5 * * *", CreateCleanupTaskWorker(coreClient)) // delete expired documents
 
 	// Glossary - Do it around the same time WG releases game updates
-	s.Add("0 10 * * *", UpdateGlossaryWorker(coreClient))
-	s.Add("0 12 * * *", UpdateGlossaryWorker(coreClient))
+	s.Add("10 12 * * *", UpdateGlossaryWorker(coreClient))
+	s.Add("10 10 * * *", UpdateGlossaryWorker(coreClient))
 	// c.AddFunc("40 9 * * 0", updateAchievementsWorker)
 
 	// Averages - Update averages once daily
