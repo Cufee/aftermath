@@ -112,7 +112,6 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 	for _, apply := range opts {
 		apply(&options)
 	}
-	println(options.vehicleID)
 
 	realm := c.wargaming.RealmFromAccountID(id)
 
@@ -180,8 +179,6 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		// not critical, this will only affect WN8
 		log.Err(averages.Err).Msg("failed to get tank averages")
 	}
-
-	println(len(vehicles.Data), "vehicle", options.vehicleID)
 
 	stats := WargamingToStats(realm, account.Data, clan, vehicles.Data)
 	if options.withWN8 {

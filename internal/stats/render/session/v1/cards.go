@@ -51,7 +51,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	var secondaryCardWidth, totalFrameWidth float64
 
 	{
-		titleStyle := common.DefaultPlayerTitleStyle(playerNameCardStyle(0))
+		titleStyle := common.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(0))
 		clanSize := common.MeasureString(session.Account.ClanTag, titleStyle.ClanTag.Font)
 		nameSize := common.MeasureString(session.Account.Nickname, titleStyle.Nickname.Font)
 		primaryCardWidth = common.Max(primaryCardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
@@ -196,7 +196,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 
 	// player title
 	primaryColumn = append(primaryColumn,
-		common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(playerNameCardStyle(primaryCardWidth)), session.Account.Nickname, session.Account.ClanTag, subs),
+		common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(primaryCardWidth)), session.Account.Nickname, session.Account.ClanTag, subs),
 	)
 
 	// overview cards

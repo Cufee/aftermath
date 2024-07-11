@@ -1,6 +1,8 @@
 package period
 
 import (
+	"image/color"
+
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
@@ -35,7 +37,7 @@ func getOverviewStyle(columnWidth float64) overviewStyle {
 		Direction:      common.DirectionVertical,
 		AlignItems:     common.AlignItemsCenter,
 		JustifyContent: common.JustifyContentCenter,
-		PaddingX:       10,
+		PaddingX:       0,
 		PaddingY:       0,
 		Gap:            10,
 		Width:          columnWidth,
@@ -78,8 +80,8 @@ func overviewCardStyle() common.Style {
 	style.JustifyContent = common.JustifyContentCenter
 	style.PaddingY = 0
 	style.PaddingX = 0
-	// style.Debug = true
 	style.Gap = 5
+	// style.Debug = true
 	return style
 }
 
@@ -88,10 +90,20 @@ func overviewCardBlocksStyle(width float64) common.Style {
 	style.AlignItems = common.AlignItemsCenter
 	style.Direction = common.DirectionHorizontal
 	style.JustifyContent = common.JustifyContentSpaceAround
-	style.PaddingY = 25
-	style.Gap = 0
+	style.PaddingY = 20
+	style.PaddingX = 10
+	style.Gap = 5
 	// style.Debug = true
 	return style
+}
+
+func overviewSpecialRatingPillStyle(color color.Color) common.Style {
+	return common.Style{
+		PaddingY:        2,
+		PaddingX:        7.5,
+		BorderRadius:    common.BorderRadiusXS,
+		BackgroundColor: color,
+	}
 }
 
 func highlightCardStyle(containerStyle common.Style) highlightStyle {
