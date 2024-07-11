@@ -88,7 +88,6 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("startSchedulerFromEnv failed")
 	}
-	defer stopScheduler()
 
 	// update vehicle cache in the background on start
 	go scheduler.UpdateGlossaryWorker(cacheCoreClient)()
@@ -145,8 +144,10 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
 	sig := <-c
+	log.Info().Msgf("received %s, exiting after cleanup", sig.String())
 	cancel()
-	log.Info().Msgf("received %s, exiting", sig.String())
+	stopScheduler()
+	log.Info().Msg("finished cleanup tasks")
 }
 
 func discordHandlersFromEnv(coreClient core.Client) []server.Handler {

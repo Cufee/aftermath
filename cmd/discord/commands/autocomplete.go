@@ -67,18 +67,18 @@ func init() {
 				if options.TankID != "" {
 					vehicle, ok := search.GetVehicleFromCache(ctx.Locale, options.TankID)
 					if !ok {
-						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: "stats_acutocomplete_not_enough_length", Value: "error#stats_acutocomplete_not_found"})
+						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"})
 					}
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale)), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)})
 				}
 
 				if len(options.TankSearch) < 3 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: "stats_acutocomplete_not_enough_length", Value: "error#stats_acutocomplete_not_found"})
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_enough_length"), Value: "error#stats_autocomplete_not_enough_length"})
 				}
 
 				vehicles, ok := search.SearchVehicles(ctx.Locale, options.TankSearch, 5)
 				if !ok || len(vehicles) < 1 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: "stats_acutocomplete_not_found", Value: "error#stats_acutocomplete_not_found"})
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"})
 				}
 
 				var opts []*discordgo.ApplicationCommandOptionChoice
