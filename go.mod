@@ -17,6 +17,7 @@ require (
 	github.com/google/go-github/v63 v63.0.0
 	github.com/joho/godotenv v1.5.1
 	github.com/justinas/alice v1.2.0
+	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/lucsky/cuid v1.2.1
 	github.com/matryer/is v1.4.1
 	github.com/mattn/go-sqlite3 v1.14.22
@@ -46,7 +47,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/hcl/v2 v2.21.0 // indirect
-	github.com/lithammer/fuzzysearch v1.1.8 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
