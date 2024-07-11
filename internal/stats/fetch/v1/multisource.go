@@ -112,6 +112,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 	for _, apply := range opts {
 		apply(&options)
 	}
+	println(options.vehicleID)
 
 	realm := c.wargaming.RealmFromAccountID(id)
 
@@ -142,13 +143,26 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 			return c.wargaming.AccountVehicles(ctx, realm, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 
+		if options.vehicleID != "" {
+			for _, v := range vehicles.Data {
+				if fmt.Sprint(v.TankID) == options.vehicleID {
+					vehicles.Data = []types.VehicleStatsFrame{v}
+					break
+				}
+			}
+			if len(vehicles.Data) > 1 {
+				vehicles.Data = nil
+			}
+		}
+
 		if vehicles.Err != nil || len(vehicles.Data) < 1 || !options.withWN8 {
 			return
 		}
 
 		var ids []string
 		for _, v := range vehicles.Data {
-			ids = append(ids, fmt.Sprint(v.TankID))
+			tid := fmt.Sprint(v.TankID)
+			ids = append(ids, tid)
 		}
 		a, err := c.database.GetVehicleAverages(ctx, ids)
 		averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
@@ -166,6 +180,8 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		// not critical, this will only affect WN8
 		log.Err(averages.Err).Msg("failed to get tank averages")
 	}
+
+	println(len(vehicles.Data), "vehicle", options.vehicleID)
 
 	stats := WargamingToStats(realm, account.Data, clan, vehicles.Data)
 	if options.withWN8 {
@@ -203,7 +219,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	go func() {
 		defer group.Done()
 
-		stats, err := c.CurrentStats(ctx, id)
+		stats, err := c.CurrentStats(ctx, id, opts...)
 		current = retry.DataWithErr[AccountStatsOverPeriod]{Data: stats, Err: err}
 
 		if err != nil || stats.RegularBattles.Battles < 1 || !options.withWN8 {
@@ -294,7 +310,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	go func() {
 		defer group.Done()
 
-		stats, err := c.CurrentStats(ctx, id)
+		stats, err := c.CurrentStats(ctx, id, opts...)
 		current = retry.DataWithErr[AccountStatsOverPeriod]{Data: stats, Err: err}
 
 		if err != nil || stats.RegularBattles.Battles < 1 || !options.withWN8 {
@@ -328,7 +344,12 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		}
 		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s[0]}
 
-		v, err := c.database.GetVehicleSnapshots(ctx, id, nil, options.snapshotType, opts...)
+		var vehicles []string
+		if options.vehicleID != "" {
+			vehicles = append(vehicles, options.vehicleID)
+		}
+
+		v, err := c.database.GetVehicleSnapshots(ctx, id, vehicles, options.snapshotType, opts...)
 		vehiclesSnapshots = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
 	}()
 

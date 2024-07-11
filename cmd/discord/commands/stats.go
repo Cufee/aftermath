@@ -61,7 +61,7 @@ func init() {
 					// TODO: Get user background
 				}
 
-				image, meta, err := ctx.Core.Stats(ctx.Locale).PeriodImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8())
+				image, meta, err := ctx.Core.Stats(ctx.Locale).PeriodImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
 				if err != nil {
 					return ctx.Err(err)
 				}

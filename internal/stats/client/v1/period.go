@@ -7,7 +7,6 @@ import (
 
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	pcommon "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/period/v1"
 )
@@ -26,7 +25,7 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 	}
 
 	stop := meta.Timer("fetchClient#PeriodStats")
-	stats, err := r.fetchClient.PeriodStats(ctx, accountId, from, fetch.WithWN8())
+	stats, err := r.fetchClient.PeriodStats(ctx, accountId, from, opts.FetchOpts()...)
 	stop()
 	if err != nil {
 		return prepare.Cards{}, meta, err
@@ -51,7 +50,7 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 	stop()
 
 	stop = meta.Timer("prepare#NewCards")
-	cards, err := prepare.NewCards(stats, glossary, pcommon.WithPrinter(printer, r.locale))
+	cards, err := prepare.NewCards(stats, glossary, opts.PrepareOpts(printer, r.locale)...)
 	stop()
 
 	return cards, meta, err

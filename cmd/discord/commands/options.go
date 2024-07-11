@@ -2,6 +2,7 @@ package commands
 
 import (
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -17,6 +18,15 @@ var daysOption = builder.NewOption("days", discordgo.ApplicationCommandOptionInt
 	Params(
 		builder.SetNameKey("common_option_stats_days_name"),
 		builder.SetDescKey("common_option_stats_days_description"),
+	)
+
+var vehicleOption = builder.NewOption("tank", discordgo.ApplicationCommandOptionString).
+	Min(3).
+	Max(32).
+	Autocomplete().
+	Params(
+		builder.SetNameKey("common_option_stats_tank_name"),
+		builder.SetDescKey("common_option_stats_tank_description"),
 	)
 
 var nicknameAndServerOptions = []builder.Option{
@@ -47,6 +57,7 @@ var userOption = builder.NewOption("user", discordgo.ApplicationCommandOptionUse
 
 var defaultStatsOptions = append([]builder.Option{
 	daysOption,
+	vehicleOption,
 	userOption,
 }, nicknameAndServerOptions...)
 
@@ -56,6 +67,8 @@ type statsOptions struct {
 	Server      string
 	Nickname    string
 	UserID      string
+	TankSearch  string
+	TankID      string
 }
 
 func (o statsOptions) Validate(ctx *common.Context) (string, bool) {
@@ -82,6 +95,10 @@ func (o statsOptions) Validate(ctx *common.Context) (string, bool) {
 func getDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataOption) statsOptions {
 	var options statsOptions
 
+	options.TankSearch, _ = common.GetOption[string](data, "tank")
+	if strings.HasPrefix(options.TankSearch, "valid#vehicle#") {
+		options.TankID = strings.TrimPrefix(options.TankSearch, "valid#vehicle#")
+	}
 	options.Nickname, _ = common.GetOption[string](data, "nickname")
 	options.Server, _ = common.GetOption[string](data, "server")
 	options.UserID, _ = common.GetOption[string](data, "user")

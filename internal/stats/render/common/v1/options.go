@@ -8,6 +8,7 @@ import (
 )
 
 type Options struct {
+	VehicleID  string
 	PromoText  []string
 	Background image.Image
 }
@@ -21,6 +22,11 @@ type Option func(*Options)
 func WithPromoText(text ...string) Option {
 	return func(o *Options) {
 		o.PromoText = text
+	}
+}
+func WithVehicleID(vid string) Option {
+	return func(o *Options) {
+		o.VehicleID = vid
 	}
 }
 

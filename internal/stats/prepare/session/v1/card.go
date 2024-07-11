@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"math"
 	"slices"
 
@@ -22,7 +23,8 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 
 	var cards Cards
 
-	{ // Rating battles overview
+	// Rating battles overview
+	if options.VehicleID == "" {
 		card, err := makeOverviewCard(
 			ratingOverviewBlocks,
 			session.RatingBattles.StatsFrame,
@@ -42,11 +44,30 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		cards.Rating.Overview = card
 	}
 	{ // Regular battles overview
+		sessionFrame := session.RegularBattles.StatsFrame
+		careerFrame := career.RegularBattles.StatsFrame
+		overviewLabel := "label_overview_unrated"
+		if options.VehicleID != "" {
+			sessionFrame = frame.StatsFrame{}
+			careerFrame = frame.StatsFrame{}
+			s, ok := session.RegularBattles.Vehicles[options.VehicleID]
+			if ok {
+				sessionFrame = *s.StatsFrame
+			}
+			c, ok := career.RegularBattles.Vehicles[options.VehicleID]
+			if ok {
+				careerFrame = *c.StatsFrame
+			}
+			glossary := glossary[options.VehicleID]
+			glossary.ID = options.VehicleID
+			overviewLabel = fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
+		}
+
 		card, err := makeOverviewCard(
 			unratedOverviewBlocks,
-			session.RegularBattles.StatsFrame,
-			career.RegularBattles.StatsFrame,
-			"label_overview_unrated",
+			sessionFrame,
+			careerFrame,
+			overviewLabel,
 			options.Printer(),
 			nil,
 		)
@@ -54,6 +75,10 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 			return Cards{}, err
 		}
 		cards.Unrated.Overview = card
+	}
+
+	if options.VehicleID != "" { // we don't vehicle cards if a specific vehicle was selected
+		return cards, nil
 	}
 
 	// Rating battles vehicles

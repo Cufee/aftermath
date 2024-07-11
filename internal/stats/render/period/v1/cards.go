@@ -49,7 +49,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 				}
 			}
 
-			cardStyle := overviewCardStyle(cardWidth)
+			cardStyle := overviewCardBlocksStyle(cardWidth)
 			paddingAndGaps := (cardStyle.PaddingX+rowStyle.container.PaddingX+rowStyle.blockContainer.PaddingX)*2 + float64(len(cards.Overview.Blocks)-1)*(cardStyle.Gap+rowStyle.container.Gap+rowStyle.blockContainer.Gap)
 
 			overviewCardContentWidth := overviewColumnWidth * float64(len(cards.Overview.Blocks))
@@ -82,13 +82,17 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	// We first render a footer in order to calculate the minimum required width
 	{
 		var footer []string
-		switch strings.ToLower(stats.Realm) {
-		case "na":
-			footer = append(footer, "North America")
-		case "eu":
-			footer = append(footer, "Europe")
-		case "as":
-			footer = append(footer, "Asia")
+		if opts.VehicleID != "" {
+			footer = append(footer, cards.Overview.Title)
+		} else {
+			switch strings.ToLower(stats.Realm) {
+			case "na":
+				footer = append(footer, "North America")
+			case "eu":
+				footer = append(footer, "Europe")
+			case "as":
+				footer = append(footer, "Asia")
+			}
 		}
 
 		sessionTo := stats.PeriodEnd.Format("Jan 2, 2006")
@@ -118,20 +122,27 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 
 	// Overview Card
 	{
-		var overviewCardBlocks []common.Block
+		var overviewStatsBlocks []common.Block
 		for _, column := range cards.Overview.Blocks {
 			columnBlock, err := statsBlocksToColumnBlock(getOverviewStyle(overviewColumnWidth), column.Blocks)
 			if err != nil {
 				return segments, err
 			}
-			overviewCardBlocks = append(overviewCardBlocks, columnBlock)
+			overviewStatsBlocks = append(overviewStatsBlocks, columnBlock)
 		}
-		segments.AddContent(common.NewBlocksContent(overviewCardStyle(cardWidth), overviewCardBlocks...))
+		var overviewCardBlocks []common.Block
+		overviewCardBlocks = append(overviewCardBlocks, common.NewBlocksContent(overviewCardBlocksStyle(cardWidth), overviewStatsBlocks...))
+		segments.AddContent(common.NewBlocksContent(overviewCardStyle(), overviewCardBlocks...))
 	}
 
 	// Highlights
 	for _, card := range cards.Highlights {
 		segments.AddContent(newHighlightCard(highlightCardStyle(defaultCardStyle(cardWidth)), card))
+	}
+
+	// Vehicle label
+	if opts.VehicleID != "" {
+		//
 	}
 
 	return segments, nil

@@ -19,13 +19,15 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 	}
 
 	var cards Cards
-
-	// Overview Card
+	overviewUnrated := stats.RegularBattles.StatsFrame
+	if stats, ok := stats.RegularBattles.Vehicles[options.VehicleID]; ok && options.VehicleID != "" {
+		overviewUnrated = *stats.StatsFrame
+	}
 	for _, column := range overviewBlocks {
 		var columnBlocks []common.StatsBlock[BlockData]
 		for _, preset := range column.blocks {
 			var block common.StatsBlock[BlockData]
-			b, err := presetToBlock(preset, stats.RegularBattles.StatsFrame, stats.RegularBattles.Vehicles, glossary)
+			b, err := presetToBlock(preset, overviewUnrated, stats.RegularBattles.Vehicles, glossary)
 			if err != nil {
 				return Cards{}, err
 			}
@@ -35,11 +37,16 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 			columnBlocks = append(columnBlocks, block)
 		}
 
+		if options.VehicleID != "" {
+			glossary := glossary[options.VehicleID]
+			glossary.ID = options.VehicleID
+			cards.Overview.Title = fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
+		}
 		cards.Overview.Type = common.CardTypeOverview
 		cards.Overview.Blocks = append(cards.Overview.Blocks, OverviewColumn{columnBlocks, column.flavor})
 	}
 
-	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 {
+	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 || options.VehicleID != "" {
 		return cards, nil
 	}
 
