@@ -176,6 +176,14 @@
   value: "This refresh button has expired. Please use the command instead."
   context: Failed to find required data in order to refresh stats/session
 
+- key: stats_autocomplete_not_found
+  value: "No tanks found matching the name you have entered"
+  context: Search returned no results when a user was typing the tank name in autocomplete
+
+- key: stats_autocomplete_not_enough_length
+  value: "Continue typing to search for available tanks..."
+  context: Shown when a user just started typing and there are not enough characters to search
+
 # /background errors
 - key: background_error_payment_required
   value: "This feature of Aftermath is only available for users with an active subscription.\nYou can subscribe by using the `/subscribe` command or pick a background using `/fancy` instead."
@@ -218,7 +226,6 @@
 - key: verify_error_missing_server
   value: "Please select a server your account is registered on."
   context: Server not selected
-
 
   # Wargaming specific errors
 - key: wargaming_error_private_account
