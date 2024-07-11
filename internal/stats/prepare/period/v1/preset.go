@@ -14,7 +14,7 @@ func presetToBlock(preset common.Tag, stats frame.StatsFrame, vehicles map[strin
 		block.Data.Flavor = BlockFlavorSpecial
 
 	case common.TagBattles:
-		block.Data.Flavor = BlockFlavorSpecial
+		block.Data.Flavor = BlockFlavorSecondary
 
 	case common.TagSurvivalRatio:
 		block.Data.Flavor = BlockFlavorSecondary

@@ -13,8 +13,8 @@ type overviewColumnBlocks struct {
 
 var overviewBlocks = []overviewColumnBlocks{
 	{[]common.Tag{common.TagDamageRatio, common.TagAvgDamage, common.TagAccuracy}, BlockFlavorDefault},
-	{[]common.Tag{common.TagWN8, common.TagBattles}, BlockFlavorSpecial},
-	{[]common.Tag{TagAvgTier, common.TagWinrate, common.TagSurvivalPercent}, BlockFlavorDefault},
+	{[]common.Tag{common.TagWN8}, BlockFlavorSpecial},
+	{[]common.Tag{TagAvgTier, common.TagWinrate, common.TagBattles}, BlockFlavorDefault},
 }
 var highlights = []common.Highlight{common.HighlightBattles, common.HighlightWN8, common.HighlightAvgDamage}
 
