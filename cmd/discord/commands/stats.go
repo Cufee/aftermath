@@ -69,6 +69,7 @@ func init() {
 				button, saveErr := saveInteractionData(ctx, "stats", models.DiscordInteractionOptions{
 					BackgroundImageURL: backgroundURL,
 					PeriodStart:        options.PeriodStart,
+					VehicleID:          options.TankID,
 					AccountID:          accountID,
 				})
 				if saveErr != nil {
