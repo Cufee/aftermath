@@ -15,6 +15,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/github"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/search"
 )
 
 func CreateCleanupTaskWorker(client core.Client) func() {
@@ -158,6 +159,9 @@ func UpdateGlossaryWorker(client core.Client) func() {
 				log.Err(err).Msg("failed to decode vehicles.json")
 				return
 			}
+
+			// load new glossary into the search memory cache
+			search.LoadVehicleCache(vehicles)
 
 			vctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 			defer cancel()

@@ -65,18 +65,30 @@ func defaultCardStyle(width float64) common.Style {
 func titleCardStyle(width float64) common.Style {
 	style := defaultCardStyle(width)
 	style.PaddingX = style.PaddingY
-	style.Gap = style.PaddingY * 2
+	style.Gap = style.PaddingY
 	// style.Debug = true
 	return style
 }
 
-func overviewCardStyle(width float64) common.Style {
+func overviewCardStyle() common.Style {
+	// style := defaultCardStyle(0)
+	style := common.Style{}
+	style.Direction = common.DirectionVertical
+	style.AlignItems = common.AlignItemsCenter
+	style.JustifyContent = common.JustifyContentCenter
+	style.PaddingY = 0
+	style.PaddingX = 0
+	// style.Debug = true
+	style.Gap = 5
+	return style
+}
+
+func overviewCardBlocksStyle(width float64) common.Style {
 	style := defaultCardStyle(width)
 	style.AlignItems = common.AlignItemsEnd
 	style.Direction = common.DirectionHorizontal
 	style.JustifyContent = common.JustifyContentSpaceAround
 	style.PaddingY = 25
-	style.PaddingX = 0
 	style.Gap = 0
 	// style.Debug = true
 	return style

@@ -11,7 +11,6 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/session/v1"
 )
@@ -105,7 +104,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	stop()
 
 	stop = meta.Timer("prepare#NewCards")
-	cards, err := prepare.NewCards(session, career, glossary, common.WithPrinter(printer, c.locale))
+	cards, err := prepare.NewCards(session, career, glossary, opts.PrepareOpts(printer, c.locale)...)
 	stop()
 	if err != nil {
 		return prepare.Cards{}, meta, err

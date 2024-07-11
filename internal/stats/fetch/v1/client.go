@@ -59,6 +59,7 @@ type Client interface {
 
 type statsOptions struct {
 	withWN8      bool
+	vehicleID    string
 	referenceID  string
 	snapshotType models.SnapshotType
 }
@@ -78,5 +79,10 @@ func WithType(sType models.SnapshotType) StatsOption {
 func WithReferenceID(reference string) StatsOption {
 	return func(so *statsOptions) {
 		so.referenceID = reference
+	}
+}
+func WithVehicleID(id string) StatsOption {
+	return func(so *statsOptions) {
+		so.vehicleID = id
 	}
 }
