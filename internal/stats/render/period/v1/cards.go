@@ -27,7 +27,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	overviewColumnWidth := float64(common.DefaultLogoOptions().Width())
 	{
 		{
-			titleStyle := common.DefaultPlayerTitleStyle(titleCardStyle(cardWidth))
+			titleStyle := common.DefaultPlayerTitleStyle(stats.Account.Nickname, titleCardStyle(cardWidth))
 			clanSize := common.MeasureString(stats.Account.ClanTag, titleStyle.ClanTag.Font)
 			nameSize := common.MeasureString(stats.Account.Nickname, titleStyle.Nickname.Font)
 			cardWidth = common.Max(cardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
@@ -45,7 +45,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 					labelSize := common.MeasureString(label, labelStyle.Font)
 					valueSize := common.MeasureString(block.Value.String(), valueStyle.Font)
 
-					overviewColumnWidth = common.Max(overviewColumnWidth, common.Max(labelSize.TotalWidth, valueSize.TotalWidth)+(rowStyle.container.PaddingX*2))
+					overviewColumnWidth = common.Max(overviewColumnWidth, common.Max(labelSize.TotalWidth+overviewSpecialRatingPillStyle(nil).PaddingX*2, valueSize.TotalWidth))
 				}
 			}
 
@@ -118,7 +118,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	}
 
 	// Player Title card
-	segments.AddContent(common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(titleCardStyle(cardWidth)), stats.Account.Nickname, stats.Account.ClanTag, subs))
+	segments.AddContent(common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(stats.Account.Nickname, titleCardStyle(cardWidth)), stats.Account.Nickname, stats.Account.ClanTag, subs))
 
 	// Overview Card
 	{

@@ -52,18 +52,13 @@ func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockDa
 	iconTop := common.AftermathLogo(ratingColors.Background, common.DefaultLogoOptions())
 	iconBlockTop := common.NewImageContent(common.Style{Width: float64(iconTop.Bounds().Dx()), Height: float64(iconTop.Bounds().Dy())}, iconTop)
 
-	style.blockContainer.Gap = 10
+	style.blockContainer.Gap = 5
 	blocks = append(blocks, common.NewBlocksContent(style.blockContainer, iconBlockTop, valueBlock))
 
 	if stats.Value.Float() >= 0 {
 		labelStyle.FontColor = ratingColors.Content
-		blocks = append(blocks, common.NewBlocksContent(common.Style{
-			PaddingY:        5,
-			PaddingX:        10,
-			BorderRadius:    15,
-			BackgroundColor: ratingColors.Background,
-		}, common.NewTextContent(labelStyle, common.GetWN8TierName(stats.Value.Float()))))
+		blocks = append(blocks, common.NewBlocksContent(overviewSpecialRatingPillStyle(ratingColors.Background), common.NewTextContent(labelStyle, common.GetWN8TierName(stats.Value.Float()))))
 	}
 
-	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Gap: 10, PaddingY: 5}, blocks...)
+	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Gap: 0}, blocks...)
 }
