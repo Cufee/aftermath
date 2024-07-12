@@ -38,6 +38,7 @@ type AccountsClient interface {
 }
 
 type GlossaryClient interface {
+	GetAllVehicles(ctx context.Context) (map[string]models.Vehicle, error)
 	GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error)
 	GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error)
 

@@ -80,3 +80,17 @@ func (c *client) GetVehicles(ctx context.Context, ids []string) (map[string]mode
 
 	return vehicles, nil
 }
+
+func (c *client) GetAllVehicles(ctx context.Context) (map[string]models.Vehicle, error) {
+	records, err := c.db.Vehicle.Query().All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	vehicles := make(map[string]models.Vehicle)
+	for _, r := range records {
+		vehicles[r.ID] = toVehicle(r)
+	}
+
+	return vehicles, nil
+}

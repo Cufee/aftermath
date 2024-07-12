@@ -85,7 +85,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		// get account vehicle stats
 		go func(id string) {
 			defer group.Done()
-			data, err := wgClient.AccountVehicles(ctx, realm, id)
+			data, err := wgClient.AccountVehicles(ctx, realm, id, nil) // nil will return all vehicles
 
 			accountVehiclesMx.Lock()
 			accountVehicles[id] = retry.DataWithErr[[]types.VehicleStatsFrame]{Data: data, Err: err}

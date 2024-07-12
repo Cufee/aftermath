@@ -138,21 +138,14 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 	go func() {
 		defer group.Done()
 
-		vehicles = retry.Retry(func() ([]types.VehicleStatsFrame, error) {
-			return c.wargaming.AccountVehicles(ctx, realm, id)
-		}, c.retriesPerRequest, c.retrySleepInterval)
-
+		var vehicleIDs []string // nil array will return all vehicles
 		if options.vehicleID != "" {
-			for _, v := range vehicles.Data {
-				if fmt.Sprint(v.TankID) == options.vehicleID {
-					vehicles.Data = []types.VehicleStatsFrame{v}
-					break
-				}
-			}
-			if len(vehicles.Data) > 1 {
-				vehicles.Data = nil
-			}
+			vehicleIDs = append(vehicleIDs, options.vehicleID)
 		}
+
+		vehicles = retry.Retry(func() ([]types.VehicleStatsFrame, error) {
+			return c.wargaming.AccountVehicles(ctx, realm, id, vehicleIDs)
+		}, c.retriesPerRequest, c.retrySleepInterval)
 
 		if vehicles.Err != nil || len(vehicles.Data) < 1 || !options.withWN8 {
 			return

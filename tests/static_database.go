@@ -3,6 +3,7 @@ package tests
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
@@ -57,6 +58,14 @@ func (c *staticTestingDatabase) UpsertAccounts(ctx context.Context, accounts []m
 	return nil, nil
 }
 
+func (c *staticTestingDatabase) GetAllVehicles(ctx context.Context) (map[string]models.Vehicle, error) {
+	vehicles := make(map[string]models.Vehicle)
+	for i := range 10 {
+		id := fmt.Sprint(i)
+		vehicles[id] = models.Vehicle{ID: id, Tier: 10, LocalizedNames: map[language.Tag]string{language.English: "Test Vehicle " + id}}
+	}
+	return vehicles, nil
+}
 func (c *staticTestingDatabase) GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error) {
 	vehicles := make(map[string]models.Vehicle)
 	for _, id := range ids {

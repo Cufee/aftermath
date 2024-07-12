@@ -6,6 +6,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
@@ -20,8 +21,11 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 
 	var cards Cards
 	overviewUnrated := stats.RegularBattles.StatsFrame
-	if stats, ok := stats.RegularBattles.Vehicles[options.VehicleID]; ok && options.VehicleID != "" {
-		overviewUnrated = *stats.StatsFrame
+	if options.VehicleID != "" {
+		overviewUnrated = frame.StatsFrame{}
+		if stats, ok := stats.RegularBattles.Vehicles[options.VehicleID]; ok {
+			overviewUnrated = *stats.StatsFrame
+		}
 	}
 	for _, column := range overviewBlocks {
 		var columnBlocks []common.StatsBlock[BlockData]

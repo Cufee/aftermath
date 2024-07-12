@@ -27,22 +27,6 @@ func CreateCleanupTaskWorker(client core.Client) func() {
 	}
 }
 
-func RotateBackgroundPresetsWorker(client core.Client) func() {
-	return func() {
-		// // We just run the logic directly as it's not a heavy task and it doesn't matter if it fails due to the app failing
-		// log.Info().Msg("rotating background presets")
-		// images, err := content.PickRandomBackgroundImages(3)
-		// if err != nil {
-		// 	log.Err(err).Msg("failed to pick random background images")
-		// 	return
-		// }
-		// err = models.UpdateAppConfiguration[[]string]("backgroundImagesSelection", images, nil, true)
-		// if err != nil {
-		// 	log.Err(err).Msg("failed to update background images selection")
-		// }
-	}
-}
-
 func CreateSnapshotTasksWorker(client core.Client, realm string) func() {
 	return func() {
 		err := tasks.CreateRecordSnapshotsTasks(client, realm)
@@ -160,15 +144,21 @@ func UpdateGlossaryWorker(client core.Client) func() {
 				return
 			}
 
-			// load new glossary into the search memory cache
-			search.LoadVehicleCache(vehicles)
-
 			vctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 			defer cancel()
 
 			_, err = client.Database().UpsertVehicles(vctx, vehicles)
 			if err != nil {
 				log.Err(err).Msg("failed to save vehicle glossary")
+				return
+			}
+
+			// load new glossary into the search memory cache
+			cctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+			err = search.RefreshVehicleCache(cctx, client.Database())
+			if err != nil {
+				log.Err(err).Msg("failed to refresh glossary cache")
 				return
 			}
 		}

@@ -1,10 +1,13 @@
 package search
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/lithammer/fuzzysearch/fuzzy"
@@ -12,11 +15,29 @@ import (
 )
 
 var cacheLock sync.Mutex
+var cacheTime time.Time
 var vehiclesCache map[string]models.Vehicle
 var vehicleNames map[language.Tag][]string
 var vehicleNameToID map[language.Tag]map[string]string
 
-func LoadVehicleCache(data map[string]models.Vehicle) {
+func RefreshVehicleCacheIfStale(ctx context.Context, db database.GlossaryClient) error {
+	cacheLock.Lock()
+	t := cacheTime
+	cacheLock.Unlock()
+	if time.Since(t) > time.Hour*1 {
+		return RefreshVehicleCache(ctx, db)
+	}
+	return nil
+}
+
+func RefreshVehicleCache(ctx context.Context, db database.GlossaryClient) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	data, err := db.GetAllVehicles(ctx)
+	if err != nil {
+		return err
+	}
+
 	newVehicleNameToID := make(map[language.Tag]map[string]string)
 	newVehiclesCache := make(map[string]models.Vehicle)
 	newVehicleNames := make(map[language.Tag][]string)
@@ -39,10 +60,13 @@ func LoadVehicleCache(data map[string]models.Vehicle) {
 	}
 
 	cacheLock.Lock()
+	cacheTime = time.Now()
 	vehicleNameToID = newVehicleNameToID
 	vehiclesCache = newVehiclesCache
 	vehicleNames = newVehicleNames
 	cacheLock.Unlock()
+
+	return nil
 }
 
 func GetVehicleFromCache(locale language.Tag, id string) (models.Vehicle, bool) {

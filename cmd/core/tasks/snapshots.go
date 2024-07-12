@@ -77,7 +77,8 @@ func CreateRecordSnapshotsTasks(client core.Client, realm string) error {
 		return err
 	}
 	if len(accounts) < 1 {
-		return errors.New("no accounts on realm " + realm)
+		log.Warn().Str("realm", realm).Msg("no accounts on realm")
+		return nil
 	}
 	task.Targets = append(task.Targets, accounts...)
 
