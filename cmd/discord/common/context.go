@@ -2,7 +2,6 @@ package common
 
 import (
 	"context"
-	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -14,6 +13,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/retry"
 
 	"github.com/cufee/aftermath/internal/log"
 	"golang.org/x/text/language"
@@ -76,22 +76,28 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 	return c, nil
 }
 
+func withRetry(fn func() error, tries ...int) error {
+	var triesCnt = 3
+	if len(tries) > 0 {
+		triesCnt = tries[0]
+	}
+	res := retry.Retry(func() (struct{}, error) {
+		return struct{}{}, fn()
+	}, triesCnt, time.Second)
+	return res.Err
+}
+
 func (c *Context) respond(data discordgo.InteractionResponse, files []rest.File) error {
 	select {
 	case <-c.Context.Done():
 		return c.Context.Err()
 	default:
-		ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*3000)
-		defer cancel()
-		err := c.rest.UpdateOrSendInteractionResponse(ctx, c.interaction.AppID, c.interaction.ID, c.interaction.Token, data, files)
-		if os.IsTimeout(err) {
-			// request timed out, most likely a discord issue
-			log.Error().Str("id", c.ID()).Str("interactionId", c.interaction.ID).Msg("discord api: request timed out while responding to an interaction")
-			ctx, cancel := context.WithTimeout(c.Context, time.Millisecond*1000)
+		return withRetry(func() error {
+			// since we already finished handling the interaction, there is no need to use the handler context
+			ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*3000)
 			defer cancel()
-			return c.rest.UpdateOrSendInteractionResponse(ctx, c.interaction.AppID, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Data: &discordgo.InteractionResponseData{Content: c.Localize("common_error_discord_outage")}, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
-		}
-		return err
+			return c.rest.UpdateOrSendInteractionResponse(ctx, c.interaction.AppID, c.interaction.ID, c.interaction.Token, data, files)
+		})
 	}
 }
 
@@ -123,10 +129,6 @@ func (c *Context) isComponentInteraction() bool {
 
 func (c *Context) isAutocompleteInteraction() bool {
 	return c.interaction.Type == discordgo.InteractionApplicationCommandAutocomplete
-}
-
-func (c *Context) isModalSubmit() bool {
-	return c.interaction.Type == discordgo.InteractionModalSubmit
 }
 
 func (c *Context) ID() string {

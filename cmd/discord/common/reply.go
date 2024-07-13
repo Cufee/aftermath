@@ -1,14 +1,11 @@
 package common
 
 import (
-	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/rest"
-	"github.com/cufee/aftermath/internal/log"
 )
 
 type reply struct {
@@ -21,14 +18,7 @@ type reply struct {
 }
 
 func (r reply) Choices(data ...*discordgo.ApplicationCommandOptionChoice) error {
-	ctx, cancel := context.WithTimeout(r.ctx.Context, time.Millisecond*3000)
-	defer cancel()
-	err := r.ctx.rest.UpdateOrSendInteractionResponse(ctx, r.ctx.interaction.AppID, r.ctx.interaction.ID, r.ctx.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &discordgo.InteractionResponseData{Choices: data}}, nil)
-	if err != nil {
-		log.Err(err).Str("interactionId", r.ctx.interaction.ID).Msg("failed to send an autocomplete response")
-	}
-	return nil
-
+	return r.ctx.respond(discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &discordgo.InteractionResponseData{Choices: data}}, nil)
 }
 
 func (r reply) Text(message ...string) reply {

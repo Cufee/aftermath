@@ -193,10 +193,8 @@ func (r *Router) handleInteraction(interaction discordgo.Interaction, command bu
 
 	cCtx, err := common.NewContext(ctx, interaction, r.restClient, r.core)
 	if err != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
 		log.Err(err).Msg("failed to create a common.Context for a handler")
-		r.sendInteractionReply(ctx, interaction, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed. Please try again in a few seconds."})
+		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed. Please try again in a few seconds."})
 		return
 	}
 
@@ -208,18 +206,14 @@ func (r *Router) handleInteraction(interaction discordgo.Interaction, command bu
 	func() {
 		defer func() {
 			if rec := recover(); rec != nil {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-				defer cancel()
 				log.Error().Str("stack", string(debug.Stack())).Msg("panic in interaction handler")
-				r.sendInteractionReply(ctx, interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")})
+				r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")})
 			}
 		}()
 		err = handler(cCtx)
 		if err != nil {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
 			log.Err(err).Msg("handler returned an error")
-			r.sendInteractionReply(ctx, interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")})
+			r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")})
 			return
 		}
 	}()
@@ -233,23 +227,30 @@ func sendPingReply(w http.ResponseWriter) {
 	}
 }
 
-func (r *Router) sendInteractionReply(ctx context.Context, interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
-	var handler func() error
+func (r *Router) sendInteractionReply(interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
+	var handler func(ctx context.Context) error
 
 	if slices.Contains(supportedInteractionTypes, interaction.Type) {
-		handler = func() error {
+		handler = func(ctx context.Context) error {
 			return r.restClient.UpdateOrSendInteractionResponse(ctx, interaction.AppID, interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &data, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
 		}
 	} else {
 		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
-		handler = func() error {
+		handler = func(ctx context.Context) error {
 			return r.restClient.UpdateOrSendInteractionResponse(ctx, interaction.AppID, interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
 		}
 	}
 
-	err := handler()
-	if err != nil {
-		log.Err(err).Stack().Any("data", data).Str("id", interaction.ID).Msg("failed to send an interaction response")
+	res := retry.Retry(func() (struct{}, error) {
+		// use a background context for this
+		// since the command is already handled, there is not much point in using the route handler context timeout
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		err := handler(ctx)
+		return struct{}{}, err
+	}, 5, time.Second) // better late than never
+	if res.Err != nil {
+		log.Err(res.Err).Stack().Any("data", data).Str("id", interaction.ID).Msg("failed to send an interaction response")
 		return
 	}
 }
