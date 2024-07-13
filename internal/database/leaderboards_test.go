@@ -54,9 +54,8 @@ func TestGetLeaderboardScores(t *testing.T) {
 		Meta:          map[string]any{},
 	}
 
-	sErr, err := client.CreateLeaderboardScores(context.Background(), score1, score2, score3)
+	err = client.CreateLeaderboardScores(context.Background(), score1, score2, score3)
 	assert.NoError(t, err, "failed to create scores")
-	assert.Nil(t, sErr, "failed to create scores")
 
 	{ // default order is created_at desc, this should return score3
 		scores, err := client.GetLeaderboardScores(context.Background(), models.LeaderboardsMasteryWeightedPlayers, models.LeaderboardScoreHourly)

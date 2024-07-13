@@ -31,7 +31,7 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 				continue // should never happen tho
 			}
 
-			err := c.db.VehicleAverage.UpdateOneID(r.ID).SetData(update).Exec(ctx)
+			err := tx.VehicleAverage.UpdateOneID(r.ID).SetData(update).Exec(ctx)
 			if err != nil {
 				errors[r.ID] = err
 			}
@@ -41,13 +41,13 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 
 		var writes []*db.VehicleAverageCreate
 		for id, frame := range averages {
-			writes = append(writes, c.db.VehicleAverage.Create().
+			writes = append(writes, tx.VehicleAverage.Create().
 				SetID(id).
 				SetData(frame),
 			)
 		}
 
-		return c.db.VehicleAverage.CreateBulk(writes...).Exec(ctx)
+		return tx.VehicleAverage.CreateBulk(writes...).Exec(ctx)
 	})
 }
 

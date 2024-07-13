@@ -39,7 +39,7 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.
 				continue
 			}
 
-			err := c.db.Vehicle.UpdateOneID(v.ID).
+			err := tx.Vehicle.UpdateOneID(v.ID).
 				SetTier(v.Tier).
 				SetLocalizedNames(v.LocalizedNames).
 				Exec(ctx)
@@ -52,14 +52,14 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.
 
 		var writes []*db.VehicleCreate
 		for id, v := range vehicles {
-			writes = append(writes, c.db.Vehicle.Create().
+			writes = append(writes, tx.Vehicle.Create().
 				SetID(id).
 				SetTier(v.Tier).
 				SetLocalizedNames(v.LocalizedNames),
 			)
 		}
 
-		return c.db.Vehicle.CreateBulk(writes...).Exec(ctx)
+		return tx.Vehicle.CreateBulk(writes...).Exec(ctx)
 	})
 }
 

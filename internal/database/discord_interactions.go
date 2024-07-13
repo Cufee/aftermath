@@ -17,7 +17,7 @@ func (c client) CreateDiscordInteraction(ctx context.Context, data models.Discor
 	}
 
 	return c.withTx(ctx, func(tx *db.Tx) error {
-		return c.db.DiscordInteraction.Create().
+		return tx.DiscordInteraction.Create().
 			SetCommand(data.Command).
 			SetLocale(data.Locale.String()).
 			SetOptions(data.Options).

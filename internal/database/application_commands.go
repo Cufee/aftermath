@@ -90,7 +90,7 @@ func (c *client) UpsertCommands(ctx context.Context, commands ...models.Applicat
 		var inserts []*db.ApplicationCommandCreate
 		for _, cmd := range commandsMap {
 			inserts = append(inserts,
-				c.db.ApplicationCommand.Create().
+				tx.ApplicationCommand.Create().
 					SetID(cmd.ID).
 					SetName(cmd.Name).
 					SetVersion(cmd.Version).

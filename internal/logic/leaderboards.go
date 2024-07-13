@@ -146,14 +146,9 @@ func RecordCurrentAchievementsLeaderboards(ctx context.Context, wgClient wargami
 		leaderboardScores = append(leaderboardScores, score)
 	}
 
-	insertErrors, err := dbClient.CreateLeaderboardScores(ctx, leaderboardScores...)
+	err := dbClient.CreateLeaderboardScores(ctx, leaderboardScores...)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to save leaderboard scores")
-	}
-	for id, err := range insertErrors {
-		if _, ok := clanScores[id]; !ok {
-			accountErrors[id] = err // if this is not a clan-related error
-		}
 	}
 	if len(accountErrors) > 0 {
 		return accountErrors, nil

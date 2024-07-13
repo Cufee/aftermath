@@ -108,9 +108,6 @@ func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...Use
 	}
 
 	if IsNotFound(err) {
-		c.writeLock.Lock()
-		defer c.writeLock.Unlock()
-
 		record, err := c.db.User.Create().SetID(id).SetPermissions(permissions.User.String()).Save(ctx)
 		if err != nil {
 			return models.User{}, err
@@ -151,9 +148,6 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...UserGetOpti
 }
 
 func (c *client) UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error) {
-	c.writeLock.Lock()
-	defer c.writeLock.Unlock()
-
 	record, err := c.db.User.UpdateOneID(userID).SetPermissions(perms.String()).Save(ctx)
 	if err != nil && !IsNotFound(err) {
 		return models.User{}, err
@@ -170,9 +164,6 @@ func (c *client) UpsertUserWithPermissions(ctx context.Context, userID string, p
 }
 
 func (c *client) CreateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
-	c.writeLock.Lock()
-	defer c.writeLock.Unlock()
-
 	record, err := c.db.UserConnection.Create().
 		SetUser(c.db.User.GetX(ctx, connection.UserID)).
 		SetPermissions(connection.Permissions.String()).
@@ -187,9 +178,6 @@ func (c *client) CreateConnection(ctx context.Context, connection models.UserCon
 }
 
 func (c *client) UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
-	c.writeLock.Lock()
-	defer c.writeLock.Unlock()
-
 	record, err := c.db.UserConnection.UpdateOneID(connection.ID).
 		SetMetadata(connection.Metadata).
 		SetPermissions(connection.Permissions.String()).

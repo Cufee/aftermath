@@ -154,7 +154,7 @@ func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
 			t.OnUpdated()
 
 			inserts = append(inserts,
-				c.db.CronTask.Create().
+				tx.CronTask.Create().
 					SetType(t.Type).
 					SetData(t.Data).
 					SetLogs(t.Logs).
@@ -166,7 +166,7 @@ func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
 					SetScheduledAfter(t.ScheduledAfter),
 			)
 		}
-		return c.db.CronTask.CreateBulk(inserts...).Exec(ctx)
+		return tx.CronTask.CreateBulk(inserts...).Exec(ctx)
 	})
 }
 

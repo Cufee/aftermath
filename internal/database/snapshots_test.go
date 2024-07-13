@@ -93,9 +93,8 @@ func TestGetVehicleSnapshots(t *testing.T) {
 
 	{ // create snapshots
 		snapshots := []models.VehicleSnapshot{vehicle1, vehicle2, vehicle3, vehicle4, vehicle5, vehicle6}
-		aErr, err := client.CreateAccountVehicleSnapshots(ctx, "a1", snapshots...)
+		err := client.CreateAccountVehicleSnapshots(ctx, "a1", snapshots...)
 		assert.NoError(t, err, "create vehicle snapshot should not error")
-		assert.Nil(t, aErr, "insert returned some errors")
 	}
 	{ // when we check created after, vehicles need to be ordered by createdAt ASC, so we expect to get vehicle2 back
 		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", nil, models.SnapshotTypeDaily, WithCreatedAfter(createdAtVehicle1), WithReferenceIDIn("r1"))
