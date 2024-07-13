@@ -85,7 +85,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		// get account vehicle stats
 		go func(id string) {
 			defer group.Done()
-			data, err := wgClient.AccountVehicles(ctx, realm, id)
+			data, err := wgClient.AccountVehicles(ctx, realm, id, nil) // nil will return all vehicles
 
 			accountVehiclesMx.Lock()
 			accountVehicles[id] = retry.DataWithErr[[]types.VehicleStatsFrame]{Data: data, Err: err}
@@ -168,24 +168,16 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		vehicles := vehicleSnapshots[accountSnapshot.AccountID]
 		if len(vehicles) > 0 {
 			// save all vehicle snapshots)
-			vErr, err := dbClient.CreateAccountVehicleSnapshots(ctx, accountSnapshot.AccountID, vehicles...)
+			err := dbClient.CreateAccountVehicleSnapshots(ctx, accountSnapshot.AccountID, vehicles...)
 			if err != nil {
 				accountErrors[accountSnapshot.AccountID] = err
-				continue
-			}
-			if len(vErr) > 0 {
-				accountErrors[accountSnapshot.AccountID] = errors.Errorf("failed to insert %d vehicle snapshots", len(vErr))
 				continue
 			}
 		}
 
 		// save account snapshot
-		aErr, err := dbClient.CreateAccountSnapshots(ctx, accountSnapshot)
+		err := dbClient.CreateAccountSnapshots(ctx, accountSnapshot)
 		if err != nil {
-			accountErrors[accountSnapshot.AccountID] = errors.Wrap(err, "failed to save account snapshots to database")
-			continue
-		}
-		if err := aErr[accountSnapshot.AccountID]; err != nil {
 			accountErrors[accountSnapshot.AccountID] = errors.Wrap(err, "failed to save account snapshots to database")
 			continue
 		}

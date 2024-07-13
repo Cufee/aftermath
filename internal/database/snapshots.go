@@ -6,6 +6,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
+	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -102,21 +103,20 @@ func (c *client) GetVehicleLastBattleTimes(ctx context.Context, accountID string
 }
 
 // create vehicle snapshots for a specific account
-func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) (map[string]error, error) {
+func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) error {
 	if len(snapshots) < 1 {
-		return nil, nil
+		return nil
 	}
 
 	account, err := c.db.Account.Get(ctx, accountID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var errors = make(map[string]error)
+	var inserts []*db.VehicleSnapshotCreate
 	for _, data := range snapshots {
-		// make a transaction per write to avoid locking for too long
-		err := c.withTx(ctx, func(tx *db.Tx) error {
-			return c.db.VehicleSnapshot.Create().
+		inserts = append(inserts,
+			c.db.VehicleSnapshot.Create().
 				SetType(data.Type).
 				SetFrame(data.Stats).
 				SetVehicleID(data.VehicleID).
@@ -124,18 +124,19 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 				SetCreatedAt(data.CreatedAt).
 				SetBattles(int(data.Stats.Battles.Float())).
 				SetLastBattleTime(data.LastBattleTime).
-				SetAccount(account).
-				Exec(ctx)
-		})
-		if err != nil {
-			errors[data.VehicleID] = err
-		}
+				SetAccount(account),
+		)
 	}
 
-	if len(errors) > 0 {
-		return errors, nil
+	for _, ops := range batch(inserts, 100) {
+		err := c.withTx(ctx, func(tx *db.Tx) error {
+			return tx.VehicleSnapshot.CreateBulk(ops...).Exec(ctx)
+		})
+		if err != nil {
+			return err
+		}
 	}
-	return nil, nil
+	return nil
 }
 
 // build a complete query for vehicle snapshots
@@ -247,22 +248,30 @@ func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []str
 	return lastBattles, nil
 }
 
-func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) (map[string]error, error) {
+func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) error {
 	if len(snapshots) < 1 {
-		return nil, nil
+		return nil
 	}
 
-	var errors = make(map[string]error)
+	var ids []string
 	for _, s := range snapshots {
-		account, err := c.db.Account.Get(ctx, s.AccountID)
-		if err != nil {
-			errors[s.AccountID] = err
-			continue
-		}
-		// make a transaction per write to avoid locking for too long
-		err = c.withTx(ctx, func(tx *db.Tx) error {
-			return c.db.AccountSnapshot.Create().
-				SetAccount(account).
+		ids = append(ids, s.AccountID)
+	}
+
+	accounts, err := c.db.Account.Query().Where(account.IDIn(ids...)).All(ctx)
+	if err != nil {
+		return err
+	}
+	accountsMap := make(map[string]*db.Account)
+	for _, a := range accounts {
+		accountsMap[a.ID] = a
+	}
+
+	var inserts []*db.AccountSnapshotCreate
+	for _, s := range snapshots {
+		inserts = append(inserts,
+			c.db.AccountSnapshot.Create().
+				SetAccount(accountsMap[s.AccountID]). // assume its valid, transaction will fail if it's not
 				SetCreatedAt(s.CreatedAt).
 				SetLastBattleTime(s.LastBattleTime).
 				SetRatingBattles(int(s.RatingBattles.Battles.Float())).
@@ -270,16 +279,19 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models
 				SetReferenceID(s.ReferenceID).
 				SetRegularBattles(int(s.RegularBattles.Battles)).
 				SetRegularFrame(s.RegularBattles).
-				SetType(s.Type).Exec(ctx)
+				SetType(s.Type),
+		)
+	}
+
+	for _, ops := range batch(inserts, 100) {
+		err := c.withTx(ctx, func(tx *db.Tx) error {
+			return tx.AccountSnapshot.CreateBulk(ops...).Exec(ctx)
 		})
 		if err != nil {
-			errors[s.AccountID] = err
+			return err
 		}
 	}
-	if len(errors) > 0 {
-		return errors, nil
-	}
-	return nil, nil
+	return nil
 }
 
 // build a complete query for account snapshot

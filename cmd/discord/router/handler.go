@@ -169,7 +169,10 @@ func (r *Router) routeInteraction(interaction discordgo.Interaction) (builder.Co
 		matchKey = data.CustomID
 	case discordgo.InteractionApplicationCommandAutocomplete:
 		data, _ := interaction.Data.(discordgo.ApplicationCommandInteractionData)
-		matchKey = "autocomplete_" + data.Name
+		key, ok := fullAutocompleteName(data.Options)
+		if ok {
+			matchKey = "autocomplete_" + data.Name + "_" + key
+		}
 	}
 
 	if matchKey == "" {
@@ -271,4 +274,17 @@ func deferredInteractionResponsePayload(t discordgo.InteractionType, ephemeral b
 	}
 
 	return response, true, nil
+}
+
+func fullAutocompleteName(options []*discordgo.ApplicationCommandInteractionDataOption) (string, bool) {
+	for _, opt := range options {
+		if opt.Type == discordgo.ApplicationCommandOptionSubCommandGroup || opt.Type == discordgo.ApplicationCommandOptionSubCommand {
+			n, ok := fullAutocompleteName(opt.Options)
+			return opt.Name + "_" + n, ok
+		}
+		if opt.Focused {
+			return opt.Name, true
+		}
+	}
+	return "", false
 }

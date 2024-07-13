@@ -85,7 +85,7 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []models.Account) 
 				continue // this should never happen tho
 			}
 
-			err = c.db.Account.UpdateOneID(r.ID).
+			err = tx.Account.UpdateOneID(r.ID).
 				SetRealm(strings.ToUpper(update.Realm)).
 				SetNickname(update.Nickname).
 				SetPrivate(update.Private).
@@ -100,7 +100,7 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []models.Account) 
 
 		var writes []*db.AccountCreate
 		for _, a := range accountsMap {
-			writes = append(writes, c.db.Account.Create().
+			writes = append(writes, tx.Account.Create().
 				SetID(a.ID).
 				SetRealm(strings.ToUpper(a.Realm)).
 				SetNickname(a.Nickname).
@@ -110,7 +110,7 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []models.Account) 
 			)
 		}
 
-		return c.db.Account.CreateBulk(writes...).Exec(ctx)
+		return tx.Account.CreateBulk(writes...).Exec(ctx)
 	})
 }
 

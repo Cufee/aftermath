@@ -3,6 +3,7 @@ package tests
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
@@ -57,6 +58,14 @@ func (c *staticTestingDatabase) UpsertAccounts(ctx context.Context, accounts []m
 	return nil, nil
 }
 
+func (c *staticTestingDatabase) GetAllVehicles(ctx context.Context) (map[string]models.Vehicle, error) {
+	vehicles := make(map[string]models.Vehicle)
+	for i := range 10 {
+		id := fmt.Sprint(i)
+		vehicles[id] = models.Vehicle{ID: id, Tier: 10, LocalizedNames: map[language.Tag]string{language.English: "Test Vehicle " + id}}
+	}
+	return vehicles, nil
+}
 func (c *staticTestingDatabase) GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error) {
 	vehicles := make(map[string]models.Vehicle)
 	for _, id := range ids {
@@ -105,8 +114,8 @@ func (c *staticTestingDatabase) DeleteConnection(ctx context.Context, connection
 func (c *staticTestingDatabase) GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.Query) ([]models.AccountSnapshot, error) {
 	return nil, errors.New("GetAccountSnapshots not implemented")
 }
-func (c *staticTestingDatabase) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) (map[string]error, error) {
-	return nil, errors.New("CreateAccountSnapshots not implemented")
+func (c *staticTestingDatabase) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) error {
+	return errors.New("CreateAccountSnapshots not implemented")
 }
 func (c *staticTestingDatabase) GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.Query) (map[string]time.Time, error) {
 	return nil, errors.New("GetAccountLastBattleTimes not implemented")
@@ -114,8 +123,8 @@ func (c *staticTestingDatabase) GetAccountLastBattleTimes(ctx context.Context, a
 func (c *staticTestingDatabase) GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.Query) ([]models.VehicleSnapshot, error) {
 	return nil, errors.New("GetVehicleSnapshots not implemented")
 }
-func (c *staticTestingDatabase) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) (map[string]error, error) {
-	return nil, errors.New("CreateAccountVehicleSnapshots not implemented")
+func (c *staticTestingDatabase) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) error {
+	return errors.New("CreateAccountVehicleSnapshots not implemented")
 }
 func (c *staticTestingDatabase) GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.Query) (map[string]time.Time, error) {
 	return nil, errors.New("GetVehicleLastBattleTimes not implemented")
@@ -123,8 +132,8 @@ func (c *staticTestingDatabase) GetVehicleLastBattleTimes(ctx context.Context, a
 func (c *staticTestingDatabase) DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error {
 	return errors.New("DeleteExpiredSnapshots not implemented")
 }
-func (c *staticTestingDatabase) CreateAccountAchievementSnapshots(ctx context.Context, accountID string, snapshots ...models.AchievementsSnapshot) (map[string]error, error) {
-	return nil, errors.New("CreateAccountAchievementSnapshots not implemented")
+func (c *staticTestingDatabase) CreateAccountAchievementSnapshots(ctx context.Context, accountID string, snapshots ...models.AchievementsSnapshot) error {
+	return errors.New("CreateAccountAchievementSnapshots not implemented")
 }
 func (c *staticTestingDatabase) GetAchievementSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.Query) ([]models.AchievementsSnapshot, error) {
 	return nil, errors.New("GetAchievementsSnapshots not implemented")
@@ -199,8 +208,8 @@ func (c *staticTestingDatabase) UserFromSession(ctx context.Context, publicID st
 	return DefaultUserWithEdges, nil
 }
 
-func (c *staticTestingDatabase) CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) (map[string]error, error) {
-	return nil, errors.New("CreateLeaderboardScores not implemented")
+func (c *staticTestingDatabase) CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) error {
+	return errors.New("CreateLeaderboardScores not implemented")
 }
 func (c *staticTestingDatabase) GetLeaderboardScores(ctx context.Context, leaderboard string, scoreType models.ScoreType, options ...database.Query) ([]models.LeaderboardScore, error) {
 	return nil, errors.New("GetLeaderboardScores not implemented")

@@ -23,34 +23,33 @@ func toScore(r *db.LeaderboardScore) models.LeaderboardScore {
 	}
 }
 
-func (c *client) CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) (map[string]error, error) {
+func (c *client) CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) error {
 	if len(scores) < 1 {
-		return nil, nil
+		return nil
 	}
 
-	var errors = make(map[string]error)
+	var inserts []*db.LeaderboardScoreCreate
 	for _, score := range scores {
-		// make a transaction per write to avoid locking for too long
-		err := c.withTx(ctx, func(tx *db.Tx) error {
-			return c.db.LeaderboardScore.Create().
+		inserts = append(inserts,
+			c.db.LeaderboardScore.Create().
 				SetMeta(score.Meta).
 				SetType(score.Type).
 				SetScore(score.Score).
 				SetCreatedAt(score.CreatedAt).
 				SetReferenceID(score.ReferenceID).
-				SetLeaderboardID(score.LeaderboardID).
-				Exec(ctx)
+				SetLeaderboardID(score.LeaderboardID),
+		)
+	}
+
+	for _, ops := range batch(inserts, 100) {
+		err := c.withTx(ctx, func(tx *db.Tx) error {
+			return tx.LeaderboardScore.CreateBulk(ops...).Exec(ctx)
 		})
 		if err != nil {
-			errors[score.ReferenceID] = err
+			return err
 		}
 	}
-
-	if len(errors) > 0 {
-		return errors, nil
-	}
-
-	return nil, nil
+	return nil
 }
 
 func (c *client) GetLeaderboardScores(ctx context.Context, leaderboardID string, scoreType models.ScoreType, opts ...Query) ([]models.LeaderboardScore, error) {

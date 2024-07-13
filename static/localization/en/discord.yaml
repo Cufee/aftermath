@@ -13,6 +13,23 @@
   value: session
 - key: command_session_description
   value: Get detailed stats for your recent session
+# /my
+- key: command_my_name
+  value: my
+- key: command_my_description
+  value: View stats for your linked accounts
+- key: command_my_session_name
+  value: session
+- key: command_my_session_description
+  value: View session stats for your linked account
+- key: command_my_stats_name
+  value: stats
+- key: command_my_stats_description
+  value: View career stats for your linked accounts
+- key: command_option_my_account_name
+  value: account
+- key: command_option_my_account_description
+  value: Select one of your linked account
 # /links
 - key: command_links_name
   value: links
@@ -183,6 +200,10 @@
 - key: stats_autocomplete_not_enough_length
   value: "Continue typing to search for available tanks..."
   context: Shown when a user just started typing and there are not enough characters to search
+
+- key: my_error_no_account_linked
+  value: "It looks like you don't have a default Blitz account set. You can manage your accounts with `/links`."
+  context: Shown when a user uses one of the /my commands, but does not have a linked account
 
 # /background errors
 - key: background_error_payment_required

@@ -2,12 +2,12 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"runtime/debug"
-	"sync"
 	"time"
 
-	"entgo.io/ent/dialect/sql"
+	entsql "entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
@@ -38,6 +38,7 @@ type AccountsClient interface {
 }
 
 type GlossaryClient interface {
+	GetAllVehicles(ctx context.Context) (map[string]models.Vehicle, error)
 	GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error)
 	GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error)
 
@@ -62,14 +63,14 @@ type SnapshotsClient interface {
 	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
 	GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
 
-	CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) (map[string]error, error)
-	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) (map[string]error, error)
+	CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) error
+	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) error
 
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
 }
 
 type LeaderboardsClient interface {
-	CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) (map[string]error, error)
+	CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) error
 	GetLeaderboardScores(ctx context.Context, leaderboardID string, scoreType models.ScoreType, options ...Query) ([]models.LeaderboardScore, error)
 
 	DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time, scoreType models.ScoreType) error
@@ -115,26 +116,15 @@ type Client interface {
 }
 
 type client struct {
-	db        *db.Client
-	writeLock *sync.Mutex
+	db *db.Client
 }
 
 func (c *client) withTx(ctx context.Context, fn func(tx *db.Tx) error) error {
-	c.writeLock.Lock()
-	defer c.writeLock.Unlock()
-
 	var err error
 	tx, err := c.db.Tx(ctx)
 	if err != nil {
 		return err
 	}
-
-	defer func() {
-		if v := recover(); v != nil {
-			tx.Rollback()
-			err = fmt.Errorf("%v", v)
-		}
-	}()
 
 	if err = fn(tx); err != nil {
 		if rerr := tx.Rollback(); rerr != nil {
@@ -181,21 +171,15 @@ func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) 
 		dbOptions = append(dbOptions, db.Debug())
 	}
 
-	c, err := db.Open("sqlite3", fmt.Sprintf("file://%s?_fk=1", filePath), dbOptions...)
+	sqldb, err := sql.Open("sqlite3", fmt.Sprintf("file://%s?_fk=1&_auto_vacuum=2&_synchronous=1&_journal_mode=WAL", filePath)) // _mutex
 	if err != nil {
 		return nil, err
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	_, err = c.ExecContext(ctx, "PRAGMA journal_mode=WAL")
-	if err != nil {
-		return nil, err
-	}
+	sqldb.SetMaxOpenConns(1)
+	dbOptions = append(dbOptions, db.Driver(entsql.OpenDB("sqlite3", sqldb)))
 
 	return &client{
-		writeLock: &sync.Mutex{},
-		db:        c,
+		db: db.NewClient(dbOptions...),
 	}, nil
 }
 
@@ -207,7 +191,20 @@ func toAnySlice[T any](s ...T) []any {
 	return a
 }
 
-func wrap(query string) *sql.Builder {
-	wrapper := &sql.Builder{}
-	return wrapper.Wrap(func(b *sql.Builder) { b.WriteString(query) })
+func wrap(query string) *entsql.Builder {
+	wrapper := &entsql.Builder{}
+	return wrapper.Wrap(func(b *entsql.Builder) { b.WriteString(query) })
+}
+
+func batch[T any](ops []T, size int) [][]T {
+	var batched [][]T
+	for i := 0; i < len(ops); i += size {
+		end := i + size
+		if end > len(ops) {
+			end = len(ops)
+		}
+		batched = append(batched, ops[i:end])
+	}
+
+	return batched
 }

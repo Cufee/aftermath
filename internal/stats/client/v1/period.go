@@ -42,6 +42,9 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 			vehicles = append(vehicles, id)
 		}
 	}
+	if opts.vehicleID != "" && !slices.Contains(vehicles, opts.vehicleID) {
+		vehicles = append(vehicles, opts.vehicleID)
+	}
 
 	glossary, err := r.database.GetVehicles(ctx, vehicles)
 	if err != nil {

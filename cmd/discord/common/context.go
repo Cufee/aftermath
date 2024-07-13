@@ -143,7 +143,8 @@ func (c *Context) ID() string {
 
 func (c *Context) Options() options {
 	if data, ok := c.interaction.Data.(discordgo.ApplicationCommandInteractionData); ok {
-		return data.Options
+		var o options = data.Options
+		return o.Deep()
 	}
 	return options{}
 }
@@ -157,6 +158,14 @@ func (o options) Value(name string) any {
 		}
 	}
 	return nil
+}
+
+func (o options) Deep() options {
+	for _, opt := range o {
+		var opts options = opt.Options
+		o = append(o, opts.Deep()...)
+	}
+	return o
 }
 
 func (o options) Subcommand() (string, options, bool) {

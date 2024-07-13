@@ -15,7 +15,8 @@ services:
       - PORT=3000 # the port does not matter, but it needs to match Traefik labels. we set it here explicitly in order to avoid any issues
       - DATABASE_PATH=/data # this is the path inside a contianer and needs to match the volume mount
     networks:
-      - dokploy-network
+      dokploy-network:
+        ipv4_address: 10.0.1.101
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.aftermath-monorepo-compose.rule=Host(`${TRAEFIK_HOST}`)"

@@ -78,7 +78,7 @@ jobs:
           labels: ${{ steps.meta-service.outputs.labels }}
           file: Dockerfile
           build-args: |
-            BRAND_FLAVOR=${{ env.BRAND_FLAVOR }}
+            BRAND_FLAVOR=${{ vars.BRAND_FLAVOR }}
       - name: Build and push migrations Docker image
         id: push-migrations
         uses: docker/build-push-action@v6
@@ -103,10 +103,3 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push-service.outputs.digest }}
           push-to-registry: true
-
-      - name: Redeploy the application using the latest image
-        uses: distributhor/workflow-webhook@v3
-        with:
-          webhook_url: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
-            
-        
