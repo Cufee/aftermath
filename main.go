@@ -19,6 +19,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core/tasks"
 	"github.com/cufee/aftermath/cmd/discord/alerts"
 	"github.com/cufee/aftermath/cmd/discord/commands"
+	"github.com/cufee/aftermath/cmd/discord/gateway"
 	"github.com/cufee/aftermath/cmd/frontend"
 
 	"github.com/cufee/aftermath/cmd/core/server"
@@ -70,6 +71,17 @@ func main() {
 		})
 		alertClient.Reader(pr, zerolog.ErrorLevel)
 	}
+
+	// discord gateway
+	gw, err := gateway.NewClient(constants.DiscordPrimaryToken, 0)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to create a gateway client")
+	}
+	err = gw.Connect()
+	if err != nil {
+		log.Fatal().Err(err).Msg("gateway client failed to connect")
+	}
+	gw.SetStatus(gateway.StatusListening, "/help", nil)
 
 	loadStaticAssets(static)
 	db, err := newDatabaseClientFromEnv()
@@ -145,6 +157,7 @@ func main() {
 
 	sig := <-c
 	log.Info().Msgf("received %s, exiting after cleanup", sig.String())
+	gw.SetStatus(gateway.StatusYellow, "🔄 Updating...", nil)
 	cancel()
 	stopScheduler()
 	log.Info().Msg("finished cleanup tasks")
