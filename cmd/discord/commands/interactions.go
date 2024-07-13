@@ -10,14 +10,63 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"golang.org/x/text/language"
 
 	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
 )
+
+func MentionHandler(errorImage []byte) func(s *discordgo.Session, e *discordgo.MessageCreate) {
+	return func(s *discordgo.Session, e *discordgo.MessageCreate) {
+		for _, mention := range e.Mentions {
+			if mention.ID == s.State.User.ID {
+				// Use the user locale selection by default with fallback to English
+				locale := language.English
+				if mention.Locale != "" {
+					locale = common.LocaleToLanguageTag(discordgo.Locale(mention.Locale))
+				}
+
+				printer, err := localization.NewPrinter("discord", locale)
+				if err != nil {
+					log.Err(err).Msg("failed to get a localization printer for context")
+					printer = func(s string) string { return s }
+				}
+
+				channel, err := s.UserChannelCreate(mention.ID)
+				if err != nil {
+					data := discordgo.MessageSend{Files: []*discordgo.File{{Name: "how-to-use-commands.png", Reader: bytes.NewReader(errorImage)}}, Content: fmt.Sprintf(printer("errors_help_missing_dm_permissions_fmt"), e.Author.Mention())}
+					s.ChannelMessageSendComplex(e.ChannelID, &data)
+					return
+				}
+
+				_, err = s.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{Content: fmt.Sprintf(printer("commands_help_message_fmt"), sessionResetTimes(printer), backgroundResetTime()), Components: []discordgo.MessageComponent{
+					discordgo.Button{
+						Style: discordgo.LinkButton,
+						Label: printer("buttons_add_aftermath_to_your_server"),
+						Emoji: &discordgo.ComponentEmoji{Name: "aftermath", ID: "1214348603104034876"},
+						URL:   "https://amth.one/invite",
+					},
+					discordgo.Button{
+						Style: discordgo.LinkButton,
+						Label: printer("buttons_join_primary_guild"),
+						Emoji: &discordgo.ComponentEmoji{Name: "aftermath_yellow", ID: "1214621621659238460"},
+						URL:   "https://amth.one/join",
+					},
+				}})
+				if err != nil {
+					data := discordgo.MessageSend{Files: []*discordgo.File{{Name: "how-to-use-commands.png", Reader: bytes.NewReader(errorImage)}}, Content: fmt.Sprintf(printer("errors_help_missing_dm_permissions_fmt"), e.Author.Mention())}
+					s.ChannelMessageSendComplex(e.ChannelID, &data)
+				}
+				return
+			}
+		}
+	}
+}
 
 func newStatsRefreshButton(data models.DiscordInteraction) discordgo.MessageComponent {
 	return discordgo.ActionsRow{

@@ -5,6 +5,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+var _ Client = &gatewayClient{}
+
+type Client interface {
+	Connect() error
+	Handler(fn interface{}) func()
+	SetStatus(status status, text string, emoji *discordgo.Emoji) error
+}
+
 type gatewayClient struct {
 	session *discordgo.Session
 }
@@ -26,6 +34,10 @@ func (c *gatewayClient) Connect() error {
 		return errors.New("already connected")
 	}
 	return c.session.Open()
+}
+
+func (c *gatewayClient) Handler(fn interface{}) func() {
+	return c.session.AddHandler(fn)
 }
 
 type status int

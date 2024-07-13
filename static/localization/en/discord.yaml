@@ -3,6 +3,15 @@
 # Commands
 # name is always the command name shown when typing /, names have to be lowercase
 # description is shown next to the command name
+# /help
+- key: command_help_name
+  value: help
+- key: command_help_description
+  value: Get some helpful information about the bot
+- key: commands_help_refresh_times_fmt
+  value: "North America: <t:%d:t> (<t:%d:R>)\nEurope: <t:%d:t> (<t:%d:R>)\nAsia: <t:%d:t> (<t:%d:R>)"
+- key: commands_help_message_fmt
+  value: "## :chart_with_upwards_trend: Track your progress\n### ○ /session\nGet an image with your current session stats. You can also mention another user to view their session.\n### Aftermath sessions will be reset at the following times:\n%s\n### ○ /live <:aftermath_plus:1208860683211513957>\nStart a new session that will be automatically updated as you play.\n### ○ /stats\nGet an image with your career stats. You can also mention another user to view their stats.\n## :film_frames: Dive deeper into every battle\n### ○ /replay\nUpload your replay and get an overview of the battle you have played.\n## :link: Tell Aftermath your Blitz nickname\n### ○ /link\nYou can set a default account by using the _/link_ command to use _/session_ and _/stats_ without providing a nickname and server.\n### ○ /verify\nVerify your Wargaming account to unlock additional features.\n## :frame_photo: Add a splash of style\n### ○ /background <:aftermath_plus:1208860683211513957>\nUpload a custom background image for your session stats. Your unique style will be visible to everyone who views your stats.\n### ○ /fancy\nSelect a background image for your session stats from a list of available options.\n*Available backgrounds for _/fancy_ will rotate %s*\n## :desktop: Show off on your stream\n### ○ /widget\nGet a link to a streaming widget for your stream overlay.\nThis widget will automatically update with your latest session stats.\n\n_Found a translation error? Let us know on Aftermath Official_\n## :heart: Share the love!"
 # /stats
 - key: command_stats_name
   value: stats
@@ -107,8 +116,20 @@
   value: Asia
 - key: common_label_realm_ru
   value: CIS
+- key: commands_subscribe_action_button
+  value: Subscribe
+- key: buttons_add_aftermath_to_your_server
+  value: Install Aftermath
+- key: buttons_join_primary_guild
+  value: Join Aftermath Official
+
 
 # Errors
+# permissions
+- key: errors_help_missing_dm_permissions_fmt
+  value: "Hey %s, Aftermath is not able to send you a direct message. Try using `/help` instead."
+  context: Aftermath is missing DM permissions to reply with a help message
+
 # internal/Unknown errors
 - key: common_error_service_outage
   value: "Aftermath is currently undergoing maintenance and is temporarily unavailable. Please try again in a few moments."
