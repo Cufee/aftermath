@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -15,9 +16,12 @@ import (
 
 func init() {
 	LoadedPublic.add(
-		builder.NewCommand("autocomplete_links").
+		builder.NewCommand("autocomplete_linked_accounts").
 			ComponentType(func(s string) bool {
-				return s == "autocomplete_links"
+				var keys []string
+				keys = append(keys, "autocomplete_links_favorite_selected", "autocomplete_links_remove_selected") // links
+				keys = append(keys, "autocomplete_my_session_account", "autocomplete_my_stats_account")           // my
+				return slices.Contains(keys, s)
 			}).
 			Handler(func(ctx *common.Context) error {
 				var currentDefault string
@@ -59,7 +63,10 @@ func init() {
 	LoadedPublic.add(
 		builder.NewCommand("autocomplete_tank_search").
 			ComponentType(func(s string) bool {
-				return s == "autocomplete_stats" || s == "autocomplete_session"
+				var keys []string
+				keys = append(keys, "autocomplete_stats_tank", "autocomplete_session_tank")       // stats/session
+				keys = append(keys, "autocomplete_my_session_tank", "autocomplete_my_stats_tank") // my
+				return slices.Contains(keys, s)
 			}).
 			Handler(func(ctx *common.Context) error {
 				options := getDefaultStatsOptions(ctx.Options())
