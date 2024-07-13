@@ -109,6 +109,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Redeploy the application using the latest image
+        env: 
+          WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
+        if: ${{ env.WEBHOOK_URL != '' }}
         uses: distributhor/workflow-webhook@v3
         with:
-          webhook_url: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
+          webhook_url: ${{ env.WEBHOOK_URL }}
