@@ -8,7 +8,7 @@ on:
       - completed
 
 jobs:
-  build-and-push-image:
+  deploy:
     environment: dokploy-${{ github.ref_name }}
     runs-on: ubuntu-latest
     steps:

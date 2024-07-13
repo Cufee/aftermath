@@ -46,7 +46,6 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=raw,latest-${{ github.ref_name }}
             type=raw,latest
             type=sha
       - name: Extract service metadata (tags, labels) for Docker
@@ -61,7 +60,6 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=raw,latest-${{ github.ref_name }}
             type=raw,latest
             type=sha
 
