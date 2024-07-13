@@ -124,13 +124,13 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 
 		res := retry.Retry(
 			func() (struct{}, error) {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*1000)
 				defer cancel()
 				err := router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, payload, nil)
 				return struct{}{}, err
 			},
 			3,
-			time.Millisecond*50,
+			time.Millisecond*150,
 			// break if the error means we were able to ack on the last request
 			func(err error) bool { return errors.Is(err, rest.ErrInteractionAlreadyAcked) })
 		if res.Err != nil && !errors.Is(res.Err, rest.ErrInteractionAlreadyAcked) {
@@ -188,7 +188,7 @@ func (r *Router) routeInteraction(interaction discordgo.Interaction) (builder.Co
 }
 
 func (r *Router) handleInteraction(interaction discordgo.Interaction, command builder.Command) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
 	cCtx, err := common.NewContext(ctx, interaction, r.restClient, r.core)
