@@ -86,7 +86,7 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				button, saveErr := saveInteractionData(ctx, "session", models.DiscordInteractionOptions{
+				button, saveErr := saveInteractionData(ctx, subcommand, models.DiscordInteractionOptions{
 					BackgroundImageURL: backgroundURL,
 					PeriodStart:        options.PeriodStart,
 					VehicleID:          options.TankID,
