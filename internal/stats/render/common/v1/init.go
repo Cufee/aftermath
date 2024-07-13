@@ -29,7 +29,7 @@ var (
 	DefaultCardColorNoAlpha = color.RGBA{10, 10, 10, 255}
 
 	ColorAftermathRed  = color.RGBA{255, 0, 120, 255}
-	ColorAftermathBlue = color.RGBA{90, 90, 255, 255}
+	ColorAftermathBlue = color.RGBA{72, 167, 250, 255}
 
 	BorderRadiusLG = 25.0
 	BorderRadiusMD = 20.0
