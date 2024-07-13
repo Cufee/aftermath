@@ -52,14 +52,14 @@ func (c *client) GetVehicleSnapshots(ctx context.Context, accountID string, vehi
 		apply(&query)
 	}
 
-	queryString, queryArgs := vehiclesQuery(accountID, vehicleIDs, kind, vehiclesnapshot.FieldVehicleID, query)
+	queryString, columns, queryArgs := vehiclesQuery(accountID, vehicleIDs, kind, vehiclesnapshot.FieldVehicleID, query)
 	rows, err := c.db.VehicleSnapshot.QueryContext(ctx, queryString, queryArgs...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	records, err := rowsToRecords[*db.VehicleSnapshot](rows, vehiclesnapshot.Columns)
+	records, err := rowsToRecords[*db.VehicleSnapshot](rows, columns)
 	if err != nil {
 		return nil, err
 	}
@@ -82,14 +82,14 @@ func (c *client) GetVehicleLastBattleTimes(ctx context.Context, accountID string
 	}
 	WithSelect(vehiclesnapshot.FieldVehicleID, vehiclesnapshot.FieldLastBattleTime)(&query)
 
-	queryString, queryArgs := vehiclesQuery(accountID, vehicleIDs, kind, vehiclesnapshot.FieldVehicleID, query)
+	queryString, columns, queryArgs := vehiclesQuery(accountID, vehicleIDs, kind, vehiclesnapshot.FieldVehicleID, query)
 	rows, err := c.db.VehicleSnapshot.QueryContext(ctx, queryString, queryArgs...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	records, err := rowsToRecords[*db.VehicleSnapshot](rows, []string{vehiclesnapshot.FieldVehicleID, vehiclesnapshot.FieldLastBattleTime})
+	records, err := rowsToRecords[*db.VehicleSnapshot](rows, columns)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 }
 
 // build a complete query for vehicle snapshots
-func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy string, query baseQueryOptions) (string, []any) {
+func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy string, query baseQueryOptions) (string, []string, []any) {
 	// required where constraints
 	var innerWhere []*sql.Predicate
 	innerWhere = append(innerWhere, sql.EQ(vehiclesnapshot.FieldType, kind), sql.EQ(vehiclesnapshot.FieldAccountID, accountID))
@@ -179,7 +179,7 @@ func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotTy
 	innerQueryString, innerQueryArgs := innerQuery.Query()
 
 	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(groupBy).Query()
-	return queryString, innerQueryArgs
+	return queryString, selectFields, innerQueryArgs
 }
 
 // --- account snapshots ---
@@ -198,14 +198,14 @@ func (c *client) GetAccountSnapshots(ctx context.Context, accountIDs []string, k
 		apply(&query)
 	}
 
-	queryString, queryArgs := accountsQuery(accountIDs, kind, accountsnapshot.FieldAccountID, query)
+	queryString, columns, queryArgs := accountsQuery(accountIDs, kind, accountsnapshot.FieldAccountID, query)
 	rows, err := c.db.AccountSnapshot.QueryContext(ctx, queryString, queryArgs...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	records, err := rowsToRecords[*db.AccountSnapshot](rows, accountsnapshot.Columns)
+	records, err := rowsToRecords[*db.AccountSnapshot](rows, columns)
 	if err != nil {
 		return nil, err
 	}
@@ -230,13 +230,13 @@ func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []str
 	}
 	WithSelect(accountsnapshot.FieldAccountID, accountsnapshot.FieldLastBattleTime)(&query)
 
-	queryStr, queryArgs := accountsQuery(accountIDs, kind, accountsnapshot.FieldAccountID, query)
+	queryStr, columns, queryArgs := accountsQuery(accountIDs, kind, accountsnapshot.FieldAccountID, query)
 	rows, err := c.db.AccountSnapshot.QueryContext(ctx, queryStr, queryArgs...)
 	if err != nil {
 		return nil, err
 	}
 
-	records, err := rowsToRecords[*db.AccountSnapshot](rows, accountsnapshot.Columns)
+	records, err := rowsToRecords[*db.AccountSnapshot](rows, columns)
 	if err != nil {
 		return nil, err
 	}
@@ -295,7 +295,7 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models
 }
 
 // build a complete query for account snapshot
-func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy string, query baseQueryOptions) (string, []any) {
+func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy string, query baseQueryOptions) (string, []string, []any) {
 	// required where constraints
 	var innerWhere []*sql.Predicate
 	innerWhere = append(innerWhere, sql.EQ(accountsnapshot.FieldType, kind), sql.In(accountsnapshot.FieldAccountID, toAnySlice(accountIDs...)...))
@@ -330,5 +330,5 @@ func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy string
 
 	innerQueryString, innerQueryArgs := innerQuery.Query()
 	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(groupBy).Query()
-	return queryString, innerQueryArgs
+	return queryString, selectFields, innerQueryArgs
 }

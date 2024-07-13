@@ -21,6 +21,7 @@ func init() {
 				var keys []string
 				keys = append(keys, "autocomplete_links_favorite_selected", "autocomplete_links_remove_selected") // links
 				keys = append(keys, "autocomplete_my_session_account", "autocomplete_my_stats_account")           // my
+				keys = append(keys, "autocomplete_widget_account")                                                // widget
 				return slices.Contains(keys, s)
 			}).
 			Handler(func(ctx *common.Context) error {

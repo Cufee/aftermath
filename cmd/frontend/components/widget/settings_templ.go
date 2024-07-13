@@ -36,7 +36,7 @@ func Settings(onChange templ.ComponentScript, or, ou bool, vl int) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input id=\"widget-settings-or\" type=\"checkbox\" class=\"toggle toggle-secondary\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input id=\"widget-settings-or\" type=\"checkbox\" class=\"toggle toggle-secondary transition-all duration-250 ease-in-out\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -63,7 +63,7 @@ func Settings(onChange templ.ComponentScript, or, ou bool, vl int) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input id=\"widget-settings-ou\" type=\"checkbox\" class=\"toggle toggle-secondary\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input id=\"widget-settings-ou\" type=\"checkbox\" class=\"toggle toggle-secondary transition-all duration-250 ease-in-out\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
