@@ -120,6 +120,14 @@ func main() {
 				Func: private.RestartStaleTasks(cacheCoreClient),
 			},
 			{
+				Path: "POST /v1/tasks/averages/refresh",
+				Func: private.RefreshAverages(cacheCoreClient),
+			},
+			{
+				Path: "POST /v1/tasks/glossary/refresh",
+				Func: private.RefreshGlossary(cacheCoreClient),
+			},
+			{
 				Path: "POST /v1/accounts/import",
 				Func: private.LoadAccountsHandler(cacheCoreClient),
 			},
