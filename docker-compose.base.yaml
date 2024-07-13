@@ -3,14 +3,14 @@
 services:
   aftermath-migrate-base:
     pull_policy: always
-    image: ghcr.io/cufee/aftermath-migrations:latest-${ENVIRONMENT}
+    image: ghcr.io/cufee/aftermath-migrations:${ENVIRONMENT}
     command: migrate apply --allow-dirty --dir "file:///migrations" --tx-mode all --url "sqlite:///data/${DATABASE_NAME}?_fk=1"
     volumes:
       - ${DATABASE_PATH}:/data
 
   aftermath-service-base:
     pull_policy: always
-    image: ghcr.io/cufee/aftermath:latest-${ENVIRONMENT}
+    image: ghcr.io/cufee/aftermath:${ENVIRONMENT}
     restart: always
     volumes:
       - ${DATABASE_PATH}:/data
