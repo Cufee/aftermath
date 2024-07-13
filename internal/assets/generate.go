@@ -47,14 +47,15 @@ func main() {
 func generateDiscordHelpImage(printer func(string) string) {
 	log.Debug().Msg("generating discord help image")
 
-	imageWidth := 512
-	imageHeight := imageWidth * 2 / 4
+	imageWidth := 550
+	imageHeight := imageWidth * 3 / 5
 	inputHeight := 50
 	iconSize := 25
+	padding := 15
 	gap := 5
 
 	{
-		filename := "images/discord/discord-help.jpg"
+		filename := "images/discord/discord-help.png"
 
 		ctx := gg.NewContext(imageWidth, imageHeight)
 		ctx.SetColor(discordColorMedium)
@@ -63,31 +64,31 @@ func generateDiscordHelpImage(printer func(string) string) {
 		{ // draw Discord UI
 			{
 				// text input
-				tctx := gg.NewContext(imageWidth-gap*2, inputHeight)
+				tctx := gg.NewContext(imageWidth-padding*2, inputHeight)
 				tctx.DrawRoundedRectangle(0, 0, float64(tctx.Width()), float64(tctx.Height()), common.BorderRadiusXS)
 				tctx.SetColor(discordColorLight)
 				tctx.Fill()
 
 				input := ctx.Image()
-				ctx.DrawImage(input, gap, imageHeight-gap-tctx.Height())
+				ctx.DrawImage(input, padding, imageHeight-padding-tctx.Height())
 
-				sctx := gg.NewContext(imageWidth, tctx.Height()+gap*2)
-				sctx.DrawRoundedRectangle(float64(gap), float64(gap), float64(tctx.Width()), float64(tctx.Height()), common.BorderRadiusXS)
+				sctx := gg.NewContext(imageWidth, tctx.Height()+padding*2)
+				sctx.DrawRoundedRectangle(float64(padding), float64(padding), float64(tctx.Width()), float64(tctx.Height()), common.BorderRadiusXS)
 				sctx.SetColor(color.RGBA{0, 0, 0, 100})
 				sctx.Fill()
 
-				ctx.DrawImage(imaging.Blur(sctx.Image(), 1.5), 0, imageHeight-sctx.Height())
-				ctx.DrawImage(tctx.Image(), gap, imageHeight-gap-tctx.Height())
+				ctx.DrawImage(imaging.Blur(sctx.Image(), 2), 0, imageHeight-sctx.Height())
+				ctx.DrawImage(tctx.Image(), padding, imageHeight-padding-tctx.Height())
 
 				circleIconR := float64(iconSize / 2)
-				circleIconX := float64(gap + 50 - (inputHeight / 2))
-				circleIconY := float64(imageHeight - gap - (inputHeight / 2))
+				circleIconX := float64(padding + 50 - (inputHeight / 2))
+				circleIconY := float64(imageHeight - padding - (inputHeight / 2))
 
 				ctx.DrawCircle(circleIconX, circleIconY, circleIconR)
 				ctx.SetColor(discordColorText)
 				ctx.Fill()
 
-				ctx.SetLineWidth(3)
+				ctx.SetLineWidth(2)
 				ctx.SetLineCapRound()
 				ctx.SetColor(discordColorMedium)
 				ctx.DrawLine(circleIconX, circleIconY-circleIconR+7, circleIconX, circleIconY+circleIconR-7)
@@ -95,14 +96,13 @@ func generateDiscordHelpImage(printer func(string) string) {
 				ctx.Stroke()
 
 				ctx.SetColor(discordColorText)
-				ctx.SetLineCapSquare()
-				ctx.DrawLine(float64(gap+inputHeight), float64(circleIconY+circleIconR), float64(gap+inputHeight)+5, float64(circleIconY-circleIconR))
-				ctx.Stroke()
+				ctx.LoadFontFace("../../static/fonts/default.ttf", 30)
+				ctx.DrawString("/", float64(padding+inputHeight), float64(circleIconY+10))
 			}
 
 			// commands drawer
 			{
-				dctx := gg.NewContext(imageWidth-gap*2, imageHeight-gap*3-inputHeight)
+				dctx := gg.NewContext(imageWidth-padding*2, imageHeight-padding*2-gap-inputHeight)
 
 				dctx.DrawRoundedRectangle(0, 0, float64(dctx.Width()), float64(dctx.Height()), common.BorderRadiusXS)
 				dctx.Clip()
@@ -116,26 +116,27 @@ func generateDiscordHelpImage(printer func(string) string) {
 				dctx.Fill()
 
 				fontSize := 20.0
-				commands := []string{"help", "links", "stats"}
+				commands := []string{"help", "links", "stats", "session"}
 				for i, name := range commands {
-					drawY := float64((gap*2 + int(fontSize)) + i*(int(fontSize*2)+gap*3))
+					drawY := float64((padding + int(fontSize)) + i*(int(fontSize*2)+padding))
 					dctx.SetColor(color.White)
 					dctx.LoadFontFace("../../static/fonts/default.ttf", fontSize)
-					dctx.DrawString("/"+printer(fmt.Sprintf("command_%s_name", name)), float64(gap+inputHeight+gap*2), drawY)
+					dctx.DrawString("/"+printer(fmt.Sprintf("command_%s_name", name)), float64(padding+inputHeight+gap), drawY)
 
 					dctx.LoadFontFace("../../static/fonts/default.ttf", fontSize*0.8)
 					dctx.SetColor(discordColorText)
-					dctx.DrawString(printer(fmt.Sprintf("command_%s_description", name)), float64(gap+inputHeight+gap*2), drawY+fontSize+float64(gap/2))
-					dctx.DrawString("Aftermath", float64(dctx.Width()-gap*3-70), drawY+fontSize/2+float64(gap/2))
+					dctx.DrawString(printer(fmt.Sprintf("command_%s_description", name)), float64(padding+inputHeight+gap), drawY+fontSize+float64(gap/2))
+					dctx.DrawString("Aftermath", float64(dctx.Width()-padding-gap*2-70), drawY+fontSize/2+float64(gap/2))
 				}
 
-				sctx := gg.NewContext(imageWidth, dctx.Height()+gap*2)
-				sctx.DrawRoundedRectangle(float64(gap), float64(gap), float64(dctx.Width()), float64(dctx.Height()), common.BorderRadiusXS)
+				sctx := gg.NewContext(imageWidth,
+					dctx.Height()+padding*2)
+				sctx.DrawRoundedRectangle(float64(padding), float64(padding), float64(dctx.Width()), float64(dctx.Height()), common.BorderRadiusXS)
 				sctx.SetColor(color.RGBA{0, 0, 0, 100})
 				sctx.Fill()
 
-				ctx.DrawImage(imaging.Blur(sctx.Image(), 2), 0, 0)
-				ctx.DrawImage(dctx.Image(), gap, gap)
+				ctx.DrawImage(imaging.Blur(sctx.Image(), 5), 0, 0)
+				ctx.DrawImage(dctx.Image(), padding, padding)
 
 			}
 
@@ -148,14 +149,14 @@ func generateDiscordHelpImage(printer func(string) string) {
 		opts := common.DefaultLogoOptions()
 		logo := common.AftermathLogo(brandColor, opts)
 
-		ctx.DrawImage(imaging.Fit(logo, iconSize, iconSize, imaging.Linear), gap+((inputHeight-iconSize)/2), gap+((inputHeight-iconSize)/2))
+		ctx.DrawImage(imaging.Fit(logo, iconSize, iconSize, imaging.Linear), padding+((inputHeight-iconSize)/2), padding*2)
 
 		f, err := os.Create(filepath.Join(outDirPath, filename))
 		if err != nil {
 			panic(err)
 		}
 
-		err = imaging.Encode(f, ctx.Image(), imaging.JPEG)
+		err = imaging.Encode(f, ctx.Image(), imaging.PNG)
 		if err != nil {
 			panic(err)
 		}

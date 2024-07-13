@@ -172,7 +172,7 @@ func discordGatewayFromEnv() (gateway.Client, error) {
 
 	helpImage, ok := assets.GetLoadedImage("discord-help")
 	if !ok {
-		return nil, errors.New("discord-help.jpg is not loaded")
+		return nil, errors.New("discord-help image is not loaded")
 	}
 
 	var buf bytes.Buffer
