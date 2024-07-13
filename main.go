@@ -48,7 +48,7 @@ import (
 	"net/http/pprof"
 )
 
-//go:generate go generate ./cmd/internal/assets
+//go:generate go generate ./internal/assets
 //go:generate go generate ./cmd/frontend/assets/generate
 
 //go:embed static/*
