@@ -13,3 +13,17 @@ func RestartStaleTasks(client core.Client) http.HandlerFunc {
 		w.Write([]byte("stale tasks restarted"))
 	}
 }
+
+func RefreshAverages(client core.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		scheduler.UpdateAveragesWorker(client)()
+		w.Write([]byte("tasks complete"))
+	}
+}
+
+func RefreshGlossary(client core.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		scheduler.UpdateGlossaryWorker(client)()
+		w.Write([]byte("tasks complete"))
+	}
+}

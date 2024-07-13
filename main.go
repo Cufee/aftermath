@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"embed"
 	"fmt"
@@ -13,13 +14,17 @@ import (
 	"os"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/core/queue"
 	"github.com/cufee/aftermath/cmd/core/scheduler"
 	"github.com/cufee/aftermath/cmd/core/tasks"
 	"github.com/cufee/aftermath/cmd/discord/alerts"
 	"github.com/cufee/aftermath/cmd/discord/commands"
+	"github.com/cufee/aftermath/cmd/discord/gateway"
 	"github.com/cufee/aftermath/cmd/frontend"
+	"github.com/disintegration/imaging"
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/cmd/core/server"
 	"github.com/cufee/aftermath/cmd/core/server/handlers/private"
@@ -43,14 +48,18 @@ import (
 	"net/http/pprof"
 )
 
+//go:generate go generate ./internal/assets
 //go:generate go generate ./cmd/frontend/assets/generate
 
 //go:embed static/*
 var static embed.FS
 
 func main() {
-	globalCtx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	loadStaticAssets(static)
+	db, err := newDatabaseClientFromEnv()
+	if err != nil {
+		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
+	}
 
 	// Logger
 	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
@@ -71,11 +80,14 @@ func main() {
 		alertClient.Reader(pr, zerolog.ErrorLevel)
 	}
 
-	loadStaticAssets(static)
-	db, err := newDatabaseClientFromEnv()
+	// Discord Gateway
+	gw, err := discordGatewayFromEnv()
 	if err != nil {
-		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
+		log.Fatal().Err(err).Msg("discordGatewayFromEnv failed")
 	}
+
+	globalCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db)
 	stopQueue, err := startQueueFromEnv(globalCtx, db, cacheCoreClient.Wargaming())
@@ -106,6 +118,14 @@ func main() {
 			{
 				Path: "POST /v1/tasks/restart",
 				Func: private.RestartStaleTasks(cacheCoreClient),
+			},
+			{
+				Path: "POST /v1/tasks/averages/refresh",
+				Func: private.RefreshAverages(cacheCoreClient),
+			},
+			{
+				Path: "POST /v1/tasks/glossary/refresh",
+				Func: private.RefreshGlossary(cacheCoreClient),
 			},
 			{
 				Path: "POST /v1/accounts/import",
@@ -145,9 +165,38 @@ func main() {
 
 	sig := <-c
 	log.Info().Msgf("received %s, exiting after cleanup", sig.String())
+	gw.SetStatus(gateway.StatusYellow, "🔄 Updating...", nil)
 	cancel()
 	stopScheduler()
 	log.Info().Msg("finished cleanup tasks")
+}
+
+func discordGatewayFromEnv() (gateway.Client, error) {
+	// discord gateway
+	gw, err := gateway.NewClient(constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create a gateway client")
+	}
+
+	helpImage, ok := assets.GetLoadedImage("discord-help")
+	if !ok {
+		return nil, errors.New("discord-help image is not loaded")
+	}
+
+	var buf bytes.Buffer
+	err = imaging.Encode(&buf, helpImage, imaging.JPEG)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to encode help image")
+	}
+	_ = gw.Handler(commands.MentionHandler(buf.Bytes()))
+
+	err = gw.Connect()
+	if err != nil {
+		return nil, errors.Wrap(err, "gateway client failed to connect")
+	}
+	gw.SetStatus(gateway.StatusListening, "/help", nil)
+
+	return gw, nil
 }
 
 func discordHandlersFromEnv(coreClient core.Client) []server.Handler {

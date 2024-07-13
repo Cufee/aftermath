@@ -66,7 +66,7 @@ func widgetPreview(accountID string, widget templ.Component, or, ou bool, vl int
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button type=\"button\" id=\"copy-widget-link\" class=\"btn btn-primary w-full\" onclick=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button type=\"button\" id=\"copy-widget-link\" class=\"btn btn-primary w-full transition-all duration-250 ease-in-out\" onclick=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -75,7 +75,7 @@ func widgetPreview(accountID string, widget templ.Component, or, ou bool, vl int
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">Copy Link</button></div><div class=\"flex flex-col items-center justify-center grow overflow-auto\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">Copy OBS Link</button></div><div class=\"flex flex-col items-center justify-center grow overflow-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -119,12 +119,21 @@ func widgetPreview(accountID string, widget templ.Component, or, ou bool, vl int
 
 func copyButtonAction() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_copyButtonAction_1df6`,
-		Function: `function __templ_copyButtonAction_1df6(){const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "/live" + window.location.search
+		Name: `__templ_copyButtonAction_88e1`,
+		Function: `function __templ_copyButtonAction_88e1(){const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "/live" + window.location.search
 	navigator.clipboard.writeText(url);
+	
+	const btn = document.getElementById("copy-widget-link")
+	const oldText = btn.textContent
+	btn.textContent = "Copied to Clipboard!";
+	btn.classList.add("btn-success");
+	setTimeout(()=> {
+		btn.textContent = oldText;
+		btn.classList.remove("btn-success");
+	}, 2000)
 }`,
-		Call:       templ.SafeScript(`__templ_copyButtonAction_1df6`),
-		CallInline: templ.SafeScriptInline(`__templ_copyButtonAction_1df6`),
+		Call:       templ.SafeScript(`__templ_copyButtonAction_88e1`),
+		CallInline: templ.SafeScriptInline(`__templ_copyButtonAction_88e1`),
 	}
 }
 

@@ -15,6 +15,7 @@ require (
 	github.com/go-co-op/gocron v1.37.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-github/v63 v63.0.0
+	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/joho/godotenv v1.5.1
 	github.com/justinas/alice v1.2.0
 	github.com/lithammer/fuzzysearch v1.1.8

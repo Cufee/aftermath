@@ -5,6 +5,8 @@ import (
 	"strconv"
 )
 
+var DevMode = os.Getenv("DEV_MODE") == "true"
+
 var (
 	SchedulerEnabled           = os.Getenv("SCHEDULER_ENABLED") == "true"
 	SchedulerConcurrentWorkers int

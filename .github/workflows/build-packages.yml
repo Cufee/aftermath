@@ -2,8 +2,9 @@ name: Create and publish Docker images
 
 # Configures this workflow to run every time a change is pushed to the branch called `release`.
 on:
+  workflow_dispatch:
   push:
-    branches: ['release', 'canary']
+    branches: ['release', 'main', 'canary', 'develop']
 
 # Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
 env:
@@ -45,7 +46,6 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=raw,latest-${{ github.ref_name }}
             type=raw,latest
             type=sha
       - name: Extract service metadata (tags, labels) for Docker
@@ -60,7 +60,6 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=raw,latest-${{ github.ref_name }}
             type=raw,latest
             type=sha
 
@@ -103,3 +102,16 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push-service.outputs.digest }}
           push-to-registry: true
+  
+  deploy:
+    needs: build-and-push-image
+    environment: dokploy-${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Redeploy the application using the latest image
+        env: 
+          WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
+        if: ${{ env.WEBHOOK_URL != '' }}
+        uses: distributhor/workflow-webhook@v3
+        with:
+          webhook_url: ${{ env.WEBHOOK_URL }}
