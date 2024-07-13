@@ -1,6 +1,7 @@
 name: Deploy with Dokploy
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["Create and publish Docker images"]
     types:
