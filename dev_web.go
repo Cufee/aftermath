@@ -52,7 +52,7 @@ func main() {
 
 	handlers = append(handlers, redirectHandlersFromEnv()...)
 
-	listen := server.NewServer(os.Getenv("PORT"), handlers...)
+	listen := server.NewServer(os.Getenv("PORT"), handlers)
 	listen()
 }
 
