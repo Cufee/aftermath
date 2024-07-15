@@ -30,6 +30,8 @@ type Tx struct {
 	CronTask *CronTaskClient
 	// DiscordInteraction is the client for interacting with the DiscordInteraction builders.
 	DiscordInteraction *DiscordInteractionClient
+	// GameMap is the client for interacting with the GameMap builders.
+	GameMap *GameMapClient
 	// LeaderboardScore is the client for interacting with the LeaderboardScore builders.
 	LeaderboardScore *LeaderboardScoreClient
 	// Session is the client for interacting with the Session builders.
@@ -187,6 +189,7 @@ func (tx *Tx) init() {
 	tx.Clan = NewClanClient(tx.config)
 	tx.CronTask = NewCronTaskClient(tx.config)
 	tx.DiscordInteraction = NewDiscordInteractionClient(tx.config)
+	tx.GameMap = NewGameMapClient(tx.config)
 	tx.LeaderboardScore = NewLeaderboardScoreClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)

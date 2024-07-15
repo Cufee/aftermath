@@ -20,6 +20,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
@@ -97,6 +98,7 @@ func checkColumn(table, column string) error {
 			clan.Table:               clan.ValidColumn,
 			crontask.Table:           crontask.ValidColumn,
 			discordinteraction.Table: discordinteraction.ValidColumn,
+			gamemap.Table:            gamemap.ValidColumn,
 			leaderboardscore.Table:   leaderboardscore.ValidColumn,
 			session.Table:            session.ValidColumn,
 			user.Table:               user.ValidColumn,

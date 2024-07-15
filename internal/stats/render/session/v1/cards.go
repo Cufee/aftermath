@@ -2,7 +2,6 @@ package session
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
@@ -50,12 +49,12 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	var primaryCardWidth float64 = minPrimaryCardWidth
 	var secondaryCardWidth, totalFrameWidth float64
 
-	{
-		titleStyle := common.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(0))
-		clanSize := common.MeasureString(session.Account.ClanTag, titleStyle.ClanTag.Font)
-		nameSize := common.MeasureString(session.Account.Nickname, titleStyle.Nickname.Font)
-		primaryCardWidth = common.Max(primaryCardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
-	}
+	// {
+	// 	titleStyle := common.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(0))
+	// 	clanSize := common.MeasureString(session.Account.ClanTag, titleStyle.ClanTag.Font)
+	// 	nameSize := common.MeasureString(session.Account.Nickname, titleStyle.Nickname.Font)
+	// 	primaryCardWidth = common.Max(primaryCardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
+	// }
 	{
 		for _, text := range opts.PromoText {
 			size := common.MeasureString(text, promoTextStyle().Font)
@@ -154,50 +153,50 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		}
 	}
 
-	{
-		var footer []string
-		if opts.VehicleID != "" {
-			footer = append(footer, cards.Unrated.Overview.Title)
-		} else {
-			switch strings.ToLower(session.Realm) {
-			case "na":
-				footer = append(footer, "North America")
-			case "eu":
-				footer = append(footer, "Europe")
-			case "as":
-				footer = append(footer, "Asia")
-			}
-		}
-		if session.LastBattleTime.Unix() > 1 {
-			sessionTo := session.PeriodEnd.Format("Jan 2")
-			sessionFrom := session.PeriodStart.Format("Jan 2")
-			if sessionFrom == sessionTo {
-				footer = append(footer, sessionTo)
-			} else {
-				footer = append(footer, sessionFrom+" - "+sessionTo)
-			}
-		}
+	// {
+	// 	var footer []string
+	// 	if opts.VehicleID != "" {
+	// 		footer = append(footer, cards.Unrated.Overview.Title)
+	// 	} else {
+	// 		switch strings.ToLower(session.Realm) {
+	// 		case "na":
+	// 			footer = append(footer, "North America")
+	// 		case "eu":
+	// 			footer = append(footer, "Europe")
+	// 		case "as":
+	// 			footer = append(footer, "Asia")
+	// 		}
+	// 	}
+	// 	if session.LastBattleTime.Unix() > 1 {
+	// 		sessionTo := session.PeriodEnd.Format("Jan 2")
+	// 		sessionFrom := session.PeriodStart.Format("Jan 2")
+	// 		if sessionFrom == sessionTo {
+	// 			footer = append(footer, sessionTo)
+	// 		} else {
+	// 			footer = append(footer, sessionFrom+" - "+sessionTo)
+	// 		}
+	// 	}
 
-		if len(footer) > 0 {
-			segments.AddFooter(common.NewFooterCard(strings.Join(footer, " • ")))
-		}
-	}
+	// 	if len(footer) > 0 {
+	// 		segments.AddFooter(common.NewFooterCard(strings.Join(footer, " • ")))
+	// 	}
+	// }
 
 	frameWidth := secondaryCardWidth + primaryCardWidth
 	if secondaryCardWidth > 0 && primaryCardWidth > 0 {
 		frameWidth += frameStyle().Gap
 	}
-	totalFrameWidth = common.Max(totalFrameWidth, frameWidth)
+	// totalFrameWidth = common.Max(totalFrameWidth, frameWidth)
 
-	// header card
-	if headerCard, headerCardExists := common.NewHeaderCard(totalFrameWidth, subs, opts.PromoText); headerCardExists {
-		segments.AddHeader(headerCard)
-	}
+	// // header card
+	// if headerCard, headerCardExists := common.NewHeaderCard(totalFrameWidth, subs, opts.PromoText); headerCardExists {
+	// 	segments.AddHeader(headerCard)
+	// }
 
-	// player title
-	primaryColumn = append(primaryColumn,
-		common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(primaryCardWidth)), session.Account.Nickname, session.Account.ClanTag, subs),
-	)
+	// // player title
+	// primaryColumn = append(primaryColumn,
+	// 	common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(primaryCardWidth)), session.Account.Nickname, session.Account.ClanTag, subs),
+	// )
 
 	// overview cards
 	if shouldRenderUnratedOverview {

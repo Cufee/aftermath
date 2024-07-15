@@ -27,7 +27,7 @@ func newProgressBar(size int, progress int, direction progressDirection, fillCol
 	}
 
 	ctx := gg.NewContext((width), (height))
-	ctx.SetColor(color.RGBA{70, 70, 70, 255})
+	ctx.SetColor(color.NRGBA{70, 70, 70, 255})
 	ctx.DrawRoundedRectangle(0, 0, float64(width), float64(height), 5)
 	ctx.Fill()
 

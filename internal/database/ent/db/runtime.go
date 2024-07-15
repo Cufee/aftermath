@@ -13,6 +13,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
@@ -239,6 +240,18 @@ func init() {
 	discordinteractionDescID := discordinteractionFields[0].Descriptor()
 	// discordinteraction.DefaultID holds the default value on creation for the id field.
 	discordinteraction.DefaultID = discordinteractionDescID.Default.(func() string)
+	gamemapFields := schema.GameMap{}.Fields()
+	_ = gamemapFields
+	// gamemapDescCreatedAt is the schema descriptor for created_at field.
+	gamemapDescCreatedAt := gamemapFields[1].Descriptor()
+	// gamemap.DefaultCreatedAt holds the default value on creation for the created_at field.
+	gamemap.DefaultCreatedAt = gamemapDescCreatedAt.Default.(func() time.Time)
+	// gamemapDescUpdatedAt is the schema descriptor for updated_at field.
+	gamemapDescUpdatedAt := gamemapFields[2].Descriptor()
+	// gamemap.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	gamemap.DefaultUpdatedAt = gamemapDescUpdatedAt.Default.(func() time.Time)
+	// gamemap.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	gamemap.UpdateDefaultUpdatedAt = gamemapDescUpdatedAt.UpdateDefault.(func() time.Time)
 	leaderboardscoreFields := schema.LeaderboardScore{}.Fields()
 	_ = leaderboardscoreFields
 	// leaderboardscoreDescCreatedAt is the schema descriptor for created_at field.

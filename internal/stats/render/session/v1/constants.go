@@ -17,6 +17,10 @@ var (
 	specialRatingIconSize     = 60.0
 	vehicleComparisonIconSize = 10.0
 	minPrimaryCardWidth       = 300.0 // making the primary card too small looks bad if there are no battles in a session
+
+	cardColor = common.DefaultCardColorNoAlpha
+	// cardColor = color.NRGBA{24, 26, 27, 255}
+	// cardColor = color.NRGBA{5, 4, 6, 255}
 )
 
 func specialRatingColumnStyle() common.Style {
@@ -89,7 +93,7 @@ func statsBlockStyle(width float64) common.Style {
 
 var (
 	vehicleLegendLabelContainer = common.Style{
-		BackgroundColor: common.DefaultCardColor,
+		BackgroundColor: cardColor,
 		BorderRadius:    common.BorderRadiusSM,
 		PaddingY:        5,
 		PaddingX:        10,
@@ -196,7 +200,7 @@ func defaultCardStyle(width float64) common.Style {
 		Direction:       common.DirectionVertical,
 		PaddingX:        10,
 		PaddingY:        15,
-		BackgroundColor: common.DefaultCardColor,
+		BackgroundColor: cardColor,
 		BorderRadius:    common.BorderRadiusLG,
 		Width:           width,
 		// Debug:           true,

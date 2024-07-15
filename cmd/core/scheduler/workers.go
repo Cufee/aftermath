@@ -8,6 +8,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/core/tasks"
 
@@ -132,36 +133,58 @@ func UpdateGlossaryWorker(client core.Client) func() {
 			return
 		}
 
+		// update vehicles
 		vf, err := zr.Open("assets/vehicles.json")
 		if err != nil {
 			log.Err(err).Msg("failed to open vehicles.json in assets.zip")
-			return
-		} else {
-			var vehicles map[string]models.Vehicle
-			err := json.NewDecoder(vf).Decode(&vehicles)
-			if err != nil {
-				log.Err(err).Msg("failed to decode vehicles.json")
-				return
-			}
 
-			vctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-			defer cancel()
-
-			_, err = client.Database().UpsertVehicles(vctx, vehicles)
-			if err != nil {
-				log.Err(err).Msg("failed to save vehicle glossary")
-				return
-			}
-
-			// load new glossary into the search memory cache
-			cctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
-			err = search.RefreshVehicleCache(cctx, client.Database())
-			if err != nil {
-				log.Err(err).Msg("failed to refresh glossary cache")
-				return
-			}
 		}
+		var vehicles map[string]models.Vehicle
+		err = json.NewDecoder(vf).Decode(&vehicles)
+		if err != nil {
+			log.Err(err).Msg("failed to decode vehicles.json")
+			return
+		}
+
+		vctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		defer cancel()
+
+		_, err = client.Database().UpsertVehicles(vctx, vehicles)
+		if err != nil {
+			log.Err(err).Msg("failed to save vehicle glossary")
+			return
+		}
+
+		// load new glossary into the search memory cache
+		cctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		err = search.RefreshVehicleCache(cctx, client.Database())
+		if err != nil {
+			log.Err(err).Msg("failed to refresh glossary cache")
+			return
+		}
+
+		// updates maps
+		mf, err := zr.Open("assets/maps.json")
+		if err != nil {
+			log.Err(err).Msg("failed to open maps.json in assets.zip")
+			return
+		}
+		var maps map[string]types.Map
+		err = json.NewDecoder(mf).Decode(&maps)
+		if err != nil {
+			log.Err(err).Msg("failed to decode maps.json")
+			return
+		}
+
+		mctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		err = client.Database().UpsertMaps(mctx, maps)
+		if err != nil {
+			log.Err(err).Msg("failed save maps glossary")
+			return
+		}
+
 		log.Info().Msg("glossary cache updated")
 	}
 }

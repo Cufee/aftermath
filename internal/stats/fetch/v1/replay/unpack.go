@@ -3,16 +3,25 @@ package replay
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/cufee/aftermath/internal/log"
 )
 
-func UnpackRemote(link string) (*UnpackedReplay, error) {
-	resp, err := http.DefaultClient.Get(link)
+var replayClient = http.Client{Timeout: time.Second * 5}
+
+func UnpackRemote(ctx context.Context, link string) (*UnpackedReplay, error) {
+	req, err := http.NewRequest(http.MethodGet, link, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := replayClient.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, ErrInvalidReplayFile
 	}

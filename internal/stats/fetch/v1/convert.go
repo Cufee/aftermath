@@ -5,8 +5,10 @@ import (
 	"strconv"
 	"time"
 
+	assets "github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1/replay"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
@@ -131,4 +133,9 @@ func blitzstarsToStats(vehicles map[string]frame.VehicleStatsFrame, histories ma
 	}
 
 	return stats
+}
+
+type Replay struct {
+	Map assets.Map
+	replay.Replay
 }

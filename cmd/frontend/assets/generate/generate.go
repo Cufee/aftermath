@@ -20,9 +20,9 @@ import (
 )
 
 var outDirPath = "../../public"
-var brandColor color.RGBA
+var brandColor color.NRGBA
 
-var cardColor = color.RGBA{7, 7, 7, 200}
+var cardColor = color.NRGBA{7, 7, 7, 200}
 
 func main() {
 	godotenv.Load("../../../../.env")
@@ -148,7 +148,7 @@ func generateOGImages() {
 
 		ctx.DrawImage(imaging.Fill(obsBg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 0, 0)
 		ctx.DrawRectangle(0, 0, float64(imageWidth), float64(imageHeight))
-		ctx.SetColor(color.RGBA{7, 7, 7, 200})
+		ctx.SetColor(color.NRGBA{7, 7, 7, 200})
 		ctx.Fill()
 
 		ctx.DrawImageAnchored(imaging.Fit(logo, logoSize, logoSize, imaging.Linear), imageWidth/2, imageHeight/2, 0.5, 0.5)

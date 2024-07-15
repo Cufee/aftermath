@@ -23,6 +23,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
@@ -57,6 +58,8 @@ type Client struct {
 	CronTask *CronTaskClient
 	// DiscordInteraction is the client for interacting with the DiscordInteraction builders.
 	DiscordInteraction *DiscordInteractionClient
+	// GameMap is the client for interacting with the GameMap builders.
+	GameMap *GameMapClient
 	// LeaderboardScore is the client for interacting with the LeaderboardScore builders.
 	LeaderboardScore *LeaderboardScoreClient
 	// Session is the client for interacting with the Session builders.
@@ -94,6 +97,7 @@ func (c *Client) init() {
 	c.Clan = NewClanClient(c.config)
 	c.CronTask = NewCronTaskClient(c.config)
 	c.DiscordInteraction = NewDiscordInteractionClient(c.config)
+	c.GameMap = NewGameMapClient(c.config)
 	c.LeaderboardScore = NewLeaderboardScoreClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -203,6 +207,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Clan:               NewClanClient(cfg),
 		CronTask:           NewCronTaskClient(cfg),
 		DiscordInteraction: NewDiscordInteractionClient(cfg),
+		GameMap:            NewGameMapClient(cfg),
 		LeaderboardScore:   NewLeaderboardScoreClient(cfg),
 		Session:            NewSessionClient(cfg),
 		User:               NewUserClient(cfg),
@@ -239,6 +244,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Clan:               NewClanClient(cfg),
 		CronTask:           NewCronTaskClient(cfg),
 		DiscordInteraction: NewDiscordInteractionClient(cfg),
+		GameMap:            NewGameMapClient(cfg),
 		LeaderboardScore:   NewLeaderboardScoreClient(cfg),
 		Session:            NewSessionClient(cfg),
 		User:               NewUserClient(cfg),
@@ -278,9 +284,9 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Account, c.AccountSnapshot, c.AppConfiguration, c.ApplicationCommand,
-		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.LeaderboardScore,
-		c.Session, c.User, c.UserConnection, c.UserContent, c.UserSubscription,
-		c.Vehicle, c.VehicleAverage, c.VehicleSnapshot,
+		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.GameMap,
+		c.LeaderboardScore, c.Session, c.User, c.UserConnection, c.UserContent,
+		c.UserSubscription, c.Vehicle, c.VehicleAverage, c.VehicleSnapshot,
 	} {
 		n.Use(hooks...)
 	}
@@ -291,9 +297,9 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Account, c.AccountSnapshot, c.AppConfiguration, c.ApplicationCommand,
-		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.LeaderboardScore,
-		c.Session, c.User, c.UserConnection, c.UserContent, c.UserSubscription,
-		c.Vehicle, c.VehicleAverage, c.VehicleSnapshot,
+		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.GameMap,
+		c.LeaderboardScore, c.Session, c.User, c.UserConnection, c.UserContent,
+		c.UserSubscription, c.Vehicle, c.VehicleAverage, c.VehicleSnapshot,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -318,6 +324,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.CronTask.mutate(ctx, m)
 	case *DiscordInteractionMutation:
 		return c.DiscordInteraction.mutate(ctx, m)
+	case *GameMapMutation:
+		return c.GameMap.mutate(ctx, m)
 	case *LeaderboardScoreMutation:
 		return c.LeaderboardScore.mutate(ctx, m)
 	case *SessionMutation:
@@ -1498,6 +1506,139 @@ func (c *DiscordInteractionClient) mutate(ctx context.Context, m *DiscordInterac
 		return (&DiscordInteractionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("db: unknown DiscordInteraction mutation op: %q", m.Op())
+	}
+}
+
+// GameMapClient is a client for the GameMap schema.
+type GameMapClient struct {
+	config
+}
+
+// NewGameMapClient returns a client for the GameMap from the given config.
+func NewGameMapClient(c config) *GameMapClient {
+	return &GameMapClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `gamemap.Hooks(f(g(h())))`.
+func (c *GameMapClient) Use(hooks ...Hook) {
+	c.hooks.GameMap = append(c.hooks.GameMap, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `gamemap.Intercept(f(g(h())))`.
+func (c *GameMapClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GameMap = append(c.inters.GameMap, interceptors...)
+}
+
+// Create returns a builder for creating a GameMap entity.
+func (c *GameMapClient) Create() *GameMapCreate {
+	mutation := newGameMapMutation(c.config, OpCreate)
+	return &GameMapCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of GameMap entities.
+func (c *GameMapClient) CreateBulk(builders ...*GameMapCreate) *GameMapCreateBulk {
+	return &GameMapCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *GameMapClient) MapCreateBulk(slice any, setFunc func(*GameMapCreate, int)) *GameMapCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &GameMapCreateBulk{err: fmt.Errorf("calling to GameMapClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*GameMapCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &GameMapCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for GameMap.
+func (c *GameMapClient) Update() *GameMapUpdate {
+	mutation := newGameMapMutation(c.config, OpUpdate)
+	return &GameMapUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GameMapClient) UpdateOne(gm *GameMap) *GameMapUpdateOne {
+	mutation := newGameMapMutation(c.config, OpUpdateOne, withGameMap(gm))
+	return &GameMapUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GameMapClient) UpdateOneID(id string) *GameMapUpdateOne {
+	mutation := newGameMapMutation(c.config, OpUpdateOne, withGameMapID(id))
+	return &GameMapUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for GameMap.
+func (c *GameMapClient) Delete() *GameMapDelete {
+	mutation := newGameMapMutation(c.config, OpDelete)
+	return &GameMapDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GameMapClient) DeleteOne(gm *GameMap) *GameMapDeleteOne {
+	return c.DeleteOneID(gm.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GameMapClient) DeleteOneID(id string) *GameMapDeleteOne {
+	builder := c.Delete().Where(gamemap.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GameMapDeleteOne{builder}
+}
+
+// Query returns a query builder for GameMap.
+func (c *GameMapClient) Query() *GameMapQuery {
+	return &GameMapQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeGameMap},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a GameMap entity by its id.
+func (c *GameMapClient) Get(ctx context.Context, id string) (*GameMap, error) {
+	return c.Query().Where(gamemap.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GameMapClient) GetX(ctx context.Context, id string) *GameMap {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *GameMapClient) Hooks() []Hook {
+	return c.hooks.GameMap
+}
+
+// Interceptors returns the client interceptors.
+func (c *GameMapClient) Interceptors() []Interceptor {
+	return c.inters.GameMap
+}
+
+func (c *GameMapClient) mutate(ctx context.Context, m *GameMapMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GameMapCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GameMapUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GameMapUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GameMapDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown GameMap mutation op: %q", m.Op())
 	}
 }
 
@@ -2862,14 +3003,14 @@ func (c *VehicleSnapshotClient) mutate(ctx context.Context, m *VehicleSnapshotMu
 type (
 	hooks struct {
 		Account, AccountSnapshot, AppConfiguration, ApplicationCommand, AuthNonce, Clan,
-		CronTask, DiscordInteraction, LeaderboardScore, Session, User, UserConnection,
-		UserContent, UserSubscription, Vehicle, VehicleAverage,
+		CronTask, DiscordInteraction, GameMap, LeaderboardScore, Session, User,
+		UserConnection, UserContent, UserSubscription, Vehicle, VehicleAverage,
 		VehicleSnapshot []ent.Hook
 	}
 	inters struct {
 		Account, AccountSnapshot, AppConfiguration, ApplicationCommand, AuthNonce, Clan,
-		CronTask, DiscordInteraction, LeaderboardScore, Session, User, UserConnection,
-		UserContent, UserSubscription, Vehicle, VehicleAverage,
+		CronTask, DiscordInteraction, GameMap, LeaderboardScore, Session, User,
+		UserConnection, UserContent, UserSubscription, Vehicle, VehicleAverage,
 		VehicleSnapshot []ent.Interceptor
 	}
 )

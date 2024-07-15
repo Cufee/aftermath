@@ -8,6 +8,14 @@ import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
+type outcome string
+
+const (
+	OutcomeVictory outcome = "victory"
+	OutcomeDefeat  outcome = "defeat"
+	OutcomeDraw    outcome = "draw"
+)
+
 type battleType struct {
 	ID  int    `json:"id" protobuf:"10"`
 	Tag string `json:"tag" protobuf:"11"`
@@ -68,11 +76,11 @@ var gameModes = map[int]gameMode{
 }
 
 type Replay struct {
-	MapID      int        `json:"mapId" protobuf:"10"`
+	MapID      string     `json:"mapId" protobuf:"10"`
 	GameMode   gameMode   `json:"gameMode" protobuf:"11"`
 	BattleType battleType `json:"battleType" protobuf:"12"`
 
-	Victory        bool      `json:"victory" protobuf:"15"`
+	Outcome        outcome   `json:"victory" protobuf:"15"`
 	BattleTime     time.Time `json:"battleTime" protobuf:"16"`
 	BattleDuration int       `json:"battleDuration" protobuf:"17"`
 
@@ -82,7 +90,7 @@ type Replay struct {
 	Teams Teams `json:"teams" protobuf:"22"`
 }
 
-func Prettify(battle battleResults, meta replayMeta) *Replay {
+func Prettify(battle battleResults, meta replayMeta) Replay {
 	var replay Replay
 
 	replay.GameMode = GameModeUnknown
@@ -96,7 +104,7 @@ func Prettify(battle battleResults, meta replayMeta) *Replay {
 		replay.BattleType = bt
 	}
 
-	replay.MapID = battle.MapID()
+	replay.MapID = fmt.Sprint(battle.MapID())
 	ts, _ := strconv.ParseInt(meta.BattleStartTime, 10, 64)
 	replay.BattleTime = time.Unix(ts, 0)
 	replay.BattleDuration = int(meta.BattleDuration)
@@ -108,12 +116,14 @@ func Prettify(battle battleResults, meta replayMeta) *Replay {
 		// MasteryBadge: data.MasteryBadge,
 	}
 
-	var allyTeam uint32
+	var allyTeam, enemyTeam uint32
 	players := make(map[int]playerInfo)
 	for _, p := range battle.Players {
 		players[int(p.AccountID)] = p.Info
 		if p.AccountID == battle.Author.AccountID {
 			allyTeam = p.Info.Team
+		} else {
+			enemyTeam = p.Info.Team
 		}
 	}
 	for _, result := range battle.PlayerResults {
@@ -132,8 +142,15 @@ func Prettify(battle battleResults, meta replayMeta) *Replay {
 		}
 	}
 
-	replay.Victory = allyTeam == battle.WinnerTeam
-	return &replay
+	replay.Outcome = OutcomeDraw
+	if battle.WinnerTeam == allyTeam {
+		replay.Outcome = OutcomeVictory
+	}
+	if battle.WinnerTeam == enemyTeam {
+		replay.Outcome = OutcomeDefeat
+	}
+
+	return replay
 }
 
 type Teams struct {

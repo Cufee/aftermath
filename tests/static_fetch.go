@@ -3,6 +3,7 @@ package tests
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/models"
@@ -96,4 +97,14 @@ func (c *staticTestingFetch) SessionStats(ctx context.Context, id string, sessio
 func (c *staticTestingFetch) CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error) {
 	// TODO: add some data
 	return map[string]frame.StatsFrame{}, nil
+}
+
+func (c *staticTestingFetch) ReplayRemote(ctx context.Context, url string) (fetch.Replay, error) {
+	// TODO: add some data
+	return fetch.Replay{}, nil
+}
+
+func (c *staticTestingFetch) Replay(ctx context.Context, file io.ReaderAt, size int64) (fetch.Replay, error) {
+	// TODO: add some data
+	return fetch.Replay{}, nil
 }

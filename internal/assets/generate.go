@@ -19,12 +19,12 @@ import (
 )
 
 var outDirPath = "../../static"
-var brandColor color.RGBA
+var brandColor color.NRGBA
 
-var discordColorLight = color.RGBA{54, 56, 61, 255}
-var discordColorMedium = color.RGBA{46, 47, 52, 255}
-var discordColorDark = color.RGBA{30, 31, 34, 255}
-var discordColorText = color.RGBA{151, 155, 162, 255}
+var discordColorLight = color.NRGBA{54, 56, 61, 255}
+var discordColorMedium = color.NRGBA{46, 47, 52, 255}
+var discordColorDark = color.NRGBA{30, 31, 34, 255}
+var discordColorText = color.NRGBA{151, 155, 162, 255}
 
 func main() {
 	godotenv.Load("../../.env")
@@ -74,7 +74,7 @@ func generateDiscordHelpImage(printer func(string) string) {
 
 				sctx := gg.NewContext(imageWidth, tctx.Height()+padding*2)
 				sctx.DrawRoundedRectangle(float64(padding), float64(padding), float64(tctx.Width()), float64(tctx.Height()), common.BorderRadiusXS)
-				sctx.SetColor(color.RGBA{0, 0, 0, 100})
+				sctx.SetColor(color.NRGBA{0, 0, 0, 100})
 				sctx.Fill()
 
 				ctx.DrawImage(imaging.Blur(sctx.Image(), 2), 0, imageHeight-sctx.Height())
@@ -132,7 +132,7 @@ func generateDiscordHelpImage(printer func(string) string) {
 				sctx := gg.NewContext(imageWidth,
 					dctx.Height()+padding*2)
 				sctx.DrawRoundedRectangle(float64(padding), float64(padding), float64(dctx.Width()), float64(dctx.Height()), common.BorderRadiusXS)
-				sctx.SetColor(color.RGBA{0, 0, 0, 100})
+				sctx.SetColor(color.NRGBA{0, 0, 0, 100})
 				sctx.Fill()
 
 				ctx.DrawImage(imaging.Blur(sctx.Image(), 5), 0, 0)

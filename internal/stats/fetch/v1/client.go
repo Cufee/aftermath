@@ -2,6 +2,7 @@ package fetch
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/models"
@@ -54,6 +55,8 @@ type Client interface {
 	PeriodStats(ctx context.Context, id string, from time.Time, opts ...StatsOption) (AccountStatsOverPeriod, error)
 	SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error)
 
+	ReplayRemote(ctx context.Context, fileURL string) (Replay, error)
+	Replay(ctx context.Context, file io.ReaderAt, size int64) (Replay, error)
 	CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error)
 }
 

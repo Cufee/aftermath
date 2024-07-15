@@ -3,6 +3,7 @@ package fetch
 import (
 	"context"
 	"fmt"
+	"io"
 	"sync"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/retry"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1/replay"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
@@ -434,4 +436,30 @@ func (c *multiSourceClient) PlayersAchievementsLeaderboard(ctx context.Context, 
 	}
 
 	return nil, nil
+}
+
+func (c *multiSourceClient) ReplayRemote(ctx context.Context, fileURL string) (Replay, error) {
+	unpacked, err := replay.UnpackRemote(ctx, fileURL)
+	if err != nil {
+		return Replay{}, errors.Wrap(err, "failed to unpack a remote replay")
+	}
+	replay := replay.Prettify(unpacked.BattleResult, unpacked.Meta)
+	mapData, err := c.database.GetMap(ctx, replay.MapID)
+	if err != nil && !database.IsNotFound(err) {
+		return Replay{}, errors.Wrap(err, "failed to get map glossary")
+	}
+	return Replay{mapData, replay}, nil
+}
+
+func (c *multiSourceClient) Replay(ctx context.Context, file io.ReaderAt, size int64) (Replay, error) {
+	unpacked, err := replay.Unpack(file, size)
+	if err != nil {
+		return Replay{}, errors.Wrap(err, "failed to unpack a remote replay")
+	}
+	replay := replay.Prettify(unpacked.BattleResult, unpacked.Meta)
+	mapData, err := c.database.GetMap(ctx, replay.MapID)
+	if err != nil && !database.IsNotFound(err) {
+		return Replay{}, errors.Wrap(err, "failed to get map glossary")
+	}
+	return Replay{mapData, replay}, nil
 }

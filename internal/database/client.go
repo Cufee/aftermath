@@ -8,6 +8,7 @@ import (
 	"time"
 
 	entsql "entgo.io/ent/dialect/sql"
+	"github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
@@ -44,6 +45,9 @@ type GlossaryClient interface {
 
 	UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) (map[string]error, error)
 	UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error)
+
+	GetMap(ctx context.Context, id string) (types.Map, error)
+	UpsertMaps(ctx context.Context, maps map[string]types.Map) error
 }
 
 type UsersClient interface {

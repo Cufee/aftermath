@@ -9,10 +9,10 @@ import (
 var (
 	frameStyle = render.Style{Direction: render.DirectionVertical, PaddingX: 30, PaddingY: 30, Gap: 10}
 
-	hpBarColorAllies  = color.RGBA{R: 120, G: 255, B: 120, A: 255}
-	hpBarColorEnemies = color.RGBA{R: 255, G: 120, B: 120, A: 255}
+	hpBarColorAllies  = color.NRGBA{R: 120, G: 255, B: 120, A: 255}
+	hpBarColorEnemies = color.NRGBA{R: 255, G: 120, B: 120, A: 255}
 
-	protagonistColor = color.RGBA{255, 223, 0, 255}
+	protagonistColor = color.NRGBA{255, 223, 0, 255}
 )
 
 func defaultCardStyle(width, height float64) render.Style {

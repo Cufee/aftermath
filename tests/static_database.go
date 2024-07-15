@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"time"
 
+	"github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -216,4 +218,11 @@ func (c *staticTestingDatabase) GetLeaderboardScores(ctx context.Context, leader
 }
 func (c *staticTestingDatabase) DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time, kind models.ScoreType) error {
 	return errors.New("DeleteExpiredLeaderboardScores not implemented")
+}
+
+func (c *staticTestingDatabase) GetMap(ctx context.Context, id string) (types.Map, error) {
+	return types.Map{}, errors.New("GetMap not implemented")
+}
+func (c *staticTestingDatabase) UpsertMaps(ctx context.Context, maps map[string]types.Map) error {
+	return errors.New("UpsertMaps not implemented")
 }

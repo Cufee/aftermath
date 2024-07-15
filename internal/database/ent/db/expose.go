@@ -108,6 +108,19 @@ func (di *DiscordInteraction) ScanValues(columns []string) ([]any, error) {
 	return di.scanValues(columns)
 }
 
+func (gm *GameMap) AssignValues(columns []string, values []any) error {
+	if gm == nil {
+		return fmt.Errorf("GameMap(nil)")
+	}
+	return gm.assignValues(columns, values)
+}
+func (gm *GameMap) ScanValues(columns []string) ([]any, error) {
+	if gm == nil {
+		return nil, fmt.Errorf("GameMap(nil)")
+	}
+	return gm.scanValues(columns)
+}
+
 func (ls *LeaderboardScore) AssignValues(columns []string, values []any) error {
 	if ls == nil {
 		return fmt.Errorf("LeaderboardScore(nil)")
