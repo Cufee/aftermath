@@ -13,8 +13,6 @@ import (
 	"github.com/fogleman/gg"
 )
 
-var logoColorOptions = []color.Color{color.NRGBA{50, 50, 50, 180}, color.NRGBA{200, 200, 200, 180}}
-
 func CardsToImage(session, career fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts ...common.Option) (image.Image, error) {
 	o := common.DefaultOptions()
 	for _, apply := range opts {
@@ -35,7 +33,7 @@ func CardsToImage(session, career fetch.AccountStatsOverPeriod, cards session.Ca
 			}
 		}
 		if len(accentColors) < 1 {
-			accentColors = logoColorOptions
+			accentColors = common.DefaultLogoColorOptions
 		}
 
 		patternSeed, _ := strconv.Atoi(session.Account.ID)

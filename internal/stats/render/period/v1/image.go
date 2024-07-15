@@ -2,11 +2,15 @@ package period
 
 import (
 	"image"
+	"image/color"
+	"strconv"
+	"time"
 
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
+	"github.com/fogleman/gg"
 )
 
 func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts ...common.Option) (image.Image, error) {
@@ -20,5 +24,27 @@ func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs [
 		return nil, err
 	}
 
-	return segments.Render(opts...)
+	if o.Background != nil {
+		var accentColors []color.Color
+		for _, vehicle := range stats.RegularBattles.Vehicles {
+			c := common.GetWN8Colors(vehicle.WN8().Float()).Background
+			if _, _, _, a := c.RGBA(); a > 0 {
+				accentColors = append(accentColors, c)
+			}
+		}
+		if len(accentColors) < 1 {
+			accentColors = common.DefaultLogoColorOptions
+		}
+
+		patternSeed, _ := strconv.Atoi(stats.Account.ID)
+		if patternSeed == 0 {
+			patternSeed = int(time.Now().Unix())
+		}
+		ctx := gg.NewContextForImage(o.Background)
+		overlay := common.NewBrandedBackground(ctx.Width(), ctx.Height(), accentColors, patternSeed)
+		ctx.DrawImage(overlay, 0, 0)
+		o.Background = ctx.Image()
+	}
+
+	return segments.Render(func(op *common.Options) { op.Background = o.Background })
 }
