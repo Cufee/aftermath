@@ -18,9 +18,7 @@ var (
 	vehicleComparisonIconSize = 10.0
 	minPrimaryCardWidth       = 300.0 // making the primary card too small looks bad if there are no battles in a session
 
-	cardColor = common.DefaultCardColorNoAlpha
-	// cardColor = color.NRGBA{24, 26, 27, 255}
-	// cardColor = color.NRGBA{5, 4, 6, 255}
+	cardColor = common.DefaultCardColor
 )
 
 func specialRatingColumnStyle() common.Style {

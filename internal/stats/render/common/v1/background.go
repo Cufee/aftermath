@@ -15,7 +15,7 @@ var globalLogoCacheMx sync.Mutex
 var globalLogoCache = make(map[color.Color]image.Image)
 
 func NewBrandedBackground(width, height int, colors []color.Color, hashSeed int) image.Image {
-	var logoSize = 40
+	var logoSize = 30
 	var padding = 30
 
 	// 2/3 of the image should be left for logos
@@ -120,7 +120,7 @@ func pickRotationRad(x, y, hashSeed int) float64 {
 
 	// Generate a pseudo-random float between 0 and 1
 	randomValue := r.Float64()
-	// Clamp the rotation angle between -2π and 2π radians
-	rotationRad := -2*math.Pi + (randomValue * (4 * math.Pi))
+	// Clamp the rotation angle between -4π and 4π radians
+	rotationRad := -4*math.Pi + (randomValue * (8 * math.Pi))
 	return rotationRad
 }
