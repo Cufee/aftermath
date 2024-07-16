@@ -3,13 +3,21 @@ package replay
 import (
 	"image"
 	"image/color"
+	"slices"
 	"strconv"
 	"time"
 
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
+
+type playerWN8 struct {
+	id      string
+	wn8     frame.Value
+	sortKey int
+}
 
 func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option) (image.Image, error) {
 	o := common.DefaultOptions()
@@ -23,19 +31,20 @@ func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option
 	}
 
 	if o.Background != nil {
-		var accentColors []color.Color
-		var wn8Values []float32
+		var values []playerWN8
 		for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
-			wn8Values = append(wn8Values, player.Performance.WN8().Float())
+			if wn8 := player.Performance.WN8(); !frame.InvalidValue.Equals(wn8) {
+				values = append(values, playerWN8{player.VehicleID, wn8, int(player.TimeAlive.Float())})
+			}
 		}
-		for _, value := range wn8Values {
-			c := common.GetWN8Colors(value).Background
+		slices.SortFunc(values, func(a, b playerWN8) int { return b.sortKey - a.sortKey })
+
+		var accentColors []color.Color
+		for _, value := range values {
+			c := common.GetWN8Colors(value.wn8.Float()).Background
 			if _, _, _, a := c.RGBA(); a > 0 {
 				accentColors = append(accentColors, c)
 			}
-		}
-		if len(accentColors) < 1 {
-			accentColors = common.DefaultLogoColorOptions
 		}
 
 		patternSeed, _ := strconv.Atoi(replay.Protagonist.ID)
