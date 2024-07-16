@@ -30,6 +30,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -108,6 +109,7 @@ func checkColumn(table, column string) error {
 			vehicle.Table:            vehicle.ValidColumn,
 			vehicleaverage.Table:     vehicleaverage.ValidColumn,
 			vehiclesnapshot.Table:    vehiclesnapshot.ValidColumn,
+			widgetsettings.Table:     widgetsettings.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

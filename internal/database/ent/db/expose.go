@@ -237,3 +237,16 @@ func (vs *VehicleSnapshot) ScanValues(columns []string) ([]any, error) {
 	}
 	return vs.scanValues(columns)
 }
+
+func (ws *WidgetSettings) AssignValues(columns []string, values []any) error {
+	if ws == nil {
+		return fmt.Errorf("WidgetSettings(nil)")
+	}
+	return ws.assignValues(columns, values)
+}
+func (ws *WidgetSettings) ScanValues(columns []string) ([]any, error) {
+	if ws == nil {
+		return nil, fmt.Errorf("WidgetSettings(nil)")
+	}
+	return ws.scanValues(columns)
+}

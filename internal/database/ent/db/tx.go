@@ -50,6 +50,8 @@ type Tx struct {
 	VehicleAverage *VehicleAverageClient
 	// VehicleSnapshot is the client for interacting with the VehicleSnapshot builders.
 	VehicleSnapshot *VehicleSnapshotClient
+	// WidgetSettings is the client for interacting with the WidgetSettings builders.
+	WidgetSettings *WidgetSettingsClient
 
 	// lazily loaded.
 	client     *Client
@@ -199,6 +201,7 @@ func (tx *Tx) init() {
 	tx.Vehicle = NewVehicleClient(tx.config)
 	tx.VehicleAverage = NewVehicleAverageClient(tx.config)
 	tx.VehicleSnapshot = NewVehicleSnapshotClient(tx.config)
+	tx.WidgetSettings = NewWidgetSettingsClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

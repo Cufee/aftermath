@@ -703,6 +703,39 @@ var (
 			},
 		},
 	}
+	// WidgetSettingsColumns holds the columns for the "widget_settings" table.
+	WidgetSettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "reference_id", Type: field.TypeString},
+		{Name: "title", Type: field.TypeString, Nullable: true},
+		{Name: "snapshot_id", Type: field.TypeString, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON},
+		{Name: "styles", Type: field.TypeJSON},
+		{Name: "user_id", Type: field.TypeString},
+	}
+	// WidgetSettingsTable holds the schema information for the "widget_settings" table.
+	WidgetSettingsTable = &schema.Table{
+		Name:       "widget_settings",
+		Columns:    WidgetSettingsColumns,
+		PrimaryKey: []*schema.Column{WidgetSettingsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "widget_settings_users_widgets",
+				Columns:    []*schema.Column{WidgetSettingsColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "widgetsettings_id",
+				Unique:  false,
+				Columns: []*schema.Column{WidgetSettingsColumns[0]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
@@ -723,6 +756,7 @@ var (
 		VehiclesTable,
 		VehicleAveragesTable,
 		VehicleSnapshotsTable,
+		WidgetSettingsTable,
 	}
 )
 
@@ -735,4 +769,5 @@ func init() {
 	UserContentsTable.ForeignKeys[0].RefTable = UsersTable
 	UserSubscriptionsTable.ForeignKeys[0].RefTable = UsersTable
 	VehicleSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
+	WidgetSettingsTable.ForeignKeys[0].RefTable = UsersTable
 }

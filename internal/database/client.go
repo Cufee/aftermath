@@ -55,9 +55,15 @@ type UsersClient interface {
 	GetOrCreateUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error)
 	UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error)
 
+	GetConnection(ctx context.Context, connection string) (models.UserConnection, error)
 	UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
 	UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
-	DeleteConnection(ctx context.Context, connectionID string) error
+	DeleteUserConnection(ctx context.Context, userID, connectionID string) error
+
+	GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error)
+	GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error)
+	UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) error
+	CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) error
 }
 
 type SnapshotsClient interface {

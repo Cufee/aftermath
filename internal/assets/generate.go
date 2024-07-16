@@ -5,6 +5,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"image/png"
 	"os"
 	"path/filepath"
 
@@ -42,6 +43,7 @@ func main() {
 	printer, _ := localization.NewPrinter("discord", language.English)
 
 	generateDiscordHelpImage(printer)
+	generateDiscordLogo()
 }
 
 func generateDiscordHelpImage(printer func(string) string) {
@@ -163,4 +165,36 @@ func generateDiscordHelpImage(printer func(string) string) {
 		f.Close()
 	}
 
+}
+
+type point struct {
+	x int
+	y int
+}
+
+func generateDiscordLogo() {
+	filename := "images/discord/logo.png"
+
+	opts := common.DefaultLogoOptions()
+	opts.Gap *= 10
+	opts.Jump *= 10
+	opts.LineStep *= 10
+	opts.LineWidth *= 10
+
+	padding := 80
+	img := imaging.Fill(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Center, imaging.Linear)
+	nctx := gg.NewContext(img.Bounds().Dx()+padding, img.Bounds().Dy()+padding)
+	nctx.SetColor(color.NRGBA{30, 31, 34, 255})
+	nctx.Clear()
+	nctx.DrawImage(img, padding/2, padding/4)
+
+	f, err := os.Create(filepath.Join(outDirPath, filename))
+	if err != nil {
+		panic(err)
+	}
+	err = png.Encode(f, nctx.Image())
+	if err != nil {
+		panic(err)
+	}
+	f.Close()
 }

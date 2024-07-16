@@ -5,6 +5,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
+	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
 )
@@ -163,6 +164,11 @@ func (c *client) UpsertUserWithPermissions(ctx context.Context, userID string, p
 	return toUser(record, nil, nil, nil), nil
 }
 
+func (c *client) GetConnection(ctx context.Context, id string) (models.UserConnection, error) {
+	record, err := c.db.UserConnection.Get(ctx, id)
+	return toUserConnection(record), err
+}
+
 func (c *client) CreateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	record, err := c.db.UserConnection.Create().
 		SetUser(c.db.User.GetX(ctx, connection.UserID)).
@@ -206,6 +212,7 @@ func (c *client) UpsertConnection(ctx context.Context, connection models.UserCon
 	return connection, nil
 }
 
-func (c *client) DeleteConnection(ctx context.Context, connectionID string) error {
-	return c.db.UserConnection.DeleteOneID(connectionID).Exec(ctx)
+func (c *client) DeleteUserConnection(ctx context.Context, userID, connectionID string) error {
+	_, err := c.db.UserConnection.Delete().Where(userconnection.ID(connectionID), userconnection.UserID(userID)).Exec(ctx)
+	return err
 }

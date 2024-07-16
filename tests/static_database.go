@@ -109,14 +109,17 @@ func (c *staticTestingDatabase) UpsertUserWithPermissions(ctx context.Context, u
 	u.Permissions = perms
 	return u, nil
 }
+func (c *staticTestingDatabase) GetConnection(ctx context.Context, id string) (models.UserConnection, error) {
+	return models.UserConnection{}, errors.New("GetConnection not implemented")
+}
 func (c *staticTestingDatabase) UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	return models.UserConnection{}, errors.New("UpdateConnection not implemented")
 }
 func (c *staticTestingDatabase) UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	return models.UserConnection{}, errors.New("UpsertConnection not implemented")
 }
-func (c *staticTestingDatabase) DeleteConnection(ctx context.Context, connectionID string) error {
-	return errors.New("DeleteConnection not implemented")
+func (c *staticTestingDatabase) DeleteUserConnection(ctx context.Context, userID, connectionID string) error {
+	return errors.New("DeleteUserConnection not implemented")
 }
 
 func (c *staticTestingDatabase) GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.Query) ([]models.AccountSnapshot, error) {
@@ -234,4 +237,30 @@ func (c *staticTestingDatabase) GetMap(ctx context.Context, id string) (types.Ma
 }
 func (c *staticTestingDatabase) UpsertMaps(ctx context.Context, maps map[string]types.Map) error {
 	return errors.New("UpsertMaps not implemented")
+}
+
+func (c *staticTestingDatabase) GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error) {
+	conn, _ := DefaultUserWithEdges.Connection(models.ConnectionTypeWargaming, nil)
+	return models.WidgetOptions{
+		ID:        "w1",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    DefaultUserWithEdges.ID,
+		AccountID: conn.ID,
+		Style: models.WidgetStyling{
+			UnratedOverview: models.WidgetCardStyle{
+				ShowTitle: true,
+			},
+		},
+	}, nil
+}
+func (c *staticTestingDatabase) GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error) {
+	s, err := c.GetWidgetSettings(ctx, userID)
+	return []models.WidgetOptions{s}, err
+}
+func (c *staticTestingDatabase) UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) error {
+	return errors.New("UpdateWidgetSettings not implemented")
+}
+func (c *staticTestingDatabase) CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) error {
+	return errors.New("CreateWidgetSettings not implemented")
 }

@@ -101,9 +101,6 @@ func main() {
 		log.Fatal().Err(err).Msg("startSchedulerFromEnv failed")
 	}
 
-	// update vehicle cache in the background on start
-	go scheduler.UpdateGlossaryWorker(cacheCoreClient)()
-
 	// Load some init options to registered admin accounts and etc
 	logic.ApplyInitOptions(liveCoreClient.Database())
 

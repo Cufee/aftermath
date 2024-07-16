@@ -18,6 +18,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 )
 
 // UserQuery is the builder for querying User entities.
@@ -30,6 +31,7 @@ type UserQuery struct {
 	withDiscordInteractions *DiscordInteractionQuery
 	withSubscriptions       *UserSubscriptionQuery
 	withConnections         *UserConnectionQuery
+	withWidgets             *WidgetSettingsQuery
 	withContent             *UserContentQuery
 	withSessions            *SessionQuery
 	modifiers               []func(*sql.Selector)
@@ -128,6 +130,28 @@ func (uq *UserQuery) QueryConnections() *UserConnectionQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(userconnection.Table, userconnection.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.ConnectionsTable, user.ConnectionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWidgets chains the current query on the "widgets" edge.
+func (uq *UserQuery) QueryWidgets() *WidgetSettingsQuery {
+	query := (&WidgetSettingsClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(widgetsettings.Table, widgetsettings.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WidgetsTable, user.WidgetsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -374,6 +398,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withDiscordInteractions: uq.withDiscordInteractions.Clone(),
 		withSubscriptions:       uq.withSubscriptions.Clone(),
 		withConnections:         uq.withConnections.Clone(),
+		withWidgets:             uq.withWidgets.Clone(),
 		withContent:             uq.withContent.Clone(),
 		withSessions:            uq.withSessions.Clone(),
 		// clone intermediate query.
@@ -412,6 +437,17 @@ func (uq *UserQuery) WithConnections(opts ...func(*UserConnectionQuery)) *UserQu
 		opt(query)
 	}
 	uq.withConnections = query
+	return uq
+}
+
+// WithWidgets tells the query-builder to eager-load the nodes that are connected to
+// the "widgets" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithWidgets(opts ...func(*WidgetSettingsQuery)) *UserQuery {
+	query := (&WidgetSettingsClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withWidgets = query
 	return uq
 }
 
@@ -515,10 +551,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			uq.withDiscordInteractions != nil,
 			uq.withSubscriptions != nil,
 			uq.withConnections != nil,
+			uq.withWidgets != nil,
 			uq.withContent != nil,
 			uq.withSessions != nil,
 		}
@@ -564,6 +601,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadConnections(ctx, query, nodes,
 			func(n *User) { n.Edges.Connections = []*UserConnection{} },
 			func(n *User, e *UserConnection) { n.Edges.Connections = append(n.Edges.Connections, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withWidgets; query != nil {
+		if err := uq.loadWidgets(ctx, query, nodes,
+			func(n *User) { n.Edges.Widgets = []*WidgetSettings{} },
+			func(n *User, e *WidgetSettings) { n.Edges.Widgets = append(n.Edges.Widgets, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -659,6 +703,36 @@ func (uq *UserQuery) loadConnections(ctx context.Context, query *UserConnectionQ
 	}
 	query.Where(predicate.UserConnection(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.ConnectionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadWidgets(ctx context.Context, query *WidgetSettingsQuery, nodes []*User, init func(*User), assign func(*User, *WidgetSettings)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(widgetsettings.FieldUserID)
+	}
+	query.Where(predicate.WidgetSettings(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.WidgetsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

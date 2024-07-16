@@ -30,6 +30,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"golang.org/x/text/language"
@@ -62,6 +63,7 @@ const (
 	TypeVehicle            = "Vehicle"
 	TypeVehicleAverage     = "VehicleAverage"
 	TypeVehicleSnapshot    = "VehicleSnapshot"
+	TypeWidgetSettings     = "WidgetSettings"
 )
 
 // AccountMutation represents an operation that mutates the Account nodes in the graph.
@@ -8140,6 +8142,9 @@ type UserMutation struct {
 	connections                 map[string]struct{}
 	removedconnections          map[string]struct{}
 	clearedconnections          bool
+	widgets                     map[string]struct{}
+	removedwidgets              map[string]struct{}
+	clearedwidgets              bool
 	content                     map[string]struct{}
 	removedcontent              map[string]struct{}
 	clearedcontent              bool
@@ -8626,6 +8631,60 @@ func (m *UserMutation) ResetConnections() {
 	m.removedconnections = nil
 }
 
+// AddWidgetIDs adds the "widgets" edge to the WidgetSettings entity by ids.
+func (m *UserMutation) AddWidgetIDs(ids ...string) {
+	if m.widgets == nil {
+		m.widgets = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.widgets[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWidgets clears the "widgets" edge to the WidgetSettings entity.
+func (m *UserMutation) ClearWidgets() {
+	m.clearedwidgets = true
+}
+
+// WidgetsCleared reports if the "widgets" edge to the WidgetSettings entity was cleared.
+func (m *UserMutation) WidgetsCleared() bool {
+	return m.clearedwidgets
+}
+
+// RemoveWidgetIDs removes the "widgets" edge to the WidgetSettings entity by IDs.
+func (m *UserMutation) RemoveWidgetIDs(ids ...string) {
+	if m.removedwidgets == nil {
+		m.removedwidgets = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.widgets, ids[i])
+		m.removedwidgets[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWidgets returns the removed IDs of the "widgets" edge to the WidgetSettings entity.
+func (m *UserMutation) RemovedWidgetsIDs() (ids []string) {
+	for id := range m.removedwidgets {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WidgetsIDs returns the "widgets" edge IDs in the mutation.
+func (m *UserMutation) WidgetsIDs() (ids []string) {
+	for id := range m.widgets {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWidgets resets all changes to the "widgets" edge.
+func (m *UserMutation) ResetWidgets() {
+	m.widgets = nil
+	m.clearedwidgets = false
+	m.removedwidgets = nil
+}
+
 // AddContentIDs adds the "content" edge to the UserContent entity by ids.
 func (m *UserMutation) AddContentIDs(ids ...string) {
 	if m.content == nil {
@@ -8944,7 +9003,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.discord_interactions != nil {
 		edges = append(edges, user.EdgeDiscordInteractions)
 	}
@@ -8953,6 +9012,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.connections != nil {
 		edges = append(edges, user.EdgeConnections)
+	}
+	if m.widgets != nil {
+		edges = append(edges, user.EdgeWidgets)
 	}
 	if m.content != nil {
 		edges = append(edges, user.EdgeContent)
@@ -8985,6 +9047,12 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWidgets:
+		ids := make([]ent.Value, 0, len(m.widgets))
+		for id := range m.widgets {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeContent:
 		ids := make([]ent.Value, 0, len(m.content))
 		for id := range m.content {
@@ -9003,7 +9071,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.removeddiscord_interactions != nil {
 		edges = append(edges, user.EdgeDiscordInteractions)
 	}
@@ -9012,6 +9080,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedconnections != nil {
 		edges = append(edges, user.EdgeConnections)
+	}
+	if m.removedwidgets != nil {
+		edges = append(edges, user.EdgeWidgets)
 	}
 	if m.removedcontent != nil {
 		edges = append(edges, user.EdgeContent)
@@ -9044,6 +9115,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWidgets:
+		ids := make([]ent.Value, 0, len(m.removedwidgets))
+		for id := range m.removedwidgets {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeContent:
 		ids := make([]ent.Value, 0, len(m.removedcontent))
 		for id := range m.removedcontent {
@@ -9062,7 +9139,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.cleareddiscord_interactions {
 		edges = append(edges, user.EdgeDiscordInteractions)
 	}
@@ -9071,6 +9148,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedconnections {
 		edges = append(edges, user.EdgeConnections)
+	}
+	if m.clearedwidgets {
+		edges = append(edges, user.EdgeWidgets)
 	}
 	if m.clearedcontent {
 		edges = append(edges, user.EdgeContent)
@@ -9091,6 +9171,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedsubscriptions
 	case user.EdgeConnections:
 		return m.clearedconnections
+	case user.EdgeWidgets:
+		return m.clearedwidgets
 	case user.EdgeContent:
 		return m.clearedcontent
 	case user.EdgeSessions:
@@ -9119,6 +9201,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeConnections:
 		m.ResetConnections()
+		return nil
+	case user.EdgeWidgets:
+		m.ResetWidgets()
 		return nil
 	case user.EdgeContent:
 		m.ResetContent()
@@ -13123,4 +13208,809 @@ func (m *VehicleSnapshotMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown VehicleSnapshot edge %s", name)
+}
+
+// WidgetSettingsMutation represents an operation that mutates the WidgetSettings nodes in the graph.
+type WidgetSettingsMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	reference_id  *string
+	title         *string
+	snapshot_id   *string
+	metadata      *map[string]interface{}
+	styles        *models.WidgetStyling
+	clearedFields map[string]struct{}
+	user          *string
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*WidgetSettings, error)
+	predicates    []predicate.WidgetSettings
+}
+
+var _ ent.Mutation = (*WidgetSettingsMutation)(nil)
+
+// widgetsettingsOption allows management of the mutation configuration using functional options.
+type widgetsettingsOption func(*WidgetSettingsMutation)
+
+// newWidgetSettingsMutation creates new mutation for the WidgetSettings entity.
+func newWidgetSettingsMutation(c config, op Op, opts ...widgetsettingsOption) *WidgetSettingsMutation {
+	m := &WidgetSettingsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeWidgetSettings,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withWidgetSettingsID sets the ID field of the mutation.
+func withWidgetSettingsID(id string) widgetsettingsOption {
+	return func(m *WidgetSettingsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *WidgetSettings
+		)
+		m.oldValue = func(ctx context.Context) (*WidgetSettings, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().WidgetSettings.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withWidgetSettings sets the old WidgetSettings of the mutation.
+func withWidgetSettings(node *WidgetSettings) widgetsettingsOption {
+	return func(m *WidgetSettingsMutation) {
+		m.oldValue = func(context.Context) (*WidgetSettings, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m WidgetSettingsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m WidgetSettingsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("db: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of WidgetSettings entities.
+func (m *WidgetSettingsMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *WidgetSettingsMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *WidgetSettingsMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().WidgetSettings.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *WidgetSettingsMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *WidgetSettingsMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the WidgetSettings entity.
+// If the WidgetSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WidgetSettingsMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *WidgetSettingsMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *WidgetSettingsMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *WidgetSettingsMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the WidgetSettings entity.
+// If the WidgetSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WidgetSettingsMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *WidgetSettingsMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetReferenceID sets the "reference_id" field.
+func (m *WidgetSettingsMutation) SetReferenceID(s string) {
+	m.reference_id = &s
+}
+
+// ReferenceID returns the value of the "reference_id" field in the mutation.
+func (m *WidgetSettingsMutation) ReferenceID() (r string, exists bool) {
+	v := m.reference_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReferenceID returns the old "reference_id" field's value of the WidgetSettings entity.
+// If the WidgetSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WidgetSettingsMutation) OldReferenceID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReferenceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReferenceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReferenceID: %w", err)
+	}
+	return oldValue.ReferenceID, nil
+}
+
+// ResetReferenceID resets all changes to the "reference_id" field.
+func (m *WidgetSettingsMutation) ResetReferenceID() {
+	m.reference_id = nil
+}
+
+// SetTitle sets the "title" field.
+func (m *WidgetSettingsMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *WidgetSettingsMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the WidgetSettings entity.
+// If the WidgetSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WidgetSettingsMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ClearTitle clears the value of the "title" field.
+func (m *WidgetSettingsMutation) ClearTitle() {
+	m.title = nil
+	m.clearedFields[widgetsettings.FieldTitle] = struct{}{}
+}
+
+// TitleCleared returns if the "title" field was cleared in this mutation.
+func (m *WidgetSettingsMutation) TitleCleared() bool {
+	_, ok := m.clearedFields[widgetsettings.FieldTitle]
+	return ok
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *WidgetSettingsMutation) ResetTitle() {
+	m.title = nil
+	delete(m.clearedFields, widgetsettings.FieldTitle)
+}
+
+// SetUserID sets the "user_id" field.
+func (m *WidgetSettingsMutation) SetUserID(s string) {
+	m.user = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *WidgetSettingsMutation) UserID() (r string, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the WidgetSettings entity.
+// If the WidgetSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WidgetSettingsMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *WidgetSettingsMutation) ResetUserID() {
+	m.user = nil
+}
+
+// SetSnapshotID sets the "snapshot_id" field.
+func (m *WidgetSettingsMutation) SetSnapshotID(s string) {
+	m.snapshot_id = &s
+}
+
+// SnapshotID returns the value of the "snapshot_id" field in the mutation.
+func (m *WidgetSettingsMutation) SnapshotID() (r string, exists bool) {
+	v := m.snapshot_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSnapshotID returns the old "snapshot_id" field's value of the WidgetSettings entity.
+// If the WidgetSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WidgetSettingsMutation) OldSnapshotID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSnapshotID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSnapshotID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSnapshotID: %w", err)
+	}
+	return oldValue.SnapshotID, nil
+}
+
+// ClearSnapshotID clears the value of the "snapshot_id" field.
+func (m *WidgetSettingsMutation) ClearSnapshotID() {
+	m.snapshot_id = nil
+	m.clearedFields[widgetsettings.FieldSnapshotID] = struct{}{}
+}
+
+// SnapshotIDCleared returns if the "snapshot_id" field was cleared in this mutation.
+func (m *WidgetSettingsMutation) SnapshotIDCleared() bool {
+	_, ok := m.clearedFields[widgetsettings.FieldSnapshotID]
+	return ok
+}
+
+// ResetSnapshotID resets all changes to the "snapshot_id" field.
+func (m *WidgetSettingsMutation) ResetSnapshotID() {
+	m.snapshot_id = nil
+	delete(m.clearedFields, widgetsettings.FieldSnapshotID)
+}
+
+// SetMetadata sets the "metadata" field.
+func (m *WidgetSettingsMutation) SetMetadata(value map[string]interface{}) {
+	m.metadata = &value
+}
+
+// Metadata returns the value of the "metadata" field in the mutation.
+func (m *WidgetSettingsMutation) Metadata() (r map[string]interface{}, exists bool) {
+	v := m.metadata
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetadata returns the old "metadata" field's value of the WidgetSettings entity.
+// If the WidgetSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WidgetSettingsMutation) OldMetadata(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetadata requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetadata: %w", err)
+	}
+	return oldValue.Metadata, nil
+}
+
+// ResetMetadata resets all changes to the "metadata" field.
+func (m *WidgetSettingsMutation) ResetMetadata() {
+	m.metadata = nil
+}
+
+// SetStyles sets the "styles" field.
+func (m *WidgetSettingsMutation) SetStyles(ms models.WidgetStyling) {
+	m.styles = &ms
+}
+
+// Styles returns the value of the "styles" field in the mutation.
+func (m *WidgetSettingsMutation) Styles() (r models.WidgetStyling, exists bool) {
+	v := m.styles
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStyles returns the old "styles" field's value of the WidgetSettings entity.
+// If the WidgetSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WidgetSettingsMutation) OldStyles(ctx context.Context) (v models.WidgetStyling, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStyles is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStyles requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStyles: %w", err)
+	}
+	return oldValue.Styles, nil
+}
+
+// ResetStyles resets all changes to the "styles" field.
+func (m *WidgetSettingsMutation) ResetStyles() {
+	m.styles = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *WidgetSettingsMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[widgetsettings.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *WidgetSettingsMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *WidgetSettingsMutation) UserIDs() (ids []string) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *WidgetSettingsMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the WidgetSettingsMutation builder.
+func (m *WidgetSettingsMutation) Where(ps ...predicate.WidgetSettings) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the WidgetSettingsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *WidgetSettingsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.WidgetSettings, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *WidgetSettingsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *WidgetSettingsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (WidgetSettings).
+func (m *WidgetSettingsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *WidgetSettingsMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, widgetsettings.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, widgetsettings.FieldUpdatedAt)
+	}
+	if m.reference_id != nil {
+		fields = append(fields, widgetsettings.FieldReferenceID)
+	}
+	if m.title != nil {
+		fields = append(fields, widgetsettings.FieldTitle)
+	}
+	if m.user != nil {
+		fields = append(fields, widgetsettings.FieldUserID)
+	}
+	if m.snapshot_id != nil {
+		fields = append(fields, widgetsettings.FieldSnapshotID)
+	}
+	if m.metadata != nil {
+		fields = append(fields, widgetsettings.FieldMetadata)
+	}
+	if m.styles != nil {
+		fields = append(fields, widgetsettings.FieldStyles)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *WidgetSettingsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case widgetsettings.FieldCreatedAt:
+		return m.CreatedAt()
+	case widgetsettings.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case widgetsettings.FieldReferenceID:
+		return m.ReferenceID()
+	case widgetsettings.FieldTitle:
+		return m.Title()
+	case widgetsettings.FieldUserID:
+		return m.UserID()
+	case widgetsettings.FieldSnapshotID:
+		return m.SnapshotID()
+	case widgetsettings.FieldMetadata:
+		return m.Metadata()
+	case widgetsettings.FieldStyles:
+		return m.Styles()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *WidgetSettingsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case widgetsettings.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case widgetsettings.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case widgetsettings.FieldReferenceID:
+		return m.OldReferenceID(ctx)
+	case widgetsettings.FieldTitle:
+		return m.OldTitle(ctx)
+	case widgetsettings.FieldUserID:
+		return m.OldUserID(ctx)
+	case widgetsettings.FieldSnapshotID:
+		return m.OldSnapshotID(ctx)
+	case widgetsettings.FieldMetadata:
+		return m.OldMetadata(ctx)
+	case widgetsettings.FieldStyles:
+		return m.OldStyles(ctx)
+	}
+	return nil, fmt.Errorf("unknown WidgetSettings field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WidgetSettingsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case widgetsettings.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case widgetsettings.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case widgetsettings.FieldReferenceID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReferenceID(v)
+		return nil
+	case widgetsettings.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case widgetsettings.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case widgetsettings.FieldSnapshotID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSnapshotID(v)
+		return nil
+	case widgetsettings.FieldMetadata:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetadata(v)
+		return nil
+	case widgetsettings.FieldStyles:
+		v, ok := value.(models.WidgetStyling)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStyles(v)
+		return nil
+	}
+	return fmt.Errorf("unknown WidgetSettings field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *WidgetSettingsMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *WidgetSettingsMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WidgetSettingsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown WidgetSettings numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *WidgetSettingsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(widgetsettings.FieldTitle) {
+		fields = append(fields, widgetsettings.FieldTitle)
+	}
+	if m.FieldCleared(widgetsettings.FieldSnapshotID) {
+		fields = append(fields, widgetsettings.FieldSnapshotID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *WidgetSettingsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *WidgetSettingsMutation) ClearField(name string) error {
+	switch name {
+	case widgetsettings.FieldTitle:
+		m.ClearTitle()
+		return nil
+	case widgetsettings.FieldSnapshotID:
+		m.ClearSnapshotID()
+		return nil
+	}
+	return fmt.Errorf("unknown WidgetSettings nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *WidgetSettingsMutation) ResetField(name string) error {
+	switch name {
+	case widgetsettings.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case widgetsettings.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case widgetsettings.FieldReferenceID:
+		m.ResetReferenceID()
+		return nil
+	case widgetsettings.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case widgetsettings.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case widgetsettings.FieldSnapshotID:
+		m.ResetSnapshotID()
+		return nil
+	case widgetsettings.FieldMetadata:
+		m.ResetMetadata()
+		return nil
+	case widgetsettings.FieldStyles:
+		m.ResetStyles()
+		return nil
+	}
+	return fmt.Errorf("unknown WidgetSettings field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *WidgetSettingsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, widgetsettings.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *WidgetSettingsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case widgetsettings.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *WidgetSettingsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *WidgetSettingsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *WidgetSettingsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, widgetsettings.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *WidgetSettingsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case widgetsettings.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *WidgetSettingsMutation) ClearEdge(name string) error {
+	switch name {
+	case widgetsettings.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown WidgetSettings unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *WidgetSettingsMutation) ResetEdge(name string) error {
+	switch name {
+	case widgetsettings.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown WidgetSettings edge %s", name)
 }

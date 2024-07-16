@@ -1,0 +1,99 @@
+package api
+
+import (
+	"errors"
+	"net/http"
+
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/routes/app"
+	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
+)
+
+var RemoveConnection handler.Endpoint = func(ctx *handler.Context) error {
+	user, err := ctx.SessionUser()
+	if err != nil {
+		return ctx.Redirect("/login", http.StatusTemporaryRedirect)
+	}
+
+	connID := ctx.Path("connectionId")
+	if connID == "" {
+		return ctx.Error(errors.New("connection id path parameter is empty"))
+	}
+
+	err = ctx.Database().DeleteUserConnection(ctx, user.ID, connID)
+	if err != nil {
+		return ctx.Error(err, "failed to delete a connection")
+	}
+
+	return nil
+}
+
+var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Component, error) {
+	user, err := ctx.SessionUser(database.WithConnections())
+	if err != nil {
+		return nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
+	}
+
+	connID := ctx.Path("connectionId")
+	if connID == "" {
+		return nil, ctx.Error(errors.New("connection id path parameter is empty"))
+	}
+
+	var previous, updated models.UserConnection
+	for _, conn := range user.Connections {
+		if conn.Metadata["default"] == true {
+			previous = conn
+		}
+
+		conn.Metadata["default"] = conn.ID == connID
+		u, err := ctx.Database().UpdateConnection(ctx, conn)
+		if err != nil {
+			return nil, ctx.Error(err, "failed to update a connection")
+		}
+
+		if conn.ID == connID {
+			updated = u
+		}
+	}
+	var ids []string
+	if previous.ID != "" {
+		ids = append(ids, previous.ID)
+	}
+	if updated.ID != "" {
+		ids = append(ids, previous.ID)
+	}
+	if len(ids) < 1 {
+		ctx.SetStatus(http.StatusNotFound)
+		return nil, ctx.Error(errors.New("connection not found"), "connection not found")
+	}
+
+	accounts, err := ctx.Database().GetAccounts(ctx.Context, ids)
+	if err != nil {
+		return nil, ctx.Error(err, "failed to find connected accounts")
+	}
+
+	var withProps []app.ConnectionWithAccount
+	for _, a := range accounts {
+		if previous.ReferenceID == a.ID {
+			withProps = append(withProps, app.ConnectionWithAccount{
+				UserConnection: previous,
+				Account:        a,
+			})
+		}
+		if updated.ReferenceID == a.ID {
+			withProps = append(withProps, app.ConnectionWithAccount{
+				UserConnection: updated,
+				Account:        a,
+			})
+		}
+	}
+
+	return nil, nil
+}
+
+templ updatedConnections(connections []app.ConnectionWithAccount) {
+	for _, c := range connections {
+		@app.ConnectionCard(c)
+	}
+}

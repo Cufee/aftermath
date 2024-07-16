@@ -42,13 +42,15 @@ type UserEdges struct {
 	Subscriptions []*UserSubscription `json:"subscriptions,omitempty"`
 	// Connections holds the value of the connections edge.
 	Connections []*UserConnection `json:"connections,omitempty"`
+	// Widgets holds the value of the widgets edge.
+	Widgets []*WidgetSettings `json:"widgets,omitempty"`
 	// Content holds the value of the content edge.
 	Content []*UserContent `json:"content,omitempty"`
 	// Sessions holds the value of the sessions edge.
 	Sessions []*Session `json:"sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // DiscordInteractionsOrErr returns the DiscordInteractions value or an error if the edge
@@ -78,10 +80,19 @@ func (e UserEdges) ConnectionsOrErr() ([]*UserConnection, error) {
 	return nil, &NotLoadedError{edge: "connections"}
 }
 
+// WidgetsOrErr returns the Widgets value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) WidgetsOrErr() ([]*WidgetSettings, error) {
+	if e.loadedTypes[3] {
+		return e.Widgets, nil
+	}
+	return nil, &NotLoadedError{edge: "widgets"}
+}
+
 // ContentOrErr returns the Content value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ContentOrErr() ([]*UserContent, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.Content, nil
 	}
 	return nil, &NotLoadedError{edge: "content"}
@@ -90,7 +101,7 @@ func (e UserEdges) ContentOrErr() ([]*UserContent, error) {
 // SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SessionsOrErr() ([]*Session, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.Sessions, nil
 	}
 	return nil, &NotLoadedError{edge: "sessions"}
@@ -186,6 +197,11 @@ func (u *User) QuerySubscriptions() *UserSubscriptionQuery {
 // QueryConnections queries the "connections" edge of the User entity.
 func (u *User) QueryConnections() *UserConnectionQuery {
 	return NewUserClient(u.config).QueryConnections(u)
+}
+
+// QueryWidgets queries the "widgets" edge of the User entity.
+func (u *User) QueryWidgets() *WidgetSettingsQuery {
+	return NewUserClient(u.config).QueryWidgets(u)
 }
 
 // QueryContent queries the "content" edge of the User entity.

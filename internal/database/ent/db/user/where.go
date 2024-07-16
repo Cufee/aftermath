@@ -374,6 +374,29 @@ func HasConnectionsWith(preds ...predicate.UserConnection) predicate.User {
 	})
 }
 
+// HasWidgets applies the HasEdge predicate on the "widgets" edge.
+func HasWidgets() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WidgetsTable, WidgetsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWidgetsWith applies the HasEdge predicate on the "widgets" edge with a given conditions (other predicates).
+func HasWidgetsWith(preds ...predicate.WidgetSettings) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newWidgetsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasContent applies the HasEdge predicate on the "content" edge.
 func HasContent() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

@@ -30,6 +30,8 @@ const (
 	EdgeSubscriptions = "subscriptions"
 	// EdgeConnections holds the string denoting the connections edge name in mutations.
 	EdgeConnections = "connections"
+	// EdgeWidgets holds the string denoting the widgets edge name in mutations.
+	EdgeWidgets = "widgets"
 	// EdgeContent holds the string denoting the content edge name in mutations.
 	EdgeContent = "content"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
@@ -57,6 +59,13 @@ const (
 	ConnectionsInverseTable = "user_connections"
 	// ConnectionsColumn is the table column denoting the connections relation/edge.
 	ConnectionsColumn = "user_id"
+	// WidgetsTable is the table that holds the widgets relation/edge.
+	WidgetsTable = "widget_settings"
+	// WidgetsInverseTable is the table name for the WidgetSettings entity.
+	// It exists in this package in order to avoid circular dependency with the "widgetsettings" package.
+	WidgetsInverseTable = "widget_settings"
+	// WidgetsColumn is the table column denoting the widgets relation/edge.
+	WidgetsColumn = "user_id"
 	// ContentTable is the table that holds the content relation/edge.
 	ContentTable = "user_contents"
 	// ContentInverseTable is the table name for the UserContent entity.
@@ -176,6 +185,20 @@ func ByConnections(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByWidgetsCount orders the results by widgets count.
+func ByWidgetsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newWidgetsStep(), opts...)
+	}
+}
+
+// ByWidgets orders the results by widgets terms.
+func ByWidgets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWidgetsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByContentCount orders the results by content count.
 func ByContentCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -222,6 +245,13 @@ func newConnectionsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ConnectionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ConnectionsTable, ConnectionsColumn),
+	)
+}
+func newWidgetsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WidgetsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WidgetsTable, WidgetsColumn),
 	)
 }
 func newContentStep() *sqlgraph.Step {

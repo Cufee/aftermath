@@ -225,6 +225,18 @@ func (f VehicleSnapshotFunc) Mutate(ctx context.Context, m db.Mutation) (db.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.VehicleSnapshotMutation", m)
 }
 
+// The WidgetSettingsFunc type is an adapter to allow the use of ordinary
+// function as WidgetSettings mutator.
+type WidgetSettingsFunc func(context.Context, *db.WidgetSettingsMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WidgetSettingsFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.WidgetSettingsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.WidgetSettingsMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, db.Mutation) bool
 

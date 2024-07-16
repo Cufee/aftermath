@@ -33,6 +33,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 
 	stdsql "database/sql"
 )
@@ -78,6 +79,8 @@ type Client struct {
 	VehicleAverage *VehicleAverageClient
 	// VehicleSnapshot is the client for interacting with the VehicleSnapshot builders.
 	VehicleSnapshot *VehicleSnapshotClient
+	// WidgetSettings is the client for interacting with the WidgetSettings builders.
+	WidgetSettings *WidgetSettingsClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -107,6 +110,7 @@ func (c *Client) init() {
 	c.Vehicle = NewVehicleClient(c.config)
 	c.VehicleAverage = NewVehicleAverageClient(c.config)
 	c.VehicleSnapshot = NewVehicleSnapshotClient(c.config)
+	c.WidgetSettings = NewWidgetSettingsClient(c.config)
 }
 
 type (
@@ -217,6 +221,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Vehicle:            NewVehicleClient(cfg),
 		VehicleAverage:     NewVehicleAverageClient(cfg),
 		VehicleSnapshot:    NewVehicleSnapshotClient(cfg),
+		WidgetSettings:     NewWidgetSettingsClient(cfg),
 	}, nil
 }
 
@@ -254,6 +259,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Vehicle:            NewVehicleClient(cfg),
 		VehicleAverage:     NewVehicleAverageClient(cfg),
 		VehicleSnapshot:    NewVehicleSnapshotClient(cfg),
+		WidgetSettings:     NewWidgetSettingsClient(cfg),
 	}, nil
 }
 
@@ -287,6 +293,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.GameMap,
 		c.LeaderboardScore, c.Session, c.User, c.UserConnection, c.UserContent,
 		c.UserSubscription, c.Vehicle, c.VehicleAverage, c.VehicleSnapshot,
+		c.WidgetSettings,
 	} {
 		n.Use(hooks...)
 	}
@@ -300,6 +307,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.GameMap,
 		c.LeaderboardScore, c.Session, c.User, c.UserConnection, c.UserContent,
 		c.UserSubscription, c.Vehicle, c.VehicleAverage, c.VehicleSnapshot,
+		c.WidgetSettings,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -344,6 +352,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.VehicleAverage.mutate(ctx, m)
 	case *VehicleSnapshotMutation:
 		return c.VehicleSnapshot.mutate(ctx, m)
+	case *WidgetSettingsMutation:
+		return c.WidgetSettings.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("db: unknown mutation type %T", m)
 	}
@@ -2080,6 +2090,22 @@ func (c *UserClient) QueryConnections(u *User) *UserConnectionQuery {
 	return query
 }
 
+// QueryWidgets queries the widgets edge of a User.
+func (c *UserClient) QueryWidgets(u *User) *WidgetSettingsQuery {
+	query := (&WidgetSettingsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(widgetsettings.Table, widgetsettings.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WidgetsTable, user.WidgetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryContent queries the content edge of a User.
 func (c *UserClient) QueryContent(u *User) *UserContentQuery {
 	query := (&UserContentClient{config: c.config}).Query()
@@ -2999,19 +3025,168 @@ func (c *VehicleSnapshotClient) mutate(ctx context.Context, m *VehicleSnapshotMu
 	}
 }
 
+// WidgetSettingsClient is a client for the WidgetSettings schema.
+type WidgetSettingsClient struct {
+	config
+}
+
+// NewWidgetSettingsClient returns a client for the WidgetSettings from the given config.
+func NewWidgetSettingsClient(c config) *WidgetSettingsClient {
+	return &WidgetSettingsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `widgetsettings.Hooks(f(g(h())))`.
+func (c *WidgetSettingsClient) Use(hooks ...Hook) {
+	c.hooks.WidgetSettings = append(c.hooks.WidgetSettings, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `widgetsettings.Intercept(f(g(h())))`.
+func (c *WidgetSettingsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WidgetSettings = append(c.inters.WidgetSettings, interceptors...)
+}
+
+// Create returns a builder for creating a WidgetSettings entity.
+func (c *WidgetSettingsClient) Create() *WidgetSettingsCreate {
+	mutation := newWidgetSettingsMutation(c.config, OpCreate)
+	return &WidgetSettingsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of WidgetSettings entities.
+func (c *WidgetSettingsClient) CreateBulk(builders ...*WidgetSettingsCreate) *WidgetSettingsCreateBulk {
+	return &WidgetSettingsCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *WidgetSettingsClient) MapCreateBulk(slice any, setFunc func(*WidgetSettingsCreate, int)) *WidgetSettingsCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &WidgetSettingsCreateBulk{err: fmt.Errorf("calling to WidgetSettingsClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*WidgetSettingsCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &WidgetSettingsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for WidgetSettings.
+func (c *WidgetSettingsClient) Update() *WidgetSettingsUpdate {
+	mutation := newWidgetSettingsMutation(c.config, OpUpdate)
+	return &WidgetSettingsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WidgetSettingsClient) UpdateOne(ws *WidgetSettings) *WidgetSettingsUpdateOne {
+	mutation := newWidgetSettingsMutation(c.config, OpUpdateOne, withWidgetSettings(ws))
+	return &WidgetSettingsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WidgetSettingsClient) UpdateOneID(id string) *WidgetSettingsUpdateOne {
+	mutation := newWidgetSettingsMutation(c.config, OpUpdateOne, withWidgetSettingsID(id))
+	return &WidgetSettingsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for WidgetSettings.
+func (c *WidgetSettingsClient) Delete() *WidgetSettingsDelete {
+	mutation := newWidgetSettingsMutation(c.config, OpDelete)
+	return &WidgetSettingsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WidgetSettingsClient) DeleteOne(ws *WidgetSettings) *WidgetSettingsDeleteOne {
+	return c.DeleteOneID(ws.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WidgetSettingsClient) DeleteOneID(id string) *WidgetSettingsDeleteOne {
+	builder := c.Delete().Where(widgetsettings.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WidgetSettingsDeleteOne{builder}
+}
+
+// Query returns a query builder for WidgetSettings.
+func (c *WidgetSettingsClient) Query() *WidgetSettingsQuery {
+	return &WidgetSettingsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWidgetSettings},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a WidgetSettings entity by its id.
+func (c *WidgetSettingsClient) Get(ctx context.Context, id string) (*WidgetSettings, error) {
+	return c.Query().Where(widgetsettings.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WidgetSettingsClient) GetX(ctx context.Context, id string) *WidgetSettings {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a WidgetSettings.
+func (c *WidgetSettingsClient) QueryUser(ws *WidgetSettings) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ws.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(widgetsettings.Table, widgetsettings.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, widgetsettings.UserTable, widgetsettings.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(ws.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WidgetSettingsClient) Hooks() []Hook {
+	return c.hooks.WidgetSettings
+}
+
+// Interceptors returns the client interceptors.
+func (c *WidgetSettingsClient) Interceptors() []Interceptor {
+	return c.inters.WidgetSettings
+}
+
+func (c *WidgetSettingsClient) mutate(ctx context.Context, m *WidgetSettingsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WidgetSettingsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WidgetSettingsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WidgetSettingsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WidgetSettingsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown WidgetSettings mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Account, AccountSnapshot, AppConfiguration, ApplicationCommand, AuthNonce, Clan,
 		CronTask, DiscordInteraction, GameMap, LeaderboardScore, Session, User,
 		UserConnection, UserContent, UserSubscription, Vehicle, VehicleAverage,
-		VehicleSnapshot []ent.Hook
+		VehicleSnapshot, WidgetSettings []ent.Hook
 	}
 	inters struct {
 		Account, AccountSnapshot, AppConfiguration, ApplicationCommand, AuthNonce, Clan,
 		CronTask, DiscordInteraction, GameMap, LeaderboardScore, Session, User,
 		UserConnection, UserContent, UserSubscription, Vehicle, VehicleAverage,
-		VehicleSnapshot []ent.Interceptor
+		VehicleSnapshot, WidgetSettings []ent.Interceptor
 	}
 )
 

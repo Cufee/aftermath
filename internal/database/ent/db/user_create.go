@@ -16,6 +16,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -136,6 +137,21 @@ func (uc *UserCreate) AddConnections(u ...*UserConnection) *UserCreate {
 		ids[i] = u[i].ID
 	}
 	return uc.AddConnectionIDs(ids...)
+}
+
+// AddWidgetIDs adds the "widgets" edge to the WidgetSettings entity by IDs.
+func (uc *UserCreate) AddWidgetIDs(ids ...string) *UserCreate {
+	uc.mutation.AddWidgetIDs(ids...)
+	return uc
+}
+
+// AddWidgets adds the "widgets" edges to the WidgetSettings entity.
+func (uc *UserCreate) AddWidgets(w ...*WidgetSettings) *UserCreate {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uc.AddWidgetIDs(ids...)
 }
 
 // AddContentIDs adds the "content" edge to the UserContent entity by IDs.
@@ -331,6 +347,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userconnection.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.WidgetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WidgetsTable,
+			Columns: []string{user.WidgetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(widgetsettings.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

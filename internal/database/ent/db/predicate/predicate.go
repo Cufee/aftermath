@@ -59,3 +59,6 @@ type VehicleAverage func(*sql.Selector)
 
 // VehicleSnapshot is the predicate function for vehiclesnapshot builders.
 type VehicleSnapshot func(*sql.Selector)
+
+// WidgetSettings is the predicate function for widgetsettings builders.
+type WidgetSettings func(*sql.Selector)

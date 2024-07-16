@@ -23,6 +23,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 	"github.com/cufee/aftermath/internal/database/ent/schema"
 )
 
@@ -442,4 +443,20 @@ func init() {
 	vehiclesnapshotDescID := vehiclesnapshotFields[0].Descriptor()
 	// vehiclesnapshot.DefaultID holds the default value on creation for the id field.
 	vehiclesnapshot.DefaultID = vehiclesnapshotDescID.Default.(func() string)
+	widgetsettingsFields := schema.WidgetSettings{}.Fields()
+	_ = widgetsettingsFields
+	// widgetsettingsDescCreatedAt is the schema descriptor for created_at field.
+	widgetsettingsDescCreatedAt := widgetsettingsFields[1].Descriptor()
+	// widgetsettings.DefaultCreatedAt holds the default value on creation for the created_at field.
+	widgetsettings.DefaultCreatedAt = widgetsettingsDescCreatedAt.Default.(func() time.Time)
+	// widgetsettingsDescUpdatedAt is the schema descriptor for updated_at field.
+	widgetsettingsDescUpdatedAt := widgetsettingsFields[2].Descriptor()
+	// widgetsettings.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	widgetsettings.DefaultUpdatedAt = widgetsettingsDescUpdatedAt.Default.(func() time.Time)
+	// widgetsettings.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	widgetsettings.UpdateDefaultUpdatedAt = widgetsettingsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// widgetsettingsDescID is the schema descriptor for id field.
+	widgetsettingsDescID := widgetsettingsFields[0].Descriptor()
+	// widgetsettings.DefaultID holds the default value on creation for the id field.
+	widgetsettings.DefaultID = widgetsettingsDescID.Default.(func() string)
 }

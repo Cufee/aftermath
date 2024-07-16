@@ -38,6 +38,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("discord_interactions", DiscordInteraction.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("subscriptions", UserSubscription.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("connections", UserConnection.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("widgets", WidgetSettings.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("content", UserContent.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("sessions", Session.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}

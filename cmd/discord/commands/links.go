@@ -142,7 +142,7 @@ func init() {
 							continue
 						}
 						if conn.ReferenceID == accountID {
-							err := ctx.Core.Database().DeleteConnection(ctx.Context, conn.ID)
+							err := ctx.Core.Database().DeleteUserConnection(ctx.Context, ctx.User.ID, conn.ID)
 							if err != nil {
 								return ctx.Err(err)
 							}

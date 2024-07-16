@@ -19,6 +19,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -132,6 +133,21 @@ func (uu *UserUpdate) AddConnections(u ...*UserConnection) *UserUpdate {
 	return uu.AddConnectionIDs(ids...)
 }
 
+// AddWidgetIDs adds the "widgets" edge to the WidgetSettings entity by IDs.
+func (uu *UserUpdate) AddWidgetIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddWidgetIDs(ids...)
+	return uu
+}
+
+// AddWidgets adds the "widgets" edges to the WidgetSettings entity.
+func (uu *UserUpdate) AddWidgets(w ...*WidgetSettings) *UserUpdate {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.AddWidgetIDs(ids...)
+}
+
 // AddContentIDs adds the "content" edge to the UserContent entity by IDs.
 func (uu *UserUpdate) AddContentIDs(ids ...string) *UserUpdate {
 	uu.mutation.AddContentIDs(ids...)
@@ -228,6 +244,27 @@ func (uu *UserUpdate) RemoveConnections(u ...*UserConnection) *UserUpdate {
 		ids[i] = u[i].ID
 	}
 	return uu.RemoveConnectionIDs(ids...)
+}
+
+// ClearWidgets clears all "widgets" edges to the WidgetSettings entity.
+func (uu *UserUpdate) ClearWidgets() *UserUpdate {
+	uu.mutation.ClearWidgets()
+	return uu
+}
+
+// RemoveWidgetIDs removes the "widgets" edge to WidgetSettings entities by IDs.
+func (uu *UserUpdate) RemoveWidgetIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveWidgetIDs(ids...)
+	return uu
+}
+
+// RemoveWidgets removes "widgets" edges to WidgetSettings entities.
+func (uu *UserUpdate) RemoveWidgets(w ...*WidgetSettings) *UserUpdate {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.RemoveWidgetIDs(ids...)
 }
 
 // ClearContent clears all "content" edges to the UserContent entity.
@@ -478,6 +515,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.WidgetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WidgetsTable,
+			Columns: []string{user.WidgetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(widgetsettings.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedWidgetsIDs(); len(nodes) > 0 && !uu.mutation.WidgetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WidgetsTable,
+			Columns: []string{user.WidgetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(widgetsettings.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.WidgetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WidgetsTable,
+			Columns: []string{user.WidgetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(widgetsettings.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if uu.mutation.ContentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -687,6 +769,21 @@ func (uuo *UserUpdateOne) AddConnections(u ...*UserConnection) *UserUpdateOne {
 	return uuo.AddConnectionIDs(ids...)
 }
 
+// AddWidgetIDs adds the "widgets" edge to the WidgetSettings entity by IDs.
+func (uuo *UserUpdateOne) AddWidgetIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddWidgetIDs(ids...)
+	return uuo
+}
+
+// AddWidgets adds the "widgets" edges to the WidgetSettings entity.
+func (uuo *UserUpdateOne) AddWidgets(w ...*WidgetSettings) *UserUpdateOne {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.AddWidgetIDs(ids...)
+}
+
 // AddContentIDs adds the "content" edge to the UserContent entity by IDs.
 func (uuo *UserUpdateOne) AddContentIDs(ids ...string) *UserUpdateOne {
 	uuo.mutation.AddContentIDs(ids...)
@@ -783,6 +880,27 @@ func (uuo *UserUpdateOne) RemoveConnections(u ...*UserConnection) *UserUpdateOne
 		ids[i] = u[i].ID
 	}
 	return uuo.RemoveConnectionIDs(ids...)
+}
+
+// ClearWidgets clears all "widgets" edges to the WidgetSettings entity.
+func (uuo *UserUpdateOne) ClearWidgets() *UserUpdateOne {
+	uuo.mutation.ClearWidgets()
+	return uuo
+}
+
+// RemoveWidgetIDs removes the "widgets" edge to WidgetSettings entities by IDs.
+func (uuo *UserUpdateOne) RemoveWidgetIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveWidgetIDs(ids...)
+	return uuo
+}
+
+// RemoveWidgets removes "widgets" edges to WidgetSettings entities.
+func (uuo *UserUpdateOne) RemoveWidgets(w ...*WidgetSettings) *UserUpdateOne {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.RemoveWidgetIDs(ids...)
 }
 
 // ClearContent clears all "content" edges to the UserContent entity.
@@ -1056,6 +1174,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userconnection.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.WidgetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WidgetsTable,
+			Columns: []string{user.WidgetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(widgetsettings.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedWidgetsIDs(); len(nodes) > 0 && !uuo.mutation.WidgetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WidgetsTable,
+			Columns: []string{user.WidgetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(widgetsettings.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.WidgetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WidgetsTable,
+			Columns: []string{user.WidgetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(widgetsettings.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
