@@ -14,10 +14,11 @@ import (
 var globalLogoCacheMx sync.Mutex
 var globalLogoCache = make(map[color.Color]image.Image)
 
-func NewBrandedBackground(width, height int, colors []color.Color, hashSeed int) image.Image {
-	var logoSize = 30
-	var padding = 30
+func DefaultBrandedOverlay(colors []color.Color, seed int) image.Image {
+	return NewBrandedBackground(500, 500, 35, -35/2, colors, seed)
+}
 
+func NewBrandedBackground(width, height, logoSize, padding int, colors []color.Color, hashSeed int) image.Image {
 	// 2/3 of the image should be left for logos
 	rows := (height - padding*2) * 2 / 3 / logoSize
 	cols := (width - padding*2) * 2 / 3 / logoSize

@@ -35,6 +35,12 @@ func (c *staticTestingDatabase) GetAccounts(ctx context.Context, ids []string) (
 	for _, id := range ids {
 		if a, ok := staticAccounts[id]; ok {
 			accounts = append(accounts, a)
+		} else {
+			accounts = append(accounts, models.Account{
+				ID:       id,
+				Nickname: "some_account_" + id,
+				Realm:    "NA",
+			})
 		}
 	}
 	return accounts, nil
@@ -221,7 +227,10 @@ func (c *staticTestingDatabase) DeleteExpiredLeaderboardScores(ctx context.Conte
 }
 
 func (c *staticTestingDatabase) GetMap(ctx context.Context, id string) (types.Map, error) {
-	return types.Map{}, errors.New("GetMap not implemented")
+	return types.Map{
+		ID:             "1",
+		LocalizedNames: map[language.Tag]string{language.English: "Mock Map Name"},
+	}, nil
 }
 func (c *staticTestingDatabase) UpsertMaps(ctx context.Context, maps map[string]types.Map) error {
 	return errors.New("UpsertMaps not implemented")

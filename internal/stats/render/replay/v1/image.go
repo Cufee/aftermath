@@ -1,4 +1,4 @@
-package period
+package replay
 
 import (
 	"image"
@@ -6,28 +6,31 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/disintegration/imaging"
 )
 
-func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts ...common.Option) (image.Image, error) {
+func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option) (image.Image, error) {
 	o := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&o)
 	}
 
-	segments, err := generateCards(stats, cards, subs, o)
+	segments, err := generateCards(replay, cards, o)
 	if err != nil {
 		return nil, err
 	}
 
 	if o.Background != nil {
 		var accentColors []color.Color
-		for _, vehicle := range stats.RegularBattles.Vehicles {
-			c := common.GetWN8Colors(vehicle.WN8().Float()).Background
+		var wn8Values []float32
+		for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
+			wn8Values = append(wn8Values, player.Performance.WN8().Float())
+		}
+		for _, value := range wn8Values {
+			c := common.GetWN8Colors(value).Background
 			if _, _, _, a := c.RGBA(); a > 0 {
 				accentColors = append(accentColors, c)
 			}
@@ -36,7 +39,7 @@ func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs [
 			accentColors = common.DefaultLogoColorOptions
 		}
 
-		patternSeed, _ := strconv.Atoi(stats.Account.ID)
+		patternSeed, _ := strconv.Atoi(replay.Protagonist.ID)
 		if patternSeed == 0 {
 			patternSeed = int(time.Now().Unix())
 		}

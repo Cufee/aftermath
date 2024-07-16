@@ -3,7 +3,7 @@ package replay
 import (
 	"image/color"
 
-	"github.com/cufee/aftermath-core/internal/logic/render"
+	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/fogleman/gg"
 )
 
@@ -16,7 +16,7 @@ const (
 
 const progressBarWidth = 8
 
-func newProgressBar(size int, progress int, direction progressDirection, fillColor color.Color) render.Block {
+func newProgressBar(size int, progress int, direction progressDirection, fillColor color.Color) common.Block {
 	var width, height int
 	if direction == progressDirectionHorizontal {
 		width = (size)
@@ -42,7 +42,7 @@ func newProgressBar(size int, progress int, direction progressDirection, fillCol
 	}
 
 	if direction == progressDirectionHorizontal {
-		return render.NewImageContent(render.Style{Width: float64(size), Height: progressBarWidth}, ctx.Image())
+		return common.NewImageContent(common.Style{Width: float64(size), Height: progressBarWidth}, ctx.Image())
 	}
-	return render.NewImageContent(render.Style{Width: progressBarWidth, Height: float64(size)}, ctx.Image())
+	return common.NewImageContent(common.Style{Width: progressBarWidth, Height: float64(size)}, ctx.Image())
 }

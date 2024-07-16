@@ -443,12 +443,7 @@ func (c *multiSourceClient) ReplayRemote(ctx context.Context, fileURL string) (R
 	if err != nil {
 		return Replay{}, errors.Wrap(err, "failed to unpack a remote replay")
 	}
-	replay := replay.Prettify(unpacked.BattleResult, unpacked.Meta)
-	mapData, err := c.database.GetMap(ctx, replay.MapID)
-	if err != nil && !database.IsNotFound(err) {
-		return Replay{}, errors.Wrap(err, "failed to get map glossary")
-	}
-	return Replay{mapData, replay}, nil
+	return c.replay(ctx, unpacked)
 }
 
 func (c *multiSourceClient) Replay(ctx context.Context, file io.ReaderAt, size int64) (Replay, error) {
@@ -456,10 +451,18 @@ func (c *multiSourceClient) Replay(ctx context.Context, file io.ReaderAt, size i
 	if err != nil {
 		return Replay{}, errors.Wrap(err, "failed to unpack a remote replay")
 	}
+	return c.replay(ctx, unpacked)
+}
+
+func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.UnpackedReplay) (Replay, error) {
 	replay := replay.Prettify(unpacked.BattleResult, unpacked.Meta)
+
+	// var accounts []
+
 	mapData, err := c.database.GetMap(ctx, replay.MapID)
 	if err != nil && !database.IsNotFound(err) {
 		return Replay{}, errors.Wrap(err, "failed to get map glossary")
 	}
+
 	return Replay{mapData, replay}, nil
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
-	"github.com/fogleman/gg"
+	"github.com/disintegration/imaging"
 )
 
 func CardsToImage(session, career fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts ...common.Option) (image.Image, error) {
@@ -40,10 +40,8 @@ func CardsToImage(session, career fetch.AccountStatsOverPeriod, cards session.Ca
 		if patternSeed == 0 {
 			patternSeed = int(time.Now().Unix())
 		}
-		ctx := gg.NewContextForImage(o.Background)
-		overlay := common.NewBrandedBackground(ctx.Width(), ctx.Height(), accentColors, patternSeed)
-		ctx.DrawImage(overlay, 0, 0)
-		o.Background = ctx.Image()
+		overlay := common.DefaultBrandedOverlay(accentColors, patternSeed)
+		o.Background = imaging.OverlayCenter(o.Background, imaging.Fill(overlay, o.Background.Bounds().Dx(), o.Background.Bounds().Dy(), imaging.Center, imaging.Linear), 100)
 	}
 
 	return segments.Render(func(opt *common.Options) { opt.Background = o.Background })

@@ -1,13 +1,22 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"os"
+	"slices"
 	"testing"
 	"time"
 
+	"github.com/cufee/aftermath/internal/localization"
 	client "github.com/cufee/aftermath/internal/stats/client/v1"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
+	render "github.com/cufee/aftermath/internal/stats/render/replay/v1"
 	"github.com/cufee/aftermath/tests"
+	"github.com/disintegration/imaging"
+	"github.com/matryer/is"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/language"
@@ -129,6 +138,54 @@ func TestRenderPeriod(t *testing.T) {
 		defer f.Close()
 
 		err = image.PNG(f)
+		assert.NoError(t, err, "failed to encode a png image")
+	}
+}
+
+func TestRenderReplay(t *testing.T) {
+	is := is.New(t)
+
+	// Logger
+	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
+	zerolog.SetGlobalLevel(level)
+
+	loadStaticAssets(static)
+
+	printer, err := localization.NewPrinter("stats", language.English)
+	is.NoErr(err)
+
+	file, err := os.ReadFile("tests/replay_1.wotbreplay")
+	is.NoErr(err)
+
+	fetch, err := fetch.NewMultiSourceClient(nil, nil, tests.StaticTestingDatabase())
+	is.NoErr(err)
+
+	replay, err := fetch.Replay(context.Background(), bytes.NewReader(file), int64(len(file)))
+	is.NoErr(err)
+
+	var vehicles []string
+	for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
+		if id := player.VehicleID; !slices.Contains(vehicles, id) {
+			vehicles = append(vehicles, id)
+		}
+	}
+
+	glossary, err := tests.StaticTestingDatabase().GetVehicles(context.Background(), vehicles)
+	is.NoErr(err)
+
+	{
+		cards, err := prepare.NewCards(replay, glossary, common.WithPrinter(printer, language.English))
+		is.NoErr(err)
+
+		image, err := render.CardsToImage(replay, cards)
+		assert.NoError(t, err, "failed to render a replay image")
+		assert.NotNil(t, image, "image is nil")
+
+		f, err := os.Create("tmp/render_test_replay.png")
+		assert.NoError(t, err, "failed to create a file")
+		defer f.Close()
+
+		err = imaging.Save(image, "tmp/render_test_replay.png")
 		assert.NoError(t, err, "failed to encode a png image")
 	}
 }
