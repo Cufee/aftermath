@@ -41,7 +41,7 @@ func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs [
 			patternSeed = int(time.Now().Unix())
 		}
 		overlay := common.DefaultBrandedOverlay(accentColors, patternSeed)
-		o.Background = imaging.PasteCenter(o.Background, imaging.Fill(overlay, o.Background.Bounds().Dx(), o.Background.Bounds().Dy(), imaging.Center, imaging.Linear))
+		o.Background = imaging.OverlayCenter(o.Background, imaging.Fill(overlay, o.Background.Bounds().Dx(), o.Background.Bounds().Dy(), imaging.Center, imaging.Linear), 100)
 	}
 
 	return segments.Render(func(op *common.Options) { op.Background = o.Background })
