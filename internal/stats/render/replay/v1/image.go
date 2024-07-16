@@ -9,7 +9,6 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
-	"github.com/disintegration/imaging"
 )
 
 func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option) (image.Image, error) {
@@ -18,7 +17,7 @@ func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option
 		apply(&o)
 	}
 
-	segments, err := generateCards(replay, cards, o)
+	segments, err := generateCards(replay, cards)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +42,7 @@ func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option
 		if patternSeed == 0 {
 			patternSeed = int(time.Now().Unix())
 		}
-		overlay := common.DefaultBrandedOverlay(accentColors, patternSeed)
-		o.Background = imaging.OverlayCenter(o.Background, imaging.Fill(overlay, o.Background.Bounds().Dx(), o.Background.Bounds().Dy(), imaging.Center, imaging.Linear), 100)
+		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed)
 	}
 
 	return segments.Render(func(op *common.Options) { op.Background = o.Background })

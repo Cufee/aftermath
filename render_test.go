@@ -151,13 +151,16 @@ func TestRenderReplay(t *testing.T) {
 
 	loadStaticAssets(static)
 
+	db, err := newDatabaseClientFromEnv()
+	is.NoErr(err)
+
 	printer, err := localization.NewPrinter("stats", language.English)
 	is.NoErr(err)
 
 	file, err := os.ReadFile("tests/replay_1.wotbreplay")
 	is.NoErr(err)
 
-	fetch, err := fetch.NewMultiSourceClient(nil, nil, tests.StaticTestingDatabase())
+	fetch, err := fetch.NewMultiSourceClient(nil, nil, db)
 	is.NoErr(err)
 
 	replay, err := fetch.Replay(context.Background(), bytes.NewReader(file), int64(len(file)))
@@ -170,7 +173,7 @@ func TestRenderReplay(t *testing.T) {
 		}
 	}
 
-	glossary, err := tests.StaticTestingDatabase().GetVehicles(context.Background(), vehicles)
+	glossary, err := db.GetVehicles(context.Background(), vehicles)
 	is.NoErr(err)
 
 	{

@@ -14,14 +14,29 @@ import (
 var globalLogoCacheMx sync.Mutex
 var globalLogoCache = make(map[color.Color]image.Image)
 
+func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed int) image.Image {
+	source := rand.NewSource(int64(seed))
+	r := rand.New(source)
+	for i := range colors {
+		if r.Float32() > 0.5 {
+			colors[i] = TextSecondary
+		}
+	}
+
+	size := 20
+	overlay := NewBrandedBackground(background.Bounds().Dx()*2, background.Bounds().Dy()*2, size, size/2, colors, seed)
+	return imaging.OverlayCenter(background, overlay, 75)
+}
+
 func DefaultBrandedOverlay(colors []color.Color, seed int) image.Image {
-	return NewBrandedBackground(500, 500, 35, -35/2, colors, seed)
+	size := 15
+	return NewBrandedBackground(500, 500, size, -size/2, colors, seed)
 }
 
 func NewBrandedBackground(width, height, logoSize, padding int, colors []color.Color, hashSeed int) image.Image {
 	// 2/3 of the image should be left for logos
-	rows := (height - padding*2) * 2 / 3 / logoSize
-	cols := (width - padding*2) * 2 / 3 / logoSize
+	rows := Max((height-padding*2)*2/3/logoSize, 2)
+	cols := Max((width-padding*2)*2/3/logoSize, 2)
 	// the rest is gaps
 	xGapsTotal := width - padding*2 - (cols)*logoSize
 	yGapsTotal := height - padding*2 - (rows)*logoSize
@@ -57,9 +72,18 @@ func NewBrandedBackground(width, height, logoSize, padding int, colors []color.C
 			makeFn = append(makeFn, func() {
 				defer wg.Done()
 
-				clr := pickColor(c*logoSize, r*logoSize, colors, hashSeed)
-				scale := pickScaleFactor(c*logoSize, r*logoSize, hashSeed)
-				rotation := pickRotationRad(c*logoSize, r*logoSize, hashSeed)
+				posX := float64(padding + c*(logoSize+xGap))
+				posY := float64(padding + r*(logoSize+yGap))
+				source := rand.NewSource(int64(hashSeed) + int64(posX)*51 + int64(posY)*37)
+				rnd := rand.New(source)
+
+				if n := rnd.Float32(); n < 0.5 {
+					return
+				}
+
+				clr := pickColor(colors, rnd)
+				scale := pickScaleFactor(rnd)
+				rotation := pickRotationRad(rnd)
 
 				mx.Lock()
 				logo := getLogo(clr)
@@ -70,11 +94,12 @@ func NewBrandedBackground(width, height, logoSize, padding int, colors []color.C
 				logoAdjusted = imaging.Rotate(logoAdjusted, rotation, color.Transparent)
 				logoAdjusted = imaging.Resize(logoAdjusted, int(float64(logoSize)*scale), int(float64(logoSize)*scale), imaging.Linear)
 
-				posX := padding + c*(logoSize+xGap)
-				posY := padding + r*(logoSize+yGap)
+				xJ, yJ := pickPositionJitter(rnd)
+				posX += xJ
+				posY += yJ
 
 				mx.Lock()
-				ctx.DrawImage(logoAdjusted, posX, posY)
+				ctx.DrawImage(logoAdjusted, int(posX), int(posY))
 				mx.Unlock()
 			})
 		}
@@ -88,40 +113,32 @@ func NewBrandedBackground(width, height, logoSize, padding int, colors []color.C
 }
 
 // pickColor function that includes hashSeed in the hash calculation
-func pickColor(x, y int, colors []color.Color, hashSeed int) color.Color {
+func pickColor(colors []color.Color, r *rand.Rand) color.Color {
 	if len(colors) < 1 {
 		return color.White
 	}
-
-	// Create a new rand source with the hashSeed and pixel position
-	source := rand.NewSource(int64(hashSeed) + int64(x)*31 + int64(y)*37)
-	r := rand.New(source)
 
 	index := r.Intn(len(colors))
 	return colors[index]
 }
 
 // pickScaleFactor function that generates a scale factor clamped between 0.8 and 1.2, influenced by image size
-func pickScaleFactor(x, y, hashSeed int) float64 {
-	// Create a new rand source with the hashSeed and pixel position
-	source := rand.NewSource(int64(hashSeed) + int64(x)*31 + int64(y)*37)
-	r := rand.New(source)
-
-	// Generate a pseudo-random float between 0 and 1
-	randomValue := r.Float64()
-	// Clamp the scale factor between 0.8 and 1.2
-	scaleFactor := 0.8 + (randomValue * 0.4)
+func pickScaleFactor(r *rand.Rand) float64 {
+	// Clamp the scale factor between 0.5 and 1.5
+	scaleFactor := 0.5 + (r.Float64())
 	return scaleFactor
 }
 
-func pickRotationRad(x, y, hashSeed int) float64 {
-	// Create a new rand source with the hashSeed and pixel position
-	source := rand.NewSource(int64(hashSeed) + int64(x)*31 + int64(y)*37)
-	r := rand.New(source)
+// pickPositionJitter function that generates an x,y  position offset based on the hash seed
+func pickPositionJitter(r *rand.Rand) (float64, float64) {
+	// Clamp between 0.5 and 1.5
+	xJitter := -0.5 + r.Float64()
+	yJitter := -0.5 + r.Float64()
+	return xJitter, yJitter
+}
 
-	// Generate a pseudo-random float between 0 and 1
-	randomValue := r.Float64()
-	// Clamp the rotation angle between -4π and 4π radians
-	rotationRad := -4*math.Pi + (randomValue * (8 * math.Pi))
+func pickRotationRad(r *rand.Rand) float64 {
+	// Clamp the rotation angle between -2.5π and 2.5π radians
+	rotationRad := -2.5*math.Pi + (r.Float64() * (5 * math.Pi))
 	return rotationRad
 }

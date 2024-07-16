@@ -10,7 +10,6 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
-	"github.com/disintegration/imaging"
 )
 
 func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts ...common.Option) (image.Image, error) {
@@ -40,8 +39,7 @@ func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs [
 		if patternSeed == 0 {
 			patternSeed = int(time.Now().Unix())
 		}
-		overlay := common.DefaultBrandedOverlay(accentColors, patternSeed)
-		o.Background = imaging.OverlayCenter(o.Background, imaging.Fill(overlay, o.Background.Bounds().Dx(), o.Background.Bounds().Dy(), imaging.Center, imaging.Linear), 100)
+		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed)
 	}
 
 	return segments.Render(func(op *common.Options) { op.Background = o.Background })
