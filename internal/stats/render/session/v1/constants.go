@@ -140,28 +140,6 @@ func vehicleBlocksRowStyle(width float64) common.Style {
 	}
 }
 
-func ratingVehicleCardTitleContainerStyle() common.Style {
-	return common.Style{Direction: common.DirectionHorizontal, Gap: 10, JustifyContent: common.JustifyContentSpaceBetween}
-}
-func ratingVehicleCardTitleStyle() common.Style {
-	return common.Style{Font: common.FontMedium(), FontColor: common.TextSecondary, PaddingX: 5}
-}
-func ratingVehicleBlockStyle() blockStyle {
-	return blockStyle{
-		common.Style{Font: common.FontLarge(), FontColor: common.TextPrimary},
-		common.Style{Font: common.FontMedium(), FontColor: common.TextSecondary},
-		common.Style{Font: common.FontSmall(), FontColor: common.TextAlt},
-	}
-}
-
-func ratingVehicleCardStyle(width float64) common.Style {
-	return defaultCardStyle(width)
-}
-
-func ratingVehicleBlocksRowStyle(width float64) common.Style {
-	return vehicleBlocksRowStyle(width)
-}
-
 func highlightCardTitleTextStyle() common.Style {
 	return common.Style{Font: common.FontSmall(), FontColor: common.TextSecondary}
 }

@@ -22,7 +22,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		shouldRenderUnratedHighlights = (session.RegularBattles.Battles > 0 && session.RatingBattles.Battles < 1 && len(cards.Unrated.Vehicles) > renderUnratedVehiclesCount) ||
 			(session.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 3)
 		shouldRenderRatingOverview = session.RatingBattles.Battles > 0 && opts.VehicleID == ""
-		shouldRenderRatingVehicles = session.RatingBattles.Battles > 0 && len(cards.Rating.Vehicles) > 0 && len(cards.Unrated.Vehicles) < 1
 		// secondary cards
 		shouldRenderUnratedVehicles = session.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 0
 	)
@@ -33,9 +32,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	}
 	if shouldRenderRatingOverview {
 		renderUnratedVehiclesCount += 1
-	}
-	if shouldRenderRatingVehicles {
-		renderUnratedVehiclesCount += len(cards.Rating.Vehicles)
 	}
 
 	var segments common.Segments
@@ -103,21 +99,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		primaryCardWidth = common.Max(primaryCardWidth, totalContentWidth)
 	}
 
-	// rating vehicle cards go on the primary block - only show if there are no unrated battles/vehicles
-	if shouldRenderRatingVehicles {
-		for _, card := range cards.Rating.Vehicles {
-			style := ratingVehicleBlockStyle()
-			titleSize := common.MeasureString(card.Title, ratingVehicleCardTitleStyle().Font)
-			presetBlockWidth, contentWidth := vehicleBlocksWidth(card.Blocks, style.session, style.career, style.label, ratingVehicleBlocksRowStyle(0))
-			// add the gap and card padding, the gap here accounts for title being inline with content
-			contentWidth += ratingVehicleBlocksRowStyle(0).Gap*float64(len(card.Blocks)) + ratingVehicleCardStyle(0).PaddingX*2 + titleSize.TotalWidth
-
-			primaryCardWidth = common.Max(primaryCardWidth, contentWidth)
-			for key, width := range presetBlockWidth {
-				primaryCardBlockSizes[key] = common.Max(primaryCardBlockSizes[key], width)
-			}
-		}
-	}
 	// highlighted vehicles go on the primary block
 	if shouldRenderUnratedHighlights {
 		for _, card := range cards.Unrated.Highlights {
@@ -213,11 +194,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 			primaryColumn = append(primaryColumn, makeVehicleHighlightCard(vehicle, highlightCardBlockSizes, primaryCardWidth))
 		}
 	}
-	// rating vehicle cards
-	if shouldRenderRatingVehicles {
-		//
-	}
-
 	// unrated vehicles
 	if shouldRenderUnratedVehicles {
 		for i, vehicle := range cards.Unrated.Vehicles {
