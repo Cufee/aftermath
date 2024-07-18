@@ -84,11 +84,11 @@ templ QuickSettingButton(id string, widget models.WidgetOptions) {
 
 templ quickSettingButton(widgetID, fieldID string, enabled bool) {
 	<form
-		id={ fieldID + "_form" }
+		id={ fmt.Sprintf("%s_%s_form", widgetID, fieldID) }
 		class="flex grow basis-2/3 sm:basis-1/3 lg:basis-1/4 xl:basis-1/5 flex-nowrap"
 		hx-patch={ "/api/widget/custom/" + widgetID + "/action/?field=" + fieldID }
-		hx-select={ "#" + fieldID + "_form" }
-		hx-target={ "#" + fieldID + "_form" }
+		hx-select={ fmt.Sprintf("#%s_%s_form", widgetID, fieldID) }
+		hx-target={ fmt.Sprintf("#%s_%s_form", widgetID, fieldID) }
 		hx-swap="outerHTML"
 	>
 		<input id={ fieldID } name={ fieldID } type="text" value={ fmt.Sprint(!enabled) } class="hidden"/>
