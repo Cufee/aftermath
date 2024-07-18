@@ -2,7 +2,6 @@ package session
 
 import (
 	"fmt"
-	"math"
 	"slices"
 
 	"github.com/cufee/aftermath/internal/database/models"
@@ -147,24 +146,8 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	}
 
 	// Vehicle Highlights
-	periodDays := session.PeriodEnd.Sub(session.PeriodStart).Hours() / 24
-	withFallback := func(battles float64) float64 {
-		return math.Min(battles, float64(session.RegularBattles.Battles.Float())/float64(len(highlights)))
-	}
-	var minimumBattles float64 = withFallback(5)
-	if periodDays > 90 {
-		minimumBattles = withFallback(100)
-	} else if periodDays > 60 {
-		minimumBattles = withFallback(75)
-	} else if periodDays > 30 {
-		minimumBattles = withFallback(50)
-	} else if periodDays > 14 {
-		minimumBattles = withFallback(25)
-	} else if periodDays > 7 {
-		minimumBattles = withFallback(10)
-	}
-
-	highlightedVehicles, err := common.GetHighlightedVehicles(highlights, session.RegularBattles.Vehicles, int(minimumBattles))
+	minVehicleBattles := max(int(session.RegularBattles.Battles.Float())/len(session.RegularBattles.Vehicles)-1, 1)
+	highlightedVehicles, err := common.GetHighlightedVehicles(highlights, session.RegularBattles.Vehicles, minVehicleBattles)
 	if err != nil {
 		return Cards{}, err
 	}

@@ -31,6 +31,8 @@ func TestRenderSession(t *testing.T) {
 
 	loadStaticAssets(static)
 
+	bgImage := "static://bg-default"
+
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 
 	{
@@ -46,7 +48,7 @@ func TestRenderSession(t *testing.T) {
 		assert.NoError(t, err, "failed to encode a png image")
 	}
 	{
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL("static://bg-default"))
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -58,7 +60,7 @@ func TestRenderSession(t *testing.T) {
 		assert.NoError(t, err, "failed to encode a png image")
 	}
 	{
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL("static://bg-default"), client.WithVehicleID("0"))
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage), client.WithVehicleID("0"))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -70,7 +72,7 @@ func TestRenderSession(t *testing.T) {
 		assert.NoError(t, err, "failed to encode a png image")
 	}
 	{
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL("static://bg-default"), client.WithVehicleID("0"))
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage), client.WithVehicleID("0"))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -90,6 +92,8 @@ func TestRenderPeriod(t *testing.T) {
 
 	loadStaticAssets(static)
 
+	bgImage := "static://bg-default"
+
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 
 	{
@@ -105,7 +109,7 @@ func TestRenderPeriod(t *testing.T) {
 		assert.NoError(t, err, "failed to encode a png image")
 	}
 	{
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL("static://bg-default"))
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -117,7 +121,7 @@ func TestRenderPeriod(t *testing.T) {
 		assert.NoError(t, err, "failed to encode a png image")
 	}
 	{
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL("static://bg-default"), client.WithVehicleID("0"))
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage), client.WithVehicleID("0"))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -129,7 +133,7 @@ func TestRenderPeriod(t *testing.T) {
 		assert.NoError(t, err, "failed to encode a png image")
 	}
 	{
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithBackgroundURL("static://bg-default"), client.WithVehicleID("0"))
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithBackgroundURL(bgImage), client.WithVehicleID("0"))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
