@@ -33,6 +33,6 @@ func init() {
 					accountID = defaultAccount.ReferenceID
 				}
 
-				return ctx.Reply().Format("commands_widget_message_fmt", constants.FrontendURL+"/widget/"+accountID).Send()
+				return ctx.Reply().Format("commands_widget_message_fmt", constants.FrontendURL+"/widget/account/"+accountID).Send()
 			}))
 }

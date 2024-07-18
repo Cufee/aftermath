@@ -13220,7 +13220,7 @@ type WidgetSettingsMutation struct {
 	updated_at    *time.Time
 	reference_id  *string
 	title         *string
-	snapshot_id   *string
+	session_from  *time.Time
 	metadata      *map[string]interface{}
 	styles        *models.WidgetStyling
 	clearedFields map[string]struct{}
@@ -13528,53 +13528,53 @@ func (m *WidgetSettingsMutation) ResetUserID() {
 	m.user = nil
 }
 
-// SetSnapshotID sets the "snapshot_id" field.
-func (m *WidgetSettingsMutation) SetSnapshotID(s string) {
-	m.snapshot_id = &s
+// SetSessionFrom sets the "session_from" field.
+func (m *WidgetSettingsMutation) SetSessionFrom(t time.Time) {
+	m.session_from = &t
 }
 
-// SnapshotID returns the value of the "snapshot_id" field in the mutation.
-func (m *WidgetSettingsMutation) SnapshotID() (r string, exists bool) {
-	v := m.snapshot_id
+// SessionFrom returns the value of the "session_from" field in the mutation.
+func (m *WidgetSettingsMutation) SessionFrom() (r time.Time, exists bool) {
+	v := m.session_from
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSnapshotID returns the old "snapshot_id" field's value of the WidgetSettings entity.
+// OldSessionFrom returns the old "session_from" field's value of the WidgetSettings entity.
 // If the WidgetSettings object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WidgetSettingsMutation) OldSnapshotID(ctx context.Context) (v string, err error) {
+func (m *WidgetSettingsMutation) OldSessionFrom(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSnapshotID is only allowed on UpdateOne operations")
+		return v, errors.New("OldSessionFrom is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSnapshotID requires an ID field in the mutation")
+		return v, errors.New("OldSessionFrom requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSnapshotID: %w", err)
+		return v, fmt.Errorf("querying old value for OldSessionFrom: %w", err)
 	}
-	return oldValue.SnapshotID, nil
+	return oldValue.SessionFrom, nil
 }
 
-// ClearSnapshotID clears the value of the "snapshot_id" field.
-func (m *WidgetSettingsMutation) ClearSnapshotID() {
-	m.snapshot_id = nil
-	m.clearedFields[widgetsettings.FieldSnapshotID] = struct{}{}
+// ClearSessionFrom clears the value of the "session_from" field.
+func (m *WidgetSettingsMutation) ClearSessionFrom() {
+	m.session_from = nil
+	m.clearedFields[widgetsettings.FieldSessionFrom] = struct{}{}
 }
 
-// SnapshotIDCleared returns if the "snapshot_id" field was cleared in this mutation.
-func (m *WidgetSettingsMutation) SnapshotIDCleared() bool {
-	_, ok := m.clearedFields[widgetsettings.FieldSnapshotID]
+// SessionFromCleared returns if the "session_from" field was cleared in this mutation.
+func (m *WidgetSettingsMutation) SessionFromCleared() bool {
+	_, ok := m.clearedFields[widgetsettings.FieldSessionFrom]
 	return ok
 }
 
-// ResetSnapshotID resets all changes to the "snapshot_id" field.
-func (m *WidgetSettingsMutation) ResetSnapshotID() {
-	m.snapshot_id = nil
-	delete(m.clearedFields, widgetsettings.FieldSnapshotID)
+// ResetSessionFrom resets all changes to the "session_from" field.
+func (m *WidgetSettingsMutation) ResetSessionFrom() {
+	m.session_from = nil
+	delete(m.clearedFields, widgetsettings.FieldSessionFrom)
 }
 
 // SetMetadata sets the "metadata" field.
@@ -13726,8 +13726,8 @@ func (m *WidgetSettingsMutation) Fields() []string {
 	if m.user != nil {
 		fields = append(fields, widgetsettings.FieldUserID)
 	}
-	if m.snapshot_id != nil {
-		fields = append(fields, widgetsettings.FieldSnapshotID)
+	if m.session_from != nil {
+		fields = append(fields, widgetsettings.FieldSessionFrom)
 	}
 	if m.metadata != nil {
 		fields = append(fields, widgetsettings.FieldMetadata)
@@ -13753,8 +13753,8 @@ func (m *WidgetSettingsMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case widgetsettings.FieldUserID:
 		return m.UserID()
-	case widgetsettings.FieldSnapshotID:
-		return m.SnapshotID()
+	case widgetsettings.FieldSessionFrom:
+		return m.SessionFrom()
 	case widgetsettings.FieldMetadata:
 		return m.Metadata()
 	case widgetsettings.FieldStyles:
@@ -13778,8 +13778,8 @@ func (m *WidgetSettingsMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldTitle(ctx)
 	case widgetsettings.FieldUserID:
 		return m.OldUserID(ctx)
-	case widgetsettings.FieldSnapshotID:
-		return m.OldSnapshotID(ctx)
+	case widgetsettings.FieldSessionFrom:
+		return m.OldSessionFrom(ctx)
 	case widgetsettings.FieldMetadata:
 		return m.OldMetadata(ctx)
 	case widgetsettings.FieldStyles:
@@ -13828,12 +13828,12 @@ func (m *WidgetSettingsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUserID(v)
 		return nil
-	case widgetsettings.FieldSnapshotID:
-		v, ok := value.(string)
+	case widgetsettings.FieldSessionFrom:
+		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSnapshotID(v)
+		m.SetSessionFrom(v)
 		return nil
 	case widgetsettings.FieldMetadata:
 		v, ok := value.(map[string]interface{})
@@ -13882,8 +13882,8 @@ func (m *WidgetSettingsMutation) ClearedFields() []string {
 	if m.FieldCleared(widgetsettings.FieldTitle) {
 		fields = append(fields, widgetsettings.FieldTitle)
 	}
-	if m.FieldCleared(widgetsettings.FieldSnapshotID) {
-		fields = append(fields, widgetsettings.FieldSnapshotID)
+	if m.FieldCleared(widgetsettings.FieldSessionFrom) {
+		fields = append(fields, widgetsettings.FieldSessionFrom)
 	}
 	return fields
 }
@@ -13902,8 +13902,8 @@ func (m *WidgetSettingsMutation) ClearField(name string) error {
 	case widgetsettings.FieldTitle:
 		m.ClearTitle()
 		return nil
-	case widgetsettings.FieldSnapshotID:
-		m.ClearSnapshotID()
+	case widgetsettings.FieldSessionFrom:
+		m.ClearSessionFrom()
 		return nil
 	}
 	return fmt.Errorf("unknown WidgetSettings nullable field %s", name)
@@ -13928,8 +13928,8 @@ func (m *WidgetSettingsMutation) ResetField(name string) error {
 	case widgetsettings.FieldUserID:
 		m.ResetUserID()
 		return nil
-	case widgetsettings.FieldSnapshotID:
-		m.ResetSnapshotID()
+	case widgetsettings.FieldSessionFrom:
+		m.ResetSessionFrom()
 		return nil
 	case widgetsettings.FieldMetadata:
 		m.ResetMetadata()

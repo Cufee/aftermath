@@ -710,7 +710,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "title", Type: field.TypeString, Nullable: true},
-		{Name: "snapshot_id", Type: field.TypeString, Nullable: true},
+		{Name: "session_from", Type: field.TypeTime, Nullable: true},
 		{Name: "metadata", Type: field.TypeJSON},
 		{Name: "styles", Type: field.TypeJSON},
 		{Name: "user_id", Type: field.TypeString},

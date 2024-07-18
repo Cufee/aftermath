@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/cufee/aftermath/cmd/frontend/components/connections"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
-	"github.com/cufee/aftermath/cmd/frontend/routes/app"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 )
@@ -57,11 +57,11 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 		}
 	}
 	var ids []string
-	if previous.ID != "" {
-		ids = append(ids, previous.ID)
+	if previous.ReferenceID != "" {
+		ids = append(ids, previous.ReferenceID)
 	}
-	if updated.ID != "" {
-		ids = append(ids, previous.ID)
+	if updated.ReferenceID != "" {
+		ids = append(ids, updated.ReferenceID)
 	}
 	if len(ids) < 1 {
 		ctx.SetStatus(http.StatusNotFound)
@@ -73,27 +73,27 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 		return nil, ctx.Error(err, "failed to find connected accounts")
 	}
 
-	var withProps []app.ConnectionWithAccount
+	var withProps []connections.ConnectionWithAccount
 	for _, a := range accounts {
+		println(previous.ID, updated.ID, a.ID)
 		if previous.ReferenceID == a.ID {
-			withProps = append(withProps, app.ConnectionWithAccount{
+			withProps = append(withProps, connections.ConnectionWithAccount{
 				UserConnection: previous,
 				Account:        a,
 			})
 		}
 		if updated.ReferenceID == a.ID {
-			withProps = append(withProps, app.ConnectionWithAccount{
+			withProps = append(withProps, connections.ConnectionWithAccount{
 				UserConnection: updated,
 				Account:        a,
 			})
 		}
 	}
-
-	return nil, nil
+	return updatedConnections(withProps, updated.ID), nil
 }
 
-templ updatedConnections(connections []app.ConnectionWithAccount) {
-	for _, c := range connections {
-		@app.ConnectionCard(c)
+templ updatedConnections(conns []connections.ConnectionWithAccount, defaultID string) {
+	for _, c := range conns {
+		@connections.ConnectionCard(c, defaultID)
 	}
 }

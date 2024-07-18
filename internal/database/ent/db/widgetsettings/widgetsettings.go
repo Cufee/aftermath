@@ -24,8 +24,8 @@ const (
 	FieldTitle = "title"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldSnapshotID holds the string denoting the snapshot_id field in the database.
-	FieldSnapshotID = "snapshot_id"
+	// FieldSessionFrom holds the string denoting the session_from field in the database.
+	FieldSessionFrom = "session_from"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
 	// FieldStyles holds the string denoting the styles field in the database.
@@ -51,7 +51,7 @@ var Columns = []string{
 	FieldReferenceID,
 	FieldTitle,
 	FieldUserID,
-	FieldSnapshotID,
+	FieldSessionFrom,
 	FieldMetadata,
 	FieldStyles,
 }
@@ -110,9 +110,9 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
-// BySnapshotID orders the results by the snapshot_id field.
-func BySnapshotID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSnapshotID, opts...).ToFunc()
+// BySessionFrom orders the results by the session_from field.
+func BySessionFrom(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSessionFrom, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

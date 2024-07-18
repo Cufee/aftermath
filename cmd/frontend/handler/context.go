@@ -68,6 +68,12 @@ func (ctx *Context) Path(key string) string {
 func (ctx *Context) URL() *url.URL {
 	return ctx.r.URL
 }
+func (ctx *Context) SetHeader(key, value string) {
+	ctx.r.Header.Set(key, value)
+}
+func (ctx *Context) GetHeader(key string) string {
+	return ctx.r.Header.Get(key)
+}
 func (ctx *Context) RealIP() (string, bool) {
 	if ip := ctx.r.Header.Get("X-Forwarded-For"); ip != "" {
 		return ip, true
@@ -162,12 +168,13 @@ func (ctx *Context) Error(err error, context ...string) error {
 		query.Set("message", strings.Join(context, ", "))
 	}
 
-	http.Redirect(ctx.w, ctx.r, "/error?"+query.Encode(), http.StatusTemporaryRedirect)
+	ctx.Redirect("/error?"+query.Encode(), http.StatusTemporaryRedirect)
 	return nil // this would never cause an error
 }
 
 func (ctx *Context) Redirect(path string, code int) error {
 	http.Redirect(ctx.w, ctx.r, path, code)
+	ctx.r.Header.Set("HX-Redirect", path)
 	return nil // this would never cause an error
 }
 

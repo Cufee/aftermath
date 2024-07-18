@@ -1,0 +1,29 @@
+package widgets 
+
+import (
+	"github.com/cufee/aftermath/cmd/frontend/components/widget"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"github.com/cufee/aftermath/internal/database/models"
+)
+
+var NewCustom handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	return layouts.Main, newWidgetPage(widget.WidgetWithAccount{WidgetOptions: models.WidgetOptions{Style: models.DefaultWidgetStyle}}), nil
+}
+
+templ newWidgetPage(options widget.WidgetWithAccount) {
+	<div class="flex flex-col gap-4 basis-1/2 grow items-center">
+		<div class="flex justify-center w-full">
+			@widget.CustomOptionsForm(options, newWidgetCreate(), templ.Attributes{
+				"hx-swap":   "outerHTML",
+				"hx-target": "#form-content",
+				"hx-select": "#form-content",
+				"hx-post":   "/api/widget/custom",
+			})
+		</div>
+	</div>
+}
+
+templ newWidgetCreate() {
+	<button type="submit" class="btn btn-primary" disabled>Create</button>
+}

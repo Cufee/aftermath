@@ -18,7 +18,7 @@ func (WidgetSettings) Fields() []ent.Field {
 		field.String("reference_id"),
 		field.String("title").Optional(),
 		field.String("user_id").Immutable(),
-		field.String("snapshot_id").Optional(),
+		field.Time("session_from").Optional(),
 		field.JSON("metadata", map[string]any{}),
 		field.JSON("styles", models.WidgetStyling{}),
 	)

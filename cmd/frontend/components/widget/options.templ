@@ -1,0 +1,135 @@
+package widget
+
+import (
+	"fmt"
+	"github.com/cufee/aftermath/cmd/frontend/components"
+)
+
+var initFormScripts = templ.NewOnceHandle()
+
+templ Settings(onChange templ.ComponentScript, or, ou bool, vl int) {
+	<div class="form-control flex gap-2">
+		<div class="flex flex-col bg-base-200 rounded-lg p-4">
+			<span class="text-lg">Rating Battles</span>
+			<label class="label group">
+				<span class="label-text group-hover:underline">Show Overview Card</span>
+				<input id="widget-settings-or" type="checkbox" class="toggle toggle-secondary transition-all duration-250 ease-in-out" checked?={ or } onchange={ onChange }/>
+			</label>
+		</div>
+		<div class="flex flex-col bg-base-200 rounded-lg p-4">
+			<span class="text-lg">Regular Battles</span>
+			<label class="label group">
+				<span class="label-text group-hover:underline">Show Overview Card</span>
+				<input id="widget-settings-ou" type="checkbox" class="toggle toggle-secondary transition-all duration-250 ease-in-out" checked?={ ou } onchange={ onChange }/>
+			</label>
+			<label class="label flex flex-col items-start gap-1 group">
+				<span class="label-text group-hover:underline">Vehicle Cards</span>
+				<input id="widget-settings-vl" type="range" min="0" max="10" value={ fmt.Sprint(vl) } class="range" step="1" onchange={ onChange }/>
+				<div class="flex w-full justify-between px-2 text-xs">
+					for i := range 11 {
+						<div class="flex flex-col items-center">
+							<span>{ fmt.Sprint(i) }</span>
+						</div>
+					}
+				</div>
+			</label>
+		</div>
+	</div>
+}
+
+func CustomOptionsForm(options WidgetWithAccount, submit templ.Component, attrs templ.Attributes) templ.Component {
+	search := components.PlayerSearch{RealmSelect: "#account_realm", SearchResults: "#search_results", NicknameInput: "#account_nickname", AccountIDInput: "#account_id"}
+	return customOptionsForm(search, options, submit, attrs)
+}
+
+templ customOptionsForm(search components.PlayerSearch, options WidgetWithAccount, submit templ.Component, attrs templ.Attributes) {
+	<form
+		id="widget-style-settings"
+		class="form-control flex gap-2 max-w-2xl w-full"
+		{ attrs... }
+	>
+		<div id="form-content" class="flex flex-col gap-2">
+			<div class="indicator flex flex-col bg-base-200 rounded-lg p-4 w-full">
+				<div class="indicator-item indicator-start change-indicator h-2 w-2 bg-info rounded-full m-1 hidden"></div>
+				<input id="widget_title" type="text" class="input input-bordered w-full" name="widget_title" data-current={ options.Title } value={ options.Title } placeholder="Widget Name" oninput="window['amthChangeWithIndicator']('widget_title', this)"/>
+				<div class="label">
+					<span class="label-text-alt">Only visible in settings</span>
+				</div>
+			</div>
+			<div class="indicator flex flex-col bg-base-200 rounded-lg p-4 w-full">
+				<div id="account_id_indicator" class="indicator-item indicator-start change-indicator h-2 w-2 bg-info rounded-full m-1 hidden"></div>
+				<div class="flex flex-row flex-wrap gap-2">
+					<select id="account_realm" name="realm" class="select select-bordered grow" value={ options.Account.Realm } onchange={ search.OnRealmSelect() }>
+						@search.RealmOptions(options.Account.Realm)
+					</select>
+					<div class="dropdown dropdown-top grow">
+						<input id="account_id" type="text" name="account_id" class="hidden" data-current={ options.Account.ID } value={ options.Account.ID } disabled/>
+						<input id="account_nickname" type="text" placeholder="Nickname" name="nickname" class="join-item input input-bordered w-full" value={ options.Account.Nickname } disabled?={ options.Account.ID == "" } oninput={ search.OnNicknameInput() } onchange="window['amthChangeWithIndicator']('account_id', this, '#account_id_indicator')"/>
+						<ul hx-boost="true" id="search_results" tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-t-box flex-nowrap overflow-auto w-full">
+							<span class="text-xs text-center cursor-default">Start typing to search</span>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="flex flex-col bg-base-200 rounded-lg p-4">
+				<span class="text-lg">Rating Battles</span>
+				<label class="label py-0 group">
+					<span class="label-text group-hover:underline flex flex-row gap-1 items-center">Show Overview Card <div class="h-1.5 w-1.5 bg-info rounded-full change-indicator hidden"></div></span>
+					<input class="hidden" id="rating_overview" type="text" name="rating_overview" data-current={ fmt.Sprint(options.Style.RatingOverview.Visible) } value={ fmt.Sprint(options.Style.RatingOverview.Visible) }/>
+					<input type="checkbox" class="toggle toggle-secondary transition-all duration-250 ease-in-out" name="rating_overview_check" value={ fmt.Sprint(options.Style.RatingOverview.Visible) } checked?={ options.Style.RatingOverview.Visible } onchange="window['amthChangeWithIndicator']('rating_overview', this)"/>
+				</label>
+			</div>
+			<div class="flex flex-col bg-base-200 gap-1 rounded-lg p-4">
+				<span class="text-lg">Regular Battles</span>
+				<label class="label py-0 group">
+					<span class="label-text group-hover:underline flex flex-row gap-1 items-center">Show Overview Card <div class="h-1.5 w-1.5 bg-info rounded-full change-indicator hidden"></div></span>
+					<input class="hidden" id="unrated_overview" type="text" name="unrated_overview" data-current={ fmt.Sprint(options.Style.UnratedOverview.Visible) } value={ fmt.Sprint(options.Style.UnratedOverview.Visible) }/>
+					<input type="checkbox" class="toggle toggle-secondary transition-all duration-250 ease-in-out" name="unrated_overview_check" value={ fmt.Sprint(options.Style.UnratedOverview.Visible) } checked?={ options.Style.UnratedOverview.Visible } onchange="window['amthChangeWithIndicator']('unrated_overview', this);"/>
+				</label>
+				<label class="label py-0 group">
+					<span class="label-text group-hover:underline flex flex-row gap-1 items-center">Show Vehicle Cards <div class="h-1.5 w-1.5 bg-info rounded-full change-indicator hidden"></div></span>
+					<input class="hidden" id="unrated_vehicles" type="text" name="unrated_vehicles" data-current={ fmt.Sprint(options.Style.Vehicles.Visible) } value={ fmt.Sprint(options.Style.Vehicles.Visible) }/>
+					<input type="checkbox" class="toggle toggle-secondary transition-all duration-250 ease-in-out" name="unrated_vehicles_check" value={ fmt.Sprint(options.Style.Vehicles.Visible) } checked?={ options.Style.Vehicles.Visible } onchange="window['amthChangeWithIndicator']('unrated_vehicles', this);"/>
+				</label>
+				<label class="label py-0 flex flex-col items-start gap-1 group">
+					<span class="label-text group-hover:underline flex flex-row gap-1 items-center">Vehicle Cards <div class="h-1.5 w-1.5 bg-info rounded-full change-indicator hidden"></div></span>
+					<input id="vehicle_limit" type="range" min="0" max="10" data-current={ fmt.Sprint(options.Style.Vehicles.Limit) } value={ fmt.Sprint(options.Style.Vehicles.Limit) } class="range" step="1" name="vehicle_limit" onchange="window['amthChangeWithIndicator']('vehicle_limit', this)"/>
+					<div class="flex w-full justify-between px-2 text-xs">
+						for i := range 11 {
+							<div class="flex flex-col items-center">
+								<span>{ fmt.Sprint(i) }</span>
+							</div>
+						}
+					</div>
+				</label>
+			</div>
+		</div>
+		<div id="widget-options-form" class="flex justify-center">
+			@submit
+		</div>
+	</form>
+	@search.Scripts()
+	@initFormScripts.Once() {
+		<script type="text/javascript">
+			window["amthWidgetOptions"] = {}
+			window["amthChangeWithIndicator"] = (valueId, emitter, indicatorSelector) => {
+				const element = document.getElementById(valueId);
+				if (emitter) {
+					element.value = emitter.type == "checkbox" ? emitter.checked : emitter.value;
+				}
+
+				const indicator = indicatorSelector ? document.querySelector(indicatorSelector) : element.parentElement.querySelector(".change-indicator");
+				if (element.dataset.current != element.value) {
+					window["amthWidgetOptions"][valueId] = true
+					indicator?.classList.remove("hidden");
+				} else {
+					delete window["amthWidgetOptions"][valueId]
+					indicator?.classList.add("hidden");
+				}
+
+				const formSubmit = document.getElementById('widget-options-form')
+				formSubmit.querySelector("button[type=submit]").disabled = Object.keys(window["amthWidgetOptions"]).length==0;
+			}
+		</script>
+	}
+}

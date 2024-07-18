@@ -90,9 +90,9 @@ func UserID(v string) predicate.WidgetSettings {
 	return predicate.WidgetSettings(sql.FieldEQ(FieldUserID, v))
 }
 
-// SnapshotID applies equality check predicate on the "snapshot_id" field. It's identical to SnapshotIDEQ.
-func SnapshotID(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldEQ(FieldSnapshotID, v))
+// SessionFrom applies equality check predicate on the "session_from" field. It's identical to SessionFromEQ.
+func SessionFrom(v time.Time) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldEQ(FieldSessionFrom, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -380,79 +380,54 @@ func UserIDContainsFold(v string) predicate.WidgetSettings {
 	return predicate.WidgetSettings(sql.FieldContainsFold(FieldUserID, v))
 }
 
-// SnapshotIDEQ applies the EQ predicate on the "snapshot_id" field.
-func SnapshotIDEQ(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldEQ(FieldSnapshotID, v))
+// SessionFromEQ applies the EQ predicate on the "session_from" field.
+func SessionFromEQ(v time.Time) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldEQ(FieldSessionFrom, v))
 }
 
-// SnapshotIDNEQ applies the NEQ predicate on the "snapshot_id" field.
-func SnapshotIDNEQ(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldNEQ(FieldSnapshotID, v))
+// SessionFromNEQ applies the NEQ predicate on the "session_from" field.
+func SessionFromNEQ(v time.Time) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldNEQ(FieldSessionFrom, v))
 }
 
-// SnapshotIDIn applies the In predicate on the "snapshot_id" field.
-func SnapshotIDIn(vs ...string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldIn(FieldSnapshotID, vs...))
+// SessionFromIn applies the In predicate on the "session_from" field.
+func SessionFromIn(vs ...time.Time) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldIn(FieldSessionFrom, vs...))
 }
 
-// SnapshotIDNotIn applies the NotIn predicate on the "snapshot_id" field.
-func SnapshotIDNotIn(vs ...string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldNotIn(FieldSnapshotID, vs...))
+// SessionFromNotIn applies the NotIn predicate on the "session_from" field.
+func SessionFromNotIn(vs ...time.Time) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldNotIn(FieldSessionFrom, vs...))
 }
 
-// SnapshotIDGT applies the GT predicate on the "snapshot_id" field.
-func SnapshotIDGT(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldGT(FieldSnapshotID, v))
+// SessionFromGT applies the GT predicate on the "session_from" field.
+func SessionFromGT(v time.Time) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldGT(FieldSessionFrom, v))
 }
 
-// SnapshotIDGTE applies the GTE predicate on the "snapshot_id" field.
-func SnapshotIDGTE(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldGTE(FieldSnapshotID, v))
+// SessionFromGTE applies the GTE predicate on the "session_from" field.
+func SessionFromGTE(v time.Time) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldGTE(FieldSessionFrom, v))
 }
 
-// SnapshotIDLT applies the LT predicate on the "snapshot_id" field.
-func SnapshotIDLT(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldLT(FieldSnapshotID, v))
+// SessionFromLT applies the LT predicate on the "session_from" field.
+func SessionFromLT(v time.Time) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldLT(FieldSessionFrom, v))
 }
 
-// SnapshotIDLTE applies the LTE predicate on the "snapshot_id" field.
-func SnapshotIDLTE(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldLTE(FieldSnapshotID, v))
+// SessionFromLTE applies the LTE predicate on the "session_from" field.
+func SessionFromLTE(v time.Time) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldLTE(FieldSessionFrom, v))
 }
 
-// SnapshotIDContains applies the Contains predicate on the "snapshot_id" field.
-func SnapshotIDContains(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldContains(FieldSnapshotID, v))
+// SessionFromIsNil applies the IsNil predicate on the "session_from" field.
+func SessionFromIsNil() predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldIsNull(FieldSessionFrom))
 }
 
-// SnapshotIDHasPrefix applies the HasPrefix predicate on the "snapshot_id" field.
-func SnapshotIDHasPrefix(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldHasPrefix(FieldSnapshotID, v))
-}
-
-// SnapshotIDHasSuffix applies the HasSuffix predicate on the "snapshot_id" field.
-func SnapshotIDHasSuffix(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldHasSuffix(FieldSnapshotID, v))
-}
-
-// SnapshotIDIsNil applies the IsNil predicate on the "snapshot_id" field.
-func SnapshotIDIsNil() predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldIsNull(FieldSnapshotID))
-}
-
-// SnapshotIDNotNil applies the NotNil predicate on the "snapshot_id" field.
-func SnapshotIDNotNil() predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldNotNull(FieldSnapshotID))
-}
-
-// SnapshotIDEqualFold applies the EqualFold predicate on the "snapshot_id" field.
-func SnapshotIDEqualFold(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldEqualFold(FieldSnapshotID, v))
-}
-
-// SnapshotIDContainsFold applies the ContainsFold predicate on the "snapshot_id" field.
-func SnapshotIDContainsFold(v string) predicate.WidgetSettings {
-	return predicate.WidgetSettings(sql.FieldContainsFold(FieldSnapshotID, v))
+// SessionFromNotNil applies the NotNil predicate on the "session_from" field.
+func SessionFromNotNil() predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldNotNull(FieldSessionFrom))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

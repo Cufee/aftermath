@@ -1,0 +1,81 @@
+package widgets
+
+import (
+	"errors"
+	"github.com/cufee/aftermath/cmd/frontend/components/widget"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"github.com/cufee/aftermath/internal/database"
+	"net/http"
+)
+
+var EditSettings handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	user, err := ctx.SessionUser()
+	if err != nil {
+		return nil, nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
+	}
+
+	widgetID := ctx.Path("widgetId")
+	if widgetID == "" {
+		return nil, nil, ctx.Redirect("/app", http.StatusMovedPermanently)
+	}
+
+	options, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
+	if err != nil {
+		if database.IsNotFound(err) {
+			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
+		}
+		return nil, nil, ctx.Error(err, "failed to get widget settings")
+	}
+	if options.UserID != user.ID {
+		return nil, nil, ctx.Redirect("/app", http.StatusNotFound)
+	}
+	if options.AccountID == "" {
+		return nil, nil, ctx.Error(errors.New("widget has no account id"), "bad widget settings, missing account id")
+	}
+
+	account, err := ctx.Database().GetAccountByID(ctx.Context, options.AccountID)
+	if err != nil {
+		if database.IsNotFound(err) {
+			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
+		}
+		return nil, nil, errors.New("invalid account id")
+	}
+
+	return layouts.Main, widgetConfiguratorPage(widget.WidgetWithAccount{options, account}), nil
+}
+
+templ widgetConfiguratorPage(options widget.WidgetWithAccount) {
+	<div class="flex flex-col gap-4 basis-1/2 grow items-center">
+		<div class="flex flex-col gap-2 text-center">
+			<div role="alert" class="alert alert-warning max-w-2xl">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+					></path>
+				</svg>
+				<span>Changes will be applied to the live widget shortly after saving!</span>
+			</div>
+		</div>
+		<div class="flex justify-center w-full">
+			@widget.CustomOptionsForm(options, widgetOptionsSave(), templ.Attributes{
+				"hx-swap":   "outerHTML",
+				"hx-target": "#form-content",
+				"hx-select": "#form-content",
+				"hx-patch":  "/api/widget/custom/" + options.ID,
+			})
+		</div>
+	</div>
+}
+
+templ widgetOptionsSave() {
+	<button type="submit" class="btn btn-info" disabled>Save and Apply</button>
+}

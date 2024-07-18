@@ -30,8 +30,8 @@ type WidgetSettings struct {
 	Title string `json:"title,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
-	// SnapshotID holds the value of the "snapshot_id" field.
-	SnapshotID string `json:"snapshot_id,omitempty"`
+	// SessionFrom holds the value of the "session_from" field.
+	SessionFrom time.Time `json:"session_from,omitempty"`
 	// Metadata holds the value of the "metadata" field.
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// Styles holds the value of the "styles" field.
@@ -69,9 +69,9 @@ func (*WidgetSettings) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case widgetsettings.FieldMetadata, widgetsettings.FieldStyles:
 			values[i] = new([]byte)
-		case widgetsettings.FieldID, widgetsettings.FieldReferenceID, widgetsettings.FieldTitle, widgetsettings.FieldUserID, widgetsettings.FieldSnapshotID:
+		case widgetsettings.FieldID, widgetsettings.FieldReferenceID, widgetsettings.FieldTitle, widgetsettings.FieldUserID:
 			values[i] = new(sql.NullString)
-		case widgetsettings.FieldCreatedAt, widgetsettings.FieldUpdatedAt:
+		case widgetsettings.FieldCreatedAt, widgetsettings.FieldUpdatedAt, widgetsettings.FieldSessionFrom:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -124,11 +124,11 @@ func (ws *WidgetSettings) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ws.UserID = value.String
 			}
-		case widgetsettings.FieldSnapshotID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field snapshot_id", values[i])
+		case widgetsettings.FieldSessionFrom:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field session_from", values[i])
 			} else if value.Valid {
-				ws.SnapshotID = value.String
+				ws.SessionFrom = value.Time
 			}
 		case widgetsettings.FieldMetadata:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -202,8 +202,8 @@ func (ws *WidgetSettings) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(ws.UserID)
 	builder.WriteString(", ")
-	builder.WriteString("snapshot_id=")
-	builder.WriteString(ws.SnapshotID)
+	builder.WriteString("session_from=")
+	builder.WriteString(ws.SessionFrom.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", ws.Metadata))

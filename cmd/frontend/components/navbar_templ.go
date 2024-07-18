@@ -65,7 +65,7 @@ func navbar(props navbarProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if !strings.HasPrefix(props.path, "/widget") {
+		if !strings.HasPrefix(props.path, "/widget") && !strings.HasPrefix(props.path, "/app") {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"form-control\"><input type=\"text\" placeholder=\"Search Players\" class=\"input input-bordered w-48 md:w-auto placeholder:text-center\" disabled></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -352,9 +352,11 @@ func navProgressAnimated(...templ.Component) templ.Component {
 
 func animateNavProgress() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_animateNavProgress_7b6b`,
-		Function: `function __templ_animateNavProgress_7b6b(){const progressBar = document.getElementById('nav-progress');
+		Name: `__templ_animateNavProgress_651c`,
+		Function: `function __templ_animateNavProgress_651c(){const progressBar = document.getElementById('nav-progress');
 	const progressBaseStep = 5;
+	
+	let stopAnimation;
 
 	const progressRandomStep = () => {
 		return Math.floor(progressBaseStep * Math.random()) + progressBaseStep;
@@ -375,6 +377,7 @@ func animateNavProgress() templ.ComponentScript {
 			stopAnimation = null;
 		}
 	}
+	resetProgress();
 
 	document.body.addEventListener('load', resetProgress);
 	document.body.addEventListener('popstate', resetProgress);
@@ -395,7 +398,6 @@ func animateNavProgress() templ.ComponentScript {
 		}
 	});
 
-	let stopAnimation;
 	document.body.addEventListener('htmx:beforeSend', () => {
 		progressBar.value = progressRandomStep()
 		progressBar.style.width = progressBar.value + "%"
@@ -415,7 +417,7 @@ func animateNavProgress() templ.ComponentScript {
 		}, 50);
 	});
 }`,
-		Call:       templ.SafeScript(`__templ_animateNavProgress_7b6b`),
-		CallInline: templ.SafeScriptInline(`__templ_animateNavProgress_7b6b`),
+		Call:       templ.SafeScript(`__templ_animateNavProgress_651c`),
+		CallInline: templ.SafeScriptInline(`__templ_animateNavProgress_651c`),
 	}
 }

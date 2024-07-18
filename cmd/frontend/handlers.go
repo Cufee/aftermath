@@ -15,6 +15,7 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/routes/api/auth"
 	aWidget "github.com/cufee/aftermath/cmd/frontend/routes/api/widget"
 	"github.com/cufee/aftermath/cmd/frontend/routes/app"
+	"github.com/cufee/aftermath/cmd/frontend/routes/app/widgets"
 	r "github.com/cufee/aftermath/cmd/frontend/routes/redirect"
 	"github.com/cufee/aftermath/cmd/frontend/routes/widget"
 	"github.com/pkg/errors"
@@ -80,20 +81,20 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 			Func: handler.Chain(core, widget.WidgetHome),
 		},
 		{
-			Path: get("/widget/{accountId}"),
+			Path: get("/widget/account/{accountId}"),
 			Func: handler.Chain(core, widget.WidgetPreview),
 		},
 		{
-			Path: get("/widget/{accountId}/live"),
+			Path: get("/widget/account/{accountId}/live"),
 			Func: handler.Chain(core, widget.LiveWidget),
 		},
 		{
-			Path: get("/widget/personal"),
+			Path: get("/widget/custom"),
 			Func: redirect("/app/widget"),
 		},
 		{
-			Path: get("/widget/personal/{widgetId}/live"),
-			Func: handler.Chain(core, widget.PersonalLiveWidget),
+			Path: get("/widget/custom/{widgetId}"),
+			Func: handler.Chain(core, widget.CustomLiveWidget),
 		},
 		// app routes
 		{
@@ -101,8 +102,12 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 			Func: handler.Chain(core, app.Index, middleware.SessionCheck),
 		},
 		{
-			Path: get("/app/widgets"),
-			Func: handler.Chain(core, app.Widgets, middleware.SessionCheck),
+			Path: get("/app/widgets/new"),
+			Func: handler.Chain(core, widgets.NewCustom, middleware.SessionCheck),
+		},
+		{
+			Path: get("/app/widgets/{widgetId}"),
+			Func: handler.Chain(core, widgets.EditSettings, middleware.SessionCheck),
 		},
 		// api routes
 		{
@@ -128,6 +133,14 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		{
 			Path: get("/api/widget/{accountId}"),
 			Func: handler.Chain(core, aWidget.AccountWidget),
+		},
+		{
+			Path: "DELETE /api/connections/{connectionId}/{$}",
+			Func: handler.Chain(core, api.RemoveConnection),
+		},
+		{
+			Path: "POST /api/connections/{connectionId}/default",
+			Func: handler.Chain(core, api.SetDefaultConnection),
 		},
 		// redirects
 		{

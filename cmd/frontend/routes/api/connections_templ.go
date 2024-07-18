@@ -12,8 +12,8 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/cufee/aftermath/cmd/frontend/components/connections"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
-	"github.com/cufee/aftermath/cmd/frontend/routes/app"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 )
@@ -65,11 +65,11 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 		}
 	}
 	var ids []string
-	if previous.ID != "" {
-		ids = append(ids, previous.ID)
+	if previous.ReferenceID != "" {
+		ids = append(ids, previous.ReferenceID)
 	}
-	if updated.ID != "" {
-		ids = append(ids, previous.ID)
+	if updated.ReferenceID != "" {
+		ids = append(ids, updated.ReferenceID)
 	}
 	if len(ids) < 1 {
 		ctx.SetStatus(http.StatusNotFound)
@@ -81,26 +81,26 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 		return nil, ctx.Error(err, "failed to find connected accounts")
 	}
 
-	var withProps []app.ConnectionWithAccount
+	var withProps []connections.ConnectionWithAccount
 	for _, a := range accounts {
+		println(previous.ID, updated.ID, a.ID)
 		if previous.ReferenceID == a.ID {
-			withProps = append(withProps, app.ConnectionWithAccount{
+			withProps = append(withProps, connections.ConnectionWithAccount{
 				UserConnection: previous,
 				Account:        a,
 			})
 		}
 		if updated.ReferenceID == a.ID {
-			withProps = append(withProps, app.ConnectionWithAccount{
+			withProps = append(withProps, connections.ConnectionWithAccount{
 				UserConnection: updated,
 				Account:        a,
 			})
 		}
 	}
-
-	return nil, nil
+	return updatedConnections(withProps, updated.ID), nil
 }
 
-func updatedConnections(connections []app.ConnectionWithAccount) templ.Component {
+func updatedConnections(conns []connections.ConnectionWithAccount, defaultID string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -118,8 +118,8 @@ func updatedConnections(connections []app.ConnectionWithAccount) templ.Component
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		for _, c := range connections {
-			templ_7745c5c3_Err = app.ConnectionCard(c).Render(ctx, templ_7745c5c3_Buffer)
+		for _, c := range conns {
+			templ_7745c5c3_Err = connections.ConnectionCard(c, defaultID).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

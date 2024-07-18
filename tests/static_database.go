@@ -49,7 +49,11 @@ func (c *staticTestingDatabase) GetAccountByID(ctx context.Context, id string) (
 	if account, ok := staticAccounts[id]; ok {
 		return account, nil
 	}
-	return models.Account{}, ErrNotFound
+	return models.Account{
+		ID:       id,
+		Realm:    "NA",
+		Nickname: "some_account" + id,
+	}, nil
 }
 func (c *staticTestingDatabase) GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error) {
 	return nil, errors.New("GetRealmAccountIDs not implemented")
@@ -113,13 +117,13 @@ func (c *staticTestingDatabase) GetConnection(ctx context.Context, id string) (m
 	return models.UserConnection{}, errors.New("GetConnection not implemented")
 }
 func (c *staticTestingDatabase) UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
-	return models.UserConnection{}, errors.New("UpdateConnection not implemented")
+	return connection, nil
 }
 func (c *staticTestingDatabase) UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
-	return models.UserConnection{}, errors.New("UpsertConnection not implemented")
+	return connection, nil
 }
 func (c *staticTestingDatabase) DeleteUserConnection(ctx context.Context, userID, connectionID string) error {
-	return errors.New("DeleteUserConnection not implemented")
+	return nil
 }
 
 func (c *staticTestingDatabase) GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.Query) ([]models.AccountSnapshot, error) {
@@ -249,6 +253,7 @@ func (c *staticTestingDatabase) GetWidgetSettings(ctx context.Context, settingsI
 		AccountID: conn.ID,
 		Style: models.WidgetStyling{
 			UnratedOverview: models.WidgetCardStyle{
+				Visible:   true,
 				ShowTitle: true,
 			},
 		},

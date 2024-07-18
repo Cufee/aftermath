@@ -70,23 +70,23 @@ func (wsu *WidgetSettingsUpdate) ClearTitle() *WidgetSettingsUpdate {
 	return wsu
 }
 
-// SetSnapshotID sets the "snapshot_id" field.
-func (wsu *WidgetSettingsUpdate) SetSnapshotID(s string) *WidgetSettingsUpdate {
-	wsu.mutation.SetSnapshotID(s)
+// SetSessionFrom sets the "session_from" field.
+func (wsu *WidgetSettingsUpdate) SetSessionFrom(t time.Time) *WidgetSettingsUpdate {
+	wsu.mutation.SetSessionFrom(t)
 	return wsu
 }
 
-// SetNillableSnapshotID sets the "snapshot_id" field if the given value is not nil.
-func (wsu *WidgetSettingsUpdate) SetNillableSnapshotID(s *string) *WidgetSettingsUpdate {
-	if s != nil {
-		wsu.SetSnapshotID(*s)
+// SetNillableSessionFrom sets the "session_from" field if the given value is not nil.
+func (wsu *WidgetSettingsUpdate) SetNillableSessionFrom(t *time.Time) *WidgetSettingsUpdate {
+	if t != nil {
+		wsu.SetSessionFrom(*t)
 	}
 	return wsu
 }
 
-// ClearSnapshotID clears the value of the "snapshot_id" field.
-func (wsu *WidgetSettingsUpdate) ClearSnapshotID() *WidgetSettingsUpdate {
-	wsu.mutation.ClearSnapshotID()
+// ClearSessionFrom clears the value of the "session_from" field.
+func (wsu *WidgetSettingsUpdate) ClearSessionFrom() *WidgetSettingsUpdate {
+	wsu.mutation.ClearSessionFrom()
 	return wsu
 }
 
@@ -189,11 +189,11 @@ func (wsu *WidgetSettingsUpdate) sqlSave(ctx context.Context) (n int, err error)
 	if wsu.mutation.TitleCleared() {
 		_spec.ClearField(widgetsettings.FieldTitle, field.TypeString)
 	}
-	if value, ok := wsu.mutation.SnapshotID(); ok {
-		_spec.SetField(widgetsettings.FieldSnapshotID, field.TypeString, value)
+	if value, ok := wsu.mutation.SessionFrom(); ok {
+		_spec.SetField(widgetsettings.FieldSessionFrom, field.TypeTime, value)
 	}
-	if wsu.mutation.SnapshotIDCleared() {
-		_spec.ClearField(widgetsettings.FieldSnapshotID, field.TypeString)
+	if wsu.mutation.SessionFromCleared() {
+		_spec.ClearField(widgetsettings.FieldSessionFrom, field.TypeTime)
 	}
 	if value, ok := wsu.mutation.Metadata(); ok {
 		_spec.SetField(widgetsettings.FieldMetadata, field.TypeJSON, value)
@@ -263,23 +263,23 @@ func (wsuo *WidgetSettingsUpdateOne) ClearTitle() *WidgetSettingsUpdateOne {
 	return wsuo
 }
 
-// SetSnapshotID sets the "snapshot_id" field.
-func (wsuo *WidgetSettingsUpdateOne) SetSnapshotID(s string) *WidgetSettingsUpdateOne {
-	wsuo.mutation.SetSnapshotID(s)
+// SetSessionFrom sets the "session_from" field.
+func (wsuo *WidgetSettingsUpdateOne) SetSessionFrom(t time.Time) *WidgetSettingsUpdateOne {
+	wsuo.mutation.SetSessionFrom(t)
 	return wsuo
 }
 
-// SetNillableSnapshotID sets the "snapshot_id" field if the given value is not nil.
-func (wsuo *WidgetSettingsUpdateOne) SetNillableSnapshotID(s *string) *WidgetSettingsUpdateOne {
-	if s != nil {
-		wsuo.SetSnapshotID(*s)
+// SetNillableSessionFrom sets the "session_from" field if the given value is not nil.
+func (wsuo *WidgetSettingsUpdateOne) SetNillableSessionFrom(t *time.Time) *WidgetSettingsUpdateOne {
+	if t != nil {
+		wsuo.SetSessionFrom(*t)
 	}
 	return wsuo
 }
 
-// ClearSnapshotID clears the value of the "snapshot_id" field.
-func (wsuo *WidgetSettingsUpdateOne) ClearSnapshotID() *WidgetSettingsUpdateOne {
-	wsuo.mutation.ClearSnapshotID()
+// ClearSessionFrom clears the value of the "session_from" field.
+func (wsuo *WidgetSettingsUpdateOne) ClearSessionFrom() *WidgetSettingsUpdateOne {
+	wsuo.mutation.ClearSessionFrom()
 	return wsuo
 }
 
@@ -412,11 +412,11 @@ func (wsuo *WidgetSettingsUpdateOne) sqlSave(ctx context.Context) (_node *Widget
 	if wsuo.mutation.TitleCleared() {
 		_spec.ClearField(widgetsettings.FieldTitle, field.TypeString)
 	}
-	if value, ok := wsuo.mutation.SnapshotID(); ok {
-		_spec.SetField(widgetsettings.FieldSnapshotID, field.TypeString, value)
+	if value, ok := wsuo.mutation.SessionFrom(); ok {
+		_spec.SetField(widgetsettings.FieldSessionFrom, field.TypeTime, value)
 	}
-	if wsuo.mutation.SnapshotIDCleared() {
-		_spec.ClearField(widgetsettings.FieldSnapshotID, field.TypeString)
+	if wsuo.mutation.SessionFromCleared() {
+		_spec.ClearField(widgetsettings.FieldSessionFrom, field.TypeTime)
 	}
 	if value, ok := wsuo.mutation.Metadata(); ok {
 		_spec.SetField(widgetsettings.FieldMetadata, field.TypeJSON, value)

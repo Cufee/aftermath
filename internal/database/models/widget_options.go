@@ -34,36 +34,36 @@ var DefaultWidgetStyle = WidgetStyling{
 }
 
 type WidgetOptions struct {
-	ID        string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        string    `json:"id"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 
-	Title      string
-	UserID     string
-	AccountID  string
-	SnapshotID string
+	Title       string    `json:"title"`
+	UserID      string    `json:"userId"`
+	AccountID   string    `json:"accountId"`
+	SessionFrom time.Time `json:"sessionFrom"`
 
-	Style WidgetStyling
+	Style WidgetStyling `json:"style"`
 
-	Meta map[string]any
+	Meta map[string]any `json:"meta"`
 }
 
 type WidgetStyling struct {
-	Flavor          WidgetFlavor
-	UnratedOverview WidgetCardStyle
-	RatingOverview  WidgetCardStyle
-	Vehicles        WidgetVehicleCardStyle
+	Flavor          WidgetFlavor           `json:"flavor"`
+	UnratedOverview WidgetCardStyle        `json:"unrated"`
+	RatingOverview  WidgetCardStyle        `json:"rating"`
+	Vehicles        WidgetVehicleCardStyle `json:"vehicles"`
 }
 
 type WidgetCardStyle struct {
-	Visible    bool
-	ShowTitle  bool
-	ShowCareer bool
-	ShowLabel  bool
-	Blocks     []string
+	Visible    bool     `json:"visible"`
+	ShowTitle  bool     `json:"showTitle"`
+	ShowCareer bool     `json:"showCareer"`
+	ShowLabel  bool     `json:"showLabel"`
+	Blocks     []string `json:"blocks"`
 }
 
 type WidgetVehicleCardStyle struct {
 	WidgetCardStyle
-	Limit int
+	Limit int `json:"limit"`
 }

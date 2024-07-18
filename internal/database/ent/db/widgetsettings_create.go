@@ -76,16 +76,16 @@ func (wsc *WidgetSettingsCreate) SetUserID(s string) *WidgetSettingsCreate {
 	return wsc
 }
 
-// SetSnapshotID sets the "snapshot_id" field.
-func (wsc *WidgetSettingsCreate) SetSnapshotID(s string) *WidgetSettingsCreate {
-	wsc.mutation.SetSnapshotID(s)
+// SetSessionFrom sets the "session_from" field.
+func (wsc *WidgetSettingsCreate) SetSessionFrom(t time.Time) *WidgetSettingsCreate {
+	wsc.mutation.SetSessionFrom(t)
 	return wsc
 }
 
-// SetNillableSnapshotID sets the "snapshot_id" field if the given value is not nil.
-func (wsc *WidgetSettingsCreate) SetNillableSnapshotID(s *string) *WidgetSettingsCreate {
-	if s != nil {
-		wsc.SetSnapshotID(*s)
+// SetNillableSessionFrom sets the "session_from" field if the given value is not nil.
+func (wsc *WidgetSettingsCreate) SetNillableSessionFrom(t *time.Time) *WidgetSettingsCreate {
+	if t != nil {
+		wsc.SetSessionFrom(*t)
 	}
 	return wsc
 }
@@ -244,9 +244,9 @@ func (wsc *WidgetSettingsCreate) createSpec() (*WidgetSettings, *sqlgraph.Create
 		_spec.SetField(widgetsettings.FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
-	if value, ok := wsc.mutation.SnapshotID(); ok {
-		_spec.SetField(widgetsettings.FieldSnapshotID, field.TypeString, value)
-		_node.SnapshotID = value
+	if value, ok := wsc.mutation.SessionFrom(); ok {
+		_spec.SetField(widgetsettings.FieldSessionFrom, field.TypeTime, value)
+		_node.SessionFrom = value
 	}
 	if value, ok := wsc.mutation.Metadata(); ok {
 		_spec.SetField(widgetsettings.FieldMetadata, field.TypeJSON, value)
