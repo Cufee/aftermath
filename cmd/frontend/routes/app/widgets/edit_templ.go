@@ -50,10 +50,10 @@ var EditSettings handler.Page = func(ctx *handler.Context) (handler.Layout, temp
 		return nil, nil, errors.New("invalid account id")
 	}
 
-	return layouts.Main, widgetConfiguratorPage(widget.WidgetWithAccount{options, account}), nil
+	return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: account}, nil), nil
 }
 
-func widgetConfiguratorPage(options widget.WidgetWithAccount) templ.Component {
+func WidgetConfiguratorPage(options widget.WidgetWithAccount, errors map[string]string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -75,12 +75,12 @@ func widgetConfiguratorPage(options widget.WidgetWithAccount) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = widget.CustomOptionsForm(options, widgetOptionsSave(), templ.Attributes{
+		templ_7745c5c3_Err = widget.CustomOptionsForm(options, widgetOptionsSave(options.ID), templ.Attributes{
 			"hx-swap":   "outerHTML",
-			"hx-target": "#form-content",
-			"hx-select": "#form-content",
-			"hx-patch":  "/api/widget/custom/" + options.ID,
-		}).Render(ctx, templ_7745c5c3_Buffer)
+			"hx-target": "#widget-style-settings",
+			"hx-select": "#widget-style-settings",
+			"hx-patch":  "/api/widget/custom/" + options.ID + "/",
+		}, errors).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -92,7 +92,7 @@ func widgetConfiguratorPage(options widget.WidgetWithAccount) templ.Component {
 	})
 }
 
-func widgetOptionsSave() templ.Component {
+func widgetOptionsSave(id string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -110,10 +110,47 @@ func widgetOptionsSave() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button type=\"submit\" class=\"btn btn-info\" disabled>Save and Apply</button>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-row flex-wrap gap-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, copyButtonAction(id))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button type=\"button\" id=\"copy-widget-link\" class=\"btn btn-primary transition-all min-w-28 duration-250 ease-in-out\" onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 templ.ComponentScript = copyButtonAction(id)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">Copy Link</button> <button type=\"submit\" class=\"btn btn-info\" disabled>Save and Apply</button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func copyButtonAction(id string) templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_copyButtonAction_48ed`,
+		Function: `function __templ_copyButtonAction_48ed(id){const url = window.location.protocol + "//" + window.location.host + "/widget/custom/" + id + "/live/"
+	navigator.clipboard.writeText(url);
+	
+	const btn = document.getElementById("copy-widget-link")
+	const oldText = btn.textContent
+	btn.textContent = "Copied!";
+	btn.classList.add("btn-success");
+	setTimeout(()=> {
+		btn.textContent = oldText;
+		btn.classList.remove("btn-success");
+	}, 2000)
+}`,
+		Call:       templ.SafeScript(`__templ_copyButtonAction_48ed`, id),
+		CallInline: templ.SafeScriptInline(`__templ_copyButtonAction_48ed`, id),
+	}
 }

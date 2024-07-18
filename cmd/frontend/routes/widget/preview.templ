@@ -55,7 +55,7 @@ templ widgetPreview(accountID string, widget templ.Component, or, ou bool, vl in
 }
 
 script copyButtonAction() {
-	const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "/live" + window.location.search
+	const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "live" + window.location.search
 	navigator.clipboard.writeText(url);
 	
 	const btn = document.getElementById("copy-widget-link")

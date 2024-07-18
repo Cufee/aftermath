@@ -55,7 +55,7 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 		return nil, nil, err
 	}
 
-	return layouts.Main, customLiveWidget(widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
+	return layouts.StyleOnly, customLiveWidget(widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
 }
 
 func customLiveWidget(widget templ.Component) templ.Component {

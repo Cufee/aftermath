@@ -35,8 +35,9 @@ type Context struct {
 	userOptions database.UserGetOptions
 	session     *models.Session
 
-	w http.ResponseWriter
-	r *http.Request
+	formParsed bool
+	w          http.ResponseWriter
+	r          *http.Request
 }
 
 type Layout func(ctx *Context, children ...templ.Component) (templ.Component, error)
@@ -59,8 +60,25 @@ func (ctx *Context) SetCookie(cookie *http.Cookie) {
 func (ctx *Context) Query(key string) string {
 	return ctx.r.URL.Query().Get(key)
 }
-func (ctx *Context) Form(key string) string {
-	return ctx.r.Form.Get(key)
+func (ctx *Context) Form(key string) (string, error) {
+	if ctx.formParsed {
+		return ctx.r.Form.Get(key), nil
+	}
+	if err := ctx.r.ParseForm(); err != nil {
+		return "", err
+	}
+	ctx.formParsed = true
+	return ctx.r.Form.Get(key), nil
+}
+func (ctx *Context) FormValues() (url.Values, error) {
+	if ctx.formParsed {
+		return ctx.r.Form, nil
+	}
+	if err := ctx.r.ParseForm(); err != nil {
+		return nil, err
+	}
+	ctx.formParsed = true
+	return ctx.r.Form, nil
 }
 func (ctx *Context) Path(key string) string {
 	return ctx.r.PathValue(key)
@@ -69,7 +87,7 @@ func (ctx *Context) URL() *url.URL {
 	return ctx.r.URL
 }
 func (ctx *Context) SetHeader(key, value string) {
-	ctx.r.Header.Set(key, value)
+	ctx.w.Header().Set(key, value)
 }
 func (ctx *Context) GetHeader(key string) string {
 	return ctx.r.Header.Get(key)
@@ -173,8 +191,11 @@ func (ctx *Context) Error(err error, context ...string) error {
 }
 
 func (ctx *Context) Redirect(path string, code int) error {
+	if ctx.r.Header.Get("HX-Request") == "true" {
+		ctx.w.Header().Set("HX-Redirect", path)
+		return nil // this would never cause an error
+	}
 	http.Redirect(ctx.w, ctx.r, path, code)
-	ctx.r.Header.Set("HX-Redirect", path)
 	return nil // this would never cause an error
 }
 

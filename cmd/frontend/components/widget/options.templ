@@ -37,12 +37,12 @@ templ Settings(onChange templ.ComponentScript, or, ou bool, vl int) {
 	</div>
 }
 
-func CustomOptionsForm(options WidgetWithAccount, submit templ.Component, attrs templ.Attributes) templ.Component {
+func CustomOptionsForm(options WidgetWithAccount, submit templ.Component, attrs templ.Attributes, errors map[string]string) templ.Component {
 	search := components.PlayerSearch{RealmSelect: "#account_realm", SearchResults: "#search_results", NicknameInput: "#account_nickname", AccountIDInput: "#account_id"}
-	return customOptionsForm(search, options, submit, attrs)
+	return customOptionsForm(search, options, submit, attrs, errors)
 }
 
-templ customOptionsForm(search components.PlayerSearch, options WidgetWithAccount, submit templ.Component, attrs templ.Attributes) {
+templ customOptionsForm(search components.PlayerSearch, options WidgetWithAccount, submit templ.Component, attrs templ.Attributes, errors map[string]string) {
 	<form
 		id="widget-style-settings"
 		class="form-control flex gap-2 max-w-2xl w-full"
@@ -63,13 +63,18 @@ templ customOptionsForm(search components.PlayerSearch, options WidgetWithAccoun
 						@search.RealmOptions(options.Account.Realm)
 					</select>
 					<div class="dropdown dropdown-top grow">
-						<input id="account_id" type="text" name="account_id" class="hidden" data-current={ options.Account.ID } value={ options.Account.ID } disabled/>
+						<input id="account_id" type="text" name="account_id" class="hidden" data-current={ options.Account.ID } value={ options.Account.ID }/>
 						<input id="account_nickname" type="text" placeholder="Nickname" name="nickname" class="join-item input input-bordered w-full" value={ options.Account.Nickname } disabled?={ options.Account.ID == "" } oninput={ search.OnNicknameInput() } onchange="window['amthChangeWithIndicator']('account_id', this, '#account_id_indicator')"/>
 						<ul hx-boost="true" id="search_results" tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-t-box flex-nowrap overflow-auto w-full">
 							<span class="text-xs text-center cursor-default">Start typing to search</span>
 						</ul>
 					</div>
 				</div>
+				if errors["account_id"] != "" {
+					<div id="account_id_error" class="label">
+						<span class="label-text-alt text-error">{ errors["account_id"] }</span>
+					</div>
+				}
 			</div>
 			<div class="flex flex-col bg-base-200 rounded-lg p-4">
 				<span class="text-lg">Rating Battles</span>
@@ -108,8 +113,8 @@ templ customOptionsForm(search components.PlayerSearch, options WidgetWithAccoun
 			@submit
 		</div>
 	</form>
-	@search.Scripts()
 	@initFormScripts.Once() {
+		@search.Scripts()
 		<script type="text/javascript">
 			window["amthWidgetOptions"] = {}
 			window["amthChangeWithIndicator"] = (valueId, emitter, indicatorSelector) => {

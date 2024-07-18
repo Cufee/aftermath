@@ -51,38 +51,38 @@ func (c *client) GetUserWidgetSettings(ctx context.Context, userID string, refer
 	return options, nil
 }
 
-func (c *client) CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) error {
+func (c *client) CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) (models.WidgetOptions, error) {
 	user, err := c.db.User.Get(ctx, userID)
 	if err != nil {
-		return err
+		return models.WidgetOptions{}, err
 	}
 
-	err = c.db.WidgetSettings.Create().
+	created, err := c.db.WidgetSettings.Create().
 		SetTitle(settings.Title).
 		SetMetadata(settings.Meta).
 		SetReferenceID(settings.AccountID).
 		SetSessionFrom(settings.SessionFrom).
 		SetStyles(settings.Style).
 		SetUser(user).
-		Exec(ctx)
+		Save(ctx)
 	if err != nil {
-		return err
+		return models.WidgetOptions{}, err
 	}
 
-	return nil
+	return toWidgetOptions(created), nil
 }
 
-func (c *client) UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) error {
-	err := c.db.WidgetSettings.UpdateOneID(id).
+func (c *client) UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) (models.WidgetOptions, error) {
+	updated, err := c.db.WidgetSettings.UpdateOneID(id).
 		SetTitle(settings.Title).
 		SetMetadata(settings.Meta).
 		SetReferenceID(settings.AccountID).
 		SetSessionFrom(settings.SessionFrom).
 		SetStyles(settings.Style).
-		Exec(ctx)
+		Save(ctx)
 	if err != nil {
-		return err
+		return models.WidgetOptions{}, err
 	}
 
-	return nil
+	return toWidgetOptions(updated), nil
 }

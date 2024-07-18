@@ -98,77 +98,80 @@ func (p PlayerSearch) RealmOptions(selected string) templ.Component {
 
 func searchOnRealmSelect(searchResultsID, realmSelectID, nicknameInputID, accountIDInputID string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_searchOnRealmSelect_c62e`,
-		Function: `function __templ_searchOnRealmSelect_c62e(searchResultsID, realmSelectID, nicknameInputID, accountIDInputID){const accountId = document.querySelector(accountIDInputID);
-	const results = document.querySelector(searchResultsID);
-	const select = document.querySelector(realmSelectID);
-	const realm = select.value;
+		Name: `__templ_searchOnRealmSelect_3536`,
+		Function: `function __templ_searchOnRealmSelect_3536(searchResultsID, realmSelectID, nicknameInputID, accountIDInputID){const accountIdError = () => document.querySelector(accountIDInputID+"_error");
+	const accountId = () => document.querySelector(accountIDInputID);
+	const results = () => document.querySelector(searchResultsID);
+	const select = () => document.querySelector(realmSelectID);
+	const realm = () => select().value;
 	// enable/disable field
-	const nickname = document.querySelector(nicknameInputID);
-	if (realm) {
-		if (nickname.value.length >= 5) {
+	const nickname = () => document.querySelector(nicknameInputID);
+	if (realm()) {
+		if (nickname().value.length >= 5) {
 			// if the input already exists - send a request
-			results.innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
-			const event = new CustomEvent("player-search", { detail: {query: nickname.value, realm} });
+			results().innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
+			const event = new CustomEvent("player-search", { detail: {query: nickname().value, realm: realm()} });
 			document.dispatchEvent(event);
 			return
 		}
-		nickname.disabled = false;
+		nickname().disabled = false;
+		accountIdError()?.classList.add("hidden")
 	} else {
-		nickname.disabled = true;
+		nickname().disabled = true;
 	}
 	// clear results
-	results.innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
+	results().innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
 }`,
-		Call:       templ.SafeScript(`__templ_searchOnRealmSelect_c62e`, searchResultsID, realmSelectID, nicknameInputID, accountIDInputID),
-		CallInline: templ.SafeScriptInline(`__templ_searchOnRealmSelect_c62e`, searchResultsID, realmSelectID, nicknameInputID, accountIDInputID),
+		Call:       templ.SafeScript(`__templ_searchOnRealmSelect_3536`, searchResultsID, realmSelectID, nicknameInputID, accountIDInputID),
+		CallInline: templ.SafeScriptInline(`__templ_searchOnRealmSelect_3536`, searchResultsID, realmSelectID, nicknameInputID, accountIDInputID),
 	}
 }
 
 func searchOnNicknameInput(searchResultsID, realmSelectID, nicknameInputID, accountIDInputID string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_searchOnNicknameInput_5399`,
-		Function: `function __templ_searchOnNicknameInput_5399(searchResultsID, realmSelectID, nicknameInputID, accountIDInputID){const accountId = document.querySelector(accountIDInputID);
-	const nickname = document.querySelector(nicknameInputID);
-	const results = document.querySelector(searchResultsID);
-	const select = document.querySelector(realmSelectID);
-	const realm = select.value;
-	if (!realm) {
-		results.innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
-		nickname.disabled = true;
-		nickname.value = '';
+		Name: `__templ_searchOnNicknameInput_76ea`,
+		Function: `function __templ_searchOnNicknameInput_76ea(searchResultsID, realmSelectID, nicknameInputID, accountIDInputID){const accountIdError = () => document.querySelector(accountIDInputID+"_error");
+	const nickname = () => document.querySelector(nicknameInputID);
+	const results = () => document.querySelector(searchResultsID);
+	const select = () => document.querySelector(realmSelectID);
+	const realm = () => select().value;
+	if (!realm()) {
+		results().innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
+		nickname().disabled = true;
+		nickname().value = '';
 		return;
 	}
-	if (!nickname.value) {
-		results.innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
+	if (!nickname().value) {
+		results().innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
 		return;
 	}
-	if (nickname.value.length < 5) {
-		results.innerHTML = '<span class="text-xs text-center cursor-default">Continue typing to search</span>';
+	if (nickname().value.length < 5) {
+		results().innerHTML = '<span class="text-xs text-center cursor-default">Continue typing to search</span>';
 		return;
 	}
-	const event = new CustomEvent("player-search", { detail: {query: nickname.value, realm} });
+	accountIdError()?.classList.add("hidden")
+	const event = new CustomEvent("player-search", { detail: {query: nickname().value, realm: realm()} });
 	document.dispatchEvent(event);
 }`,
-		Call:       templ.SafeScript(`__templ_searchOnNicknameInput_5399`, searchResultsID, realmSelectID, nicknameInputID, accountIDInputID),
-		CallInline: templ.SafeScriptInline(`__templ_searchOnNicknameInput_5399`, searchResultsID, realmSelectID, nicknameInputID, accountIDInputID),
+		Call:       templ.SafeScript(`__templ_searchOnNicknameInput_76ea`, searchResultsID, realmSelectID, nicknameInputID, accountIDInputID),
+		CallInline: templ.SafeScriptInline(`__templ_searchOnNicknameInput_76ea`, searchResultsID, realmSelectID, nicknameInputID, accountIDInputID),
 	}
 }
 
 func searchEventHandler(searchResultsID, nicknameInputID, accountIDInputID string, appId string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_searchEventHandler_3728`,
-		Function: `function __templ_searchEventHandler_3728(searchResultsID, nicknameInputID, accountIDInputID, appId){const results = document.querySelector(searchResultsID);
-	const nickname = document.querySelector(nicknameInputID);
-	const accountId = document.querySelector(accountIDInputID);
+		Name: `__templ_searchEventHandler_b9c0`,
+		Function: `function __templ_searchEventHandler_b9c0(searchResultsID, nicknameInputID, accountIDInputID, appId){const results = () => document.querySelector(searchResultsID);
+	const nickname = () => document.querySelector(nicknameInputID);
+	const accountId = () => document.querySelector(accountIDInputID);
 
 	const setResultsLoading = () => {
-		results.innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
+		results().innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
 	}
 
 	const selectAccount = (name, id) => {
-		nickname.value = name
-		accountId.value = id
+		nickname().value = name
+		accountId().value = id
 	}
 	window.amthSelectAccount = selectAccount
 
@@ -207,8 +210,8 @@ func searchEventHandler(searchResultsID, nicknameInputID, accountIDInputID strin
 
 				fetch(url).then(res => res.json()).then(data => {
 					if (data.status != "ok") {
-						results.innerHTML = ` + "`" + `<span class="text-xs text-center cursor-default">${data?.error?.message.toLocaleLowerCase().replaceAll("_", " ") || "Failed to get accounts"}</span>` + "`" + `;
-						nickname.disabled = false;
+						results().innerHTML = ` + "`" + `<span class="text-xs text-center cursor-default">${data?.error?.message.toLocaleLowerCase().replaceAll("_", " ") || "Failed to get accounts"}</span>` + "`" + `;
+						nickname().disabled = false;
 						return;
 					}
 					const elements = []
@@ -217,23 +220,23 @@ func searchEventHandler(searchResultsID, nicknameInputID, accountIDInputID strin
 						elements.push(` + "`" + `<li><button onclick="window.amthSelectAccount('${account.nickname}','${account.account_id}');return false;">${account.nickname}</button></li>` + "`" + `);
 					}
 					if (elements.length == 0) {
-						results.innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
-						nickname.disabled = false;
+						results().innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
+						nickname().disabled = false;
 						return;
 					}
-					results.innerHTML = elements.join("");
+					results().innerHTML = elements.join("");
 					return;
 				}).catch(e => {
 					console.log("failed to search for accounts",e);
-					results.innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
-					nickname.disabled = false;
+					results().innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
+					nickname().disabled = false;
 				});
 			}, debounceDelay);
 		},
 		false,
 	);
 }`,
-		Call:       templ.SafeScript(`__templ_searchEventHandler_3728`, searchResultsID, nicknameInputID, accountIDInputID, appId),
-		CallInline: templ.SafeScriptInline(`__templ_searchEventHandler_3728`, searchResultsID, nicknameInputID, accountIDInputID, appId),
+		Call:       templ.SafeScript(`__templ_searchEventHandler_b9c0`, searchResultsID, nicknameInputID, accountIDInputID, appId),
+		CallInline: templ.SafeScriptInline(`__templ_searchEventHandler_b9c0`, searchResultsID, nicknameInputID, accountIDInputID, appId),
 	}
 }

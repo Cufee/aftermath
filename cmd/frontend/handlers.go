@@ -93,7 +93,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 			Func: redirect("/app/widget"),
 		},
 		{
-			Path: get("/widget/custom/{widgetId}"),
+			Path: get("/widget/custom/{widgetId}/live"),
 			Func: handler.Chain(core, widget.CustomLiveWidget),
 		},
 		// app routes
@@ -133,6 +133,18 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		{
 			Path: get("/api/widget/{accountId}"),
 			Func: handler.Chain(core, aWidget.AccountWidget),
+		},
+		{
+			Path: "PATCH /api/widget/custom/{widgetId}/{$}",
+			Func: handler.Chain(core, aWidget.UpdateCustomWidget),
+		},
+		{
+			Path: "PATCH /api/widget/custom/{widgetId}/action/{$}",
+			Func: handler.Chain(core, aWidget.QuickAction),
+		},
+		{
+			Path: "POST /api/widget/custom/{$}",
+			Func: handler.Chain(core, aWidget.CreateCustomWidget),
 		},
 		{
 			Path: "DELETE /api/connections/{connectionId}/{$}",

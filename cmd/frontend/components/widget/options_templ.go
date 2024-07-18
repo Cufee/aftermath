@@ -148,12 +148,12 @@ func Settings(onChange templ.ComponentScript, or, ou bool, vl int) templ.Compone
 	})
 }
 
-func CustomOptionsForm(options WidgetWithAccount, submit templ.Component, attrs templ.Attributes) templ.Component {
+func CustomOptionsForm(options WidgetWithAccount, submit templ.Component, attrs templ.Attributes, errors map[string]string) templ.Component {
 	search := components.PlayerSearch{RealmSelect: "#account_realm", SearchResults: "#search_results", NicknameInput: "#account_nickname", AccountIDInput: "#account_id"}
-	return customOptionsForm(search, options, submit, attrs)
+	return customOptionsForm(search, options, submit, attrs, errors)
 }
 
-func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount, submit templ.Component, attrs templ.Attributes) templ.Component {
+func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount, submit templ.Component, attrs templ.Attributes, errors map[string]string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -269,7 +269,7 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" disabled> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -309,16 +309,39 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" onchange=\"window[&#39;amthChangeWithIndicator&#39;](&#39;account_id&#39;, this, &#39;#account_id_indicator&#39;)\"><ul hx-boost=\"true\" id=\"search_results\" tabindex=\"0\" class=\"dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-t-box flex-nowrap overflow-auto w-full\"><span class=\"text-xs text-center cursor-default\">Start typing to search</span></ul></div></div></div><div class=\"flex flex-col bg-base-200 rounded-lg p-4\"><span class=\"text-lg\">Rating Battles</span> <label class=\"label py-0 group\"><span class=\"label-text group-hover:underline flex flex-row gap-1 items-center\">Show Overview Card <div class=\"h-1.5 w-1.5 bg-info rounded-full change-indicator hidden\"></div></span> <input class=\"hidden\" id=\"rating_overview\" type=\"text\" name=\"rating_overview\" data-current=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" onchange=\"window[&#39;amthChangeWithIndicator&#39;](&#39;account_id&#39;, this, &#39;#account_id_indicator&#39;)\"><ul hx-boost=\"true\" id=\"search_results\" tabindex=\"0\" class=\"dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-t-box flex-nowrap overflow-auto w-full\"><span class=\"text-xs text-center cursor-default\">Start typing to search</span></ul></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.RatingOverview.Visible))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 78, Col: 146}
+		if errors["account_id"] != "" {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"account_id_error\" class=\"label\"><span class=\"label-text-alt text-error\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var16 string
+			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(errors["account_id"])
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 75, Col: 68}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"flex flex-col bg-base-200 rounded-lg p-4\"><span class=\"text-lg\">Rating Battles</span> <label class=\"label py-0 group\"><span class=\"label-text group-hover:underline flex flex-row gap-1 items-center\">Show Overview Card <div class=\"h-1.5 w-1.5 bg-info rounded-full change-indicator hidden\"></div></span> <input class=\"hidden\" id=\"rating_overview\" type=\"text\" name=\"rating_overview\" data-current=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var17 string
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.RatingOverview.Visible))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 83, Col: 146}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -326,12 +349,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.RatingOverview.Visible))
+		var templ_7745c5c3_Var18 string
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.RatingOverview.Visible))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 78, Col: 205}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 83, Col: 205}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -339,12 +362,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.RatingOverview.Visible))
+		var templ_7745c5c3_Var19 string
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.RatingOverview.Visible))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 79, Col: 185}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 84, Col: 185}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -362,12 +385,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var19 string
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.UnratedOverview.Visible))
+		var templ_7745c5c3_Var20 string
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.UnratedOverview.Visible))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 86, Col: 149}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 91, Col: 149}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -375,12 +398,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var20 string
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.UnratedOverview.Visible))
+		var templ_7745c5c3_Var21 string
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.UnratedOverview.Visible))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 86, Col: 209}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 91, Col: 209}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -388,12 +411,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.UnratedOverview.Visible))
+		var templ_7745c5c3_Var22 string
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.UnratedOverview.Visible))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 87, Col: 187}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 92, Col: 187}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -411,12 +434,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.Vehicles.Visible))
+		var templ_7745c5c3_Var23 string
+		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.Vehicles.Visible))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 91, Col: 142}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 96, Col: 142}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -424,12 +447,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var23 string
-		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.Vehicles.Visible))
+		var templ_7745c5c3_Var24 string
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.Vehicles.Visible))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 91, Col: 195}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 96, Col: 195}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -437,12 +460,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.Vehicles.Visible))
+		var templ_7745c5c3_Var25 string
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.Vehicles.Visible))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 92, Col: 180}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 97, Col: 180}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -460,12 +483,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var25 string
-		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.Vehicles.Limit))
+		var templ_7745c5c3_Var26 string
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.Vehicles.Limit))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 96, Col: 116}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 101, Col: 116}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -473,12 +496,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var26 string
-		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.Vehicles.Limit))
+		var templ_7745c5c3_Var27 string
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(options.Style.Vehicles.Limit))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 96, Col: 167}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 101, Col: 167}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -491,12 +514,12 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var27 string
-			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
+			var templ_7745c5c3_Var28 string
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 100, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/components/widget/options.templ`, Line: 105, Col: 29}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -517,11 +540,7 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = search.Scripts().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var28 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var29 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -533,13 +552,17 @@ func customOptionsForm(search components.PlayerSearch, options WidgetWithAccount
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script type=\"text/javascript\">\n\t\t\twindow[\"amthWidgetOptions\"] = {}\n\t\t\twindow[\"amthChangeWithIndicator\"] = (valueId, emitter, indicatorSelector) => {\n\t\t\t\tconst element = document.getElementById(valueId);\n\t\t\t\tif (emitter) {\n\t\t\t\t\telement.value = emitter.type == \"checkbox\" ? emitter.checked : emitter.value;\n\t\t\t\t}\n\n\t\t\t\tconst indicator = indicatorSelector ? document.querySelector(indicatorSelector) : element.parentElement.querySelector(\".change-indicator\");\n\t\t\t\tif (element.dataset.current != element.value) {\n\t\t\t\t\twindow[\"amthWidgetOptions\"][valueId] = true\n\t\t\t\t\tindicator?.classList.remove(\"hidden\");\n\t\t\t\t} else {\n\t\t\t\t\tdelete window[\"amthWidgetOptions\"][valueId]\n\t\t\t\t\tindicator?.classList.add(\"hidden\");\n\t\t\t\t}\n\n\t\t\t\tconst formSubmit = document.getElementById('widget-options-form')\n\t\t\t\tformSubmit.querySelector(\"button[type=submit]\").disabled = Object.keys(window[\"amthWidgetOptions\"]).length==0;\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = search.Scripts().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <script type=\"text/javascript\">\n\t\t\twindow[\"amthWidgetOptions\"] = {}\n\t\t\twindow[\"amthChangeWithIndicator\"] = (valueId, emitter, indicatorSelector) => {\n\t\t\t\tconst element = document.getElementById(valueId);\n\t\t\t\tif (emitter) {\n\t\t\t\t\telement.value = emitter.type == \"checkbox\" ? emitter.checked : emitter.value;\n\t\t\t\t}\n\n\t\t\t\tconst indicator = indicatorSelector ? document.querySelector(indicatorSelector) : element.parentElement.querySelector(\".change-indicator\");\n\t\t\t\tif (element.dataset.current != element.value) {\n\t\t\t\t\twindow[\"amthWidgetOptions\"][valueId] = true\n\t\t\t\t\tindicator?.classList.remove(\"hidden\");\n\t\t\t\t} else {\n\t\t\t\t\tdelete window[\"amthWidgetOptions\"][valueId]\n\t\t\t\t\tindicator?.classList.add(\"hidden\");\n\t\t\t\t}\n\n\t\t\t\tconst formSubmit = document.getElementById('widget-options-form')\n\t\t\t\tformSubmit.querySelector(\"button[type=submit]\").disabled = Object.keys(window[\"amthWidgetOptions\"]).length==0;\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = initFormScripts.Once().Render(templ.WithChildren(ctx, templ_7745c5c3_Var28), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = initFormScripts.Once().Render(templ.WithChildren(ctx, templ_7745c5c3_Var29), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

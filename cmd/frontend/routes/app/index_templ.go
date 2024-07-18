@@ -14,11 +14,11 @@ import (
 	wc "github.com/cufee/aftermath/cmd/frontend/components/widget"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"net/http"
 	"slices"
-	"time"
 )
 
 var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
@@ -34,7 +34,6 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 		return nil, nil, ctx.Error(err, "failed to get widgets")
 	}
 	for _, widget := range settings {
-		widget.SessionFrom = time.Now()
 		widgets = append(widgets, wc.WidgetWithAccount{WidgetOptions: widget})
 		if !slices.Contains(ids, widget.AccountID) {
 			ids = append(ids, widget.AccountID)
@@ -71,7 +70,7 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 	}
 	defaultConn, _ := user.Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
 
-	return layouts.Main, index(user, connections, defaultConn.ID, 3, widgets, 10), nil
+	return layouts.Main, index(user, connections, defaultConn.ID, 3, widgets, constants.WidgetAccountLimit), nil
 }
 
 func index(user *models.User, connections []components.ConnectionWithAccount, defaultConnID string, linkLimit int, widgets []wc.WidgetWithAccount, widgetsLimit int) templ.Component {
@@ -99,7 +98,7 @@ func index(user *models.User, connections []components.ConnectionWithAccount, de
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d/%d", len(connections), linkLimit))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/index.templ`, Line: 72, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/index.templ`, Line: 71, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -128,13 +127,13 @@ func index(user *models.User, connections []components.ConnectionWithAccount, de
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d/%d", len(widgets), widgetsLimit))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/index.templ`, Line: 112, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/index.templ`, Line: 111, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span><div class=\"tooltip\" data-tip=\"This feature is in Beta and might become limited to premium users once released.\"><span class=\"badge badge-outline badge-info font-bold\">BETA <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4 text-info ml-1 -mr-2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg></span></div></div><div class=\"flex flex-col md:flex-row md:flex-wrap gap-2 w-full\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span><div class=\"tooltip\" data-tip=\"This feature is in Beta and might become limited to premium users once released.\"><span class=\"badge badge-outline badge-info font-bold\">BETA <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4 text-info ml-0.5 -mr-2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg></span></div></div><div class=\"flex flex-col md:flex-row md:flex-wrap gap-2 w-full\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -30,64 +30,67 @@ templ (p PlayerSearch) RealmOptions(selected string) {
 }
 
 script searchOnRealmSelect(searchResultsID, realmSelectID, nicknameInputID, accountIDInputID string) {
-	const accountId = document.querySelector(accountIDInputID);
-	const results = document.querySelector(searchResultsID);
-	const select = document.querySelector(realmSelectID);
-	const realm = select.value;
+	const accountIdError = () => document.querySelector(accountIDInputID+"_error");
+	const accountId = () => document.querySelector(accountIDInputID);
+	const results = () => document.querySelector(searchResultsID);
+	const select = () => document.querySelector(realmSelectID);
+	const realm = () => select().value;
 	// enable/disable field
-	const nickname = document.querySelector(nicknameInputID);
-	if (realm) {
-		if (nickname.value.length >= 5) {
+	const nickname = () => document.querySelector(nicknameInputID);
+	if (realm()) {
+		if (nickname().value.length >= 5) {
 			// if the input already exists - send a request
-			results.innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
-			const event = new CustomEvent("player-search", { detail: {query: nickname.value, realm} });
+			results().innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
+			const event = new CustomEvent("player-search", { detail: {query: nickname().value, realm: realm()} });
 			document.dispatchEvent(event);
 			return
 		}
-		nickname.disabled = false;
+		nickname().disabled = false;
+		accountIdError()?.classList.add("hidden")
 	} else {
-		nickname.disabled = true;
+		nickname().disabled = true;
 	}
 	// clear results
-	results.innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
+	results().innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
 }
 
 script searchOnNicknameInput(searchResultsID, realmSelectID, nicknameInputID, accountIDInputID string) {
-	const accountId = document.querySelector(accountIDInputID);
-	const nickname = document.querySelector(nicknameInputID);
-	const results = document.querySelector(searchResultsID);
-	const select = document.querySelector(realmSelectID);
-	const realm = select.value;
-	if (!realm) {
-		results.innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
-		nickname.disabled = true;
-		nickname.value = '';
+	const accountIdError = () => document.querySelector(accountIDInputID+"_error");
+	const nickname = () => document.querySelector(nicknameInputID);
+	const results = () => document.querySelector(searchResultsID);
+	const select = () => document.querySelector(realmSelectID);
+	const realm = () => select().value;
+	if (!realm()) {
+		results().innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
+		nickname().disabled = true;
+		nickname().value = '';
 		return;
 	}
-	if (!nickname.value) {
-		results.innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
+	if (!nickname().value) {
+		results().innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
 		return;
 	}
-	if (nickname.value.length < 5) {
-		results.innerHTML = '<span class="text-xs text-center cursor-default">Continue typing to search</span>';
+	if (nickname().value.length < 5) {
+		results().innerHTML = '<span class="text-xs text-center cursor-default">Continue typing to search</span>';
 		return;
 	}
-	const event = new CustomEvent("player-search", { detail: {query: nickname.value, realm} });
+	accountIdError()?.classList.add("hidden")
+	const event = new CustomEvent("player-search", { detail: {query: nickname().value, realm: realm()} });
 	document.dispatchEvent(event);
 }
 
 script searchEventHandler(searchResultsID, nicknameInputID, accountIDInputID string, appId string) {
-	const results = document.querySelector(searchResultsID);
-	const nickname = document.querySelector(nicknameInputID);
-	const accountId = document.querySelector(accountIDInputID);
+	const results = () => document.querySelector(searchResultsID);
+	const nickname = () => document.querySelector(nicknameInputID);
+	const accountId = () => document.querySelector(accountIDInputID);
 
 	const setResultsLoading = () => {
-		results.innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
+		results().innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
 	}
 
 	const selectAccount = (name, id) => {
-		nickname.value = name
-		accountId.value = id
+		nickname().value = name
+		accountId().value = id
 	}
 	window.amthSelectAccount = selectAccount
 
@@ -126,8 +129,8 @@ script searchEventHandler(searchResultsID, nicknameInputID, accountIDInputID str
 
 				fetch(url).then(res => res.json()).then(data => {
 					if (data.status != "ok") {
-						results.innerHTML = `<span class="text-xs text-center cursor-default">${data?.error?.message.toLocaleLowerCase().replaceAll("_", " ") || "Failed to get accounts"}</span>`;
-						nickname.disabled = false;
+						results().innerHTML = `<span class="text-xs text-center cursor-default">${data?.error?.message.toLocaleLowerCase().replaceAll("_", " ") || "Failed to get accounts"}</span>`;
+						nickname().disabled = false;
 						return;
 					}
 					const elements = []
@@ -136,16 +139,16 @@ script searchEventHandler(searchResultsID, nicknameInputID, accountIDInputID str
 						elements.push(`<li><button onclick="window.amthSelectAccount('${account.nickname}','${account.account_id}');return false;">${account.nickname}</button></li>`);
 					}
 					if (elements.length == 0) {
-						results.innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
-						nickname.disabled = false;
+						results().innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
+						nickname().disabled = false;
 						return;
 					}
-					results.innerHTML = elements.join("");
+					results().innerHTML = elements.join("");
 					return;
 				}).catch(e => {
 					console.log("failed to search for accounts",e);
-					results.innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
-					nickname.disabled = false;
+					results().innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
+					nickname().disabled = false;
 				});
 			}, debounceDelay);
 		},

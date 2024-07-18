@@ -119,8 +119,8 @@ func widgetPreview(accountID string, widget templ.Component, or, ou bool, vl int
 
 func copyButtonAction() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_copyButtonAction_88e1`,
-		Function: `function __templ_copyButtonAction_88e1(){const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "/live" + window.location.search
+		Name: `__templ_copyButtonAction_e532`,
+		Function: `function __templ_copyButtonAction_e532(){const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "live" + window.location.search
 	navigator.clipboard.writeText(url);
 	
 	const btn = document.getElementById("copy-widget-link")
@@ -132,8 +132,8 @@ func copyButtonAction() templ.ComponentScript {
 		btn.classList.remove("btn-success");
 	}, 2000)
 }`,
-		Call:       templ.SafeScript(`__templ_copyButtonAction_88e1`),
-		CallInline: templ.SafeScriptInline(`__templ_copyButtonAction_88e1`),
+		Call:       templ.SafeScript(`__templ_copyButtonAction_e532`),
+		CallInline: templ.SafeScriptInline(`__templ_copyButtonAction_e532`),
 	}
 }
 

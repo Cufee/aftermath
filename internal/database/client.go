@@ -62,8 +62,8 @@ type UsersClient interface {
 
 	GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error)
 	GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error)
-	UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) error
-	CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) error
+	UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) (models.WidgetOptions, error)
+	CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) (models.WidgetOptions, error)
 }
 
 type SnapshotsClient interface {

@@ -263,9 +263,11 @@ func (c *staticTestingDatabase) GetUserWidgetSettings(ctx context.Context, userI
 	s, err := c.GetWidgetSettings(ctx, userID)
 	return []models.WidgetOptions{s}, err
 }
-func (c *staticTestingDatabase) UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) error {
-	return errors.New("UpdateWidgetSettings not implemented")
+func (c *staticTestingDatabase) UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) (models.WidgetOptions, error) {
+	return settings, nil
 }
-func (c *staticTestingDatabase) CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) error {
-	return errors.New("CreateWidgetSettings not implemented")
+func (c *staticTestingDatabase) CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) (models.WidgetOptions, error) {
+	settings.ID = fmt.Sprint(time.Now().Unix())
+	settings.UserID = userID
+	return settings, nil
 }

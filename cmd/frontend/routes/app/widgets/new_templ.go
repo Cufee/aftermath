@@ -16,10 +16,10 @@ import (
 )
 
 var NewCustom handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
-	return layouts.Main, newWidgetPage(widget.WidgetWithAccount{WidgetOptions: models.WidgetOptions{Style: models.DefaultWidgetStyle}}), nil
+	return layouts.Main, NewWidgetPage(widget.WidgetWithAccount{WidgetOptions: models.WidgetOptions{Style: models.DefaultWidgetStyle}}, nil), nil
 }
 
-func newWidgetPage(options widget.WidgetWithAccount) templ.Component {
+func NewWidgetPage(options widget.WidgetWithAccount, errors map[string]string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -42,11 +42,11 @@ func newWidgetPage(options widget.WidgetWithAccount) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = widget.CustomOptionsForm(options, newWidgetCreate(), templ.Attributes{
+			"hx-post":   "/api/widget/custom/",
+			"hx-target": "#widget-style-settings",
+			"hx-select": "#widget-style-settings",
 			"hx-swap":   "outerHTML",
-			"hx-target": "#form-content",
-			"hx-select": "#form-content",
-			"hx-post":   "/api/widget/custom",
-		}).Render(ctx, templ_7745c5c3_Buffer)
+		}, errors).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
