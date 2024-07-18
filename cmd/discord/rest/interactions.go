@@ -12,14 +12,46 @@ type File struct {
 	Name string
 }
 
+type responseType byte
+
+const (
+	updateResponse responseType = iota
+	newResponse
+)
+
+func convertInteractionType(rt responseType, data discordgo.InteractionResponse) discordgo.InteractionResponse {
+	switch rt {
+	default:
+		return data
+	case updateResponse:
+		switch data.Type {
+		default:
+			return data
+		case discordgo.InteractionResponseChannelMessageWithSource, discordgo.InteractionResponseDeferredChannelMessageWithSource:
+			// this call will be updating a message, convert the "new message" types to an update type
+			data.Type = discordgo.InteractionResponseDeferredMessageUpdate
+			return data
+		}
+	case newResponse:
+		switch data.Type {
+		default:
+			return data
+		case discordgo.InteractionResponseDeferredMessageUpdate:
+			// this call will be sending a new message, convert a "message update" type to a new message type
+			data.Type = discordgo.InteractionResponseChannelMessageWithSource
+			return data
+		}
+	}
+}
+
 /*
 Optimistically send an interaction response update request with fallback to interaction response send request
 */
 func (c *Client) UpdateOrSendInteractionResponse(ctx context.Context, appID, interactionID, token string, data discordgo.InteractionResponse, files []File) error {
-	err := c.UpdateInteractionResponse(ctx, appID, token, *data.Data, files)
+	err := c.UpdateInteractionResponse(ctx, appID, token, *convertInteractionType(updateResponse, data).Data, files)
 	if err != nil {
 		if errors.Is(err, ErrUnknownWebhook) || errors.Is(err, ErrUnknownInteraction) {
-			return c.SendInteractionResponse(ctx, interactionID, token, data, files)
+			return c.SendInteractionResponse(ctx, interactionID, token, convertInteractionType(newResponse, data), files)
 		}
 		return err
 	}
