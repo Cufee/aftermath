@@ -127,6 +127,14 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 		return widgets.NewWidgetPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: account}, map[string]string{"account_id": "You need to select a user from the list of search results."}), nil
 	}
 
+	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
+	if database.IsNotFound(err) {
+		account, err = ctx.Fetch().Account(ctx.Context, settings.AccountID)
+	}
+	if err != nil || account.Private {
+		return widgets.NewWidgetPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: account}, map[string]string{"account_id": "You have selected a private account - stats are not available for private accounts."}), nil
+	}
+
 	created, err := ctx.Database().CreateWidgetSettings(ctx.Context, user.ID, settings)
 	if err != nil {
 		return nil, ctx.Error(err, "failed to create widget settings")
@@ -179,17 +187,17 @@ var UpdateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 		return widgets.WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: account}, map[string]string{"account_id": "You need to select a user from the list of search results."}), nil
 	}
 
+	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
+	if database.IsNotFound(err) {
+		account, err = ctx.Fetch().Account(ctx.Context, settings.AccountID)
+	}
+	if err != nil || account.Private {
+		return widgets.NewWidgetPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: account}, map[string]string{"account_id": "You have selected a private account - stats are not available for private accounts."}), nil
+	}
+
 	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Context, settings.ID, settings)
 	if err != nil {
 		return nil, ctx.Error(err, "failed to update widget settings")
-	}
-
-	account, err := ctx.Database().GetAccountByID(ctx.Context, updated.AccountID)
-	if database.IsNotFound(err) {
-		account, err = ctx.Fetch().Account(ctx.Context, updated.AccountID)
-	}
-	if err != nil {
-		return nil, ctx.Error(err, "failed to get updated widget account")
 	}
 
 	return widgets.WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: updated, Account: account}, nil), nil

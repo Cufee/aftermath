@@ -14,6 +14,7 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
 	"net/http"
 )
 
@@ -29,24 +30,24 @@ var EditSettings handler.Page = func(ctx *handler.Context) (handler.Layout, temp
 	}
 
 	options, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
-	if err != nil {
-		if database.IsNotFound(err) {
-			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
-		}
-		return nil, nil, ctx.Error(err, "failed to get widget settings")
+	if database.IsNotFound(err) {
+		return nil, nil, ctx.Error(err, "widget not found")
 	}
 	if options.UserID != user.ID {
-		return nil, nil, ctx.Redirect("/app", http.StatusNotFound)
+		return nil, nil, ctx.Error(err, "widget not found")
+	}
+	if err != nil {
+		return nil, nil, ctx.Error(err, "failed to get widget settings")
 	}
 	if options.AccountID == "" {
-		return nil, nil, ctx.Error(errors.New("widget has no account id"), "bad widget settings, missing account id")
+		return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: models.Account{}}, nil), nil
 	}
 
 	account, err := ctx.Database().GetAccountByID(ctx.Context, options.AccountID)
+	if database.IsNotFound(err) {
+		return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: models.Account{}}, map[string]string{"account_id": "Invalid or private account selected"}), nil
+	}
 	if err != nil {
-		if database.IsNotFound(err) {
-			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
-		}
 		return nil, nil, errors.New("invalid account id")
 	}
 
