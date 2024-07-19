@@ -80,7 +80,7 @@ func WidgetConfiguratorPage(options widget.WidgetWithAccount, errors map[string]
 			"hx-swap":   "outerHTML",
 			"hx-target": "#widget-style-settings",
 			"hx-select": "#widget-style-settings",
-			"hx-patch":  "/api/widget/custom/" + options.ID + "/",
+			"hx-patch":  "/api/s/widget/custom/" + options.ID + "/",
 		}, errors).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

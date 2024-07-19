@@ -276,8 +276,8 @@ func searchEventHandler(appId string) templ.ComponentScript {
 
 func handlePreviewOnHome() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_handlePreviewOnHome_2c46`,
-		Function: `function __templ_handlePreviewOnHome_2c46(){const ouEl = document.getElementById("widget-settings-ou");
+		Name: `__templ_handlePreviewOnHome_31d9`,
+		Function: `function __templ_handlePreviewOnHome_31d9(){const ouEl = document.getElementById("widget-settings-ou");
 	const orEl = document.getElementById("widget-settings-or");
 	const vlEl = document.getElementById("widget-settings-vl");
 
@@ -289,7 +289,7 @@ func handlePreviewOnHome() templ.ComponentScript {
 		ouEl.disabled = true;
 		orEl.disabled = true;
 		vlEl.disabled = true;
-		fetch("/api/widget/mock"+newQuery).then((r) => r.text()).then((html) => {
+		fetch("/api/p/widget/mock"+newQuery).then((r) => r.text()).then((html) => {
 			document.getElementById("mock-widget").outerHTML = html;
 			const url = window.location.protocol + "//" + window.location.host + window.location.pathname + newQuery;
 			window.history?.pushState({path:url},'',url);
@@ -302,7 +302,7 @@ func handlePreviewOnHome() templ.ComponentScript {
 		});
 	}
 }`,
-		Call:       templ.SafeScript(`__templ_handlePreviewOnHome_2c46`),
-		CallInline: templ.SafeScriptInline(`__templ_handlePreviewOnHome_2c46`),
+		Call:       templ.SafeScript(`__templ_handlePreviewOnHome_31d9`),
+		CallInline: templ.SafeScriptInline(`__templ_handlePreviewOnHome_31d9`),
 	}
 }

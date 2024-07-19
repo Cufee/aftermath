@@ -195,7 +195,7 @@ script handlePreviewOnHome() {
 		ouEl.disabled = true;
 		orEl.disabled = true;
 		vlEl.disabled = true;
-		fetch("/api/widget/mock"+newQuery).then((r) => r.text()).then((html) => {
+		fetch("/api/p/widget/mock"+newQuery).then((r) => r.text()).then((html) => {
 			document.getElementById("mock-widget").outerHTML = html;
 			const url = window.location.protocol + "//" + window.location.host + window.location.pathname + newQuery;
 			window.history?.pushState({path:url},'',url);

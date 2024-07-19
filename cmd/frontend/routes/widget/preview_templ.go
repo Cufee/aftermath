@@ -139,8 +139,8 @@ func copyButtonAction() templ.ComponentScript {
 
 func handlePreview(id string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_handlePreview_7995`,
-		Function: `function __templ_handlePreview_7995(id){const ouEl = document.getElementById("widget-settings-ou")
+		Name: `__templ_handlePreview_5e47`,
+		Function: `function __templ_handlePreview_5e47(id){const ouEl = document.getElementById("widget-settings-ou")
 	const orEl = document.getElementById("widget-settings-or")
 	const vlEl = document.getElementById("widget-settings-vl")
 	const button = document.getElementById("copy-widget-link")
@@ -155,7 +155,7 @@ func handlePreview(id string) templ.ComponentScript {
 		vlEl.disabled = true
 		button.disabled = true
 
-		fetch("/api/widget/"+id+newQuery).then((r) => r.text()).then((html) => {
+		fetch("/api/p/widget/"+id+newQuery).then((r) => r.text()).then((html) => {
 			document.getElementById("account-widget").outerHTML = html
 			const url = window.location.protocol + "//" + window.location.host + window.location.pathname + newQuery;
 			window.history?.pushState({path:url},'',url);
@@ -167,7 +167,7 @@ func handlePreview(id string) templ.ComponentScript {
 		})
 	}
 }`,
-		Call:       templ.SafeScript(`__templ_handlePreview_7995`, id),
-		CallInline: templ.SafeScriptInline(`__templ_handlePreview_7995`, id),
+		Call:       templ.SafeScript(`__templ_handlePreview_5e47`, id),
+		CallInline: templ.SafeScriptInline(`__templ_handlePreview_5e47`, id),
 	}
 }

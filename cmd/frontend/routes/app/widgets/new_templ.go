@@ -42,7 +42,7 @@ func NewWidgetPage(options widget.WidgetWithAccount, errors map[string]string) t
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = widget.CustomOptionsForm(options, newWidgetCreate(), templ.Attributes{
-			"hx-post":   "/api/widget/custom/",
+			"hx-post":   "/api/s/widget/custom/",
 			"hx-target": "#widget-style-settings",
 			"hx-select": "#widget-style-settings",
 			"hx-swap":   "outerHTML",

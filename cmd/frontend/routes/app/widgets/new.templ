@@ -15,7 +15,7 @@ templ NewWidgetPage(options widget.WidgetWithAccount, errors map[string]string) 
 	<div class="flex flex-col gap-4 basis-1/2 grow items-center">
 		<div class="flex justify-center w-full">
 			@widget.CustomOptionsForm(options, newWidgetCreate(), templ.Attributes{
-				"hx-post":   "/api/widget/custom/",
+				"hx-post":   "/api/s/widget/custom/",
 				"hx-target": "#widget-style-settings",
 				"hx-select": "#widget-style-settings",
 				"hx-swap":   "outerHTML",

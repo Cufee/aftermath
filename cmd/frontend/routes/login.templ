@@ -14,7 +14,7 @@ var LoginStatic handler.Partial = func(ctx *handler.Context) (templ.Component, e
 templ loginStaticPage(query string) {
 	@components.DoctypeHTML(loginStaticHead()) {
 		@logic.EmbedScript(loginPageRedirectScript(query))
-		@components.ManualRedirect("/api/login?" + query)
+		@components.ManualRedirect("/api/p/login?" + query)
 	}
 }
 
@@ -34,5 +34,5 @@ templ loginStaticHead() {
 }
 
 script loginPageRedirectScript(query string) {
-	window.location.href="/api/login?"+query;
+	window.location.href="/api/p/login?"+query;
 }

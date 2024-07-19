@@ -33,7 +33,7 @@ templ ConnectionCard(connection ConnectionWithAccount, defaultConnID string) {
 					}
 				</div>
 				if connection.Metadata["verified"] != true {
-					<form action={ templ.URL("/api/auth/wargaming/login/" + connection.Account.Realm) }>
+					<form action={ templ.URL("/api/p/auth/wargaming/login/" + connection.Account.Realm) }>
 						<button type="submit" class="verify-button btn btn-sm btn-info flex flex-row flex-nowrap items-center justify-between gap-1 font-normal">
 							<span>Verify</span>
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
@@ -56,7 +56,7 @@ templ ConnectionCard(connection ConnectionWithAccount, defaultConnID string) {
 							<button
 								hx-ext="multi-swap"
 								class="verify-button bg-base-200 flex flex-row align-center justify-between gap-1"
-								hx-post={ fmt.Sprintf("/api/connections/%s/default", connection.ID) }
+								hx-post={ fmt.Sprintf("/api/s/connections/%s/default", connection.ID) }
 								hx-swap={ fmt.Sprintf("multi:#connection-%s,#connection-%s:outerHTML", defaultConnID, connection.ID) }
 							>
 								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -70,7 +70,7 @@ templ ConnectionCard(connection ConnectionWithAccount, defaultConnID string) {
 						<button
 							class="verify-button bg-base-200 flex flex-row align-center justify-between gap-1"
 							hx-target={ fmt.Sprintf("#connection-%s", connection.ID) }
-							hx-delete={ "/api/connections/" + connection.ID }
+							hx-delete={ "/api/s/connections/" + connection.ID }
 							hx-swap="delete"
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">

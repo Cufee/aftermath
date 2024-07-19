@@ -2,9 +2,13 @@ package frontend
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
+
 	"net/http"
-	"path/filepath"
+	"net/url"
+
+	"strings"
 
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/core/server"
@@ -13,11 +17,12 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/routes"
 	"github.com/cufee/aftermath/cmd/frontend/routes/api"
 	"github.com/cufee/aftermath/cmd/frontend/routes/api/auth"
-	aWidget "github.com/cufee/aftermath/cmd/frontend/routes/api/widget"
-	"github.com/cufee/aftermath/cmd/frontend/routes/app"
+	wa "github.com/cufee/aftermath/cmd/frontend/routes/api/widget"
+	a "github.com/cufee/aftermath/cmd/frontend/routes/app"
 	"github.com/cufee/aftermath/cmd/frontend/routes/app/widgets"
 	r "github.com/cufee/aftermath/cmd/frontend/routes/redirect"
-	"github.com/cufee/aftermath/cmd/frontend/routes/widget"
+	w "github.com/cufee/aftermath/cmd/frontend/routes/widget"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
 )
 
@@ -34,143 +39,114 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 	}
 
 	// https://go.dev/blog/routing-enhancements
-	return []server.Handler{
-		// assets
-		{
-			Path: get("/assets"),
-			Func: redirect("/"),
-		},
-		{
-			Path: "GET /assets/{_...}",
-			Func: http.StripPrefix("/assets/", http.FileServerFS(assetsFS)).ServeHTTP,
-		},
-		// wildcard to catch all invalid requests
-		{
-			Path: "GET /{pathname...}",
-			Func: handler.Chain(core, routes.ErrorNotFound),
-		},
-		// legal
-		{
-			Path: get("/legal/terms-of-service"),
-			Func: handler.Chain(core, routes.TermsOfService),
-		},
-		{
-			Path: get("/legal/privacy-policy"),
-			Func: handler.Chain(core, routes.PrivacyPolicy),
-		},
-		// common routes
-		{
-			Path: get("/"),
-			Func: handler.Chain(core, routes.Index),
-		},
-		{
-			Path: get("/error"),
-			Func: handler.Chain(core, routes.GenericError),
-		},
-		{
-			Path: get("/login"),
-			Func: handler.Chain(core, routes.LoginStatic),
-		},
-		{
-			Path: get("/linked"),
-			Func: handler.Chain(core, routes.AccountLinked),
-		},
-		// widget
-		{
-			Path: get("/widget"),
-			Func: handler.Chain(core, widget.WidgetHome),
-		},
-		{
-			Path: get("/widget/account/{accountId}"),
-			Func: handler.Chain(core, widget.WidgetPreview),
-		},
-		{
-			Path: get("/widget/account/{accountId}/live"),
-			Func: handler.Chain(core, widget.LiveWidget),
-		},
-		{
-			Path: get("/widget/custom"),
-			Func: redirect("/app/widget"),
-		},
-		{
-			Path: get("/widget/custom/{widgetId}/live"),
-			Func: handler.Chain(core, widget.CustomLiveWidget),
-		},
-		// app routes
-		{
-			Path: get("/app"),
-			Func: handler.Chain(core, app.Index, middleware.SessionCheck),
-		},
-		{
-			Path: get("/app/widgets/new"),
-			Func: handler.Chain(core, widgets.NewCustom, middleware.SessionCheck),
-		},
-		{
-			Path: get("/app/widgets/{widgetId}"),
-			Func: handler.Chain(core, widgets.EditSettings, middleware.SessionCheck),
-		},
-		// api routes
-		{
-			Path: get("/api/login"),
-			Func: handler.Chain(core, api.Login),
-		},
-		{
-			Path: get("/api/auth/discord"),
-			Func: handler.Chain(core, auth.DiscordRedirect),
-		},
-		{
-			Path: get("/api/auth/wargaming/login/{realm}"),
-			Func: handler.Chain(core, auth.WargamingBegin),
-		},
-		{
-			Path: get("/api/auth/wargaming/redirect/{token}"),
-			Func: handler.Chain(core, auth.WargamingRedirect),
-		},
-		{
-			Path: get("/api/widget/mock"),
-			Func: handler.Chain(core, aWidget.MockWidget),
-		},
-		{
-			Path: get("/api/widget/{accountId}"),
-			Func: handler.Chain(core, aWidget.AccountWidget),
-		},
-		{
-			Path: "PATCH /api/widget/custom/{widgetId}/{$}",
-			Func: handler.Chain(core, aWidget.UpdateCustomWidget, middleware.SessionCheck),
-		},
-		{
-			Path: "PATCH /api/widget/custom/{widgetId}/action/{$}",
-			Func: handler.Chain(core, aWidget.QuickAction, middleware.SessionCheck),
-		},
-		{
-			Path: "PATCH /api/widget/custom/{widgetId}/session/{$}",
-			Func: handler.Chain(core, aWidget.ResetSession, middleware.SessionCheck),
-		},
-		{
-			Path: "POST /api/widget/custom/{$}",
-			Func: handler.Chain(core, aWidget.CreateCustomWidget, middleware.SessionCheck),
-		},
-		{
-			Path: "DELETE /api/connections/{connectionId}/{$}",
-			Func: handler.Chain(core, api.RemoveConnection, middleware.SessionCheck),
-		},
-		{
-			Path: "POST /api/connections/{connectionId}/default",
-			Func: handler.Chain(core, api.SetDefaultConnection, middleware.SessionCheck),
-		},
-		// redirects
-		{
-			Path: get("/r/verify/{realm}"),
-			Func: handler.Chain(core, r.VerifyFromDiscord),
-		},
-	}, nil
+	srv := App(core)
+
+	root := srv.Group("/")
+	root.GET("/", routes.Index)
+	root.GET("/login", routes.LoginStatic)
+	root.GET("/error", routes.GenericError)
+	root.GET("/linked", routes.AccountLinked)
+	root.GET("/{pathname...}", routes.ErrorNotFound)
+
+	assets := srv.Group("/assets")
+	assets.GET("/", handler.Redirect("/", http.StatusMovedPermanently))
+	assets.GET("/{_...}", handler.HTTP(http.StripPrefix("/assets/", http.FileServerFS(assetsFS))))
+
+	legal := srv.Group("/legal")
+	legal.GET("/privacy-policy", routes.PrivacyPolicy)
+	legal.GET("/terms-of-service", routes.TermsOfService)
+
+	widget := srv.Group("/widget")
+	widget.GET("/", w.WidgetHome)
+	widget.GET("/account/{accountId}", w.WidgetPreview)
+	widget.GET("/account/{accountId}/live", w.LiveWidget)
+	widget.GET("/custom/{widgetId}/live", w.CustomLiveWidget)
+	widget.GET("/custom", handler.Redirect("/app/widget", http.StatusMovedPermanently))
+
+	app := srv.Group("/app", middleware.SessionCheck)
+	app.GET("/", a.Index)
+	app.GET("/widgets/new", widgets.NewCustom)
+	app.GET("/widgets/{widgetId}", widgets.EditSettings)
+
+	secureApi := srv.Group("/api/s", middleware.SessionCheck)
+	secureApi.PATCH("/widget/custom", wa.CreateCustomWidget)
+	secureApi.PATCH("/widget/custom/{widgetId}", wa.UpdateCustomWidget)
+	secureApi.PATCH("/widget/custom/{widgetId}/action", wa.QuickAction)
+	secureApi.PATCH("/widget/custom/{widgetId}/session", wa.ResetSession)
+
+	secureApi.DELETE("/connections/{connectionId}", api.RemoveConnection)
+	secureApi.PATCH("/connections/{connectionId}/default", api.SetDefaultConnection)
+
+	publicApi := srv.Group("/api/p")
+	publicApi.GET("/login", api.Login)
+	publicApi.GET("/auth/discord", auth.DiscordRedirect)
+	publicApi.GET("/auth/wargaming/login/{realm}", auth.WargamingBegin)
+	publicApi.GET("/auth/wargaming/redirect/{token}", auth.WargamingRedirect)
+	publicApi.GET("/widget/{accountId}", wa.AccountWidget)
+	publicApi.GET("/widget/mock", wa.MockWidget)
+
+	redirect := srv.Group("/r")
+	redirect.GET("/verify/{realm}", r.VerifyFromDiscord)
+
+	return srv.Handlers(), nil
 }
 
-func get(path string) string {
-	// we add the suffix in order to route past the wildcard handler correctly
-	return "GET " + filepath.Join(path, "{$}")
+type app struct {
+	groups []*group
+	core   core.Client
 }
 
-func redirect(path string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) { http.Redirect(w, r, path, http.StatusPermanentRedirect) }
+func App(core core.Client) *app {
+	return &app{core: core}
+}
+
+func (a *app) Group(prefix string, middleware ...handler.Middleware) *group {
+	g := &group{core: a.core, prefix: prefix, middleware: middleware}
+	a.groups = append(a.groups, g)
+	return g
+}
+
+func (a *app) Handlers() []server.Handler {
+	var handlers []server.Handler
+	for _, g := range a.groups {
+		handlers = append(handlers, g.Handlers...)
+	}
+	return handlers
+}
+
+type group struct {
+	core       core.Client
+	prefix     string
+	Handlers   []server.Handler
+	middleware []handler.Middleware
+}
+
+func (g *group) buildPath(m, p string) string {
+	elms := []string{p}
+	if !strings.HasSuffix(p, "...}") {
+		elms = append(elms, "{$}")
+	}
+
+	path, err := url.JoinPath(g.prefix, elms...)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to build a path")
+	}
+	path, _ = url.PathUnescape(path)
+	return fmt.Sprintf("%s %s", strings.ToUpper(m), path)
+}
+
+func (g *group) POST(path string, h handler.Servable, middleware ...handler.Middleware) {
+	g.Handlers = append(g.Handlers, server.Handler{Path: g.buildPath("POST", path), Func: handler.Chain(g.core, h, append(middleware, g.middleware...)...)})
+}
+func (g *group) GET(path string, h handler.Servable, middleware ...handler.Middleware) {
+	g.Handlers = append(g.Handlers, server.Handler{Path: g.buildPath("GET", path), Func: handler.Chain(g.core, h, append(middleware, g.middleware...)...)})
+}
+func (g *group) PUT(path string, h handler.Servable, middleware ...handler.Middleware) {
+	g.Handlers = append(g.Handlers, server.Handler{Path: g.buildPath("PUT", path), Func: handler.Chain(g.core, h, append(middleware, g.middleware...)...)})
+}
+func (g *group) PATCH(path string, h handler.Servable, middleware ...handler.Middleware) {
+	g.Handlers = append(g.Handlers, server.Handler{Path: g.buildPath("PATCH", path), Func: handler.Chain(g.core, h, append(middleware, g.middleware...)...)})
+}
+func (g *group) DELETE(path string, h handler.Servable, middleware ...handler.Middleware) {
+	g.Handlers = append(g.Handlers, server.Handler{Path: g.buildPath("DELETE", path), Func: handler.Chain(g.core, h, append(middleware, g.middleware...)...)})
 }

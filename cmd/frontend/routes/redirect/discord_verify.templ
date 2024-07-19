@@ -21,7 +21,7 @@ var VerifyFromDiscord handler.Partial = func(ctx *handler.Context) (templ.Compon
 templ discordVerifyRedirect(realm string) {
 	@components.DoctypeHTML(discordVerifyHead(realm)) {
 		@logic.EmbedScript(discordVerifyRedirectScript(realm), realm)
-		@components.ManualRedirect("/api/login?from=/api/auth/wargaming/login/" + realm)
+		@components.ManualRedirect("/api/p/login?from=/api/p/auth/wargaming/login/" + realm)
 	}
 }
 
@@ -41,5 +41,5 @@ templ discordVerifyHead(realm string) {
 }
 
 script discordVerifyRedirectScript(realm string) {
-	window.location.href="/api/login?from=/api/auth/wargaming/login/"+realm;
+	window.location.href="/api/p/login?from=/api/p/auth/wargaming/login/"+realm;
 }

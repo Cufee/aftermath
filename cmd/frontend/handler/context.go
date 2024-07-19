@@ -275,3 +275,16 @@ func Chain(core core.Client, serve Servable, middleware ...Middleware) http.Hand
 		}
 	}
 }
+
+func Redirect(url string, code int) Endpoint {
+	return func(ctx *Context) error {
+		return ctx.Redirect(url, code)
+	}
+}
+
+func HTTP(handler http.Handler) Endpoint {
+	return func(ctx *Context) error {
+		handler.ServeHTTP(ctx.w, ctx.r)
+		return nil
+	}
+}

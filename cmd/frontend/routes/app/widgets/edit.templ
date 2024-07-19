@@ -71,7 +71,7 @@ templ WidgetConfiguratorPage(options widget.WidgetWithAccount, errors map[string
 				"hx-swap":   "outerHTML",
 				"hx-target": "#widget-style-settings",
 				"hx-select": "#widget-style-settings",
-				"hx-patch":  "/api/widget/custom/" + options.ID + "/",
+				"hx-patch":  "/api/s/widget/custom/" + options.ID + "/",
 			}, errors)
 		</div>
 	</div>
