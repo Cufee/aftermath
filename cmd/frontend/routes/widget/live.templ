@@ -41,6 +41,9 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 		}
 		return layouts.StyleOnly, nil, errors.New("invalid account id")
 	}
+	if account.Private {
+		return layouts.StyleOnly, nil, ctx.Error(errors.New("private account"), "private accounts cannot be tracked")
+	}
 
 	var opts = []client.RequestOption{client.WithWN8()}
 	if settings.SessionRefID != "" {

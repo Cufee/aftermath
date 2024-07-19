@@ -272,6 +272,9 @@ var ResetSession handler.Partial = func(ctx *handler.Context) (templ.Component, 
 		return nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
 	}
 
+	if time.Since(settings.SessionFrom) < constants.WidgetSessionResetTimeout {
+		return nil, ctx.Error(errors.New("too many requests"))
+	}
 	if settings.AccountID == "" {
 		return nil, ctx.Error(errors.New("widget has no account id set"))
 	}
