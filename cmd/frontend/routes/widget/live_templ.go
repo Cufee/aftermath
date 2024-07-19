@@ -113,8 +113,8 @@ func customLiveWidget(id string, widget templ.Component) templ.Component {
 
 func customLiveWidgetScript(protocol, host, id string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_customLiveWidgetScript_a368`,
-		Function: `function __templ_customLiveWidgetScript_a368(protocol, host, id){const socket = new WebSocket(` + "`" + `${wss}://${host}/api/p/realtime/widget/custom/${id}/` + "`" + `);
+		Name: `__templ_customLiveWidgetScript_183d`,
+		Function: `function __templ_customLiveWidgetScript_183d(protocol, host, id){const socket = new WebSocket(` + "`" + `${protocol}://${host}/api/p/realtime/widget/custom/${id}/` + "`" + `);
 	socket.addEventListener("open", (event) => {
 		console.log("connected")
 	});
@@ -138,8 +138,8 @@ func customLiveWidgetScript(protocol, host, id string) templ.ComponentScript {
 		setTimeout(() => {window.location.reload();}, 5000);
 	});
 }`,
-		Call:       templ.SafeScript(`__templ_customLiveWidgetScript_a368`, protocol, host, id),
-		CallInline: templ.SafeScriptInline(`__templ_customLiveWidgetScript_a368`, protocol, host, id),
+		Call:       templ.SafeScript(`__templ_customLiveWidgetScript_183d`, protocol, host, id),
+		CallInline: templ.SafeScriptInline(`__templ_customLiveWidgetScript_183d`, protocol, host, id),
 	}
 }
 

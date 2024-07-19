@@ -76,7 +76,7 @@ templ customLiveWidget(id string, widget templ.Component) {
 }
 
 script customLiveWidgetScript(protocol, host, id string) {
-	const socket = new WebSocket(`${wss}://${host}/api/p/realtime/widget/custom/${id}/`);
+	const socket = new WebSocket(`${protocol}://${host}/api/p/realtime/widget/custom/${id}/`);
 	socket.addEventListener("open", (event) => {
 		console.log("connected")
 	});
