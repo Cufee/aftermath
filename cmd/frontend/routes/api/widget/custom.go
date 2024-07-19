@@ -211,7 +211,7 @@ var UpdateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 		pctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
 		defer cancel()
 		err = ctx.PubSub().Send(pctx, realtime.Message{Topic: topicID, Strategy: realtime.RouteToAll, Data: "reload"})
-		if err != nil && !errors.As(err, realtime.ErrInvalidTopic) && !errors.As(err, realtime.ErrTopicHasNoListeners) {
+		if err != nil && !errors.Is(err, realtime.ErrInvalidTopic) && !errors.Is(err, realtime.ErrTopicHasNoListeners) {
 			log.Err(err).Str("topic", topicID).Str("widget", widgetID).Msg("failed to update the live widget through pubsub")
 		}
 	}(settings.ID)

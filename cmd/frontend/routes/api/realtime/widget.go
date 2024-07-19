@@ -31,7 +31,7 @@ var WidgetSettings handler.WebSocket = func(ctx *handler.Context) (*websocket.Up
 
 	topicID := fmt.Sprintf("widget-settings-%s", settings.ID)
 	err = ctx.PubSub().NewTopic(topicID)
-	if err != nil && !errors.As(err, realtime.ErrTopicRegistered) {
+	if err != nil && !errors.Is(err, realtime.ErrTopicRegistered) {
 		ctx.SetStatus(http.StatusInternalServerError)
 		return nil, nil, ctx.String("failed to register a pubsub topic")
 	}
