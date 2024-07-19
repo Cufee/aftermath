@@ -133,7 +133,7 @@ func index(user *models.User, connections []components.ConnectionWithAccount, de
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span><div class=\"tooltip\" data-tip=\"This feature is in Beta and might become limited to premium users once released.\"><span class=\"badge badge-outline badge-info font-bold\">BETA <svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4 text-info ml-0.5 -mr-2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z\"></path></svg></span></div></div><div class=\"flex flex-col md:flex-row md:flex-wrap gap-2 w-full\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span> <span class=\"badge badge-outline badge-info font-bold\">BETA</span></div><div class=\"flex flex-col md:flex-row md:flex-wrap gap-2 w-full\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
