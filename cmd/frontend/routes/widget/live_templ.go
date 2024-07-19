@@ -42,8 +42,6 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 		return layouts.StyleOnly, nil, ctx.Error(errors.New("widget has no account id"), "bad widget settings, missing account id")
 	}
 
-	settings.SessionRefID = "asdasdasd"
-
 	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
 	if err != nil {
 		if database.IsNotFound(err) {

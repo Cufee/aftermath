@@ -209,6 +209,7 @@ func (c *client) GetAccountSnapshots(ctx context.Context, accountIDs []string, k
 	if err != nil {
 		return nil, err
 	}
+
 	var snapshots []models.AccountSnapshot
 	for _, r := range records {
 		snapshots = append(snapshots, toAccountSnapshot(r))
@@ -330,5 +331,6 @@ func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy string
 
 	innerQueryString, innerQueryArgs := innerQuery.Query()
 	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(groupBy).Query()
+
 	return queryString, selectFields, innerQueryArgs
 }
