@@ -28,10 +28,10 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 		if database.IsNotFound(err) {
 			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
 		}
-		return layouts.StyleOnly, nil, ctx.Error(err, "failed to get widget settings")
+		return layouts.StyleOnly, nil, ctx.Err(err, "failed to get widget settings")
 	}
 	if settings.AccountID == "" {
-		return layouts.StyleOnly, nil, ctx.Error(errors.New("widget has no account id"), "bad widget settings, missing account id")
+		return layouts.StyleOnly, nil, ctx.Error("bad widget settings, missing account id")
 	}
 
 	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
@@ -42,7 +42,7 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 		return layouts.StyleOnly, nil, errors.New("invalid account id")
 	}
 	if account.Private {
-		return layouts.StyleOnly, nil, ctx.Error(errors.New("private account"), "private accounts cannot be tracked")
+		return layouts.StyleOnly, nil, ctx.Error("private accounts cannot be tracked")
 	}
 
 	var opts = []client.RequestOption{client.WithWN8()}

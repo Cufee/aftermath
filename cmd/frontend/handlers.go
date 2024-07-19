@@ -17,6 +17,7 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/routes"
 	"github.com/cufee/aftermath/cmd/frontend/routes/api"
 	"github.com/cufee/aftermath/cmd/frontend/routes/api/auth"
+	"github.com/cufee/aftermath/cmd/frontend/routes/api/realtime"
 	wa "github.com/cufee/aftermath/cmd/frontend/routes/api/widget"
 	a "github.com/cufee/aftermath/cmd/frontend/routes/app"
 	"github.com/cufee/aftermath/cmd/frontend/routes/app/widgets"
@@ -84,6 +85,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 	publicApi.GET("/auth/wargaming/redirect/{token}", auth.WargamingRedirect)
 	publicApi.GET("/widget/{accountId}", wa.AccountWidget)
 	publicApi.GET("/widget/mock", wa.MockWidget)
+	publicApi.GET("/realtime/widget/custom/{widgetId}", realtime.WidgetSettings)
 
 	redirect := srv.Group("/r")
 	redirect.GET("/verify/{realm}", r.VerifyFromDiscord)
@@ -132,6 +134,10 @@ func (g *group) buildPath(m, p string) string {
 		log.Fatal().Err(err).Msg("failed to build a path")
 	}
 	path, _ = url.PathUnescape(path)
+
+	if m == "" {
+		return path
+	}
 	return fmt.Sprintf("%s %s", strings.ToUpper(m), path)
 }
 

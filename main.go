@@ -35,6 +35,7 @@ import (
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
+	"github.com/cufee/aftermath/internal/realtime"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 
 	"github.com/cufee/aftermath/internal/log"
@@ -90,7 +91,7 @@ func main() {
 	defer cancel()
 
 	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db)
-	stopQueue, err := startQueueFromEnv(globalCtx, db, cacheCoreClient.Wargaming())
+	stopQueue, err := startQueueFromEnv(globalCtx, cacheCoreClient)
 	if err != nil {
 		log.Fatal().Err(err).Msg("startQueueFromEnv failed")
 	}
@@ -235,20 +236,7 @@ func startSchedulerFromEnv(ctx context.Context, coreClient core.Client) (func(),
 	return s.Start(ctx)
 }
 
-func startQueueFromEnv(ctx context.Context, db database.Client, wgClient wargaming.Client) (func(), error) {
-	bsClient, err := blitzstars.NewClient(constants.BlitzStarsApiURL, time.Second*10)
-	if err != nil {
-		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
-	}
-
-	// Fetch client
-	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, db)
-	if err != nil {
-		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
-	}
-
-	// Queue - pulls tasks from database and runs the logic
-	coreClient := core.NewClient(client, wgClient, db)
+func startQueueFromEnv(ctx context.Context, coreClient core.Client) (func(), error) {
 	q := queue.New(constants.SchedulerConcurrentWorkers, func() (core.Client, error) {
 		return coreClient, nil
 	})
@@ -276,7 +264,10 @@ func coreClientsFromEnv(db database.Client) (core.Client, core.Client) {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
 
-	return core.NewClient(liveFetchClient, liveClient, db), core.NewClient(cacheFetchClient, cacheClient, db)
+	// PubSub client - shared across fetch clients
+	pubsub := realtime.NewClient()
+
+	return core.NewClient(liveFetchClient, liveClient, db, pubsub), core.NewClient(cacheFetchClient, cacheClient, db, pubsub)
 }
 
 func loadStaticAssets(static fs.FS) {

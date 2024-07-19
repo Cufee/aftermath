@@ -29,9 +29,9 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 
 	var ids []string
 	var widgets []wc.WidgetWithAccount
-	settings, err := ctx.Database().GetUserWidgetSettings(ctx, user.ID, nil)
+	settings, err := ctx.Database().GetUserWidgetSettings(ctx.Context, user.ID, nil)
 	if err != nil && !database.IsNotFound(err) {
-		return nil, nil, ctx.Error(err, "failed to get widgets")
+		return nil, nil, ctx.Err(err, "failed to get widgets")
 	}
 	for _, widget := range settings {
 		widgets = append(widgets, wc.WidgetWithAccount{WidgetOptions: widget})
@@ -52,7 +52,7 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 	if len(ids) > 0 {
 		accounts, err := ctx.Database().GetAccounts(ctx.Context, ids)
 		if err != nil {
-			return nil, nil, ctx.Error(err, "failed to get account information")
+			return nil, nil, ctx.Err(err, "failed to get account information")
 		}
 		for _, acc := range accounts {
 			connections = append(connections, components.ConnectionWithAccount{
@@ -70,10 +70,10 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 	}
 	defaultConn, _ := user.Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
 
-	return layouts.Main, index(user, connections, defaultConn.ID, 3, widgets, constants.WidgetAccountLimit), nil
+	return layouts.Main, index(connections, defaultConn.ID, 3, widgets, constants.WidgetAccountLimit), nil
 }
 
-func index(user *models.User, connections []components.ConnectionWithAccount, defaultConnID string, linkLimit int, widgets []wc.WidgetWithAccount, widgetsLimit int) templ.Component {
+func index(connections []components.ConnectionWithAccount, defaultConnID string, linkLimit int, widgets []wc.WidgetWithAccount, widgetsLimit int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)

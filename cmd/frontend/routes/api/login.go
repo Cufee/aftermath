@@ -23,12 +23,12 @@ var Login handler.Endpoint = func(ctx *handler.Context) error {
 
 	nonceID, err := logic.RandomString(32)
 	if err != nil {
-		return ctx.Error(err, "failed to authenticate")
+		return ctx.Err(err, "failed to authenticate")
 	}
 
 	identifier, err := ctx.Identifier()
 	if err != nil {
-		return ctx.Error(err, "failed to extract an identifier")
+		return ctx.Err(err, "failed to extract an identifier")
 	}
 	log.Debug().Str("identifier", identifier).Msg("new login request")
 
@@ -40,7 +40,7 @@ var Login handler.Endpoint = func(ctx *handler.Context) error {
 
 	nonce, err := ctx.Database().CreateAuthNonce(ctx.Context, nonceID, identifier, time.Now().Add(time.Minute*5), meta)
 	if err != nil {
-		return ctx.Error(err, "failed to authenticate")
+		return ctx.Err(err, "failed to authenticate")
 	}
 
 	ctx.SetCookie(auth.NewNonceCookie(nonce.PublicID, nonce.ExpiresAt))

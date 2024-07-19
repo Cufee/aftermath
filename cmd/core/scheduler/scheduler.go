@@ -33,6 +33,7 @@ func (s *scheduler) Start(ctx context.Context) (func(), error) {
 
 func RegisterDefaultTasks(s *scheduler, coreClient core.Client) {
 	s.Add("0 * * * *", RestartTasksWorker(coreClient))
+	s.Add("0 15 * * *", CleanupPubSubWorker(coreClient))
 	s.Add("0 5 * * *", CreateCleanupTaskWorker(coreClient)) // delete expired documents
 
 	// Glossary - Do it around the same time WG releases game updates

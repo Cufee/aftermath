@@ -36,7 +36,7 @@ var DiscordRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		log.Debug().Msg("discord redirect missing or invalid nonce")
 		return ctx.Redirect("/login?message=session expired", http.StatusTemporaryRedirect)
 	}
-	err = ctx.Database().SetAuthNonceActive(ctx, nonce.ID, false)
+	err = ctx.Database().SetAuthNonceActive(ctx.Context, nonce.ID, false)
 	if err != nil {
 		log.Err(err).Msg("failed to update nonce active status")
 		return ctx.Redirect("/login?message=session expired", http.StatusTemporaryRedirect)

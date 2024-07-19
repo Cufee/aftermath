@@ -14,7 +14,7 @@ import (
 var WidgetHome handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	widget, err := widget.MockWidget(ctx)
 	if err != nil {
-		return layouts.Main, nil, ctx.Error(err, "failed to generate a widget preview")
+		return layouts.Main, nil, ctx.Err(err, "failed to generate a widget preview")
 	}
 
 	var withUnrated = ctx.Query("ou") != "0"

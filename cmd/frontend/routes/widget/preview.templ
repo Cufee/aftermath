@@ -12,7 +12,7 @@ import (
 var WidgetPreview handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	widget, err := widget.AccountWidget(ctx)
 	if err != nil {
-		return layouts.Main, nil, ctx.Error(err, "failed to generate a widget preview")
+		return layouts.Main, nil, ctx.Err(err, "failed to generate a widget preview")
 	}
 	if widget == nil {
 		return nil, nil, nil

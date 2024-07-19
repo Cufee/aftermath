@@ -63,7 +63,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 
 		_, err := ctx.Database().UpdateConnection(ctx.Context, conn)
 		if err != nil {
-			return ctx.Error(err, "failed to update user connection")
+			return ctx.Err(err, "failed to update user connection")
 		}
 	}
 	if !found {
@@ -75,7 +75,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		}
 		_, err := ctx.Database().UpsertConnection(ctx.Context, conn)
 		if err != nil {
-			return ctx.Error(err, "failed to update user connection")
+			return ctx.Err(err, "failed to update user connection")
 		}
 	}
 

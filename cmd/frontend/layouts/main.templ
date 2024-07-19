@@ -8,7 +8,7 @@ import (
 var Main handler.Layout = func(ctx *handler.Context, children ...templ.Component) (templ.Component, error) {
 	navbar, err := components.Navbar(ctx)
 	if err != nil {
-		return nil, ctx.Error(err, "failed to render a page")
+		return nil, ctx.Err(err, "failed to render a page")
 	}
 
 	return main(components.Head(), navbar, children...), nil

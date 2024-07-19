@@ -189,11 +189,11 @@ func UpdateGlossaryWorker(client core.Client) func() {
 	}
 }
 
-// func CreateLeaderboardTasksWorker(client core.Client, realm string, scoreType models.ScoreType) func() {
-// 	return func() {
-// 		err := tasks.CreateUpdateLeaderboardsTasks(client, realm, scoreType)
-// 		if err != nil {
-// 			log.Err(err).Str("realm", realm).Msg("failed to schedule leaderboard update tasks")
-// 		}
-// 	}
-// }
+func CleanupPubSubWorker(client core.Client) func() {
+	return func() {
+		err := client.PubSub().Cleanup()
+		if err != nil {
+			log.Err(err).Msg("failed to cleanup pubsub")
+		}
+	}
+}

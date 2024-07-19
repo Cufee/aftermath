@@ -2,7 +2,7 @@ package widget
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -18,6 +18,8 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
+	"github.com/cufee/aftermath/internal/realtime"
+	"github.com/pkg/errors"
 )
 
 type widgetSettingsPayload struct {
@@ -98,15 +100,15 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 
 	existing, err := ctx.Database().GetUserWidgetSettings(ctx.Context, user.ID, nil)
 	if err != nil && !database.IsNotFound(err) {
-		return nil, ctx.Error(err, "failed to get user widgets")
+		return nil, ctx.Err(err, "failed to get user widgets")
 	}
 	if len(existing) >= constants.WidgetAccountLimit {
-		return nil, ctx.Error(errors.New("widget limit reached"))
+		return nil, ctx.Error("widget limit reached")
 	}
 
 	form, err := ctx.FormValues()
 	if err != nil {
-		return nil, ctx.Error(err, "invalid form data")
+		return nil, ctx.Err(err, "invalid form data")
 	}
 
 	var data widgetSettingsPayload
@@ -141,7 +143,7 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 
 	created, err := ctx.Database().CreateWidgetSettings(ctx.Context, user.ID, settings)
 	if err != nil {
-		return nil, ctx.Error(err, "failed to create widget settings")
+		return nil, ctx.Err(err, "failed to create widget settings")
 	}
 	return nil, ctx.Redirect("/app/widgets/"+created.ID, http.StatusTemporaryRedirect)
 }
@@ -154,12 +156,12 @@ var UpdateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 
 	widgetID := ctx.Path("widgetId")
 	if widgetID == "" {
-		return nil, ctx.Error(errors.New("invalid widget id"))
+		return nil, ctx.Error("invalid widget id")
 	}
 
 	form, err := ctx.FormValues()
 	if err != nil {
-		return nil, ctx.Error(err, "invalid form data")
+		return nil, ctx.Err(err, "invalid form data")
 	}
 
 	var data widgetSettingsPayload
@@ -168,9 +170,9 @@ var UpdateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
 	if err != nil {
 		if database.IsNotFound(err) {
-			return nil, ctx.Error(errors.New("widget not found"))
+			return nil, ctx.Error("widget not found")
 		}
-		return nil, ctx.Error(err, "failed to get widget settings")
+		return nil, ctx.Err(err, "failed to get widget settings")
 	}
 	if settings.UserID != user.ID {
 		return nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
@@ -201,8 +203,18 @@ var UpdateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 
 	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Context, settings.ID, settings)
 	if err != nil {
-		return nil, ctx.Error(err, "failed to update widget settings")
+		return nil, ctx.Err(err, "failed to update widget settings")
 	}
+
+	go func(widgetID string) {
+		topicID := fmt.Sprintf("widget-settings-%s", widgetID)
+		pctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+		defer cancel()
+		err = ctx.PubSub().Send(pctx, realtime.Message{Topic: topicID, Strategy: realtime.RouteToAll, Data: "reload"})
+		if err != nil && !errors.As(err, realtime.ErrInvalidTopic) && !errors.As(err, realtime.ErrTopicHasNoListeners) {
+			log.Err(err).Str("topic", topicID).Str("widget", widgetID).Msg("failed to update the live widget through pubsub")
+		}
+	}(settings.ID)
 
 	return widgets.WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: updated, Account: account}, nil), nil
 }
@@ -215,12 +227,12 @@ var QuickAction handler.Partial = func(ctx *handler.Context) (templ.Component, e
 
 	widgetID := ctx.Path("widgetId")
 	if widgetID == "" {
-		return nil, ctx.Error(errors.New("invalid widget id"))
+		return nil, ctx.Error("invalid widget id")
 	}
 
 	form, err := ctx.FormValues()
 	if err != nil {
-		return nil, ctx.Error(err, "invalid form data")
+		return nil, ctx.Err(err, "invalid form data")
 	}
 
 	var data widgetSettingsPayload
@@ -229,9 +241,9 @@ var QuickAction handler.Partial = func(ctx *handler.Context) (templ.Component, e
 	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
 	if err != nil {
 		if database.IsNotFound(err) {
-			return nil, ctx.Error(errors.New("widget not found"))
+			return nil, ctx.Error("widget not found")
 		}
-		return nil, ctx.Error(err, "failed to get widget settings")
+		return nil, ctx.Err(err, "failed to get widget settings")
 	}
 	if settings.UserID != user.ID {
 		return nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
@@ -239,12 +251,12 @@ var QuickAction handler.Partial = func(ctx *handler.Context) (templ.Component, e
 	data.updateOptions(&settings)
 
 	if settings.AccountID == "" {
-		return nil, ctx.Error(errors.New("widget has no account id set"))
+		return nil, ctx.Error("widget has no account id set")
 	}
 
 	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Context, settings.ID, settings)
 	if err != nil {
-		return nil, ctx.Error(err, "failed to update widget settings")
+		return nil, ctx.Err(err, "failed to update widget settings")
 	}
 
 	return widget.QuickSettingButton(ctx.Query("field"), updated), nil
@@ -258,31 +270,31 @@ var ResetSession handler.Partial = func(ctx *handler.Context) (templ.Component, 
 
 	widgetID := ctx.Path("widgetId")
 	if widgetID == "" {
-		return nil, ctx.Error(errors.New("invalid widget id"))
+		return nil, ctx.Error("invalid widget id")
 	}
 
 	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
 	if err != nil {
 		if database.IsNotFound(err) {
-			return nil, ctx.Error(errors.New("widget not found"))
+			return nil, ctx.Error("widget not found")
 		}
-		return nil, ctx.Error(err, "failed to get widget settings")
+		return nil, ctx.Err(err, "failed to get widget settings")
 	}
 	if settings.UserID != user.ID {
 		return nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
 	}
 
 	if time.Since(settings.SessionFrom) < constants.WidgetSessionResetTimeout {
-		return nil, ctx.Error(errors.New("too many requests"))
+		return nil, ctx.Error("too many requests")
 	}
 	if settings.AccountID == "" {
-		return nil, ctx.Error(errors.New("widget has no account id set"))
+		return nil, ctx.Error("widget has no account id set")
 	}
 
 	settings.SessionFrom = time.Now()
 	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Context, settings.ID, settings)
 	if err != nil {
-		return nil, ctx.Error(err, "failed to update widget settings")
+		return nil, ctx.Err(err, "failed to update widget settings")
 	}
 
 	go func(widgetID, accountID string) {

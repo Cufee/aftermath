@@ -9,7 +9,6 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/cufee/aftermath/cmd/frontend/components/connections"
@@ -26,12 +25,12 @@ var RemoveConnection handler.Endpoint = func(ctx *handler.Context) error {
 
 	connID := ctx.Path("connectionId")
 	if connID == "" {
-		return ctx.Error(errors.New("connection id path parameter is empty"))
+		return ctx.Error("connection id path parameter is empty")
 	}
 
-	err = ctx.Database().DeleteUserConnection(ctx, user.ID, connID)
+	err = ctx.Database().DeleteUserConnection(ctx.Context, user.ID, connID)
 	if err != nil {
-		return ctx.Error(err, "failed to delete a connection")
+		return ctx.Err(err, "failed to delete a connection")
 	}
 
 	return nil
@@ -45,7 +44,7 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 
 	connID := ctx.Path("connectionId")
 	if connID == "" {
-		return nil, ctx.Error(errors.New("connection id path parameter is empty"))
+		return nil, ctx.Error("connection id path parameter is empty")
 	}
 
 	var previous, updated models.UserConnection
@@ -55,9 +54,9 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 		}
 
 		conn.Metadata["default"] = conn.ID == connID
-		u, err := ctx.Database().UpdateConnection(ctx, conn)
+		u, err := ctx.Database().UpdateConnection(ctx.Context, conn)
 		if err != nil {
-			return nil, ctx.Error(err, "failed to update a connection")
+			return nil, ctx.Err(err, "failed to update a connection")
 		}
 
 		if conn.ID == connID {
@@ -73,17 +72,16 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 	}
 	if len(ids) < 1 {
 		ctx.SetStatus(http.StatusNotFound)
-		return nil, ctx.Error(errors.New("connection not found"), "connection not found")
+		return nil, ctx.Error("connection not found")
 	}
 
 	accounts, err := ctx.Database().GetAccounts(ctx.Context, ids)
 	if err != nil {
-		return nil, ctx.Error(err, "failed to find connected accounts")
+		return nil, ctx.Err(err, "failed to find connected accounts")
 	}
 
 	var withProps []connections.ConnectionWithAccount
 	for _, a := range accounts {
-		println(previous.ID, updated.ID, a.ID)
 		if previous.ReferenceID == a.ID {
 			withProps = append(withProps, connections.ConnectionWithAccount{
 				UserConnection: previous,

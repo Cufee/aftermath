@@ -31,13 +31,13 @@ var EditSettings handler.Page = func(ctx *handler.Context) (handler.Layout, temp
 
 	options, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
 	if database.IsNotFound(err) {
-		return nil, nil, ctx.Error(err, "widget not found")
+		return nil, nil, ctx.Err(err, "widget not found")
 	}
 	if options.UserID != user.ID {
-		return nil, nil, ctx.Error(err, "widget not found")
+		return nil, nil, ctx.Err(err, "widget not found")
 	}
 	if err != nil {
-		return nil, nil, ctx.Error(err, "failed to get widget settings")
+		return nil, nil, ctx.Err(err, "failed to get widget settings")
 	}
 	if options.AccountID == "" {
 		return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: models.Account{}}, nil), nil
