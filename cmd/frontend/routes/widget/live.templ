@@ -72,11 +72,11 @@ templ customLiveWidget(id string, widget templ.Component) {
 	<style>
     :root { background-color: rgba(0, 0, 0, 0); white-space: nowrap; }
   </style>
-	@logic.EmbedMinifiedScript(customLiveWidgetScript(constants.FrontendHost, id), constants.FrontendHost, id)
+	@logic.EmbedMinifiedScript(customLiveWidgetScript(logic.StringIfElse("ws", "wss", constants.DevMode), constants.FrontendHost, id), logic.StringIfElse("ws", "wss", constants.DevMode), constants.FrontendHost, id)
 }
 
-script customLiveWidgetScript(host, id string) {
-	const socket = new WebSocket(`ws://${host}/api/p/realtime/widget/custom/${id}/`);
+script customLiveWidgetScript(protocol, host, id string) {
+	const socket = new WebSocket(`${wss}://${host}/api/p/realtime/widget/custom/${id}/`);
 	socket.addEventListener("open", (event) => {
 		console.log("connected")
 	});

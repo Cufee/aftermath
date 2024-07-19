@@ -103,7 +103,7 @@ func customLiveWidget(id string, widget templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = logic.EmbedMinifiedScript(customLiveWidgetScript(constants.FrontendHost, id), constants.FrontendHost, id).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = logic.EmbedMinifiedScript(customLiveWidgetScript(logic.StringIfElse("ws", "wss", constants.DevMode), constants.FrontendHost, id), logic.StringIfElse("ws", "wss", constants.DevMode), constants.FrontendHost, id).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -111,10 +111,10 @@ func customLiveWidget(id string, widget templ.Component) templ.Component {
 	})
 }
 
-func customLiveWidgetScript(host, id string) templ.ComponentScript {
+func customLiveWidgetScript(protocol, host, id string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_customLiveWidgetScript_d361`,
-		Function: `function __templ_customLiveWidgetScript_d361(host, id){const socket = new WebSocket(` + "`" + `ws://${host}/api/p/realtime/widget/custom/${id}/` + "`" + `);
+		Name: `__templ_customLiveWidgetScript_a368`,
+		Function: `function __templ_customLiveWidgetScript_a368(protocol, host, id){const socket = new WebSocket(` + "`" + `${wss}://${host}/api/p/realtime/widget/custom/${id}/` + "`" + `);
 	socket.addEventListener("open", (event) => {
 		console.log("connected")
 	});
@@ -138,8 +138,8 @@ func customLiveWidgetScript(host, id string) templ.ComponentScript {
 		setTimeout(() => {window.location.reload();}, 5000);
 	});
 }`,
-		Call:       templ.SafeScript(`__templ_customLiveWidgetScript_d361`, host, id),
-		CallInline: templ.SafeScriptInline(`__templ_customLiveWidgetScript_d361`, host, id),
+		Call:       templ.SafeScript(`__templ_customLiveWidgetScript_a368`, protocol, host, id),
+		CallInline: templ.SafeScriptInline(`__templ_customLiveWidgetScript_a368`, protocol, host, id),
 	}
 }
 

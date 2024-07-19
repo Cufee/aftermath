@@ -259,6 +259,16 @@ var QuickAction handler.Partial = func(ctx *handler.Context) (templ.Component, e
 		return nil, ctx.Err(err, "failed to update widget settings")
 	}
 
+	go func(widgetID string) {
+		topicID := fmt.Sprintf("widget-settings-%s", widgetID)
+		pctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+		defer cancel()
+		err = ctx.PubSub().Send(pctx, realtime.Message{Topic: topicID, Strategy: realtime.RouteToAll, Data: "reload"})
+		if err != nil && !errors.Is(err, realtime.ErrInvalidTopic) && !errors.Is(err, realtime.ErrTopicHasNoListeners) {
+			log.Err(err).Str("topic", topicID).Str("widget", widgetID).Msg("failed to update the live widget through pubsub")
+		}
+	}(settings.ID)
+
 	return widget.QuickSettingButton(ctx.Query("field"), updated), nil
 }
 
@@ -304,7 +314,14 @@ var ResetSession handler.Partial = func(ctx *handler.Context) (templ.Component, 
 		if err != nil {
 			log.Err(err).Str("widgetId", widgetID).Str("accountId", accountID).Msg("failed to refresh a session for widget")
 		}
-		// TODO: notify the live widget here
+
+		topicID := fmt.Sprintf("widget-settings-%s", widgetID)
+		pctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+		defer cancel()
+		err = ctx.PubSub().Send(pctx, realtime.Message{Topic: topicID, Strategy: realtime.RouteToAll, Data: "reload"})
+		if err != nil && !errors.Is(err, realtime.ErrInvalidTopic) && !errors.Is(err, realtime.ErrTopicHasNoListeners) {
+			log.Err(err).Str("topic", topicID).Str("widget", widgetID).Msg("failed to update the live widget through pubsub")
+		}
 	}(updated.ID, updated.AccountID)
 
 	return widget.SessionResetButton(updated.ID, constants.WidgetSessionResetTimeout.Seconds()), nil
