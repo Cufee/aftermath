@@ -13,6 +13,8 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/components/widget"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/client/v1"
@@ -62,16 +64,16 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 		if errors.As(err, fetch.ErrSessionNotFound) {
 			cards, _, err = ctx.Client.Stats(language.English).EmptySessionCards(ctx.Context, account.ID)
 			if err == nil {
-				return layouts.StyleOnly, customLiveWidget(widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
+				return layouts.StyleOnly, customLiveWidget(settings.ID, widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
 			}
 		}
 		return layouts.StyleOnly, nil, err
 	}
 
-	return layouts.StyleOnly, customLiveWidget(widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
+	return layouts.StyleOnly, customLiveWidget(settings.ID, widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
 }
 
-func customLiveWidget(widget templ.Component) templ.Component {
+func customLiveWidget(id string, widget templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -101,8 +103,44 @@ func customLiveWidget(widget templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = logic.EmbedMinifiedScript(customLiveWidgetScript(constants.FrontendHost, id), constants.FrontendHost, id).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func customLiveWidgetScript(host, id string) templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_customLiveWidgetScript_d361`,
+		Function: `function __templ_customLiveWidgetScript_d361(host, id){const socket = new WebSocket(` + "`" + `ws://${host}/api/p/realtime/widget/custom/${id}/` + "`" + `);
+	socket.addEventListener("open", (event) => {
+		console.log("connected")
+	});
+	socket.addEventListener("message", (event) => {
+		try {
+			const data = JSON.parse(event.data)
+			if (data.command === "reload") {
+				window.location.reload();
+			}
+		} catch (e) {
+			console.error(r)
+			setTimeout(() => {window.location.reload();}, 5000);
+		}
+	});
+	socket.addEventListener("error", (event) => {
+		console.error(event.data)
+		setTimeout(() => {window.location.reload();}, 5000);
+	});
+	socket.addEventListener("close", (event) => {
+		console.error(event.data)
+		setTimeout(() => {window.location.reload();}, 5000);
+	});
+}`,
+		Call:       templ.SafeScript(`__templ_customLiveWidgetScript_d361`, host, id),
+		CallInline: templ.SafeScriptInline(`__templ_customLiveWidgetScript_d361`, host, id),
+	}
 }
 
 var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
