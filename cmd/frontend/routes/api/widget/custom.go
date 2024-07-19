@@ -1,11 +1,13 @@
 package widget
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/cufee/aftermath/cmd/frontend/components/widget"
@@ -14,6 +16,8 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/logic"
 )
 
 type widgetSettingsPayload struct {
@@ -244,4 +248,49 @@ var QuickAction handler.Partial = func(ctx *handler.Context) (templ.Component, e
 	}
 
 	return widget.QuickSettingButton(ctx.Query("field"), updated), nil
+}
+
+var ResetSession handler.Partial = func(ctx *handler.Context) (templ.Component, error) {
+	user, err := ctx.SessionUser()
+	if err != nil {
+		return nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
+	}
+
+	widgetID := ctx.Path("widgetId")
+	if widgetID == "" {
+		return nil, ctx.Error(errors.New("invalid widget id"))
+	}
+
+	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
+	if err != nil {
+		if database.IsNotFound(err) {
+			return nil, ctx.Error(errors.New("widget not found"))
+		}
+		return nil, ctx.Error(err, "failed to get widget settings")
+	}
+	if settings.UserID != user.ID {
+		return nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
+	}
+
+	if settings.AccountID == "" {
+		return nil, ctx.Error(errors.New("widget has no account id set"))
+	}
+
+	settings.SessionFrom = time.Now()
+	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Context, settings.ID, settings)
+	if err != nil {
+		return nil, ctx.Error(err, "failed to update widget settings")
+	}
+
+	go func(widgetID, accountID string) {
+		c, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		defer cancel()
+		_, err := logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(accountID), false, widgetID, []string{accountID})
+		if err != nil {
+			log.Err(err).Str("widgetId", widgetID).Str("accountId", accountID).Msg("failed to refresh a session for widget")
+		}
+		// TODO: notify the live widget here
+	}(updated.ID, updated.AccountID)
+
+	return widget.SessionResetButton(updated.ID, constants.WidgetSessionResetTimeout.Seconds()), nil
 }

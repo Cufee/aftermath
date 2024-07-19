@@ -711,6 +711,7 @@ var (
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "title", Type: field.TypeString, Nullable: true},
 		{Name: "session_from", Type: field.TypeTime, Nullable: true},
+		{Name: "session_reference_id", Type: field.TypeString, Nullable: true},
 		{Name: "metadata", Type: field.TypeJSON},
 		{Name: "styles", Type: field.TypeJSON},
 		{Name: "user_id", Type: field.TypeString},
@@ -723,7 +724,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "widget_settings_users_widgets",
-				Columns:    []*schema.Column{WidgetSettingsColumns[8]},
+				Columns:    []*schema.Column{WidgetSettingsColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

@@ -90,6 +90,20 @@ func (wsc *WidgetSettingsCreate) SetNillableSessionFrom(t *time.Time) *WidgetSet
 	return wsc
 }
 
+// SetSessionReferenceID sets the "session_reference_id" field.
+func (wsc *WidgetSettingsCreate) SetSessionReferenceID(s string) *WidgetSettingsCreate {
+	wsc.mutation.SetSessionReferenceID(s)
+	return wsc
+}
+
+// SetNillableSessionReferenceID sets the "session_reference_id" field if the given value is not nil.
+func (wsc *WidgetSettingsCreate) SetNillableSessionReferenceID(s *string) *WidgetSettingsCreate {
+	if s != nil {
+		wsc.SetSessionReferenceID(*s)
+	}
+	return wsc
+}
+
 // SetMetadata sets the "metadata" field.
 func (wsc *WidgetSettingsCreate) SetMetadata(m map[string]interface{}) *WidgetSettingsCreate {
 	wsc.mutation.SetMetadata(m)
@@ -247,6 +261,10 @@ func (wsc *WidgetSettingsCreate) createSpec() (*WidgetSettings, *sqlgraph.Create
 	if value, ok := wsc.mutation.SessionFrom(); ok {
 		_spec.SetField(widgetsettings.FieldSessionFrom, field.TypeTime, value)
 		_node.SessionFrom = value
+	}
+	if value, ok := wsc.mutation.SessionReferenceID(); ok {
+		_spec.SetField(widgetsettings.FieldSessionReferenceID, field.TypeString, value)
+		_node.SessionReferenceID = value
 	}
 	if value, ok := wsc.mutation.Metadata(); ok {
 		_spec.SetField(widgetsettings.FieldMetadata, field.TypeJSON, value)

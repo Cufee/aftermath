@@ -95,6 +95,11 @@ func SessionFrom(v time.Time) predicate.WidgetSettings {
 	return predicate.WidgetSettings(sql.FieldEQ(FieldSessionFrom, v))
 }
 
+// SessionReferenceID applies equality check predicate on the "session_reference_id" field. It's identical to SessionReferenceIDEQ.
+func SessionReferenceID(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldEQ(FieldSessionReferenceID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.WidgetSettings {
 	return predicate.WidgetSettings(sql.FieldEQ(FieldCreatedAt, v))
@@ -428,6 +433,81 @@ func SessionFromIsNil() predicate.WidgetSettings {
 // SessionFromNotNil applies the NotNil predicate on the "session_from" field.
 func SessionFromNotNil() predicate.WidgetSettings {
 	return predicate.WidgetSettings(sql.FieldNotNull(FieldSessionFrom))
+}
+
+// SessionReferenceIDEQ applies the EQ predicate on the "session_reference_id" field.
+func SessionReferenceIDEQ(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldEQ(FieldSessionReferenceID, v))
+}
+
+// SessionReferenceIDNEQ applies the NEQ predicate on the "session_reference_id" field.
+func SessionReferenceIDNEQ(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldNEQ(FieldSessionReferenceID, v))
+}
+
+// SessionReferenceIDIn applies the In predicate on the "session_reference_id" field.
+func SessionReferenceIDIn(vs ...string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldIn(FieldSessionReferenceID, vs...))
+}
+
+// SessionReferenceIDNotIn applies the NotIn predicate on the "session_reference_id" field.
+func SessionReferenceIDNotIn(vs ...string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldNotIn(FieldSessionReferenceID, vs...))
+}
+
+// SessionReferenceIDGT applies the GT predicate on the "session_reference_id" field.
+func SessionReferenceIDGT(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldGT(FieldSessionReferenceID, v))
+}
+
+// SessionReferenceIDGTE applies the GTE predicate on the "session_reference_id" field.
+func SessionReferenceIDGTE(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldGTE(FieldSessionReferenceID, v))
+}
+
+// SessionReferenceIDLT applies the LT predicate on the "session_reference_id" field.
+func SessionReferenceIDLT(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldLT(FieldSessionReferenceID, v))
+}
+
+// SessionReferenceIDLTE applies the LTE predicate on the "session_reference_id" field.
+func SessionReferenceIDLTE(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldLTE(FieldSessionReferenceID, v))
+}
+
+// SessionReferenceIDContains applies the Contains predicate on the "session_reference_id" field.
+func SessionReferenceIDContains(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldContains(FieldSessionReferenceID, v))
+}
+
+// SessionReferenceIDHasPrefix applies the HasPrefix predicate on the "session_reference_id" field.
+func SessionReferenceIDHasPrefix(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldHasPrefix(FieldSessionReferenceID, v))
+}
+
+// SessionReferenceIDHasSuffix applies the HasSuffix predicate on the "session_reference_id" field.
+func SessionReferenceIDHasSuffix(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldHasSuffix(FieldSessionReferenceID, v))
+}
+
+// SessionReferenceIDIsNil applies the IsNil predicate on the "session_reference_id" field.
+func SessionReferenceIDIsNil() predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldIsNull(FieldSessionReferenceID))
+}
+
+// SessionReferenceIDNotNil applies the NotNil predicate on the "session_reference_id" field.
+func SessionReferenceIDNotNil() predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldNotNull(FieldSessionReferenceID))
+}
+
+// SessionReferenceIDEqualFold applies the EqualFold predicate on the "session_reference_id" field.
+func SessionReferenceIDEqualFold(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldEqualFold(FieldSessionReferenceID, v))
+}
+
+// SessionReferenceIDContainsFold applies the ContainsFold predicate on the "session_reference_id" field.
+func SessionReferenceIDContainsFold(v string) predicate.WidgetSettings {
+	return predicate.WidgetSettings(sql.FieldContainsFold(FieldSessionReferenceID, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

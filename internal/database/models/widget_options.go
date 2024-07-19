@@ -38,10 +38,11 @@ type WidgetOptions struct {
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 
-	Title       string    `json:"title"`
-	UserID      string    `json:"userId"`
-	AccountID   string    `json:"accountId"`
-	SessionFrom time.Time `json:"sessionFrom"`
+	Title        string    `json:"title"`
+	UserID       string    `json:"userId"`
+	AccountID    string    `json:"accountId"`
+	SessionFrom  time.Time `json:"sessionFrom"`
+	SessionRefID string    `json:"sessionReferenceId"`
 
 	Style WidgetStyling `json:"style"`
 

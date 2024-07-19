@@ -28,6 +28,7 @@ type Client interface {
 
 	SessionCards(ctx context.Context, accountId string, from time.Time, opts ...RequestOption) (session.Cards, Metadata, error)
 	SessionImage(ctx context.Context, accountId string, from time.Time, opts ...RequestOption) (Image, Metadata, error)
+	EmptySessionCards(ctx context.Context, accountId string) (session.Cards, Metadata, error)
 
 	ReplayCards(ctx context.Context, replayURL string, o ...RequestOption) (replay.Cards, Metadata, error)
 	ReplayImage(ctx context.Context, replayURL string, o ...RequestOption) (Image, Metadata, error)

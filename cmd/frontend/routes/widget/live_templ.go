@@ -16,6 +16,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/client/v1"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/pkg/errors"
 	"golang.org/x/text/language"
 	"net/http"
@@ -35,24 +36,35 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 		if database.IsNotFound(err) {
 			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
 		}
-		return nil, nil, ctx.Error(err, "failed to get widget settings")
+		return layouts.StyleOnly, nil, ctx.Error(err, "failed to get widget settings")
 	}
 	if settings.AccountID == "" {
-		return nil, nil, ctx.Error(errors.New("widget has no account id"), "bad widget settings, missing account id")
+		return layouts.StyleOnly, nil, ctx.Error(errors.New("widget has no account id"), "bad widget settings, missing account id")
 	}
+
+	settings.SessionRefID = "asdasdasd"
 
 	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
 	if err != nil {
 		if database.IsNotFound(err) {
 			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
 		}
-		return nil, nil, errors.New("invalid account id")
+		return layouts.StyleOnly, nil, errors.New("invalid account id")
 	}
 
 	var opts = []client.RequestOption{client.WithWN8()}
+	if settings.SessionRefID != "" {
+		opts = append(opts, client.WithReferenceID(settings.SessionRefID))
+	}
 	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
 	if err != nil {
-		return nil, nil, err
+		if errors.As(err, fetch.ErrSessionNotFound) {
+			cards, _, err = ctx.Client.Stats(language.English).EmptySessionCards(ctx.Context, account.ID)
+			if err == nil {
+				return layouts.StyleOnly, customLiveWidget(widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
+			}
+		}
+		return layouts.StyleOnly, nil, err
 	}
 
 	return layouts.StyleOnly, customLiveWidget(widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil

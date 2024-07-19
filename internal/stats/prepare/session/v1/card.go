@@ -146,7 +146,11 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	}
 
 	// Vehicle Highlights
-	minVehicleBattles := max(int(session.RegularBattles.Battles.Float())/len(session.RegularBattles.Vehicles)-1, 1)
+	var minVehicleBattles = 1
+	if len(session.RegularBattles.Vehicles) > 0 {
+		minVehicleBattles = int(session.RegularBattles.Battles.Float()) / len(session.RegularBattles.Vehicles)
+	}
+
 	highlightedVehicles, err := common.GetHighlightedVehicles(highlights, session.RegularBattles.Vehicles, minVehicleBattles)
 	if err != nil {
 		return Cards{}, err

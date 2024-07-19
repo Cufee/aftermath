@@ -26,6 +26,8 @@ const (
 	FieldUserID = "user_id"
 	// FieldSessionFrom holds the string denoting the session_from field in the database.
 	FieldSessionFrom = "session_from"
+	// FieldSessionReferenceID holds the string denoting the session_reference_id field in the database.
+	FieldSessionReferenceID = "session_reference_id"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
 	// FieldStyles holds the string denoting the styles field in the database.
@@ -52,6 +54,7 @@ var Columns = []string{
 	FieldTitle,
 	FieldUserID,
 	FieldSessionFrom,
+	FieldSessionReferenceID,
 	FieldMetadata,
 	FieldStyles,
 }
@@ -113,6 +116,11 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 // BySessionFrom orders the results by the session_from field.
 func BySessionFrom(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSessionFrom, opts...).ToFunc()
+}
+
+// BySessionReferenceID orders the results by the session_reference_id field.
+func BySessionReferenceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSessionReferenceID, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

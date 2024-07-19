@@ -32,6 +32,8 @@ type WidgetSettings struct {
 	UserID string `json:"user_id,omitempty"`
 	// SessionFrom holds the value of the "session_from" field.
 	SessionFrom time.Time `json:"session_from,omitempty"`
+	// SessionReferenceID holds the value of the "session_reference_id" field.
+	SessionReferenceID string `json:"session_reference_id,omitempty"`
 	// Metadata holds the value of the "metadata" field.
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// Styles holds the value of the "styles" field.
@@ -69,7 +71,7 @@ func (*WidgetSettings) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case widgetsettings.FieldMetadata, widgetsettings.FieldStyles:
 			values[i] = new([]byte)
-		case widgetsettings.FieldID, widgetsettings.FieldReferenceID, widgetsettings.FieldTitle, widgetsettings.FieldUserID:
+		case widgetsettings.FieldID, widgetsettings.FieldReferenceID, widgetsettings.FieldTitle, widgetsettings.FieldUserID, widgetsettings.FieldSessionReferenceID:
 			values[i] = new(sql.NullString)
 		case widgetsettings.FieldCreatedAt, widgetsettings.FieldUpdatedAt, widgetsettings.FieldSessionFrom:
 			values[i] = new(sql.NullTime)
@@ -129,6 +131,12 @@ func (ws *WidgetSettings) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field session_from", values[i])
 			} else if value.Valid {
 				ws.SessionFrom = value.Time
+			}
+		case widgetsettings.FieldSessionReferenceID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field session_reference_id", values[i])
+			} else if value.Valid {
+				ws.SessionReferenceID = value.String
 			}
 		case widgetsettings.FieldMetadata:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -204,6 +212,9 @@ func (ws *WidgetSettings) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("session_from=")
 	builder.WriteString(ws.SessionFrom.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("session_reference_id=")
+	builder.WriteString(ws.SessionReferenceID)
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", ws.Metadata))

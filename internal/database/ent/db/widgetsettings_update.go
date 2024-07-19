@@ -90,6 +90,26 @@ func (wsu *WidgetSettingsUpdate) ClearSessionFrom() *WidgetSettingsUpdate {
 	return wsu
 }
 
+// SetSessionReferenceID sets the "session_reference_id" field.
+func (wsu *WidgetSettingsUpdate) SetSessionReferenceID(s string) *WidgetSettingsUpdate {
+	wsu.mutation.SetSessionReferenceID(s)
+	return wsu
+}
+
+// SetNillableSessionReferenceID sets the "session_reference_id" field if the given value is not nil.
+func (wsu *WidgetSettingsUpdate) SetNillableSessionReferenceID(s *string) *WidgetSettingsUpdate {
+	if s != nil {
+		wsu.SetSessionReferenceID(*s)
+	}
+	return wsu
+}
+
+// ClearSessionReferenceID clears the value of the "session_reference_id" field.
+func (wsu *WidgetSettingsUpdate) ClearSessionReferenceID() *WidgetSettingsUpdate {
+	wsu.mutation.ClearSessionReferenceID()
+	return wsu
+}
+
 // SetMetadata sets the "metadata" field.
 func (wsu *WidgetSettingsUpdate) SetMetadata(m map[string]interface{}) *WidgetSettingsUpdate {
 	wsu.mutation.SetMetadata(m)
@@ -195,6 +215,12 @@ func (wsu *WidgetSettingsUpdate) sqlSave(ctx context.Context) (n int, err error)
 	if wsu.mutation.SessionFromCleared() {
 		_spec.ClearField(widgetsettings.FieldSessionFrom, field.TypeTime)
 	}
+	if value, ok := wsu.mutation.SessionReferenceID(); ok {
+		_spec.SetField(widgetsettings.FieldSessionReferenceID, field.TypeString, value)
+	}
+	if wsu.mutation.SessionReferenceIDCleared() {
+		_spec.ClearField(widgetsettings.FieldSessionReferenceID, field.TypeString)
+	}
 	if value, ok := wsu.mutation.Metadata(); ok {
 		_spec.SetField(widgetsettings.FieldMetadata, field.TypeJSON, value)
 	}
@@ -280,6 +306,26 @@ func (wsuo *WidgetSettingsUpdateOne) SetNillableSessionFrom(t *time.Time) *Widge
 // ClearSessionFrom clears the value of the "session_from" field.
 func (wsuo *WidgetSettingsUpdateOne) ClearSessionFrom() *WidgetSettingsUpdateOne {
 	wsuo.mutation.ClearSessionFrom()
+	return wsuo
+}
+
+// SetSessionReferenceID sets the "session_reference_id" field.
+func (wsuo *WidgetSettingsUpdateOne) SetSessionReferenceID(s string) *WidgetSettingsUpdateOne {
+	wsuo.mutation.SetSessionReferenceID(s)
+	return wsuo
+}
+
+// SetNillableSessionReferenceID sets the "session_reference_id" field if the given value is not nil.
+func (wsuo *WidgetSettingsUpdateOne) SetNillableSessionReferenceID(s *string) *WidgetSettingsUpdateOne {
+	if s != nil {
+		wsuo.SetSessionReferenceID(*s)
+	}
+	return wsuo
+}
+
+// ClearSessionReferenceID clears the value of the "session_reference_id" field.
+func (wsuo *WidgetSettingsUpdateOne) ClearSessionReferenceID() *WidgetSettingsUpdateOne {
+	wsuo.mutation.ClearSessionReferenceID()
 	return wsuo
 }
 
@@ -417,6 +463,12 @@ func (wsuo *WidgetSettingsUpdateOne) sqlSave(ctx context.Context) (_node *Widget
 	}
 	if wsuo.mutation.SessionFromCleared() {
 		_spec.ClearField(widgetsettings.FieldSessionFrom, field.TypeTime)
+	}
+	if value, ok := wsuo.mutation.SessionReferenceID(); ok {
+		_spec.SetField(widgetsettings.FieldSessionReferenceID, field.TypeString, value)
+	}
+	if wsuo.mutation.SessionReferenceIDCleared() {
+		_spec.ClearField(widgetsettings.FieldSessionReferenceID, field.TypeString)
 	}
 	if value, ok := wsuo.mutation.Metadata(); ok {
 		_spec.SetField(widgetsettings.FieldMetadata, field.TypeJSON, value)

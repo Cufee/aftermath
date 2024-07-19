@@ -136,23 +136,27 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 		},
 		{
 			Path: "PATCH /api/widget/custom/{widgetId}/{$}",
-			Func: handler.Chain(core, aWidget.UpdateCustomWidget),
+			Func: handler.Chain(core, aWidget.UpdateCustomWidget, middleware.SessionCheck),
 		},
 		{
 			Path: "PATCH /api/widget/custom/{widgetId}/action/{$}",
-			Func: handler.Chain(core, aWidget.QuickAction),
+			Func: handler.Chain(core, aWidget.QuickAction, middleware.SessionCheck),
+		},
+		{
+			Path: "PATCH /api/widget/custom/{widgetId}/session/{$}",
+			Func: handler.Chain(core, aWidget.ResetSession, middleware.SessionCheck),
 		},
 		{
 			Path: "POST /api/widget/custom/{$}",
-			Func: handler.Chain(core, aWidget.CreateCustomWidget),
+			Func: handler.Chain(core, aWidget.CreateCustomWidget, middleware.SessionCheck),
 		},
 		{
 			Path: "DELETE /api/connections/{connectionId}/{$}",
-			Func: handler.Chain(core, api.RemoveConnection),
+			Func: handler.Chain(core, api.RemoveConnection, middleware.SessionCheck),
 		},
 		{
 			Path: "POST /api/connections/{connectionId}/default",
-			Func: handler.Chain(core, api.SetDefaultConnection),
+			Func: handler.Chain(core, api.SetDefaultConnection, middleware.SessionCheck),
 		},
 		// redirects
 		{

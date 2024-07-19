@@ -25,14 +25,18 @@ type vehicleBattleData struct {
 Filter passed in accounts and return active account ids
   - an account is considered active if it has played a battle since the last snapshot, or has no snapshots
 */
-func filterActiveAccounts(ctx context.Context, dbClient database.Client, accounts map[string]types.ExtendedAccount, force bool) ([]string, error) {
+func filterActiveAccounts(ctx context.Context, dbClient database.Client, referenceID string, accounts map[string]types.ExtendedAccount, force bool) ([]string, error) {
 	var ids []string
 	for id := range accounts {
 		ids = append(ids, id)
 	}
 
 	// existing snapshots for accounts
-	existingLastBattleTimes, err := dbClient.GetAccountLastBattleTimes(ctx, ids, models.SnapshotTypeDaily)
+	var opts []database.Query
+	if referenceID != "" {
+		opts = append(opts, database.WithReferenceIDIn(referenceID))
+	}
+	existingLastBattleTimes, err := dbClient.GetAccountLastBattleTimes(ctx, ids, models.SnapshotTypeDaily, opts...)
 	if err != nil && !database.IsNotFound(err) {
 		return nil, errors.Wrap(err, "failed to get existing snapshots")
 	}
@@ -52,7 +56,7 @@ func filterActiveAccounts(ctx context.Context, dbClient database.Client, account
 	return needAnUpdate, nil
 }
 
-func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm string, force bool, accountIDs ...string) (map[string]error, error) {
+func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm string, force bool, referenceID string, accountIDs []string) (map[string]error, error) {
 	if len(accountIDs) < 1 {
 		return nil, nil
 	}
@@ -66,7 +70,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		return nil, errors.Wrap(err, "failed to fetch accounts")
 	}
 
-	accountsNeedAnUpdate, err := filterActiveAccounts(ctx, dbClient, accounts, false)
+	accountsNeedAnUpdate, err := filterActiveAccounts(ctx, dbClient, referenceID, accounts, force)
 	if err != nil {
 		return nil, err
 	}
@@ -127,13 +131,18 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			continue
 		}
 
+		accountRefID := referenceID
+		if accountRefID == "" {
+			accountRefID = accountID
+		}
+
 		snapshotStats := fetch.WargamingToStats(realm, accounts[accountID], clans[accountID], vehicles.Data)
 		{ // account snapshot
 			accountSnapshots = append(accountSnapshots, models.AccountSnapshot{
 				Type:           models.SnapshotTypeDaily,
 				CreatedAt:      createdAt,
+				ReferenceID:    accountRefID,
 				AccountID:      snapshotStats.Account.ID,
-				ReferenceID:    snapshotStats.Account.ID,
 				LastBattleTime: snapshotStats.LastBattleTime,
 				RatingBattles:  snapshotStats.RatingBattles.StatsFrame,
 				RegularBattles: snapshotStats.RegularBattles.StatsFrame,
@@ -156,8 +165,8 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 					LastBattleTime: vehicle.LastBattleTime,
 					Stats:          *vehicle.StatsFrame,
 					VehicleID:      vehicle.VehicleID,
+					ReferenceID:    accountRefID,
 					AccountID:      accountID,
-					ReferenceID:    accountID,
 					CreatedAt:      createdAt,
 				})
 			}

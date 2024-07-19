@@ -15,10 +15,11 @@ func toWidgetOptions(record *db.WidgetSettings) models.WidgetOptions {
 		CreatedAt: record.CreatedAt,
 		UpdatedAt: record.UpdatedAt,
 
-		Title:       record.Title,
-		UserID:      record.UserID,
-		AccountID:   record.ReferenceID,
-		SessionFrom: record.SessionFrom,
+		Title:        record.Title,
+		UserID:       record.UserID,
+		AccountID:    record.ReferenceID,
+		SessionFrom:  record.SessionFrom,
+		SessionRefID: record.SessionReferenceID,
 
 		Style: record.Styles,
 		Meta:  record.Metadata,
@@ -62,6 +63,7 @@ func (c *client) CreateWidgetSettings(ctx context.Context, userID string, settin
 		SetMetadata(settings.Meta).
 		SetReferenceID(settings.AccountID).
 		SetSessionFrom(settings.SessionFrom).
+		SetSessionReferenceID(settings.SessionRefID).
 		SetStyles(settings.Style).
 		SetUser(user).
 		Save(ctx)
@@ -78,6 +80,7 @@ func (c *client) UpdateWidgetSettings(ctx context.Context, id string, settings m
 		SetMetadata(settings.Meta).
 		SetReferenceID(settings.AccountID).
 		SetSessionFrom(settings.SessionFrom).
+		SetSessionReferenceID(settings.SessionRefID).
 		SetStyles(settings.Style).
 		Save(ctx)
 	if err != nil {
