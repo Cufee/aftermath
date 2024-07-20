@@ -86,6 +86,19 @@
   value: account
 - key: command_option_widget_account_description
   value: Select one of your linked account
+# /replay
+- key: "commands_replay_name"
+  value: "replay"
+- key: "commands_replay_description"
+  value: "Analyze your replay and view stats for every single player"
+- key: command_option_replay_file_name
+  value: "file"
+- key: command_option_replay_file_description
+  value: "A Blitz replay file"
+- key: command_option_replay_link_name
+  value: "link"
+- key: command_option_replay_link_description
+  value: "A link to a Blitz replay file"
 
 # Common command options
 # days
@@ -254,8 +267,11 @@
   context: Invalid file attached
 
   # /replay errors
-- key: replay_error_missing_attachment
+- key: replay_errors_invalid_attachment
   value: "You need to provide a link or attach a WoT Blitz replay file."
+  context: No link or file provided
+- key: replay_errors_missing_attachment
+  value: "The file you have attached is not a valid WoT Blitz replay."
   context: Invalid file attached
 
   # /links errors

@@ -140,11 +140,6 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		segments.AddContent(newHighlightCard(highlightCardStyle(defaultCardStyle(cardWidth)), card))
 	}
 
-	// Vehicle label
-	if opts.VehicleID != "" {
-		//
-	}
-
 	return segments, nil
 }
 
