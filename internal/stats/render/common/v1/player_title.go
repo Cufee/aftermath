@@ -22,11 +22,6 @@ func DefaultPlayerTitleStyle(name string, containerStyle Style) TitleCardStyle {
 	containerStyle.Direction = DirectionHorizontal
 	// containerStyle.Debug = true
 
-	clanTagBackgroundColor := DefaultCardColor
-	clanTagBackgroundColor.R += 15
-	clanTagBackgroundColor.G += 15
-	clanTagBackgroundColor.B += 15
-
 	nameFontSize := FontLarge()
 	if len(name) > 10 {
 		nameFontSize = FontMedium()
@@ -34,7 +29,7 @@ func DefaultPlayerTitleStyle(name string, containerStyle Style) TitleCardStyle {
 	return TitleCardStyle{
 		Container: containerStyle,
 		Nickname:  Style{Font: nameFontSize, FontColor: TextPrimary},
-		ClanTag:   Style{Font: FontMedium(), FontColor: TextSecondary, PaddingX: 10, PaddingY: 5, BackgroundColor: clanTagBackgroundColor, BorderRadius: BorderRadiusSM},
+		ClanTag:   Style{Font: FontMedium(), FontColor: TextSecondary, PaddingX: 10, PaddingY: 5, BackgroundColor: ClanTagBackgroundColor, BorderRadius: BorderRadiusSM},
 	}
 }
 

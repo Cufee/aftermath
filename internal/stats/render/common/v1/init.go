@@ -28,6 +28,7 @@ var (
 
 	DefaultCardColor        = color.NRGBA{10, 10, 10, 180}
 	DefaultCardColorNoAlpha = color.NRGBA{10, 10, 10, 255}
+	ClanTagBackgroundColor  = color.NRGBA{10, 10, 10, 120}
 
 	ColorAftermathRed  = color.NRGBA{255, 0, 120, 255}
 	ColorAftermathBlue = color.NRGBA{72, 167, 250, 255}
