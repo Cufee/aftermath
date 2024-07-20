@@ -181,8 +181,11 @@ func TestRenderReplay(t *testing.T) {
 	glossary, err := db.GetVehicles(context.Background(), vehicles)
 	is.NoErr(err)
 
+	gameModeNames, err := db.GetGameModeNames(context.Background(), replay.GameMode.String())
+	is.NoErr(err)
+
 	{
-		cards, err := prepare.NewCards(replay, glossary, common.WithPrinter(printer, language.English))
+		cards, err := prepare.NewCards(replay, glossary, gameModeNames, common.WithPrinter(printer, language.English))
 		is.NoErr(err)
 
 		image, err := render.CardsToImage(replay, cards, rc.WithBackground(""))
