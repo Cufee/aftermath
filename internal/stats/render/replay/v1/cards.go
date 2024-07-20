@@ -22,15 +22,10 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 		if card.Meta.Player.ClanTag != "" {
 			name += fmt.Sprintf(" [%s]", card.Meta.Player.ClanTag)
 		}
+
 		nameSize := common.MeasureString(name, common.FontLarge())
 		tankSize := common.MeasureString(card.Title, common.FontLarge())
-		size := nameSize
-		if tankSize.TotalWidth > nameSize.TotalWidth {
-			size = tankSize
-		}
-		if size.TotalWidth > playerNameWidth {
-			playerNameWidth = size.TotalWidth
-		}
+		playerNameWidth = max(playerNameWidth, max(nameSize.TotalWidth, tankSize.TotalWidth))
 
 		// Measure stats value and label
 		for _, block := range card.Blocks {
@@ -46,12 +41,14 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 		}
 	}
 
-	var totalStatsWidth float64
+	statsStyle := statsRowStyle()
+	var totalStatsWidth float64 = statsStyle.Gap * float64(len(statsSizes)-1)
 	for _, width := range statsSizes {
 		totalStatsWidth += width
 	}
 
-	playerStatsCardStyle := defaultCardStyle(playerNameWidth+(float64(len(statsSizes)*10))+totalStatsWidth, 0)
+	cardStyle := defaultCardStyle(0, 0)
+	playerStatsCardStyle := defaultCardStyle(playerNameWidth+totalStatsWidth+cardStyle.Gap+cardStyle.PaddingX*2, 0)
 	totalCardsWidth := (playerStatsCardStyle.Width * 2) - 30
 
 	// Allies
@@ -70,8 +67,8 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 	var teamsBlocks []common.Block
 	teamsBlocks = append(teamsBlocks, common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, Gap: 10}, alliesBlocks...))
 	teamsBlocks = append(teamsBlocks, common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, Gap: 10}, enemiesBlocks...))
-	playersBlock := common.NewBlocksContent(common.Style{Direction: common.DirectionHorizontal, Gap: 10}, teamsBlocks...)
-	teamsBlock := common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, Gap: 10}, playersBlock)
+	playersBlock := common.NewBlocksContent(statsStyle, teamsBlocks...)
+	teamsBlock := common.NewBlocksContent(statsStyle, playersBlock)
 
 	segments.AddContent(common.NewBlocksContent(frameStyle, titleBlock, teamsBlock))
 	return segments, nil

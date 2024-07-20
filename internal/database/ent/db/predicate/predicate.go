@@ -33,6 +33,9 @@ type DiscordInteraction func(*sql.Selector)
 // GameMap is the predicate function for gamemap builders.
 type GameMap func(*sql.Selector)
 
+// GameMode is the predicate function for gamemode builders.
+type GameMode func(*sql.Selector)
+
 // LeaderboardScore is the predicate function for leaderboardscore builders.
 type LeaderboardScore func(*sql.Selector)
 

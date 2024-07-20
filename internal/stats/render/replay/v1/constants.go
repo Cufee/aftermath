@@ -21,7 +21,15 @@ func defaultCardStyle(width, height float64) common.Style {
 		Width:           width + 40,
 		Height:          height,
 		BackgroundColor: common.DefaultCardColor,
-		PaddingX:        10,
-		BorderRadius:    15,
+		PaddingX:        common.BorderRadiusLG,
+		BorderRadius:    common.BorderRadiusLG,
+		Gap:             10,
+	}
+}
+
+func statsRowStyle() common.Style {
+	return common.Style{
+		Direction: common.DirectionHorizontal,
+		Gap:       10,
 	}
 }

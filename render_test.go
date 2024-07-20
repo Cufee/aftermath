@@ -13,6 +13,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
+	rc "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/replay/v1"
 	"github.com/cufee/aftermath/tests"
 	"github.com/disintegration/imaging"
@@ -184,7 +185,7 @@ func TestRenderReplay(t *testing.T) {
 		cards, err := prepare.NewCards(replay, glossary, common.WithPrinter(printer, language.English))
 		is.NoErr(err)
 
-		image, err := render.CardsToImage(replay, cards)
+		image, err := render.CardsToImage(replay, cards, rc.WithBackground(""))
 		assert.NoError(t, err, "failed to render a replay image")
 		assert.NotNil(t, image, "image is nil")
 

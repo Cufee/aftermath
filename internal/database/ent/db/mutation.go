@@ -20,6 +20,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
 	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
+	"github.com/cufee/aftermath/internal/database/ent/db/gamemode"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
@@ -54,6 +55,7 @@ const (
 	TypeCronTask           = "CronTask"
 	TypeDiscordInteraction = "DiscordInteraction"
 	TypeGameMap            = "GameMap"
+	TypeGameMode           = "GameMode"
 	TypeLeaderboardScore   = "LeaderboardScore"
 	TypeSession            = "Session"
 	TypeUser               = "User"
@@ -6770,6 +6772,446 @@ func (m *GameMapMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *GameMapMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown GameMap edge %s", name)
+}
+
+// GameModeMutation represents an operation that mutates the GameMode nodes in the graph.
+type GameModeMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *string
+	created_at      *time.Time
+	updated_at      *time.Time
+	localized_names *map[language.Tag]string
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*GameMode, error)
+	predicates      []predicate.GameMode
+}
+
+var _ ent.Mutation = (*GameModeMutation)(nil)
+
+// gamemodeOption allows management of the mutation configuration using functional options.
+type gamemodeOption func(*GameModeMutation)
+
+// newGameModeMutation creates new mutation for the GameMode entity.
+func newGameModeMutation(c config, op Op, opts ...gamemodeOption) *GameModeMutation {
+	m := &GameModeMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeGameMode,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withGameModeID sets the ID field of the mutation.
+func withGameModeID(id string) gamemodeOption {
+	return func(m *GameModeMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *GameMode
+		)
+		m.oldValue = func(ctx context.Context) (*GameMode, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().GameMode.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withGameMode sets the old GameMode of the mutation.
+func withGameMode(node *GameMode) gamemodeOption {
+	return func(m *GameModeMutation) {
+		m.oldValue = func(context.Context) (*GameMode, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m GameModeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m GameModeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("db: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of GameMode entities.
+func (m *GameModeMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *GameModeMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *GameModeMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().GameMode.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *GameModeMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *GameModeMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the GameMode entity.
+// If the GameMode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameModeMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *GameModeMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *GameModeMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *GameModeMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the GameMode entity.
+// If the GameMode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameModeMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *GameModeMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetLocalizedNames sets the "localized_names" field.
+func (m *GameModeMutation) SetLocalizedNames(value map[language.Tag]string) {
+	m.localized_names = &value
+}
+
+// LocalizedNames returns the value of the "localized_names" field in the mutation.
+func (m *GameModeMutation) LocalizedNames() (r map[language.Tag]string, exists bool) {
+	v := m.localized_names
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLocalizedNames returns the old "localized_names" field's value of the GameMode entity.
+// If the GameMode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameModeMutation) OldLocalizedNames(ctx context.Context) (v map[language.Tag]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLocalizedNames is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLocalizedNames requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLocalizedNames: %w", err)
+	}
+	return oldValue.LocalizedNames, nil
+}
+
+// ResetLocalizedNames resets all changes to the "localized_names" field.
+func (m *GameModeMutation) ResetLocalizedNames() {
+	m.localized_names = nil
+}
+
+// Where appends a list predicates to the GameModeMutation builder.
+func (m *GameModeMutation) Where(ps ...predicate.GameMode) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the GameModeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GameModeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.GameMode, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *GameModeMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GameModeMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (GameMode).
+func (m *GameModeMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *GameModeMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.created_at != nil {
+		fields = append(fields, gamemode.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, gamemode.FieldUpdatedAt)
+	}
+	if m.localized_names != nil {
+		fields = append(fields, gamemode.FieldLocalizedNames)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *GameModeMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case gamemode.FieldCreatedAt:
+		return m.CreatedAt()
+	case gamemode.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case gamemode.FieldLocalizedNames:
+		return m.LocalizedNames()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *GameModeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case gamemode.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case gamemode.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case gamemode.FieldLocalizedNames:
+		return m.OldLocalizedNames(ctx)
+	}
+	return nil, fmt.Errorf("unknown GameMode field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GameModeMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case gamemode.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case gamemode.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case gamemode.FieldLocalizedNames:
+		v, ok := value.(map[language.Tag]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLocalizedNames(v)
+		return nil
+	}
+	return fmt.Errorf("unknown GameMode field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *GameModeMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *GameModeMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GameModeMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown GameMode numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *GameModeMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *GameModeMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *GameModeMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown GameMode nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *GameModeMutation) ResetField(name string) error {
+	switch name {
+	case gamemode.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case gamemode.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case gamemode.FieldLocalizedNames:
+		m.ResetLocalizedNames()
+		return nil
+	}
+	return fmt.Errorf("unknown GameMode field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *GameModeMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *GameModeMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *GameModeMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *GameModeMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *GameModeMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *GameModeMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *GameModeMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown GameMode unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *GameModeMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown GameMode edge %s", name)
 }
 
 // LeaderboardScoreMutation represents an operation that mutates the LeaderboardScore nodes in the graph.

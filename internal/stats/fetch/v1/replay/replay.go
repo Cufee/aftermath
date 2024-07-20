@@ -37,42 +37,51 @@ var battleTypes = map[int]battleType{
 }
 
 type gameMode struct {
-	ID      int    `json:"id" protobuf:"15"`
-	Name    string `json:"name" protobuf:"16"`
-	Special bool   `json:"special" protobuf:"17"` // Signifies if WN8 should be calculated
+	ID      int      `json:"id" protobuf:"15"`
+	Name    string   `json:"name" protobuf:"16"`
+	Special bool     `json:"special" protobuf:"17"` // Signifies if WN8 should be calculated
+	Tags    []string `json:"tags"`
 }
 
 func (gm gameMode) String() string {
 	return gm.Name
 }
 
-var (
-	GameModeUnknown         = gameMode{-1, "game_mode_unknown", false}
-	GameModeRegular         = gameMode{1, "game_mode_regular", false}
-	GameModeTraining        = gameMode{2, "game_mode_training", true}
-	GameModeTournament      = gameMode{4, "game_mode_tournament", true}
-	GameModeQuickTournament = gameMode{5, "game_mode_quick_tournament", true}
-	GameModeRating          = gameMode{7, "game_mode_rating", false}
-	GameModeMadGames        = gameMode{8, "game_mode_mad_games", true}
-	GameModeRealistic       = gameMode{22, "game_mode_realistic", false}
-	GameModeUprising        = gameMode{23, "game_mode_uprising", true}
-	GameModeGravity         = gameMode{24, "game_mode_gravity", true}
-	GameModeSkirmish        = gameMode{25, "game_mode_skirmish", false}
-	GameModeBurningGames    = gameMode{26, "game_mode_burning_games", true}
-)
-
 var gameModes = map[int]gameMode{
-	1:  GameModeRegular,
-	2:  GameModeTraining,
-	4:  GameModeTournament,
-	5:  GameModeQuickTournament,
-	7:  GameModeRating,
-	8:  GameModeMadGames,
-	22: GameModeRealistic,
-	23: GameModeUprising,
-	24: GameModeGravity,
-	25: GameModeSkirmish,
-	26: GameModeBurningGames,
+	0:  {-1, "game_mode_unknown", false, nil},
+	2:  {2, "game_mode_training", false, nil},
+	6:  {6, "game_mode_tutorial", true, nil},
+	18: {18, "game_mode_tutorial", true, nil},
+	// 3:  GameModeCompany,
+	1:  {1, "game_mode_regular", false, nil},
+	4:  {4, "game_mode_regular", true, []string{"tournament"}},
+	5:  {5, "game_mode_regular", true, []string{"quick_tournament"}},
+	7:  {7, "game_mode_rating", false, nil},
+	8:  {8, "game_mode_arcade", true, nil},
+	29: {29, "game_mode_arcade", true, []string{"tournament"}},
+	36: {36, "game_mode_arcade", true, []string{"quick_tournament"}},
+	// 21: GameModeVirtual,
+	22: {22, "game_mode_scuffle", false, nil},
+	30: {30, "game_mode_scuffle", false, []string{"tournament"}},
+	37: {37, "game_mode_scuffle", false, []string{"quick_tournament"}},
+	23: {23, "game_mode_hellgames", true, nil},
+	28: {23, "game_mode_hellgames", true, []string{"tournament"}},
+	35: {35, "game_mode_hellgames", true, []string{"quick_tournament"}},
+	24: {24, "game_mode_lunar", true, nil},
+	31: {31, "game_mode_lunar", true, []string{"tournament"}},
+	38: {38, "game_mode_lunar", true, []string{"quick_tournament"}},
+	25: {25, "game_mode_nanomaps", false, nil},
+	32: {32, "game_mode_nanomaps", false, []string{"tournament"}},
+	39: {39, "game_mode_nanomaps", false, []string{"quick_tournament"}},
+	26: {26, "game_mode_vampiric", true, nil},
+	33: {33, "game_mode_vampiric", true, []string{"tournament"}},
+	40: {40, "game_mode_vampiric", true, []string{"quick_tournament"}},
+	27: {27, "game_mode_bossmode", true, nil},
+	34: {34, "game_mode_bossmode", true, []string{"tournament"}},
+	41: {41, "game_mode_bossmode", true, []string{"quick_tournament"}},
+	42: {42, "game_mode_gravitizing", true, nil},
+	43: {43, "game_mode_gravitizing", true, []string{"tournament"}},
+	44: {42, "game_mode_gravitizing", true, []string{"quick_tournament"}},
 }
 
 type Replay struct {
@@ -93,7 +102,7 @@ type Replay struct {
 func Prettify(battle battleResults, meta replayMeta) Replay {
 	var replay Replay
 
-	replay.GameMode = GameModeUnknown
+	replay.GameMode = gameModes[-1]
 	if gm, ok := gameModes[int(battle.RoomType)]; ok {
 		replay.GameMode = gm
 	}

@@ -5,6 +5,8 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
+var defaultBlocks = []common.Tag{common.TagWN8, common.TagDamageDealt, TagDamageAssistedCombined, common.TagFrags}
+
 const (
 	TagDamageBlocked          common.Tag = "blocked"
 	TagDamageAssisted         common.Tag = "assisted"
@@ -20,9 +22,10 @@ type Cards struct {
 type Card common.StatsCard[common.StatsBlock[BlockData], CardMeta]
 
 type HeaderCard struct {
-	Result   string `json:"result"`
-	MapName  string `json:"map"`
-	GameMode string `json:"gameMode"`
+	Result       string   `json:"result"`
+	MapName      string   `json:"map"`
+	GameMode     string   `json:"gameMode"`
+	GameModeTags []string `json:"gameModeTags"`
 }
 
 type CardMeta struct {

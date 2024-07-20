@@ -7,11 +7,12 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1/replay"
+	"golang.org/x/text/language"
 
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
-func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, opts ...common.Option) (Cards, error) {
+func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes map[string]map[language.Tag]string, opts ...common.Option) (Cards, error) {
 	options := common.DefaultOptions
 	for _, apply := range opts {
 		apply(&options)
@@ -23,6 +24,12 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, opts ...c
 	var cards Cards
 	cards.Header.Result = options.Printer()("label_" + string(replay.Outcome))
 	cards.Header.GameMode = options.Printer()(replay.GameMode.String())
+	if name, ok := gameModes[replay.GameMode.String()][options.Locale()]; ok {
+		cards.Header.GameMode = name
+	}
+	for _, tag := range replay.GameMode.Tags {
+		cards.Header.GameModeTags = append(cards.Header.GameModeTags, options.Printer()("tag_"+tag))
+	}
 	cards.Header.MapName = "label_map_name_unknown"
 	if n := replay.Map.LocalizedNames[options.Locale()]; n != "" {
 		cards.Header.MapName = n
@@ -35,7 +42,7 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, opts ...c
 		vehicle := glossary[player.VehicleID]
 		vehicle.ID = player.VehicleID
 		name := fmt.Sprintf("%s %s", common.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
-		card, err := playerToCard(player, name, nil)
+		card, err := playerToCard(player, name, defaultBlocks, options.Printer())
 		if err != nil {
 			return cards, err
 		}
@@ -46,7 +53,7 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, opts ...c
 		vehicle := glossary[player.VehicleID]
 		vehicle.ID = player.VehicleID
 		name := fmt.Sprintf("%s %s", common.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
-		card, err := playerToCard(player, name, nil)
+		card, err := playerToCard(player, name, defaultBlocks, options.Printer())
 		if err != nil {
 			return cards, err
 		}
@@ -56,14 +63,14 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, opts ...c
 	return cards, nil
 }
 
-func playerToCard(player replay.Player, vehicleName string, blocks []common.Tag) (Card, error) {
+func playerToCard(player replay.Player, vehicleName string, blocks []common.Tag, printer func(string) string) (Card, error) {
 	card := Card{
 		Title: vehicleName,
 		Type:  common.CardTypeVehicle,
 		Meta:  CardMeta{player, blocks},
 	}
 	for _, preset := range blocks {
-		block, err := presetToBlock(player, preset)
+		block, err := presetToBlock(player, preset, printer)
 		if err != nil {
 			return card, err
 		}
@@ -72,23 +79,31 @@ func playerToCard(player replay.Player, vehicleName string, blocks []common.Tag)
 	return card, nil
 }
 
-func presetToBlock(player replay.Player, preset common.Tag) (common.StatsBlock[BlockData], error) {
+func presetToBlock(player replay.Player, preset common.Tag, printer func(string) string) (common.StatsBlock[BlockData], error) {
 	block := common.StatsBlock[BlockData](common.NewBlock(preset, BlockData{}))
 
 	switch preset {
 	case TagDamageBlocked:
 		block.Value = player.Performance.DamageBlocked
+		block.Localize(printer)
 		return block, nil
 	case TagDamageAssisted:
 		block.Value = player.Performance.DamageAssisted
+		block.Localize(printer)
 		return block, nil
 	case TagDamageAssistedCombined:
 		block.Value = player.Performance.DamageAssisted + player.Performance.DamageBlocked
+		block.Localize(printer)
 		return block, nil
 	}
 
 	err := block.FillValue(player.Performance.StatsFrame)
-	return block, err
+	if err != nil {
+		return block, err
+	}
+
+	block.Localize(printer)
+	return block, nil
 }
 
 func sortTeams(teams replay.Teams) {

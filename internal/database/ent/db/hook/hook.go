@@ -117,6 +117,18 @@ func (f GameMapFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.GameMapMutation", m)
 }
 
+// The GameModeFunc type is an adapter to allow the use of ordinary
+// function as GameMode mutator.
+type GameModeFunc func(context.Context, *db.GameModeMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GameModeFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.GameModeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.GameModeMutation", m)
+}
+
 // The LeaderboardScoreFunc type is an adapter to allow the use of ordinary
 // function as LeaderboardScore mutator.
 type LeaderboardScoreFunc func(context.Context, *db.LeaderboardScoreMutation) (db.Value, error)

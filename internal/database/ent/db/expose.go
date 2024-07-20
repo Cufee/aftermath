@@ -121,6 +121,19 @@ func (gm *GameMap) ScanValues(columns []string) ([]any, error) {
 	return gm.scanValues(columns)
 }
 
+func (gm *GameMode) AssignValues(columns []string, values []any) error {
+	if gm == nil {
+		return fmt.Errorf("GameMode(nil)")
+	}
+	return gm.assignValues(columns, values)
+}
+func (gm *GameMode) ScanValues(columns []string) ([]any, error) {
+	if gm == nil {
+		return nil, fmt.Errorf("GameMode(nil)")
+	}
+	return gm.scanValues(columns)
+}
+
 func (ls *LeaderboardScore) AssignValues(columns []string, values []any) error {
 	if ls == nil {
 		return fmt.Errorf("LeaderboardScore(nil)")

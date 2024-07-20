@@ -11,6 +11,7 @@ import (
 	"github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/core/tasks"
+	"golang.org/x/text/language"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -182,6 +183,36 @@ func UpdateGlossaryWorker(client core.Client) func() {
 		err = client.Database().UpsertMaps(mctx, maps)
 		if err != nil {
 			log.Err(err).Msg("failed save maps glossary")
+			return
+		}
+
+		// update game modes
+		gmf, err := zr.Open("assets/game_modes.json")
+		if err != nil {
+			log.Err(err).Msg("failed to open game_modes.json in assets.zip")
+			return
+		}
+		var gameModes map[string]map[string]string
+		err = json.NewDecoder(gmf).Decode(&gameModes)
+		if err != nil {
+			log.Err(err).Msg("failed to decode maps.json")
+			return
+		}
+		var withTags = make(map[string]map[language.Tag]string)
+		for key, value := range gameModes {
+			localized := make(map[language.Tag]string)
+			for locale, name := range value {
+				localized[language.MustParse(locale)] = name
+			}
+			withTags[key] = localized
+		}
+
+		gmctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+
+		_, err = client.Database().UpsertGameModes(gmctx, withTags)
+		if err != nil {
+			log.Err(err).Msg("failed save game modes glossary")
 			return
 		}
 

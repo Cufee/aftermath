@@ -350,6 +350,26 @@ var (
 			},
 		},
 	}
+	// GameModesColumns holds the columns for the "game_modes" table.
+	GameModesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "localized_names", Type: field.TypeJSON},
+	}
+	// GameModesTable holds the schema information for the "game_modes" table.
+	GameModesTable = &schema.Table{
+		Name:       "game_modes",
+		Columns:    GameModesColumns,
+		PrimaryKey: []*schema.Column{GameModesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "gamemode_id",
+				Unique:  false,
+				Columns: []*schema.Column{GameModesColumns[0]},
+			},
+		},
+	}
 	// LeaderboardScoresColumns holds the columns for the "leaderboard_scores" table.
 	LeaderboardScoresColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -748,6 +768,7 @@ var (
 		CronTasksTable,
 		DiscordInteractionsTable,
 		GameMapsTable,
+		GameModesTable,
 		LeaderboardScoresTable,
 		SessionsTable,
 		UsersTable,

@@ -14,6 +14,7 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
+	"golang.org/x/text/language"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -48,6 +49,9 @@ type GlossaryClient interface {
 
 	GetMap(ctx context.Context, id string) (types.Map, error)
 	UpsertMaps(ctx context.Context, maps map[string]types.Map) error
+
+	GetGameModeNames(ctx context.Context, id string) (map[language.Tag]string, error)
+	UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) (map[string]error, error)
 }
 
 type UsersClient interface {
