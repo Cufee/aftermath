@@ -42,6 +42,7 @@ func NewAssetsHandler(root fs.FS) handler.Servable {
 		r.Header.Del("If-Modified-Since")
 
 		// Set ETag to to uniquely identify the unchanged static asset.
+		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("ETag", tags[r.URL.Path])
 
 		fs.ServeHTTP(w, r)
