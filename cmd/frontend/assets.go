@@ -15,7 +15,7 @@ func calculateETag(content []byte) string {
 	h := sha256.New()
 	h.Write(content)
 	hash := hex.EncodeToString(h.Sum(nil))
-	return fmt.Sprintf("W/\"%s\"", hash)
+	return fmt.Sprintf("\"%s\"", hash)
 }
 
 func NewAssetsHandler(root fs.FS) handler.Servable {

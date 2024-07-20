@@ -53,7 +53,7 @@ func WidgetCard(widget WidgetWithAccount) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"rounded-md bg-base-300 flex flex-col grow overflow-hidden\"><div class=\"flex flex-row grow\"><div class=\"p-1 bg-base-200 flex justify-center items-center h-full aspect-square rounded-none rounded-br-md\"><span class=\"font-bold\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"flex flex-col overflow-hidden rounded-md bg-base-300 grow\"><div class=\"flex flex-row grow\"><div class=\"flex items-center justify-center h-full p-1 rounded-none bg-base-200 aspect-square rounded-br-md\"><span class=\"font-bold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -66,7 +66,7 @@ func WidgetCard(widget WidgetWithAccount) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div><div class=\"p-3 pr-0 flex flex-row gap-2 items-center justify-between grow\"><div class=\"flex flex-row gap-1 items-center w-full\"><div class=\"text-lg break-all overflow-hidden line-clamp-1\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div><div class=\"flex flex-row items-center justify-between gap-2 p-3 pr-0 grow\"><div class=\"flex flex-row items-center w-full gap-1\"><div class=\"overflow-hidden text-lg break-all line-clamp-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -100,7 +100,7 @@ func WidgetCard(widget WidgetWithAccount) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"btn btn-sm rounded-none rounded-bl-md h-full btn-ghost w-24 transition-all duration-250 ease-in-out\" onclick=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"w-24 h-full transition-all ease-in-out rounded-none btn btn-sm rounded-bl-md btn-ghost duration-250\" onclick=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -109,7 +109,7 @@ func WidgetCard(widget WidgetWithAccount) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">Copy Link</button> <a hx-boost=\"true\" class=\"btn btn-sm rounded-none h-full btn-ghost\" href=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">Copy Link</button> <a hx-boost=\"true\" class=\"h-full rounded-none btn btn-sm btn-ghost\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -190,7 +190,7 @@ func SessionResetButton(widgetID string, secondsLeft float64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"group btn hover:bg-base-200 px-2 flex flex-row justify-center items-center gap-2 w-full bg-base-100 rounded-sm flex-nowrap px-2\" hx-patch=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"flex flex-row items-center justify-center w-full gap-2 px-2 rounded-sm group btn hover:bg-base-200 bg-base-100 flex-nowrap no-animation\" hx-patch=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -229,7 +229,7 @@ func SessionResetButton(widgetID string, secondsLeft float64) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"size-4 group-hover:text-yellow-500 group-hover:rotate-180 transition-all duration-500\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99\"></path></svg> <span class=\"font-bold text-nowrap\">Reset Session</span></button>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\" class=\"transition-all duration-500 size-4 group-hover:text-yellow-500 group-hover:rotate-180\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99\"></path></svg> <span class=\"font-bold text-nowrap\">Reset Session</span></button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -447,7 +447,7 @@ func quickSettingButton(widgetID, fieldID string, enabled bool) templ.Component 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"hidden\"> <button type=\"submit\" class=\"group btn hover:bg-base-200 px-2 flex flex-nowrap justify-center items-center gap-2 bg-base-100 rounded-sm w-full no-animation\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"hidden\"> <button type=\"submit\" class=\"flex items-center justify-center w-full gap-2 px-2 rounded-sm group btn hover:bg-base-200 flex-nowrap bg-base-100 no-animation\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -513,15 +513,15 @@ func resetTimeoutTicker(elementID string, seconds float64) templ.ComponentScript
 
 func copyButtonAction(elementID, widgetID string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_copyButtonAction_2e09`,
-		Function: `function __templ_copyButtonAction_2e09(elementID, widgetID){const url = window.location.protocol + "//" + window.location.host + "/widget/custom/" + widgetID + "/live/"
+		Name: `__templ_copyButtonAction_0e64`,
+		Function: `function __templ_copyButtonAction_0e64(elementID, widgetID){const url = window.location.protocol + "//" + window.location.host + "/widget/custom/" + widgetID + "/live/"
 	navigator.clipboard.writeText(url);
 	
 	const btn = document.getElementById(elementID)
 	const oldContent = btn.innerHTML
 	btn.innerHTML = ` + "`" + `
 	<div class="flex flex-row items-center justify-center">
-		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-green-500">
+		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-green-500 size-4">
 			<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
 		</svg>
 	</div>
@@ -530,7 +530,7 @@ func copyButtonAction(elementID, widgetID string) templ.ComponentScript {
 		btn.innerHTML = oldContent;
 	}, 2000)
 }`,
-		Call:       templ.SafeScript(`__templ_copyButtonAction_2e09`, elementID, widgetID),
-		CallInline: templ.SafeScriptInline(`__templ_copyButtonAction_2e09`, elementID, widgetID),
+		Call:       templ.SafeScript(`__templ_copyButtonAction_0e64`, elementID, widgetID),
+		CallInline: templ.SafeScriptInline(`__templ_copyButtonAction_0e64`, elementID, widgetID),
 	}
 }
