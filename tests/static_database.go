@@ -271,3 +271,10 @@ func (c *staticTestingDatabase) CreateWidgetSettings(ctx context.Context, userID
 	settings.UserID = userID
 	return settings, nil
 }
+
+func (c *staticTestingDatabase) GetGameModeNames(ctx context.Context, id string) (map[language.Tag]string, error) {
+	return nil, nil
+}
+func (c *staticTestingDatabase) UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) (map[string]error, error) {
+	return nil, nil
+}

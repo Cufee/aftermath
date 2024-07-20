@@ -12,7 +12,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
-func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes map[string]map[language.Tag]string, opts ...common.Option) (Cards, error) {
+func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes map[language.Tag]string, opts ...common.Option) (Cards, error) {
 	options := common.DefaultOptions
 	for _, apply := range opts {
 		apply(&options)
@@ -24,7 +24,7 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes
 	var cards Cards
 	cards.Header.Result = options.Printer()("label_" + string(replay.Outcome))
 	cards.Header.GameMode = options.Printer()(replay.GameMode.String())
-	if name, ok := gameModes[replay.GameMode.String()][options.Locale()]; ok {
+	if name, ok := gameModes[options.Locale()]; ok {
 		cards.Header.GameMode = name
 	}
 	for _, tag := range replay.GameMode.Tags {

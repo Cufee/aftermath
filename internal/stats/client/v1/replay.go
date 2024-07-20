@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
@@ -45,8 +46,13 @@ func (r *client) ReplayCards(ctx context.Context, replayURL string, o ...Request
 	}
 	stop()
 
+	gameModeNames, err := r.database.GetGameModeNames(ctx, replay.GameMode.String())
+	if err != nil && !database.IsNotFound(err) {
+		return prepare.Cards{}, meta, nil
+	}
+
 	stop = meta.Timer("prepare#NewCards")
-	cards, err := prepare.NewCards(replay, glossary, opts.PrepareOpts(printer, r.locale)...)
+	cards, err := prepare.NewCards(replay, glossary, gameModeNames, opts.PrepareOpts(printer, r.locale)...)
 	stop()
 
 	return cards, meta, err
