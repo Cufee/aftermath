@@ -30,7 +30,7 @@ templ WidgetCard(widget WidgetWithAccount) {
 						</div>
 					</div>
 				</div>
-				<button id="copy-widget-link" class="btn btn-sm rounded-none rounded-bl-md h-full btn-ghost w-24 transition-all duration-250 ease-in-out" onclick={ copyButtonAction("copy-widget-link", widget.ID) }>
+				<button id={ "copy-widget-link-" + widget.ID } class="btn btn-sm rounded-none rounded-bl-md h-full btn-ghost w-24 transition-all duration-250 ease-in-out" onclick={ copyButtonAction("copy-widget-link-"+widget.ID, widget.ID) }>
 					Copy Link
 				</button>
 				<a hx-boost="true" class="btn btn-sm rounded-none h-full btn-ghost" href={ templ.URL("/app/widgets/" + widget.ID) }>

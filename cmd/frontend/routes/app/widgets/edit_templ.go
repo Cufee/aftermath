@@ -119,12 +119,25 @@ func widgetOptionsSave(id string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button type=\"button\" id=\"copy-widget-link\" class=\"btn btn-primary transition-all min-w-28 duration-250 ease-in-out\" onclick=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button type=\"button\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 templ.ComponentScript = copyButtonAction(id)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3.Call)
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("copy-widget-link-" + id)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/frontend/routes/app/widgets/edit.templ`, Line: 82, Col: 53}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"btn btn-primary transition-all min-w-28 duration-250 ease-in-out\" onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 templ.ComponentScript = copyButtonAction(id)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4.Call)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -138,11 +151,11 @@ func widgetOptionsSave(id string) templ.Component {
 
 func copyButtonAction(id string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_copyButtonAction_48ed`,
-		Function: `function __templ_copyButtonAction_48ed(id){const url = window.location.protocol + "//" + window.location.host + "/widget/custom/" + id + "/live/"
+		Name: `__templ_copyButtonAction_87a8`,
+		Function: `function __templ_copyButtonAction_87a8(id){const url = window.location.protocol + "//" + window.location.host + "/widget/custom/" + id + "/live/"
 	navigator.clipboard.writeText(url);
 	
-	const btn = document.getElementById("copy-widget-link")
+	const btn = document.getElementById("copy-widget-link"+id)
 	const oldText = btn.textContent
 	btn.textContent = "Copied!";
 	btn.classList.add("btn-success");
@@ -151,7 +164,7 @@ func copyButtonAction(id string) templ.ComponentScript {
 		btn.classList.remove("btn-success");
 	}, 2000)
 }`,
-		Call:       templ.SafeScript(`__templ_copyButtonAction_48ed`, id),
-		CallInline: templ.SafeScriptInline(`__templ_copyButtonAction_48ed`, id),
+		Call:       templ.SafeScript(`__templ_copyButtonAction_87a8`, id),
+		CallInline: templ.SafeScriptInline(`__templ_copyButtonAction_87a8`, id),
 	}
 }

@@ -79,7 +79,7 @@ templ WidgetConfiguratorPage(options widget.WidgetWithAccount, errors map[string
 
 templ widgetOptionsSave(id string) {
 	<div class="flex flex-row flex-wrap gap-2">
-		<button type="button" id="copy-widget-link" class="btn btn-primary transition-all min-w-28 duration-250 ease-in-out" onclick={ copyButtonAction(id) }>Copy Link</button>
+		<button type="button" id={ "copy-widget-link-" + id } class="btn btn-primary transition-all min-w-28 duration-250 ease-in-out" onclick={ copyButtonAction(id) }>Copy Link</button>
 		<button type="submit" class="btn btn-info" disabled>Save and Apply</button>
 	</div>
 }
@@ -88,7 +88,7 @@ script copyButtonAction(id string) {
 	const url = window.location.protocol + "//" + window.location.host + "/widget/custom/" + id + "/live/"
 	navigator.clipboard.writeText(url);
 	
-	const btn = document.getElementById("copy-widget-link")
+	const btn = document.getElementById("copy-widget-link"+id)
 	const oldText = btn.textContent
 	btn.textContent = "Copied!";
 	btn.classList.add("btn-success");

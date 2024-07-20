@@ -157,7 +157,7 @@ func (w defaultWidget) overviewCard(card session.OverviewCard, style models.Widg
 				return templ_7745c5c3_Err
 			}
 		}
-		var templ_7745c5c3_Var4 = []any{fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-1 items-center bg-black rounded-xl bg-opacity-75 p-4", len(card.Blocks))}
+		var templ_7745c5c3_Var4 = []any{fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-1 items-center bg-black rounded-xl bg-opacity-[0.975] p-4", len(card.Blocks))}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -211,7 +211,7 @@ func (w defaultWidget) vehicleCard(card vehicleExtended, style models.WidgetVehi
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col gap-1 card vehicle-card grow bg-black rounded-lg bg-opacity-75 p-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col gap-1 card vehicle-card grow bg-black rounded-lg bg-opacity-[0.975] p-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -328,7 +328,7 @@ func (w defaultWidget) vehicleLegendCard(blocks []common.StatsBlock[session.Bloc
 			return templ_7745c5c3_Err
 		}
 		for _, block := range blocks {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-black rounded-full bg-opacity-75 m-auto px-3 py-1\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-black rounded-full bg-opacity-[0.975] m-auto px-3 py-1\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
