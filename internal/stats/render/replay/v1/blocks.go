@@ -20,7 +20,7 @@ func newTitleBlock(replay replay.Cards, width float64) common.Block {
 	titleBlocks = append(titleBlocks, common.NewTextContent(common.Style{
 		Font:      common.FontLarge(),
 		FontColor: common.TextSecondary,
-	}, fmt.Sprintf(" - %s", replay.Header.GameMode)))
+	}, fmt.Sprintf("%s - %s", replay.Header.MapName, replay.Header.GameMode)))
 
 	style := defaultCardStyle(width, 75)
 	style.JustifyContent = common.JustifyContentCenter

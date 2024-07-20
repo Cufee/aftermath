@@ -21,22 +21,25 @@ func init() {
 				builder.NewOption("file", discordgo.ApplicationCommandOptionAttachment).
 					Params(builder.SetNameKey("command_option_replay_file_name"), builder.SetDescKey("command_option_replay_file_description")),
 
-				builder.NewOption("link", discordgo.ApplicationCommandOptionAttachment).
+				builder.NewOption("link", discordgo.ApplicationCommandOptionString).
 					Params(builder.SetNameKey("command_option_replay_link_name"), builder.SetDescKey("command_option_replay_link_description")),
 			).
 			Handler(func(ctx *common.Context) error {
+				var replayURL string
 				link, linkOK := ctx.Options().Value("link").(string)
 				file, fileOK := ctx.Options().Value("file").(string)
 				if (!linkOK && !fileOK) || (link == "" && file == "") {
 					return ctx.Reply().Send("replay_errors_missing_attachment")
 				}
-				if link == "" {
-					link = file
+				if link != "" {
+					replayURL = link
+				} else {
+					replayURL = ""
 				}
 				if !strings.Contains(link, ".wotbreplay") {
 					return ctx.Reply().Send("replay_errors_invalid_attachment")
 				}
-				parsed, err := url.Parse(link)
+				parsed, err := url.Parse(replayURL)
 				if err != nil {
 					return ctx.Reply().Send("replay_errors_invalid_attachment")
 				}
