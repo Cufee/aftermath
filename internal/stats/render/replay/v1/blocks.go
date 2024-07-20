@@ -51,7 +51,7 @@ func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card repla
 	leftBlock := common.NewBlocksContent(common.Style{
 		Direction:  common.DirectionHorizontal,
 		AlignItems: common.AlignItemsCenter,
-		Gap:        10,
+		Gap:        defaultCardStyle(0, 0).Gap,
 		Height:     80,
 		// Debug:      true,
 	}, hpBar, common.NewBlocksContent(common.Style{Direction: common.DirectionVertical},
@@ -79,9 +79,13 @@ func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card repla
 }
 
 func playerNameBlock(player fetch.Player, protagonist bool) common.Block {
+	tagColor := common.TextSecondary
 	nameColor := common.TextSecondary
 	if protagonist {
 		nameColor = protagonistColor
+	} else if player.HPLeft <= 0 {
+		tagColor = common.TextAlt
+		nameColor = common.TextAlt
 	}
 
 	var nameBlocks []common.Block
@@ -92,8 +96,8 @@ func playerNameBlock(player fetch.Player, protagonist bool) common.Block {
 	}, player.Nickname))
 	if player.ClanTag != "" {
 		nameBlocks = append(nameBlocks, common.NewTextContent(common.Style{
-			FontColor: common.TextSecondary,
-			Font:      common.FontLarge(),
+			FontColor: tagColor,
+			Font:      common.FontMedium(),
 			// Debug:     true,
 		}, fmt.Sprintf("[%s]", player.ClanTag)))
 	}

@@ -1,8 +1,6 @@
 package replay
 
 import (
-	"fmt"
-
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
@@ -14,18 +12,16 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 
 	var alliesBlocks, enemiesBlocks []common.Block
 
+	cardStyle := defaultCardStyle(0, 0)
+
 	var playerNameWidth float64
 	statsSizes := make(map[prepare.Tag]float64)
 	for _, card := range append(cards.Allies, cards.Enemies...) {
 		// Measure player name and tag or vehicle name
-		name := card.Meta.Player.Nickname
-		if card.Meta.Player.ClanTag != "" {
-			name += fmt.Sprintf(" [%s]", card.Meta.Player.ClanTag)
-		}
-
-		nameSize := common.MeasureString(name, common.FontLarge())
+		nameSize := common.MeasureString(card.Meta.Player.Nickname, common.FontLarge())
+		clanSize := common.MeasureString(card.Meta.Player.ClanTag, common.FontMedium())
 		tankSize := common.MeasureString(card.Title, common.FontLarge())
-		playerNameWidth = max(playerNameWidth, max(nameSize.TotalWidth, tankSize.TotalWidth))
+		playerNameWidth = max(playerNameWidth, max(nameSize.TotalWidth+clanSize.TotalWidth+cardStyle.Gap, tankSize.TotalWidth))
 
 		// Measure stats value and label
 		for _, block := range card.Blocks {
@@ -47,9 +43,8 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 		totalStatsWidth += width
 	}
 
-	cardStyle := defaultCardStyle(0, 0)
-	playerStatsCardStyle := defaultCardStyle(playerNameWidth+totalStatsWidth+cardStyle.Gap+cardStyle.PaddingX*2, 0)
-	totalCardsWidth := (playerStatsCardStyle.Width * 2) - 30
+	playerStatsCardStyle := defaultCardStyle(playerNameWidth+totalStatsWidth+progressBarWidth+cardStyle.Gap*2+cardStyle.PaddingX*2, 0)
+	totalCardsWidth := (playerStatsCardStyle.Width * 2) + frameStyle.Gap
 
 	// Allies
 	for _, card := range cards.Allies {

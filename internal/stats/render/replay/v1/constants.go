@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	frameStyle = common.Style{Direction: common.DirectionVertical, PaddingX: 30, PaddingY: 30, Gap: 10}
+	frameStyle = common.Style{Direction: common.DirectionVertical, PaddingX: 20, PaddingY: 20, Gap: 10}
 
 	hpBarColorAllies  = color.NRGBA{R: 120, G: 255, B: 120, A: 255}
 	hpBarColorEnemies = color.NRGBA{R: 255, G: 120, B: 120, A: 255}
@@ -18,12 +18,13 @@ var (
 func defaultCardStyle(width, height float64) common.Style {
 	return common.Style{
 		Direction:       common.DirectionVertical,
-		Width:           width + 40,
+		Width:           width,
 		Height:          height,
 		BackgroundColor: common.DefaultCardColor,
 		PaddingX:        common.BorderRadiusLG,
 		BorderRadius:    common.BorderRadiusLG,
-		Gap:             10,
+		Gap:             15,
+		// Debug:           true,
 	}
 }
 

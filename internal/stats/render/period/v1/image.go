@@ -55,7 +55,7 @@ func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs [
 		if patternSeed == 0 {
 			patternSeed = int(time.Now().Unix())
 		}
-		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed)
+		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed, 0.5)
 	}
 
 	return segments.Render(func(op *common.Options) { op.Background = o.Background })

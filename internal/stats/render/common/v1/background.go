@@ -14,7 +14,7 @@ import (
 var globalLogoCacheMx sync.Mutex
 var globalLogoCache = make(map[color.Color]image.Image)
 
-func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed int) image.Image {
+func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed int, colorChance float32) image.Image {
 	if len(colors) < 1 {
 		colors = DefaultLogoColorOptions
 	}
@@ -22,7 +22,7 @@ func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed
 	source := rand.NewSource(int64(seed))
 	r := rand.New(source)
 	for i := range colors {
-		if r.Float32() > 0.5 {
+		if r.Float32() <= colorChance {
 			colors[i] = TextSecondary
 		}
 	}

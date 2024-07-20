@@ -51,7 +51,7 @@ func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option
 		if patternSeed == 0 {
 			patternSeed = int(time.Now().Unix())
 		}
-		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed)
+		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed, 1)
 	}
 
 	return segments.Render(func(op *common.Options) { op.Background = o.Background })
