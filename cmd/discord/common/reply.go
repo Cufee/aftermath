@@ -18,7 +18,7 @@ type reply struct {
 }
 
 func (r reply) Choices(data ...*discordgo.ApplicationCommandOptionChoice) error {
-	return r.ctx.respond(discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &discordgo.InteractionResponseData{Choices: data}}, nil)
+	return r.ctx.respond(discordgo.InteractionResponseData{Choices: data}, nil)
 }
 
 func (r reply) Text(message ...string) reply {
@@ -64,18 +64,15 @@ func (r reply) Send(content ...string) error {
 	return r.ctx.respond(r.data())
 }
 
-func (r reply) data() (discordgo.InteractionResponse, []rest.File) {
+func (r reply) data() (discordgo.InteractionResponseData, []rest.File) {
 	var content []string
 	for _, t := range r.text {
 		content = append(content, r.ctx.Localize(t))
 	}
 
-	return discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content:    strings.Join(content, "\n"),
-			Components: r.components,
-			Embeds:     r.embeds,
-		},
+	return discordgo.InteractionResponseData{
+		Content:    strings.Join(content, "\n"),
+		Components: r.components,
+		Embeds:     r.embeds,
 	}, r.files
 }

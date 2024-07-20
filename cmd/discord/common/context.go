@@ -77,8 +77,8 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 }
 
 func withRetry(fn func() error, tries ...int) error {
-	var triesCnt = 3
-	if len(tries) > 0 {
+	var triesCnt = 5
+	if len(tries) > 0 && tries[0] > 0 {
 		triesCnt = tries[0]
 	}
 	res := retry.Retry(func() (struct{}, error) {
@@ -87,16 +87,16 @@ func withRetry(fn func() error, tries ...int) error {
 	return res.Err
 }
 
-func (c *Context) respond(data discordgo.InteractionResponse, files []rest.File) error {
+func (c *Context) respond(data discordgo.InteractionResponseData, files []rest.File) error {
 	select {
 	case <-c.Context.Done():
 		return c.Context.Err()
 	default:
 		return withRetry(func() error {
 			// since we already finished handling the interaction, there is no need to use the handler context
-			ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*3000)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
-			return c.rest.UpdateOrSendInteractionResponse(ctx, c.interaction.AppID, c.interaction.ID, c.interaction.Token, data, files)
+			return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data, files)
 		})
 	}
 }

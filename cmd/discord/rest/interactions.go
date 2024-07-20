@@ -2,7 +2,6 @@ package rest
 
 import (
 	"context"
-	"errors"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -10,31 +9,6 @@ import (
 type File struct {
 	Data []byte
 	Name string
-}
-
-func convertInteractionType(data discordgo.InteractionResponse) discordgo.InteractionResponse {
-	switch data.Type {
-	default:
-		return data
-	case discordgo.InteractionResponseDeferredMessageUpdate:
-		// this call will be sending a new message, convert a "message update" type to a new message type
-		data.Type = discordgo.InteractionResponseChannelMessageWithSource
-		return data
-	}
-}
-
-/*
-Optimistically send an interaction response update request with fallback to interaction response send request
-*/
-func (c *Client) UpdateOrSendInteractionResponse(ctx context.Context, appID, interactionID, token string, data discordgo.InteractionResponse, files []File) error {
-	err := c.UpdateInteractionResponse(ctx, appID, token, *data.Data, files)
-	if err != nil {
-		if errors.Is(err, ErrUnknownWebhook) || errors.Is(err, ErrUnknownInteraction) {
-			return c.SendInteractionResponse(ctx, interactionID, token, convertInteractionType(data), files)
-		}
-		return err
-	}
-	return nil
 }
 
 func (c *Client) SendInteractionResponse(ctx context.Context, interactionID, token string, data discordgo.InteractionResponse, files []File) error {

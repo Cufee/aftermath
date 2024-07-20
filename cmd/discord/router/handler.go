@@ -232,19 +232,19 @@ func (r *Router) sendInteractionReply(interaction discordgo.Interaction, data di
 
 	if slices.Contains(supportedInteractionTypes, interaction.Type) {
 		handler = func(ctx context.Context) error {
-			return r.restClient.UpdateOrSendInteractionResponse(ctx, interaction.AppID, interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &data, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
+			return r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, data, nil)
 		}
 	} else {
 		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
 		handler = func(ctx context.Context) error {
-			return r.restClient.UpdateOrSendInteractionResponse(ctx, interaction.AppID, interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
+			return r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, nil)
 		}
 	}
 
 	res := retry.Retry(func() (struct{}, error) {
 		// use a background context for this
 		// since the command is already handled, there is not much point in using the route handler context timeout
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		err := handler(ctx)
 		return struct{}{}, err
