@@ -5,6 +5,10 @@
 
 - key: label_assisted_combined
   value: Assisted+
+- key: label_assisted
+  value: Assisted
+- key: label_blocked
+  value: Blocked
 
 - key: label_ranked_rating
   value: Rating

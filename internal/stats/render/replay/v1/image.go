@@ -25,7 +25,7 @@ func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option
 		apply(&o)
 	}
 
-	segments, err := generateCards(replay, cards)
+	segments, err := generateCards(replay, cards, o.Printer)
 	if err != nil {
 		return nil, err
 	}

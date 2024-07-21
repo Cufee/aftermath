@@ -6,11 +6,11 @@ import (
 
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
-	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
+	rp "github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
-func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, error) {
+func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) string) (common.Segments, error) {
 	var segments common.Segments
 
 	var alliesBlocks, enemiesBlocks []common.Block
@@ -59,6 +59,7 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 			footer = append(footer, "Asia")
 		}
 		footer = append(footer, replay.BattleTime.Format("Jan 2, 2006"))
+		footer = append(footer, fmt.Sprintf("%s + %s", printer("label_"+rp.TagDamageAssisted.String()), printer("label_"+rp.TagDamageBlocked.String())))
 
 		footerBlock := common.NewFooterCard(strings.Join(footer, " • "))
 		footerImage, err := footerBlock.Render()

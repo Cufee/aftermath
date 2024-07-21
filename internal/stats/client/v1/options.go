@@ -38,13 +38,16 @@ func WithBackgroundURL(url string) RequestOption {
 	return func(o *requestOptions) { o.backgroundURL = url }
 }
 
-func (o requestOptions) RenderOpts() []common.Option {
+func (o requestOptions) RenderOpts(printer func(string) string) []common.Option {
 	var copts []common.Option
 	if o.promoText != nil {
 		copts = append(copts, common.WithPromoText(o.promoText...))
 	}
 	if o.vehicleID != "" {
 		copts = append(copts, common.WithVehicleID(o.vehicleID))
+	}
+	if printer != nil {
+		copts = append(copts, common.WithPrinter(printer))
 	}
 	copts = append(copts, common.WithBackground(o.backgroundURL))
 	return copts

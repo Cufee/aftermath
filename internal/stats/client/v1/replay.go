@@ -69,8 +69,13 @@ func (r *client) ReplayImage(ctx context.Context, replayURL string, o ...Request
 		return nil, meta, err
 	}
 
+	printer, err := localization.NewPrinter("stats", r.locale)
+	if err != nil {
+		return nil, meta, err
+	}
+
 	stop := meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(meta.Replay, cards, opts.RenderOpts()...)
+	image, err := render.CardsToImage(meta.Replay, cards, opts.RenderOpts(printer)...)
 	stop()
 	if err != nil {
 		return nil, meta, err

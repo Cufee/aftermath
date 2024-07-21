@@ -11,10 +11,11 @@ type Options struct {
 	VehicleID  string
 	PromoText  []string
 	Background image.Image
+	Printer    func(string) string
 }
 
 func DefaultOptions() Options {
-	return Options{}
+	return Options{Printer: func(s string) string { return s }}
 }
 
 type Option func(*Options)
@@ -27,6 +28,12 @@ func WithPromoText(text ...string) Option {
 func WithVehicleID(vid string) Option {
 	return func(o *Options) {
 		o.VehicleID = vid
+	}
+}
+
+func WithPrinter(printer func(string) string) Option {
+	return func(o *Options) {
+		o.Printer = printer
 	}
 }
 

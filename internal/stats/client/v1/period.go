@@ -70,8 +70,13 @@ func (r *client) PeriodImage(ctx context.Context, accountId string, from time.Ti
 		return nil, meta, err
 	}
 
+	printer, err := localization.NewPrinter("stats", r.locale)
+	if err != nil {
+		return nil, meta, err
+	}
+
 	stop := meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(meta.Stats["period"], cards, nil, opts.RenderOpts()...)
+	image, err := render.CardsToImage(meta.Stats["period"], cards, nil, opts.RenderOpts(printer)...)
 	stop()
 	if err != nil {
 		return nil, meta, err

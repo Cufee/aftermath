@@ -190,7 +190,7 @@ func TestRenderReplay(t *testing.T) {
 		cards, err := prepare.NewCards(replay, glossary, gameModeNames, common.WithPrinter(printer, language.English))
 		is.NoErr(err)
 
-		image, err := render.CardsToImage(replay, cards, rc.WithBackground(""))
+		image, err := render.CardsToImage(replay, cards, rc.WithBackground(""), rc.WithPrinter(printer))
 		assert.NoError(t, err, "failed to render a replay image")
 		assert.NotNil(t, image, "image is nil")
 
