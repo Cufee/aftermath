@@ -101,9 +101,11 @@ func (r reply) data() (discordgo.InteractionResponseData, []rest.File) {
 		content = append(content, "-# "+r.ctx.Localize(r.hint))
 	}
 
+	var cleatAttachments []*discordgo.MessageAttachment
 	return discordgo.InteractionResponseData{
-		Content:    strings.Join(content, "\n"),
-		Components: r.components,
-		Embeds:     r.embeds,
+		Content:     strings.Join(content, "\n"),
+		Components:  r.components,
+		Embeds:      r.embeds,
+		Attachments: &cleatAttachments,
 	}, r.files
 }
