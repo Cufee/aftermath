@@ -57,8 +57,8 @@ func sendHelpResponse(ctx *common.Context) error {
 
 func Help() builder.Builder {
 	return builder.NewCommand("help").
-		Middleware(middleware.RequirePermissions(permissions.UseTextCommands)).
 		Ephemeral().
+		Middleware(middleware.RequirePermissions(permissions.UseTextCommands)).
 		Handler(func(ctx *common.Context) error {
 			return sendHelpResponse(ctx)
 		})

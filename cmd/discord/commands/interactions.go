@@ -85,15 +85,11 @@ func newStatsRefreshButton(data models.DiscordInteraction) discordgo.MessageComp
 func init() {
 	LoadedPublic.add(
 		builder.NewCommand("refresh_stats_from_button").
-			Middleware(middleware.RequirePermissions(permissions.UseDebugFeatures)).
+			Middleware(middleware.RequirePermissions(permissions.UseImageCommands, permissions.UseTextCommands)).
 			ComponentType(func(customID string) bool {
 				return strings.HasPrefix(customID, "refresh_stats_from_button_")
 			}).
 			Handler(func(ctx *common.Context) error {
-				if !ctx.User.Permissions.Has(permissions.UseImageCommands, permissions.UseTextCommands) {
-					return ctx.Reply().Send("common_error_command_missing_permissions")
-				}
-
 				data, ok := ctx.ComponentData()
 				if !ok {
 					return ctx.Error("failed to get component data on interaction command")
