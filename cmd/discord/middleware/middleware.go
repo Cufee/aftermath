@@ -7,9 +7,9 @@ import (
 
 type MiddlewareFunc func(*common.Context, func(*common.Context) error) func(*common.Context) error
 
-func RequirePermissions(required permissions.Permissions) MiddlewareFunc {
+func RequirePermissions(required ...permissions.Permissions) MiddlewareFunc {
 	return func(ctx *common.Context, next func(*common.Context) error) func(*common.Context) error {
-		if !ctx.User.HasPermission(required) {
+		if !ctx.User.HasPermission(required...) {
 			return func(ctx *common.Context) error {
 				return ctx.Reply().Send("common_error_command_missing_permissions")
 			}

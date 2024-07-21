@@ -7,6 +7,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/cmd/discord/middleware"
+	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/gorhill/cronexpr"
 )
 
@@ -55,6 +57,7 @@ func sendHelpResponse(ctx *common.Context) error {
 
 func Help() builder.Builder {
 	return builder.NewCommand("help").
+		Middleware(middleware.RequirePermissions(permissions.UseTextCommands)).
 		Ephemeral().
 		Handler(func(ctx *common.Context) error {
 			return sendHelpResponse(ctx)

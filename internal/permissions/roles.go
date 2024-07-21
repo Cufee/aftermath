@@ -4,6 +4,9 @@ var (
 	User Permissions = UseTextCommands.
 		Add(UseImageCommands).
 		Add(UsePromotionalPersonalContent).
+		Add(CreatePersonalContent).
+		Add(UpdatePersonalContent).
+		Add(RemovePersonalContent).
 		Add(CreatePersonalConnection).
 		Add(UpdatePersonalConnection).
 		Add(RemovePersonalConnection).

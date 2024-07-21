@@ -35,9 +35,13 @@ var (
 	Blank Permissions = Permissions{big.NewInt(0)}
 )
 
-func (p Permissions) Has(permission Permissions) bool {
-	result := big.NewInt(0)
-	return result.And(p.value, permission.value).Cmp(permission.value) == 0
+func (p Permissions) Has(perms ...Permissions) bool {
+	for _, pn := range perms {
+		if result := new(big.Int).And(p.value, pn.value); result.Cmp(pn.value) != 0 {
+			return false
+		}
+	}
+	return true
 }
 
 func (p Permissions) Add(permission Permissions) Permissions {

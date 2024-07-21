@@ -8,8 +8,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/permissions"
 	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/pkg/errors"
@@ -18,6 +20,7 @@ import (
 func init() {
 	LoadedPublic.add(
 		builder.NewCommand("my").
+			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
 			Params(builder.SetNameKey("command_my_name"), builder.SetDescKey("command_my_description")).
 			Options(
 				builder.NewOption("stats", discordgo.ApplicationCommandOptionSubCommand).

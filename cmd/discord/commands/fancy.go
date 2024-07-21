@@ -18,14 +18,14 @@ import (
 
 func init() {
 	LoadedPublic.add(
-		builder.NewCommand("replay").
-			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
+		builder.NewCommand("fancy").
+			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.CreatePersonalContent, permissions.RemovePersonalContent, permissions.UpdatePersonalContent)).
 			Options(
 				builder.NewOption("file", discordgo.ApplicationCommandOptionAttachment).
-					Params(builder.SetNameKey("command_option_replay_file_name"), builder.SetDescKey("command_option_replay_file_description")),
+					Params(builder.SetNameKey("command_option_fancy_file_name"), builder.SetDescKey("command_option_fancy_file_description")),
 
 				builder.NewOption("link", discordgo.ApplicationCommandOptionString).
-					Params(builder.SetNameKey("command_option_replay_link_name"), builder.SetDescKey("command_option_replay_link_description")),
+					Params(builder.SetNameKey("command_option_fancy_link_name"), builder.SetDescKey("command_option_fancy_link_description")),
 			).
 			Handler(func(ctx *common.Context) error {
 				link, linkOK := ctx.Options().Value("link").(string)

@@ -8,6 +8,7 @@ import (
 
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
@@ -18,6 +19,7 @@ import (
 func init() {
 	LoadedPublic.add(
 		builder.NewCommand("stats").
+			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
 			Options(defaultStatsOptions...).
 			Handler(func(ctx *common.Context) error {
 				options := getDefaultStatsOptions(ctx.Options())

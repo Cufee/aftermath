@@ -10,14 +10,17 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/permissions"
 )
 
 func init() {
 	LoadedPublic.add(
 		builder.NewCommand("links").
+			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.CreatePersonalConnection, permissions.RemovePersonalConnection, permissions.UpdatePersonalConnection)).
 			Ephemeral().
 			Options(
 				builder.NewOption("add", discordgo.ApplicationCommandOptionSubCommand).

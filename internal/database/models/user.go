@@ -15,7 +15,7 @@ type User struct {
 	Subscriptions []UserSubscription
 }
 
-func (u User) HasPermission(value permissions.Permissions) bool {
+func (u User) HasPermission(values ...permissions.Permissions) bool {
 	perms := u.Permissions
 	for _, c := range u.Connections {
 		perms.Add(c.Permissions)
@@ -31,7 +31,7 @@ func (u User) HasPermission(value permissions.Permissions) bool {
 			return false
 		}
 	}
-	return perms.Has(value)
+	return perms.Has(values...)
 }
 
 func (u User) Connection(kind ConnectionType, conditions map[string]any) (UserConnection, bool) {
