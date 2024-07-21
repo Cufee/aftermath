@@ -22,7 +22,7 @@ func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed
 	source := rand.NewSource(int64(seed))
 	r := rand.New(source)
 	for i := range colors {
-		if r.Float32() <= colorChance {
+		if r.Float32() > colorChance {
 			colors[i] = TextSecondary
 		}
 	}
