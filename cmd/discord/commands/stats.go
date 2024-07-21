@@ -92,7 +92,7 @@ func init() {
 					timings = append(timings, "```")
 				}
 
-				return ctx.Reply().Hint(message).File(buf.Bytes(), "stats_command_by_aftermath.png").Component(button).Text(timings...).Send()
+				return ctx.Reply().WithAds().Hint(message).File(buf.Bytes(), "stats_command_by_aftermath.png").Component(button).Text(timings...).Send()
 			}),
 	)
 }

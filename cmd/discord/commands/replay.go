@@ -36,7 +36,7 @@ func init() {
 				}
 
 				replayURL := link
-				if data, ok := ctx.CommandData(); ok {
+				if data, ok := ctx.CommandData(); ok && data.Resolved != nil {
 					if attachment, ok := data.Resolved.Attachments[file]; ok {
 						replayURL = attachment.URL
 					}
@@ -64,7 +64,7 @@ func init() {
 				if err != nil {
 					return ctx.Err(err)
 				}
-				return ctx.Reply().Hint(hintMessage).File(buf.Bytes(), "replay_command_by_aftermath.png").Send()
+				return ctx.Reply().WithAds().Hint(hintMessage).File(buf.Bytes(), "replay_command_by_aftermath.png").Send()
 			}),
 	)
 

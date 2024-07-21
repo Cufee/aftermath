@@ -18,6 +18,10 @@ type Tx struct {
 	Account *AccountClient
 	// AccountSnapshot is the client for interacting with the AccountSnapshot builders.
 	AccountSnapshot *AccountSnapshotClient
+	// AdEvent is the client for interacting with the AdEvent builders.
+	AdEvent *AdEventClient
+	// AdMessage is the client for interacting with the AdMessage builders.
+	AdMessage *AdMessageClient
 	// AppConfiguration is the client for interacting with the AppConfiguration builders.
 	AppConfiguration *AppConfigurationClient
 	// ApplicationCommand is the client for interacting with the ApplicationCommand builders.
@@ -187,6 +191,8 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.AccountSnapshot = NewAccountSnapshotClient(tx.config)
+	tx.AdEvent = NewAdEventClient(tx.config)
+	tx.AdMessage = NewAdMessageClient(tx.config)
 	tx.AppConfiguration = NewAppConfigurationClient(tx.config)
 	tx.ApplicationCommand = NewApplicationCommandClient(tx.config)
 	tx.AuthNonce = NewAuthNonceClient(tx.config)

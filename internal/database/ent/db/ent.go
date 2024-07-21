@@ -14,6 +14,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
+	"github.com/cufee/aftermath/internal/database/ent/db/adevent"
+	"github.com/cufee/aftermath/internal/database/ent/db/admessage"
 	"github.com/cufee/aftermath/internal/database/ent/db/appconfiguration"
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
 	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
@@ -94,6 +96,8 @@ func checkColumn(table, column string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			account.Table:            account.ValidColumn,
 			accountsnapshot.Table:    accountsnapshot.ValidColumn,
+			adevent.Table:            adevent.ValidColumn,
+			admessage.Table:          admessage.ValidColumn,
 			appconfiguration.Table:   appconfiguration.ValidColumn,
 			applicationcommand.Table: applicationcommand.ValidColumn,
 			authnonce.Table:          authnonce.ValidColumn,

@@ -150,7 +150,7 @@ func init() {
 					timings = append(timings, "```")
 				}
 
-				return ctx.Reply().File(buf.Bytes(), interaction.Command+"_command_by_aftermath.png").Component(button).Text(timings...).Send()
+				return ctx.Reply().WithAds().File(buf.Bytes(), interaction.Command+"_command_by_aftermath.png").Component(button).Text(timings...).Send()
 			}),
 	)
 }

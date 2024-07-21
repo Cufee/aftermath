@@ -7,6 +7,8 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
+	"github.com/cufee/aftermath/internal/database/ent/db/adevent"
+	"github.com/cufee/aftermath/internal/database/ent/db/admessage"
 	"github.com/cufee/aftermath/internal/database/ent/db/appconfiguration"
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
 	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
@@ -94,6 +96,46 @@ func init() {
 	accountsnapshotDescID := accountsnapshotFields[0].Descriptor()
 	// accountsnapshot.DefaultID holds the default value on creation for the id field.
 	accountsnapshot.DefaultID = accountsnapshotDescID.Default.(func() string)
+	adeventFields := schema.AdEvent{}.Fields()
+	_ = adeventFields
+	// adeventDescCreatedAt is the schema descriptor for created_at field.
+	adeventDescCreatedAt := adeventFields[1].Descriptor()
+	// adevent.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adevent.DefaultCreatedAt = adeventDescCreatedAt.Default.(func() time.Time)
+	// adeventDescUpdatedAt is the schema descriptor for updated_at field.
+	adeventDescUpdatedAt := adeventFields[2].Descriptor()
+	// adevent.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adevent.DefaultUpdatedAt = adeventDescUpdatedAt.Default.(func() time.Time)
+	// adevent.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adevent.UpdateDefaultUpdatedAt = adeventDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adeventDescUserID is the schema descriptor for user_id field.
+	adeventDescUserID := adeventFields[3].Descriptor()
+	// adevent.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	adevent.UserIDValidator = adeventDescUserID.Validators[0].(func(string) error)
+	// adeventDescChannelID is the schema descriptor for channel_id field.
+	adeventDescChannelID := adeventFields[5].Descriptor()
+	// adevent.ChannelIDValidator is a validator for the "channel_id" field. It is called by the builders before save.
+	adevent.ChannelIDValidator = adeventDescChannelID.Validators[0].(func(string) error)
+	// adeventDescID is the schema descriptor for id field.
+	adeventDescID := adeventFields[0].Descriptor()
+	// adevent.DefaultID holds the default value on creation for the id field.
+	adevent.DefaultID = adeventDescID.Default.(func() string)
+	admessageFields := schema.AdMessage{}.Fields()
+	_ = admessageFields
+	// admessageDescCreatedAt is the schema descriptor for created_at field.
+	admessageDescCreatedAt := admessageFields[1].Descriptor()
+	// admessage.DefaultCreatedAt holds the default value on creation for the created_at field.
+	admessage.DefaultCreatedAt = admessageDescCreatedAt.Default.(func() time.Time)
+	// admessageDescUpdatedAt is the schema descriptor for updated_at field.
+	admessageDescUpdatedAt := admessageFields[2].Descriptor()
+	// admessage.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	admessage.DefaultUpdatedAt = admessageDescUpdatedAt.Default.(func() time.Time)
+	// admessage.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	admessage.UpdateDefaultUpdatedAt = admessageDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// admessageDescID is the schema descriptor for id field.
+	admessageDescID := admessageFields[0].Descriptor()
+	// admessage.DefaultID holds the default value on creation for the id field.
+	admessage.DefaultID = admessageDescID.Default.(func() string)
 	appconfigurationFields := schema.AppConfiguration{}.Fields()
 	_ = appconfigurationFields
 	// appconfigurationDescCreatedAt is the schema descriptor for created_at field.

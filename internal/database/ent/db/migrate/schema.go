@@ -116,6 +116,65 @@ var (
 			},
 		},
 	}
+	// AdEventsColumns holds the columns for the "ad_events" table.
+	AdEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "guild_id", Type: field.TypeString},
+		{Name: "channel_id", Type: field.TypeString},
+		{Name: "locale", Type: field.TypeString},
+		{Name: "message_id", Type: field.TypeString},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+	}
+	// AdEventsTable holds the schema information for the "ad_events" table.
+	AdEventsTable = &schema.Table{
+		Name:       "ad_events",
+		Columns:    AdEventsColumns,
+		PrimaryKey: []*schema.Column{AdEventsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adevent_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdEventsColumns[0]},
+			},
+			{
+				Name:    "adevent_user_id_guild_id_channel_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdEventsColumns[3], AdEventsColumns[4], AdEventsColumns[5], AdEventsColumns[1]},
+			},
+		},
+	}
+	// AdMessagesColumns holds the columns for the "ad_messages" table.
+	AdMessagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "enabled", Type: field.TypeBool},
+		{Name: "weight", Type: field.TypeInt},
+		{Name: "chance", Type: field.TypeFloat32},
+		{Name: "message", Type: field.TypeJSON},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+	}
+	// AdMessagesTable holds the schema information for the "ad_messages" table.
+	AdMessagesTable = &schema.Table{
+		Name:       "ad_messages",
+		Columns:    AdMessagesColumns,
+		PrimaryKey: []*schema.Column{AdMessagesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "admessage_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdMessagesColumns[0]},
+			},
+			{
+				Name:    "admessage_weight_enabled",
+				Unique:  false,
+				Columns: []*schema.Column{AdMessagesColumns[4], AdMessagesColumns[3]},
+			},
+		},
+	}
 	// AppConfigurationsColumns holds the columns for the "app_configurations" table.
 	AppConfigurationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -761,6 +820,8 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		AccountSnapshotsTable,
+		AdEventsTable,
+		AdMessagesTable,
 		AppConfigurationsTable,
 		ApplicationCommandsTable,
 		AuthNoncesTable,

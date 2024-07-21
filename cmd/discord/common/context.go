@@ -101,6 +101,20 @@ func (c *Context) respond(data discordgo.InteractionResponseData, files []rest.F
 	}
 }
 
+func (c *Context) followUp(data discordgo.InteractionResponseData, files []rest.File) error {
+	select {
+	case <-c.Context.Done():
+		return c.Context.Err()
+	default:
+		return withRetry(func() error {
+			// since we already finished handling the interaction, there is no need to use the handler context
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			return c.rest.SendInteractionFollowup(ctx, c.interaction.AppID, c.interaction.Token, data, files)
+		})
+	}
+}
+
 func (c *Context) InteractionID() string {
 	return c.interaction.ID
 }

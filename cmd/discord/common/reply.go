@@ -5,12 +5,15 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+
 	"github.com/cufee/aftermath/cmd/discord/rest"
+	"github.com/cufee/aftermath/internal/log"
 )
 
 type reply struct {
 	ctx *Context
 
+	includeAds bool
 	hint       string
 	text       []string
 	files      []rest.File
@@ -65,7 +68,26 @@ func (r reply) Embed(embeds ...*discordgo.MessageEmbed) reply {
 	return r
 }
 
+func (r reply) WithAds() reply {
+	r.includeAds = true
+	return r
+}
+
 func (r reply) Send(content ...string) error {
+	if r.includeAds {
+		defer func() {
+			data, send := r.newMessageAd()
+			if !send {
+				return
+			}
+
+			err := r.ctx.followUp(data, nil)
+			if err != nil {
+				log.Err(err).Msg("failed to send an interaction ad followup")
+			}
+		}()
+	}
+
 	r.text = append(r.text, content...)
 	return r.ctx.respond(r.data())
 }

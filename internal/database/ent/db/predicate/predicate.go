@@ -12,6 +12,12 @@ type Account func(*sql.Selector)
 // AccountSnapshot is the predicate function for accountsnapshot builders.
 type AccountSnapshot func(*sql.Selector)
 
+// AdEvent is the predicate function for adevent builders.
+type AdEvent func(*sql.Selector)
+
+// AdMessage is the predicate function for admessage builders.
+type AdMessage func(*sql.Selector)
+
 // AppConfiguration is the predicate function for appconfiguration builders.
 type AppConfiguration func(*sql.Selector)
 

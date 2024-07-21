@@ -27,7 +27,7 @@ func (c *Client) UpdateInteractionResponse(ctx context.Context, appID, token str
 	return c.do(ctx, req, nil)
 }
 
-func (c *Client) SendInteractionFollowup(ctx context.Context, appID, token string, data discordgo.InteractionResponse, files []File) error {
+func (c *Client) SendInteractionFollowup(ctx context.Context, appID, token string, data discordgo.InteractionResponseData, files []File) error {
 	req, err := c.requestWithFiles("POST", discordgo.EndpointFollowupMessage(appID, token), data, files)
 	if err != nil {
 		return err
