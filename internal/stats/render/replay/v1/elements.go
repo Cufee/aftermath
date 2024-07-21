@@ -14,20 +14,18 @@ const (
 	progressDirectionVertical
 )
 
-const progressBarWidth = 8
-
-func newProgressBar(size int, progress int, direction progressDirection, fillColor color.Color) common.Block {
+func newProgressBar(size int, progress int, direction progressDirection, fillColor color.Color, bgColor color.Color) common.Block {
 	var width, height int
 	if direction == progressDirectionHorizontal {
 		width = (size)
-		height = progressBarWidth
+		height = int(hpBarWidth)
 	} else {
-		width = progressBarWidth
+		width = int(hpBarWidth)
 		height = (size)
 	}
 
 	ctx := gg.NewContext((width), (height))
-	ctx.SetColor(color.NRGBA{70, 70, 70, 255})
+	ctx.SetColor(bgColor)
 	ctx.DrawRoundedRectangle(0, 0, float64(width), float64(height), 5)
 	ctx.Fill()
 
@@ -42,7 +40,7 @@ func newProgressBar(size int, progress int, direction progressDirection, fillCol
 	}
 
 	if direction == progressDirectionHorizontal {
-		return common.NewImageContent(common.Style{Width: float64(size), Height: progressBarWidth}, ctx.Image())
+		return common.NewImageContent(common.Style{Width: float64(size), Height: hpBarWidth}, ctx.Image())
 	}
-	return common.NewImageContent(common.Style{Width: progressBarWidth, Height: float64(size)}, ctx.Image())
+	return common.NewImageContent(common.Style{Width: hpBarWidth, Height: float64(size)}, ctx.Image())
 }

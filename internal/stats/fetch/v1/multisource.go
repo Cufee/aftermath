@@ -457,7 +457,25 @@ func (c *multiSourceClient) Replay(ctx context.Context, file io.ReaderAt, size i
 func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.UnpackedReplay) (Replay, error) {
 	replay := replay.Prettify(unpacked.BattleResult, unpacked.Meta)
 
-	// var accounts []
+	var vehicles []string
+	for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
+		vehicles = append(vehicles, player.VehicleID)
+	}
+
+	averages, err := c.database.GetVehicleAverages(ctx, vehicles)
+	if err != nil {
+		log.Err(err).Msg("failed to get tank averages for a replay")
+	}
+
+	for i, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
+		avg := averages[player.VehicleID]
+		_ = player.Performance.WN8(avg) // calculate and cache WN8
+		if i < len(replay.Teams.Allies) {
+			replay.Teams.Allies[i] = player
+		} else {
+			replay.Teams.Enemies[i-len(replay.Teams.Allies)] = player
+		}
+	}
 
 	mapData, err := c.database.GetMap(ctx, replay.MapID)
 	if err != nil && !database.IsNotFound(err) {

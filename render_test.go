@@ -162,7 +162,7 @@ func TestRenderReplay(t *testing.T) {
 	printer, err := localization.NewPrinter("stats", language.English)
 	is.NoErr(err)
 
-	file, err := os.ReadFile("tests/replay_1.wotbreplay")
+	file, err := os.ReadFile("tests/replay_2.wotbreplay")
 	is.NoErr(err)
 
 	fetch, err := fetch.NewMultiSourceClient(nil, nil, db)

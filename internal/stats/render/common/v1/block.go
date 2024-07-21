@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"image"
+	"image/color"
 	"strings"
 	"sync"
 
@@ -25,6 +26,7 @@ const (
 	BlockContentTypeImage
 	// BlockContentTypeIcon
 	BlockContentTypeBlocks
+	BlockContentTypeEmpty
 )
 
 type BlockContent interface {
@@ -205,6 +207,20 @@ func (content contentImage) Render(style Style) (image.Image, error) {
 	return image, nil
 }
 
+func NewEmptyContent(width, height float64) Block {
+	return NewBlock(contentEmpty{}, Style{Width: width, Height: height})
+}
+
 func (content contentImage) Type() blockContentType {
 	return BlockContentTypeBlocks
+}
+
+type contentEmpty struct{}
+
+func (content contentEmpty) Type() blockContentType {
+	return BlockContentTypeEmpty
+}
+
+func (content contentEmpty) Render(style Style) (image.Image, error) {
+	return imaging.New(int(style.Width), int(style.Height), color.Transparent), nil
 }

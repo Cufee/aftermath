@@ -8,12 +8,12 @@ import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
-type outcome string
+type Outcome string
 
 const (
-	OutcomeVictory outcome = "victory"
-	OutcomeDefeat  outcome = "defeat"
-	OutcomeDraw    outcome = "draw"
+	OutcomeVictory Outcome = "victory"
+	OutcomeDefeat  Outcome = "defeat"
+	OutcomeDraw    Outcome = "draw"
 )
 
 type battleType struct {
@@ -89,7 +89,7 @@ type Replay struct {
 	GameMode   gameMode   `json:"gameMode" protobuf:"11"`
 	BattleType battleType `json:"battleType" protobuf:"12"`
 
-	Outcome        outcome   `json:"victory" protobuf:"15"`
+	Outcome        Outcome   `json:"victory" protobuf:"15"`
 	BattleTime     time.Time `json:"battleTime" protobuf:"16"`
 	BattleDuration int       `json:"battleDuration" protobuf:"17"`
 

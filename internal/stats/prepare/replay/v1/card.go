@@ -22,6 +22,7 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes
 	}
 
 	var cards Cards
+	cards.Header.Outcome = replay.Outcome
 	cards.Header.Result = options.Printer()("label_" + string(replay.Outcome))
 	cards.Header.GameMode = options.Printer()(replay.GameMode.String())
 	if name, ok := gameModes[options.Locale()]; ok {

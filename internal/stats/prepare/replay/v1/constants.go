@@ -22,6 +22,7 @@ type Cards struct {
 type Card common.StatsCard[common.StatsBlock[BlockData], CardMeta]
 
 type HeaderCard struct {
+	Outcome      replay.Outcome
 	Result       string   `json:"result"`
 	MapName      string   `json:"map"`
 	GameMode     string   `json:"gameMode"`

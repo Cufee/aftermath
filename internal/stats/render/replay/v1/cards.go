@@ -38,12 +38,12 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 	}
 
 	statsStyle := statsRowStyle()
-	var totalStatsWidth float64 = statsStyle.Gap * float64(len(statsSizes)-1)
+	var totalStatsWidth float64 = statsStyle.Gap*float64(len(statsSizes)-1) + statsStyle.PaddingX*2
 	for _, width := range statsSizes {
 		totalStatsWidth += width
 	}
 
-	playerStatsCardStyle := defaultCardStyle(playerNameWidth+totalStatsWidth+progressBarWidth+cardStyle.Gap*2+cardStyle.PaddingX*2, 0)
+	playerStatsCardStyle := defaultCardStyle(playerNameWidth+totalStatsWidth+hpBarWidth+cardStyle.Gap*2+cardStyle.PaddingX*2, 0)
 	totalCardsWidth := (playerStatsCardStyle.Width * 2) + frameStyle.Gap
 
 	// Allies
@@ -62,8 +62,8 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 	var teamsBlocks []common.Block
 	teamsBlocks = append(teamsBlocks, common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, Gap: 10}, alliesBlocks...))
 	teamsBlocks = append(teamsBlocks, common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, Gap: 10}, enemiesBlocks...))
-	playersBlock := common.NewBlocksContent(statsStyle, teamsBlocks...)
-	teamsBlock := common.NewBlocksContent(statsStyle, playersBlock)
+	playersBlock := common.NewBlocksContent(teamsRowStyle(), teamsBlocks...)
+	teamsBlock := common.NewBlocksContent(teamsRowStyle(), playersBlock)
 
 	segments.AddContent(common.NewBlocksContent(frameStyle, titleBlock, teamsBlock))
 	return segments, nil

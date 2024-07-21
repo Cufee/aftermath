@@ -2,32 +2,32 @@ package replay
 
 import (
 	"fmt"
+	"image"
+	"image/color"
 	"math"
 
 	fetch "github.com/cufee/aftermath/internal/stats/fetch/v1/replay"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
+	"github.com/cufee/aftermath/internal/stats/render/assets"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
+	"github.com/disintegration/imaging"
 )
 
 func newTitleBlock(replay replay.Cards, width float64) common.Block {
-	var titleBlocks []common.Block
-	titleBlocks = append(titleBlocks, common.NewTextContent(common.Style{
-		Font:      common.FontLarge(),
-		FontColor: common.TextPrimary,
-	}, replay.Header.Result))
-
-	titleBlocks = append(titleBlocks, common.NewTextContent(common.Style{
-		Font:      common.FontLarge(),
-		FontColor: common.TextSecondary,
-	}, fmt.Sprintf("%s - %s", replay.Header.MapName, replay.Header.GameMode)))
-
-	style := defaultCardStyle(width, 75)
-	style.JustifyContent = common.JustifyContentCenter
+	style := defaultCardStyle(width, 80)
+	style.JustifyContent = common.JustifyContentSpaceBetween
 	style.Direction = common.DirectionHorizontal
 	style.AlignItems = common.AlignItemsCenter
+	style.PaddingX = playerCardPadding
 
-	return common.NewBlocksContent(style, titleBlocks...)
+	return common.NewBlocksContent(style,
+		outcomeIcon(replay.Header.Outcome),
+		common.NewTextContent(common.Style{
+			Font:      common.FontLarge(),
+			FontColor: common.TextPrimary,
+		}, fmt.Sprintf("%s - %s", replay.Header.MapName, replay.Header.GameMode)),
+		common.NewEmptyContent(outcomeIconSize, outcomeIconSize))
 }
 
 func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card replay.Card, player fetch.Player, ally, protagonist bool) common.Block {
@@ -38,9 +38,9 @@ func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card repla
 
 	var hpBar common.Block
 	if ally {
-		hpBar = newProgressBar(60, int(hpBarValue*100), progressDirectionVertical, hpBarColorAllies)
+		hpBar = newProgressBar(int(hpBarHeight), int(hpBarValue*100), progressDirectionVertical, hpBarColorAllies, hpBarBgColorAllies)
 	} else {
-		hpBar = newProgressBar(60, int(hpBarValue*100), progressDirectionVertical, hpBarColorEnemies)
+		hpBar = newProgressBar(int(hpBarHeight), int(hpBarValue*100), progressDirectionVertical, hpBarColorEnemies, hpBarBgColorEnemies)
 	}
 
 	vehicleColor := common.TextPrimary
@@ -54,22 +54,20 @@ func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card repla
 		Gap:        defaultCardStyle(0, 0).Gap,
 		Height:     80,
 		// Debug:      true,
-	}, hpBar, common.NewBlocksContent(common.Style{Direction: common.DirectionVertical},
-		common.NewTextContent(common.Style{Font: common.FontLarge(), FontColor: vehicleColor}, card.Title),
-		playerNameBlock(player, protagonist),
-	))
+	},
+		hpBar,
+		common.NewBlocksContent(common.Style{Direction: common.DirectionVertical},
+			common.NewTextContent(common.Style{Font: common.FontLarge(), FontColor: vehicleColor}, card.Title),
+			playerNameBlock(player, protagonist),
+		))
 
 	var rightBlocks []common.Block
 	for _, block := range card.Blocks {
 		rightBlocks = append(rightBlocks, statsBlockToBlock(block, sizes[block.Tag]))
 	}
-	rightBlock := common.NewBlocksContent(common.Style{
-		JustifyContent: common.JustifyContentCenter,
-		AlignItems:     common.AlignItemsCenter,
-		Gap:            10,
-		// Debug: true,
-	}, rightBlocks...)
+	rightBlock := common.NewBlocksContent(statsRowStyle(), rightBlocks...)
 
+	style.PaddingX = (80 - hpBarHeight) / 2
 	style.Direction = common.DirectionHorizontal
 	style.AlignItems = common.AlignItemsCenter
 	style.JustifyContent = common.JustifyContentSpaceBetween
@@ -102,4 +100,24 @@ func playerNameBlock(player fetch.Player, protagonist bool) common.Block {
 		}, fmt.Sprintf("[%s]", player.ClanTag)))
 	}
 	return common.NewBlocksContent(common.Style{Direction: common.DirectionHorizontal, Gap: 5, AlignItems: common.AlignItemsCenter}, nameBlocks...)
+}
+
+var outcomeIconCache image.Image
+
+func outcomeIcon(outcome fetch.Outcome) common.Block {
+	if outcomeIconCache == nil {
+		flagIcon, _ := assets.GetLoadedImage("flag")
+		outcomeIconCache = imaging.Fit(flagIcon, int(outcomeIconSize), int(outcomeIconSize), imaging.Linear)
+	}
+
+	iconColor := color.NRGBA{255, 240, 0, 180}
+	if outcome == fetch.OutcomeVictory {
+		iconColor = color.NRGBA{46, 204, 113, 180}
+	}
+	if outcome == fetch.OutcomeDefeat {
+		iconColor = color.NRGBA{242, 38, 19, 180}
+	}
+
+	return common.NewImageContent(common.Style{BackgroundColor: iconColor}, outcomeIconCache)
+
 }
