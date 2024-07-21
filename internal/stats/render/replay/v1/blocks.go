@@ -13,7 +13,6 @@ import (
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/disintegration/imaging"
-	"github.com/fogleman/gg"
 )
 
 func newTitleBlock(replay replay.Cards, width float64) common.Block {
@@ -59,16 +58,16 @@ func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card repla
 	},
 		hpBar,
 		common.NewBlocksContent(common.Style{Direction: common.DirectionVertical},
-			common.NewBlocksContent(common.Style{Direction: common.DirectionHorizontal, Gap: style.Gap, AlignItems: common.AlignItemsCenter},
-				common.NewTextContent(common.Style{Font: common.FontLarge(), FontColor: vehicleColor}, card.Title),
-				playerWN8Icon(player.Performance.WN8()),
-			),
+			common.NewTextContent(common.Style{Font: common.FontLarge(), FontColor: vehicleColor}, card.Title),
 			playerNameBlock(player, protagonist),
 		))
 
 	var rightBlocks []common.Block
 	for _, block := range card.Blocks {
 		rightBlocks = append(rightBlocks, statsBlockToBlock(block, sizes[block.Tag]))
+		if block.Tag == prepare.TagWN8 {
+			rightBlocks = append(rightBlocks, playerWN8Icon(block.Value))
+		}
 	}
 	rightBlock := common.NewBlocksContent(statsRowStyle(), rightBlocks...)
 
@@ -129,12 +128,10 @@ func outcomeIcon(outcome fetch.Outcome) common.Block {
 
 func playerWN8Icon(value frame.Value) common.Block {
 	colors := common.GetWN8Colors(value.Float())
-
-	ctx := gg.NewContext(int(playerWN8IconSize), int(playerWN8IconSize))
-	ctx.DrawCircle(playerWN8IconSize/2, playerWN8IconSize/2, playerWN8IconSize/2)
-	ctx.SetColor(colors.Background)
-	ctx.Fill()
-
-	return common.NewImageContent(common.Style{}, ctx.Image())
+	if frame.InvalidValue.Equals(value) {
+		colors.Background = common.TextAlt
+	}
+	icon := common.AftermathLogo(colors.Background, common.SmallLogoOptions())
+	return common.NewImageContent(common.Style{Width: playerWN8IconSize, Height: playerWN8IconSize}, icon)
 
 }

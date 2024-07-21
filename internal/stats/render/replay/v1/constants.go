@@ -19,7 +19,7 @@ var (
 	protagonistColor = color.NRGBA{255, 223, 0, 255}
 	outcomeIconSize  = 30.0
 
-	playerWN8IconSize = 10.0
+	playerWN8IconSize = 25.0
 	playerCardPadding = (80 - hpBarHeight) / 2
 )
 
@@ -38,9 +38,10 @@ func defaultCardStyle(width, height float64) common.Style {
 
 func statsRowStyle() common.Style {
 	return common.Style{
-		PaddingX:  common.BorderRadiusLG - playerCardPadding,
-		Direction: common.DirectionHorizontal,
-		Gap:       10,
+		PaddingX:   common.BorderRadiusLG - playerCardPadding,
+		Direction:  common.DirectionHorizontal,
+		AlignItems: common.AlignItemsCenter,
+		Gap:        10,
 		// Debug:     true,
 	}
 }

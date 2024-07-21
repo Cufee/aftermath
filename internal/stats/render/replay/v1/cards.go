@@ -15,6 +15,7 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 
 	var alliesBlocks, enemiesBlocks []common.Block
 
+	statsStyle := statsRowStyle()
 	cardStyle := defaultCardStyle(0, 0)
 
 	var playerNameWidth float64
@@ -24,19 +25,17 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 		nameSize := common.MeasureString(card.Meta.Player.Nickname, common.FontLarge())
 		clanSize := common.MeasureString(card.Meta.Player.ClanTag, common.FontMedium())
 		tankSize := common.MeasureString(card.Title, common.FontLarge())
-		playerNameWidth = max(playerNameWidth, max(nameSize.TotalWidth+clanSize.TotalWidth+cardStyle.Gap, tankSize.TotalWidth+cardStyle.Gap+playerWN8IconSize))
+		playerNameWidth = max(playerNameWidth, max(nameSize.TotalWidth+clanSize.TotalWidth+cardStyle.Gap, tankSize.TotalWidth))
 
 		// Measure stats value and label
 		for _, block := range card.Blocks {
 			valueSize := common.MeasureString(block.Value.String(), common.FontLarge())
 			labelSize := common.MeasureString(block.Label, common.FontSmall())
-			w := valueSize.TotalWidth
-			if labelSize.TotalWidth > valueSize.TotalWidth {
-				w = labelSize.TotalWidth
+			w := max(valueSize.TotalWidth, labelSize.TotalWidth)
+			if block.Tag == prepare.TagWN8 {
+				statsSizes["wn8_icon"] = playerWN8IconSize + statsStyle.Gap/2
 			}
-			if w > statsSizes[block.Tag] {
-				statsSizes[block.Tag] = w
-			}
+			statsSizes[block.Tag] = max(statsSizes[block.Tag], w)
 		}
 	}
 
@@ -71,7 +70,6 @@ func generateCards(replay fetch.Replay, cards replay.Cards) (common.Segments, er
 		segments.AddFooter(common.NewImageContent(common.Style{}, footerImage))
 	}
 
-	statsStyle := statsRowStyle()
 	var totalStatsWidth float64 = statsStyle.Gap*float64(len(statsSizes)-1) + statsStyle.PaddingX*2
 	for _, width := range statsSizes {
 		totalStatsWidth += width
