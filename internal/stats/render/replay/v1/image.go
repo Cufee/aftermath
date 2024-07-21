@@ -40,18 +40,16 @@ func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option
 		slices.SortFunc(values, func(a, b playerWN8) int { return b.sortKey - a.sortKey })
 
 		var accentColors []color.Color
-		for _, value := range values {
-			c := common.GetWN8Colors(value.wn8.Float()).Background
-			if _, _, _, a := c.RGBA(); a > 0 {
-				accentColors = append(accentColors, c)
-			}
+		c := common.GetWN8Colors(replay.Protagonist.Performance.WN8().Float()).Background
+		if _, _, _, a := c.RGBA(); a > 0 {
+			accentColors = append(accentColors, c)
 		}
 
 		patternSeed, _ := strconv.Atoi(replay.Protagonist.ID)
 		if patternSeed == 0 {
 			patternSeed = int(time.Now().Unix())
 		}
-		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed, 0.75)
+		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed, 0.35)
 	}
 
 	return segments.Render(func(op *common.Options) { op.Background = o.Background })

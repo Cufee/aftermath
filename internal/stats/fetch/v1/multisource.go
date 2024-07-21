@@ -467,9 +467,11 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 		log.Err(err).Msg("failed to get tank averages for a replay")
 	}
 
+	// calculate and cache WN8
+	_ = replay.Protagonist.Performance.WN8(averages[replay.Protagonist.VehicleID])
 	for i, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
 		avg := averages[player.VehicleID]
-		_ = player.Performance.WN8(avg) // calculate and cache WN8
+		_ = player.Performance.WN8(avg)
 		if i < len(replay.Teams.Allies) {
 			replay.Teams.Allies[i] = player
 		} else {
