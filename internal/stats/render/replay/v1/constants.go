@@ -19,6 +19,7 @@ var (
 	protagonistColor = color.NRGBA{255, 223, 0, 255}
 	outcomeIconSize  = 30.0
 
+	playerWN8IconSize = 10.0
 	playerCardPadding = (80 - hpBarHeight) / 2
 )
 

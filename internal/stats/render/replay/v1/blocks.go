@@ -7,11 +7,13 @@ import (
 	"math"
 
 	fetch "github.com/cufee/aftermath/internal/stats/fetch/v1/replay"
+	"github.com/cufee/aftermath/internal/stats/frame"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/disintegration/imaging"
+	"github.com/fogleman/gg"
 )
 
 func newTitleBlock(replay replay.Cards, width float64) common.Block {
@@ -57,7 +59,10 @@ func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card repla
 	},
 		hpBar,
 		common.NewBlocksContent(common.Style{Direction: common.DirectionVertical},
-			common.NewTextContent(common.Style{Font: common.FontLarge(), FontColor: vehicleColor}, card.Title),
+			common.NewBlocksContent(common.Style{Direction: common.DirectionHorizontal, Gap: style.Gap, AlignItems: common.AlignItemsCenter},
+				common.NewTextContent(common.Style{Font: common.FontLarge(), FontColor: vehicleColor}, card.Title),
+				playerWN8Icon(player.Performance.WN8()),
+			),
 			playerNameBlock(player, protagonist),
 		))
 
@@ -99,6 +104,7 @@ func playerNameBlock(player fetch.Player, protagonist bool) common.Block {
 			// Debug:     true,
 		}, fmt.Sprintf("[%s]", player.ClanTag)))
 	}
+
 	return common.NewBlocksContent(common.Style{Direction: common.DirectionHorizontal, Gap: 5, AlignItems: common.AlignItemsCenter}, nameBlocks...)
 }
 
@@ -119,5 +125,16 @@ func outcomeIcon(outcome fetch.Outcome) common.Block {
 	}
 
 	return common.NewImageContent(common.Style{BackgroundColor: iconColor}, outcomeIconCache)
+}
+
+func playerWN8Icon(value frame.Value) common.Block {
+	colors := common.GetWN8Colors(value.Float())
+
+	ctx := gg.NewContext(int(playerWN8IconSize), int(playerWN8IconSize))
+	ctx.DrawCircle(playerWN8IconSize/2, playerWN8IconSize/2, playerWN8IconSize/2)
+	ctx.SetColor(colors.Background)
+	ctx.Fill()
+
+	return common.NewImageContent(common.Style{}, ctx.Image())
 
 }

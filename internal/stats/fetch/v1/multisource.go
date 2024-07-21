@@ -482,5 +482,5 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 		return Replay{}, errors.Wrap(err, "failed to get map glossary")
 	}
 
-	return Replay{mapData, replay}, nil
+	return Replay{mapData, replay, c.wargaming.RealmFromAccountID(replay.Protagonist.ID)}, nil
 }
