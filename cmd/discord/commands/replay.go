@@ -25,22 +25,24 @@ func init() {
 					Params(builder.SetNameKey("command_option_replay_link_name"), builder.SetDescKey("command_option_replay_link_description")),
 			).
 			Handler(func(ctx *common.Context) error {
-				var replayURL string
 				link, linkOK := ctx.Options().Value("link").(string)
 				file, fileOK := ctx.Options().Value("file").(string)
 				if (!linkOK && !fileOK) || (link == "" && file == "") {
 					return ctx.Reply().Send("replay_errors_missing_attachment")
 				}
-				if link != "" {
-					replayURL = link
-				} else {
-					replayURL = ""
+
+				replayURL := link
+				if data, ok := ctx.CommandData(); ok {
+					if attachment, ok := data.Resolved.Attachments[file]; ok {
+						replayURL = attachment.URL
+					}
 				}
-				if !strings.Contains(link, ".wotbreplay") {
-					return ctx.Reply().Send("replay_errors_invalid_attachment")
-				}
+
 				parsed, err := url.Parse(replayURL)
 				if err != nil {
+					return ctx.Reply().Send("replay_errors_invalid_attachment")
+				}
+				if !strings.Contains(parsed.Path, ".wotbreplay") {
 					return ctx.Reply().Send("replay_errors_invalid_attachment")
 				}
 

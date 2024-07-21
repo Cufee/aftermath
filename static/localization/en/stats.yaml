@@ -4,7 +4,7 @@
   value: Victory
 
 - key: label_assisted_combined
-  value: Assisted
+  value: Assisted+
 
 - key: label_ranked_rating
   value: Rating
