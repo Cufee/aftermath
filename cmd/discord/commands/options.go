@@ -73,21 +73,21 @@ type statsOptions struct {
 
 func (o statsOptions) Validate(ctx *common.Context) (string, bool) {
 	// check if the name is valid
-	if o.Nickname != "" && !validatePlayerName(o.Nickname) {
+	if o.UserID == "" && o.Nickname != "" && !validatePlayerName(o.Nickname) {
 		return "errors_generic_nickname_invalid", false
 	}
-	// handle mixed up options
-	if o.Nickname != "" && o.UserID != "" {
-		// mention should not include a nickname
-		return "errors_generic_invalid_option_combination", false
-	}
-	if o.Nickname != "" && o.Server == "" {
+	if o.UserID == "" && o.Nickname != "" && o.Server == "" {
 		// entering nickname also requires to enter the server
 		return "errors_generic_nickname_requires_server", false
 	}
+
 	if o.UserID != "" && o.UserID == ctx.User.ID {
 		// mentioning self is redundant - this should not prevent the command from working though
-		ctx.Reply().Send("stats_error_mentioned_self_non_blocking")
+		return "stats_error_mentioned_self_non_blocking", true
+	}
+	if o.UserID != "" && o.Nickname != "" {
+		// mentioning a user and providing a nickname is redundant
+		return "stats_error_too_many_arguments_non_blocking", true
 	}
 	return "", true
 }

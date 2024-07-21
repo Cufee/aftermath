@@ -30,6 +30,10 @@ func init() {
 				if (!linkOK && !fileOK) || (link == "" && file == "") {
 					return ctx.Reply().Send("replay_errors_missing_attachment")
 				}
+				var hintMessage string
+				if linkOK && fileOK {
+					hintMessage = "replay_error_too_many_options_non_blocking"
+				}
 
 				replayURL := link
 				if data, ok := ctx.CommandData(); ok {
@@ -60,7 +64,7 @@ func init() {
 				if err != nil {
 					return ctx.Err(err)
 				}
-				return ctx.Reply().File(buf.Bytes(), "replay_command_by_aftermath.png").Send()
+				return ctx.Reply().Hint(hintMessage).File(buf.Bytes(), "replay_command_by_aftermath.png").Send()
 			}),
 	)
 

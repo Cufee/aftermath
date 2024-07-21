@@ -202,7 +202,11 @@
 
 - key: stats_error_mentioned_self_non_blocking
   value: "You don't need to @mention yourself when checking stats, just type the command without any options to check your own account."
-  context: Mentioned self when checking stats, will not prevent the command from running
+  context: Mentioned self when checking stats, will not prevent the command from running, this will not cause an error
+
+- key: stats_error_too_many_arguments_non_blocking
+  value: "When using this command, you only need to mention a user or provide a nickname. The mentioned user will override the nickname if both are provided."
+  context: User mentioned someone AND provided a nickname, this will not cause an error
 
 - key: stats_error_connection_not_found_personal
   value: "Looks like you don't have a Blitz account linked yet. Give the `/links` command a shot."
@@ -216,10 +220,6 @@
   value: "This does not look like a valid player name, make sure you are using your in-game name."
   context: Invalid Blitz username provided
   notes: This does not mean it was not found, just that the input provided cannot possibly be a valid nickname
-
-- key: stats_error_invalid_options_combination
-  value: "It looks like you have provided too many options. You can't specify a nickname when mentioning another user."
-  context: Both user mention and nickname provided
 
 - key: stats_error_nickname_not_fount_fmt
   value: "I was not able to find a player named **%s** on **%s**. Was the name spelled correctly?"
@@ -273,6 +273,9 @@
 - key: replay_errors_missing_attachment
   value: "You need to provide a link or attach a WoT Blitz replay file."
   context: No link or file provided
+- key: replay_error_too_many_options_non_blocking
+  value: "When using this command, you only need to provide either a link or a replay file. The replay file will override the link if both are provided."
+  context: User provided a link AND a file, this will not cause an error
 
   # /links errors
 - key: links_error_missing_input

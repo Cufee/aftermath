@@ -11,6 +11,7 @@ import (
 type reply struct {
 	ctx *Context
 
+	hint       string
 	text       []string
 	files      []rest.File
 	components []discordgo.MessageComponent
@@ -19,6 +20,11 @@ type reply struct {
 
 func (r reply) Choices(data ...*discordgo.ApplicationCommandOptionChoice) error {
 	return r.ctx.respond(discordgo.InteractionResponseData{Choices: data}, nil)
+}
+
+func (r reply) Hint(text string) reply {
+	r.hint = text
+	return r
 }
 
 func (r reply) Text(message ...string) reply {
@@ -68,6 +74,9 @@ func (r reply) data() (discordgo.InteractionResponseData, []rest.File) {
 	var content []string
 	for _, t := range r.text {
 		content = append(content, r.ctx.Localize(t))
+	}
+	if r.hint != "" {
+		content = append(content, "-# "+r.ctx.Localize(r.hint))
 	}
 
 	return discordgo.InteractionResponseData{
