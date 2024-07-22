@@ -18,6 +18,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
 	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 )
@@ -37,6 +38,7 @@ type UserQuery struct {
 	withSessions            *SessionQuery
 	withModerationRequests  *ModerationRequestQuery
 	withModerationActions   *ModerationRequestQuery
+	withRestrictions        *UserRestrictionQuery
 	modifiers               []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -250,6 +252,28 @@ func (uq *UserQuery) QueryModerationActions() *ModerationRequestQuery {
 	return query
 }
 
+// QueryRestrictions chains the current query on the "restrictions" edge.
+func (uq *UserQuery) QueryRestrictions() *UserRestrictionQuery {
+	query := (&UserRestrictionClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(userrestriction.Table, userrestriction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RestrictionsTable, user.RestrictionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
@@ -450,6 +474,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withSessions:            uq.withSessions.Clone(),
 		withModerationRequests:  uq.withModerationRequests.Clone(),
 		withModerationActions:   uq.withModerationActions.Clone(),
+		withRestrictions:        uq.withRestrictions.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -544,6 +569,17 @@ func (uq *UserQuery) WithModerationActions(opts ...func(*ModerationRequestQuery)
 	return uq
 }
 
+// WithRestrictions tells the query-builder to eager-load the nodes that are connected to
+// the "restrictions" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRestrictions(opts ...func(*UserRestrictionQuery)) *UserQuery {
+	query := (&UserRestrictionClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withRestrictions = query
+	return uq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -622,7 +658,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [9]bool{
 			uq.withDiscordInteractions != nil,
 			uq.withSubscriptions != nil,
 			uq.withConnections != nil,
@@ -631,6 +667,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			uq.withSessions != nil,
 			uq.withModerationRequests != nil,
 			uq.withModerationActions != nil,
+			uq.withRestrictions != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -711,6 +748,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadModerationActions(ctx, query, nodes,
 			func(n *User) { n.Edges.ModerationActions = []*ModerationRequest{} },
 			func(n *User, e *ModerationRequest) { n.Edges.ModerationActions = append(n.Edges.ModerationActions, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withRestrictions; query != nil {
+		if err := uq.loadRestrictions(ctx, query, nodes,
+			func(n *User) { n.Edges.Restrictions = []*UserRestriction{} },
+			func(n *User, e *UserRestriction) { n.Edges.Restrictions = append(n.Edges.Restrictions, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -955,6 +999,36 @@ func (uq *UserQuery) loadModerationActions(ctx context.Context, query *Moderatio
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "moderator_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadRestrictions(ctx context.Context, query *UserRestrictionQuery, nodes []*User, init func(*User), assign func(*User, *UserRestriction)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(userrestriction.FieldUserID)
+	}
+	query.Where(predicate.UserRestriction(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.RestrictionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

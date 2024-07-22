@@ -24,10 +24,10 @@ func init() {
 				keys = append(keys, "autocomplete_widget_account")                                                // widget
 				return slices.Contains(keys, s)
 			}).
-			Handler(func(ctx *common.Context) error {
+			Handler(func(ctx common.Context) error {
 				var currentDefault string
 				var linkedAccounts []string
-				for _, conn := range ctx.User.Connections {
+				for _, conn := range ctx.User().Connections {
 					if conn.Type != models.ConnectionTypeWargaming {
 						continue
 					}
@@ -41,7 +41,7 @@ func init() {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"})
 				}
 
-				accounts, err := ctx.Core.Database().GetAccounts(ctx.Context, linkedAccounts)
+				accounts, err := ctx.Core().Database().GetAccounts(ctx.Ctx(), linkedAccounts)
 				if err != nil {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"})
 				}
@@ -69,29 +69,29 @@ func init() {
 				keys = append(keys, "autocomplete_my_session_tank", "autocomplete_my_stats_tank") // my
 				return slices.Contains(keys, s)
 			}).
-			Handler(func(ctx *common.Context) error {
+			Handler(func(ctx common.Context) error {
 				options := getDefaultStatsOptions(ctx.Options())
 				// if the tank was already found, return the tank
 				if options.TankID != "" {
-					vehicle, ok := search.GetVehicleFromCache(ctx.Locale, options.TankID)
+					vehicle, ok := search.GetVehicleFromCache(ctx.Locale(), options.TankID)
 					if !ok {
 						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"})
 					}
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale)), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)})
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)})
 				}
 
 				if len(options.TankSearch) < 3 {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_enough_length"), Value: "error#stats_autocomplete_not_enough_length"})
 				}
 
-				vehicles, ok := search.SearchVehicles(ctx.Locale, options.TankSearch, 5)
+				vehicles, ok := search.SearchVehicles(ctx.Locale(), options.TankSearch, 5)
 				if !ok || len(vehicles) < 1 {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"})
 				}
 
 				var opts []*discordgo.ApplicationCommandOptionChoice
 				for _, v := range vehicles {
-					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(v.Tier), v.Name(ctx.Locale)), Value: fmt.Sprintf("valid#vehicle#%s", v.ID)})
+					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(v.Tier), v.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", v.ID)})
 				}
 				return ctx.Reply().Choices(opts...)
 			}),

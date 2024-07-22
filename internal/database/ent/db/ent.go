@@ -30,6 +30,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
@@ -113,6 +114,7 @@ func checkColumn(table, column string) error {
 			user.Table:               user.ValidColumn,
 			userconnection.Table:     userconnection.ValidColumn,
 			usercontent.Table:        usercontent.ValidColumn,
+			userrestriction.Table:    userrestriction.ValidColumn,
 			usersubscription.Table:   usersubscription.ValidColumn,
 			vehicle.Table:            vehicle.ValidColumn,
 			vehicleaverage.Table:     vehicleaverage.ValidColumn,

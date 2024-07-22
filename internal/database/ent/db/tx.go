@@ -50,6 +50,8 @@ type Tx struct {
 	UserConnection *UserConnectionClient
 	// UserContent is the client for interacting with the UserContent builders.
 	UserContent *UserContentClient
+	// UserRestriction is the client for interacting with the UserRestriction builders.
+	UserRestriction *UserRestrictionClient
 	// UserSubscription is the client for interacting with the UserSubscription builders.
 	UserSubscription *UserSubscriptionClient
 	// Vehicle is the client for interacting with the Vehicle builders.
@@ -209,6 +211,7 @@ func (tx *Tx) init() {
 	tx.User = NewUserClient(tx.config)
 	tx.UserConnection = NewUserConnectionClient(tx.config)
 	tx.UserContent = NewUserContentClient(tx.config)
+	tx.UserRestriction = NewUserRestrictionClient(tx.config)
 	tx.UserSubscription = NewUserSubscriptionClient(tx.config)
 	tx.Vehicle = NewVehicleClient(tx.config)
 	tx.VehicleAverage = NewVehicleAverageClient(tx.config)

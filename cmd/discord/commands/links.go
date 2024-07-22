@@ -79,7 +79,7 @@ func init() {
 							Required(),
 					),
 			).
-			Handler(func(ctx *common.Context) error {
+			Handler(func(ctx common.Context) error {
 				// handle subcommand
 				subcommand, subOptions, _ := ctx.Options().Subcommand()
 				switch subcommand {
@@ -104,7 +104,7 @@ func init() {
 
 					var found bool
 					var newConnectionVerified bool
-					for _, conn := range ctx.User.Connections {
+					for _, conn := range ctx.User().Connections {
 						if conn.Type != models.ConnectionTypeWargaming {
 							continue
 						}
@@ -114,7 +114,7 @@ func init() {
 						}
 						conn.Metadata["default"] = conn.ReferenceID == accountID
 
-						_, err := ctx.Core.Database().UpdateConnection(ctx.Context, conn)
+						_, err := ctx.Core().Database().UpdateUserConnection(ctx.Ctx(), conn)
 						if err != nil {
 							if database.IsNotFound(err) {
 								return ctx.Reply().Send("links_error_connection_not_found")
@@ -140,12 +140,12 @@ func init() {
 					}
 					accountID := parts[1]
 
-					for _, conn := range ctx.User.Connections {
+					for _, conn := range ctx.User().Connections {
 						if conn.Type != models.ConnectionTypeWargaming {
 							continue
 						}
 						if conn.ReferenceID == accountID {
-							err := ctx.Core.Database().DeleteUserConnection(ctx.Context, ctx.User.ID, conn.ID)
+							err := ctx.Core().Database().DeleteUserConnection(ctx.Ctx(), ctx.User().ID, conn.ID)
 							if err != nil {
 								return ctx.Err(err)
 							}
@@ -157,7 +157,7 @@ func init() {
 				case "view":
 					var currentDefault string
 					var linkedAccounts []string
-					for _, conn := range ctx.User.Connections {
+					for _, conn := range ctx.User().Connections {
 						if conn.Type != models.ConnectionTypeWargaming {
 							continue
 						}
@@ -167,7 +167,7 @@ func init() {
 						}
 					}
 
-					accounts, err := ctx.Core.Database().GetAccounts(ctx.Context, linkedAccounts)
+					accounts, err := ctx.Core().Database().GetAccounts(ctx.Ctx(), linkedAccounts)
 					if err != nil && !database.IsNotFound(err) {
 						return ctx.Err(err)
 					}
@@ -190,7 +190,7 @@ func init() {
 
 				case "add":
 					var wgConnections []models.UserConnection
-					for _, conn := range ctx.User.Connections {
+					for _, conn := range ctx.User().Connections {
 						if conn.Type != models.ConnectionTypeWargaming {
 							continue
 						}
@@ -206,7 +206,7 @@ func init() {
 						return ctx.Reply().Send(message)
 					}
 
-					account, err := ctx.Core.Fetch().Search(ctx.Context, options.Nickname, options.Server)
+					account, err := ctx.Core().Fetch().Search(ctx.Ctx(), options.Nickname, options.Server)
 					if err != nil {
 						if err.Error() == "no results found" {
 							return ctx.Reply().Format("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server)).Send()
@@ -222,7 +222,7 @@ func init() {
 						}
 						conn.Metadata["default"] = conn.ReferenceID == fmt.Sprint(account.ID)
 
-						_, err = ctx.Core.Database().UpsertConnection(ctx.Context, conn)
+						_, err = ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), conn)
 						if err != nil {
 							return ctx.Err(err)
 						}
@@ -231,10 +231,10 @@ func init() {
 						meta := make(map[string]any)
 						meta["verified"] = false
 						meta["default"] = true
-						_, err = ctx.Core.Database().UpsertConnection(ctx.Context, models.UserConnection{
+						_, err = ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), models.UserConnection{
 							Type:        models.ConnectionTypeWargaming,
 							ReferenceID: fmt.Sprint(account.ID),
-							UserID:      ctx.User.ID,
+							UserID:      ctx.User().ID,
 							Metadata:    meta,
 						})
 						if err != nil {
@@ -245,7 +245,7 @@ func init() {
 					go func(id string) {
 						c, cancel := context.WithTimeout(context.Background(), time.Second)
 						defer cancel()
-						_, _ = ctx.Core.Fetch().Account(c, id) // Make sure the account is cached
+						_, _ = ctx.Core().Fetch().Account(c, id) // Make sure the account is cached
 					}(fmt.Sprint(account.ID))
 
 					return ctx.Reply().Format("command_links_linked_successfully_fmt", account.Nickname, strings.ToUpper(options.Server)).Send()

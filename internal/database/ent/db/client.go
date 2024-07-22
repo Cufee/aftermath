@@ -33,6 +33,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
@@ -83,6 +84,8 @@ type Client struct {
 	UserConnection *UserConnectionClient
 	// UserContent is the client for interacting with the UserContent builders.
 	UserContent *UserContentClient
+	// UserRestriction is the client for interacting with the UserRestriction builders.
+	UserRestriction *UserRestrictionClient
 	// UserSubscription is the client for interacting with the UserSubscription builders.
 	UserSubscription *UserSubscriptionClient
 	// Vehicle is the client for interacting with the Vehicle builders.
@@ -122,6 +125,7 @@ func (c *Client) init() {
 	c.User = NewUserClient(c.config)
 	c.UserConnection = NewUserConnectionClient(c.config)
 	c.UserContent = NewUserContentClient(c.config)
+	c.UserRestriction = NewUserRestrictionClient(c.config)
 	c.UserSubscription = NewUserSubscriptionClient(c.config)
 	c.Vehicle = NewVehicleClient(c.config)
 	c.VehicleAverage = NewVehicleAverageClient(c.config)
@@ -237,6 +241,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		User:               NewUserClient(cfg),
 		UserConnection:     NewUserConnectionClient(cfg),
 		UserContent:        NewUserContentClient(cfg),
+		UserRestriction:    NewUserRestrictionClient(cfg),
 		UserSubscription:   NewUserSubscriptionClient(cfg),
 		Vehicle:            NewVehicleClient(cfg),
 		VehicleAverage:     NewVehicleAverageClient(cfg),
@@ -279,6 +284,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		User:               NewUserClient(cfg),
 		UserConnection:     NewUserConnectionClient(cfg),
 		UserContent:        NewUserContentClient(cfg),
+		UserRestriction:    NewUserRestrictionClient(cfg),
 		UserSubscription:   NewUserSubscriptionClient(cfg),
 		Vehicle:            NewVehicleClient(cfg),
 		VehicleAverage:     NewVehicleAverageClient(cfg),
@@ -316,8 +322,8 @@ func (c *Client) Use(hooks ...Hook) {
 		c.Account, c.AccountSnapshot, c.AdEvent, c.AdMessage, c.AppConfiguration,
 		c.ApplicationCommand, c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction,
 		c.GameMap, c.GameMode, c.LeaderboardScore, c.ModerationRequest, c.Session,
-		c.User, c.UserConnection, c.UserContent, c.UserSubscription, c.Vehicle,
-		c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
+		c.User, c.UserConnection, c.UserContent, c.UserRestriction, c.UserSubscription,
+		c.Vehicle, c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
 	} {
 		n.Use(hooks...)
 	}
@@ -330,8 +336,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.Account, c.AccountSnapshot, c.AdEvent, c.AdMessage, c.AppConfiguration,
 		c.ApplicationCommand, c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction,
 		c.GameMap, c.GameMode, c.LeaderboardScore, c.ModerationRequest, c.Session,
-		c.User, c.UserConnection, c.UserContent, c.UserSubscription, c.Vehicle,
-		c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
+		c.User, c.UserConnection, c.UserContent, c.UserRestriction, c.UserSubscription,
+		c.Vehicle, c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -376,6 +382,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.UserConnection.mutate(ctx, m)
 	case *UserContentMutation:
 		return c.UserContent.mutate(ctx, m)
+	case *UserRestrictionMutation:
+		return c.UserRestriction.mutate(ctx, m)
 	case *UserSubscriptionMutation:
 		return c.UserSubscription.mutate(ctx, m)
 	case *VehicleMutation:
@@ -2766,6 +2774,22 @@ func (c *UserClient) QueryModerationActions(u *User) *ModerationRequestQuery {
 	return query
 }
 
+// QueryRestrictions queries the restrictions edge of a User.
+func (c *UserClient) QueryRestrictions(u *User) *UserRestrictionQuery {
+	query := (&UserRestrictionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(userrestriction.Table, userrestriction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RestrictionsTable, user.RestrictionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -3086,6 +3110,155 @@ func (c *UserContentClient) mutate(ctx context.Context, m *UserContentMutation) 
 		return (&UserContentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("db: unknown UserContent mutation op: %q", m.Op())
+	}
+}
+
+// UserRestrictionClient is a client for the UserRestriction schema.
+type UserRestrictionClient struct {
+	config
+}
+
+// NewUserRestrictionClient returns a client for the UserRestriction from the given config.
+func NewUserRestrictionClient(c config) *UserRestrictionClient {
+	return &UserRestrictionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userrestriction.Hooks(f(g(h())))`.
+func (c *UserRestrictionClient) Use(hooks ...Hook) {
+	c.hooks.UserRestriction = append(c.hooks.UserRestriction, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userrestriction.Intercept(f(g(h())))`.
+func (c *UserRestrictionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserRestriction = append(c.inters.UserRestriction, interceptors...)
+}
+
+// Create returns a builder for creating a UserRestriction entity.
+func (c *UserRestrictionClient) Create() *UserRestrictionCreate {
+	mutation := newUserRestrictionMutation(c.config, OpCreate)
+	return &UserRestrictionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserRestriction entities.
+func (c *UserRestrictionClient) CreateBulk(builders ...*UserRestrictionCreate) *UserRestrictionCreateBulk {
+	return &UserRestrictionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserRestrictionClient) MapCreateBulk(slice any, setFunc func(*UserRestrictionCreate, int)) *UserRestrictionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserRestrictionCreateBulk{err: fmt.Errorf("calling to UserRestrictionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserRestrictionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserRestrictionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserRestriction.
+func (c *UserRestrictionClient) Update() *UserRestrictionUpdate {
+	mutation := newUserRestrictionMutation(c.config, OpUpdate)
+	return &UserRestrictionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserRestrictionClient) UpdateOne(ur *UserRestriction) *UserRestrictionUpdateOne {
+	mutation := newUserRestrictionMutation(c.config, OpUpdateOne, withUserRestriction(ur))
+	return &UserRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserRestrictionClient) UpdateOneID(id string) *UserRestrictionUpdateOne {
+	mutation := newUserRestrictionMutation(c.config, OpUpdateOne, withUserRestrictionID(id))
+	return &UserRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserRestriction.
+func (c *UserRestrictionClient) Delete() *UserRestrictionDelete {
+	mutation := newUserRestrictionMutation(c.config, OpDelete)
+	return &UserRestrictionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserRestrictionClient) DeleteOne(ur *UserRestriction) *UserRestrictionDeleteOne {
+	return c.DeleteOneID(ur.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserRestrictionClient) DeleteOneID(id string) *UserRestrictionDeleteOne {
+	builder := c.Delete().Where(userrestriction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserRestrictionDeleteOne{builder}
+}
+
+// Query returns a query builder for UserRestriction.
+func (c *UserRestrictionClient) Query() *UserRestrictionQuery {
+	return &UserRestrictionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserRestriction},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserRestriction entity by its id.
+func (c *UserRestrictionClient) Get(ctx context.Context, id string) (*UserRestriction, error) {
+	return c.Query().Where(userrestriction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserRestrictionClient) GetX(ctx context.Context, id string) *UserRestriction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a UserRestriction.
+func (c *UserRestrictionClient) QueryUser(ur *UserRestriction) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ur.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userrestriction.Table, userrestriction.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, userrestriction.UserTable, userrestriction.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(ur.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserRestrictionClient) Hooks() []Hook {
+	return c.hooks.UserRestriction
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserRestrictionClient) Interceptors() []Interceptor {
+	return c.inters.UserRestriction
+}
+
+func (c *UserRestrictionClient) mutate(ctx context.Context, m *UserRestrictionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserRestrictionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserRestrictionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserRestrictionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown UserRestriction mutation op: %q", m.Op())
 	}
 }
 
@@ -3808,15 +3981,15 @@ type (
 		Account, AccountSnapshot, AdEvent, AdMessage, AppConfiguration,
 		ApplicationCommand, AuthNonce, Clan, CronTask, DiscordInteraction, GameMap,
 		GameMode, LeaderboardScore, ModerationRequest, Session, User, UserConnection,
-		UserContent, UserSubscription, Vehicle, VehicleAverage, VehicleSnapshot,
-		WidgetSettings []ent.Hook
+		UserContent, UserRestriction, UserSubscription, Vehicle, VehicleAverage,
+		VehicleSnapshot, WidgetSettings []ent.Hook
 	}
 	inters struct {
 		Account, AccountSnapshot, AdEvent, AdMessage, AppConfiguration,
 		ApplicationCommand, AuthNonce, Clan, CronTask, DiscordInteraction, GameMap,
 		GameMode, LeaderboardScore, ModerationRequest, Session, User, UserConnection,
-		UserContent, UserSubscription, Vehicle, VehicleAverage, VehicleSnapshot,
-		WidgetSettings []ent.Interceptor
+		UserContent, UserRestriction, UserSubscription, Vehicle, VehicleAverage,
+		VehicleSnapshot, WidgetSettings []ent.Interceptor
 	}
 )
 

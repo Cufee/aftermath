@@ -71,7 +71,7 @@ type statsOptions struct {
 	TankID      string
 }
 
-func (o statsOptions) Validate(ctx *common.Context) (string, bool) {
+func (o statsOptions) Validate(ctx common.Context) (string, bool) {
 	// check if the name is valid
 	if o.UserID == "" && o.Nickname != "" && !validatePlayerName(o.Nickname) {
 		return "errors_generic_nickname_invalid", false
@@ -81,7 +81,7 @@ func (o statsOptions) Validate(ctx *common.Context) (string, bool) {
 		return "errors_generic_nickname_requires_server", false
 	}
 
-	if o.UserID != "" && o.UserID == ctx.User.ID {
+	if o.UserID != "" && o.UserID == ctx.User().ID {
 		// mentioning self is redundant - this should not prevent the command from working though
 		return "stats_error_mentioned_self_non_blocking", true
 	}

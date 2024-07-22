@@ -59,15 +59,22 @@ type UsersClient interface {
 	GetOrCreateUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error)
 	UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error)
 
-	GetConnection(ctx context.Context, connection string) (models.UserConnection, error)
-	UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
-	UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
+	GetUserConnection(ctx context.Context, connection string) (models.UserConnection, error)
+	UpdateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
+	UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
 	DeleteUserConnection(ctx context.Context, userID, connectionID string) error
 
 	GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error)
 	GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error)
 	UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) (models.WidgetOptions, error)
 	CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) (models.WidgetOptions, error)
+
+	GetUserContent(ctx context.Context, id string) (models.UserContent, error)
+	FindUserContent(ctx context.Context, userID string, referenceID string, kind models.UserContentType) ([]models.UserContent, error)
+	CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
+	UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
+	UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
+	DeleteUserContent(ctx context.Context, id string) error
 }
 
 type SnapshotsClient interface {
@@ -115,8 +122,14 @@ type DiscordDataClient interface {
 
 type ModerationClient interface {
 	GetModerationRequest(ctx context.Context, id string) (models.ModerationRequest, error)
+	FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus) ([]models.ModerationRequest, error)
 	CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
 	UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
+
+	GetUserRestriction(ctx context.Context, id string) (models.UserRestriction, error)
+	GetUserRestrictions(ctx context.Context, userID string) ([]models.UserRestriction, error)
+	CreateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error)
+	UpdateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error)
 }
 
 type Client interface {

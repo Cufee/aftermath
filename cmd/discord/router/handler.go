@@ -72,7 +72,7 @@ func verifyPublicKey(r *http.Request, key ed25519.PublicKey) bool {
 /*
 Returns a handler for the current router
 */
-func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
+func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 	if router.publicKey == "" {
 		return nil, errors.New("missing publicKey")
 	}
@@ -159,7 +159,7 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 	}, nil
 }
 
-func (r *Router) routeInteraction(interaction discordgo.Interaction) (builder.Command, error) {
+func (r *router) routeInteraction(interaction discordgo.Interaction) (builder.Command, error) {
 	var matchKey string
 
 	switch interaction.Type {
@@ -189,11 +189,11 @@ func (r *Router) routeInteraction(interaction discordgo.Interaction) (builder.Co
 	return builder.Command{}, fmt.Errorf("failed to match %s to a command handler", matchKey)
 }
 
-func (r *Router) handleInteraction(interaction discordgo.Interaction, command builder.Command) {
+func (r *router) handleInteraction(interaction discordgo.Interaction, command builder.Command) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	cCtx, err := common.NewContext(ctx, interaction, r.restClient, r.core)
+	cCtx, err := newContext(ctx, interaction, r.restClient, r.core)
 	if err != nil {
 		log.Err(err).Msg("failed to create a common.Context for a handler")
 		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{
@@ -252,7 +252,7 @@ func sendPingReply(w http.ResponseWriter) {
 	}
 }
 
-func (r *Router) sendInteractionReply(interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
+func (r *router) sendInteractionReply(interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
 	var handler func(ctx context.Context) error
 
 	if slices.Contains(supportedInteractionTypes, interaction.Type) {

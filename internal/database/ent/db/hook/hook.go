@@ -225,6 +225,18 @@ func (f UserContentFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.UserContentMutation", m)
 }
 
+// The UserRestrictionFunc type is an adapter to allow the use of ordinary
+// function as UserRestriction mutator.
+type UserRestrictionFunc func(context.Context, *db.UserRestrictionMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserRestrictionFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.UserRestrictionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.UserRestrictionMutation", m)
+}
+
 // The UserSubscriptionFunc type is an adapter to allow the use of ordinary
 // function as UserSubscription mutator.
 type UserSubscriptionFunc func(context.Context, *db.UserSubscriptionMutation) (db.Value, error)

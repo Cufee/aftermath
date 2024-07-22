@@ -23,7 +23,7 @@ func init() {
 		builder.NewCommand("session").
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
 			Options(defaultStatsOptions...).
-			Handler(func(ctx *common.Context) error {
+			Handler(func(ctx common.Context) error {
 				options := getDefaultStatsOptions(ctx.Options())
 				message, valid := options.Validate(ctx)
 				if !valid {
@@ -36,7 +36,7 @@ func init() {
 				switch {
 				case options.UserID != "":
 					// mentioned another user, check if the user has an account linked
-					mentionedUser, _ := ctx.Core.Database().GetUserByID(ctx.Context, options.UserID, database.WithConnections(), database.WithSubscriptions(), database.WithContent())
+					mentionedUser, _ := ctx.Core().Database().GetUserByID(ctx.Ctx(), options.UserID, database.WithConnections(), database.WithSubscriptions(), database.WithContent())
 					defaultAccount, hasDefaultAccount := mentionedUser.Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
 					if !hasDefaultAccount {
 						return ctx.Reply().Send("stats_error_connection_not_found_vague")
@@ -49,7 +49,7 @@ func init() {
 
 				case options.Nickname != "" && options.Server != "":
 					// nickname provided and server selected - lookup the account
-					account, err := ctx.Core.Fetch().Search(ctx.Context, options.Nickname, options.Server)
+					account, err := ctx.Core().Fetch().Search(ctx.Ctx(), options.Nickname, options.Server)
 					if err != nil {
 						if err.Error() == "no results found" {
 							return ctx.Reply().Format("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server)).Send()
@@ -59,19 +59,19 @@ func init() {
 					accountID = fmt.Sprint(account.ID)
 
 				default:
-					defaultAccount, hasDefaultAccount := ctx.User.Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
+					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
 					if !hasDefaultAccount {
 						return ctx.Reply().Send("stats_error_nickname_or_server_missing")
 					}
 					// command used without options, but user has a default connection
 					accountID = defaultAccount.ReferenceID
-					background, ok := ctx.User.Content(models.UserContentTypePersonalBackground)
+					background, ok := ctx.User().Content(models.UserContentTypePersonalBackground)
 					if ok {
 						backgroundURL = background.Value
 					}
 				}
 
-				image, meta, err := ctx.Core.Stats(ctx.Locale).SessionImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
+				image, meta, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
 						return ctx.Reply().Send("session_error_account_was_not_tracked")
@@ -100,7 +100,7 @@ func init() {
 				}
 
 				var timings []string
-				if ctx.User.HasPermission(permissions.UseDebugFeatures) {
+				if ctx.User().HasPermission(permissions.UseDebugFeatures) {
 					timings = append(timings, "```")
 					for name, duration := range meta.Timings {
 						timings = append(timings, fmt.Sprintf("%s: %v", name, duration.Milliseconds()))

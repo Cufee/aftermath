@@ -2,15 +2,19 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
+	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
+	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
 )
 
-func toUser(record *db.User, connections []*db.UserConnection, subscriptions []*db.UserSubscription, content []*db.UserContent) models.User {
+func toUser(record *db.User, connections []*db.UserConnection, subscriptions []*db.UserSubscription, content []*db.UserContent, restrictions []*db.UserRestriction) models.User {
 	user := models.User{
 		ID:          record.ID,
 		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
@@ -24,7 +28,27 @@ func toUser(record *db.User, connections []*db.UserConnection, subscriptions []*
 	for _, c := range content {
 		user.Uploads = append(user.Uploads, toUserContent(c))
 	}
+	for _, r := range restrictions {
+		user.Restrictions = append(user.Restrictions, toUserRestriction(r))
+	}
 	return user
+}
+
+func toUserRestriction(record *db.UserRestriction) models.UserRestriction {
+	return models.UserRestriction{
+		ID:     record.ID,
+		Type:   record.Type,
+		UserID: record.UserID,
+
+		CreatedAt: record.CreatedAt,
+		UpdatedAt: record.UpdatedAt,
+		ExpiresAt: record.ExpiresAt,
+
+		ModeratorComment: record.ModeratorComment,
+		PublicReason:     record.PublicReason,
+		Restriction:      permissions.Parse(record.Restriction, permissions.Blank),
+		Events:           record.Events,
+	}
 }
 
 func toUserConnection(record *db.UserConnection) models.UserConnection {
@@ -113,7 +137,7 @@ func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...Use
 		if err != nil {
 			return models.User{}, err
 		}
-		user = toUser(record, nil, nil, nil)
+		user = toUser(record, nil, nil, nil, nil)
 	}
 
 	return user, nil
@@ -129,7 +153,7 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...UserGetOpti
 		apply(&options)
 	}
 
-	query := c.db.User.Query().Where(user.ID(id))
+	query := c.db.User.Query().Where(user.ID(id)).WithRestrictions(func(urq *db.UserRestrictionQuery) { urq.Where(userrestriction.ExpiresAtGT(time.Now())) })
 	if options.subscriptions {
 		query = query.WithSubscriptions()
 	}
@@ -145,7 +169,7 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...UserGetOpti
 		return models.User{}, err
 	}
 
-	return toUser(record, record.Edges.Connections, record.Edges.Subscriptions, record.Edges.Content), nil
+	return toUser(record, record.Edges.Connections, record.Edges.Subscriptions, record.Edges.Content, record.Edges.Restrictions), nil
 }
 
 func (c *client) UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error) {
@@ -161,15 +185,15 @@ func (c *client) UpsertUserWithPermissions(ctx context.Context, userID string, p
 		}
 	}
 
-	return toUser(record, nil, nil, nil), nil
+	return toUser(record, nil, nil, nil, nil), nil
 }
 
-func (c *client) GetConnection(ctx context.Context, id string) (models.UserConnection, error) {
+func (c *client) GetUserConnection(ctx context.Context, id string) (models.UserConnection, error) {
 	record, err := c.db.UserConnection.Get(ctx, id)
 	return toUserConnection(record), err
 }
 
-func (c *client) CreateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+func (c *client) CreateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	record, err := c.db.UserConnection.Create().
 		SetUser(c.db.User.GetX(ctx, connection.UserID)).
 		SetPermissions(connection.Permissions.String()).
@@ -183,7 +207,7 @@ func (c *client) CreateConnection(ctx context.Context, connection models.UserCon
 	return toUserConnection(record), err
 }
 
-func (c *client) UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+func (c *client) UpdateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	record, err := c.db.UserConnection.UpdateOneID(connection.ID).
 		SetMetadata(connection.Metadata).
 		SetPermissions(connection.Permissions.String()).
@@ -196,17 +220,17 @@ func (c *client) UpdateConnection(ctx context.Context, connection models.UserCon
 	return toUserConnection(record), err
 }
 
-func (c *client) UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+func (c *client) UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	if connection.ID == "" {
-		return c.CreateConnection(ctx, connection)
+		return c.CreateUserConnection(ctx, connection)
 	}
 
-	connection, err := c.UpdateConnection(ctx, connection)
+	connection, err := c.UpdateUserConnection(ctx, connection)
 	if err != nil && !IsNotFound(err) {
 		return models.UserConnection{}, err
 	}
 	if IsNotFound(err) {
-		return c.CreateConnection(ctx, connection)
+		return c.CreateUserConnection(ctx, connection)
 	}
 
 	return connection, nil
@@ -215,4 +239,84 @@ func (c *client) UpsertConnection(ctx context.Context, connection models.UserCon
 func (c *client) DeleteUserConnection(ctx context.Context, userID, connectionID string) error {
 	_, err := c.db.UserConnection.Delete().Where(userconnection.ID(connectionID), userconnection.UserID(userID)).Exec(ctx)
 	return err
+}
+
+func (c *client) GetUserContent(ctx context.Context, id string) (models.UserContent, error) {
+	record, err := c.db.UserContent.Get(ctx, id)
+	if err != nil {
+		return models.UserContent{}, err
+	}
+
+	return toUserContent(record), nil
+}
+
+func (c *client) FindUserContent(ctx context.Context, userID string, referenceID string, kind models.UserContentType) ([]models.UserContent, error) {
+	var where []predicate.UserContent
+	where = append(where, usercontent.UserID(userID), usercontent.TypeEQ(kind))
+	if referenceID != "" {
+		where = append(where, usercontent.ReferenceID(referenceID))
+	}
+
+	records, err := c.db.UserContent.Query().Where(where...).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var content []models.UserContent
+	for _, r := range records {
+		content = append(content, toUserContent(r))
+	}
+
+	return content, nil
+}
+
+func (c *client) CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	user, err := c.db.User.Get(ctx, content.UserID)
+	if err != nil {
+		return models.UserContent{}, err
+	}
+
+	record, err := c.db.UserContent.Create().
+		SetMetadata(content.Meta).
+		SetReferenceID(content.ReferenceID).
+		SetType(content.Type).
+		SetUser(user).
+		SetValue(content.Value).
+		Save(ctx)
+	if err != nil {
+		return models.UserContent{}, err
+	}
+
+	return toUserContent(record), nil
+}
+
+func (c *client) UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	record, err := c.db.UserContent.UpdateOneID(content.ID).
+		SetMetadata(content.Meta).
+		SetReferenceID(content.ReferenceID).
+		SetType(content.Type).
+		SetValue(content.Value).
+		Save(ctx)
+	if err != nil {
+		return models.UserContent{}, err
+	}
+
+	return toUserContent(record), nil
+}
+
+func (c *client) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	if content.ID == "" {
+		return c.CreateUserContent(ctx, content)
+	}
+
+	return c.UpdateUserContent(ctx, content)
+}
+
+func (c *client) DeleteUserContent(ctx context.Context, id string) error {
+	err := c.db.UserContent.DeleteOneID(id).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

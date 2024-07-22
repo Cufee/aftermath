@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"image"
 	"net/url"
 	"strings"
 	"time"
@@ -15,7 +16,9 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/internal/constants"
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/encoding"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/permissions"
 	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
@@ -35,7 +38,20 @@ func init() {
 				builder.NewOption("link", discordgo.ApplicationCommandOptionString).
 					Params(builder.SetNameKey("command_option_fancy_link_name"), builder.SetDescKey("command_option_fancy_link_description")),
 			).
-			Handler(func(ctx *common.Context) error {
+			Handler(func(ctx common.Context) error {
+				helpButton := discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
+					}}
+
+				pending, err := ctx.Core().Database().FindUserModerationRequests(ctx.Ctx(), ctx.User().ID, []string{"background-upload"}, []models.ModerationStatus{models.ModerationStatusSubmitted})
+				if err != nil {
+					return ctx.Err(err)
+				}
+				if len(pending) > 0 {
+					return ctx.Reply().Component(helpButton).Send("fancy_errors_pending_request_exists")
+				}
+
 				link, linkOK := ctx.Options().Value("link").(string)
 				file, fileOK := ctx.Options().Value("file").(string)
 				if (!linkOK && !fileOK) || (link == "" && file == "") {
@@ -52,11 +68,6 @@ func init() {
 						imageURL = attachment.URL
 					}
 				}
-
-				helpButton := discordgo.ActionsRow{
-					Components: []discordgo.MessageComponent{
-						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
-					}}
 
 				parsed, err := url.Parse(imageURL)
 				if err != nil {
@@ -80,6 +91,21 @@ func init() {
 				withBg.Clear()
 				withBg.DrawImage(img, 0, 0)
 
+				// save the image
+				encoded, err := encoding.EncodeGob(img)
+				if err != nil {
+					return ctx.Err(err)
+				}
+				content, err := ctx.Core().Database().CreateUserContent(ctx.Ctx(), models.UserContent{
+					Type:        models.UserContentTypeInModeration,
+					Value:       string(encoded),
+					UserID:      ctx.User().ID,
+					ReferenceID: ctx.User().ID,
+				})
+				if err != nil {
+					return ctx.Err(err)
+				}
+
 				buttons := discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
 						discordgo.Button{
@@ -90,7 +116,7 @@ func init() {
 								Name:     "check",
 								Animated: true,
 							},
-							CustomID: fmt.Sprintf("moderation_image_submit#%s", "id"),
+							CustomID: fmt.Sprintf("moderation_image_submit#%s", content.ID),
 						},
 						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
 					}}
@@ -103,15 +129,15 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				go func(rest *rest.Client, appID, token string) {
+				go func(ctx common.Context) {
 					time.Sleep(time.Minute * 1)
 					c, cancel := context.WithTimeout(context.Background(), time.Second*5)
 					defer cancel()
-					err := rest.DeleteInteractionResponse(c, appID, token)
+					err := ctx.DeleteResponse(c)
 					if err != nil {
 						log.Err(err).Msg("failed to delete an interaction response")
 					}
-				}(ctx.Rest(), ctx.RawInteraction().AppID, ctx.RawInteraction().Token)
+				}(ctx)
 
 				return nil
 			}),
@@ -123,7 +149,7 @@ func init() {
 			ComponentType(func(customID string) bool {
 				return strings.HasPrefix(customID, "moderation_image_submit#")
 			}).
-			Handler(func(ctx *common.Context) error {
+			Handler(func(ctx common.Context) error {
 				data, ok := ctx.ComponentData()
 				if !ok {
 					return ctx.Error("failed to get component data on interaction command")
@@ -133,30 +159,72 @@ func init() {
 					return ctx.Error("failed to get content id from custom id")
 				}
 
-				// interaction, err := ctx.Core.Database().GetDiscordInteraction(ctx.Context, interactionID)
-				// if err != nil {
-				// 	return ctx.Reply().Send("stats_refresh_interaction_error_expired")
-				// }
+				content, err := ctx.Core().Database().GetUserContent(ctx.Ctx(), contentID)
+				if err != nil {
+					if database.IsNotFound(err) {
+						return ctx.Reply().Send("fancy_errors_preview_expired")
+					}
+					return ctx.Err(err)
+				}
+
+				var img image.NRGBA
+				err = encoding.DecodeGob([]byte(content.Value), &img)
+				if err != nil {
+					return ctx.Err(err)
+				}
 
 				request := models.ModerationRequest{
-					ReferenceID:    contentID,
-					RequestorID:    ctx.User.ID,
+					RequestorID:    ctx.User().ID,
+					ReferenceID:    "background-upload",
 					RequestContext: "image submitted from /fancy",
 					ActionStatus:   models.ModerationStatusSubmitted,
+					Data:           map[string]any{"content": content.ID},
 				}
 
-				_, err := ctx.Core.Database().CreateModerationRequest(ctx.Context, request)
+				request, err = ctx.Core().Database().CreateModerationRequest(ctx.Ctx(), request)
 				if err != nil {
 					return ctx.Err(err)
 				}
 
-				_, err = ctx.Rest().CreateMessage(ctx.Context, constants.DiscordContentModerationChannelID, discordgo.Message{Content: request.ID}, nil)
+				var buf bytes.Buffer
+				err = imaging.Encode(&buf, &img, imaging.PNG)
 				if err != nil {
 					return ctx.Err(err)
 				}
 
-				return ctx.Reply().Hint(contentID).Send("fancy_submitted_msg_fmt")
+				_, err = ctx.CreateMessage(ctx.Ctx(), constants.DiscordContentModerationChannelID, discordgo.Message{
+					Components: []discordgo.MessageComponent{
+						discordgo.ActionsRow{
+							Components: []discordgo.MessageComponent{
+								discordgo.Button{Style: discordgo.SuccessButton, Label: "Approved", CustomID: "moderation_image_approve_button#" + request.ID},
+								discordgo.Button{Style: discordgo.PrimaryButton, Label: "Decline", CustomID: "moderation_image_decline_button#" + request.ID},
+							},
+						},
+						discordgo.ActionsRow{
+							Components: []discordgo.MessageComponent{
+								discordgo.Button{Style: discordgo.DangerButton, Label: "Feature Ban", CustomID: "moderation_image_feature_ban_button#" + request.ID},
+							},
+						},
+					},
+					Content: fmt.Sprintf(
+						`
+## New Moderation Request
+*image submitted from /fancy*
+**id**: %s
+**User:** <@%s>
+Please review the attached image and use the buttons below to take an action.
+- We should not allow any kind of NSFW or suggestive content - this includes an intent. If there is something ever remotely sus, decline it.
+- Some users will upload NSFW content or attempt to scribble over the image to bypass the filer. In such cases, we should issue a permanent feature ban.
+	*A feature ban will disable all content uploading features for the user.*
+					`, request.ID, ctx.User().ID,
+					)},
+					[]rest.File{{Data: buf.Bytes(), Name: "user_background.png"}},
+				)
+				if err != nil {
+					return ctx.Err(err)
+				}
+
+				return ctx.Reply().Hint(request.ID).Send("fancy_submitted_msg")
 			}),
 	)
-
 }

@@ -118,6 +118,14 @@
   context: "Images need to be manually approved by a moderator"
 - key: fancy_preview_msg
   value: "## Here is a preview of your image!\nUse the buttons below to submit it for moderation."
+- key: fancy_submitted_msg
+  value: "### :tada: Your request was submitted. You will get a Direct Message when it is reviewed - no further action is required.\n_Please make sure your Direct Messages are open._"
+- key: fancy_moderation_request_approved
+  value: "### :tada: Your background was updated!\nThe image you have submitted was approved by a moderator and is now set as your stats background."
+- key: fancy_moderation_request_declined
+  value: "### Your recent image moderation request was actioned.\nIt looks like the image you have uploaded did not pass out safety standards. You background will not be updated."
+- key: fancy_moderation_request_declined_and_banned
+  value: "### Your recent image moderation request was actioned.\nIt looks like you have tried to upload an image that is against Aftermath Terms Of Service. As a result, your account will be restricted from uploading custom content for %s. This decision is final and cannot be appealed."
 
 # Common command options
 # days
@@ -318,6 +326,10 @@
   value: "You don't have any linked accounts."
 
 # /fancy errors
+- key: fancy_errors_pending_request_exists
+  value: "You have a pending moderation request. Please wait until your previously submitted image is approved or rejected."
+- key: fancy_errors_preview_expired
+  value: "This preview has expired. Please create a new one to submit it for moderation."
 - key: fancy_errors_missing_attachment
   value: "You need to provide a link or attach an image file."
 - key: fancy_errors_invalid_link

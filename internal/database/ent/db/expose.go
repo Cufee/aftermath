@@ -238,6 +238,19 @@ func (uc *UserContent) ScanValues(columns []string) ([]any, error) {
 	return uc.scanValues(columns)
 }
 
+func (ur *UserRestriction) AssignValues(columns []string, values []any) error {
+	if ur == nil {
+		return fmt.Errorf("UserRestriction(nil)")
+	}
+	return ur.assignValues(columns, values)
+}
+func (ur *UserRestriction) ScanValues(columns []string) ([]any, error) {
+	if ur == nil {
+		return nil, fmt.Errorf("UserRestriction(nil)")
+	}
+	return ur.scanValues(columns)
+}
+
 func (us *UserSubscription) AssignValues(columns []string, values []any) error {
 	if us == nil {
 		return fmt.Errorf("UserSubscription(nil)")

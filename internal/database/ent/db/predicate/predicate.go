@@ -60,6 +60,9 @@ type UserConnection func(*sql.Selector)
 // UserContent is the predicate function for usercontent builders.
 type UserContent func(*sql.Selector)
 
+// UserRestriction is the predicate function for userrestriction builders.
+type UserRestriction func(*sql.Selector)
+
 // UserSubscription is the predicate function for usersubscription builders.
 type UserSubscription func(*sql.Selector)
 

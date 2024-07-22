@@ -19,6 +19,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
 	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 )
@@ -209,6 +210,21 @@ func (uu *UserUpdate) AddModerationActions(m ...*ModerationRequest) *UserUpdate 
 	return uu.AddModerationActionIDs(ids...)
 }
 
+// AddRestrictionIDs adds the "restrictions" edge to the UserRestriction entity by IDs.
+func (uu *UserUpdate) AddRestrictionIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddRestrictionIDs(ids...)
+	return uu
+}
+
+// AddRestrictions adds the "restrictions" edges to the UserRestriction entity.
+func (uu *UserUpdate) AddRestrictions(u ...*UserRestriction) *UserUpdate {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.AddRestrictionIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -380,6 +396,27 @@ func (uu *UserUpdate) RemoveModerationActions(m ...*ModerationRequest) *UserUpda
 		ids[i] = m[i].ID
 	}
 	return uu.RemoveModerationActionIDs(ids...)
+}
+
+// ClearRestrictions clears all "restrictions" edges to the UserRestriction entity.
+func (uu *UserUpdate) ClearRestrictions() *UserUpdate {
+	uu.mutation.ClearRestrictions()
+	return uu
+}
+
+// RemoveRestrictionIDs removes the "restrictions" edge to UserRestriction entities by IDs.
+func (uu *UserUpdate) RemoveRestrictionIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveRestrictionIDs(ids...)
+	return uu
+}
+
+// RemoveRestrictions removes "restrictions" edges to UserRestriction entities.
+func (uu *UserUpdate) RemoveRestrictions(u ...*UserRestriction) *UserUpdate {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.RemoveRestrictionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -813,6 +850,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.RestrictionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RestrictionsTable,
+			Columns: []string{user.RestrictionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userrestriction.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedRestrictionsIDs(); len(nodes) > 0 && !uu.mutation.RestrictionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RestrictionsTable,
+			Columns: []string{user.RestrictionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userrestriction.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RestrictionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RestrictionsTable,
+			Columns: []string{user.RestrictionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userrestriction.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(uu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -1007,6 +1089,21 @@ func (uuo *UserUpdateOne) AddModerationActions(m ...*ModerationRequest) *UserUpd
 	return uuo.AddModerationActionIDs(ids...)
 }
 
+// AddRestrictionIDs adds the "restrictions" edge to the UserRestriction entity by IDs.
+func (uuo *UserUpdateOne) AddRestrictionIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddRestrictionIDs(ids...)
+	return uuo
+}
+
+// AddRestrictions adds the "restrictions" edges to the UserRestriction entity.
+func (uuo *UserUpdateOne) AddRestrictions(u ...*UserRestriction) *UserUpdateOne {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.AddRestrictionIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -1178,6 +1275,27 @@ func (uuo *UserUpdateOne) RemoveModerationActions(m ...*ModerationRequest) *User
 		ids[i] = m[i].ID
 	}
 	return uuo.RemoveModerationActionIDs(ids...)
+}
+
+// ClearRestrictions clears all "restrictions" edges to the UserRestriction entity.
+func (uuo *UserUpdateOne) ClearRestrictions() *UserUpdateOne {
+	uuo.mutation.ClearRestrictions()
+	return uuo
+}
+
+// RemoveRestrictionIDs removes the "restrictions" edge to UserRestriction entities by IDs.
+func (uuo *UserUpdateOne) RemoveRestrictionIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveRestrictionIDs(ids...)
+	return uuo
+}
+
+// RemoveRestrictions removes "restrictions" edges to UserRestriction entities.
+func (uuo *UserUpdateOne) RemoveRestrictions(u ...*UserRestriction) *UserUpdateOne {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.RemoveRestrictionIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1634,6 +1752,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.RestrictionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RestrictionsTable,
+			Columns: []string{user.RestrictionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userrestriction.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedRestrictionsIDs(); len(nodes) > 0 && !uuo.mutation.RestrictionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RestrictionsTable,
+			Columns: []string{user.RestrictionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userrestriction.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RestrictionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RestrictionsTable,
+			Columns: []string{user.RestrictionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userrestriction.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

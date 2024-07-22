@@ -25,7 +25,7 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 		return nil, nil, ctx.Redirect("/app", http.StatusMovedPermanently)
 	}
 
-	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
+	settings, err := ctx.Database().GetWidgetSettings(ctx.Ctx(), widgetID)
 	if err != nil {
 		if database.IsNotFound(err) {
 			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
@@ -36,7 +36,7 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 		return layouts.StyleOnly, nil, ctx.Error("bad widget settings, missing account id")
 	}
 
-	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
+	account, err := ctx.Database().GetAccountByID(ctx.Ctx(), settings.AccountID)
 	if err != nil {
 		if database.IsNotFound(err) {
 			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
@@ -54,7 +54,7 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
 	if err != nil {
 		if errors.As(err, fetch.ErrSessionNotFound) {
-			cards, _, err = ctx.Client.Stats(language.English).EmptySessionCards(ctx.Context, account.ID)
+			cards, _, err = ctx.Client.Stats(language.English).EmptySessionCards(ctx.Ctx(), account.ID)
 			if err == nil {
 				return layouts.StyleOnly, customLiveWidget(settings.ID, widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
 			}
@@ -107,7 +107,7 @@ var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.
 		return nil, nil, errors.New("invalid account id")
 	}
 
-	account, err := ctx.Fetch().Account(ctx.Context, accountID)
+	account, err := ctx.Fetch().Account(ctx.Ctx(), accountID)
 	if err != nil {
 		return nil, nil, errors.New("invalid account id")
 	}

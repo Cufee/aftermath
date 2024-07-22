@@ -113,13 +113,13 @@ func (c *staticTestingDatabase) UpsertUserWithPermissions(ctx context.Context, u
 	u.Permissions = perms
 	return u, nil
 }
-func (c *staticTestingDatabase) GetConnection(ctx context.Context, id string) (models.UserConnection, error) {
+func (c *staticTestingDatabase) GetUserConnection(ctx context.Context, id string) (models.UserConnection, error) {
 	return models.UserConnection{}, errors.New("GetConnection not implemented")
 }
-func (c *staticTestingDatabase) UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+func (c *staticTestingDatabase) UpdateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	return connection, nil
 }
-func (c *staticTestingDatabase) UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+func (c *staticTestingDatabase) UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	return connection, nil
 }
 func (c *staticTestingDatabase) DeleteUserConnection(ctx context.Context, userID, connectionID string) error {
@@ -279,6 +279,9 @@ func (c *staticTestingDatabase) UpsertGameModes(ctx context.Context, modes map[s
 	return nil, nil
 }
 
+func (c *staticTestingDatabase) FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus) ([]models.ModerationRequest, error) {
+	return nil, errors.New("FindUserModerationRequests not implemented")
+}
 func (c *staticTestingDatabase) CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {
 	return models.ModerationRequest{}, errors.New("CreateModerationRequest not implemented")
 }
@@ -287,4 +290,35 @@ func (c *staticTestingDatabase) GetModerationRequest(ctx context.Context, id str
 }
 func (c *staticTestingDatabase) UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {
 	return models.ModerationRequest{}, errors.New("UpdateModerationRequest not implemented")
+}
+
+func (c *staticTestingDatabase) GetUserContent(ctx context.Context, id string) (models.UserContent, error) {
+	return models.UserContent{}, errors.New("GetUserContent not implemented")
+}
+func (c *staticTestingDatabase) FindUserContent(ctx context.Context, userID string, referenceID string, kind models.UserContentType) ([]models.UserContent, error) {
+	return nil, errors.New("FindUserContent not implemented")
+}
+func (c *staticTestingDatabase) CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	return models.UserContent{}, errors.New("CreateUserContent not implemented")
+}
+func (c *staticTestingDatabase) UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	return models.UserContent{}, errors.New("UpdateUserContent not implemented")
+}
+func (c *staticTestingDatabase) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	return models.UserContent{}, errors.New("UpsertUserContent not implemented")
+}
+func (c *staticTestingDatabase) DeleteUserContent(ctx context.Context, id string) error {
+	return errors.New("DeleteUserContent not implemented")
+}
+func (c *staticTestingDatabase) GetUserRestriction(ctx context.Context, id string) (models.UserRestriction, error) {
+	return models.UserRestriction{}, errors.New("GetUserRestriction not implemented")
+}
+func (c *staticTestingDatabase) GetUserRestrictions(ctx context.Context, userID string) ([]models.UserRestriction, error) {
+	return nil, errors.New("GetUserRestrictions not implemented")
+}
+func (c *staticTestingDatabase) CreateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error) {
+	return models.UserRestriction{}, errors.New("CreateUserRestriction not implemented")
+}
+func (c *staticTestingDatabase) UpdateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error) {
+	return models.UserRestriction{}, errors.New("UpdateUserRestriction not implemented")
 }

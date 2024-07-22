@@ -16,6 +16,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
 	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 )
@@ -213,6 +214,21 @@ func (uc *UserCreate) AddModerationActions(m ...*ModerationRequest) *UserCreate 
 		ids[i] = m[i].ID
 	}
 	return uc.AddModerationActionIDs(ids...)
+}
+
+// AddRestrictionIDs adds the "restrictions" edge to the UserRestriction entity by IDs.
+func (uc *UserCreate) AddRestrictionIDs(ids ...string) *UserCreate {
+	uc.mutation.AddRestrictionIDs(ids...)
+	return uc
+}
+
+// AddRestrictions adds the "restrictions" edges to the UserRestriction entity.
+func (uc *UserCreate) AddRestrictions(u ...*UserRestriction) *UserCreate {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uc.AddRestrictionIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -458,6 +474,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.RestrictionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RestrictionsTable,
+			Columns: []string{user.RestrictionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userrestriction.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

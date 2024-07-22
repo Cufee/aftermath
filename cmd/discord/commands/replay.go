@@ -27,7 +27,7 @@ func init() {
 				builder.NewOption("link", discordgo.ApplicationCommandOptionString).
 					Params(builder.SetNameKey("command_option_replay_link_name"), builder.SetDescKey("command_option_replay_link_description")),
 			).
-			Handler(func(ctx *common.Context) error {
+			Handler(func(ctx common.Context) error {
 				link, linkOK := ctx.Options().Value("link").(string)
 				file, fileOK := ctx.Options().Value("file").(string)
 				if (!linkOK && !fileOK) || (link == "" && file == "") {
@@ -54,7 +54,7 @@ func init() {
 				}
 
 				var backgroundURL = "static://bg-default"
-				image, _, err := ctx.Core.Stats(ctx.Locale).ReplayImage(context.Background(), parsed.String(), stats.WithBackgroundURL(backgroundURL), stats.WithWN8())
+				image, _, err := ctx.Core().Stats(ctx.Locale()).ReplayImage(context.Background(), parsed.String(), stats.WithBackgroundURL(backgroundURL), stats.WithWN8())
 				if err != nil {
 					if errors.Is(err, replay.ErrInvalidReplayFile) {
 						return ctx.Reply().Send("replay_errors_invalid_attachment")

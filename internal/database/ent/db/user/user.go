@@ -40,6 +40,8 @@ const (
 	EdgeModerationRequests = "moderation_requests"
 	// EdgeModerationActions holds the string denoting the moderation_actions edge name in mutations.
 	EdgeModerationActions = "moderation_actions"
+	// EdgeRestrictions holds the string denoting the restrictions edge name in mutations.
+	EdgeRestrictions = "restrictions"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// DiscordInteractionsTable is the table that holds the discord_interactions relation/edge.
@@ -98,6 +100,13 @@ const (
 	ModerationActionsInverseTable = "moderation_requests"
 	// ModerationActionsColumn is the table column denoting the moderation_actions relation/edge.
 	ModerationActionsColumn = "moderator_id"
+	// RestrictionsTable is the table that holds the restrictions relation/edge.
+	RestrictionsTable = "user_restrictions"
+	// RestrictionsInverseTable is the table name for the UserRestriction entity.
+	// It exists in this package in order to avoid circular dependency with the "userrestriction" package.
+	RestrictionsInverseTable = "user_restrictions"
+	// RestrictionsColumn is the table column denoting the restrictions relation/edge.
+	RestrictionsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -272,6 +281,20 @@ func ByModerationActions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption
 		sqlgraph.OrderByNeighborTerms(s, newModerationActionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByRestrictionsCount orders the results by restrictions count.
+func ByRestrictionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRestrictionsStep(), opts...)
+	}
+}
+
+// ByRestrictions orders the results by restrictions terms.
+func ByRestrictions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRestrictionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newDiscordInteractionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -326,5 +349,12 @@ func newModerationActionsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ModerationActionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ModerationActionsTable, ModerationActionsColumn),
+	)
+}
+func newRestrictionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RestrictionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RestrictionsTable, RestrictionsColumn),
 	)
 }

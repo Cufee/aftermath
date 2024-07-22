@@ -32,7 +32,7 @@ func now() time.Time {
 	return time.Now().UTC()
 }
 
-func sendHelpResponse(ctx *common.Context) error {
+func sendHelpResponse(ctx common.Context) error {
 	return ctx.Reply().
 		Format("commands_help_message_fmt", sessionResetTimes(ctx.Localize), backgroundResetTime()).
 		Component(
@@ -49,7 +49,7 @@ func Help() builder.Builder {
 	return builder.NewCommand("help").
 		Ephemeral().
 		Middleware(middleware.RequirePermissions(permissions.UseTextCommands)).
-		Handler(func(ctx *common.Context) error {
+		Handler(func(ctx common.Context) error {
 			return sendHelpResponse(ctx)
 		})
 

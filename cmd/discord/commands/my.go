@@ -42,7 +42,7 @@ func init() {
 							Autocomplete(),
 					),
 			).
-			Handler(func(ctx *common.Context) error {
+			Handler(func(ctx common.Context) error {
 				subcommand, subOptions, _ := ctx.Options().Subcommand()
 				options := getDefaultStatsOptions(ctx.Options())
 				message, valid := options.Validate(ctx)
@@ -52,7 +52,7 @@ func init() {
 
 				var accountID string
 				var backgroundURL string
-				background, ok := ctx.User.Content(models.UserContentTypePersonalBackground)
+				background, ok := ctx.User().Content(models.UserContentTypePersonalBackground)
 				if ok {
 					backgroundURL = background.Value
 				}
@@ -62,7 +62,7 @@ func init() {
 				if len(parts) == 4 && parts[0] == "valid" {
 					accountID = parts[1]
 				} else {
-					defaultAccount, hasDefaultAccount := ctx.User.Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
+					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
 					if !hasDefaultAccount {
 						return ctx.Reply().Send("my_error_no_account_linked")
 					}
@@ -73,11 +73,11 @@ func init() {
 				var image stats.Image
 				switch subcommand {
 				case "stats":
-					image, _, err = ctx.Core.Stats(ctx.Locale).PeriodImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
+					image, _, err = ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
 				case "session":
-					image, _, err = ctx.Core.Stats(ctx.Locale).SessionImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
+					image, _, err = ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
 				default:
-					ctx.Error("invalid subcommand in /my - " + subcommand)
+					return ctx.Error("invalid subcommand in /my - " + subcommand)
 				}
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {

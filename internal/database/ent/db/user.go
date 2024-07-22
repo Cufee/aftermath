@@ -52,9 +52,11 @@ type UserEdges struct {
 	ModerationRequests []*ModerationRequest `json:"moderation_requests,omitempty"`
 	// ModerationActions holds the value of the moderation_actions edge.
 	ModerationActions []*ModerationRequest `json:"moderation_actions,omitempty"`
+	// Restrictions holds the value of the restrictions edge.
+	Restrictions []*UserRestriction `json:"restrictions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [9]bool
 }
 
 // DiscordInteractionsOrErr returns the DiscordInteractions value or an error if the edge
@@ -127,6 +129,15 @@ func (e UserEdges) ModerationActionsOrErr() ([]*ModerationRequest, error) {
 		return e.ModerationActions, nil
 	}
 	return nil, &NotLoadedError{edge: "moderation_actions"}
+}
+
+// RestrictionsOrErr returns the Restrictions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RestrictionsOrErr() ([]*UserRestriction, error) {
+	if e.loadedTypes[8] {
+		return e.Restrictions, nil
+	}
+	return nil, &NotLoadedError{edge: "restrictions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -244,6 +255,11 @@ func (u *User) QueryModerationRequests() *ModerationRequestQuery {
 // QueryModerationActions queries the "moderation_actions" edge of the User entity.
 func (u *User) QueryModerationActions() *ModerationRequestQuery {
 	return NewUserClient(u.config).QueryModerationActions(u)
+}
+
+// QueryRestrictions queries the "restrictions" edge of the User entity.
+func (u *User) QueryRestrictions() *UserRestrictionQuery {
+	return NewUserClient(u.config).QueryRestrictions(u)
 }
 
 // Update returns a builder for updating this User.

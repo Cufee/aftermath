@@ -44,13 +44,13 @@ func init() {
 					),
 				),
 			).
-			Handler(func(ctx *common.Context) error {
+			Handler(func(ctx common.Context) error {
 				command, opts, _ := ctx.Options().Subcommand()
 
 				switch command {
 				case "users_lookup":
 					userID, _ := opts.Value("user").(string)
-					result, err := ctx.Core.Database().GetUserByID(ctx.Context, userID, database.WithConnections())
+					result, err := ctx.Core().Database().GetUserByID(ctx.Ctx(), userID, database.WithConnections())
 					if err != nil {
 						return ctx.Reply().Send("Database#GetUserByID: " + err.Error())
 					}
@@ -64,7 +64,7 @@ func init() {
 				case "accounts_search":
 					nickname, _ := opts.Value("nickname").(string)
 					server, _ := opts.Value("server").(string)
-					result, err := ctx.Core.Fetch().Search(ctx.Context, nickname, server)
+					result, err := ctx.Core().Fetch().Search(ctx.Ctx(), nickname, server)
 					if err != nil {
 						return ctx.Reply().Send("Fetch#Search: " + err.Error())
 					}
@@ -75,7 +75,7 @@ func init() {
 					return ctx.Reply().Send("```" + string(data) + "```")
 
 				case "tasks_view":
-					if !ctx.User.HasPermission(permissions.ViewTaskLogs) {
+					if !ctx.User().HasPermission(permissions.ViewTaskLogs) {
 						ctx.Reply().Send("You do not have access to this sub-command.")
 					}
 
@@ -85,7 +85,7 @@ func init() {
 						hours = 1
 					}
 
-					tasks, err := ctx.Core.Database().GetRecentTasks(ctx.Context, time.Now().Add(time.Hour*time.Duration(hours)*-1), models.TaskStatus(status))
+					tasks, err := ctx.Core().Database().GetRecentTasks(ctx.Ctx(), time.Now().Add(time.Hour*time.Duration(hours)*-1), models.TaskStatus(status))
 					if err != nil {
 						return ctx.Reply().Send("Database#GetRecentTasks: " + err.Error())
 					}
@@ -113,7 +113,7 @@ func init() {
 					return ctx.Reply().File([]byte(content), "tasks.json").Send()
 
 				case "tasks_details":
-					if !ctx.User.HasPermission(permissions.ViewTaskLogs) {
+					if !ctx.User().HasPermission(permissions.ViewTaskLogs) {
 						ctx.Reply().Send("You do not have access to this sub-command.")
 					}
 
@@ -122,7 +122,7 @@ func init() {
 						return ctx.Reply().Send("id cannot be blank")
 					}
 
-					tasks, err := ctx.Core.Database().GetTasks(ctx.Context, id)
+					tasks, err := ctx.Core().Database().GetTasks(ctx.Ctx(), id)
 					if err != nil {
 						return ctx.Reply().Send("Database#GetTasks: " + err.Error())
 					}

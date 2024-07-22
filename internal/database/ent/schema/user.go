@@ -43,6 +43,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("sessions", Session.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("moderation_requests", ModerationRequest.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("moderation_actions", ModerationRequest.Type).Annotations(entsql.OnDelete(entsql.NoAction)),
+		edge.To("restrictions", UserRestriction.Type).Annotations(entsql.OnDelete(entsql.NoAction)),
 	}
 }
 

@@ -654,7 +654,7 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"clan-background-image", "personal-background-image"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"personal-background-image", "clan-background-image", "in-moderation"}},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "value", Type: field.TypeString},
 		{Name: "metadata", Type: field.TypeJSON},
@@ -698,6 +698,50 @@ var (
 				Name:    "usercontent_type_reference_id",
 				Unique:  false,
 				Columns: []*schema.Column{UserContentsColumns[3], UserContentsColumns[4]},
+			},
+		},
+	}
+	// UserRestrictionsColumns holds the columns for the "user_restrictions" table.
+	UserRestrictionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"partial", "complete"}},
+		{Name: "restriction", Type: field.TypeString},
+		{Name: "public_reason", Type: field.TypeString},
+		{Name: "moderator_comment", Type: field.TypeString},
+		{Name: "events", Type: field.TypeJSON},
+		{Name: "user_id", Type: field.TypeString},
+	}
+	// UserRestrictionsTable holds the schema information for the "user_restrictions" table.
+	UserRestrictionsTable = &schema.Table{
+		Name:       "user_restrictions",
+		Columns:    UserRestrictionsColumns,
+		PrimaryKey: []*schema.Column{UserRestrictionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_restrictions_users_restrictions",
+				Columns:    []*schema.Column{UserRestrictionsColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "userrestriction_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserRestrictionsColumns[0]},
+			},
+			{
+				Name:    "userrestriction_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserRestrictionsColumns[9]},
+			},
+			{
+				Name:    "userrestriction_expires_at_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserRestrictionsColumns[3], UserRestrictionsColumns[9]},
 			},
 		},
 	}
@@ -902,6 +946,7 @@ var (
 		UsersTable,
 		UserConnectionsTable,
 		UserContentsTable,
+		UserRestrictionsTable,
 		UserSubscriptionsTable,
 		VehiclesTable,
 		VehicleAveragesTable,
@@ -919,6 +964,7 @@ func init() {
 	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserConnectionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserContentsTable.ForeignKeys[0].RefTable = UsersTable
+	UserRestrictionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserSubscriptionsTable.ForeignKeys[0].RefTable = UsersTable
 	VehicleSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
 	WidgetSettingsTable.ForeignKeys[0].RefTable = UsersTable

@@ -79,7 +79,7 @@ var (
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type models.UserContentType) error {
 	switch _type {
-	case "clan-background-image", "personal-background-image":
+	case "personal-background-image", "clan-background-image", "in-moderation":
 		return nil
 	default:
 		return fmt.Errorf("usercontent: invalid enum value for type field: %q", _type)

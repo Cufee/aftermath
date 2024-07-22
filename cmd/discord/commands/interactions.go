@@ -89,7 +89,7 @@ func init() {
 			ComponentType(func(customID string) bool {
 				return strings.HasPrefix(customID, "refresh_stats_from_button_")
 			}).
-			Handler(func(ctx *common.Context) error {
+			Handler(func(ctx common.Context) error {
 				data, ok := ctx.ComponentData()
 				if !ok {
 					return ctx.Error("failed to get component data on interaction command")
@@ -99,7 +99,7 @@ func init() {
 					return ctx.Error("failed to get interaction id from custom id")
 				}
 
-				interaction, err := ctx.Core.Database().GetDiscordInteraction(ctx.Context, interactionID)
+				interaction, err := ctx.Core().Database().GetDiscordInteraction(ctx.Ctx(), interactionID)
 				if err != nil {
 					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
@@ -108,7 +108,7 @@ func init() {
 				var meta stats.Metadata
 				switch interaction.Command {
 				case "stats":
-					img, mt, err := ctx.Core.Stats(ctx.Locale).PeriodImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL), stats.WithWN8(), stats.WithVehicleID(interaction.Options.VehicleID))
+					img, mt, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL), stats.WithWN8(), stats.WithVehicleID(interaction.Options.VehicleID))
 					if err != nil {
 						return ctx.Err(err)
 					}
@@ -116,7 +116,7 @@ func init() {
 					meta = mt
 
 				case "session":
-					img, mt, err := ctx.Core.Stats(ctx.Locale).SessionImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL), stats.WithWN8(), stats.WithVehicleID(interaction.Options.VehicleID))
+					img, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL), stats.WithWN8(), stats.WithVehicleID(interaction.Options.VehicleID))
 					if err != nil {
 						if errors.Is(err, fetch.ErrSessionNotFound) || errors.Is(err, stats.ErrAccountNotTracked) {
 							return ctx.Reply().Send("stats_refresh_interaction_error_expired")
@@ -144,7 +144,7 @@ func init() {
 				}
 
 				var timings []string
-				if ctx.User.HasPermission(permissions.UseDebugFeatures) {
+				if ctx.User().HasPermission(permissions.UseDebugFeatures) {
 					timings = append(timings, "```")
 					for name, duration := range meta.Timings {
 						timings = append(timings, fmt.Sprintf("%s: %v", name, duration.Milliseconds()))

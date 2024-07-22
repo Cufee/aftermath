@@ -9,12 +9,11 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"net/http"
-
 	"github.com/cufee/aftermath/cmd/frontend/components/connections"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"net/http"
 )
 
 var RemoveConnection handler.Endpoint = func(ctx *handler.Context) error {
@@ -54,7 +53,7 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 		}
 
 		conn.Metadata["default"] = conn.ID == connID
-		u, err := ctx.Database().UpdateConnection(ctx.Context, conn)
+		u, err := ctx.Database().UpdateUserConnection(ctx.Context, conn)
 		if err != nil {
 			return nil, ctx.Err(err, "failed to update a connection")
 		}

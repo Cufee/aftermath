@@ -38,7 +38,7 @@ var Login handler.Endpoint = func(ctx *handler.Context) error {
 		meta["from"] = path
 	}
 
-	nonce, err := ctx.Database().CreateAuthNonce(ctx.Context, nonceID, identifier, time.Now().Add(time.Minute*5), meta)
+	nonce, err := ctx.Database().CreateAuthNonce(ctx.Ctx(), nonceID, identifier, time.Now().Add(time.Minute*5), meta)
 	if err != nil {
 		return ctx.Err(err, "failed to authenticate")
 	}

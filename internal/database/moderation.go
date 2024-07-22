@@ -4,10 +4,13 @@ import (
 	"context"
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
+	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/models"
 )
 
-func toModeratorAction(r *db.ModerationRequest) models.ModerationRequest {
+func toModerationRequest(r *db.ModerationRequest) models.ModerationRequest {
 	return models.ModerationRequest{
 		ID:        r.ID,
 		UpdateAt:  r.UpdatedAt,
@@ -47,7 +50,7 @@ func (c *client) CreateModerationRequest(ctx context.Context, request models.Mod
 		return models.ModerationRequest{}, err
 	}
 
-	return toModeratorAction(record), nil
+	return toModerationRequest(record), nil
 }
 
 func (c *client) GetModerationRequest(ctx context.Context, id string) (models.ModerationRequest, error) {
@@ -55,7 +58,30 @@ func (c *client) GetModerationRequest(ctx context.Context, id string) (models.Mo
 	if err != nil {
 		return models.ModerationRequest{}, err
 	}
-	return toModeratorAction(record), nil
+	return toModerationRequest(record), nil
+}
+
+func (c *client) FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus) ([]models.ModerationRequest, error) {
+	var where []predicate.ModerationRequest
+	where = append(where, moderationrequest.RequestorID(userID))
+	if referenceIDs != nil {
+		where = append(where, moderationrequest.ReferenceIDIn(referenceIDs...))
+	}
+	if status != nil {
+		where = append(where, moderationrequest.ActionStatusIn(status...))
+	}
+
+	records, err := c.db.ModerationRequest.Query().Where(where...).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var requests []models.ModerationRequest
+	for _, r := range records {
+		requests = append(requests, toModerationRequest(r))
+	}
+
+	return requests, nil
 }
 
 func (c *client) UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {
@@ -79,5 +105,63 @@ func (c *client) UpdateModerationRequest(ctx context.Context, request models.Mod
 		return models.ModerationRequest{}, err
 	}
 
-	return toModeratorAction(record), nil
+	return toModerationRequest(record), nil
+}
+
+func (c *client) GetUserRestriction(ctx context.Context, id string) (models.UserRestriction, error) {
+	record, err := c.db.UserRestriction.Get(ctx, id)
+	if err != nil {
+		return models.UserRestriction{}, err
+	}
+
+	return toUserRestriction(record), nil
+}
+
+func (c *client) GetUserRestrictions(ctx context.Context, userID string) ([]models.UserRestriction, error) {
+	records, err := c.db.UserRestriction.Query().Where(userrestriction.UserID(userID)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var restrictions []models.UserRestriction
+	for _, r := range records {
+		restrictions = append(restrictions, toUserRestriction(r))
+	}
+
+	return restrictions, nil
+}
+
+func (c *client) CreateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error) {
+	user, err := c.db.User.Get(ctx, data.UserID)
+	if err != nil {
+		return models.UserRestriction{}, err
+	}
+
+	record, err := c.db.UserRestriction.Create().
+		SetModeratorComment(data.ModeratorComment).
+		SetRestriction(data.Restriction.String()).
+		SetPublicReason(data.PublicReason).
+		SetExpiresAt(data.ExpiresAt).
+		SetType(data.Type).
+		SetUser(user).
+		Save(ctx)
+	if err != nil {
+		return models.UserRestriction{}, err
+	}
+
+	return toUserRestriction(record), nil
+}
+
+func (c *client) UpdateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error) {
+	record, err := c.db.UserRestriction.UpdateOneID(data.ID).
+		SetModeratorComment(data.ModeratorComment).
+		SetRestriction(data.Restriction.String()).
+		SetPublicReason(data.PublicReason).
+		SetExpiresAt(data.ExpiresAt).
+		SetType(data.Type).
+		Save(ctx)
+	if err != nil {
+		return models.UserRestriction{}, err
+	}
+	return toUserRestriction(record), nil
 }

@@ -5,6 +5,7 @@ import "time"
 type UserContentType string
 
 const (
+	UserContentTypeInModeration       = UserContentType("in-moderation")
 	UserContentTypeClanBackground     = UserContentType("clan-background-image")
 	UserContentTypePersonalBackground = UserContentType("personal-background-image")
 )
@@ -24,8 +25,9 @@ func (t UserContentType) Valid() bool {
 func (UserContentType) Values() []string {
 	var kinds []string
 	for _, s := range []UserContentType{
-		UserContentTypeClanBackground,
 		UserContentTypePersonalBackground,
+		UserContentTypeClanBackground,
+		UserContentTypeInModeration,
 	} {
 		kinds = append(kinds, string(s))
 	}

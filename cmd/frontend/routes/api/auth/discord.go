@@ -31,12 +31,12 @@ var DiscordRedirect handler.Endpoint = func(ctx *handler.Context) error {
 	}
 	log.Debug().Str("identifier", cookie.Value).Msg("handling a discord redirect")
 
-	nonce, err := ctx.Database().FindAuthNonce(ctx.Context, state)
+	nonce, err := ctx.Database().FindAuthNonce(ctx.Ctx(), state)
 	if err != nil || !nonce.Active || nonce.ExpiresAt.Before(time.Now()) {
 		log.Debug().Msg("discord redirect missing or invalid nonce")
 		return ctx.Redirect("/login?message=session expired", http.StatusTemporaryRedirect)
 	}
-	err = ctx.Database().SetAuthNonceActive(ctx.Context, nonce.ID, false)
+	err = ctx.Database().SetAuthNonceActive(ctx.Ctx(), nonce.ID, false)
 	if err != nil {
 		log.Err(err).Msg("failed to update nonce active status")
 		return ctx.Redirect("/login?message=session expired", http.StatusTemporaryRedirect)
@@ -75,7 +75,7 @@ var DiscordRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/login?message=failed to create a session", http.StatusTemporaryRedirect)
 	}
 
-	sess, err := ctx.Database().CreateSession(ctx.Context, sessionID, user.ID, time.Now().Add(time.Hour*24*7), nil)
+	sess, err := ctx.Database().CreateSession(ctx.Ctx(), sessionID, user.ID, time.Now().Add(time.Hour*24*7), nil)
 	if err != nil {
 		log.Err(err).Msg("failed to create a new user session")
 		return ctx.Redirect("/login?message=failed to create a session", http.StatusTemporaryRedirect)

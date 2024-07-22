@@ -23,6 +23,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
@@ -425,6 +426,34 @@ func init() {
 	usercontentDescID := usercontentFields[0].Descriptor()
 	// usercontent.DefaultID holds the default value on creation for the id field.
 	usercontent.DefaultID = usercontentDescID.Default.(func() string)
+	userrestrictionFields := schema.UserRestriction{}.Fields()
+	_ = userrestrictionFields
+	// userrestrictionDescCreatedAt is the schema descriptor for created_at field.
+	userrestrictionDescCreatedAt := userrestrictionFields[1].Descriptor()
+	// userrestriction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	userrestriction.DefaultCreatedAt = userrestrictionDescCreatedAt.Default.(func() time.Time)
+	// userrestrictionDescUpdatedAt is the schema descriptor for updated_at field.
+	userrestrictionDescUpdatedAt := userrestrictionFields[2].Descriptor()
+	// userrestriction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	userrestriction.DefaultUpdatedAt = userrestrictionDescUpdatedAt.Default.(func() time.Time)
+	// userrestriction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	userrestriction.UpdateDefaultUpdatedAt = userrestrictionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userrestrictionDescUserID is the schema descriptor for user_id field.
+	userrestrictionDescUserID := userrestrictionFields[5].Descriptor()
+	// userrestriction.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	userrestriction.UserIDValidator = userrestrictionDescUserID.Validators[0].(func(string) error)
+	// userrestrictionDescRestriction is the schema descriptor for restriction field.
+	userrestrictionDescRestriction := userrestrictionFields[6].Descriptor()
+	// userrestriction.RestrictionValidator is a validator for the "restriction" field. It is called by the builders before save.
+	userrestriction.RestrictionValidator = userrestrictionDescRestriction.Validators[0].(func(string) error)
+	// userrestrictionDescPublicReason is the schema descriptor for public_reason field.
+	userrestrictionDescPublicReason := userrestrictionFields[7].Descriptor()
+	// userrestriction.PublicReasonValidator is a validator for the "public_reason" field. It is called by the builders before save.
+	userrestriction.PublicReasonValidator = userrestrictionDescPublicReason.Validators[0].(func(string) error)
+	// userrestrictionDescID is the schema descriptor for id field.
+	userrestrictionDescID := userrestrictionFields[0].Descriptor()
+	// userrestriction.DefaultID holds the default value on creation for the id field.
+	userrestriction.DefaultID = userrestrictionDescID.Default.(func() string)
 	usersubscriptionFields := schema.UserSubscription{}.Fields()
 	_ = usersubscriptionFields
 	// usersubscriptionDescCreatedAt is the schema descriptor for created_at field.

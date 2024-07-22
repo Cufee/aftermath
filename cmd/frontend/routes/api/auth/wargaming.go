@@ -31,7 +31,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
-	session, err := ctx.Database().FindSession(ctx.Context, token)
+	session, err := ctx.Database().FindSession(ctx.Ctx(), token)
 	if err != nil {
 		log.Debug().Err(err).Msg("failed to find session")
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
@@ -40,13 +40,13 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
-	user, err := ctx.Database().GetUserByID(ctx.Context, session.UserID, database.WithConnections())
+	user, err := ctx.Database().GetUserByID(ctx.Ctx(), session.UserID, database.WithConnections())
 	if err != nil {
 		log.Debug().Err(err).Msg("failed to find user")
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
-	err = ctx.Database().SetSessionExpiresAt(ctx.Context, session.ID, time.Time{})
+	err = ctx.Database().SetSessionExpiresAt(ctx.Ctx(), session.ID, time.Time{})
 	if err != nil {
 		log.Err(err).Msg("failed to set session expiration")
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
@@ -61,7 +61,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 			found = true
 		}
 
-		_, err := ctx.Database().UpdateConnection(ctx.Context, conn)
+		_, err := ctx.Database().UpdateUserConnection(ctx.Ctx(), conn)
 		if err != nil {
 			return ctx.Err(err, "failed to update user connection")
 		}
@@ -73,7 +73,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 			ReferenceID: accountID,
 			Metadata:    map[string]any{"verified": true, "default": true},
 		}
-		_, err := ctx.Database().UpsertConnection(ctx.Context, conn)
+		_, err := ctx.Database().UpsertUserConnection(ctx.Ctx(), conn)
 		if err != nil {
 			return ctx.Err(err, "failed to update user connection")
 		}
@@ -98,7 +98,7 @@ var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=failed to start a new session", http.StatusTemporaryRedirect)
 	}
 
-	verifySession, err := ctx.Database().CreateSession(ctx.Context, verifySessionID, user.ID, time.Now().Add(time.Minute*5), map[string]string{"flow": "wargaming-redirect"})
+	verifySession, err := ctx.Database().CreateSession(ctx.Ctx(), verifySessionID, user.ID, time.Now().Add(time.Minute*5), map[string]string{"flow": "wargaming-redirect"})
 	if err != nil {
 		log.Err(err).Str("userId", user.ID).Msg("failed to create a new user session for wargaming auth flow")
 		return ctx.Redirect("/error?message=failed to start a new session", http.StatusTemporaryRedirect)
