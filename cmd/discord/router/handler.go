@@ -14,12 +14,13 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"golang.org/x/text/language"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/rest"
+	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/retry"
 )
@@ -200,7 +201,7 @@ func (r *Router) handleInteraction(interaction discordgo.Interaction, command bu
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
-						commands.ButtonJoinPrimaryGuild("Need Help?"),
+						common.ButtonJoinPrimaryGuild("Need Help?"),
 					}},
 			},
 		})
@@ -221,7 +222,7 @@ func (r *Router) handleInteraction(interaction discordgo.Interaction, command bu
 					Components: []discordgo.MessageComponent{
 						discordgo.ActionsRow{
 							Components: []discordgo.MessageComponent{
-								commands.ButtonJoinPrimaryGuild(cCtx.Localize("buttons_join_primary_guild")),
+								common.ButtonJoinPrimaryGuild(cCtx.Localize("buttons_join_primary_guild")),
 							}},
 					},
 				})
@@ -234,7 +235,7 @@ func (r *Router) handleInteraction(interaction discordgo.Interaction, command bu
 				Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
-							commands.ButtonJoinPrimaryGuild(cCtx.Localize("buttons_need_help_question")),
+							common.ButtonJoinPrimaryGuild(cCtx.Localize("buttons_join_primary_guild")),
 						}},
 				},
 			})
@@ -261,8 +262,23 @@ func (r *Router) sendInteractionReply(interaction discordgo.Interaction, data di
 		}
 	} else {
 		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
+
+		printer, err := localization.NewPrinter("discord", language.English)
+		if err != nil {
+			log.Err(err).Msg("failed to create a new locale printer")
+			printer = func(_ string) string { return "Join Aftermath Official" } // we only need it for this one button
+		}
+
 		handler = func(ctx context.Context) error {
-			_, err := r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, nil)
+			_, err := r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, discordgo.InteractionResponseData{
+				Content: "Something unexpected happened and your command failed.",
+				Components: []discordgo.MessageComponent{
+					discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							common.ButtonJoinPrimaryGuild(printer("buttons_join_primary_guild")),
+						}},
+				},
+			}, nil)
 			return err
 		}
 	}

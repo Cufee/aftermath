@@ -8,6 +8,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/core"
+
 	"github.com/cufee/aftermath/cmd/discord/rest"
 
 	"github.com/cufee/aftermath/internal/database"
@@ -131,12 +132,15 @@ func (c *Context) Reply() reply {
 
 func (c *Context) Err(err error) error {
 	log.Err(err).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
-	return c.Reply().Send("common_error_unhandled_reported")
+	button := discordgo.ActionsRow{
+		Components: []discordgo.MessageComponent{
+			ButtonJoinPrimaryGuild(c.Localize("buttons_have_a_question_question")),
+		}}
+	return c.Reply().Component(button).Send("common_error_unhandled_reported")
 }
 
 func (c *Context) Error(message string) error {
-	log.Error().Str("message", message).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
-	return c.Reply().Send("common_error_unhandled_reported")
+	return c.Err(errors.New(message))
 }
 
 func (c *Context) isCommand() bool {

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -13,6 +14,8 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/cmd/discord/rest"
+	"github.com/cufee/aftermath/internal/constants"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/permissions"
 	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
@@ -52,7 +55,7 @@ func init() {
 
 				helpButton := discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
-						ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
+						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
 					}}
 
 				parsed, err := url.Parse(imageURL)
@@ -87,9 +90,9 @@ func init() {
 								Name:     "check",
 								Animated: true,
 							},
-							CustomID: fmt.Sprintf("moderation_image_submit#id:%s", "id"),
+							CustomID: fmt.Sprintf("moderation_image_submit#%s", "id"),
 						},
-						ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
+						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
 					}}
 
 				// send a preview
@@ -111,6 +114,48 @@ func init() {
 				}(ctx.Rest(), ctx.RawInteraction().AppID, ctx.RawInteraction().Token)
 
 				return nil
+			}),
+	)
+
+	LoadedPublic.add(
+		builder.NewCommand("moderation_image_submit_button").
+			Middleware(middleware.RequirePermissions(permissions.CreatePersonalContent, permissions.UseTextCommands)).
+			ComponentType(func(customID string) bool {
+				return strings.HasPrefix(customID, "moderation_image_submit#")
+			}).
+			Handler(func(ctx *common.Context) error {
+				data, ok := ctx.ComponentData()
+				if !ok {
+					return ctx.Error("failed to get component data on interaction command")
+				}
+				contentID := strings.ReplaceAll(data.CustomID, "moderation_image_submit#", "")
+				if contentID == "" {
+					return ctx.Error("failed to get content id from custom id")
+				}
+
+				// interaction, err := ctx.Core.Database().GetDiscordInteraction(ctx.Context, interactionID)
+				// if err != nil {
+				// 	return ctx.Reply().Send("stats_refresh_interaction_error_expired")
+				// }
+
+				request := models.ModerationRequest{
+					ReferenceID:    contentID,
+					RequestorID:    ctx.User.ID,
+					RequestContext: "image submitted from /fancy",
+					ActionStatus:   models.ModerationStatusSubmitted,
+				}
+
+				_, err := ctx.Core.Database().CreateModerationRequest(ctx.Context, request)
+				if err != nil {
+					return ctx.Err(err)
+				}
+
+				_, err = ctx.Rest().CreateMessage(ctx.Context, constants.DiscordContentModerationChannelID, discordgo.Message{Content: request.ID}, nil)
+				if err != nil {
+					return ctx.Err(err)
+				}
+
+				return ctx.Reply().Hint(contentID).Send("fancy_submitted_msg_fmt")
 			}),
 	)
 

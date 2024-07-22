@@ -24,6 +24,10 @@ var (
 )
 
 var (
+	DiscordContentModerationChannelID = mustGetEnv("DISCORD_CONTENT_MODERATION_CHANNEL_ID")
+)
+
+var (
 	ImageUploadMaxSize  int64 = 1_000 * 1_000 * 3 // assuming 24Bit image at 3 bytes per pixel
 	ReplayUploadMaxSize int64 = 1_000_000
 )
