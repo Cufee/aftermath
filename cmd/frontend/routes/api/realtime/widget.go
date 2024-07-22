@@ -23,7 +23,7 @@ var WidgetSettings handler.WebSocket = func(ctx *handler.Context) (*websocket.Up
 		return nil, nil, nil
 	}
 
-	settings, err := ctx.Database().GetWidgetSettings(ctx.Ctx(), widgetId)
+	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetId)
 	if err != nil {
 		ctx.SetStatus(http.StatusNotFound)
 		return nil, nil, nil

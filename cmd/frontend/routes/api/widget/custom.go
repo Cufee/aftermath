@@ -98,7 +98,7 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 		return nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
 	}
 
-	existing, err := ctx.Database().GetUserWidgetSettings(ctx.Ctx(), user.ID, nil)
+	existing, err := ctx.Database().GetUserWidgetSettings(ctx.Context, user.ID, nil)
 	if err != nil && !database.IsNotFound(err) {
 		return nil, ctx.Err(err, "failed to get user widgets")
 	}
@@ -133,15 +133,15 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 		return widgets.NewWidgetPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: account}, map[string]string{"account_id": "You need to select a user from the list of search results."}), nil
 	}
 
-	account, err := ctx.Database().GetAccountByID(ctx.Ctx(), settings.AccountID)
+	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
 	if database.IsNotFound(err) {
-		account, err = ctx.Fetch().Account(ctx.Ctx(), settings.AccountID)
+		account, err = ctx.Fetch().Account(ctx.Context, settings.AccountID)
 	}
 	if err != nil || account.Private {
 		return widgets.NewWidgetPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: account}, map[string]string{"account_id": "You have selected a private account - stats are not available for private accounts."}), nil
 	}
 
-	created, err := ctx.Database().CreateWidgetSettings(ctx.Ctx(), user.ID, settings)
+	created, err := ctx.Database().CreateWidgetSettings(ctx.Context, user.ID, settings)
 	if err != nil {
 		return nil, ctx.Err(err, "failed to create widget settings")
 	}
@@ -167,7 +167,7 @@ var UpdateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 	var data widgetSettingsPayload
 	data.parse(form)
 
-	settings, err := ctx.Database().GetWidgetSettings(ctx.Ctx(), widgetID)
+	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
 	if err != nil {
 		if database.IsNotFound(err) {
 			return nil, ctx.Error("widget not found")
@@ -193,15 +193,15 @@ var UpdateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 		return widgets.WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: account}, map[string]string{"account_id": "You need to select a user from the list of search results."}), nil
 	}
 
-	account, err := ctx.Database().GetAccountByID(ctx.Ctx(), settings.AccountID)
+	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
 	if database.IsNotFound(err) {
-		account, err = ctx.Fetch().Account(ctx.Ctx(), settings.AccountID)
+		account, err = ctx.Fetch().Account(ctx.Context, settings.AccountID)
 	}
 	if err != nil || account.Private {
 		return widgets.NewWidgetPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: account}, map[string]string{"account_id": "You have selected a private account - stats are not available for private accounts."}), nil
 	}
 
-	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Ctx(), settings.ID, settings)
+	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Context, settings.ID, settings)
 	if err != nil {
 		return nil, ctx.Err(err, "failed to update widget settings")
 	}
@@ -238,7 +238,7 @@ var QuickAction handler.Partial = func(ctx *handler.Context) (templ.Component, e
 	var data widgetSettingsPayload
 	data.parse(form)
 
-	settings, err := ctx.Database().GetWidgetSettings(ctx.Ctx(), widgetID)
+	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
 	if err != nil {
 		if database.IsNotFound(err) {
 			return nil, ctx.Error("widget not found")
@@ -254,7 +254,7 @@ var QuickAction handler.Partial = func(ctx *handler.Context) (templ.Component, e
 		return nil, ctx.Error("widget has no account id set")
 	}
 
-	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Ctx(), settings.ID, settings)
+	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Context, settings.ID, settings)
 	if err != nil {
 		return nil, ctx.Err(err, "failed to update widget settings")
 	}
@@ -283,7 +283,7 @@ var ResetSession handler.Partial = func(ctx *handler.Context) (templ.Component, 
 		return nil, ctx.Error("invalid widget id")
 	}
 
-	settings, err := ctx.Database().GetWidgetSettings(ctx.Ctx(), widgetID)
+	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
 	if err != nil {
 		if database.IsNotFound(err) {
 			return nil, ctx.Error("widget not found")
@@ -302,7 +302,7 @@ var ResetSession handler.Partial = func(ctx *handler.Context) (templ.Component, 
 	}
 
 	settings.SessionFrom = time.Now()
-	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Ctx(), settings.ID, settings)
+	updated, err := ctx.Database().UpdateWidgetSettings(ctx.Context, settings.ID, settings)
 	if err != nil {
 		return nil, ctx.Err(err, "failed to update widget settings")
 	}

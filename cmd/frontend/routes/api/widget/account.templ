@@ -19,7 +19,7 @@ var AccountWidget handler.Partial = func(ctx *handler.Context) (templ.Component,
 		return nil, ctx.Redirect("/widget", http.StatusTemporaryRedirect)
 	}
 
-	account, err := ctx.Fetch().Account(ctx.Ctx(), accountID)
+	account, err := ctx.Fetch().Account(ctx.Context, accountID)
 	if err != nil {
 		return nil, ctx.Redirect("/widget", http.StatusTemporaryRedirect)
 	}

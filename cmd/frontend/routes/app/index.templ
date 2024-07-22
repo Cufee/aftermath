@@ -21,7 +21,7 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 
 	var ids []string
 	var widgets []wc.WidgetWithAccount
-	settings, err := ctx.Database().GetUserWidgetSettings(ctx.Ctx(), user.ID, nil)
+	settings, err := ctx.Database().GetUserWidgetSettings(ctx.Context, user.ID, nil)
 	if err != nil && !database.IsNotFound(err) {
 		return nil, nil, ctx.Err(err, "failed to get widgets")
 	}
@@ -42,7 +42,7 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 		}
 	}
 	if len(ids) > 0 {
-		accounts, err := ctx.Database().GetAccounts(ctx.Ctx(), ids)
+		accounts, err := ctx.Database().GetAccounts(ctx.Context, ids)
 		if err != nil {
 			return nil, nil, ctx.Err(err, "failed to get account information")
 		}

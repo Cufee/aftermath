@@ -19,7 +19,7 @@ var RemoveConnection handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Error("connection id path parameter is empty")
 	}
 
-	err = ctx.Database().DeleteUserConnection(ctx.Ctx(), user.ID, connID)
+	err = ctx.Database().DeleteUserConnection(ctx.Context, user.ID, connID)
 	if err != nil {
 		return ctx.Err(err, "failed to delete a connection")
 	}
@@ -45,7 +45,7 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 		}
 
 		conn.Metadata["default"] = conn.ID == connID
-		u, err := ctx.Database().UpdateUserConnection(ctx.Ctx(), conn)
+		u, err := ctx.Database().UpdateUserConnection(ctx.Context, conn)
 		if err != nil {
 			return nil, ctx.Err(err, "failed to update a connection")
 		}
@@ -66,7 +66,7 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 		return nil, ctx.Error("connection not found")
 	}
 
-	accounts, err := ctx.Database().GetAccounts(ctx.Ctx(), ids)
+	accounts, err := ctx.Database().GetAccounts(ctx.Context, ids)
 	if err != nil {
 		return nil, ctx.Err(err, "failed to find connected accounts")
 	}
