@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
@@ -178,6 +179,36 @@ func (uu *UserUpdate) AddSessions(s ...*Session) *UserUpdate {
 	return uu.AddSessionIDs(ids...)
 }
 
+// AddModerationRequestIDs adds the "moderation_requests" edge to the ModerationRequest entity by IDs.
+func (uu *UserUpdate) AddModerationRequestIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddModerationRequestIDs(ids...)
+	return uu
+}
+
+// AddModerationRequests adds the "moderation_requests" edges to the ModerationRequest entity.
+func (uu *UserUpdate) AddModerationRequests(m ...*ModerationRequest) *UserUpdate {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uu.AddModerationRequestIDs(ids...)
+}
+
+// AddModerationActionIDs adds the "moderation_actions" edge to the ModerationRequest entity by IDs.
+func (uu *UserUpdate) AddModerationActionIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddModerationActionIDs(ids...)
+	return uu
+}
+
+// AddModerationActions adds the "moderation_actions" edges to the ModerationRequest entity.
+func (uu *UserUpdate) AddModerationActions(m ...*ModerationRequest) *UserUpdate {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uu.AddModerationActionIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -307,6 +338,48 @@ func (uu *UserUpdate) RemoveSessions(s ...*Session) *UserUpdate {
 		ids[i] = s[i].ID
 	}
 	return uu.RemoveSessionIDs(ids...)
+}
+
+// ClearModerationRequests clears all "moderation_requests" edges to the ModerationRequest entity.
+func (uu *UserUpdate) ClearModerationRequests() *UserUpdate {
+	uu.mutation.ClearModerationRequests()
+	return uu
+}
+
+// RemoveModerationRequestIDs removes the "moderation_requests" edge to ModerationRequest entities by IDs.
+func (uu *UserUpdate) RemoveModerationRequestIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveModerationRequestIDs(ids...)
+	return uu
+}
+
+// RemoveModerationRequests removes "moderation_requests" edges to ModerationRequest entities.
+func (uu *UserUpdate) RemoveModerationRequests(m ...*ModerationRequest) *UserUpdate {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uu.RemoveModerationRequestIDs(ids...)
+}
+
+// ClearModerationActions clears all "moderation_actions" edges to the ModerationRequest entity.
+func (uu *UserUpdate) ClearModerationActions() *UserUpdate {
+	uu.mutation.ClearModerationActions()
+	return uu
+}
+
+// RemoveModerationActionIDs removes the "moderation_actions" edge to ModerationRequest entities by IDs.
+func (uu *UserUpdate) RemoveModerationActionIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveModerationActionIDs(ids...)
+	return uu
+}
+
+// RemoveModerationActions removes "moderation_actions" edges to ModerationRequest entities.
+func (uu *UserUpdate) RemoveModerationActions(m ...*ModerationRequest) *UserUpdate {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uu.RemoveModerationActionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -650,6 +723,96 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.ModerationRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationRequestsTable,
+			Columns: []string{user.ModerationRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedModerationRequestsIDs(); len(nodes) > 0 && !uu.mutation.ModerationRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationRequestsTable,
+			Columns: []string{user.ModerationRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.ModerationRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationRequestsTable,
+			Columns: []string{user.ModerationRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.ModerationActionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationActionsTable,
+			Columns: []string{user.ModerationActionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedModerationActionsIDs(); len(nodes) > 0 && !uu.mutation.ModerationActionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationActionsTable,
+			Columns: []string{user.ModerationActionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.ModerationActionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationActionsTable,
+			Columns: []string{user.ModerationActionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(uu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -814,6 +977,36 @@ func (uuo *UserUpdateOne) AddSessions(s ...*Session) *UserUpdateOne {
 	return uuo.AddSessionIDs(ids...)
 }
 
+// AddModerationRequestIDs adds the "moderation_requests" edge to the ModerationRequest entity by IDs.
+func (uuo *UserUpdateOne) AddModerationRequestIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddModerationRequestIDs(ids...)
+	return uuo
+}
+
+// AddModerationRequests adds the "moderation_requests" edges to the ModerationRequest entity.
+func (uuo *UserUpdateOne) AddModerationRequests(m ...*ModerationRequest) *UserUpdateOne {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uuo.AddModerationRequestIDs(ids...)
+}
+
+// AddModerationActionIDs adds the "moderation_actions" edge to the ModerationRequest entity by IDs.
+func (uuo *UserUpdateOne) AddModerationActionIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddModerationActionIDs(ids...)
+	return uuo
+}
+
+// AddModerationActions adds the "moderation_actions" edges to the ModerationRequest entity.
+func (uuo *UserUpdateOne) AddModerationActions(m ...*ModerationRequest) *UserUpdateOne {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uuo.AddModerationActionIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -943,6 +1136,48 @@ func (uuo *UserUpdateOne) RemoveSessions(s ...*Session) *UserUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return uuo.RemoveSessionIDs(ids...)
+}
+
+// ClearModerationRequests clears all "moderation_requests" edges to the ModerationRequest entity.
+func (uuo *UserUpdateOne) ClearModerationRequests() *UserUpdateOne {
+	uuo.mutation.ClearModerationRequests()
+	return uuo
+}
+
+// RemoveModerationRequestIDs removes the "moderation_requests" edge to ModerationRequest entities by IDs.
+func (uuo *UserUpdateOne) RemoveModerationRequestIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveModerationRequestIDs(ids...)
+	return uuo
+}
+
+// RemoveModerationRequests removes "moderation_requests" edges to ModerationRequest entities.
+func (uuo *UserUpdateOne) RemoveModerationRequests(m ...*ModerationRequest) *UserUpdateOne {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uuo.RemoveModerationRequestIDs(ids...)
+}
+
+// ClearModerationActions clears all "moderation_actions" edges to the ModerationRequest entity.
+func (uuo *UserUpdateOne) ClearModerationActions() *UserUpdateOne {
+	uuo.mutation.ClearModerationActions()
+	return uuo
+}
+
+// RemoveModerationActionIDs removes the "moderation_actions" edge to ModerationRequest entities by IDs.
+func (uuo *UserUpdateOne) RemoveModerationActionIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveModerationActionIDs(ids...)
+	return uuo
+}
+
+// RemoveModerationActions removes "moderation_actions" edges to ModerationRequest entities.
+func (uuo *UserUpdateOne) RemoveModerationActions(m ...*ModerationRequest) *UserUpdateOne {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uuo.RemoveModerationActionIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1309,6 +1544,96 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.ModerationRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationRequestsTable,
+			Columns: []string{user.ModerationRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedModerationRequestsIDs(); len(nodes) > 0 && !uuo.mutation.ModerationRequestsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationRequestsTable,
+			Columns: []string{user.ModerationRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.ModerationRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationRequestsTable,
+			Columns: []string{user.ModerationRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.ModerationActionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationActionsTable,
+			Columns: []string{user.ModerationActionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedModerationActionsIDs(); len(nodes) > 0 && !uuo.mutation.ModerationActionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationActionsTable,
+			Columns: []string{user.ModerationActionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.ModerationActionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationActionsTable,
+			Columns: []string{user.ModerationActionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

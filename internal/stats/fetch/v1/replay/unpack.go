@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/log"
 )
 
@@ -27,9 +28,6 @@ func UnpackRemote(ctx context.Context, link string) (*UnpackedReplay, error) {
 	}
 	defer resp.Body.Close()
 
-	// Convert 10 MB to bytes
-	const maxFileSize = 10 * 1024 * 1024
-
 	// Check the Content-Length header
 	contentLengthStr := resp.Header.Get("Content-Length")
 	if contentLengthStr == "" {
@@ -41,11 +39,11 @@ func UnpackRemote(ctx context.Context, link string) (*UnpackedReplay, error) {
 	if err != nil {
 		return nil, err
 	}
-	if contentLength > maxFileSize {
+	if contentLength > constants.ReplayUploadMaxSize {
 		return nil, ErrInvalidReplayFile
 	}
 
-	data, err := io.ReadAll(resp.Body)
+	data, err := io.ReadAll(io.LimitReader(resp.Body, constants.ReplayUploadMaxSize))
 	if err != nil {
 		return nil, err
 	}

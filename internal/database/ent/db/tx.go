@@ -40,6 +40,8 @@ type Tx struct {
 	GameMode *GameModeClient
 	// LeaderboardScore is the client for interacting with the LeaderboardScore builders.
 	LeaderboardScore *LeaderboardScoreClient
+	// ModerationRequest is the client for interacting with the ModerationRequest builders.
+	ModerationRequest *ModerationRequestClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// User is the client for interacting with the User builders.
@@ -202,6 +204,7 @@ func (tx *Tx) init() {
 	tx.GameMap = NewGameMapClient(tx.config)
 	tx.GameMode = NewGameModeClient(tx.config)
 	tx.LeaderboardScore = NewLeaderboardScoreClient(tx.config)
+	tx.ModerationRequest = NewModerationRequestClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserConnection = NewUserConnectionClient(tx.config)

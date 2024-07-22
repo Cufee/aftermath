@@ -7,10 +7,28 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/cmd/discord/emoji"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/gorhill/cronexpr"
 )
+
+func ButtonInviteAftermath(label string) discordgo.Button {
+	return discordgo.Button{
+		Style: discordgo.LinkButton,
+		Label: label,
+		Emoji: emoji.AftermathLogoDefault(),
+		URL:   "https://amth.one/invite",
+	}
+}
+func ButtonJoinPrimaryGuild(label string) discordgo.Button {
+	return discordgo.Button{
+		Style: discordgo.LinkButton,
+		Label: label,
+		Emoji: emoji.AftermathLogoColored("yellow"),
+		URL:   "https://amth.one/join",
+	}
+}
 
 var euCron = cronexpr.MustParse("0 1 * * *")
 var naCron = cronexpr.MustParse("0 9 * * *")
@@ -38,18 +56,8 @@ func sendHelpResponse(ctx *common.Context) error {
 		Component(
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
-					discordgo.Button{
-						Style: discordgo.LinkButton,
-						Label: ctx.Localize("buttons_add_aftermath_to_your_server"),
-						Emoji: &discordgo.ComponentEmoji{Name: "aftermath", ID: "1214348603104034876"},
-						URL:   "https://amth.one/invite",
-					},
-					discordgo.Button{
-						Style: discordgo.LinkButton,
-						Label: ctx.Localize("buttons_join_primary_guild"),
-						Emoji: &discordgo.ComponentEmoji{Name: "aftermath_yellow", ID: "1214621621659238460"},
-						URL:   "https://amth.one/join",
-					},
+					ButtonInviteAftermath(ctx.Localize("buttons_add_aftermath_to_your_server")),
+					ButtonJoinPrimaryGuild(ctx.Localize("buttons_join_primary_guild")),
 				}},
 		).
 		Send()

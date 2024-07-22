@@ -113,6 +113,12 @@ type DiscordDataClient interface {
 	DeleteExpiredInteractions(ctx context.Context, expiration time.Time) error
 }
 
+type ModerationClient interface {
+	GetModerationRequest(ctx context.Context, id string) (models.ModerationRequest, error)
+	CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
+	UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
+}
+
 type Client interface {
 	AuthClient
 	UsersClient
@@ -126,6 +132,7 @@ type Client interface {
 
 	DiscordDataClient
 
+	ModerationClient
 	Disconnect() error
 }
 

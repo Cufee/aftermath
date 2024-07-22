@@ -28,6 +28,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
 	"github.com/cufee/aftermath/internal/database/ent/db/gamemode"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
@@ -72,6 +73,8 @@ type Client struct {
 	GameMode *GameModeClient
 	// LeaderboardScore is the client for interacting with the LeaderboardScore builders.
 	LeaderboardScore *LeaderboardScoreClient
+	// ModerationRequest is the client for interacting with the ModerationRequest builders.
+	ModerationRequest *ModerationRequestClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// User is the client for interacting with the User builders.
@@ -114,6 +117,7 @@ func (c *Client) init() {
 	c.GameMap = NewGameMapClient(c.config)
 	c.GameMode = NewGameModeClient(c.config)
 	c.LeaderboardScore = NewLeaderboardScoreClient(c.config)
+	c.ModerationRequest = NewModerationRequestClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserConnection = NewUserConnectionClient(c.config)
@@ -228,6 +232,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GameMap:            NewGameMapClient(cfg),
 		GameMode:           NewGameModeClient(cfg),
 		LeaderboardScore:   NewLeaderboardScoreClient(cfg),
+		ModerationRequest:  NewModerationRequestClient(cfg),
 		Session:            NewSessionClient(cfg),
 		User:               NewUserClient(cfg),
 		UserConnection:     NewUserConnectionClient(cfg),
@@ -269,6 +274,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GameMap:            NewGameMapClient(cfg),
 		GameMode:           NewGameModeClient(cfg),
 		LeaderboardScore:   NewLeaderboardScoreClient(cfg),
+		ModerationRequest:  NewModerationRequestClient(cfg),
 		Session:            NewSessionClient(cfg),
 		User:               NewUserClient(cfg),
 		UserConnection:     NewUserConnectionClient(cfg),
@@ -309,9 +315,9 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Account, c.AccountSnapshot, c.AdEvent, c.AdMessage, c.AppConfiguration,
 		c.ApplicationCommand, c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction,
-		c.GameMap, c.GameMode, c.LeaderboardScore, c.Session, c.User, c.UserConnection,
-		c.UserContent, c.UserSubscription, c.Vehicle, c.VehicleAverage,
-		c.VehicleSnapshot, c.WidgetSettings,
+		c.GameMap, c.GameMode, c.LeaderboardScore, c.ModerationRequest, c.Session,
+		c.User, c.UserConnection, c.UserContent, c.UserSubscription, c.Vehicle,
+		c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
 	} {
 		n.Use(hooks...)
 	}
@@ -323,9 +329,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Account, c.AccountSnapshot, c.AdEvent, c.AdMessage, c.AppConfiguration,
 		c.ApplicationCommand, c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction,
-		c.GameMap, c.GameMode, c.LeaderboardScore, c.Session, c.User, c.UserConnection,
-		c.UserContent, c.UserSubscription, c.Vehicle, c.VehicleAverage,
-		c.VehicleSnapshot, c.WidgetSettings,
+		c.GameMap, c.GameMode, c.LeaderboardScore, c.ModerationRequest, c.Session,
+		c.User, c.UserConnection, c.UserContent, c.UserSubscription, c.Vehicle,
+		c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -360,6 +366,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.GameMode.mutate(ctx, m)
 	case *LeaderboardScoreMutation:
 		return c.LeaderboardScore.mutate(ctx, m)
+	case *ModerationRequestMutation:
+		return c.ModerationRequest.mutate(ctx, m)
 	case *SessionMutation:
 		return c.Session.mutate(ctx, m)
 	case *UserMutation:
@@ -2208,6 +2216,171 @@ func (c *LeaderboardScoreClient) mutate(ctx context.Context, m *LeaderboardScore
 	}
 }
 
+// ModerationRequestClient is a client for the ModerationRequest schema.
+type ModerationRequestClient struct {
+	config
+}
+
+// NewModerationRequestClient returns a client for the ModerationRequest from the given config.
+func NewModerationRequestClient(c config) *ModerationRequestClient {
+	return &ModerationRequestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `moderationrequest.Hooks(f(g(h())))`.
+func (c *ModerationRequestClient) Use(hooks ...Hook) {
+	c.hooks.ModerationRequest = append(c.hooks.ModerationRequest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `moderationrequest.Intercept(f(g(h())))`.
+func (c *ModerationRequestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ModerationRequest = append(c.inters.ModerationRequest, interceptors...)
+}
+
+// Create returns a builder for creating a ModerationRequest entity.
+func (c *ModerationRequestClient) Create() *ModerationRequestCreate {
+	mutation := newModerationRequestMutation(c.config, OpCreate)
+	return &ModerationRequestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ModerationRequest entities.
+func (c *ModerationRequestClient) CreateBulk(builders ...*ModerationRequestCreate) *ModerationRequestCreateBulk {
+	return &ModerationRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ModerationRequestClient) MapCreateBulk(slice any, setFunc func(*ModerationRequestCreate, int)) *ModerationRequestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ModerationRequestCreateBulk{err: fmt.Errorf("calling to ModerationRequestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ModerationRequestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ModerationRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ModerationRequest.
+func (c *ModerationRequestClient) Update() *ModerationRequestUpdate {
+	mutation := newModerationRequestMutation(c.config, OpUpdate)
+	return &ModerationRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ModerationRequestClient) UpdateOne(mr *ModerationRequest) *ModerationRequestUpdateOne {
+	mutation := newModerationRequestMutation(c.config, OpUpdateOne, withModerationRequest(mr))
+	return &ModerationRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ModerationRequestClient) UpdateOneID(id string) *ModerationRequestUpdateOne {
+	mutation := newModerationRequestMutation(c.config, OpUpdateOne, withModerationRequestID(id))
+	return &ModerationRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ModerationRequest.
+func (c *ModerationRequestClient) Delete() *ModerationRequestDelete {
+	mutation := newModerationRequestMutation(c.config, OpDelete)
+	return &ModerationRequestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ModerationRequestClient) DeleteOne(mr *ModerationRequest) *ModerationRequestDeleteOne {
+	return c.DeleteOneID(mr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ModerationRequestClient) DeleteOneID(id string) *ModerationRequestDeleteOne {
+	builder := c.Delete().Where(moderationrequest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ModerationRequestDeleteOne{builder}
+}
+
+// Query returns a query builder for ModerationRequest.
+func (c *ModerationRequestClient) Query() *ModerationRequestQuery {
+	return &ModerationRequestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeModerationRequest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ModerationRequest entity by its id.
+func (c *ModerationRequestClient) Get(ctx context.Context, id string) (*ModerationRequest, error) {
+	return c.Query().Where(moderationrequest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ModerationRequestClient) GetX(ctx context.Context, id string) *ModerationRequest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryModerator queries the moderator edge of a ModerationRequest.
+func (c *ModerationRequestClient) QueryModerator(mr *ModerationRequest) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(moderationrequest.Table, moderationrequest.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, moderationrequest.ModeratorTable, moderationrequest.ModeratorColumn),
+		)
+		fromV = sqlgraph.Neighbors(mr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequestor queries the requestor edge of a ModerationRequest.
+func (c *ModerationRequestClient) QueryRequestor(mr *ModerationRequest) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(moderationrequest.Table, moderationrequest.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, moderationrequest.RequestorTable, moderationrequest.RequestorColumn),
+		)
+		fromV = sqlgraph.Neighbors(mr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ModerationRequestClient) Hooks() []Hook {
+	return c.hooks.ModerationRequest
+}
+
+// Interceptors returns the client interceptors.
+func (c *ModerationRequestClient) Interceptors() []Interceptor {
+	return c.inters.ModerationRequest
+}
+
+func (c *ModerationRequestClient) mutate(ctx context.Context, m *ModerationRequestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ModerationRequestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ModerationRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ModerationRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ModerationRequestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown ModerationRequest mutation op: %q", m.Op())
+	}
+}
+
 // SessionClient is a client for the Session schema.
 type SessionClient struct {
 	config
@@ -2554,6 +2727,38 @@ func (c *UserClient) QuerySessions(u *User) *SessionQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryModerationRequests queries the moderation_requests edge of a User.
+func (c *UserClient) QueryModerationRequests(u *User) *ModerationRequestQuery {
+	query := (&ModerationRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(moderationrequest.Table, moderationrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ModerationRequestsTable, user.ModerationRequestsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryModerationActions queries the moderation_actions edge of a User.
+func (c *UserClient) QueryModerationActions(u *User) *ModerationRequestQuery {
+	query := (&ModerationRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(moderationrequest.Table, moderationrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ModerationActionsTable, user.ModerationActionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -3602,15 +3807,15 @@ type (
 	hooks struct {
 		Account, AccountSnapshot, AdEvent, AdMessage, AppConfiguration,
 		ApplicationCommand, AuthNonce, Clan, CronTask, DiscordInteraction, GameMap,
-		GameMode, LeaderboardScore, Session, User, UserConnection, UserContent,
-		UserSubscription, Vehicle, VehicleAverage, VehicleSnapshot,
+		GameMode, LeaderboardScore, ModerationRequest, Session, User, UserConnection,
+		UserContent, UserSubscription, Vehicle, VehicleAverage, VehicleSnapshot,
 		WidgetSettings []ent.Hook
 	}
 	inters struct {
 		Account, AccountSnapshot, AdEvent, AdMessage, AppConfiguration,
 		ApplicationCommand, AuthNonce, Clan, CronTask, DiscordInteraction, GameMap,
-		GameMode, LeaderboardScore, Session, User, UserConnection, UserContent,
-		UserSubscription, Vehicle, VehicleAverage, VehicleSnapshot,
+		GameMode, LeaderboardScore, ModerationRequest, Session, User, UserConnection,
+		UserContent, UserSubscription, Vehicle, VehicleAverage, VehicleSnapshot,
 		WidgetSettings []ent.Interceptor
 	}
 )

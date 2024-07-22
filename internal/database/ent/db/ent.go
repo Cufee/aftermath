@@ -25,6 +25,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
 	"github.com/cufee/aftermath/internal/database/ent/db/gamemode"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
@@ -107,6 +108,7 @@ func checkColumn(table, column string) error {
 			gamemap.Table:            gamemap.ValidColumn,
 			gamemode.Table:           gamemode.ValidColumn,
 			leaderboardscore.Table:   leaderboardscore.ValidColumn,
+			moderationrequest.Table:  moderationrequest.ValidColumn,
 			session.Table:            session.ValidColumn,
 			user.Table:               user.ValidColumn,
 			userconnection.Table:     userconnection.ValidColumn,

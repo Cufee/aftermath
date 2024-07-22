@@ -48,9 +48,13 @@ type UserEdges struct {
 	Content []*UserContent `json:"content,omitempty"`
 	// Sessions holds the value of the sessions edge.
 	Sessions []*Session `json:"sessions,omitempty"`
+	// ModerationRequests holds the value of the moderation_requests edge.
+	ModerationRequests []*ModerationRequest `json:"moderation_requests,omitempty"`
+	// ModerationActions holds the value of the moderation_actions edge.
+	ModerationActions []*ModerationRequest `json:"moderation_actions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [8]bool
 }
 
 // DiscordInteractionsOrErr returns the DiscordInteractions value or an error if the edge
@@ -105,6 +109,24 @@ func (e UserEdges) SessionsOrErr() ([]*Session, error) {
 		return e.Sessions, nil
 	}
 	return nil, &NotLoadedError{edge: "sessions"}
+}
+
+// ModerationRequestsOrErr returns the ModerationRequests value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ModerationRequestsOrErr() ([]*ModerationRequest, error) {
+	if e.loadedTypes[6] {
+		return e.ModerationRequests, nil
+	}
+	return nil, &NotLoadedError{edge: "moderation_requests"}
+}
+
+// ModerationActionsOrErr returns the ModerationActions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ModerationActionsOrErr() ([]*ModerationRequest, error) {
+	if e.loadedTypes[7] {
+		return e.ModerationActions, nil
+	}
+	return nil, &NotLoadedError{edge: "moderation_actions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -212,6 +234,16 @@ func (u *User) QueryContent() *UserContentQuery {
 // QuerySessions queries the "sessions" edge of the User entity.
 func (u *User) QuerySessions() *SessionQuery {
 	return NewUserClient(u.config).QuerySessions(u)
+}
+
+// QueryModerationRequests queries the "moderation_requests" edge of the User entity.
+func (u *User) QueryModerationRequests() *ModerationRequestQuery {
+	return NewUserClient(u.config).QueryModerationRequests(u)
+}
+
+// QueryModerationActions queries the "moderation_actions" edge of the User entity.
+func (u *User) QueryModerationActions() *ModerationRequestQuery {
+	return NewUserClient(u.config).QueryModerationActions(u)
 }
 
 // Update returns a builder for updating this User.

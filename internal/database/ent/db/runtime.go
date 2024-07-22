@@ -18,6 +18,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
 	"github.com/cufee/aftermath/internal/database/ent/db/gamemode"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
@@ -324,6 +325,30 @@ func init() {
 	leaderboardscoreDescID := leaderboardscoreFields[0].Descriptor()
 	// leaderboardscore.DefaultID holds the default value on creation for the id field.
 	leaderboardscore.DefaultID = leaderboardscoreDescID.Default.(func() string)
+	moderationrequestFields := schema.ModerationRequest{}.Fields()
+	_ = moderationrequestFields
+	// moderationrequestDescCreatedAt is the schema descriptor for created_at field.
+	moderationrequestDescCreatedAt := moderationrequestFields[1].Descriptor()
+	// moderationrequest.DefaultCreatedAt holds the default value on creation for the created_at field.
+	moderationrequest.DefaultCreatedAt = moderationrequestDescCreatedAt.Default.(func() time.Time)
+	// moderationrequestDescUpdatedAt is the schema descriptor for updated_at field.
+	moderationrequestDescUpdatedAt := moderationrequestFields[2].Descriptor()
+	// moderationrequest.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	moderationrequest.DefaultUpdatedAt = moderationrequestDescUpdatedAt.Default.(func() time.Time)
+	// moderationrequest.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	moderationrequest.UpdateDefaultUpdatedAt = moderationrequestDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// moderationrequestDescReferenceID is the schema descriptor for reference_id field.
+	moderationrequestDescReferenceID := moderationrequestFields[6].Descriptor()
+	// moderationrequest.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
+	moderationrequest.ReferenceIDValidator = moderationrequestDescReferenceID.Validators[0].(func(string) error)
+	// moderationrequestDescRequestorID is the schema descriptor for requestor_id field.
+	moderationrequestDescRequestorID := moderationrequestFields[7].Descriptor()
+	// moderationrequest.RequestorIDValidator is a validator for the "requestor_id" field. It is called by the builders before save.
+	moderationrequest.RequestorIDValidator = moderationrequestDescRequestorID.Validators[0].(func(string) error)
+	// moderationrequestDescID is the schema descriptor for id field.
+	moderationrequestDescID := moderationrequestFields[0].Descriptor()
+	// moderationrequest.DefaultID holds the default value on creation for the id field.
+	moderationrequest.DefaultID = moderationrequestDescID.Default.(func() string)
 	sessionFields := schema.Session{}.Fields()
 	_ = sessionFields
 	// sessionDescCreatedAt is the schema descriptor for created_at field.

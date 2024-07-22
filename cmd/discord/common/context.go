@@ -76,23 +76,21 @@ func NewContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 	return c, nil
 }
 
-func withRetry(fn func() error, tries ...int) error {
+func withRetry(fn func() (discordgo.Message, error), tries ...int) (discordgo.Message, error) {
 	var triesCnt = 5
 	if len(tries) > 0 && tries[0] > 0 {
 		triesCnt = tries[0]
 	}
-	res := retry.Retry(func() (struct{}, error) {
-		return struct{}{}, fn()
-	}, triesCnt, time.Second)
-	return res.Err
+	res := retry.Retry(fn, triesCnt, time.Second)
+	return res.Data, res.Err
 }
 
-func (c *Context) respond(data discordgo.InteractionResponseData, files []rest.File) error {
+func (c *Context) respond(data discordgo.InteractionResponseData, files []rest.File) (discordgo.Message, error) {
 	select {
 	case <-c.Context.Done():
-		return c.Context.Err()
+		return discordgo.Message{}, c.Context.Err()
 	default:
-		return withRetry(func() error {
+		return withRetry(func() (discordgo.Message, error) {
 			// since we already finished handling the interaction, there is no need to use the handler context
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
@@ -101,18 +99,26 @@ func (c *Context) respond(data discordgo.InteractionResponseData, files []rest.F
 	}
 }
 
-func (c *Context) followUp(data discordgo.InteractionResponseData, files []rest.File) error {
+func (c *Context) followUp(data discordgo.InteractionResponseData, files []rest.File) (discordgo.Message, error) {
 	select {
 	case <-c.Context.Done():
-		return c.Context.Err()
+		return discordgo.Message{}, c.Context.Err()
 	default:
-		return withRetry(func() error {
+		return withRetry(func() (discordgo.Message, error) {
 			// since we already finished handling the interaction, there is no need to use the handler context
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 			return c.rest.SendInteractionFollowup(ctx, c.interaction.AppID, c.interaction.Token, data, files)
 		})
 	}
+}
+
+func (c *Context) Rest() *rest.Client {
+	return c.rest
+}
+
+func (c *Context) RawInteraction() discordgo.Interaction {
+	return c.interaction
 }
 
 func (c *Context) InteractionID() string {

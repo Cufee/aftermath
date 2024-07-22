@@ -57,7 +57,7 @@ func (s *Segments) Render(opts ...Option) (image.Image, error) {
 			contentBlock = retry.DataWithErr[Block]{Err: err}
 			return
 		}
-		mainSegmentBlock := NewImageContent(Style{}, AddBackground(mainSegmentImg, options.Background, Style{Blur: 10, BorderRadius: 42.5}))
+		mainSegmentBlock := NewImageContent(Style{}, AddBackground(mainSegmentImg, options.Background, Style{Blur: DefaultBackgroundBlur, BorderRadius: 42.5}))
 		contentBlock = retry.DataWithErr[Block]{Data: mainSegmentBlock}
 	}()
 	go func() {

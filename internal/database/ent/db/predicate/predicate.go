@@ -45,6 +45,9 @@ type GameMode func(*sql.Selector)
 // LeaderboardScore is the predicate function for leaderboardscore builders.
 type LeaderboardScore func(*sql.Selector)
 
+// ModerationRequest is the predicate function for moderationrequest builders.
+type ModerationRequest func(*sql.Selector)
+
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
 

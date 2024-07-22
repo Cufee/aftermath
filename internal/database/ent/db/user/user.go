@@ -36,6 +36,10 @@ const (
 	EdgeContent = "content"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
 	EdgeSessions = "sessions"
+	// EdgeModerationRequests holds the string denoting the moderation_requests edge name in mutations.
+	EdgeModerationRequests = "moderation_requests"
+	// EdgeModerationActions holds the string denoting the moderation_actions edge name in mutations.
+	EdgeModerationActions = "moderation_actions"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// DiscordInteractionsTable is the table that holds the discord_interactions relation/edge.
@@ -80,6 +84,20 @@ const (
 	SessionsInverseTable = "sessions"
 	// SessionsColumn is the table column denoting the sessions relation/edge.
 	SessionsColumn = "user_id"
+	// ModerationRequestsTable is the table that holds the moderation_requests relation/edge.
+	ModerationRequestsTable = "moderation_requests"
+	// ModerationRequestsInverseTable is the table name for the ModerationRequest entity.
+	// It exists in this package in order to avoid circular dependency with the "moderationrequest" package.
+	ModerationRequestsInverseTable = "moderation_requests"
+	// ModerationRequestsColumn is the table column denoting the moderation_requests relation/edge.
+	ModerationRequestsColumn = "requestor_id"
+	// ModerationActionsTable is the table that holds the moderation_actions relation/edge.
+	ModerationActionsTable = "moderation_requests"
+	// ModerationActionsInverseTable is the table name for the ModerationRequest entity.
+	// It exists in this package in order to avoid circular dependency with the "moderationrequest" package.
+	ModerationActionsInverseTable = "moderation_requests"
+	// ModerationActionsColumn is the table column denoting the moderation_actions relation/edge.
+	ModerationActionsColumn = "moderator_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -226,6 +244,34 @@ func BySessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByModerationRequestsCount orders the results by moderation_requests count.
+func ByModerationRequestsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newModerationRequestsStep(), opts...)
+	}
+}
+
+// ByModerationRequests orders the results by moderation_requests terms.
+func ByModerationRequests(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newModerationRequestsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByModerationActionsCount orders the results by moderation_actions count.
+func ByModerationActionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newModerationActionsStep(), opts...)
+	}
+}
+
+// ByModerationActions orders the results by moderation_actions terms.
+func ByModerationActions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newModerationActionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newDiscordInteractionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -266,5 +312,19 @@ func newSessionsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SessionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
+	)
+}
+func newModerationRequestsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ModerationRequestsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ModerationRequestsTable, ModerationRequestsColumn),
+	)
+}
+func newModerationActionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ModerationActionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ModerationActionsTable, ModerationActionsColumn),
 	)
 }

@@ -99,6 +99,25 @@
   value: "link"
 - key: command_option_replay_link_description
   value: "A link to a Blitz replay file"
+# /fancy
+# fancy_preview_msg
+- key: command_fancy_name
+  value: "fancy"
+- key: command_fancy_description
+  value: "Set a custom background for your stats!"
+- key: command_option_fancy_link_name
+  value: "link"
+- key: command_option_fancy_link_description
+  value: "A link to a JPEG or PNG image"
+- key: command_option_fancy_file_name
+  value: "file"
+- key: command_option_fancy_file_description
+  value: "A JPEG or PNG image file"
+- key: fancy_hint_image_transformation
+  value: "Images uploaded to Aftermath via this command will be scaled down and blurred. They will also require manual moderation."
+  context: "Images need to be manually approved by a moderator"
+- key: fancy_preview_msg
+  value: "## Here is a preview of your image!\nUse the buttons below to submit it for moderation."
 
 # Common command options
 # days
@@ -145,7 +164,12 @@
   value: Install Aftermath
 - key: buttons_join_primary_guild
   value: Join Aftermath Official
-
+- key: buttons_need_help_question
+  value: Need Help?
+- key: buttons_have_a_question_question
+  value: Have a Question?
+- key: buttons_submit
+  value: Submit
 
 # Errors
 # permissions
@@ -162,7 +186,7 @@
   context: Discord request timed out for unknown reasons
 
 - key: common_error_unhandled_reported
-  value: Something unexpected happened and your command failed.\n*This error was reported automatically, you can also reach out to our team on Aftermath Official*"
+  value: "Something unexpected happened and your command failed.\n*This error was reported automatically, you can also reach out to our team on Aftermath Official*"
   context: We failed to execute a command, the error is not user-facing and will be reported to a dev automatically
 
 - key: common_error_unhandled_not_reported
@@ -292,6 +316,19 @@
   context: Failed to find the selected account by ID
 - key: links_error_no_accounts_linked
   value: "You don't have any linked accounts."
+
+# /fancy errors
+- key: fancy_errors_missing_attachment
+  value: "You need to provide a link or attach an image file."
+- key: fancy_errors_invalid_link
+  value: "The image you have provided is invalid, Aftermath was not able to view it."
+- key: fancy_errors_invalid_format
+  value: "The image you have provided is not in a JPEG or PNG format. This command does not support other file formats."
+- key: fancy_errors_invalid_image
+  value: "The image you have provided may be broken or is too large.\n_The maximum recommended image size is 1000px x 1000px._"
+- key: fancy_error_too_many_options_non_blocking
+  value: "When using this command, you only need to provide either a link or a file. The image file will override the link if both are provided."
+  context: User provided a link AND a file, this will not cause an error
 
   # Wargaming specific errors
 - key: wargaming_error_private_account

@@ -22,3 +22,8 @@ var (
 	DiscordAuthRedirectURL   = mustGetEnv("DISCORD_AUTH_REDIRECT_URL")
 	DiscordAuthDefaultScopes = mustGetEnv("DISCORD_AUTH_DEFAULT_SCOPES")
 )
+
+var (
+	ImageUploadMaxSize  int64 = 1_000 * 1_000 * 3 // assuming 24Bit image at 3 bytes per pixel
+	ReplayUploadMaxSize int64 = 1_000_000
+)

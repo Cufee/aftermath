@@ -278,3 +278,13 @@ func (c *staticTestingDatabase) GetGameModeNames(ctx context.Context, id string)
 func (c *staticTestingDatabase) UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) (map[string]error, error) {
 	return nil, nil
 }
+
+func (c *staticTestingDatabase) CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {
+	return models.ModerationRequest{}, errors.New("CreateModerationRequest not implemented")
+}
+func (c *staticTestingDatabase) GetModerationRequest(ctx context.Context, id string) (models.ModerationRequest, error) {
+	return models.ModerationRequest{}, errors.New("GetModerationRequest not implemented")
+}
+func (c *staticTestingDatabase) UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {
+	return models.ModerationRequest{}, errors.New("UpdateModerationRequest not implemented")
+}

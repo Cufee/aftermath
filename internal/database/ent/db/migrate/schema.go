@@ -468,6 +468,72 @@ var (
 			},
 		},
 	}
+	// ModerationRequestsColumns holds the columns for the "moderation_requests" table.
+	ModerationRequestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "moderator_comment", Type: field.TypeString, Nullable: true},
+		{Name: "context", Type: field.TypeString, Nullable: true},
+		{Name: "reference_id", Type: field.TypeString},
+		{Name: "action_reason", Type: field.TypeString, Nullable: true},
+		{Name: "action_status", Type: field.TypeEnum, Enums: []string{"submitted", "approved", "declined", "expired"}},
+		{Name: "data", Type: field.TypeJSON},
+		{Name: "requestor_id", Type: field.TypeString},
+		{Name: "moderator_id", Type: field.TypeString, Nullable: true},
+	}
+	// ModerationRequestsTable holds the schema information for the "moderation_requests" table.
+	ModerationRequestsTable = &schema.Table{
+		Name:       "moderation_requests",
+		Columns:    ModerationRequestsColumns,
+		PrimaryKey: []*schema.Column{ModerationRequestsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "moderation_requests_users_moderation_requests",
+				Columns:    []*schema.Column{ModerationRequestsColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "moderation_requests_users_moderation_actions",
+				Columns:    []*schema.Column{ModerationRequestsColumns[10]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "moderationrequest_id",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[0]},
+			},
+			{
+				Name:    "moderationrequest_reference_id",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[5]},
+			},
+			{
+				Name:    "moderationrequest_requestor_id",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[9]},
+			},
+			{
+				Name:    "moderationrequest_moderator_id",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[10]},
+			},
+			{
+				Name:    "moderationrequest_requestor_id_reference_id",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[9], ModerationRequestsColumns[5]},
+			},
+			{
+				Name:    "moderationrequest_requestor_id_reference_id_action_status",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[9], ModerationRequestsColumns[5], ModerationRequestsColumns[7]},
+			},
+		},
+	}
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -831,6 +897,7 @@ var (
 		GameMapsTable,
 		GameModesTable,
 		LeaderboardScoresTable,
+		ModerationRequestsTable,
 		SessionsTable,
 		UsersTable,
 		UserConnectionsTable,
@@ -847,6 +914,8 @@ func init() {
 	AccountsTable.ForeignKeys[0].RefTable = ClansTable
 	AccountSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
 	DiscordInteractionsTable.ForeignKeys[0].RefTable = UsersTable
+	ModerationRequestsTable.ForeignKeys[0].RefTable = UsersTable
+	ModerationRequestsTable.ForeignKeys[1].RefTable = UsersTable
 	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserConnectionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserContentsTable.ForeignKeys[0].RefTable = UsersTable

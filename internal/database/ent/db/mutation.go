@@ -24,6 +24,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
 	"github.com/cufee/aftermath/internal/database/ent/db/gamemode"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
@@ -61,6 +62,7 @@ const (
 	TypeGameMap            = "GameMap"
 	TypeGameMode           = "GameMode"
 	TypeLeaderboardScore   = "LeaderboardScore"
+	TypeModerationRequest  = "ModerationRequest"
 	TypeSession            = "Session"
 	TypeUser               = "User"
 	TypeUserConnection     = "UserConnection"
@@ -9389,6 +9391,1003 @@ func (m *LeaderboardScoreMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown LeaderboardScore edge %s", name)
 }
 
+// ModerationRequestMutation represents an operation that mutates the ModerationRequest nodes in the graph.
+type ModerationRequestMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *string
+	created_at        *time.Time
+	updated_at        *time.Time
+	moderator_comment *string
+	context           *string
+	reference_id      *string
+	action_reason     *string
+	action_status     *models.ModerationStatus
+	data              *map[string]interface{}
+	clearedFields     map[string]struct{}
+	moderator         *string
+	clearedmoderator  bool
+	requestor         *string
+	clearedrequestor  bool
+	done              bool
+	oldValue          func(context.Context) (*ModerationRequest, error)
+	predicates        []predicate.ModerationRequest
+}
+
+var _ ent.Mutation = (*ModerationRequestMutation)(nil)
+
+// moderationrequestOption allows management of the mutation configuration using functional options.
+type moderationrequestOption func(*ModerationRequestMutation)
+
+// newModerationRequestMutation creates new mutation for the ModerationRequest entity.
+func newModerationRequestMutation(c config, op Op, opts ...moderationrequestOption) *ModerationRequestMutation {
+	m := &ModerationRequestMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeModerationRequest,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withModerationRequestID sets the ID field of the mutation.
+func withModerationRequestID(id string) moderationrequestOption {
+	return func(m *ModerationRequestMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ModerationRequest
+		)
+		m.oldValue = func(ctx context.Context) (*ModerationRequest, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ModerationRequest.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withModerationRequest sets the old ModerationRequest of the mutation.
+func withModerationRequest(node *ModerationRequest) moderationrequestOption {
+	return func(m *ModerationRequestMutation) {
+		m.oldValue = func(context.Context) (*ModerationRequest, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ModerationRequestMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ModerationRequestMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("db: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ModerationRequest entities.
+func (m *ModerationRequestMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ModerationRequestMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ModerationRequestMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ModerationRequest.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ModerationRequestMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ModerationRequestMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the ModerationRequest entity.
+// If the ModerationRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ModerationRequestMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ModerationRequestMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ModerationRequestMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ModerationRequestMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the ModerationRequest entity.
+// If the ModerationRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ModerationRequestMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ModerationRequestMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetModeratorID sets the "moderator_id" field.
+func (m *ModerationRequestMutation) SetModeratorID(s string) {
+	m.moderator = &s
+}
+
+// ModeratorID returns the value of the "moderator_id" field in the mutation.
+func (m *ModerationRequestMutation) ModeratorID() (r string, exists bool) {
+	v := m.moderator
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModeratorID returns the old "moderator_id" field's value of the ModerationRequest entity.
+// If the ModerationRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ModerationRequestMutation) OldModeratorID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModeratorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModeratorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModeratorID: %w", err)
+	}
+	return oldValue.ModeratorID, nil
+}
+
+// ClearModeratorID clears the value of the "moderator_id" field.
+func (m *ModerationRequestMutation) ClearModeratorID() {
+	m.moderator = nil
+	m.clearedFields[moderationrequest.FieldModeratorID] = struct{}{}
+}
+
+// ModeratorIDCleared returns if the "moderator_id" field was cleared in this mutation.
+func (m *ModerationRequestMutation) ModeratorIDCleared() bool {
+	_, ok := m.clearedFields[moderationrequest.FieldModeratorID]
+	return ok
+}
+
+// ResetModeratorID resets all changes to the "moderator_id" field.
+func (m *ModerationRequestMutation) ResetModeratorID() {
+	m.moderator = nil
+	delete(m.clearedFields, moderationrequest.FieldModeratorID)
+}
+
+// SetModeratorComment sets the "moderator_comment" field.
+func (m *ModerationRequestMutation) SetModeratorComment(s string) {
+	m.moderator_comment = &s
+}
+
+// ModeratorComment returns the value of the "moderator_comment" field in the mutation.
+func (m *ModerationRequestMutation) ModeratorComment() (r string, exists bool) {
+	v := m.moderator_comment
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModeratorComment returns the old "moderator_comment" field's value of the ModerationRequest entity.
+// If the ModerationRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ModerationRequestMutation) OldModeratorComment(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModeratorComment is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModeratorComment requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModeratorComment: %w", err)
+	}
+	return oldValue.ModeratorComment, nil
+}
+
+// ClearModeratorComment clears the value of the "moderator_comment" field.
+func (m *ModerationRequestMutation) ClearModeratorComment() {
+	m.moderator_comment = nil
+	m.clearedFields[moderationrequest.FieldModeratorComment] = struct{}{}
+}
+
+// ModeratorCommentCleared returns if the "moderator_comment" field was cleared in this mutation.
+func (m *ModerationRequestMutation) ModeratorCommentCleared() bool {
+	_, ok := m.clearedFields[moderationrequest.FieldModeratorComment]
+	return ok
+}
+
+// ResetModeratorComment resets all changes to the "moderator_comment" field.
+func (m *ModerationRequestMutation) ResetModeratorComment() {
+	m.moderator_comment = nil
+	delete(m.clearedFields, moderationrequest.FieldModeratorComment)
+}
+
+// SetContext sets the "context" field.
+func (m *ModerationRequestMutation) SetContext(s string) {
+	m.context = &s
+}
+
+// Context returns the value of the "context" field in the mutation.
+func (m *ModerationRequestMutation) Context() (r string, exists bool) {
+	v := m.context
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContext returns the old "context" field's value of the ModerationRequest entity.
+// If the ModerationRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ModerationRequestMutation) OldContext(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContext is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContext requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContext: %w", err)
+	}
+	return oldValue.Context, nil
+}
+
+// ClearContext clears the value of the "context" field.
+func (m *ModerationRequestMutation) ClearContext() {
+	m.context = nil
+	m.clearedFields[moderationrequest.FieldContext] = struct{}{}
+}
+
+// ContextCleared returns if the "context" field was cleared in this mutation.
+func (m *ModerationRequestMutation) ContextCleared() bool {
+	_, ok := m.clearedFields[moderationrequest.FieldContext]
+	return ok
+}
+
+// ResetContext resets all changes to the "context" field.
+func (m *ModerationRequestMutation) ResetContext() {
+	m.context = nil
+	delete(m.clearedFields, moderationrequest.FieldContext)
+}
+
+// SetReferenceID sets the "reference_id" field.
+func (m *ModerationRequestMutation) SetReferenceID(s string) {
+	m.reference_id = &s
+}
+
+// ReferenceID returns the value of the "reference_id" field in the mutation.
+func (m *ModerationRequestMutation) ReferenceID() (r string, exists bool) {
+	v := m.reference_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReferenceID returns the old "reference_id" field's value of the ModerationRequest entity.
+// If the ModerationRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ModerationRequestMutation) OldReferenceID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReferenceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReferenceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReferenceID: %w", err)
+	}
+	return oldValue.ReferenceID, nil
+}
+
+// ResetReferenceID resets all changes to the "reference_id" field.
+func (m *ModerationRequestMutation) ResetReferenceID() {
+	m.reference_id = nil
+}
+
+// SetRequestorID sets the "requestor_id" field.
+func (m *ModerationRequestMutation) SetRequestorID(s string) {
+	m.requestor = &s
+}
+
+// RequestorID returns the value of the "requestor_id" field in the mutation.
+func (m *ModerationRequestMutation) RequestorID() (r string, exists bool) {
+	v := m.requestor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestorID returns the old "requestor_id" field's value of the ModerationRequest entity.
+// If the ModerationRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ModerationRequestMutation) OldRequestorID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequestorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequestorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestorID: %w", err)
+	}
+	return oldValue.RequestorID, nil
+}
+
+// ResetRequestorID resets all changes to the "requestor_id" field.
+func (m *ModerationRequestMutation) ResetRequestorID() {
+	m.requestor = nil
+}
+
+// SetActionReason sets the "action_reason" field.
+func (m *ModerationRequestMutation) SetActionReason(s string) {
+	m.action_reason = &s
+}
+
+// ActionReason returns the value of the "action_reason" field in the mutation.
+func (m *ModerationRequestMutation) ActionReason() (r string, exists bool) {
+	v := m.action_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActionReason returns the old "action_reason" field's value of the ModerationRequest entity.
+// If the ModerationRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ModerationRequestMutation) OldActionReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActionReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActionReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActionReason: %w", err)
+	}
+	return oldValue.ActionReason, nil
+}
+
+// ClearActionReason clears the value of the "action_reason" field.
+func (m *ModerationRequestMutation) ClearActionReason() {
+	m.action_reason = nil
+	m.clearedFields[moderationrequest.FieldActionReason] = struct{}{}
+}
+
+// ActionReasonCleared returns if the "action_reason" field was cleared in this mutation.
+func (m *ModerationRequestMutation) ActionReasonCleared() bool {
+	_, ok := m.clearedFields[moderationrequest.FieldActionReason]
+	return ok
+}
+
+// ResetActionReason resets all changes to the "action_reason" field.
+func (m *ModerationRequestMutation) ResetActionReason() {
+	m.action_reason = nil
+	delete(m.clearedFields, moderationrequest.FieldActionReason)
+}
+
+// SetActionStatus sets the "action_status" field.
+func (m *ModerationRequestMutation) SetActionStatus(ms models.ModerationStatus) {
+	m.action_status = &ms
+}
+
+// ActionStatus returns the value of the "action_status" field in the mutation.
+func (m *ModerationRequestMutation) ActionStatus() (r models.ModerationStatus, exists bool) {
+	v := m.action_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActionStatus returns the old "action_status" field's value of the ModerationRequest entity.
+// If the ModerationRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ModerationRequestMutation) OldActionStatus(ctx context.Context) (v models.ModerationStatus, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActionStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActionStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActionStatus: %w", err)
+	}
+	return oldValue.ActionStatus, nil
+}
+
+// ResetActionStatus resets all changes to the "action_status" field.
+func (m *ModerationRequestMutation) ResetActionStatus() {
+	m.action_status = nil
+}
+
+// SetData sets the "data" field.
+func (m *ModerationRequestMutation) SetData(value map[string]interface{}) {
+	m.data = &value
+}
+
+// Data returns the value of the "data" field in the mutation.
+func (m *ModerationRequestMutation) Data() (r map[string]interface{}, exists bool) {
+	v := m.data
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldData returns the old "data" field's value of the ModerationRequest entity.
+// If the ModerationRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ModerationRequestMutation) OldData(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldData is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldData requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldData: %w", err)
+	}
+	return oldValue.Data, nil
+}
+
+// ResetData resets all changes to the "data" field.
+func (m *ModerationRequestMutation) ResetData() {
+	m.data = nil
+}
+
+// ClearModerator clears the "moderator" edge to the User entity.
+func (m *ModerationRequestMutation) ClearModerator() {
+	m.clearedmoderator = true
+	m.clearedFields[moderationrequest.FieldModeratorID] = struct{}{}
+}
+
+// ModeratorCleared reports if the "moderator" edge to the User entity was cleared.
+func (m *ModerationRequestMutation) ModeratorCleared() bool {
+	return m.ModeratorIDCleared() || m.clearedmoderator
+}
+
+// ModeratorIDs returns the "moderator" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ModeratorID instead. It exists only for internal usage by the builders.
+func (m *ModerationRequestMutation) ModeratorIDs() (ids []string) {
+	if id := m.moderator; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetModerator resets all changes to the "moderator" edge.
+func (m *ModerationRequestMutation) ResetModerator() {
+	m.moderator = nil
+	m.clearedmoderator = false
+}
+
+// ClearRequestor clears the "requestor" edge to the User entity.
+func (m *ModerationRequestMutation) ClearRequestor() {
+	m.clearedrequestor = true
+	m.clearedFields[moderationrequest.FieldRequestorID] = struct{}{}
+}
+
+// RequestorCleared reports if the "requestor" edge to the User entity was cleared.
+func (m *ModerationRequestMutation) RequestorCleared() bool {
+	return m.clearedrequestor
+}
+
+// RequestorIDs returns the "requestor" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RequestorID instead. It exists only for internal usage by the builders.
+func (m *ModerationRequestMutation) RequestorIDs() (ids []string) {
+	if id := m.requestor; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRequestor resets all changes to the "requestor" edge.
+func (m *ModerationRequestMutation) ResetRequestor() {
+	m.requestor = nil
+	m.clearedrequestor = false
+}
+
+// Where appends a list predicates to the ModerationRequestMutation builder.
+func (m *ModerationRequestMutation) Where(ps ...predicate.ModerationRequest) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ModerationRequestMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ModerationRequestMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ModerationRequest, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ModerationRequestMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ModerationRequestMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ModerationRequest).
+func (m *ModerationRequestMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ModerationRequestMutation) Fields() []string {
+	fields := make([]string, 0, 10)
+	if m.created_at != nil {
+		fields = append(fields, moderationrequest.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, moderationrequest.FieldUpdatedAt)
+	}
+	if m.moderator != nil {
+		fields = append(fields, moderationrequest.FieldModeratorID)
+	}
+	if m.moderator_comment != nil {
+		fields = append(fields, moderationrequest.FieldModeratorComment)
+	}
+	if m.context != nil {
+		fields = append(fields, moderationrequest.FieldContext)
+	}
+	if m.reference_id != nil {
+		fields = append(fields, moderationrequest.FieldReferenceID)
+	}
+	if m.requestor != nil {
+		fields = append(fields, moderationrequest.FieldRequestorID)
+	}
+	if m.action_reason != nil {
+		fields = append(fields, moderationrequest.FieldActionReason)
+	}
+	if m.action_status != nil {
+		fields = append(fields, moderationrequest.FieldActionStatus)
+	}
+	if m.data != nil {
+		fields = append(fields, moderationrequest.FieldData)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ModerationRequestMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case moderationrequest.FieldCreatedAt:
+		return m.CreatedAt()
+	case moderationrequest.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case moderationrequest.FieldModeratorID:
+		return m.ModeratorID()
+	case moderationrequest.FieldModeratorComment:
+		return m.ModeratorComment()
+	case moderationrequest.FieldContext:
+		return m.Context()
+	case moderationrequest.FieldReferenceID:
+		return m.ReferenceID()
+	case moderationrequest.FieldRequestorID:
+		return m.RequestorID()
+	case moderationrequest.FieldActionReason:
+		return m.ActionReason()
+	case moderationrequest.FieldActionStatus:
+		return m.ActionStatus()
+	case moderationrequest.FieldData:
+		return m.Data()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ModerationRequestMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case moderationrequest.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case moderationrequest.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case moderationrequest.FieldModeratorID:
+		return m.OldModeratorID(ctx)
+	case moderationrequest.FieldModeratorComment:
+		return m.OldModeratorComment(ctx)
+	case moderationrequest.FieldContext:
+		return m.OldContext(ctx)
+	case moderationrequest.FieldReferenceID:
+		return m.OldReferenceID(ctx)
+	case moderationrequest.FieldRequestorID:
+		return m.OldRequestorID(ctx)
+	case moderationrequest.FieldActionReason:
+		return m.OldActionReason(ctx)
+	case moderationrequest.FieldActionStatus:
+		return m.OldActionStatus(ctx)
+	case moderationrequest.FieldData:
+		return m.OldData(ctx)
+	}
+	return nil, fmt.Errorf("unknown ModerationRequest field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ModerationRequestMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case moderationrequest.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case moderationrequest.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case moderationrequest.FieldModeratorID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModeratorID(v)
+		return nil
+	case moderationrequest.FieldModeratorComment:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModeratorComment(v)
+		return nil
+	case moderationrequest.FieldContext:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContext(v)
+		return nil
+	case moderationrequest.FieldReferenceID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReferenceID(v)
+		return nil
+	case moderationrequest.FieldRequestorID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestorID(v)
+		return nil
+	case moderationrequest.FieldActionReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActionReason(v)
+		return nil
+	case moderationrequest.FieldActionStatus:
+		v, ok := value.(models.ModerationStatus)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActionStatus(v)
+		return nil
+	case moderationrequest.FieldData:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetData(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ModerationRequest field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ModerationRequestMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ModerationRequestMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ModerationRequestMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown ModerationRequest numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ModerationRequestMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(moderationrequest.FieldModeratorID) {
+		fields = append(fields, moderationrequest.FieldModeratorID)
+	}
+	if m.FieldCleared(moderationrequest.FieldModeratorComment) {
+		fields = append(fields, moderationrequest.FieldModeratorComment)
+	}
+	if m.FieldCleared(moderationrequest.FieldContext) {
+		fields = append(fields, moderationrequest.FieldContext)
+	}
+	if m.FieldCleared(moderationrequest.FieldActionReason) {
+		fields = append(fields, moderationrequest.FieldActionReason)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ModerationRequestMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ModerationRequestMutation) ClearField(name string) error {
+	switch name {
+	case moderationrequest.FieldModeratorID:
+		m.ClearModeratorID()
+		return nil
+	case moderationrequest.FieldModeratorComment:
+		m.ClearModeratorComment()
+		return nil
+	case moderationrequest.FieldContext:
+		m.ClearContext()
+		return nil
+	case moderationrequest.FieldActionReason:
+		m.ClearActionReason()
+		return nil
+	}
+	return fmt.Errorf("unknown ModerationRequest nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ModerationRequestMutation) ResetField(name string) error {
+	switch name {
+	case moderationrequest.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case moderationrequest.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case moderationrequest.FieldModeratorID:
+		m.ResetModeratorID()
+		return nil
+	case moderationrequest.FieldModeratorComment:
+		m.ResetModeratorComment()
+		return nil
+	case moderationrequest.FieldContext:
+		m.ResetContext()
+		return nil
+	case moderationrequest.FieldReferenceID:
+		m.ResetReferenceID()
+		return nil
+	case moderationrequest.FieldRequestorID:
+		m.ResetRequestorID()
+		return nil
+	case moderationrequest.FieldActionReason:
+		m.ResetActionReason()
+		return nil
+	case moderationrequest.FieldActionStatus:
+		m.ResetActionStatus()
+		return nil
+	case moderationrequest.FieldData:
+		m.ResetData()
+		return nil
+	}
+	return fmt.Errorf("unknown ModerationRequest field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ModerationRequestMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.moderator != nil {
+		edges = append(edges, moderationrequest.EdgeModerator)
+	}
+	if m.requestor != nil {
+		edges = append(edges, moderationrequest.EdgeRequestor)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ModerationRequestMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case moderationrequest.EdgeModerator:
+		if id := m.moderator; id != nil {
+			return []ent.Value{*id}
+		}
+	case moderationrequest.EdgeRequestor:
+		if id := m.requestor; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ModerationRequestMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ModerationRequestMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ModerationRequestMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedmoderator {
+		edges = append(edges, moderationrequest.EdgeModerator)
+	}
+	if m.clearedrequestor {
+		edges = append(edges, moderationrequest.EdgeRequestor)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ModerationRequestMutation) EdgeCleared(name string) bool {
+	switch name {
+	case moderationrequest.EdgeModerator:
+		return m.clearedmoderator
+	case moderationrequest.EdgeRequestor:
+		return m.clearedrequestor
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ModerationRequestMutation) ClearEdge(name string) error {
+	switch name {
+	case moderationrequest.EdgeModerator:
+		m.ClearModerator()
+		return nil
+	case moderationrequest.EdgeRequestor:
+		m.ClearRequestor()
+		return nil
+	}
+	return fmt.Errorf("unknown ModerationRequest unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ModerationRequestMutation) ResetEdge(name string) error {
+	switch name {
+	case moderationrequest.EdgeModerator:
+		m.ResetModerator()
+		return nil
+	case moderationrequest.EdgeRequestor:
+		m.ResetRequestor()
+		return nil
+	}
+	return fmt.Errorf("unknown ModerationRequest edge %s", name)
+}
+
 // SessionMutation represents an operation that mutates the Session nodes in the graph.
 type SessionMutation struct {
 	config
@@ -10076,6 +11075,12 @@ type UserMutation struct {
 	sessions                    map[string]struct{}
 	removedsessions             map[string]struct{}
 	clearedsessions             bool
+	moderation_requests         map[string]struct{}
+	removedmoderation_requests  map[string]struct{}
+	clearedmoderation_requests  bool
+	moderation_actions          map[string]struct{}
+	removedmoderation_actions   map[string]struct{}
+	clearedmoderation_actions   bool
 	done                        bool
 	oldValue                    func(context.Context) (*User, error)
 	predicates                  []predicate.User
@@ -10718,6 +11723,114 @@ func (m *UserMutation) ResetSessions() {
 	m.removedsessions = nil
 }
 
+// AddModerationRequestIDs adds the "moderation_requests" edge to the ModerationRequest entity by ids.
+func (m *UserMutation) AddModerationRequestIDs(ids ...string) {
+	if m.moderation_requests == nil {
+		m.moderation_requests = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.moderation_requests[ids[i]] = struct{}{}
+	}
+}
+
+// ClearModerationRequests clears the "moderation_requests" edge to the ModerationRequest entity.
+func (m *UserMutation) ClearModerationRequests() {
+	m.clearedmoderation_requests = true
+}
+
+// ModerationRequestsCleared reports if the "moderation_requests" edge to the ModerationRequest entity was cleared.
+func (m *UserMutation) ModerationRequestsCleared() bool {
+	return m.clearedmoderation_requests
+}
+
+// RemoveModerationRequestIDs removes the "moderation_requests" edge to the ModerationRequest entity by IDs.
+func (m *UserMutation) RemoveModerationRequestIDs(ids ...string) {
+	if m.removedmoderation_requests == nil {
+		m.removedmoderation_requests = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.moderation_requests, ids[i])
+		m.removedmoderation_requests[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedModerationRequests returns the removed IDs of the "moderation_requests" edge to the ModerationRequest entity.
+func (m *UserMutation) RemovedModerationRequestsIDs() (ids []string) {
+	for id := range m.removedmoderation_requests {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ModerationRequestsIDs returns the "moderation_requests" edge IDs in the mutation.
+func (m *UserMutation) ModerationRequestsIDs() (ids []string) {
+	for id := range m.moderation_requests {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetModerationRequests resets all changes to the "moderation_requests" edge.
+func (m *UserMutation) ResetModerationRequests() {
+	m.moderation_requests = nil
+	m.clearedmoderation_requests = false
+	m.removedmoderation_requests = nil
+}
+
+// AddModerationActionIDs adds the "moderation_actions" edge to the ModerationRequest entity by ids.
+func (m *UserMutation) AddModerationActionIDs(ids ...string) {
+	if m.moderation_actions == nil {
+		m.moderation_actions = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.moderation_actions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearModerationActions clears the "moderation_actions" edge to the ModerationRequest entity.
+func (m *UserMutation) ClearModerationActions() {
+	m.clearedmoderation_actions = true
+}
+
+// ModerationActionsCleared reports if the "moderation_actions" edge to the ModerationRequest entity was cleared.
+func (m *UserMutation) ModerationActionsCleared() bool {
+	return m.clearedmoderation_actions
+}
+
+// RemoveModerationActionIDs removes the "moderation_actions" edge to the ModerationRequest entity by IDs.
+func (m *UserMutation) RemoveModerationActionIDs(ids ...string) {
+	if m.removedmoderation_actions == nil {
+		m.removedmoderation_actions = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.moderation_actions, ids[i])
+		m.removedmoderation_actions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedModerationActions returns the removed IDs of the "moderation_actions" edge to the ModerationRequest entity.
+func (m *UserMutation) RemovedModerationActionsIDs() (ids []string) {
+	for id := range m.removedmoderation_actions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ModerationActionsIDs returns the "moderation_actions" edge IDs in the mutation.
+func (m *UserMutation) ModerationActionsIDs() (ids []string) {
+	for id := range m.moderation_actions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetModerationActions resets all changes to the "moderation_actions" edge.
+func (m *UserMutation) ResetModerationActions() {
+	m.moderation_actions = nil
+	m.clearedmoderation_actions = false
+	m.removedmoderation_actions = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -10928,7 +12041,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 8)
 	if m.discord_interactions != nil {
 		edges = append(edges, user.EdgeDiscordInteractions)
 	}
@@ -10946,6 +12059,12 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.sessions != nil {
 		edges = append(edges, user.EdgeSessions)
+	}
+	if m.moderation_requests != nil {
+		edges = append(edges, user.EdgeModerationRequests)
+	}
+	if m.moderation_actions != nil {
+		edges = append(edges, user.EdgeModerationActions)
 	}
 	return edges
 }
@@ -10990,13 +12109,25 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeModerationRequests:
+		ids := make([]ent.Value, 0, len(m.moderation_requests))
+		for id := range m.moderation_requests {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeModerationActions:
+		ids := make([]ent.Value, 0, len(m.moderation_actions))
+		for id := range m.moderation_actions {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 8)
 	if m.removeddiscord_interactions != nil {
 		edges = append(edges, user.EdgeDiscordInteractions)
 	}
@@ -11014,6 +12145,12 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedsessions != nil {
 		edges = append(edges, user.EdgeSessions)
+	}
+	if m.removedmoderation_requests != nil {
+		edges = append(edges, user.EdgeModerationRequests)
+	}
+	if m.removedmoderation_actions != nil {
+		edges = append(edges, user.EdgeModerationActions)
 	}
 	return edges
 }
@@ -11058,13 +12195,25 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeModerationRequests:
+		ids := make([]ent.Value, 0, len(m.removedmoderation_requests))
+		for id := range m.removedmoderation_requests {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeModerationActions:
+		ids := make([]ent.Value, 0, len(m.removedmoderation_actions))
+		for id := range m.removedmoderation_actions {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 8)
 	if m.cleareddiscord_interactions {
 		edges = append(edges, user.EdgeDiscordInteractions)
 	}
@@ -11082,6 +12231,12 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedsessions {
 		edges = append(edges, user.EdgeSessions)
+	}
+	if m.clearedmoderation_requests {
+		edges = append(edges, user.EdgeModerationRequests)
+	}
+	if m.clearedmoderation_actions {
+		edges = append(edges, user.EdgeModerationActions)
 	}
 	return edges
 }
@@ -11102,6 +12257,10 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedcontent
 	case user.EdgeSessions:
 		return m.clearedsessions
+	case user.EdgeModerationRequests:
+		return m.clearedmoderation_requests
+	case user.EdgeModerationActions:
+		return m.clearedmoderation_actions
 	}
 	return false
 }
@@ -11135,6 +12294,12 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeSessions:
 		m.ResetSessions()
+		return nil
+	case user.EdgeModerationRequests:
+		m.ResetModerationRequests()
+		return nil
+	case user.EdgeModerationActions:
+		m.ResetModerationActions()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

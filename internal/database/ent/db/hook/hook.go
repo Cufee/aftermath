@@ -165,6 +165,18 @@ func (f LeaderboardScoreFunc) Mutate(ctx context.Context, m db.Mutation) (db.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.LeaderboardScoreMutation", m)
 }
 
+// The ModerationRequestFunc type is an adapter to allow the use of ordinary
+// function as ModerationRequest mutator.
+type ModerationRequestFunc func(context.Context, *db.ModerationRequestMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ModerationRequestFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.ModerationRequestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.ModerationRequestMutation", m)
+}
+
 // The SessionFunc type is an adapter to allow the use of ordinary
 // function as Session mutator.
 type SessionFunc func(context.Context, *db.SessionMutation) (db.Value, error)

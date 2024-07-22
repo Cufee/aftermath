@@ -49,13 +49,13 @@ func MentionHandler(errorImage []byte) func(s *discordgo.Session, e *discordgo.M
 					discordgo.Button{
 						Style: discordgo.LinkButton,
 						Label: printer("buttons_add_aftermath_to_your_server"),
-						Emoji: &discordgo.ComponentEmoji{Name: "aftermath", ID: "1214348603104034876"},
+						Emoji: &discordgo.ComponentEmoji{Name: "aftermath_red", ID: "1264728619381555200"},
 						URL:   "https://amth.one/invite",
 					},
 					discordgo.Button{
 						Style: discordgo.LinkButton,
 						Label: printer("buttons_join_primary_guild"),
-						Emoji: &discordgo.ComponentEmoji{Name: "aftermath_yellow", ID: "1214621621659238460"},
+						Emoji: &discordgo.ComponentEmoji{Name: "aftermath_yellow", ID: "1264728131273625662"},
 						URL:   "https://amth.one/join",
 					},
 				}})

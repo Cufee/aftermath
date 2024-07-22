@@ -11,6 +11,8 @@ import (
 	"github.com/fogleman/gg"
 )
 
+var DefaultBackgroundBlur = 10.0
+
 var globalLogoCacheMx sync.Mutex
 var globalLogoCache = make(map[color.Color]image.Image)
 

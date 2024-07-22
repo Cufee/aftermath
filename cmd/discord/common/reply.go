@@ -22,7 +22,8 @@ type reply struct {
 }
 
 func (r reply) Choices(data ...*discordgo.ApplicationCommandOptionChoice) error {
-	return r.ctx.respond(discordgo.InteractionResponseData{Choices: data}, nil)
+	_, err := r.ctx.respond(discordgo.InteractionResponseData{Choices: data}, nil)
+	return err
 }
 
 func (r reply) Hint(text string) reply {
@@ -74,6 +75,11 @@ func (r reply) WithAds() reply {
 }
 
 func (r reply) Send(content ...string) error {
+	_, err := r.Message(content...)
+	return err
+}
+
+func (r reply) Message(content ...string) (discordgo.Message, error) {
 	if r.includeAds {
 		defer func() {
 			data, send := r.newMessageAd()
@@ -81,7 +87,7 @@ func (r reply) Send(content ...string) error {
 				return
 			}
 
-			err := r.ctx.followUp(data, nil)
+			_, err := r.ctx.followUp(data, nil)
 			if err != nil {
 				log.Err(err).Msg("failed to send an interaction ad followup")
 			}
@@ -91,6 +97,12 @@ func (r reply) Send(content ...string) error {
 	r.text = append(r.text, content...)
 	return r.ctx.respond(r.data())
 }
+
+// func (r reply) Message(content ...string) (discordgo.Message, error) {
+
+// 	r.text = append(r.text, content...)
+// 	return r.ctx.respond(r.data())
+// }
 
 func (r reply) data() (discordgo.InteractionResponseData, []rest.File) {
 	var content []string

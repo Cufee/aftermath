@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
@@ -34,6 +35,8 @@ type UserQuery struct {
 	withWidgets             *WidgetSettingsQuery
 	withContent             *UserContentQuery
 	withSessions            *SessionQuery
+	withModerationRequests  *ModerationRequestQuery
+	withModerationActions   *ModerationRequestQuery
 	modifiers               []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -196,6 +199,50 @@ func (uq *UserQuery) QuerySessions() *SessionQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryModerationRequests chains the current query on the "moderation_requests" edge.
+func (uq *UserQuery) QueryModerationRequests() *ModerationRequestQuery {
+	query := (&ModerationRequestClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(moderationrequest.Table, moderationrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ModerationRequestsTable, user.ModerationRequestsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryModerationActions chains the current query on the "moderation_actions" edge.
+func (uq *UserQuery) QueryModerationActions() *ModerationRequestQuery {
+	query := (&ModerationRequestClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(moderationrequest.Table, moderationrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ModerationActionsTable, user.ModerationActionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -401,6 +448,8 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withWidgets:             uq.withWidgets.Clone(),
 		withContent:             uq.withContent.Clone(),
 		withSessions:            uq.withSessions.Clone(),
+		withModerationRequests:  uq.withModerationRequests.Clone(),
+		withModerationActions:   uq.withModerationActions.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -470,6 +519,28 @@ func (uq *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withSessions = query
+	return uq
+}
+
+// WithModerationRequests tells the query-builder to eager-load the nodes that are connected to
+// the "moderation_requests" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithModerationRequests(opts ...func(*ModerationRequestQuery)) *UserQuery {
+	query := (&ModerationRequestClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withModerationRequests = query
+	return uq
+}
+
+// WithModerationActions tells the query-builder to eager-load the nodes that are connected to
+// the "moderation_actions" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithModerationActions(opts ...func(*ModerationRequestQuery)) *UserQuery {
+	query := (&ModerationRequestClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withModerationActions = query
 	return uq
 }
 
@@ -551,13 +622,15 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [8]bool{
 			uq.withDiscordInteractions != nil,
 			uq.withSubscriptions != nil,
 			uq.withConnections != nil,
 			uq.withWidgets != nil,
 			uq.withContent != nil,
 			uq.withSessions != nil,
+			uq.withModerationRequests != nil,
+			uq.withModerationActions != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -622,6 +695,22 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadSessions(ctx, query, nodes,
 			func(n *User) { n.Edges.Sessions = []*Session{} },
 			func(n *User, e *Session) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withModerationRequests; query != nil {
+		if err := uq.loadModerationRequests(ctx, query, nodes,
+			func(n *User) { n.Edges.ModerationRequests = []*ModerationRequest{} },
+			func(n *User, e *ModerationRequest) {
+				n.Edges.ModerationRequests = append(n.Edges.ModerationRequests, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withModerationActions; query != nil {
+		if err := uq.loadModerationActions(ctx, query, nodes,
+			func(n *User) { n.Edges.ModerationActions = []*ModerationRequest{} },
+			func(n *User, e *ModerationRequest) { n.Edges.ModerationActions = append(n.Edges.ModerationActions, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -803,6 +892,69 @@ func (uq *UserQuery) loadSessions(ctx context.Context, query *SessionQuery, node
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadModerationRequests(ctx context.Context, query *ModerationRequestQuery, nodes []*User, init func(*User), assign func(*User, *ModerationRequest)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(moderationrequest.FieldRequestorID)
+	}
+	query.Where(predicate.ModerationRequest(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ModerationRequestsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.RequestorID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "requestor_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadModerationActions(ctx context.Context, query *ModerationRequestQuery, nodes []*User, init func(*User), assign func(*User, *ModerationRequest)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(moderationrequest.FieldModeratorID)
+	}
+	query.Where(predicate.ModerationRequest(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ModerationActionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ModeratorID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "moderator_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "moderator_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

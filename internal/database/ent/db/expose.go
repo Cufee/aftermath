@@ -173,6 +173,19 @@ func (ls *LeaderboardScore) ScanValues(columns []string) ([]any, error) {
 	return ls.scanValues(columns)
 }
 
+func (mr *ModerationRequest) AssignValues(columns []string, values []any) error {
+	if mr == nil {
+		return fmt.Errorf("ModerationRequest(nil)")
+	}
+	return mr.assignValues(columns, values)
+}
+func (mr *ModerationRequest) ScanValues(columns []string) ([]any, error) {
+	if mr == nil {
+		return nil, fmt.Errorf("ModerationRequest(nil)")
+	}
+	return mr.scanValues(columns)
+}
+
 func (s *Session) AssignValues(columns []string, values []any) error {
 	if s == nil {
 		return fmt.Errorf("Session(nil)")

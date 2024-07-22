@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/rest"
@@ -126,7 +127,7 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 			func() (struct{}, error) {
 				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*1000)
 				defer cancel()
-				err := router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, payload, nil)
+				_, err := router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, payload, nil)
 				return struct{}{}, err
 			},
 			3,
@@ -194,7 +195,15 @@ func (r *Router) handleInteraction(interaction discordgo.Interaction, command bu
 	cCtx, err := common.NewContext(ctx, interaction, r.restClient, r.core)
 	if err != nil {
 		log.Err(err).Msg("failed to create a common.Context for a handler")
-		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed. Please try again in a few seconds."})
+		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{
+			Content: "Something unexpected happened and your command failed. Please try again in a few seconds.",
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						commands.ButtonJoinPrimaryGuild("Need Help?"),
+					}},
+			},
+		})
 		return
 	}
 
@@ -207,13 +216,28 @@ func (r *Router) handleInteraction(interaction discordgo.Interaction, command bu
 		defer func() {
 			if rec := recover(); rec != nil {
 				log.Error().Str("stack", string(debug.Stack())).Msg("panic in interaction handler")
-				r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")})
+				r.sendInteractionReply(interaction, discordgo.InteractionResponseData{
+					Content: cCtx.Localize("common_error_unhandled_not_reported"),
+					Components: []discordgo.MessageComponent{
+						discordgo.ActionsRow{
+							Components: []discordgo.MessageComponent{
+								commands.ButtonJoinPrimaryGuild(cCtx.Localize("buttons_join_primary_guild")),
+							}},
+					},
+				})
 			}
 		}()
 		err = handler(cCtx)
 		if err != nil {
 			log.Err(err).Msg("handler returned an error")
-			r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")})
+			r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported"),
+				Components: []discordgo.MessageComponent{
+					discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							commands.ButtonJoinPrimaryGuild(cCtx.Localize("buttons_need_help_question")),
+						}},
+				},
+			})
 			return
 		}
 	}()
@@ -232,12 +256,14 @@ func (r *Router) sendInteractionReply(interaction discordgo.Interaction, data di
 
 	if slices.Contains(supportedInteractionTypes, interaction.Type) {
 		handler = func(ctx context.Context) error {
-			return r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, data, nil)
+			_, err := r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, data, nil)
+			return err
 		}
 	} else {
 		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
 		handler = func(ctx context.Context) error {
-			return r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, nil)
+			_, err := r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, nil)
+			return err
 		}
 	}
 
