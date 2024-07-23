@@ -58,7 +58,6 @@ func init() {
 				ioptions := models.DiscordInteractionOptions{
 					PeriodStart: options.PeriodStart,
 					VehicleID:   options.TankID,
-					AccountID:   accountID,
 				}
 
 				background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
@@ -99,6 +98,7 @@ func init() {
 					return ctx.Err(err)
 				}
 
+				ioptions.AccountID = accountID
 				button, saveErr := saveInteractionData(ctx, subcommand, ioptions)
 				if saveErr != nil {
 					// nil button will not cause an error and will be ignored

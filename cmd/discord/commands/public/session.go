@@ -38,7 +38,6 @@ func init() {
 				ioptions := models.DiscordInteractionOptions{
 					PeriodStart: options.PeriodStart,
 					VehicleID:   options.TankID,
-					AccountID:   accountID,
 				}
 
 				switch {
@@ -50,6 +49,7 @@ func init() {
 						return ctx.Reply().Send("stats_error_connection_not_found_vague")
 					}
 					accountID = defaultAccount.ReferenceID
+
 					background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
 					if img, err := logic.UserContentToImage(background); err == nil {
 						opts = append(opts, stats.WithBackground(img))
@@ -74,6 +74,7 @@ func init() {
 					}
 					// command used without options, but user has a default connection
 					accountID = defaultAccount.ReferenceID
+
 					background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
 					if img, err := logic.UserContentToImage(background); err == nil {
 						opts = append(opts, stats.WithBackground(img))
@@ -92,6 +93,7 @@ func init() {
 					return ctx.Err(err)
 				}
 
+				ioptions.AccountID = accountID
 				button, saveErr := saveInteractionData(ctx, "session", ioptions)
 				if saveErr != nil {
 					// nil button will not cause an error and will be ignored
