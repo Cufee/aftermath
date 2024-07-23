@@ -106,7 +106,6 @@
 - key: command_option_replay_link_description
   value: "A link to a Blitz replay file"
 # /fancy
-# fancy_preview_msg
 - key: command_fancy_name
   value: "fancy"
 - key: command_fancy_description
@@ -127,9 +126,9 @@
 - key: fancy_preview_msg
   value: "## Here is a preview of your image!\nUse the buttons below to submit it for moderation."
 - key: fancy_submitted_msg
-  value: "**Your request was submitted**\nYou will get a Direct Message when it is reviewed - no further action is required.\n_Please make sure your Direct Messages are open._"
+  value: "**Your request was submitted**\nYou will get a Direct Message when it is reviewed - no further action is required.\n\n_Please make sure your Direct Messages are open._"
 - key: fancy_moderation_request_approved
-  value: ":tada: **Your Custom Background is set!** :tada:\nThe image you have submitted was approved by a moderator and is now set as your stats background."
+  value: "## :tada: **Your Custom Background is set!** :tada:\nThe image you have submitted was approved by a moderator and is now set as your stats background. Other users will only see this background if your default linked account is verified."
 - key: fancy_moderation_request_declined
   value: "**Your recent image moderation request was declined**\nIt looks like the image you have uploaded did not pass out safety standards. You background will not be updated."
 - key: fancy_moderation_request_declined_and_banned_fmt
@@ -330,6 +329,9 @@
   value: "You don't have any linked accounts."
 
 # /fancy errors
+- key: fancy_errors_upload_timeout_fmt
+  value: "It looks like you have uploaded a custom background image recently.\nYou will be able to use this command again <t:%d:R>."
+  context: Shown when a user has a recent moderation request that was approved. The timestamp will show [in xx days/months/hours]
 - key: fancy_errors_pending_request_exists
   value: "You have a pending moderation request. Please wait until your previously submitted image is approved or rejected."
 - key: fancy_errors_preview_expired

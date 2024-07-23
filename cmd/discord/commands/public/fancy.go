@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -38,21 +39,30 @@ func init() {
 					Params(builder.SetNameKey("command_option_fancy_link_name"), builder.SetDescKey("command_option_fancy_link_description")),
 			).
 			Handler(func(ctx common.Context) error {
-				if len(ctx.Options()) == 0 {
-					return ctx.Reply().Send("command_fancy_help_message")
-				}
-
 				helpButton := discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
 						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
 					}}
 
-				pending, err := ctx.Core().Database().FindUserModerationRequests(ctx.Ctx(), ctx.User().ID, []string{"background-upload"}, []models.ModerationStatus{models.ModerationStatusSubmitted})
-				if err != nil {
+				// check if a user has a pending/recent request
+				pending, err := ctx.Core().Database().FindUserModerationRequests(ctx.Ctx(), ctx.User().ID, []string{"background-upload"}, []models.ModerationStatus{models.ModerationStatusSubmitted, models.ModerationStatusApproved, models.ModerationStatusDeclined})
+				if err != nil && !database.IsNotFound(err) {
 					return ctx.Err(err)
 				}
-				if len(pending) > 0 {
-					return ctx.Reply().Component(helpButton).Send("fancy_errors_pending_request_exists")
+				slices.SortFunc(pending, func(a, b models.ModerationRequest) int {
+					return b.CreatedAt.Compare(a.CreatedAt)
+				})
+				for _, req := range pending {
+					if req.ActionStatus == models.ModerationStatusSubmitted {
+						return ctx.Reply().Component(helpButton).Send("fancy_errors_pending_request_exists")
+					}
+					if time.Since(req.CreatedAt) < time.Hour*24 {
+						return ctx.Reply().Component(helpButton).Format("fancy_errors_upload_timeout_fmt", req.CreatedAt.Add(time.Hour*24).Unix()).Send()
+					}
+				}
+
+				if len(ctx.Options()) == 0 {
+					return ctx.Reply().Send("command_fancy_help_message")
 				}
 
 				link, linkOK := ctx.Options().Value("link").(string)

@@ -45,7 +45,7 @@ func newContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 		return nil, errors.New("failed to get a valid discord user id")
 	}
 
-	user, err := client.Database().GetOrCreateUserByID(ctx, c.member.ID, database.WithConnections(), database.WithSubscriptions())
+	user, err := client.Database().GetOrCreateUserByID(ctx, c.member.ID, database.WithConnections(), database.WithSubscriptions(), database.WithContent())
 	if err != nil {
 		return nil, err
 	}
