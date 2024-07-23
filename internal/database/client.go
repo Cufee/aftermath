@@ -123,7 +123,7 @@ type DiscordDataClient interface {
 
 type ModerationClient interface {
 	GetModerationRequest(ctx context.Context, id string) (models.ModerationRequest, error)
-	FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus) ([]models.ModerationRequest, error)
+	FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus, since time.Time) ([]models.ModerationRequest, error)
 	CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
 	UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
 

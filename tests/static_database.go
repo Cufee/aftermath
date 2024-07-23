@@ -279,7 +279,7 @@ func (c *staticTestingDatabase) UpsertGameModes(ctx context.Context, modes map[s
 	return nil, nil
 }
 
-func (c *staticTestingDatabase) FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus) ([]models.ModerationRequest, error) {
+func (c *staticTestingDatabase) FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus, since time.Time) ([]models.ModerationRequest, error) {
 	return nil, errors.New("FindUserModerationRequests not implemented")
 }
 func (c *staticTestingDatabase) CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {

@@ -2,7 +2,9 @@ package database
 
 import (
 	"context"
+	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
@@ -61,9 +63,9 @@ func (c *client) GetModerationRequest(ctx context.Context, id string) (models.Mo
 	return toModerationRequest(record), nil
 }
 
-func (c *client) FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus) ([]models.ModerationRequest, error) {
+func (c *client) FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus, since time.Time) ([]models.ModerationRequest, error) {
 	var where []predicate.ModerationRequest
-	where = append(where, moderationrequest.RequestorID(userID))
+	where = append(where, moderationrequest.RequestorID(userID), moderationrequest.UpdatedAtGT(since))
 	if referenceIDs != nil {
 		where = append(where, moderationrequest.ReferenceIDIn(referenceIDs...))
 	}
@@ -71,7 +73,7 @@ func (c *client) FindUserModerationRequests(ctx context.Context, userID string, 
 		where = append(where, moderationrequest.ActionStatusIn(status...))
 	}
 
-	records, err := c.db.ModerationRequest.Query().Where(where...).All(ctx)
+	records, err := c.db.ModerationRequest.Query().Where(where...).Order(moderationrequest.ByCreatedAt(sql.OrderDesc())).All(ctx)
 	if err != nil {
 		return nil, err
 	}

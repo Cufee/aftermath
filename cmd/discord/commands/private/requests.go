@@ -2,6 +2,7 @@ package private
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands"
@@ -45,14 +46,14 @@ func init() {
 						data, err = ctx.Core().Database().GetModerationRequest(ctx.Ctx(), requestID)
 					}
 					if userID != "" {
-						data, err = ctx.Core().Database().FindUserModerationRequests(ctx.Ctx(), userID, nil, []models.ModerationStatus{models.ModerationStatusSubmitted})
+						data, err = ctx.Core().Database().FindUserModerationRequests(ctx.Ctx(), userID, nil, nil, time.Now().Add(-time.Hour*72))
 					}
 					if err != nil {
 						return ctx.Reply().Send("failed to get requests", err.Error())
 					}
 
 					d, _ := json.MarshalIndent(data, "", "  ")
-					return ctx.Reply().Send(string(d))
+					return ctx.Reply().File(d, "requests.json").Send()
 
 				case "set_status":
 					requestID, _ := subOptions.Value("request_id").(string)
@@ -76,7 +77,7 @@ func init() {
 						return ctx.Reply().Send("failed to update request", err.Error())
 					}
 					d, _ := json.MarshalIndent(data, "", "  ")
-					return ctx.Reply().Send(string(d))
+					return ctx.Reply().File(d, "request.json").Send()
 
 				default:
 					return ctx.Error("invalid subcommand: " + subcommand)
