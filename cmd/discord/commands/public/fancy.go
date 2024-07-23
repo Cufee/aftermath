@@ -99,7 +99,7 @@ func init() {
 				if err != nil {
 					return ctx.Err(err)
 				}
-				content, err := ctx.Core().Database().CreateUserContent(ctx.Ctx(), models.UserContent{
+				content, err := ctx.Core().Database().UpsertUserContent(ctx.Ctx(), models.UserContent{
 					Type:        models.UserContentTypeInModeration,
 					Value:       string(encoded),
 					UserID:      ctx.User().ID,

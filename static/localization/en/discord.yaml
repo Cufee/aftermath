@@ -129,7 +129,7 @@
 - key: fancy_submitted_msg
   value: "**Your request was submitted**\nYou will get a Direct Message when it is reviewed - no further action is required.\n_Please make sure your Direct Messages are open._"
 - key: fancy_moderation_request_approved
-  value: ":tada: **Your background was updated!** :tada:\nThe image you have submitted was approved by a moderator and is now set as your stats background."
+  value: ":tada: **Your Custom Background is set!** :tada:\nThe image you have submitted was approved by a moderator and is now set as your stats background."
 - key: fancy_moderation_request_declined
   value: "**Your recent image moderation request was declined**\nIt looks like the image you have uploaded did not pass out safety standards. You background will not be updated."
 - key: fancy_moderation_request_declined_and_banned_fmt

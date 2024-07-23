@@ -6,6 +6,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/replay/v1"
@@ -72,6 +73,10 @@ func (r *client) ReplayImage(ctx context.Context, replayURL string, o ...Request
 	printer, err := localization.NewPrinter("stats", r.locale)
 	if err != nil {
 		return nil, meta, err
+	}
+
+	if img, _, err := logic.GetBackgroundImageFromRef(ctx, r.database, meta.Replay.Protagonist.ID); err == nil {
+		opts.backgroundImage = img
 	}
 
 	stop := meta.Timer("render#CardsToImage")

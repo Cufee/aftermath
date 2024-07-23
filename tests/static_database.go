@@ -295,8 +295,11 @@ func (c *staticTestingDatabase) UpdateModerationRequest(ctx context.Context, req
 func (c *staticTestingDatabase) GetUserContent(ctx context.Context, id string) (models.UserContent, error) {
 	return models.UserContent{}, errors.New("GetUserContent not implemented")
 }
-func (c *staticTestingDatabase) FindUserContent(ctx context.Context, userID string, referenceID string, kind models.UserContentType) ([]models.UserContent, error) {
-	return nil, errors.New("FindUserContent not implemented")
+func (c *staticTestingDatabase) GetUserContentFromRef(ctx context.Context, referenceID string, kind models.UserContentType) (models.UserContent, error) {
+	return models.UserContent{}, errors.New("GetUserContentFromRef not implemented")
+}
+func (c *staticTestingDatabase) FindUserContentFromRefs(ctx context.Context, kind models.UserContentType, referenceIDs ...string) ([]models.UserContent, error) {
+	return nil, errors.New("FindUserContentFromRefs not implemented")
 }
 func (c *staticTestingDatabase) CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
 	return models.UserContent{}, errors.New("CreateUserContent not implemented")

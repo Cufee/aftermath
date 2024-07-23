@@ -50,10 +50,9 @@ func init() {
 					}
 					accountID = defaultAccount.ReferenceID
 
-					background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
-					if img, err := logic.UserContentToImage(background); err == nil {
+					if img, content, err := logic.GetBackgroundImageFromRef(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
 						opts = append(opts, stats.WithBackground(img))
-						ioptions.BackgroundContentID = background.ID
+						ioptions.BackgroundContentID = content.ID
 					}
 
 				case options.Nickname != "" && options.Server != "":
@@ -66,6 +65,11 @@ func init() {
 						return ctx.Err(err)
 					}
 					accountID = fmt.Sprint(account.ID)
+
+					if img, content, err := logic.GetBackgroundImageFromRef(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
+						opts = append(opts, stats.WithBackground(img))
+						ioptions.BackgroundContentID = content.ID
+					}
 
 				default:
 					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})

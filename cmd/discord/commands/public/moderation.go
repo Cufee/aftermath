@@ -9,6 +9,8 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
+	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/permissions"
@@ -93,16 +95,33 @@ func init() {
 					return ctx.Reply().Hint("no action was performed").Send("Invalid action")
 				case "approve":
 					request.ActionStatus = models.ModerationStatusApproved
+
 					// update user content
-					content.ReferenceID = request.RequestorID
+					requestor, err := ctx.Core().Database().GetUserByID(ctx.Ctx(), content.UserID, database.WithContent(), database.WithConnections())
+					if err != nil {
+						return ctx.Reply().Hint("no action was performed").Send("Failed to get requestor user")
+					}
+
+					currentContent, ok := requestor.Content(models.UserContentTypePersonalBackground)
+					if ok {
+						// delete the existing image
+						err := ctx.Core().Database().DeleteUserContent(ctx.Ctx(), currentContent.ID)
+						if err != nil {
+							return ctx.Reply().Hint("no action was performed").Send("Failed to delete existing user content")
+						}
+					}
+
+					// update the content
+					content.ReferenceID = logic.StringIfElse(currentContent.ReferenceID, request.RequestorID, currentContent.ReferenceID != "")
 					content.Type = models.UserContentTypePersonalBackground
 					content.Meta["moderation_request_approved_time"] = time.Now()
 					content.Meta["moderation_request_approved"] = true
 					content.Meta["value_type"] = "gob_image"
-					_, err := ctx.Core().Database().UpdateUserContent(ctx.Ctx(), content)
+					_, err = ctx.Core().Database().UpdateUserContent(ctx.Ctx(), content)
 					if err != nil {
 						return ctx.Reply().Hint("no action was performed").Send("Failed to update user content")
 					}
+
 					directMessageContent = "fancy_moderation_request_approved"
 
 				case "feature-ban":

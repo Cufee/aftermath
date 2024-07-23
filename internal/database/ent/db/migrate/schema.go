@@ -696,7 +696,7 @@ var (
 			},
 			{
 				Name:    "usercontent_type_reference_id",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{UserContentsColumns[3], UserContentsColumns[4]},
 			},
 		},

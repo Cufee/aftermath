@@ -2,10 +2,10 @@ package database
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/ent/db"
-	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
@@ -258,14 +258,21 @@ func (c *client) GetUserContent(ctx context.Context, id string) (models.UserCont
 	return toUserContent(record), nil
 }
 
-func (c *client) FindUserContent(ctx context.Context, userID string, referenceID string, kind models.UserContentType) ([]models.UserContent, error) {
-	var where []predicate.UserContent
-	where = append(where, usercontent.UserID(userID), usercontent.TypeEQ(kind))
-	if referenceID != "" {
-		where = append(where, usercontent.ReferenceID(referenceID))
+func (c *client) GetUserContentFromRef(ctx context.Context, referenceID string, kind models.UserContentType) (models.UserContent, error) {
+	record, err := c.db.UserContent.Query().Where(usercontent.ReferenceID(referenceID), usercontent.TypeEQ(kind)).First(ctx)
+	if err != nil {
+		return models.UserContent{}, err
 	}
 
-	records, err := c.db.UserContent.Query().Where(where...).All(ctx)
+	return toUserContent(record), nil
+}
+
+func (c *client) FindUserContentFromRefs(ctx context.Context, kind models.UserContentType, referenceIDs ...string) ([]models.UserContent, error) {
+	if len(referenceIDs) < 1 {
+		return nil, errors.New("at least one reference id is required")
+	}
+
+	records, err := c.db.UserContent.Query().Where(usercontent.ReferenceIDIn(referenceIDs...), usercontent.TypeEQ(kind)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -313,11 +320,14 @@ func (c *client) UpdateUserContent(ctx context.Context, content models.UserConte
 }
 
 func (c *client) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
-	if content.ID == "" {
+	id, err := c.db.UserContent.Query().Where(usercontent.UserID(content.UserID), usercontent.TypeEQ(content.Type)).FirstID(ctx)
+	if IsNotFound(err) {
 		return c.CreateUserContent(ctx, content)
 	}
 
+	content.ID = id
 	return c.UpdateUserContent(ctx, content)
+
 }
 
 func (c *client) DeleteUserContent(ctx context.Context, id string) error {

@@ -2,6 +2,7 @@ package public
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
 )
 
@@ -103,32 +105,16 @@ func init() {
 					nickname := parts[2]
 					realm := parts[3]
 
-					var found bool
-					var newConnectionVerified bool
-					for _, conn := range ctx.User().Connections {
-						if conn.Type != models.ConnectionTypeWargaming {
-							continue
+					updated, err := logic.UpdateDefaultUserConnection(ctx.Ctx(), ctx.Core().Database(), ctx.User().ID, accountID)
+					if err != nil {
+						if errors.Is(err, logic.ErrConnectionNotFound) {
+							return ctx.Reply().Send("links_error_connection_not_found")
 						}
-						if conn.ReferenceID == accountID {
-							newConnectionVerified, _ = conn.Metadata["verified"].(bool)
-							found = true
-						}
-						conn.Metadata["default"] = conn.ReferenceID == accountID
-
-						_, err := ctx.Core().Database().UpdateUserConnection(ctx.Ctx(), conn)
-						if err != nil {
-							if database.IsNotFound(err) {
-								return ctx.Reply().Send("links_error_connection_not_found")
-							}
-							return ctx.Err(err)
-						}
-					}
-					if !found {
-						return ctx.Reply().Send("links_error_connection_not_found")
+						return ctx.Err(err)
 					}
 
 					var content = []string{fmt.Sprintf(ctx.Localize("command_links_set_default_successfully_fmt"), nickname, realm)}
-					if !newConnectionVerified {
+					if updated.Metadata["verified"] != true {
 						content = append(content, ctx.Localize("command_links_verify_cta"))
 					}
 					return ctx.Reply().Text(content...).Send()

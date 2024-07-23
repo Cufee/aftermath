@@ -79,18 +79,10 @@ func (u User) FilterSubscriptions(kind SubscriptionType) ([]UserSubscription, bo
 }
 
 func (u User) Content(kind UserContentType) (UserContent, bool) {
-	valid, ok := u.FilterContent(kind)
-	if !ok {
-		return UserContent{}, false
-	}
-	return valid[0], true
-}
-func (u User) FilterContent(kind UserContentType) ([]UserContent, bool) {
-	var valid []UserContent
 	for _, content := range u.Uploads {
 		if content.Type == kind {
-			valid = append(valid, content)
+			return content, true
 		}
 	}
-	return valid, len(valid) > 0
+	return UserContent{}, false
 }

@@ -70,7 +70,8 @@ type UsersClient interface {
 	CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) (models.WidgetOptions, error)
 
 	GetUserContent(ctx context.Context, id string) (models.UserContent, error)
-	FindUserContent(ctx context.Context, userID string, referenceID string, kind models.UserContentType) ([]models.UserContent, error)
+	GetUserContentFromRef(ctx context.Context, referenceID string, kind models.UserContentType) (models.UserContent, error)
+	FindUserContentFromRefs(ctx context.Context, kind models.UserContentType, referenceIDs ...string) ([]models.UserContent, error)
 	CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
 	UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
 	UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)

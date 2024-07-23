@@ -1,9 +1,11 @@
 package logic
 
 import (
+	"context"
 	"errors"
 	"image"
 
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/encoding"
 )
@@ -29,4 +31,17 @@ func ImageToUserContentValue(img image.Image) ([]byte, error) {
 		return nil, err
 	}
 	return encoded, nil
+}
+
+func GetBackgroundImageFromRef(ctx context.Context, db database.Client, referenceID string) (image.Image, models.UserContent, error) {
+	content, err := db.GetUserContentFromRef(ctx, referenceID, models.UserContentTypePersonalBackground)
+	if err != nil {
+		return nil, models.UserContent{}, err
+	}
+	img, err := UserContentToImage(content)
+	if err != nil {
+		return nil, models.UserContent{}, err
+	}
+
+	return img, content, nil
 }

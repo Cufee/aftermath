@@ -58,8 +58,7 @@ func init() {
 					return ctx.Reply().Send("replay_errors_invalid_attachment")
 				}
 
-				var backgroundURL = "static://bg-default"
-				image, _, err := ctx.Core().Stats(ctx.Locale()).ReplayImage(context.Background(), parsed.String(), stats.WithBackgroundURL(backgroundURL), stats.WithWN8())
+				image, _, err := ctx.Core().Stats(ctx.Locale()).ReplayImage(context.Background(), parsed.String(), stats.WithWN8())
 				if err != nil {
 					if errors.Is(err, replay.ErrInvalidReplayFile) {
 						return ctx.Reply().Send("replay_errors_invalid_attachment")
