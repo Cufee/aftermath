@@ -38,30 +38,24 @@ func MentionHandler(errorImage []byte) func(s *discordgo.Session, e *discordgo.M
 					printer = func(s string) string { return s }
 				}
 
-				channel, err := s.UserChannelCreate(mention.ID)
+				channel, err := s.UserChannelCreate(e.Author.ID)
 				if err != nil {
+					log.Warn().Str("userId", e.Author.ID).Err(err).Msg("failed to create a DM channel for a user")
 					data := discordgo.MessageSend{Files: []*discordgo.File{{Name: "how-to-use-commands.png", Reader: bytes.NewReader(errorImage)}}, Content: fmt.Sprintf(printer("errors_help_missing_dm_permissions_fmt"), e.Author.Mention())}
-					s.ChannelMessageSendComplex(e.ChannelID, &data)
+					_, _ = s.ChannelMessageSendComplex(e.ChannelID, &data)
 					return
 				}
 
 				_, err = s.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{Content: fmt.Sprintf(printer("commands_help_message_fmt"), sessionResetTimes(printer), backgroundResetTime()), Components: []discordgo.MessageComponent{
-					discordgo.Button{
-						Style: discordgo.LinkButton,
-						Label: printer("buttons_add_aftermath_to_your_server"),
-						Emoji: &discordgo.ComponentEmoji{Name: "aftermath_red", ID: "1264728619381555200"},
-						URL:   "https://amth.one/invite",
-					},
-					discordgo.Button{
-						Style: discordgo.LinkButton,
-						Label: printer("buttons_join_primary_guild"),
-						Emoji: &discordgo.ComponentEmoji{Name: "aftermath_yellow", ID: "1264728131273625662"},
-						URL:   "https://amth.one/join",
-					},
-				}})
+					discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							common.ButtonInviteAftermath(printer("buttons_add_aftermath_to_your_server")),
+							common.ButtonJoinPrimaryGuild(printer("buttons_join_primary_guild")),
+						}}}})
 				if err != nil {
+					log.Warn().Str("userId", e.Author.ID).Err(err).Msg("failed to DM a user")
 					data := discordgo.MessageSend{Files: []*discordgo.File{{Name: "how-to-use-commands.png", Reader: bytes.NewReader(errorImage)}}, Content: fmt.Sprintf(printer("errors_help_missing_dm_permissions_fmt"), e.Author.Mention())}
-					s.ChannelMessageSendComplex(e.ChannelID, &data)
+					_, _ = s.ChannelMessageSendComplex(e.ChannelID, &data)
 				}
 				return
 			}

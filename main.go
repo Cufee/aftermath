@@ -179,9 +179,6 @@ func discordGatewayFromEnv(core core.Client) (gateway.Client, error) {
 		return nil, errors.Wrap(err, "failed to create a gateway client")
 	}
 
-	gw.LoadCommands(commands.Help().Build())
-	gw.LoadCommands(commands.LoadedPublic.Compose()...)
-
 	helpImage, ok := assets.GetLoadedImage("discord-help")
 	if !ok {
 		return nil, errors.New("discord-help image is not loaded")
