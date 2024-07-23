@@ -200,9 +200,6 @@ func init() {
 							Components: []discordgo.MessageComponent{
 								discordgo.Button{Style: discordgo.SuccessButton, Label: "Approved", CustomID: "moderation_image_approve_button#" + request.ID},
 								discordgo.Button{Style: discordgo.PrimaryButton, Label: "Decline", CustomID: "moderation_image_decline_button#" + request.ID},
-							}},
-						discordgo.ActionsRow{
-							Components: []discordgo.MessageComponent{
 								discordgo.Button{Style: discordgo.DangerButton, Label: "Feature Ban", CustomID: "moderation_image_feature_ban_button#" + request.ID},
 							}},
 					).
