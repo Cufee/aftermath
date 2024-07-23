@@ -73,11 +73,15 @@ func (c *routeContext) InteractionResponse(data discordgo.InteractionResponseDat
 	default:
 		return common.WithRetry(func() (discordgo.Message, error) {
 			// since we already finished handling the interaction, there is no need to use the handler context
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 			defer cancel()
 
 			if c.interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
-				return c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &data}, files)
+				msg, err := c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &data}, files)
+				if errors.Is(err, rest.ErrInteractionAlreadyAcked) {
+					err = nil
+				}
+				return msg, err
 			}
 			return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data, files)
 		})
