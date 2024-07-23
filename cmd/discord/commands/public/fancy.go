@@ -157,7 +157,7 @@ func init() {
 				if !ok {
 					return ctx.Error("failed to get component data on interaction command")
 				}
-				contentID := strings.ReplaceAll(data.CustomID, "moderation_image_submit#", "")
+				contentID := strings.ReplaceAll(data.CustomID, "fancy_image_submit#", "")
 				if contentID == "" {
 					return ctx.Error("failed to get content id from custom id")
 				}
