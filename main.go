@@ -21,6 +21,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core/tasks"
 	"github.com/cufee/aftermath/cmd/discord/alerts"
 	"github.com/cufee/aftermath/cmd/discord/commands"
+	_ "github.com/cufee/aftermath/cmd/discord/commands/private"
 	"github.com/cufee/aftermath/cmd/discord/commands/public"
 	"github.com/cufee/aftermath/cmd/discord/gateway"
 	"github.com/cufee/aftermath/cmd/discord/router"
@@ -209,6 +210,8 @@ func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
 
 	// main Discord with all the user-facing command
 	{
+		log.Debug().Msg("setting up a public commands router")
+
 		router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, constants.DiscordPrimaryPublicKey)
 		if err != nil {
 			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
@@ -237,6 +240,8 @@ func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
 
 	// secondary Discord bot with mod/admin commands - permissions are still checked
 	if constants.DiscordPrivateBotEnabled {
+		log.Debug().Msg("setting up an internal commands router")
+
 		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, constants.DiscordPrivatePublicKey)
 		if err != nil {
 			log.Fatal().Msgf("discord#NewHTTPRouter failed %s", err)

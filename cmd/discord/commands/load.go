@@ -1,6 +1,8 @@
 package commands
 
-import "github.com/cufee/aftermath/cmd/discord/commands/builder"
+import (
+	"github.com/cufee/aftermath/cmd/discord/commands/builder"
+)
 
 type commandInit []builder.Builder
 
