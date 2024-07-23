@@ -8,8 +8,8 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strings"
 
-	"github.com/cufee/aftermath/cmd/frontend/assets"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
@@ -52,7 +52,7 @@ func generateWN8Icons() {
 			color = common.TextAlt
 		}
 		{
-			filename := assets.WN8IconFilename(float32(tier))
+			filename := wn8IconFilename(float32(tier))
 			img := common.AftermathLogo(color, common.DefaultLogoOptions())
 			f, err := os.Create(filepath.Join(outDirPath, "wn8", filename))
 			if err != nil {
@@ -65,7 +65,7 @@ func generateWN8Icons() {
 			f.Close()
 		}
 		{
-			filename := "small_" + assets.WN8IconFilename(float32(tier))
+			filename := "small_" + wn8IconFilename(float32(tier))
 			img := common.AftermathLogo(color, common.SmallLogoOptions())
 			f, err := os.Create(filepath.Join(outDirPath, "wn8", filename))
 			if err != nil {
@@ -250,4 +250,12 @@ func generateOGImages() {
 		}
 		f.Close()
 	}
+}
+
+func wn8IconFilename(rating float32) string {
+	name := strings.ReplaceAll(strings.ToLower(common.GetWN8TierName(rating)), " ", "_")
+	if rating < 1 {
+		name = "invalid"
+	}
+	return name + ".png"
 }
