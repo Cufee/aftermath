@@ -144,6 +144,7 @@ func (c *client) CreateUserRestriction(ctx context.Context, data models.UserRest
 		SetRestriction(data.Restriction.String()).
 		SetPublicReason(data.PublicReason).
 		SetExpiresAt(data.ExpiresAt).
+		SetEvents(data.Events).
 		SetType(data.Type).
 		SetUser(user).
 		Save(ctx)
@@ -160,6 +161,7 @@ func (c *client) UpdateUserRestriction(ctx context.Context, data models.UserRest
 		SetRestriction(data.Restriction.String()).
 		SetPublicReason(data.PublicReason).
 		SetExpiresAt(data.ExpiresAt).
+		SetEvents(data.Events).
 		SetType(data.Type).
 		Save(ctx)
 	if err != nil {
