@@ -158,6 +158,7 @@ func init() {
 
 	commands.LoadedPublic.Add(
 		builder.NewCommand("fancy_image_submit_button").
+			Ephemeral().
 			Middleware(middleware.RequirePermissions(permissions.CreatePersonalContent, permissions.UseTextCommands)).
 			ComponentType(func(customID string) bool {
 				return strings.HasPrefix(customID, "fancy_image_submit#")

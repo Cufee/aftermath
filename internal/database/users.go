@@ -10,6 +10,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
 	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
+	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
 )
@@ -163,7 +164,7 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...UserGetOpti
 
 	query := c.db.User.Query().Where(user.ID(id)).WithRestrictions(func(urq *db.UserRestrictionQuery) { urq.Where(userrestriction.ExpiresAtGT(time.Now())) })
 	if options.subscriptions {
-		query = query.WithSubscriptions()
+		query = query.WithSubscriptions(func(usq *db.UserSubscriptionQuery) { usq.Where(usersubscription.ExpiresAtGT(time.Now())) })
 	}
 	if options.connections {
 		query = query.WithConnections()

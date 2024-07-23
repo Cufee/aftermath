@@ -18,15 +18,15 @@ type User struct {
 func (u User) HasPermission(values ...permissions.Permissions) bool {
 	perms := u.Permissions
 	for _, c := range u.Connections {
-		perms.Add(c.Permissions)
+		perms = perms.Add(c.Permissions)
 	}
 	for _, s := range u.Subscriptions {
-		perms.Add(s.Permissions)
+		perms = perms.Add(s.Permissions)
 	}
 	for _, r := range u.Restrictions {
 		switch r.Type {
 		case RestrictionTypePartial:
-			perms.Remove(r.Restriction)
+			perms = perms.Remove(r.Restriction)
 		default:
 			return false
 		}
