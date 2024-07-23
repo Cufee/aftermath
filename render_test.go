@@ -186,11 +186,13 @@ func TestRenderReplay(t *testing.T) {
 	gameModeNames, err := db.GetGameModeNames(context.Background(), replay.GameMode.String())
 	is.NoErr(err)
 
+	bgImage := "static://bg-default"
+
 	{
 		cards, err := prepare.NewCards(replay, glossary, gameModeNames, common.WithPrinter(printer, language.English))
 		is.NoErr(err)
 
-		image, err := render.CardsToImage(replay, cards, rc.WithBackground(""), rc.WithPrinter(printer))
+		image, err := render.CardsToImage(replay, cards, rc.WithBackgroundURL(bgImage), rc.WithPrinter(printer))
 		assert.NoError(t, err, "failed to render a replay image")
 		assert.NotNil(t, image, "image is nil")
 

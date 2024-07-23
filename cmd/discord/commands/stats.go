@@ -12,6 +12,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
 	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 )
@@ -29,7 +30,13 @@ func init() {
 				}
 
 				var accountID string
-				var backgroundURL = "static://bg-default"
+				var opts = []stats.RequestOption{stats.WithWN8(), stats.WithVehicleID(options.TankID)}
+
+				ioptions := models.DiscordInteractionOptions{
+					PeriodStart: options.PeriodStart,
+					VehicleID:   options.TankID,
+					AccountID:   accountID,
+				}
 
 				switch {
 				case options.UserID != "":
@@ -40,7 +47,11 @@ func init() {
 						return ctx.Reply().Send("stats_error_connection_not_found_vague")
 					}
 					accountID = defaultAccount.ReferenceID
-					// TODO: Get user background
+					background, _ := mentionedUser.Content(models.UserContentTypePersonalBackground)
+					if img, err := logic.UserContentToImage(background); err == nil {
+						opts = append(opts, stats.WithBackground(img))
+						ioptions.BackgroundContentID = background.ID
+					}
 
 				case options.Nickname != "" && options.Server != "":
 					// nickname provided and server selected - lookup the account
@@ -60,20 +71,19 @@ func init() {
 					}
 					// command used without options, but user has a default connection
 					accountID = defaultAccount.ReferenceID
-					// TODO: Get user background
+					background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
+					if img, err := logic.UserContentToImage(background); err == nil {
+						opts = append(opts, stats.WithBackground(img))
+						ioptions.BackgroundContentID = background.ID
+					}
 				}
 
-				image, meta, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
+				image, meta, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), accountID, options.PeriodStart, opts...)
 				if err != nil {
 					return ctx.Err(err)
 				}
 
-				button, saveErr := saveInteractionData(ctx, "stats", models.DiscordInteractionOptions{
-					BackgroundImageURL: backgroundURL,
-					PeriodStart:        options.PeriodStart,
-					VehicleID:          options.TankID,
-					AccountID:          accountID,
-				})
+				button, saveErr := saveInteractionData(ctx, "stats", ioptions)
 				if saveErr != nil {
 					// nil button will not cause an error and will be ignored
 					log.Err(err).Str("interactionId", ctx.ID()).Str("command", "session").Msg("failed to save discord interaction")

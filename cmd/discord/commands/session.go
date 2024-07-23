@@ -12,6 +12,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
 	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
@@ -31,7 +32,13 @@ func init() {
 				}
 
 				var accountID string
-				var backgroundURL string
+				var opts = []stats.RequestOption{stats.WithWN8(), stats.WithVehicleID(options.TankID)}
+
+				ioptions := models.DiscordInteractionOptions{
+					PeriodStart: options.PeriodStart,
+					VehicleID:   options.TankID,
+					AccountID:   accountID,
+				}
 
 				switch {
 				case options.UserID != "":
@@ -42,9 +49,10 @@ func init() {
 						return ctx.Reply().Send("stats_error_connection_not_found_vague")
 					}
 					accountID = defaultAccount.ReferenceID
-					background, ok := mentionedUser.Content(models.UserContentTypePersonalBackground)
-					if ok {
-						backgroundURL = background.Value
+					background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
+					if img, err := logic.UserContentToImage(background); err == nil {
+						opts = append(opts, stats.WithBackground(img))
+						ioptions.BackgroundContentID = background.ID
 					}
 
 				case options.Nickname != "" && options.Server != "":
@@ -65,13 +73,14 @@ func init() {
 					}
 					// command used without options, but user has a default connection
 					accountID = defaultAccount.ReferenceID
-					background, ok := ctx.User().Content(models.UserContentTypePersonalBackground)
-					if ok {
-						backgroundURL = background.Value
+					background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
+					if img, err := logic.UserContentToImage(background); err == nil {
+						opts = append(opts, stats.WithBackground(img))
+						ioptions.BackgroundContentID = background.ID
 					}
 				}
 
-				image, meta, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
+				image, meta, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, opts...)
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
 						return ctx.Reply().Send("session_error_account_was_not_tracked")
@@ -82,12 +91,7 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				button, saveErr := saveInteractionData(ctx, "session", models.DiscordInteractionOptions{
-					BackgroundImageURL: backgroundURL,
-					PeriodStart:        options.PeriodStart,
-					VehicleID:          options.TankID,
-					AccountID:          accountID,
-				})
+				button, saveErr := saveInteractionData(ctx, "session", ioptions)
 				if saveErr != nil {
 					// nil button will not cause an error and will be ignored
 					log.Err(err).Str("interactionId", ctx.ID()).Str("command", "session").Msg("failed to save discord interaction")

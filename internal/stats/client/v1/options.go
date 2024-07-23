@@ -1,6 +1,8 @@
 package client
 
 import (
+	"image"
+
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
@@ -9,12 +11,13 @@ import (
 )
 
 type requestOptions struct {
-	snapshotType  models.SnapshotType
-	backgroundURL string
-	referenceID   string
-	promoText     []string
-	vehicleID     string
-	withWN8       bool
+	snapshotType    models.SnapshotType
+	backgroundImage image.Image
+	backgroundURL   string
+	referenceID     string
+	promoText       []string
+	vehicleID       string
+	withWN8         bool
 }
 
 type RequestOption func(o *requestOptions)
@@ -37,6 +40,9 @@ func WithType(t models.SnapshotType) RequestOption {
 func WithBackgroundURL(url string) RequestOption {
 	return func(o *requestOptions) { o.backgroundURL = url }
 }
+func WithBackground(image image.Image) RequestOption {
+	return func(o *requestOptions) { o.backgroundImage = image }
+}
 
 func (o requestOptions) RenderOpts(printer func(string) string) []common.Option {
 	var copts []common.Option
@@ -49,7 +55,13 @@ func (o requestOptions) RenderOpts(printer func(string) string) []common.Option 
 	if printer != nil {
 		copts = append(copts, common.WithPrinter(printer))
 	}
-	copts = append(copts, common.WithBackground(o.backgroundURL))
+	if o.backgroundImage != nil {
+		copts = append(copts, common.WithBackground(o.backgroundImage))
+	} else if o.backgroundURL != "" {
+		copts = append(copts, common.WithBackgroundURL(o.backgroundURL))
+	} else {
+		copts = append(copts, common.WithBackgroundURL("static://bg-default"))
+	}
 	return copts
 }
 

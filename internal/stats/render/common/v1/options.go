@@ -37,22 +37,19 @@ func WithPrinter(printer func(string) string) Option {
 	}
 }
 
-func WithBackground(bgURL string) Option {
-	if bgURL == "" {
-		bgURL = "static://bg-default"
-	}
-
-	var image image.Image
+func WithBackgroundURL(bgURL string) Option {
 	if strings.HasPrefix(bgURL, "static://") {
 		img, ok := assets.GetLoadedImage(strings.ReplaceAll(bgURL, "static://", ""))
 		if ok {
-			image = img
+			return func(o *Options) {
+				o.Background = img
+			}
 		}
 	}
+	return func(o *Options) {}
+}
 
-	if image == nil {
-		return func(o *Options) {}
-	}
+func WithBackground(image image.Image) Option {
 	return func(o *Options) {
 		o.Background = image
 	}

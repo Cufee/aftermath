@@ -12,6 +12,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"golang.org/x/text/language"
@@ -98,11 +99,20 @@ func init() {
 					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
 
+				var opts = []stats.RequestOption{stats.WithWN8(), stats.WithVehicleID(interaction.Options.VehicleID)}
+
+				if interaction.Options.BackgroundContentID != "" {
+					background, _ := ctx.Core().Database().GetUserContent(ctx.Ctx(), interaction.Options.BackgroundContentID)
+					if img, err := logic.UserContentToImage(background); err == nil {
+						opts = append(opts, stats.WithBackground(img))
+					}
+				}
+
 				var image stats.Image
 				var meta stats.Metadata
 				switch interaction.Command {
 				case "stats":
-					img, mt, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL), stats.WithWN8(), stats.WithVehicleID(interaction.Options.VehicleID))
+					img, mt, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, opts...)
 					if err != nil {
 						return ctx.Err(err)
 					}
@@ -110,7 +120,7 @@ func init() {
 					meta = mt
 
 				case "session":
-					img, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, stats.WithBackgroundURL(interaction.Options.BackgroundImageURL), stats.WithWN8(), stats.WithVehicleID(interaction.Options.VehicleID))
+					img, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, opts...)
 					if err != nil {
 						if errors.Is(err, fetch.ErrSessionNotFound) || errors.Is(err, stats.ErrAccountNotTracked) {
 							return ctx.Reply().Send("stats_refresh_interaction_error_expired")

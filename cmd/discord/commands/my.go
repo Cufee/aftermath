@@ -11,6 +11,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
 	stats "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
@@ -51,10 +52,18 @@ func init() {
 				}
 
 				var accountID string
-				var backgroundURL string
-				background, ok := ctx.User().Content(models.UserContentTypePersonalBackground)
-				if ok {
-					backgroundURL = background.Value
+				var opts = []stats.RequestOption{stats.WithWN8(), stats.WithVehicleID(options.TankID)}
+
+				ioptions := models.DiscordInteractionOptions{
+					PeriodStart: options.PeriodStart,
+					VehicleID:   options.TankID,
+					AccountID:   accountID,
+				}
+
+				background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
+				if img, err := logic.UserContentToImage(background); err == nil {
+					opts = append(opts, stats.WithBackground(img))
+					ioptions.BackgroundContentID = background.ID
 				}
 
 				value, _ := subOptions.Value("account").(string)
@@ -73,9 +82,9 @@ func init() {
 				var image stats.Image
 				switch subcommand {
 				case "stats":
-					image, _, err = ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
+					image, _, err = ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), accountID, options.PeriodStart, opts...)
 				case "session":
-					image, _, err = ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, stats.WithBackgroundURL(backgroundURL), stats.WithWN8(), stats.WithVehicleID(options.TankID))
+					image, _, err = ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, opts...)
 				default:
 					return ctx.Error("invalid subcommand in /my - " + subcommand)
 				}
@@ -89,12 +98,7 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				button, saveErr := saveInteractionData(ctx, subcommand, models.DiscordInteractionOptions{
-					BackgroundImageURL: backgroundURL,
-					PeriodStart:        options.PeriodStart,
-					VehicleID:          options.TankID,
-					AccountID:          accountID,
-				})
+				button, saveErr := saveInteractionData(ctx, subcommand, ioptions)
 				if saveErr != nil {
 					// nil button will not cause an error and will be ignored
 					log.Err(err).Str("interactionId", ctx.ID()).Str("command", "session").Msg("failed to save discord interaction")

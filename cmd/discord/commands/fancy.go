@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"image"
 	"net/url"
 	"strings"
 	"time"
@@ -17,8 +16,8 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/encoding"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
 	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/disintegration/imaging"
@@ -91,7 +90,7 @@ func init() {
 				withBg.DrawImage(img, 0, 0)
 
 				// save the image
-				encoded, err := encoding.EncodeGob(img)
+				encoded, err := logic.ImageToUserContentValue(img)
 				if err != nil {
 					return ctx.Err(err)
 				}
@@ -166,8 +165,7 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				var img image.NRGBA
-				err = encoding.DecodeGob([]byte(content.Value), &img)
+				img, err := logic.UserContentToImage(content)
 				if err != nil {
 					return ctx.Err(err)
 				}
@@ -186,7 +184,7 @@ func init() {
 				}
 
 				var buf bytes.Buffer
-				err = imaging.Encode(&buf, &img, imaging.PNG)
+				err = imaging.Encode(&buf, img, imaging.PNG)
 				if err != nil {
 					return ctx.Err(err)
 				}
