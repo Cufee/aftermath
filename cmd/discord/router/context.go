@@ -75,6 +75,10 @@ func (c *routeContext) InteractionResponse(data discordgo.InteractionResponseDat
 			// since we already finished handling the interaction, there is no need to use the handler context
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
+
+			if c.interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
+				return c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &data}, files)
+			}
 			return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data, files)
 		})
 	}
