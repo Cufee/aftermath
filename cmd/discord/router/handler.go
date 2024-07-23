@@ -129,13 +129,14 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*1000)
 				defer cancel()
 				_, err := router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, payload, nil)
+				if errors.Is(err, rest.ErrInteractionAlreadyAcked) {
+					err = nil
+				}
 				return struct{}{}, err
 			},
 			3,
-			time.Millisecond*150,
-			// break if the error means we were able to ack on the last request
-			func(err error) bool { return errors.Is(err, rest.ErrInteractionAlreadyAcked) })
-		if res.Err != nil && !errors.Is(res.Err, rest.ErrInteractionAlreadyAcked) {
+			time.Millisecond*150)
+		if res.Err != nil {
 			log.Warn().Err(res.Err).Str("id", data.ID).Msg("failed to ack an interaction")
 			// cross our fingers and hope discord registered one of those requests, or will propagate the ack from the response body
 		}
