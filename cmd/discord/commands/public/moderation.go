@@ -120,7 +120,7 @@ func init() {
 					if err != nil {
 						return ctx.Reply().Send("Failed to create a user restriction", err.Error())
 					}
-					directMessageContent = ctx.Localize("fancy_moderation_request_declined_and_banned")
+					directMessageContent = fmt.Sprintf(ctx.Localize("fancy_moderation_request_declined_and_banned_fmt"), "180")
 					request.ModeratorComment = "moderator chose to issue a feature ban"
 					fallthrough
 				case "decline":
