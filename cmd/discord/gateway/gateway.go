@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/core"
+	"github.com/cufee/aftermath/cmd/discord"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/logic"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
@@ -15,6 +16,10 @@ import (
 var _ Client = &gatewayClient{}
 
 type Client interface {
+	discord.Commander
+
+	Session(guildID string) *discordgo.Session
+
 	Connect() error
 	Handler(fn interface{}) func()
 	SetStatus(status status, text string, emoji *discordgo.Emoji) error
@@ -37,7 +42,7 @@ func NewClient(core core.Client, token string, intent discordgo.Intent) (*gatewa
 
 	rest, err := rest.NewClient(token)
 	if err != nil {
-		return nil, errors.Errorf("failed to create a new rest client :%w", err)
+		return nil, errors.Wrap(err, "failed to create a new rest client")
 	}
 
 	dg.Identify.Intents = intent
@@ -59,7 +64,7 @@ func (c *gatewayClient) Handler(fn interface{}) func() {
 	return c.session.AddHandler(fn)
 }
 
-func (c *gatewayClient) Session() *discordgo.Session {
+func (c *gatewayClient) Session(guildID string) *discordgo.Session {
 	return c.session
 }
 

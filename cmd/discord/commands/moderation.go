@@ -265,7 +265,7 @@ func init() {
 					log.Err(err).Msg("failed to create a DM channel")
 					replyHint = "failed to dm the user, this does not cancel the action."
 				} else {
-					_, err := ctx.CreateMessage(ctx.Ctx(), dmChan.ID, discordgo.Message{Content: directMessageContent}, nil)
+					_, err := ctx.CreateMessage(ctx.Ctx(), dmChan.ID, discordgo.MessageSend{Content: directMessageContent}, nil)
 					if err != nil {
 						log.Err(err).Msg("failed to send a DM")
 						replyHint = "failed to dm the user, this does not cancel the action."

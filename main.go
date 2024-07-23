@@ -147,12 +147,13 @@ func main() {
 		log.Fatal().Err(err).Msg("frontend#Handlers failed")
 	}
 
-	discordInternalHandler := discordInternalHandlersFromEnv(liveCoreClient)
+	discordInternalHandlers := discordInternalHandlersFromEnv(liveCoreClient)
 	// POST /discord/internal/callback
+	// POST /discord/public/callback
 
 	var handlers []server.Handler
-	handlers = append(handlers, discordInternalHandler)
 	handlers = append(handlers, frontendHandlers...)
+	handlers = append(handlers, discordInternalHandlers...)
 	handlers = append(handlers, redirectHandlersFromEnv()...)
 
 	port := os.Getenv("PORT")
@@ -202,33 +203,67 @@ func discordGatewayFromEnv(core core.Client) (gateway.Client, error) {
 	return gw, nil
 }
 
-func discordInternalHandlersFromEnv(coreClient core.Client) server.Handler {
+func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
+
+	var handlers []server.Handler
+
+	// main Discord with all the user-facing command
+	{
+		router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, constants.DiscordPrimaryPublicKey)
+		if err != nil {
+			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
+		}
+
+		router.LoadCommands(commands.Help().Build())
+		router.LoadCommands(commands.LoadedPublic.Compose()...)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+		defer cancel()
+
+		err = router.UpdateLoadedCommands(ctx)
+		if err != nil {
+			log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
+		}
+
+		fn, err := router.HTTPHandler()
+		if err != nil {
+			log.Fatal().Msgf("router#HTTPHandler failed %s", err)
+		}
+		handlers = append(handlers, server.Handler{
+			Path: "POST /discord/public/callback",
+			Func: fn,
+		})
+	}
+
 	// secondary Discord bot with mod/admin commands - permissions are still checked
-	router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, constants.DiscordPrivatePublicKey)
-	if err != nil {
-		log.Fatal().Msgf("discord#NewHTTPRouter failed %s", err)
+	if constants.DiscordPrivateBotEnabled {
+		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, constants.DiscordPrivatePublicKey)
+		if err != nil {
+			log.Fatal().Msgf("discord#NewHTTPRouter failed %s", err)
+		}
+
+		router.LoadCommands(commands.LoadedInternal.Compose()...)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+		defer cancel()
+
+		err = router.UpdateLoadedCommands(ctx)
+		if err != nil {
+			log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
+		}
+
+		fn, err := router.HTTPHandler()
+		if err != nil {
+			log.Fatal().Msgf("router#HTTPHandler failed %s", err)
+		}
+
+		handlers = append(handlers, server.Handler{
+			Path: "POST /discord/internal/callback",
+			Func: fn,
+		})
 	}
 
-	router.LoadCommands(commands.LoadedInternal.Compose()...)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-
-	err = router.UpdateLoadedCommands(ctx)
-	if err != nil {
-		log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
-	}
-
-	fn, err := router.HTTPHandler()
-	if err != nil {
-		log.Fatal().Msgf("router#HTTPHandler failed %s", err)
-	}
-
-	handler := server.Handler{
-		Path: "POST /discord/internal/callback",
-		Func: fn,
-	}
-	return handler
+	return handlers
 }
 
 func startSchedulerFromEnv(ctx context.Context, coreClient core.Client) (func(), error) {

@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func (c *Client) CreateMessage(ctx context.Context, channelID string, data discordgo.Message, files []File) (discordgo.Message, error) {
+func (c *Client) CreateMessage(ctx context.Context, channelID string, data discordgo.MessageSend, files []File) (discordgo.Message, error) {
 	req, err := c.requestWithFiles("POST", discordgo.EndpointChannelMessages(channelID), data, files)
 	if err != nil {
 		return discordgo.Message{}, err

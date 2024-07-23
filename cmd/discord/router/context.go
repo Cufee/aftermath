@@ -206,7 +206,7 @@ func (c *routeContext) AutocompleteData() (discordgo.ApplicationCommandInteracti
 func (c *routeContext) DeleteResponse(ctx context.Context) error {
 	return c.rest.DeleteInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token)
 }
-func (c *routeContext) CreateMessage(ctx context.Context, channelID string, data discordgo.Message, files []rest.File) (discordgo.Message, error) {
+func (c *routeContext) CreateMessage(ctx context.Context, channelID string, data discordgo.MessageSend, files []rest.File) (discordgo.Message, error) {
 	return c.rest.CreateMessage(ctx, channelID, data, files)
 }
 func (c *routeContext) UpdateMessage(ctx context.Context, channelID string, messageID string, data discordgo.Message, files []rest.File) (discordgo.Message, error) {

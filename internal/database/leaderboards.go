@@ -11,7 +11,7 @@ import (
 )
 
 func toScore(r *db.LeaderboardScore) models.LeaderboardScore {
-	return models.LeaderboardScore{
+	lb := models.LeaderboardScore{
 		ID:            r.ID,
 		Type:          r.Type,
 		CreatedAt:     r.CreatedAt,
@@ -21,6 +21,10 @@ func toScore(r *db.LeaderboardScore) models.LeaderboardScore {
 		Score:         r.Score,
 		Meta:          r.Meta,
 	}
+	if lb.Meta == nil {
+		lb.Meta = make(map[string]any)
+	}
+	return lb
 }
 
 func (c *client) CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) error {

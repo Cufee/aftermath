@@ -52,7 +52,7 @@ func toUserRestriction(record *db.UserRestriction) models.UserRestriction {
 }
 
 func toUserConnection(record *db.UserConnection) models.UserConnection {
-	return models.UserConnection{
+	c := models.UserConnection{
 		ID:          record.ID,
 		Type:        record.Type,
 		UserID:      record.UserID,
@@ -60,6 +60,10 @@ func toUserConnection(record *db.UserConnection) models.UserConnection {
 		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
 		Metadata:    record.Metadata,
 	}
+	if c.Metadata == nil {
+		c.Metadata = make(map[string]any)
+	}
+	return c
 }
 
 func toUserSubscription(record *db.UserSubscription) models.UserSubscription {
@@ -74,7 +78,7 @@ func toUserSubscription(record *db.UserSubscription) models.UserSubscription {
 }
 
 func toUserContent(record *db.UserContent) models.UserContent {
-	return models.UserContent{
+	c := models.UserContent{
 		ID:          record.ID,
 		Type:        record.Type,
 		UserID:      record.UserID,
@@ -86,6 +90,10 @@ func toUserContent(record *db.UserContent) models.UserContent {
 		CreatedAt: record.CreatedAt,
 		UpdatedAt: record.UpdatedAt,
 	}
+	if c.Meta == nil {
+		c.Meta = make(map[string]any)
+	}
+	return c
 }
 
 type userGetOpts struct {

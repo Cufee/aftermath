@@ -38,7 +38,7 @@ type Context interface {
 	Options() Options
 
 	DeleteResponse(ctx context.Context) error
-	CreateMessage(ctx context.Context, channelID string, data discordgo.Message, files []rest.File) (discordgo.Message, error)
+	CreateMessage(ctx context.Context, channelID string, data discordgo.MessageSend, files []rest.File) (discordgo.Message, error)
 	UpdateMessage(ctx context.Context, channelID string, messageID string, data discordgo.Message, files []rest.File) (discordgo.Message, error)
 
 	CreateDMChannel(ctx context.Context, userID string) (discordgo.Channel, error)
