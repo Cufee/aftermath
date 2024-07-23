@@ -15,12 +15,16 @@ import (
 type Reply struct {
 	ctx Context
 
-	includeAds bool
-	hint       string
-	text       []string
-	files      []rest.File
-	components []discordgo.MessageComponent
-	embeds     []*discordgo.MessageEmbed
+	internal replyInternal
+}
+
+type replyInternal struct {
+	IncludeAds bool
+	Hint       string
+	Text       []string
+	Files      []rest.File
+	Components []discordgo.MessageComponent
+	Embeds     []*discordgo.MessageEmbed
 }
 
 func WithRetry(fn func() (discordgo.Message, error), tries ...int) (discordgo.Message, error) {
@@ -36,23 +40,27 @@ func ContextReply(ctx Context) Reply {
 	return Reply{ctx: ctx}
 }
 
+func (r Reply) Peek() replyInternal {
+	return r.internal
+}
+
 func (r Reply) Choices(data ...*discordgo.ApplicationCommandOptionChoice) error {
 	_, err := r.ctx.InteractionResponse(discordgo.InteractionResponseData{Choices: data}, nil)
 	return err
 }
 
 func (r Reply) Hint(text string) Reply {
-	r.hint = text
+	r.internal.Hint = text
 	return r
 }
 
 func (r Reply) Text(message ...string) Reply {
-	r.text = append(r.text, message...)
+	r.internal.Text = append(r.internal.Text, message...)
 	return r
 }
 
 func (r Reply) Format(format string, args ...any) Reply {
-	r.text = append(r.text, fmt.Sprintf(r.ctx.Localize(format), args...))
+	r.internal.Text = append(r.internal.Text, fmt.Sprintf(r.ctx.Localize(format), args...))
 	return r
 }
 
@@ -60,32 +68,32 @@ func (r Reply) File(data []byte, name string) Reply {
 	if data == nil {
 		return r
 	}
-	r.files = append(r.files, rest.File{Data: data, Name: name})
+	r.internal.Files = append(r.internal.Files, rest.File{Data: data, Name: name})
 	return r
 }
 
 func (r Reply) Component(components ...discordgo.MessageComponent) Reply {
-	for _, c := range components {
-		if c == nil {
-			continue
-		}
-		r.components = append(r.components, c)
+	if len(components) == 1 && components[0] == nil {
+		r.internal.Components = make([]discordgo.MessageComponent, 0)
+		return r
 	}
+
+	r.internal.Components = append(r.internal.Components, components...)
 	return r
 }
 
 func (r Reply) Embed(embeds ...*discordgo.MessageEmbed) Reply {
-	for _, e := range embeds {
-		if e == nil {
-			continue
-		}
-		r.embeds = append(r.embeds, e)
+	if len(embeds) == 1 && embeds[0] == nil {
+		r.internal.Embeds = make([]*discordgo.MessageEmbed, 0)
+		return r
 	}
+
+	r.internal.Embeds = append(r.internal.Embeds, embeds...)
 	return r
 }
 
 func (r Reply) WithAds() Reply {
-	r.includeAds = true
+	r.internal.IncludeAds = true
 	return r
 }
 
@@ -95,7 +103,7 @@ func (r Reply) Send(content ...string) error {
 }
 
 func (r Reply) Message(content ...string) (discordgo.Message, error) {
-	if r.includeAds {
+	if r.internal.IncludeAds {
 		defer func() {
 			data, send := r.newMessageAd()
 			if !send {
@@ -109,24 +117,24 @@ func (r Reply) Message(content ...string) (discordgo.Message, error) {
 		}()
 	}
 
-	r.text = append(r.text, content...)
-	return r.ctx.InteractionResponse(r.data())
+	r.internal.Text = append(r.internal.Text, content...)
+	return r.ctx.InteractionResponse(r.internal.Data(r.ctx.Localize))
 }
 
-func (r Reply) data() (discordgo.InteractionResponseData, []rest.File) {
+func (r replyInternal) Data(localize func(string) string) (discordgo.InteractionResponseData, []rest.File) {
 	var content []string
-	for _, t := range r.text {
-		content = append(content, r.ctx.Localize(t))
+	for _, t := range r.Text {
+		content = append(content, localize(t))
 	}
-	if r.hint != "" {
-		content = append(content, "-# "+r.ctx.Localize(r.hint))
+	if r.Hint != "" {
+		content = append(content, "-# "+localize(r.Hint))
 	}
 
-	var cleatAttachments []*discordgo.MessageAttachment
+	var clearAttachments []*discordgo.MessageAttachment
 	return discordgo.InteractionResponseData{
 		Content:     strings.Join(content, "\n"),
-		Components:  r.components,
-		Embeds:      r.embeds,
-		Attachments: &cleatAttachments,
-	}, r.files
+		Components:  r.Components,
+		Embeds:      r.Embeds,
+		Attachments: &clearAttachments,
+	}, r.Files
 }

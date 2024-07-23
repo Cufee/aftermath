@@ -7,7 +7,10 @@ import (
 )
 
 func (c *Client) CreateDMChannel(ctx context.Context, userID string) (discordgo.Channel, error) {
-	req, err := c.request("POST", discordgo.EndpointUserChannels("@me"), nil)
+	data := struct {
+		RecipientID string `json:"recipient_id"`
+	}{userID}
+	req, err := c.request("POST", discordgo.EndpointUserChannels("@me"), data)
 	if err != nil {
 		return discordgo.Channel{}, err
 	}

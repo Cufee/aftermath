@@ -14,7 +14,6 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
-	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -192,34 +191,31 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				_, err = ctx.CreateMessage(ctx.Ctx(), constants.DiscordContentModerationChannelID, discordgo.MessageSend{
-					Components: []discordgo.MessageComponent{
+				_, err = ctx.CreateMessage(ctx.Ctx(), constants.DiscordContentModerationChannelID, ctx.Reply().
+					Component(
 						discordgo.ActionsRow{
 							Components: []discordgo.MessageComponent{
 								discordgo.Button{Style: discordgo.SuccessButton, Label: "Approved", CustomID: "moderation_image_approve_button#" + request.ID},
 								discordgo.Button{Style: discordgo.PrimaryButton, Label: "Decline", CustomID: "moderation_image_decline_button#" + request.ID},
-							},
-						},
+							}},
 						discordgo.ActionsRow{
 							Components: []discordgo.MessageComponent{
 								discordgo.Button{Style: discordgo.DangerButton, Label: "Feature Ban", CustomID: "moderation_image_feature_ban_button#" + request.ID},
-							},
-						},
-					},
-					Content: fmt.Sprintf(
+							}},
+					).
+					Format(
 						`
-## New Moderation Request
-### *image submitted from /fancy*
-**id**: %s%s%s
-**User:** <@%s>
-Please review the attached image and use the buttons below to take an action.
-- We should not allow any kind of NSFW or suggestive content - this includes an intent. If there is something ever remotely sus, decline it.
-- Some users will upload NSFW content or attempt to scribble over the image to bypass the filer. In such cases, we should issue a permanent feature ban.
-
-*A feature ban will disable all content uploading features for the user.*
-					`, request.ID, "`", ctx.User().ID, "`",
-					)},
-					[]rest.File{{Data: buf.Bytes(), Name: "user_background.png"}},
+					## New Moderation Request
+					### *image submitted from /fancy*
+					**id**: %s%s%s
+					**User:** <@%s>
+					Please review the attached image and use the buttons below to take an action.
+					- We should not allow any kind of NSFW or suggestive content - this includes an intent. If there is something ever remotely sus, decline it.
+					- Some users will upload NSFW content or attempt to scribble over the image to bypass the filer. In such cases, we should issue a permanent feature ban.
+	
+					*A feature ban will disable all content uploading features for the user.*`, request.ID, "`", ctx.User().ID, "`",
+					).
+					File(buf.Bytes(), "user_background.png"),
 				)
 				if err != nil {
 					return ctx.Err(err)

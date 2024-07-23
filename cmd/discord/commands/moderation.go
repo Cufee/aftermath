@@ -226,7 +226,7 @@ func init() {
 					if err != nil {
 						return ctx.Reply().Hint("no action was performed").Send("Failed to update user content")
 					}
-					directMessageContent = ""
+					directMessageContent = "fancy_moderation_request_approved"
 
 				case "feature-ban":
 					// issue a feature ban
@@ -265,7 +265,7 @@ func init() {
 					log.Err(err).Msg("failed to create a DM channel")
 					replyHint = "failed to dm the user, this does not cancel the action."
 				} else {
-					_, err := ctx.CreateMessage(ctx.Ctx(), dmChan.ID, discordgo.MessageSend{Content: directMessageContent}, nil)
+					_, err := ctx.CreateMessage(ctx.Ctx(), dmChan.ID, ctx.Reply().Text(directMessageContent))
 					if err != nil {
 						log.Err(err).Msg("failed to send a DM")
 						replyHint = "failed to dm the user, this does not cancel the action."
@@ -280,12 +280,10 @@ func init() {
 					return ctx.Reply().Hint("no action was performed").Send("Failed to update request", err.Error())
 				}
 
-				// update the message to remove attachment and action buttons
-				_, err = ctx.UpdateMessage(ctx.Ctx(), ctx.RawInteraction().ChannelID, messageID, discordgo.Message{
-					Attachments: []*discordgo.MessageAttachment{},
-					Components:  []discordgo.MessageComponent{},
-					Content:     fmt.Sprintf("## Moderation Request (Actioned)\n*image submitted from /fancy*\n**User:** <@%s>\n**Action:** %s\n**Moderator:** <@%s>", request.RequestorID, string(request.ActionStatus), ctx.User().ID),
-				}, nil)
+				_, err = ctx.UpdateMessage(ctx.Ctx(), ctx.RawInteraction().ChannelID, messageID, ctx.Reply().
+					Format("## Moderation Request (Actioned)\n*image submitted from /fancy*\n**User:** <@%s>\n**Action:** %s\n**Moderator:** <@%s>", request.RequestorID, string(request.ActionStatus), ctx.User().ID).
+					Component(nil),
+				)
 				if err != nil {
 					return ctx.Reply().Send("Failed to update request message", err.Error())
 				}

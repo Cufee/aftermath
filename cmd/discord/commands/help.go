@@ -33,16 +33,18 @@ func now() time.Time {
 }
 
 func sendHelpResponse(ctx common.Context) error {
-	return ctx.Reply().
-		Format("commands_help_message_fmt", sessionResetTimes(ctx.Localize), backgroundResetTime()).
+	return reply(ctx).Send()
+}
+
+func reply(ctx common.Context) common.Reply {
+	return ctx.Reply().Format("commands_help_message_fmt", sessionResetTimes(ctx.Localize), backgroundResetTime()).
 		Component(
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
 					common.ButtonInviteAftermath(ctx.Localize("buttons_add_aftermath_to_your_server")),
 					common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_join_primary_guild")),
 				}},
-		).
-		Send()
+		)
 }
 
 func Help() builder.Builder {

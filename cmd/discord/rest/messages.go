@@ -15,7 +15,7 @@ func (c *Client) CreateMessage(ctx context.Context, channelID string, data disco
 	return m, c.do(ctx, req, &m)
 }
 
-func (c *Client) UpdateMessage(ctx context.Context, channelID string, messageID string, data discordgo.Message, files []File) (discordgo.Message, error) {
+func (c *Client) UpdateMessage(ctx context.Context, channelID string, messageID string, data discordgo.MessageEdit, files []File) (discordgo.Message, error) {
 	req, err := c.requestWithFiles("PATCH", discordgo.EndpointChannelMessage(channelID, messageID), data, files)
 	if err != nil {
 		return discordgo.Message{}, err

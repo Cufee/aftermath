@@ -206,11 +206,29 @@ func (c *routeContext) AutocompleteData() (discordgo.ApplicationCommandInteracti
 func (c *routeContext) DeleteResponse(ctx context.Context) error {
 	return c.rest.DeleteInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token)
 }
-func (c *routeContext) CreateMessage(ctx context.Context, channelID string, data discordgo.MessageSend, files []rest.File) (discordgo.Message, error) {
-	return c.rest.CreateMessage(ctx, channelID, data, files)
+func (c *routeContext) CreateMessage(ctx context.Context, channelID string, reply common.Reply) (discordgo.Message, error) {
+	data, files := reply.Peek().Data(c.localize)
+	return c.rest.CreateMessage(ctx, channelID, discordgo.MessageSend{
+		Content:    data.Content,
+		Components: data.Components,
+		Embeds:     data.Embeds,
+	}, files)
 }
-func (c *routeContext) UpdateMessage(ctx context.Context, channelID string, messageID string, data discordgo.Message, files []rest.File) (discordgo.Message, error) {
-	return c.rest.UpdateMessage(ctx, channelID, messageID, data, files)
+func (c *routeContext) UpdateMessage(ctx context.Context, channelID string, messageID string, reply common.Reply) (discordgo.Message, error) {
+	data, files := reply.Peek().Data(c.localize)
+	edit := discordgo.MessageEdit{
+		Attachments: data.Attachments,
+	}
+	if data.Content != "" {
+		edit.Content = &data.Content
+	}
+	if data.Components != nil {
+		edit.Components = &data.Components
+	}
+	if data.Embeds != nil {
+		edit.Embeds = &data.Embeds
+	}
+	return c.rest.UpdateMessage(ctx, channelID, messageID, edit, files)
 }
 func (c *routeContext) CreateDMChannel(ctx context.Context, userID string) (discordgo.Channel, error) {
 	return c.rest.CreateDMChannel(ctx, userID)
