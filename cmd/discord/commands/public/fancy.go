@@ -1,4 +1,4 @@
-package commands
+package public
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
@@ -25,7 +26,7 @@ import (
 )
 
 func init() {
-	LoadedPublic.add(
+	commands.LoadedPublic.Add(
 		builder.NewCommand("fancy").
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.CreatePersonalContent, permissions.RemovePersonalContent, permissions.UpdatePersonalContent)).
 			Ephemeral().
@@ -37,6 +38,10 @@ func init() {
 					Params(builder.SetNameKey("command_option_fancy_link_name"), builder.SetDescKey("command_option_fancy_link_description")),
 			).
 			Handler(func(ctx common.Context) error {
+				if len(ctx.Options()) == 0 {
+					return ctx.Reply().Send("command_fancy_help_message")
+				}
+
 				helpButton := discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
 						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
@@ -114,7 +119,7 @@ func init() {
 								Name:     "check",
 								Animated: true,
 							},
-							CustomID: fmt.Sprintf("moderation_image_submit#%s", content.ID),
+							CustomID: fmt.Sprintf("fancy_image_submit#%s", content.ID),
 						},
 						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
 					}}
@@ -141,11 +146,11 @@ func init() {
 			}),
 	)
 
-	LoadedPublic.add(
-		builder.NewCommand("moderation_image_submit_button").
+	commands.LoadedPublic.Add(
+		builder.NewCommand("fancy_image_submit_button").
 			Middleware(middleware.RequirePermissions(permissions.CreatePersonalContent, permissions.UseTextCommands)).
 			ComponentType(func(customID string) bool {
-				return strings.HasPrefix(customID, "moderation_image_submit#")
+				return strings.HasPrefix(customID, "fancy_image_submit#")
 			}).
 			Handler(func(ctx common.Context) error {
 				data, ok := ctx.ComponentData()

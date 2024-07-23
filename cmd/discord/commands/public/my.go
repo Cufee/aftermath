@@ -1,4 +1,4 @@
-package commands
+package public
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
@@ -19,7 +20,7 @@ import (
 )
 
 func init() {
-	LoadedPublic.add(
+	commands.LoadedPublic.Add(
 		builder.NewCommand("my").
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
 			Params(builder.SetNameKey("command_my_name"), builder.SetDescKey("command_my_description")).
@@ -27,8 +28,8 @@ func init() {
 				builder.NewOption("stats", discordgo.ApplicationCommandOptionSubCommand).
 					Params(builder.SetNameKey("command_my_stats_name"), builder.SetDescKey("command_my_stats_description")).
 					Options(
-						daysOption,
-						vehicleOption,
+						commands.DaysOption,
+						commands.VehicleOption,
 						builder.NewOption("account", discordgo.ApplicationCommandOptionString).
 							Params(builder.SetNameKey("command_option_my_account_name"), builder.SetDescKey("command_option_my_account_description")).
 							Autocomplete(),
@@ -36,8 +37,8 @@ func init() {
 				builder.NewOption("session", discordgo.ApplicationCommandOptionSubCommand).
 					Params(builder.SetNameKey("command_my_session_name"), builder.SetDescKey("command_my_session_description")).
 					Options(
-						daysOption,
-						vehicleOption,
+						commands.DaysOption,
+						commands.VehicleOption,
 						builder.NewOption("account", discordgo.ApplicationCommandOptionString).
 							Params(builder.SetNameKey("command_option_my_account_name"), builder.SetDescKey("command_option_my_account_description")).
 							Autocomplete(),
@@ -45,7 +46,7 @@ func init() {
 			).
 			Handler(func(ctx common.Context) error {
 				subcommand, subOptions, _ := ctx.Options().Subcommand()
-				options := getDefaultStatsOptions(ctx.Options())
+				options := commands.GetDefaultStatsOptions(ctx.Options())
 				message, valid := options.Validate(ctx)
 				if !valid {
 					return ctx.Reply().Send(message)

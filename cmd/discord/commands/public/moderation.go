@@ -1,12 +1,11 @@
-package commands
+package public
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
@@ -16,129 +15,7 @@ import (
 )
 
 func init() {
-	LoadedInternal.add(
-		builder.NewCommand("restriction").
-			Middleware(middleware.RequirePermissions(permissions.CreateSoftUserRestriction, permissions.RemoveSoftRestriction, permissions.CreateHardUserRestriction, permissions.RemoveHardRestriction)).
-			Options(
-				builder.NewOption("view", discordgo.ApplicationCommandOptionSubCommand).
-					Options(
-						builder.NewOption("user_id", discordgo.ApplicationCommandOptionString),
-						builder.NewOption("restriction_id", discordgo.ApplicationCommandOptionString),
-					),
-				builder.NewOption("update", discordgo.ApplicationCommandOptionSubCommand).
-					Options(
-						builder.NewOption("restriction_id", discordgo.ApplicationCommandOptionString).Required(),
-						builder.NewOption("expires_at_unix", discordgo.ApplicationCommandOptionNumber).Required(),
-					),
-			).
-			Handler(func(ctx common.Context) error {
-				subcommand, subOptions, _ := ctx.Options().Subcommand()
-
-				userID, _ := subOptions.Value("user_id").(string)
-				restrictionID, _ := subOptions.Value("restriction_id").(string)
-
-				if userID == "" && restrictionID == "" {
-					return ctx.Reply().Send("user id or restriction id needs to be provided")
-				}
-
-				switch subcommand {
-				case "view":
-					var data any
-					var err error
-					if restrictionID != "" {
-						data, err = ctx.Core().Database().GetUserRestriction(ctx.Ctx(), restrictionID)
-					}
-					if userID != "" {
-						data, err = ctx.Core().Database().GetUserRestrictions(ctx.Ctx(), userID)
-					}
-					if err != nil {
-						return ctx.Reply().Send("failed to get restriction", err.Error())
-					}
-					d, _ := json.MarshalIndent(data, "", "  ")
-					return ctx.Reply().Send(string(d))
-
-				case "update":
-					data, err := ctx.Core().Database().GetUserRestriction(ctx.Ctx(), restrictionID)
-					if err != nil {
-						return ctx.Reply().Send("failed to get restriction", err.Error())
-					}
-					expiresAtUnix, ok := subOptions.Value("expires_at_unix").(float64)
-					if !ok {
-						return ctx.Reply().Send("failed to parse expires_at_unix")
-					}
-					expiresAt := time.Unix(int64(expiresAtUnix), 0)
-					data.ExpiresAt = expiresAt
-					data.AddEvent(ctx.User().ID, "updated expires_at", "expired_at updated from a /restriction update command")
-
-					data, err = ctx.Core().Database().UpdateUserRestriction(ctx.Ctx(), data)
-					if err != nil {
-						return ctx.Reply().Send("failed to update restriction", err.Error())
-					}
-					d, _ := json.MarshalIndent(data, "", "  ")
-					return ctx.Reply().Send(string(d))
-
-				default:
-					return ctx.Error("invalid subcommand: " + subcommand)
-				}
-			}),
-	)
-
-	LoadedInternal.add(
-		builder.NewCommand("requests").
-			Middleware(middleware.RequirePermissions(permissions.ContentModerator)).
-			Options(
-				builder.NewOption("view", discordgo.ApplicationCommandOptionSubCommand).
-					Options(
-						builder.NewOption("requests_id", discordgo.ApplicationCommandOptionString).Required(),
-					),
-				builder.NewOption("set_status", discordgo.ApplicationCommandOptionSubCommand).
-					Options(
-						builder.NewOption("status", discordgo.ApplicationCommandOptionString).Required(),
-						builder.NewOption("requests_id", discordgo.ApplicationCommandOptionString).Required(),
-					),
-			).
-			Handler(func(ctx common.Context) error {
-				subcommand, subOptions, _ := ctx.Options().Subcommand()
-				requestID, _ := subOptions.Value("requests_id").(string)
-				if requestID == "" {
-					return ctx.Reply().Send("review id needs to be provided")
-				}
-
-				switch subcommand {
-				case "view":
-					data, err := ctx.Core().Database().GetModerationRequest(ctx.Ctx(), requestID)
-					if err != nil {
-						return ctx.Reply().Send("failed to get request", err.Error())
-					}
-					d, _ := json.MarshalIndent(data, "", "  ")
-					return ctx.Reply().Send(string(d))
-
-				case "set_status":
-					status, ok := subOptions.Value("status").(string)
-					if !ok {
-						return ctx.Reply().Send("status cannot be left blank")
-					}
-
-					data, err := ctx.Core().Database().GetModerationRequest(ctx.Ctx(), requestID)
-					if err != nil {
-						return ctx.Reply().Send("failed to get request", err.Error())
-					}
-
-					data.ActionStatus = models.ModerationStatus(status)
-					data, err = ctx.Core().Database().UpdateModerationRequest(ctx.Ctx(), data)
-					if err != nil {
-						return ctx.Reply().Send("failed to update request", err.Error())
-					}
-					d, _ := json.MarshalIndent(data, "", "  ")
-					return ctx.Reply().Send(string(d))
-
-				default:
-					return ctx.Error("invalid subcommand: " + subcommand)
-				}
-			}),
-	)
-
-	LoadedPublic.add(
+	commands.LoadedPublic.Add(
 		builder.NewCommand("moderation_image_action_button").
 			Middleware(middleware.RequirePermissions(permissions.ContentModerator, permissions.UseTextCommands)).
 			ComponentType(func(customID string) bool {

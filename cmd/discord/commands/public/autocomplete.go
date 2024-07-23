@@ -1,4 +1,4 @@
-package commands
+package public
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -15,7 +16,7 @@ import (
 )
 
 func init() {
-	LoadedPublic.add(
+	commands.LoadedPublic.Add(
 		builder.NewCommand("autocomplete_linked_accounts").
 			ComponentType(func(s string) bool {
 				var keys []string
@@ -61,7 +62,7 @@ func init() {
 			}),
 	)
 
-	LoadedPublic.add(
+	commands.LoadedPublic.Add(
 		builder.NewCommand("autocomplete_tank_search").
 			ComponentType(func(s string) bool {
 				var keys []string
@@ -70,7 +71,7 @@ func init() {
 				return slices.Contains(keys, s)
 			}).
 			Handler(func(ctx common.Context) error {
-				options := getDefaultStatsOptions(ctx.Options())
+				options := commands.GetDefaultStatsOptions(ctx.Options())
 				// if the tank was already found, return the tank
 				if options.TankID != "" {
 					vehicle, ok := search.GetVehicleFromCache(ctx.Locale(), options.TankID)

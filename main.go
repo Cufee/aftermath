@@ -21,6 +21,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core/tasks"
 	"github.com/cufee/aftermath/cmd/discord/alerts"
 	"github.com/cufee/aftermath/cmd/discord/commands"
+	"github.com/cufee/aftermath/cmd/discord/commands/public"
 	"github.com/cufee/aftermath/cmd/discord/gateway"
 	"github.com/cufee/aftermath/cmd/discord/router"
 	"github.com/cufee/aftermath/cmd/frontend"
@@ -191,7 +192,7 @@ func discordGatewayFromEnv(core core.Client) (gateway.Client, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encode help image")
 	}
-	_ = gw.Handler(commands.MentionHandler(buf.Bytes()))
+	_ = gw.Handler(public.MentionHandler(buf.Bytes()))
 
 	err = gw.Connect()
 	if err != nil {
@@ -213,7 +214,7 @@ func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
 			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
 		}
 
-		router.LoadCommands(commands.Help().Build())
+		router.LoadCommands(public.Help().Build())
 		router.LoadCommands(commands.LoadedPublic.Compose()...)
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)

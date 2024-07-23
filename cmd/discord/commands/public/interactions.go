@@ -1,4 +1,4 @@
-package commands
+package public
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
@@ -78,7 +79,7 @@ func newStatsRefreshButton(data models.DiscordInteraction) discordgo.MessageComp
 }
 
 func init() {
-	LoadedPublic.add(
+	commands.LoadedPublic.Add(
 		builder.NewCommand("refresh_stats_from_button").
 			Middleware(middleware.RequirePermissions(permissions.UseImageCommands, permissions.UseTextCommands)).
 			ComponentType(func(customID string) bool {

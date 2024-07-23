@@ -1,4 +1,4 @@
-package commands
+package public
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
@@ -18,12 +19,12 @@ import (
 )
 
 func init() {
-	LoadedPublic.add(
+	commands.LoadedPublic.Add(
 		builder.NewCommand("stats").
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
-			Options(defaultStatsOptions...).
+			Options(commands.DefaultStatsOptions...).
 			Handler(func(ctx common.Context) error {
-				options := getDefaultStatsOptions(ctx.Options())
+				options := commands.GetDefaultStatsOptions(ctx.Options())
 				message, valid := options.Validate(ctx)
 				if !valid {
 					return ctx.Reply().Send(message)
@@ -67,7 +68,7 @@ func init() {
 				default:
 					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
 					if !hasDefaultAccount {
-						return ctx.Reply().Send("stats_error_nickname_or_server_missing")
+						return ctx.Reply().Send("command_stats_help_message")
 					}
 					// command used without options, but user has a default connection
 					accountID = defaultAccount.ReferenceID

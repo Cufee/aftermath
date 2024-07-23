@@ -17,11 +17,15 @@
   value: stats
 - key: command_stats_description
   value: Get an overview of your stats
+- key: command_stats_help_message
+  value: "## View Career Stats for Your Account!\nTo get started, include a nickname and server, mention another user, or link an account using `/links add`!"
 # /session
 - key: command_session_name
   value: session
 - key: command_session_description
   value: Get detailed stats for your recent session
+- key: command_session_help_message
+  value: "## View Session Stats for Your Account!\nTo get started, include a nickname and server, mention another user, or link an account using `/links add`!"
 # /my
 - key: command_my_name
   value: my
@@ -91,6 +95,8 @@
   value: "replay"
 - key: "commands_replay_description"
   value: "Analyze your replay and view stats for every single player"
+- key: "command_replay_help_message"
+  value: "## Analyze Your Replay and View Stats for All Players!\nTo get started, attach a replay file or provide a link to a replay file when sending the command!"
 - key: command_option_replay_file_name
   value: "file"
 - key: command_option_replay_file_description
@@ -105,6 +111,8 @@
   value: "fancy"
 - key: command_fancy_description
   value: "Set a custom background for your stats!"
+- key: command_fancy_help_message
+  value: "## Upload a Custom Background!\nTo get started, attach an image or provide a link to an image when sending the command!"
 - key: command_option_fancy_link_name
   value: "link"
 - key: command_option_fancy_link_description
@@ -243,10 +251,6 @@
 - key: stats_error_connection_not_found_personal
   value: "Looks like you don't have a Blitz account linked yet. Give the `/links` command a shot."
   context: No Blitz account linked
-
-- key: stats_error_nickname_or_server_missing
-  value: "I need both the name and server to find your account. You can also use the `/links` command to setup a default account."
-  context: User provided a nickname, but no server
 
 - key: stats_error_nickname_invalid
   value: "This does not look like a valid player name, make sure you are using your in-game name."

@@ -1,4 +1,4 @@
-package commands
+package public
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
@@ -17,7 +18,7 @@ import (
 )
 
 func init() {
-	LoadedPublic.add(
+	commands.LoadedPublic.Add(
 		builder.NewCommand("replay").
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
 			Options(
@@ -28,6 +29,10 @@ func init() {
 					Params(builder.SetNameKey("command_option_replay_link_name"), builder.SetDescKey("command_option_replay_link_description")),
 			).
 			Handler(func(ctx common.Context) error {
+				if len(ctx.Options()) == 0 {
+					return ctx.Reply().Send("command_replay_help_message")
+				}
+
 				link, linkOK := ctx.Options().Value("link").(string)
 				file, fileOK := ctx.Options().Value("file").(string)
 				if (!linkOK && !fileOK) || (link == "" && file == "") {

@@ -1,4 +1,4 @@
-package commands
+package public
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
@@ -18,7 +19,7 @@ import (
 )
 
 func init() {
-	LoadedPublic.add(
+	commands.LoadedPublic.Add(
 		builder.NewCommand("links").
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.CreatePersonalConnection, permissions.RemovePersonalConnection, permissions.UpdatePersonalConnection)).
 			Ephemeral().
@@ -87,7 +88,7 @@ func init() {
 					return ctx.Error("received an unexpected subcommand: " + subcommand)
 
 				case "verify":
-					options := getDefaultStatsOptions(subOptions)
+					options := commands.GetDefaultStatsOptions(subOptions)
 					realm := strings.ToLower(options.Server)
 					loginURL := fmt.Sprintf("%s/r/verify/%s", constants.FrontendURL, realm)
 					return ctx.Reply().Format("command_links_verify_response_fmt", ctx.Localize("common_label_realm_"+realm), loginURL).Send()
@@ -200,7 +201,7 @@ func init() {
 						return ctx.Reply().Send("links_error_too_many_connections")
 					}
 
-					options := getDefaultStatsOptions(subOptions)
+					options := commands.GetDefaultStatsOptions(subOptions)
 					message, valid := options.Validate(ctx)
 					if !valid {
 						return ctx.Reply().Send(message)

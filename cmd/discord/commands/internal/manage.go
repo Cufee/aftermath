@@ -1,4 +1,4 @@
-package commands
+package internal
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
@@ -15,18 +16,18 @@ import (
 )
 
 func init() {
-	LoadedInternal.add(
+	commands.LoadedInternal.Add(
 		builder.NewCommand("manage").
 			Middleware(middleware.RequirePermissions(permissions.UseDebugFeatures)).
 			Options(
 				builder.NewOption("users", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
 					builder.NewOption("lookup", discordgo.ApplicationCommandOptionSubCommand).Options(
-						userOption,
+						commands.UserOption,
 					),
 				),
 				builder.NewOption("accounts", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
 					builder.NewOption("search", discordgo.ApplicationCommandOptionSubCommand).Options(
-						nicknameAndServerOptions...,
+						commands.NicknameAndServerOptions...,
 					),
 				),
 				builder.NewOption("tasks", discordgo.ApplicationCommandOptionSubCommandGroup).Options(

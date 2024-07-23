@@ -12,7 +12,7 @@ import (
 
 var validNameRegex = regexp.MustCompile(`[^\w\_]`)
 
-var daysOption = builder.NewOption("days", discordgo.ApplicationCommandOptionInteger).
+var DaysOption = builder.NewOption("days", discordgo.ApplicationCommandOptionInteger).
 	Min(1).
 	Max(90).
 	Params(
@@ -20,7 +20,7 @@ var daysOption = builder.NewOption("days", discordgo.ApplicationCommandOptionInt
 		builder.SetDescKey("common_option_stats_days_description"),
 	)
 
-var vehicleOption = builder.NewOption("tank", discordgo.ApplicationCommandOptionString).
+var VehicleOption = builder.NewOption("tank", discordgo.ApplicationCommandOptionString).
 	Min(3).
 	Max(32).
 	Autocomplete().
@@ -29,7 +29,7 @@ var vehicleOption = builder.NewOption("tank", discordgo.ApplicationCommandOption
 		builder.SetDescKey("common_option_stats_tank_description"),
 	)
 
-var nicknameAndServerOptions = []builder.Option{
+var NicknameAndServerOptions = []builder.Option{
 	builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
 		Min(5).
 		Max(30).
@@ -49,17 +49,17 @@ var nicknameAndServerOptions = []builder.Option{
 		),
 }
 
-var userOption = builder.NewOption("user", discordgo.ApplicationCommandOptionUser).
+var UserOption = builder.NewOption("user", discordgo.ApplicationCommandOptionUser).
 	Params(
 		builder.SetNameKey("common_option_stats_user_name"),
 		builder.SetDescKey("common_option_stats_user_description"),
 	)
 
-var defaultStatsOptions = append([]builder.Option{
-	daysOption,
-	vehicleOption,
-	userOption,
-}, nicknameAndServerOptions...)
+var DefaultStatsOptions = append([]builder.Option{
+	DaysOption,
+	VehicleOption,
+	UserOption,
+}, NicknameAndServerOptions...)
 
 type statsOptions struct {
 	PeriodStart time.Time
@@ -73,7 +73,7 @@ type statsOptions struct {
 
 func (o statsOptions) Validate(ctx common.Context) (string, bool) {
 	// check if the name is valid
-	if o.UserID == "" && o.Nickname != "" && !validatePlayerName(o.Nickname) {
+	if o.UserID == "" && o.Nickname != "" && !ValidatePlayerName(o.Nickname) {
 		return "errors_generic_nickname_invalid", false
 	}
 	if o.UserID == "" && o.Nickname != "" && o.Server == "" {
@@ -92,7 +92,7 @@ func (o statsOptions) Validate(ctx common.Context) (string, bool) {
 	return "", true
 }
 
-func getDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataOption) statsOptions {
+func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataOption) statsOptions {
 	var options statsOptions
 
 	options.TankSearch, _ = common.GetOption[string](data, "tank")
@@ -111,6 +111,6 @@ func getDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataO
 	return options
 }
 
-func validatePlayerName(name string) bool {
+func ValidatePlayerName(name string) bool {
 	return !validNameRegex.MatchString(name)
 }

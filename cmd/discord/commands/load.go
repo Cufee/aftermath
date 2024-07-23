@@ -4,7 +4,7 @@ import "github.com/cufee/aftermath/cmd/discord/commands/builder"
 
 type commandInit []builder.Builder
 
-func (c *commandInit) add(cmd builder.Builder) {
+func (c *commandInit) Add(cmd builder.Builder) {
 	*c = append(*c, cmd)
 }
 
