@@ -2,12 +2,18 @@ package fetch
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
+
+type AccountWithRealm struct {
+	types.Account
+	Realm string
+}
 
 type AccountStatsOverPeriod struct {
 	Realm string `json:"realm"`
@@ -49,11 +55,14 @@ type StatsWithVehicles struct {
 type Client interface {
 	Account(ctx context.Context, id string) (models.Account, error)
 	Search(ctx context.Context, nickname, realm string) (types.Account, error)
+	BroadSearch(ctx context.Context, nickname string) ([]AccountWithRealm, error)
 	CurrentStats(ctx context.Context, id string, opts ...StatsOption) (AccountStatsOverPeriod, error)
 
 	PeriodStats(ctx context.Context, id string, from time.Time, opts ...StatsOption) (AccountStatsOverPeriod, error)
 	SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error)
 
+	ReplayRemote(ctx context.Context, fileURL string) (Replay, error)
+	Replay(ctx context.Context, file io.ReaderAt, size int64) (Replay, error)
 	CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error)
 }
 

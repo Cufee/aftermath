@@ -11,10 +11,11 @@ type Options struct {
 	VehicleID  string
 	PromoText  []string
 	Background image.Image
+	Printer    func(string) string
 }
 
 func DefaultOptions() Options {
-	return Options{}
+	return Options{Printer: func(s string) string { return s }}
 }
 
 type Option func(*Options)
@@ -30,22 +31,25 @@ func WithVehicleID(vid string) Option {
 	}
 }
 
-func WithBackground(bgURL string) Option {
-	if bgURL == "" {
-		bgURL = "static://bg-default"
+func WithPrinter(printer func(string) string) Option {
+	return func(o *Options) {
+		o.Printer = printer
 	}
+}
 
-	var image image.Image
+func WithBackgroundURL(bgURL string) Option {
 	if strings.HasPrefix(bgURL, "static://") {
 		img, ok := assets.GetLoadedImage(strings.ReplaceAll(bgURL, "static://", ""))
 		if ok {
-			image = img
+			return func(o *Options) {
+				o.Background = img
+			}
 		}
 	}
+	return func(o *Options) {}
+}
 
-	if image == nil {
-		return func(o *Options) {}
-	}
+func WithBackground(image image.Image) Option {
 	return func(o *Options) {
 		o.Background = image
 	}

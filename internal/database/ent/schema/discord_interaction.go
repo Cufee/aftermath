@@ -14,13 +14,16 @@ type DiscordInteraction struct {
 
 func (DiscordInteraction) Fields() []ent.Field {
 	return append(defaultFields,
-		field.String("command").NotEmpty(),
+		field.String("result").NotEmpty().Immutable(),
 		field.String("user_id").NotEmpty().Immutable(),
-		field.String("reference_id").NotEmpty(),
+		field.String("event_id").NotEmpty().Immutable(),
+		field.String("guild_id").Immutable(),
+		field.String("channel_id").Immutable(),
+		field.String("message_id").Immutable(),
 		field.Enum("type").
 			GoType(models.DiscordInteractionType("")),
 		field.String("locale"),
-		field.JSON("options", models.DiscordInteractionOptions{}),
+		field.JSON("metadata", map[string]any{}),
 	)
 }
 
@@ -33,9 +36,9 @@ func (DiscordInteraction) Edges() []ent.Edge {
 func (DiscordInteraction) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("id"),
-		index.Fields("command"),
 		index.Fields("user_id"),
-		index.Fields("user_id", "type"),
-		index.Fields("reference_id"),
+		index.Fields("created_at"),
+		index.Fields("user_id", "type", "created_at"),
+		index.Fields("channel_id", "type", "created_at"),
 	}
 }

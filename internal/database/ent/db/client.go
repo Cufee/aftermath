@@ -23,15 +23,20 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
+	"github.com/cufee/aftermath/internal/database/ent/db/gamemode"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 
 	stdsql "database/sql"
 )
@@ -57,8 +62,14 @@ type Client struct {
 	CronTask *CronTaskClient
 	// DiscordInteraction is the client for interacting with the DiscordInteraction builders.
 	DiscordInteraction *DiscordInteractionClient
+	// GameMap is the client for interacting with the GameMap builders.
+	GameMap *GameMapClient
+	// GameMode is the client for interacting with the GameMode builders.
+	GameMode *GameModeClient
 	// LeaderboardScore is the client for interacting with the LeaderboardScore builders.
 	LeaderboardScore *LeaderboardScoreClient
+	// ModerationRequest is the client for interacting with the ModerationRequest builders.
+	ModerationRequest *ModerationRequestClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// User is the client for interacting with the User builders.
@@ -67,6 +78,8 @@ type Client struct {
 	UserConnection *UserConnectionClient
 	// UserContent is the client for interacting with the UserContent builders.
 	UserContent *UserContentClient
+	// UserRestriction is the client for interacting with the UserRestriction builders.
+	UserRestriction *UserRestrictionClient
 	// UserSubscription is the client for interacting with the UserSubscription builders.
 	UserSubscription *UserSubscriptionClient
 	// Vehicle is the client for interacting with the Vehicle builders.
@@ -75,6 +88,8 @@ type Client struct {
 	VehicleAverage *VehicleAverageClient
 	// VehicleSnapshot is the client for interacting with the VehicleSnapshot builders.
 	VehicleSnapshot *VehicleSnapshotClient
+	// WidgetSettings is the client for interacting with the WidgetSettings builders.
+	WidgetSettings *WidgetSettingsClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -94,15 +109,20 @@ func (c *Client) init() {
 	c.Clan = NewClanClient(c.config)
 	c.CronTask = NewCronTaskClient(c.config)
 	c.DiscordInteraction = NewDiscordInteractionClient(c.config)
+	c.GameMap = NewGameMapClient(c.config)
+	c.GameMode = NewGameModeClient(c.config)
 	c.LeaderboardScore = NewLeaderboardScoreClient(c.config)
+	c.ModerationRequest = NewModerationRequestClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserConnection = NewUserConnectionClient(c.config)
 	c.UserContent = NewUserContentClient(c.config)
+	c.UserRestriction = NewUserRestrictionClient(c.config)
 	c.UserSubscription = NewUserSubscriptionClient(c.config)
 	c.Vehicle = NewVehicleClient(c.config)
 	c.VehicleAverage = NewVehicleAverageClient(c.config)
 	c.VehicleSnapshot = NewVehicleSnapshotClient(c.config)
+	c.WidgetSettings = NewWidgetSettingsClient(c.config)
 }
 
 type (
@@ -203,15 +223,20 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Clan:               NewClanClient(cfg),
 		CronTask:           NewCronTaskClient(cfg),
 		DiscordInteraction: NewDiscordInteractionClient(cfg),
+		GameMap:            NewGameMapClient(cfg),
+		GameMode:           NewGameModeClient(cfg),
 		LeaderboardScore:   NewLeaderboardScoreClient(cfg),
+		ModerationRequest:  NewModerationRequestClient(cfg),
 		Session:            NewSessionClient(cfg),
 		User:               NewUserClient(cfg),
 		UserConnection:     NewUserConnectionClient(cfg),
 		UserContent:        NewUserContentClient(cfg),
+		UserRestriction:    NewUserRestrictionClient(cfg),
 		UserSubscription:   NewUserSubscriptionClient(cfg),
 		Vehicle:            NewVehicleClient(cfg),
 		VehicleAverage:     NewVehicleAverageClient(cfg),
 		VehicleSnapshot:    NewVehicleSnapshotClient(cfg),
+		WidgetSettings:     NewWidgetSettingsClient(cfg),
 	}, nil
 }
 
@@ -239,15 +264,20 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Clan:               NewClanClient(cfg),
 		CronTask:           NewCronTaskClient(cfg),
 		DiscordInteraction: NewDiscordInteractionClient(cfg),
+		GameMap:            NewGameMapClient(cfg),
+		GameMode:           NewGameModeClient(cfg),
 		LeaderboardScore:   NewLeaderboardScoreClient(cfg),
+		ModerationRequest:  NewModerationRequestClient(cfg),
 		Session:            NewSessionClient(cfg),
 		User:               NewUserClient(cfg),
 		UserConnection:     NewUserConnectionClient(cfg),
 		UserContent:        NewUserContentClient(cfg),
+		UserRestriction:    NewUserRestrictionClient(cfg),
 		UserSubscription:   NewUserSubscriptionClient(cfg),
 		Vehicle:            NewVehicleClient(cfg),
 		VehicleAverage:     NewVehicleAverageClient(cfg),
 		VehicleSnapshot:    NewVehicleSnapshotClient(cfg),
+		WidgetSettings:     NewWidgetSettingsClient(cfg),
 	}, nil
 }
 
@@ -278,9 +308,10 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Account, c.AccountSnapshot, c.AppConfiguration, c.ApplicationCommand,
-		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.LeaderboardScore,
-		c.Session, c.User, c.UserConnection, c.UserContent, c.UserSubscription,
-		c.Vehicle, c.VehicleAverage, c.VehicleSnapshot,
+		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.GameMap, c.GameMode,
+		c.LeaderboardScore, c.ModerationRequest, c.Session, c.User, c.UserConnection,
+		c.UserContent, c.UserRestriction, c.UserSubscription, c.Vehicle,
+		c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
 	} {
 		n.Use(hooks...)
 	}
@@ -291,9 +322,10 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Account, c.AccountSnapshot, c.AppConfiguration, c.ApplicationCommand,
-		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.LeaderboardScore,
-		c.Session, c.User, c.UserConnection, c.UserContent, c.UserSubscription,
-		c.Vehicle, c.VehicleAverage, c.VehicleSnapshot,
+		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.GameMap, c.GameMode,
+		c.LeaderboardScore, c.ModerationRequest, c.Session, c.User, c.UserConnection,
+		c.UserContent, c.UserRestriction, c.UserSubscription, c.Vehicle,
+		c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -318,8 +350,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.CronTask.mutate(ctx, m)
 	case *DiscordInteractionMutation:
 		return c.DiscordInteraction.mutate(ctx, m)
+	case *GameMapMutation:
+		return c.GameMap.mutate(ctx, m)
+	case *GameModeMutation:
+		return c.GameMode.mutate(ctx, m)
 	case *LeaderboardScoreMutation:
 		return c.LeaderboardScore.mutate(ctx, m)
+	case *ModerationRequestMutation:
+		return c.ModerationRequest.mutate(ctx, m)
 	case *SessionMutation:
 		return c.Session.mutate(ctx, m)
 	case *UserMutation:
@@ -328,6 +366,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.UserConnection.mutate(ctx, m)
 	case *UserContentMutation:
 		return c.UserContent.mutate(ctx, m)
+	case *UserRestrictionMutation:
+		return c.UserRestriction.mutate(ctx, m)
 	case *UserSubscriptionMutation:
 		return c.UserSubscription.mutate(ctx, m)
 	case *VehicleMutation:
@@ -336,6 +376,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.VehicleAverage.mutate(ctx, m)
 	case *VehicleSnapshotMutation:
 		return c.VehicleSnapshot.mutate(ctx, m)
+	case *WidgetSettingsMutation:
+		return c.WidgetSettings.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("db: unknown mutation type %T", m)
 	}
@@ -1501,6 +1543,272 @@ func (c *DiscordInteractionClient) mutate(ctx context.Context, m *DiscordInterac
 	}
 }
 
+// GameMapClient is a client for the GameMap schema.
+type GameMapClient struct {
+	config
+}
+
+// NewGameMapClient returns a client for the GameMap from the given config.
+func NewGameMapClient(c config) *GameMapClient {
+	return &GameMapClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `gamemap.Hooks(f(g(h())))`.
+func (c *GameMapClient) Use(hooks ...Hook) {
+	c.hooks.GameMap = append(c.hooks.GameMap, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `gamemap.Intercept(f(g(h())))`.
+func (c *GameMapClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GameMap = append(c.inters.GameMap, interceptors...)
+}
+
+// Create returns a builder for creating a GameMap entity.
+func (c *GameMapClient) Create() *GameMapCreate {
+	mutation := newGameMapMutation(c.config, OpCreate)
+	return &GameMapCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of GameMap entities.
+func (c *GameMapClient) CreateBulk(builders ...*GameMapCreate) *GameMapCreateBulk {
+	return &GameMapCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *GameMapClient) MapCreateBulk(slice any, setFunc func(*GameMapCreate, int)) *GameMapCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &GameMapCreateBulk{err: fmt.Errorf("calling to GameMapClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*GameMapCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &GameMapCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for GameMap.
+func (c *GameMapClient) Update() *GameMapUpdate {
+	mutation := newGameMapMutation(c.config, OpUpdate)
+	return &GameMapUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GameMapClient) UpdateOne(gm *GameMap) *GameMapUpdateOne {
+	mutation := newGameMapMutation(c.config, OpUpdateOne, withGameMap(gm))
+	return &GameMapUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GameMapClient) UpdateOneID(id string) *GameMapUpdateOne {
+	mutation := newGameMapMutation(c.config, OpUpdateOne, withGameMapID(id))
+	return &GameMapUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for GameMap.
+func (c *GameMapClient) Delete() *GameMapDelete {
+	mutation := newGameMapMutation(c.config, OpDelete)
+	return &GameMapDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GameMapClient) DeleteOne(gm *GameMap) *GameMapDeleteOne {
+	return c.DeleteOneID(gm.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GameMapClient) DeleteOneID(id string) *GameMapDeleteOne {
+	builder := c.Delete().Where(gamemap.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GameMapDeleteOne{builder}
+}
+
+// Query returns a query builder for GameMap.
+func (c *GameMapClient) Query() *GameMapQuery {
+	return &GameMapQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeGameMap},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a GameMap entity by its id.
+func (c *GameMapClient) Get(ctx context.Context, id string) (*GameMap, error) {
+	return c.Query().Where(gamemap.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GameMapClient) GetX(ctx context.Context, id string) *GameMap {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *GameMapClient) Hooks() []Hook {
+	return c.hooks.GameMap
+}
+
+// Interceptors returns the client interceptors.
+func (c *GameMapClient) Interceptors() []Interceptor {
+	return c.inters.GameMap
+}
+
+func (c *GameMapClient) mutate(ctx context.Context, m *GameMapMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GameMapCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GameMapUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GameMapUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GameMapDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown GameMap mutation op: %q", m.Op())
+	}
+}
+
+// GameModeClient is a client for the GameMode schema.
+type GameModeClient struct {
+	config
+}
+
+// NewGameModeClient returns a client for the GameMode from the given config.
+func NewGameModeClient(c config) *GameModeClient {
+	return &GameModeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `gamemode.Hooks(f(g(h())))`.
+func (c *GameModeClient) Use(hooks ...Hook) {
+	c.hooks.GameMode = append(c.hooks.GameMode, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `gamemode.Intercept(f(g(h())))`.
+func (c *GameModeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GameMode = append(c.inters.GameMode, interceptors...)
+}
+
+// Create returns a builder for creating a GameMode entity.
+func (c *GameModeClient) Create() *GameModeCreate {
+	mutation := newGameModeMutation(c.config, OpCreate)
+	return &GameModeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of GameMode entities.
+func (c *GameModeClient) CreateBulk(builders ...*GameModeCreate) *GameModeCreateBulk {
+	return &GameModeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *GameModeClient) MapCreateBulk(slice any, setFunc func(*GameModeCreate, int)) *GameModeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &GameModeCreateBulk{err: fmt.Errorf("calling to GameModeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*GameModeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &GameModeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for GameMode.
+func (c *GameModeClient) Update() *GameModeUpdate {
+	mutation := newGameModeMutation(c.config, OpUpdate)
+	return &GameModeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GameModeClient) UpdateOne(gm *GameMode) *GameModeUpdateOne {
+	mutation := newGameModeMutation(c.config, OpUpdateOne, withGameMode(gm))
+	return &GameModeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GameModeClient) UpdateOneID(id string) *GameModeUpdateOne {
+	mutation := newGameModeMutation(c.config, OpUpdateOne, withGameModeID(id))
+	return &GameModeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for GameMode.
+func (c *GameModeClient) Delete() *GameModeDelete {
+	mutation := newGameModeMutation(c.config, OpDelete)
+	return &GameModeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GameModeClient) DeleteOne(gm *GameMode) *GameModeDeleteOne {
+	return c.DeleteOneID(gm.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GameModeClient) DeleteOneID(id string) *GameModeDeleteOne {
+	builder := c.Delete().Where(gamemode.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GameModeDeleteOne{builder}
+}
+
+// Query returns a query builder for GameMode.
+func (c *GameModeClient) Query() *GameModeQuery {
+	return &GameModeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeGameMode},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a GameMode entity by its id.
+func (c *GameModeClient) Get(ctx context.Context, id string) (*GameMode, error) {
+	return c.Query().Where(gamemode.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GameModeClient) GetX(ctx context.Context, id string) *GameMode {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *GameModeClient) Hooks() []Hook {
+	return c.hooks.GameMode
+}
+
+// Interceptors returns the client interceptors.
+func (c *GameModeClient) Interceptors() []Interceptor {
+	return c.inters.GameMode
+}
+
+func (c *GameModeClient) mutate(ctx context.Context, m *GameModeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GameModeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GameModeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GameModeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GameModeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown GameMode mutation op: %q", m.Op())
+	}
+}
+
 // LeaderboardScoreClient is a client for the LeaderboardScore schema.
 type LeaderboardScoreClient struct {
 	config
@@ -1631,6 +1939,171 @@ func (c *LeaderboardScoreClient) mutate(ctx context.Context, m *LeaderboardScore
 		return (&LeaderboardScoreDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("db: unknown LeaderboardScore mutation op: %q", m.Op())
+	}
+}
+
+// ModerationRequestClient is a client for the ModerationRequest schema.
+type ModerationRequestClient struct {
+	config
+}
+
+// NewModerationRequestClient returns a client for the ModerationRequest from the given config.
+func NewModerationRequestClient(c config) *ModerationRequestClient {
+	return &ModerationRequestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `moderationrequest.Hooks(f(g(h())))`.
+func (c *ModerationRequestClient) Use(hooks ...Hook) {
+	c.hooks.ModerationRequest = append(c.hooks.ModerationRequest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `moderationrequest.Intercept(f(g(h())))`.
+func (c *ModerationRequestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ModerationRequest = append(c.inters.ModerationRequest, interceptors...)
+}
+
+// Create returns a builder for creating a ModerationRequest entity.
+func (c *ModerationRequestClient) Create() *ModerationRequestCreate {
+	mutation := newModerationRequestMutation(c.config, OpCreate)
+	return &ModerationRequestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ModerationRequest entities.
+func (c *ModerationRequestClient) CreateBulk(builders ...*ModerationRequestCreate) *ModerationRequestCreateBulk {
+	return &ModerationRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ModerationRequestClient) MapCreateBulk(slice any, setFunc func(*ModerationRequestCreate, int)) *ModerationRequestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ModerationRequestCreateBulk{err: fmt.Errorf("calling to ModerationRequestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ModerationRequestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ModerationRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ModerationRequest.
+func (c *ModerationRequestClient) Update() *ModerationRequestUpdate {
+	mutation := newModerationRequestMutation(c.config, OpUpdate)
+	return &ModerationRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ModerationRequestClient) UpdateOne(mr *ModerationRequest) *ModerationRequestUpdateOne {
+	mutation := newModerationRequestMutation(c.config, OpUpdateOne, withModerationRequest(mr))
+	return &ModerationRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ModerationRequestClient) UpdateOneID(id string) *ModerationRequestUpdateOne {
+	mutation := newModerationRequestMutation(c.config, OpUpdateOne, withModerationRequestID(id))
+	return &ModerationRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ModerationRequest.
+func (c *ModerationRequestClient) Delete() *ModerationRequestDelete {
+	mutation := newModerationRequestMutation(c.config, OpDelete)
+	return &ModerationRequestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ModerationRequestClient) DeleteOne(mr *ModerationRequest) *ModerationRequestDeleteOne {
+	return c.DeleteOneID(mr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ModerationRequestClient) DeleteOneID(id string) *ModerationRequestDeleteOne {
+	builder := c.Delete().Where(moderationrequest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ModerationRequestDeleteOne{builder}
+}
+
+// Query returns a query builder for ModerationRequest.
+func (c *ModerationRequestClient) Query() *ModerationRequestQuery {
+	return &ModerationRequestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeModerationRequest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ModerationRequest entity by its id.
+func (c *ModerationRequestClient) Get(ctx context.Context, id string) (*ModerationRequest, error) {
+	return c.Query().Where(moderationrequest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ModerationRequestClient) GetX(ctx context.Context, id string) *ModerationRequest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryModerator queries the moderator edge of a ModerationRequest.
+func (c *ModerationRequestClient) QueryModerator(mr *ModerationRequest) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(moderationrequest.Table, moderationrequest.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, moderationrequest.ModeratorTable, moderationrequest.ModeratorColumn),
+		)
+		fromV = sqlgraph.Neighbors(mr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequestor queries the requestor edge of a ModerationRequest.
+func (c *ModerationRequestClient) QueryRequestor(mr *ModerationRequest) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(moderationrequest.Table, moderationrequest.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, moderationrequest.RequestorTable, moderationrequest.RequestorColumn),
+		)
+		fromV = sqlgraph.Neighbors(mr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ModerationRequestClient) Hooks() []Hook {
+	return c.hooks.ModerationRequest
+}
+
+// Interceptors returns the client interceptors.
+func (c *ModerationRequestClient) Interceptors() []Interceptor {
+	return c.inters.ModerationRequest
+}
+
+func (c *ModerationRequestClient) mutate(ctx context.Context, m *ModerationRequestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ModerationRequestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ModerationRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ModerationRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ModerationRequestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown ModerationRequest mutation op: %q", m.Op())
 	}
 }
 
@@ -1939,6 +2412,22 @@ func (c *UserClient) QueryConnections(u *User) *UserConnectionQuery {
 	return query
 }
 
+// QueryWidgets queries the widgets edge of a User.
+func (c *UserClient) QueryWidgets(u *User) *WidgetSettingsQuery {
+	query := (&WidgetSettingsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(widgetsettings.Table, widgetsettings.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WidgetsTable, user.WidgetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryContent queries the content edge of a User.
 func (c *UserClient) QueryContent(u *User) *UserContentQuery {
 	query := (&UserContentClient{config: c.config}).Query()
@@ -1964,6 +2453,54 @@ func (c *UserClient) QuerySessions(u *User) *SessionQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryModerationRequests queries the moderation_requests edge of a User.
+func (c *UserClient) QueryModerationRequests(u *User) *ModerationRequestQuery {
+	query := (&ModerationRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(moderationrequest.Table, moderationrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ModerationRequestsTable, user.ModerationRequestsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryModerationActions queries the moderation_actions edge of a User.
+func (c *UserClient) QueryModerationActions(u *User) *ModerationRequestQuery {
+	query := (&ModerationRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(moderationrequest.Table, moderationrequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ModerationActionsTable, user.ModerationActionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRestrictions queries the restrictions edge of a User.
+func (c *UserClient) QueryRestrictions(u *User) *UserRestrictionQuery {
+	query := (&UserRestrictionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(userrestriction.Table, userrestriction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RestrictionsTable, user.RestrictionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -2291,6 +2828,155 @@ func (c *UserContentClient) mutate(ctx context.Context, m *UserContentMutation) 
 		return (&UserContentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("db: unknown UserContent mutation op: %q", m.Op())
+	}
+}
+
+// UserRestrictionClient is a client for the UserRestriction schema.
+type UserRestrictionClient struct {
+	config
+}
+
+// NewUserRestrictionClient returns a client for the UserRestriction from the given config.
+func NewUserRestrictionClient(c config) *UserRestrictionClient {
+	return &UserRestrictionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userrestriction.Hooks(f(g(h())))`.
+func (c *UserRestrictionClient) Use(hooks ...Hook) {
+	c.hooks.UserRestriction = append(c.hooks.UserRestriction, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userrestriction.Intercept(f(g(h())))`.
+func (c *UserRestrictionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserRestriction = append(c.inters.UserRestriction, interceptors...)
+}
+
+// Create returns a builder for creating a UserRestriction entity.
+func (c *UserRestrictionClient) Create() *UserRestrictionCreate {
+	mutation := newUserRestrictionMutation(c.config, OpCreate)
+	return &UserRestrictionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserRestriction entities.
+func (c *UserRestrictionClient) CreateBulk(builders ...*UserRestrictionCreate) *UserRestrictionCreateBulk {
+	return &UserRestrictionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserRestrictionClient) MapCreateBulk(slice any, setFunc func(*UserRestrictionCreate, int)) *UserRestrictionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserRestrictionCreateBulk{err: fmt.Errorf("calling to UserRestrictionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserRestrictionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserRestrictionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserRestriction.
+func (c *UserRestrictionClient) Update() *UserRestrictionUpdate {
+	mutation := newUserRestrictionMutation(c.config, OpUpdate)
+	return &UserRestrictionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserRestrictionClient) UpdateOne(ur *UserRestriction) *UserRestrictionUpdateOne {
+	mutation := newUserRestrictionMutation(c.config, OpUpdateOne, withUserRestriction(ur))
+	return &UserRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserRestrictionClient) UpdateOneID(id string) *UserRestrictionUpdateOne {
+	mutation := newUserRestrictionMutation(c.config, OpUpdateOne, withUserRestrictionID(id))
+	return &UserRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserRestriction.
+func (c *UserRestrictionClient) Delete() *UserRestrictionDelete {
+	mutation := newUserRestrictionMutation(c.config, OpDelete)
+	return &UserRestrictionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserRestrictionClient) DeleteOne(ur *UserRestriction) *UserRestrictionDeleteOne {
+	return c.DeleteOneID(ur.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserRestrictionClient) DeleteOneID(id string) *UserRestrictionDeleteOne {
+	builder := c.Delete().Where(userrestriction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserRestrictionDeleteOne{builder}
+}
+
+// Query returns a query builder for UserRestriction.
+func (c *UserRestrictionClient) Query() *UserRestrictionQuery {
+	return &UserRestrictionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserRestriction},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserRestriction entity by its id.
+func (c *UserRestrictionClient) Get(ctx context.Context, id string) (*UserRestriction, error) {
+	return c.Query().Where(userrestriction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserRestrictionClient) GetX(ctx context.Context, id string) *UserRestriction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a UserRestriction.
+func (c *UserRestrictionClient) QueryUser(ur *UserRestriction) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ur.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userrestriction.Table, userrestriction.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, userrestriction.UserTable, userrestriction.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(ur.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserRestrictionClient) Hooks() []Hook {
+	return c.hooks.UserRestriction
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserRestrictionClient) Interceptors() []Interceptor {
+	return c.inters.UserRestriction
+}
+
+func (c *UserRestrictionClient) mutate(ctx context.Context, m *UserRestrictionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserRestrictionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserRestrictionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserRestrictionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserRestrictionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown UserRestriction mutation op: %q", m.Op())
 	}
 }
 
@@ -2858,19 +3544,170 @@ func (c *VehicleSnapshotClient) mutate(ctx context.Context, m *VehicleSnapshotMu
 	}
 }
 
+// WidgetSettingsClient is a client for the WidgetSettings schema.
+type WidgetSettingsClient struct {
+	config
+}
+
+// NewWidgetSettingsClient returns a client for the WidgetSettings from the given config.
+func NewWidgetSettingsClient(c config) *WidgetSettingsClient {
+	return &WidgetSettingsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `widgetsettings.Hooks(f(g(h())))`.
+func (c *WidgetSettingsClient) Use(hooks ...Hook) {
+	c.hooks.WidgetSettings = append(c.hooks.WidgetSettings, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `widgetsettings.Intercept(f(g(h())))`.
+func (c *WidgetSettingsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WidgetSettings = append(c.inters.WidgetSettings, interceptors...)
+}
+
+// Create returns a builder for creating a WidgetSettings entity.
+func (c *WidgetSettingsClient) Create() *WidgetSettingsCreate {
+	mutation := newWidgetSettingsMutation(c.config, OpCreate)
+	return &WidgetSettingsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of WidgetSettings entities.
+func (c *WidgetSettingsClient) CreateBulk(builders ...*WidgetSettingsCreate) *WidgetSettingsCreateBulk {
+	return &WidgetSettingsCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *WidgetSettingsClient) MapCreateBulk(slice any, setFunc func(*WidgetSettingsCreate, int)) *WidgetSettingsCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &WidgetSettingsCreateBulk{err: fmt.Errorf("calling to WidgetSettingsClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*WidgetSettingsCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &WidgetSettingsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for WidgetSettings.
+func (c *WidgetSettingsClient) Update() *WidgetSettingsUpdate {
+	mutation := newWidgetSettingsMutation(c.config, OpUpdate)
+	return &WidgetSettingsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WidgetSettingsClient) UpdateOne(ws *WidgetSettings) *WidgetSettingsUpdateOne {
+	mutation := newWidgetSettingsMutation(c.config, OpUpdateOne, withWidgetSettings(ws))
+	return &WidgetSettingsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WidgetSettingsClient) UpdateOneID(id string) *WidgetSettingsUpdateOne {
+	mutation := newWidgetSettingsMutation(c.config, OpUpdateOne, withWidgetSettingsID(id))
+	return &WidgetSettingsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for WidgetSettings.
+func (c *WidgetSettingsClient) Delete() *WidgetSettingsDelete {
+	mutation := newWidgetSettingsMutation(c.config, OpDelete)
+	return &WidgetSettingsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WidgetSettingsClient) DeleteOne(ws *WidgetSettings) *WidgetSettingsDeleteOne {
+	return c.DeleteOneID(ws.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WidgetSettingsClient) DeleteOneID(id string) *WidgetSettingsDeleteOne {
+	builder := c.Delete().Where(widgetsettings.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WidgetSettingsDeleteOne{builder}
+}
+
+// Query returns a query builder for WidgetSettings.
+func (c *WidgetSettingsClient) Query() *WidgetSettingsQuery {
+	return &WidgetSettingsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWidgetSettings},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a WidgetSettings entity by its id.
+func (c *WidgetSettingsClient) Get(ctx context.Context, id string) (*WidgetSettings, error) {
+	return c.Query().Where(widgetsettings.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WidgetSettingsClient) GetX(ctx context.Context, id string) *WidgetSettings {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a WidgetSettings.
+func (c *WidgetSettingsClient) QueryUser(ws *WidgetSettings) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ws.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(widgetsettings.Table, widgetsettings.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, widgetsettings.UserTable, widgetsettings.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(ws.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WidgetSettingsClient) Hooks() []Hook {
+	return c.hooks.WidgetSettings
+}
+
+// Interceptors returns the client interceptors.
+func (c *WidgetSettingsClient) Interceptors() []Interceptor {
+	return c.inters.WidgetSettings
+}
+
+func (c *WidgetSettingsClient) mutate(ctx context.Context, m *WidgetSettingsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WidgetSettingsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WidgetSettingsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WidgetSettingsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WidgetSettingsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("db: unknown WidgetSettings mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Account, AccountSnapshot, AppConfiguration, ApplicationCommand, AuthNonce, Clan,
-		CronTask, DiscordInteraction, LeaderboardScore, Session, User, UserConnection,
-		UserContent, UserSubscription, Vehicle, VehicleAverage,
-		VehicleSnapshot []ent.Hook
+		CronTask, DiscordInteraction, GameMap, GameMode, LeaderboardScore,
+		ModerationRequest, Session, User, UserConnection, UserContent, UserRestriction,
+		UserSubscription, Vehicle, VehicleAverage, VehicleSnapshot,
+		WidgetSettings []ent.Hook
 	}
 	inters struct {
 		Account, AccountSnapshot, AppConfiguration, ApplicationCommand, AuthNonce, Clan,
-		CronTask, DiscordInteraction, LeaderboardScore, Session, User, UserConnection,
-		UserContent, UserSubscription, Vehicle, VehicleAverage,
-		VehicleSnapshot []ent.Interceptor
+		CronTask, DiscordInteraction, GameMap, GameMode, LeaderboardScore,
+		ModerationRequest, Session, User, UserConnection, UserContent, UserRestriction,
+		UserSubscription, Vehicle, VehicleAverage, VehicleSnapshot,
+		WidgetSettings []ent.Interceptor
 	}
 )
 

@@ -3,6 +3,7 @@ package tests
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/models"
@@ -28,6 +29,9 @@ func (c *staticTestingFetch) Account(ctx context.Context, id string) (models.Acc
 }
 func (c *staticTestingFetch) Search(ctx context.Context, nickname, realm string) (types.Account, error) {
 	return types.Account{}, nil
+}
+func (c *staticTestingFetch) BroadSearch(ctx context.Context, nickname string) ([]fetch.AccountWithRealm, error) {
+	return nil, nil
 }
 func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts ...fetch.StatsOption) (fetch.AccountStatsOverPeriod, error) {
 	account, err := c.Account(ctx, id)
@@ -96,4 +100,14 @@ func (c *staticTestingFetch) SessionStats(ctx context.Context, id string, sessio
 func (c *staticTestingFetch) CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error) {
 	// TODO: add some data
 	return map[string]frame.StatsFrame{}, nil
+}
+
+func (c *staticTestingFetch) ReplayRemote(ctx context.Context, url string) (fetch.Replay, error) {
+	// TODO: add some data
+	return fetch.Replay{}, nil
+}
+
+func (c *staticTestingFetch) Replay(ctx context.Context, file io.ReaderAt, size int64) (fetch.Replay, error) {
+	// TODO: add some data
+	return fetch.Replay{}, nil
 }

@@ -17,6 +17,8 @@ var (
 	specialRatingIconSize     = 60.0
 	vehicleComparisonIconSize = 10.0
 	minPrimaryCardWidth       = 300.0 // making the primary card too small looks bad if there are no battles in a session
+
+	cardColor = common.DefaultCardColor
 )
 
 func specialRatingColumnStyle() common.Style {
@@ -89,7 +91,7 @@ func statsBlockStyle(width float64) common.Style {
 
 var (
 	vehicleLegendLabelContainer = common.Style{
-		BackgroundColor: common.DefaultCardColor,
+		BackgroundColor: cardColor,
 		BorderRadius:    common.BorderRadiusSM,
 		PaddingY:        5,
 		PaddingX:        10,
@@ -138,28 +140,6 @@ func vehicleBlocksRowStyle(width float64) common.Style {
 	}
 }
 
-func ratingVehicleCardTitleContainerStyle() common.Style {
-	return common.Style{Direction: common.DirectionHorizontal, Gap: 10, JustifyContent: common.JustifyContentSpaceBetween}
-}
-func ratingVehicleCardTitleStyle() common.Style {
-	return common.Style{Font: common.FontMedium(), FontColor: common.TextSecondary, PaddingX: 5}
-}
-func ratingVehicleBlockStyle() blockStyle {
-	return blockStyle{
-		common.Style{Font: common.FontLarge(), FontColor: common.TextPrimary},
-		common.Style{Font: common.FontMedium(), FontColor: common.TextSecondary},
-		common.Style{Font: common.FontSmall(), FontColor: common.TextAlt},
-	}
-}
-
-func ratingVehicleCardStyle(width float64) common.Style {
-	return defaultCardStyle(width)
-}
-
-func ratingVehicleBlocksRowStyle(width float64) common.Style {
-	return vehicleBlocksRowStyle(width)
-}
-
 func highlightCardTitleTextStyle() common.Style {
 	return common.Style{Font: common.FontSmall(), FontColor: common.TextSecondary}
 }
@@ -196,7 +176,7 @@ func defaultCardStyle(width float64) common.Style {
 		Direction:       common.DirectionVertical,
 		PaddingX:        10,
 		PaddingY:        15,
-		BackgroundColor: common.DefaultCardColor,
+		BackgroundColor: cardColor,
 		BorderRadius:    common.BorderRadiusLG,
 		Width:           width,
 		// Debug:           true,

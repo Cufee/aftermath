@@ -11,11 +11,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -138,6 +141,21 @@ func (uc *UserCreate) AddConnections(u ...*UserConnection) *UserCreate {
 	return uc.AddConnectionIDs(ids...)
 }
 
+// AddWidgetIDs adds the "widgets" edge to the WidgetSettings entity by IDs.
+func (uc *UserCreate) AddWidgetIDs(ids ...string) *UserCreate {
+	uc.mutation.AddWidgetIDs(ids...)
+	return uc
+}
+
+// AddWidgets adds the "widgets" edges to the WidgetSettings entity.
+func (uc *UserCreate) AddWidgets(w ...*WidgetSettings) *UserCreate {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uc.AddWidgetIDs(ids...)
+}
+
 // AddContentIDs adds the "content" edge to the UserContent entity by IDs.
 func (uc *UserCreate) AddContentIDs(ids ...string) *UserCreate {
 	uc.mutation.AddContentIDs(ids...)
@@ -166,6 +184,51 @@ func (uc *UserCreate) AddSessions(s ...*Session) *UserCreate {
 		ids[i] = s[i].ID
 	}
 	return uc.AddSessionIDs(ids...)
+}
+
+// AddModerationRequestIDs adds the "moderation_requests" edge to the ModerationRequest entity by IDs.
+func (uc *UserCreate) AddModerationRequestIDs(ids ...string) *UserCreate {
+	uc.mutation.AddModerationRequestIDs(ids...)
+	return uc
+}
+
+// AddModerationRequests adds the "moderation_requests" edges to the ModerationRequest entity.
+func (uc *UserCreate) AddModerationRequests(m ...*ModerationRequest) *UserCreate {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uc.AddModerationRequestIDs(ids...)
+}
+
+// AddModerationActionIDs adds the "moderation_actions" edge to the ModerationRequest entity by IDs.
+func (uc *UserCreate) AddModerationActionIDs(ids ...string) *UserCreate {
+	uc.mutation.AddModerationActionIDs(ids...)
+	return uc
+}
+
+// AddModerationActions adds the "moderation_actions" edges to the ModerationRequest entity.
+func (uc *UserCreate) AddModerationActions(m ...*ModerationRequest) *UserCreate {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uc.AddModerationActionIDs(ids...)
+}
+
+// AddRestrictionIDs adds the "restrictions" edge to the UserRestriction entity by IDs.
+func (uc *UserCreate) AddRestrictionIDs(ids ...string) *UserCreate {
+	uc.mutation.AddRestrictionIDs(ids...)
+	return uc
+}
+
+// AddRestrictions adds the "restrictions" edges to the UserRestriction entity.
+func (uc *UserCreate) AddRestrictions(u ...*UserRestriction) *UserCreate {
+	ids := make([]string, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uc.AddRestrictionIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -338,6 +401,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := uc.mutation.WidgetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WidgetsTable,
+			Columns: []string{user.WidgetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(widgetsettings.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := uc.mutation.ContentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -363,6 +442,54 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.ModerationRequestsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationRequestsTable,
+			Columns: []string{user.ModerationRequestsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.ModerationActionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ModerationActionsTable,
+			Columns: []string{user.ModerationActionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moderationrequest.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.RestrictionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RestrictionsTable,
+			Columns: []string{user.RestrictionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userrestriction.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -3,6 +3,7 @@ package fetch
 import (
 	"context"
 	"fmt"
+	"io"
 	"sync"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/retry"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1/replay"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
@@ -52,6 +54,65 @@ func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string) 
 	}
 
 	return accounts[0], nil
+}
+
+func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string) ([]AccountWithRealm, error) {
+	data := make(chan AccountWithRealm, 9)
+	errors := make(chan error, 3)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		accounts, err := c.wargaming.SearchAccounts(ctx, "NA", nickname)
+		if err != nil {
+			errors <- err
+			return
+		}
+		for _, a := range accounts {
+			data <- AccountWithRealm{a, "NA"}
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		accounts, err := c.wargaming.SearchAccounts(ctx, "EU", nickname)
+		if err != nil {
+			errors <- err
+			return
+		}
+		for _, a := range accounts {
+			data <- AccountWithRealm{a, "EU"}
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		accounts, err := c.wargaming.SearchAccounts(ctx, "AS", nickname)
+		if err != nil {
+			errors <- err
+			return
+		}
+		for _, a := range accounts {
+			data <- AccountWithRealm{a, "AS"}
+		}
+	}()
+	wg.Wait()
+	close(data)
+	close(errors)
+
+	// return first error
+	if len(errors) == 3 || (len(data) == 0 && len(errors) > 0) {
+		for err := range errors {
+			return nil, err
+		}
+	}
+
+	var accounts []AccountWithRealm
+	for a := range data {
+		accounts = append(accounts, a)
+	}
+
+	return accounts, nil
 }
 
 /*
@@ -434,4 +495,53 @@ func (c *multiSourceClient) PlayersAchievementsLeaderboard(ctx context.Context, 
 	}
 
 	return nil, nil
+}
+
+func (c *multiSourceClient) ReplayRemote(ctx context.Context, fileURL string) (Replay, error) {
+	unpacked, err := replay.UnpackRemote(ctx, fileURL)
+	if err != nil {
+		return Replay{}, errors.Wrap(err, "failed to unpack a remote replay")
+	}
+	return c.replay(ctx, unpacked)
+}
+
+func (c *multiSourceClient) Replay(ctx context.Context, file io.ReaderAt, size int64) (Replay, error) {
+	unpacked, err := replay.Unpack(file, size)
+	if err != nil {
+		return Replay{}, errors.Wrap(err, "failed to unpack a remote replay")
+	}
+	return c.replay(ctx, unpacked)
+}
+
+func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.UnpackedReplay) (Replay, error) {
+	replay := replay.Prettify(unpacked.BattleResult, unpacked.Meta)
+
+	var vehicles []string
+	for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
+		vehicles = append(vehicles, player.VehicleID)
+	}
+
+	averages, err := c.database.GetVehicleAverages(ctx, vehicles)
+	if err != nil {
+		log.Err(err).Msg("failed to get tank averages for a replay")
+	}
+
+	// calculate and cache WN8
+	_ = replay.Protagonist.Performance.WN8(averages[replay.Protagonist.VehicleID])
+	for i, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
+		avg := averages[player.VehicleID]
+		_ = player.Performance.WN8(avg)
+		if i < len(replay.Teams.Allies) {
+			replay.Teams.Allies[i] = player
+		} else {
+			replay.Teams.Enemies[i-len(replay.Teams.Allies)] = player
+		}
+	}
+
+	mapData, err := c.database.GetMap(ctx, replay.MapID)
+	if err != nil && !database.IsNotFound(err) {
+		return Replay{}, errors.Wrap(err, "failed to get map glossary")
+	}
+
+	return Replay{mapData, replay, c.wargaming.RealmFromAccountID(replay.Protagonist.ID)}, nil
 }

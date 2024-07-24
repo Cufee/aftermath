@@ -17,11 +17,15 @@
   value: stats
 - key: command_stats_description
   value: Get an overview of your stats
+- key: command_stats_help_message
+  value: "## View Career Stats for Your Account!\nTo get started, include a nickname and server, mention another user, or link an account using `/links add`!"
 # /session
 - key: command_session_name
   value: session
 - key: command_session_description
   value: Get detailed stats for your recent session
+- key: command_session_help_message
+  value: "## View Session Stats for Your Account!\nTo get started, include a nickname and server, mention another user, or link an account using `/links add`!"
 # /my
 - key: command_my_name
   value: my
@@ -86,6 +90,49 @@
   value: account
 - key: command_option_widget_account_description
   value: Select one of your linked account
+# /replay
+- key: "commands_replay_name"
+  value: "replay"
+- key: "commands_replay_description"
+  value: "Analyze your replay and view stats for every single player"
+- key: "command_replay_help_message"
+  value: "## Analyze Your Replay and View Stats for All Players!\nTo get started, attach a replay file or provide a link to a replay file when sending the command!"
+- key: command_option_replay_file_name
+  value: "file"
+- key: command_option_replay_file_description
+  value: "A Blitz replay file"
+- key: command_option_replay_link_name
+  value: "link"
+- key: command_option_replay_link_description
+  value: "A link to a Blitz replay file"
+# /fancy
+- key: command_fancy_name
+  value: "fancy"
+- key: command_fancy_description
+  value: "Set a custom background for your stats!"
+- key: command_fancy_help_message
+  value: "## Upload a Custom Background!\nTo get started, attach an image or provide a link to an image when sending the command!"
+- key: command_option_fancy_link_name
+  value: "link"
+- key: command_option_fancy_link_description
+  value: "A link to a JPEG or PNG image"
+- key: command_option_fancy_file_name
+  value: "file"
+- key: command_option_fancy_file_description
+  value: "A JPEG or PNG image file"
+- key: fancy_hint_image_transformation
+  value: "Images uploaded to Aftermath via this command will be scaled down and blurred. They will also require manual moderation."
+  context: "Images need to be manually approved by a moderator"
+- key: fancy_preview_msg
+  value: "## Here is a preview of your image!\nUse the buttons below to submit it for moderation."
+- key: fancy_submitted_msg
+  value: "**Your request was submitted**\nYou will get a Direct Message when it is reviewed - no further action is required.\n\n_Please make sure your Direct Messages are open._"
+- key: fancy_moderation_request_approved
+  value: "## :tada: **Your Custom Background is set!** :tada:\nThe image you have submitted was approved by a moderator and is now set as your stats background. Other users will only see this background if your default linked account is verified."
+- key: fancy_moderation_request_declined
+  value: "**Your recent image moderation request was declined**\nIt looks like the image you have uploaded did not pass out safety standards. You background will not be updated."
+- key: fancy_moderation_request_declined_and_banned_fmt
+  value: "**Your recent image moderation request was declined**\nIt looks like you have tried to upload an image that is against Aftermath Terms Of Service. As a result, your account will be restricted from uploading custom content until <t:%d:D>. This decision is final and cannot be appealed."
 
 # Common command options
 # days
@@ -132,7 +179,12 @@
   value: Install Aftermath
 - key: buttons_join_primary_guild
   value: Join Aftermath Official
-
+- key: buttons_need_help_question
+  value: Need Help?
+- key: buttons_have_a_question_question
+  value: Have a Question?
+- key: buttons_submit
+  value: Submit
 
 # Errors
 # permissions
@@ -149,7 +201,7 @@
   context: Discord request timed out for unknown reasons
 
 - key: common_error_unhandled_reported
-  value: Something unexpected happened and your command failed.\n*This error was reported automatically, you can also reach out to our team on Aftermath Official*"
+  value: "Something unexpected happened and your command failed.\n*This error was reported automatically, you can also reach out to our team on Aftermath Official*"
   context: We failed to execute a command, the error is not user-facing and will be reported to a dev automatically
 
 - key: common_error_unhandled_not_reported
@@ -189,27 +241,18 @@
 
 - key: stats_error_mentioned_self_non_blocking
   value: "You don't need to @mention yourself when checking stats, just type the command without any options to check your own account."
-  context: Mentioned self when checking stats, will not prevent the command from running
+  context: Mentioned self when checking stats, will not prevent the command from running, this will not cause an error
+
+- key: stats_error_too_many_arguments_non_blocking
+  value: "When using this command, you only need to mention a user or provide a nickname. The mentioned user will override the nickname if both are provided."
+  context: User mentioned someone AND provided a nickname, this will not cause an error
 
 - key: stats_error_connection_not_found_personal
   value: "Looks like you don't have a Blitz account linked yet. Give the `/links` command a shot."
   context: No Blitz account linked
 
-- key: stats_error_nickname_or_server_missing
-  value: "I need both the name and server to find your account. You can also use the `/links` command to setup a default account."
-  context: User provided a nickname, but no server
-
-- key: stats_error_nickname_invalid
-  value: "This does not look like a valid player name, make sure you are using your in-game name."
-  context: Invalid Blitz username provided
-  notes: This does not mean it was not found, just that the input provided cannot possibly be a valid nickname
-
-- key: stats_error_invalid_options_combination
-  value: "It looks like you have provided too many options. You can't specify a nickname when mentioning another user."
-  context: Both user mention and nickname provided
-
 - key: stats_error_nickname_not_fount_fmt
-  value: "I was not able to find a player named **%s** on **%s**. Was the name spelled correctly?"
+  value: "I was not able to find a player named **%s**. Was the name spelled correctly?"
   context: Invalid Blitz username provided
 
 - key: session_error_account_was_not_tracked
@@ -225,11 +268,19 @@
   context: Failed to find required data in order to refresh stats/session
 
 - key: stats_autocomplete_not_found
-  value: "No tanks found matching the name you have entered"
+  value: "No tanks found matching the name you have entered. Please select a tank from the autocompletion list."
   context: Search returned no results when a user was typing the tank name in autocomplete
 
 - key: stats_autocomplete_not_enough_length
   value: "Continue typing to search for available tanks..."
+  context: Shown when a user just started typing and there are not enough characters to search
+
+- key: nickname_autocomplete_not_found
+  value: "No players found matching the name you have entered. Please select a name from the autocompletion list."
+  context: Search returned no results when a user was typing the name in autocomplete
+
+- key: nickname_autocomplete_not_enough_length
+  value: "Continue typing to search for accounts..."
   context: Shown when a user just started typing and there are not enough characters to search
 
 - key: my_error_no_account_linked
@@ -254,9 +305,15 @@
   context: Invalid file attached
 
   # /replay errors
-- key: replay_error_missing_attachment
-  value: "You need to provide a link or attach a WoT Blitz replay file."
+- key: replay_errors_invalid_attachment
+  value: "The file you have attached is not a valid WoT Blitz replay."
   context: Invalid file attached
+- key: replay_errors_missing_attachment
+  value: "You need to provide a link or attach a WoT Blitz replay file."
+  context: No link or file provided
+- key: replay_error_too_many_options_non_blocking
+  value: "When using this command, you only need to provide either a link or a replay file. The replay file will override the link if both are provided."
+  context: User provided a link AND a file, this will not cause an error
 
   # /links errors
 - key: links_error_missing_input
@@ -273,6 +330,26 @@
   context: Failed to find the selected account by ID
 - key: links_error_no_accounts_linked
   value: "You don't have any linked accounts."
+
+# /fancy errors
+- key: fancy_errors_upload_timeout_fmt
+  value: "It looks like you have uploaded a custom background image recently.\nYou will be able to use this command again <t:%d:R>."
+  context: Shown when a user has a recent moderation request that was approved. The timestamp will show [in xx days/months/hours]
+- key: fancy_errors_pending_request_exists
+  value: "You have a pending moderation request. Please wait until your previously submitted image is approved or rejected."
+- key: fancy_errors_preview_expired
+  value: "This preview has expired. Please create a new one to submit it for moderation."
+- key: fancy_errors_missing_attachment
+  value: "You need to provide a link or attach an image file."
+- key: fancy_errors_invalid_link
+  value: "The image you have provided is invalid, Aftermath was not able to view it."
+- key: fancy_errors_invalid_format
+  value: "The image you have provided is not in a JPEG or PNG format. This command does not support other file formats."
+- key: fancy_errors_invalid_image
+  value: "The image you have provided may be broken or is too large.\n_The maximum recommended image size is 1000px x 1000px._"
+- key: fancy_error_too_many_options_non_blocking
+  value: "When using this command, you only need to provide either a link or a file. The image file will override the link if both are provided."
+  context: User provided a link AND a file, this will not cause an error
 
   # Wargaming specific errors
 - key: wargaming_error_private_account

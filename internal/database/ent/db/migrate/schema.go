@@ -280,11 +280,14 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "command", Type: field.TypeString},
-		{Name: "reference_id", Type: field.TypeString},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"stats"}},
+		{Name: "result", Type: field.TypeString},
+		{Name: "event_id", Type: field.TypeString},
+		{Name: "guild_id", Type: field.TypeString},
+		{Name: "channel_id", Type: field.TypeString},
+		{Name: "message_id", Type: field.TypeString},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"unknown", "modal", "command", "follow_up", "component", "autocomplete", "automated_message"}},
 		{Name: "locale", Type: field.TypeString},
-		{Name: "options", Type: field.TypeJSON},
+		{Name: "metadata", Type: field.TypeJSON},
 		{Name: "user_id", Type: field.TypeString},
 	}
 	// DiscordInteractionsTable holds the schema information for the "discord_interactions" table.
@@ -295,7 +298,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "discord_interactions_users_discord_interactions",
-				Columns:    []*schema.Column{DiscordInteractionsColumns[8]},
+				Columns:    []*schema.Column{DiscordInteractionsColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -307,24 +310,66 @@ var (
 				Columns: []*schema.Column{DiscordInteractionsColumns[0]},
 			},
 			{
-				Name:    "discordinteraction_command",
-				Unique:  false,
-				Columns: []*schema.Column{DiscordInteractionsColumns[3]},
-			},
-			{
 				Name:    "discordinteraction_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{DiscordInteractionsColumns[8]},
+				Columns: []*schema.Column{DiscordInteractionsColumns[11]},
 			},
 			{
-				Name:    "discordinteraction_user_id_type",
+				Name:    "discordinteraction_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{DiscordInteractionsColumns[8], DiscordInteractionsColumns[5]},
+				Columns: []*schema.Column{DiscordInteractionsColumns[1]},
 			},
 			{
-				Name:    "discordinteraction_reference_id",
+				Name:    "discordinteraction_user_id_type_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{DiscordInteractionsColumns[4]},
+				Columns: []*schema.Column{DiscordInteractionsColumns[11], DiscordInteractionsColumns[8], DiscordInteractionsColumns[1]},
+			},
+			{
+				Name:    "discordinteraction_channel_id_type_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{DiscordInteractionsColumns[6], DiscordInteractionsColumns[8], DiscordInteractionsColumns[1]},
+			},
+		},
+	}
+	// GameMapsColumns holds the columns for the "game_maps" table.
+	GameMapsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "game_modes", Type: field.TypeJSON},
+		{Name: "supremacy_points", Type: field.TypeInt},
+		{Name: "localized_names", Type: field.TypeJSON},
+	}
+	// GameMapsTable holds the schema information for the "game_maps" table.
+	GameMapsTable = &schema.Table{
+		Name:       "game_maps",
+		Columns:    GameMapsColumns,
+		PrimaryKey: []*schema.Column{GameMapsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "gamemap_id",
+				Unique:  false,
+				Columns: []*schema.Column{GameMapsColumns[0]},
+			},
+		},
+	}
+	// GameModesColumns holds the columns for the "game_modes" table.
+	GameModesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "localized_names", Type: field.TypeJSON},
+	}
+	// GameModesTable holds the schema information for the "game_modes" table.
+	GameModesTable = &schema.Table{
+		Name:       "game_modes",
+		Columns:    GameModesColumns,
+		PrimaryKey: []*schema.Column{GameModesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "gamemode_id",
+				Unique:  false,
+				Columns: []*schema.Column{GameModesColumns[0]},
 			},
 		},
 	}
@@ -364,6 +409,72 @@ var (
 				Name:    "leaderboardscore_leaderboard_id_type_reference_id",
 				Unique:  false,
 				Columns: []*schema.Column{LeaderboardScoresColumns[6], LeaderboardScoresColumns[3], LeaderboardScoresColumns[5]},
+			},
+		},
+	}
+	// ModerationRequestsColumns holds the columns for the "moderation_requests" table.
+	ModerationRequestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "moderator_comment", Type: field.TypeString, Nullable: true},
+		{Name: "context", Type: field.TypeString, Nullable: true},
+		{Name: "reference_id", Type: field.TypeString},
+		{Name: "action_reason", Type: field.TypeString, Nullable: true},
+		{Name: "action_status", Type: field.TypeEnum, Enums: []string{"submitted", "approved", "declined", "expired"}},
+		{Name: "data", Type: field.TypeJSON},
+		{Name: "requestor_id", Type: field.TypeString},
+		{Name: "moderator_id", Type: field.TypeString, Nullable: true},
+	}
+	// ModerationRequestsTable holds the schema information for the "moderation_requests" table.
+	ModerationRequestsTable = &schema.Table{
+		Name:       "moderation_requests",
+		Columns:    ModerationRequestsColumns,
+		PrimaryKey: []*schema.Column{ModerationRequestsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "moderation_requests_users_moderation_requests",
+				Columns:    []*schema.Column{ModerationRequestsColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "moderation_requests_users_moderation_actions",
+				Columns:    []*schema.Column{ModerationRequestsColumns[10]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "moderationrequest_id",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[0]},
+			},
+			{
+				Name:    "moderationrequest_reference_id",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[5]},
+			},
+			{
+				Name:    "moderationrequest_requestor_id",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[9]},
+			},
+			{
+				Name:    "moderationrequest_moderator_id",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[10]},
+			},
+			{
+				Name:    "moderationrequest_requestor_id_reference_id",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[9], ModerationRequestsColumns[5]},
+			},
+			{
+				Name:    "moderationrequest_requestor_id_reference_id_action_status",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationRequestsColumns[9], ModerationRequestsColumns[5], ModerationRequestsColumns[7]},
 			},
 		},
 	}
@@ -487,7 +598,7 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"clan-background-image", "personal-background-image"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"personal-background-image", "clan-background-image", "in-moderation"}},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "value", Type: field.TypeString},
 		{Name: "metadata", Type: field.TypeJSON},
@@ -518,19 +629,63 @@ var (
 				Columns: []*schema.Column{UserContentsColumns[7]},
 			},
 			{
-				Name:    "usercontent_type_user_id",
-				Unique:  false,
-				Columns: []*schema.Column{UserContentsColumns[3], UserContentsColumns[7]},
-			},
-			{
 				Name:    "usercontent_reference_id",
 				Unique:  false,
 				Columns: []*schema.Column{UserContentsColumns[4]},
 			},
 			{
+				Name:    "usercontent_type_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{UserContentsColumns[3], UserContentsColumns[7]},
+			},
+			{
 				Name:    "usercontent_type_reference_id",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{UserContentsColumns[3], UserContentsColumns[4]},
+			},
+		},
+	}
+	// UserRestrictionsColumns holds the columns for the "user_restrictions" table.
+	UserRestrictionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"partial", "complete"}},
+		{Name: "restriction", Type: field.TypeString},
+		{Name: "public_reason", Type: field.TypeString},
+		{Name: "moderator_comment", Type: field.TypeString},
+		{Name: "events", Type: field.TypeJSON},
+		{Name: "user_id", Type: field.TypeString},
+	}
+	// UserRestrictionsTable holds the schema information for the "user_restrictions" table.
+	UserRestrictionsTable = &schema.Table{
+		Name:       "user_restrictions",
+		Columns:    UserRestrictionsColumns,
+		PrimaryKey: []*schema.Column{UserRestrictionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_restrictions_users_restrictions",
+				Columns:    []*schema.Column{UserRestrictionsColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "userrestriction_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserRestrictionsColumns[0]},
+			},
+			{
+				Name:    "userrestriction_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserRestrictionsColumns[9]},
+			},
+			{
+				Name:    "userrestriction_expires_at_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserRestrictionsColumns[3], UserRestrictionsColumns[9]},
 			},
 		},
 	}
@@ -681,6 +836,40 @@ var (
 			},
 		},
 	}
+	// WidgetSettingsColumns holds the columns for the "widget_settings" table.
+	WidgetSettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "reference_id", Type: field.TypeString},
+		{Name: "title", Type: field.TypeString, Nullable: true},
+		{Name: "session_from", Type: field.TypeTime, Nullable: true},
+		{Name: "session_reference_id", Type: field.TypeString, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON},
+		{Name: "styles", Type: field.TypeJSON},
+		{Name: "user_id", Type: field.TypeString},
+	}
+	// WidgetSettingsTable holds the schema information for the "widget_settings" table.
+	WidgetSettingsTable = &schema.Table{
+		Name:       "widget_settings",
+		Columns:    WidgetSettingsColumns,
+		PrimaryKey: []*schema.Column{WidgetSettingsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "widget_settings_users_widgets",
+				Columns:    []*schema.Column{WidgetSettingsColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "widgetsettings_id",
+				Unique:  false,
+				Columns: []*schema.Column{WidgetSettingsColumns[0]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
@@ -691,15 +880,20 @@ var (
 		ClansTable,
 		CronTasksTable,
 		DiscordInteractionsTable,
+		GameMapsTable,
+		GameModesTable,
 		LeaderboardScoresTable,
+		ModerationRequestsTable,
 		SessionsTable,
 		UsersTable,
 		UserConnectionsTable,
 		UserContentsTable,
+		UserRestrictionsTable,
 		UserSubscriptionsTable,
 		VehiclesTable,
 		VehicleAveragesTable,
 		VehicleSnapshotsTable,
+		WidgetSettingsTable,
 	}
 )
 
@@ -707,9 +901,13 @@ func init() {
 	AccountsTable.ForeignKeys[0].RefTable = ClansTable
 	AccountSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
 	DiscordInteractionsTable.ForeignKeys[0].RefTable = UsersTable
+	ModerationRequestsTable.ForeignKeys[0].RefTable = UsersTable
+	ModerationRequestsTable.ForeignKeys[1].RefTable = UsersTable
 	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserConnectionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserContentsTable.ForeignKeys[0].RefTable = UsersTable
+	UserRestrictionsTable.ForeignKeys[0].RefTable = UsersTable
 	UserSubscriptionsTable.ForeignKeys[0].RefTable = UsersTable
 	VehicleSnapshotsTable.ForeignKeys[0].RefTable = AccountsTable
+	WidgetSettingsTable.ForeignKeys[0].RefTable = UsersTable
 }

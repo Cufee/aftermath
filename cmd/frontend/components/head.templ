@@ -19,11 +19,11 @@ templ Head(additional ...templ.Component) {
 		<meta name="twitter:image:alt" content={ constants.FrontendAppName + " Logo" }/>
 		<meta name="twitter:image" content={ constants.FrontendURL + "/assets/og/default.jpg" }/>
 		<meta name="twitter:description" content="The Fastest and Most Beautifudl way to view Blitz stats!"/>
-		<link href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css" rel="stylesheet" type="text/css"/>
-		<script src="https://unpkg.com/htmx.org@1.9.12"></script>
-		<script src="https://unpkg.com/htmx.org/dist/ext/head-support.js"></script>
-		<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/multi-swap.js"></script>
-		<script src="https://cdn.tailwindcss.com"></script>
+		<link href="/assets/css/daisyui.min.css" rel="stylesheet" type="text/css"/>
+		<script src="/assets/js/htmx.min.js"></script>
+		<script src="/assets/js/head-support.js"></script>
+		<script src="/assets/js/multi-swap.js"></script>
+		<script src="/assets/js/tailwind.js"></script>
 		@logic.EmbedMinifiedScript(tailwindConfig())
 		<title>{ constants.FrontendAppName }</title>
 		<link rel="icon" type="image/x-icon" href="/assets/favicon.ico"/>

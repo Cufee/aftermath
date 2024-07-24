@@ -3,6 +3,7 @@ package widget
 import (
 	"fmt"
 	"github.com/cufee/aftermath/cmd/frontend/assets"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
@@ -35,7 +36,7 @@ func (w widget) defaultWidget() templ.Component {
 
 	var vehicles []vehicleExtended
 	for i, card := range w.cards.Unrated.Vehicles {
-		if i >= w.unratedVehiclesLimit {
+		if i >= w.style.Vehicles.Limit {
 			break
 		}
 		if len(card.Blocks) < 1 {
@@ -45,9 +46,9 @@ func (w widget) defaultWidget() templ.Component {
 	}
 
 	widget := defaultWidget{w, false, vehicles}
-	if w.vehicleStyle.showLabel {
+	if w.style.Vehicles.ShowLabel {
 		widget.showLegend = true
-		widget.vehicleStyle.showLabel = false
+		widget.style.Vehicles.ShowLabel = false
 	}
 
 	return widget.Render()
@@ -55,14 +56,14 @@ func (w widget) defaultWidget() templ.Component {
 
 templ (w defaultWidget) Render() {
 	<div class="flex flex-col w-full gap-2 widget">
-		if w.showRatingOverview && len(w.cards.Rating.Overview.Blocks) > 0 {
-			@w.overviewCard(w.cards.Rating.Overview)
+		if w.style.RatingOverview.Visible && len(w.cards.Rating.Overview.Blocks) > 0 {
+			@w.overviewCard(w.cards.Rating.Overview, w.style.RatingOverview)
 		}
-		if w.showUnratedOverview && len(w.cards.Unrated.Overview.Blocks) > 0 {
-			@w.overviewCard(w.cards.Unrated.Overview)
+		if w.style.UnratedOverview.Visible && len(w.cards.Unrated.Overview.Blocks) > 0 {
+			@w.overviewCard(w.cards.Unrated.Overview, w.style.UnratedOverview)
 		}
 		for _, card := range w.vehicleCards {
-			@w.vehicleCard(card)
+			@w.vehicleCard(card, w.style.Vehicles)
 		}
 		if len(w.vehicleCards) > 0 && w.showLegend {
 			@w.vehicleLegendCard(w.vehicleCards[0].Blocks)
@@ -70,24 +71,24 @@ templ (w defaultWidget) Render() {
 	</div>
 }
 
-templ (w defaultWidget) overviewCard(card session.OverviewCard) {
+templ (w defaultWidget) overviewCard(card session.OverviewCard, style models.WidgetCardStyle) {
 	<div class="flex flex-col gap-1 card overview-card grow">
-		if w.overviewStyle.showTitle {
+		if style.ShowTitle {
 			<span class="text-center text-gray-300 title">
 				{ card.Title }
 			</span>
 		}
-		<div class={ fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-1 items-center bg-black rounded-xl bg-opacity-75 p-4", len(card.Blocks)) }>
+		<div class={ fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-1 items-center bg-black rounded-xl bg-opacity-[0.975] p-4", len(card.Blocks)) }>
 			for _, column := range card.Blocks {
-				@w.overviewColumn(column)
+				@w.overviewColumn(column, style)
 			}
 		</div>
 	</div>
 }
 
-templ (w defaultWidget) vehicleCard(card vehicleExtended) {
-	<div class="flex flex-col gap-1 card vehicle-card grow bg-black rounded-lg bg-opacity-75 p-4">
-		if w.vehicleStyle.showTitle {
+templ (w defaultWidget) vehicleCard(card vehicleExtended, style models.WidgetVehicleCardStyle) {
+	<div class="flex flex-col gap-1 card vehicle-card grow bg-black rounded-lg bg-opacity-[0.975] p-4">
+		if w.style.Vehicles.ShowTitle {
 			<div class="flex flex-row gap-2 justify-between">
 				<span class="text-gray-300 title">
 					{ card.Title }
@@ -97,7 +98,7 @@ templ (w defaultWidget) vehicleCard(card vehicleExtended) {
 		}
 		<div class={ fmt.Sprintf("blocks vehicle-blocks grid grid-cols-%d gap-1 items-center", len(card.Blocks)) }>
 			for _, block := range card.Blocks {
-				@w.block(block, w.vehicleStyle)
+				@w.block(block, style.WidgetCardStyle)
 			}
 		</div>
 	</div>
@@ -107,7 +108,7 @@ templ (w defaultWidget) vehicleLegendCard(blocks []common.StatsBlock[session.Blo
 	<div class="flex flex-col gap-1 card legend-card grow">
 		<div class={ fmt.Sprintf("blocks legend-blocks grid grid-cols-%d gap-1 items-center justify-center px-4", len(blocks)) }>
 			for _, block := range blocks {
-				<div class="bg-black rounded-full bg-opacity-75 m-auto px-3 py-1">
+				<div class="bg-black rounded-full bg-opacity-[0.975] m-auto px-3 py-1">
 					{ block.Label }
 				</div>
 			}
@@ -115,13 +116,13 @@ templ (w defaultWidget) vehicleLegendCard(blocks []common.StatsBlock[session.Blo
 	</div>
 }
 
-templ (w defaultWidget) overviewColumn(column session.OverviewColumn) {
+templ (w defaultWidget) overviewColumn(column session.OverviewColumn, style models.WidgetCardStyle) {
 	if column.Flavor == session.BlockFlavorRating || column.Flavor == session.BlockFlavorWN8 {
 		@w.specialOverviewColumn(column)
 	} else {
 		<div class="flex flex-col items-center justify-center column overview-column gap-2">
 			for _, block := range column.Blocks {
-				@w.block(block, w.overviewStyle)
+				@w.block(block, style)
 			}
 		</div>
 	}
@@ -132,22 +133,23 @@ templ (w defaultWidget) specialOverviewColumn(column session.OverviewColumn) {
 		for _, block := range column.Blocks {
 			if column.Flavor == session.BlockFlavorRating {
 				<img src={ assets.RatingIconPath(block.Value.Float()) } class="w-16 h-16"/>
+				@w.block(block, w.style.RatingOverview)
 			}
 			if column.Flavor == session.BlockFlavorWN8 {
 				<img src={ assets.WN8IconPath(block.Value.Float()) } class="w-18 h-18"/>
+				@w.block(block, w.style.UnratedOverview)
 			}
-			@w.block(block, w.overviewStyle)
 		}
 	</div>
 }
 
-templ (w defaultWidget) block(block common.StatsBlock[session.BlockData], style styleOptions) {
+templ (w defaultWidget) block(block common.StatsBlock[session.BlockData], style models.WidgetCardStyle) {
 	<div class="flex flex-col items-center justify-between block">
 		<span class="text-2xl text-white">{ block.Data.Session.String() }</span>
-		if style.showCareer {
+		if style.ShowCareer {
 			<span class="text-xl text-gray-300">{ block.Data.Career.String() }</span>
 		}
-		if style.showLabel {
+		if style.ShowLabel {
 			<span class="text-sm text-gray-600">{ block.Label }</span>
 		}
 	</div>

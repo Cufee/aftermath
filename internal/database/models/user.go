@@ -15,23 +15,23 @@ type User struct {
 	Subscriptions []UserSubscription
 }
 
-func (u User) HasPermission(value permissions.Permissions) bool {
+func (u User) HasPermission(values ...permissions.Permissions) bool {
 	perms := u.Permissions
 	for _, c := range u.Connections {
-		perms.Add(c.Permissions)
+		perms = perms.Add(c.Permissions)
 	}
 	for _, s := range u.Subscriptions {
-		perms.Add(s.Permissions)
+		perms = perms.Add(s.Permissions)
 	}
 	for _, r := range u.Restrictions {
 		switch r.Type {
 		case RestrictionTypePartial:
-			perms.Remove(r.Restriction)
+			perms = perms.Remove(r.Restriction)
 		default:
 			return false
 		}
 	}
-	return perms.Has(value)
+	return perms.Has(values...)
 }
 
 func (u User) Connection(kind ConnectionType, conditions map[string]any) (UserConnection, bool) {
@@ -79,18 +79,10 @@ func (u User) FilterSubscriptions(kind SubscriptionType) ([]UserSubscription, bo
 }
 
 func (u User) Content(kind UserContentType) (UserContent, bool) {
-	valid, ok := u.FilterContent(kind)
-	if !ok {
-		return UserContent{}, false
-	}
-	return valid[0], true
-}
-func (u User) FilterContent(kind UserContentType) ([]UserContent, bool) {
-	var valid []UserContent
 	for _, content := range u.Uploads {
 		if content.Type == kind {
-			valid = append(valid, content)
+			return content, true
 		}
 	}
-	return valid, len(valid) > 0
+	return UserContent{}, false
 }

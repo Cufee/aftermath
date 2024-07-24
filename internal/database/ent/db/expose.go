@@ -108,6 +108,32 @@ func (di *DiscordInteraction) ScanValues(columns []string) ([]any, error) {
 	return di.scanValues(columns)
 }
 
+func (gm *GameMap) AssignValues(columns []string, values []any) error {
+	if gm == nil {
+		return fmt.Errorf("GameMap(nil)")
+	}
+	return gm.assignValues(columns, values)
+}
+func (gm *GameMap) ScanValues(columns []string) ([]any, error) {
+	if gm == nil {
+		return nil, fmt.Errorf("GameMap(nil)")
+	}
+	return gm.scanValues(columns)
+}
+
+func (gm *GameMode) AssignValues(columns []string, values []any) error {
+	if gm == nil {
+		return fmt.Errorf("GameMode(nil)")
+	}
+	return gm.assignValues(columns, values)
+}
+func (gm *GameMode) ScanValues(columns []string) ([]any, error) {
+	if gm == nil {
+		return nil, fmt.Errorf("GameMode(nil)")
+	}
+	return gm.scanValues(columns)
+}
+
 func (ls *LeaderboardScore) AssignValues(columns []string, values []any) error {
 	if ls == nil {
 		return fmt.Errorf("LeaderboardScore(nil)")
@@ -119,6 +145,19 @@ func (ls *LeaderboardScore) ScanValues(columns []string) ([]any, error) {
 		return nil, fmt.Errorf("LeaderboardScore(nil)")
 	}
 	return ls.scanValues(columns)
+}
+
+func (mr *ModerationRequest) AssignValues(columns []string, values []any) error {
+	if mr == nil {
+		return fmt.Errorf("ModerationRequest(nil)")
+	}
+	return mr.assignValues(columns, values)
+}
+func (mr *ModerationRequest) ScanValues(columns []string) ([]any, error) {
+	if mr == nil {
+		return nil, fmt.Errorf("ModerationRequest(nil)")
+	}
+	return mr.scanValues(columns)
 }
 
 func (s *Session) AssignValues(columns []string, values []any) error {
@@ -173,6 +212,19 @@ func (uc *UserContent) ScanValues(columns []string) ([]any, error) {
 	return uc.scanValues(columns)
 }
 
+func (ur *UserRestriction) AssignValues(columns []string, values []any) error {
+	if ur == nil {
+		return fmt.Errorf("UserRestriction(nil)")
+	}
+	return ur.assignValues(columns, values)
+}
+func (ur *UserRestriction) ScanValues(columns []string) ([]any, error) {
+	if ur == nil {
+		return nil, fmt.Errorf("UserRestriction(nil)")
+	}
+	return ur.scanValues(columns)
+}
+
 func (us *UserSubscription) AssignValues(columns []string, values []any) error {
 	if us == nil {
 		return fmt.Errorf("UserSubscription(nil)")
@@ -223,4 +275,17 @@ func (vs *VehicleSnapshot) ScanValues(columns []string) ([]any, error) {
 		return nil, fmt.Errorf("VehicleSnapshot(nil)")
 	}
 	return vs.scanValues(columns)
+}
+
+func (ws *WidgetSettings) AssignValues(columns []string, values []any) error {
+	if ws == nil {
+		return fmt.Errorf("WidgetSettings(nil)")
+	}
+	return ws.assignValues(columns, values)
+}
+func (ws *WidgetSettings) ScanValues(columns []string) ([]any, error) {
+	if ws == nil {
+		return nil, fmt.Errorf("WidgetSettings(nil)")
+	}
+	return ws.scanValues(columns)
 }

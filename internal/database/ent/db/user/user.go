@@ -30,10 +30,18 @@ const (
 	EdgeSubscriptions = "subscriptions"
 	// EdgeConnections holds the string denoting the connections edge name in mutations.
 	EdgeConnections = "connections"
+	// EdgeWidgets holds the string denoting the widgets edge name in mutations.
+	EdgeWidgets = "widgets"
 	// EdgeContent holds the string denoting the content edge name in mutations.
 	EdgeContent = "content"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
 	EdgeSessions = "sessions"
+	// EdgeModerationRequests holds the string denoting the moderation_requests edge name in mutations.
+	EdgeModerationRequests = "moderation_requests"
+	// EdgeModerationActions holds the string denoting the moderation_actions edge name in mutations.
+	EdgeModerationActions = "moderation_actions"
+	// EdgeRestrictions holds the string denoting the restrictions edge name in mutations.
+	EdgeRestrictions = "restrictions"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// DiscordInteractionsTable is the table that holds the discord_interactions relation/edge.
@@ -57,6 +65,13 @@ const (
 	ConnectionsInverseTable = "user_connections"
 	// ConnectionsColumn is the table column denoting the connections relation/edge.
 	ConnectionsColumn = "user_id"
+	// WidgetsTable is the table that holds the widgets relation/edge.
+	WidgetsTable = "widget_settings"
+	// WidgetsInverseTable is the table name for the WidgetSettings entity.
+	// It exists in this package in order to avoid circular dependency with the "widgetsettings" package.
+	WidgetsInverseTable = "widget_settings"
+	// WidgetsColumn is the table column denoting the widgets relation/edge.
+	WidgetsColumn = "user_id"
 	// ContentTable is the table that holds the content relation/edge.
 	ContentTable = "user_contents"
 	// ContentInverseTable is the table name for the UserContent entity.
@@ -71,6 +86,27 @@ const (
 	SessionsInverseTable = "sessions"
 	// SessionsColumn is the table column denoting the sessions relation/edge.
 	SessionsColumn = "user_id"
+	// ModerationRequestsTable is the table that holds the moderation_requests relation/edge.
+	ModerationRequestsTable = "moderation_requests"
+	// ModerationRequestsInverseTable is the table name for the ModerationRequest entity.
+	// It exists in this package in order to avoid circular dependency with the "moderationrequest" package.
+	ModerationRequestsInverseTable = "moderation_requests"
+	// ModerationRequestsColumn is the table column denoting the moderation_requests relation/edge.
+	ModerationRequestsColumn = "requestor_id"
+	// ModerationActionsTable is the table that holds the moderation_actions relation/edge.
+	ModerationActionsTable = "moderation_requests"
+	// ModerationActionsInverseTable is the table name for the ModerationRequest entity.
+	// It exists in this package in order to avoid circular dependency with the "moderationrequest" package.
+	ModerationActionsInverseTable = "moderation_requests"
+	// ModerationActionsColumn is the table column denoting the moderation_actions relation/edge.
+	ModerationActionsColumn = "moderator_id"
+	// RestrictionsTable is the table that holds the restrictions relation/edge.
+	RestrictionsTable = "user_restrictions"
+	// RestrictionsInverseTable is the table name for the UserRestriction entity.
+	// It exists in this package in order to avoid circular dependency with the "userrestriction" package.
+	RestrictionsInverseTable = "user_restrictions"
+	// RestrictionsColumn is the table column denoting the restrictions relation/edge.
+	RestrictionsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -176,6 +212,20 @@ func ByConnections(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByWidgetsCount orders the results by widgets count.
+func ByWidgetsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newWidgetsStep(), opts...)
+	}
+}
+
+// ByWidgets orders the results by widgets terms.
+func ByWidgets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWidgetsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByContentCount orders the results by content count.
 func ByContentCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -203,6 +253,48 @@ func BySessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByModerationRequestsCount orders the results by moderation_requests count.
+func ByModerationRequestsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newModerationRequestsStep(), opts...)
+	}
+}
+
+// ByModerationRequests orders the results by moderation_requests terms.
+func ByModerationRequests(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newModerationRequestsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByModerationActionsCount orders the results by moderation_actions count.
+func ByModerationActionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newModerationActionsStep(), opts...)
+	}
+}
+
+// ByModerationActions orders the results by moderation_actions terms.
+func ByModerationActions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newModerationActionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRestrictionsCount orders the results by restrictions count.
+func ByRestrictionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRestrictionsStep(), opts...)
+	}
+}
+
+// ByRestrictions orders the results by restrictions terms.
+func ByRestrictions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRestrictionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newDiscordInteractionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -224,6 +316,13 @@ func newConnectionsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, ConnectionsTable, ConnectionsColumn),
 	)
 }
+func newWidgetsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WidgetsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WidgetsTable, WidgetsColumn),
+	)
+}
 func newContentStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -236,5 +335,26 @@ func newSessionsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SessionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
+	)
+}
+func newModerationRequestsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ModerationRequestsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ModerationRequestsTable, ModerationRequestsColumn),
+	)
+}
+func newModerationActionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ModerationActionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ModerationActionsTable, ModerationActionsColumn),
+	)
+}
+func newRestrictionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RestrictionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RestrictionsTable, RestrictionsColumn),
 	)
 }

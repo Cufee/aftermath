@@ -105,6 +105,30 @@ func (f DiscordInteractionFunc) Mutate(ctx context.Context, m db.Mutation) (db.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.DiscordInteractionMutation", m)
 }
 
+// The GameMapFunc type is an adapter to allow the use of ordinary
+// function as GameMap mutator.
+type GameMapFunc func(context.Context, *db.GameMapMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GameMapFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.GameMapMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.GameMapMutation", m)
+}
+
+// The GameModeFunc type is an adapter to allow the use of ordinary
+// function as GameMode mutator.
+type GameModeFunc func(context.Context, *db.GameModeMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GameModeFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.GameModeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.GameModeMutation", m)
+}
+
 // The LeaderboardScoreFunc type is an adapter to allow the use of ordinary
 // function as LeaderboardScore mutator.
 type LeaderboardScoreFunc func(context.Context, *db.LeaderboardScoreMutation) (db.Value, error)
@@ -115,6 +139,18 @@ func (f LeaderboardScoreFunc) Mutate(ctx context.Context, m db.Mutation) (db.Val
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.LeaderboardScoreMutation", m)
+}
+
+// The ModerationRequestFunc type is an adapter to allow the use of ordinary
+// function as ModerationRequest mutator.
+type ModerationRequestFunc func(context.Context, *db.ModerationRequestMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ModerationRequestFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.ModerationRequestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.ModerationRequestMutation", m)
 }
 
 // The SessionFunc type is an adapter to allow the use of ordinary
@@ -165,6 +201,18 @@ func (f UserContentFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.UserContentMutation", m)
 }
 
+// The UserRestrictionFunc type is an adapter to allow the use of ordinary
+// function as UserRestriction mutator.
+type UserRestrictionFunc func(context.Context, *db.UserRestrictionMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserRestrictionFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.UserRestrictionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.UserRestrictionMutation", m)
+}
+
 // The UserSubscriptionFunc type is an adapter to allow the use of ordinary
 // function as UserSubscription mutator.
 type UserSubscriptionFunc func(context.Context, *db.UserSubscriptionMutation) (db.Value, error)
@@ -211,6 +259,18 @@ func (f VehicleSnapshotFunc) Mutate(ctx context.Context, m db.Mutation) (db.Valu
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.VehicleSnapshotMutation", m)
+}
+
+// The WidgetSettingsFunc type is an adapter to allow the use of ordinary
+// function as WidgetSettings mutator.
+type WidgetSettingsFunc func(context.Context, *db.WidgetSettingsMutation) (db.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WidgetSettingsFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
+	if mv, ok := m.(*db.WidgetSettingsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.WidgetSettingsMutation", m)
 }
 
 // Condition is a hook condition function.

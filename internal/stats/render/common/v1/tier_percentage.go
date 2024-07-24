@@ -13,7 +13,7 @@ func NewTierPercentageCard(style Style, vehicles map[string]frame.VehicleStatsFr
 	var elements int = 10
 
 	backgroundSharePrimary := DefaultCardColor
-	backgroundShareSecondary := color.RGBA{120, 120, 120, 120}
+	backgroundShareSecondary := color.NRGBA{120, 120, 120, 120}
 
 	for i := range elements {
 		shade := backgroundSharePrimary

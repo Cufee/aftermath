@@ -13,7 +13,7 @@ const (
 	RestrictionTypeComplete UserRestrictionType = "complete" // restricts user from using any and all features
 )
 
-func (r *UserRestrictionType) Values() []string {
+func (UserRestrictionType) Values() []string {
 	return []string{string(RestrictionTypePartial), string(RestrictionTypeComplete)}
 }
 
@@ -29,4 +29,20 @@ type UserRestriction struct {
 	ExpiresAt time.Time
 	CreatedAt time.Time
 	UpdatedAt time.Time
+
+	Events []RestrictionUpdate
+}
+
+func (r *UserRestriction) AddEvent(modID string, summary string, context string) {
+	r.Events = append(r.Events, RestrictionUpdate{
+		ModeratorID: modID,
+		Summary:     summary,
+		Context:     context,
+	})
+}
+
+type RestrictionUpdate struct {
+	ModeratorID string
+	Summary     string
+	Context     string
 }

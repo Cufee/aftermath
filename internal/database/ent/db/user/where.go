@@ -374,6 +374,29 @@ func HasConnectionsWith(preds ...predicate.UserConnection) predicate.User {
 	})
 }
 
+// HasWidgets applies the HasEdge predicate on the "widgets" edge.
+func HasWidgets() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WidgetsTable, WidgetsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWidgetsWith applies the HasEdge predicate on the "widgets" edge with a given conditions (other predicates).
+func HasWidgetsWith(preds ...predicate.WidgetSettings) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newWidgetsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasContent applies the HasEdge predicate on the "content" edge.
 func HasContent() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -412,6 +435,75 @@ func HasSessions() predicate.User {
 func HasSessionsWith(preds ...predicate.Session) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newSessionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasModerationRequests applies the HasEdge predicate on the "moderation_requests" edge.
+func HasModerationRequests() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ModerationRequestsTable, ModerationRequestsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasModerationRequestsWith applies the HasEdge predicate on the "moderation_requests" edge with a given conditions (other predicates).
+func HasModerationRequestsWith(preds ...predicate.ModerationRequest) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newModerationRequestsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasModerationActions applies the HasEdge predicate on the "moderation_actions" edge.
+func HasModerationActions() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ModerationActionsTable, ModerationActionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasModerationActionsWith applies the HasEdge predicate on the "moderation_actions" edge with a given conditions (other predicates).
+func HasModerationActionsWith(preds ...predicate.ModerationRequest) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newModerationActionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasRestrictions applies the HasEdge predicate on the "restrictions" edge.
+func HasRestrictions() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RestrictionsTable, RestrictionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRestrictionsWith applies the HasEdge predicate on the "restrictions" edge with a given conditions (other predicates).
+func HasRestrictionsWith(preds ...predicate.UserRestriction) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newRestrictionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

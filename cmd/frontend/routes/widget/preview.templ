@@ -12,7 +12,7 @@ import (
 var WidgetPreview handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	widget, err := widget.AccountWidget(ctx)
 	if err != nil {
-		return layouts.Main, nil, ctx.Error(err, "failed to generate a widget preview")
+		return layouts.Main, nil, ctx.Err(err, "failed to generate a widget preview")
 	}
 	if widget == nil {
 		return nil, nil, nil
@@ -55,7 +55,7 @@ templ widgetPreview(accountID string, widget templ.Component, or, ou bool, vl in
 }
 
 script copyButtonAction() {
-	const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "/live" + window.location.search
+	const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "live" + window.location.search
 	navigator.clipboard.writeText(url);
 	
 	const btn = document.getElementById("copy-widget-link")
@@ -84,7 +84,7 @@ script handlePreview(id string) {
 		vlEl.disabled = true
 		button.disabled = true
 
-		fetch("/api/widget/"+id+newQuery).then((r) => r.text()).then((html) => {
+		fetch("/api/p/widget/"+id+newQuery).then((r) => r.text()).then((html) => {
 			document.getElementById("account-widget").outerHTML = html
 			const url = window.location.protocol + "//" + window.location.host + window.location.pathname + newQuery;
 			window.history?.pushState({path:url},'',url);

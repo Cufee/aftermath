@@ -33,7 +33,7 @@ templ navbar(props navbarProps) {
 				</a>
 			</div>
 			<div class="navbar-center">
-				if !strings.HasPrefix(props.path, "/widget") {
+				if !strings.HasPrefix(props.path, "/widget") && !strings.HasPrefix(props.path, "/app") {
 					<div class="form-control">
 						<input type="text" placeholder="Search Players" class="input input-bordered w-48 md:w-auto placeholder:text-center" disabled/>
 					</div>
@@ -111,6 +111,8 @@ templ navProgressAnimated(...templ.Component) {
 script animateNavProgress() {
 	const progressBar = document.getElementById('nav-progress');
 	const progressBaseStep = 5;
+	
+	let stopAnimation;
 
 	const progressRandomStep = () => {
 		return Math.floor(progressBaseStep * Math.random()) + progressBaseStep;
@@ -131,6 +133,7 @@ script animateNavProgress() {
 			stopAnimation = null;
 		}
 	}
+	resetProgress();
 
 	document.body.addEventListener('load', resetProgress);
 	document.body.addEventListener('popstate', resetProgress);
@@ -151,7 +154,6 @@ script animateNavProgress() {
 		}
 	});
 
-	let stopAnimation;
 	document.body.addEventListener('htmx:beforeSend', () => {
 		progressBar.value = progressRandomStep()
 		progressBar.style.width = progressBar.value + "%"

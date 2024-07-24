@@ -14,11 +14,13 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"golang.org/x/text/language"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/rest"
+	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/retry"
 )
@@ -70,7 +72,7 @@ func verifyPublicKey(r *http.Request, key ed25519.PublicKey) bool {
 /*
 Returns a handler for the current router
 */
-func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
+func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 	if router.publicKey == "" {
 		return nil, errors.New("missing publicKey")
 	}
@@ -124,16 +126,17 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 
 		res := retry.Retry(
 			func() (struct{}, error) {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*1000)
 				defer cancel()
-				err := router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, payload, nil)
+				_, err := router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, payload, nil)
+				if errors.Is(err, rest.ErrInteractionAlreadyAcked) {
+					err = nil
+				}
 				return struct{}{}, err
 			},
 			3,
-			time.Millisecond*50,
-			// break if the error means we were able to ack on the last request
-			func(err error) bool { return errors.Is(err, rest.ErrInteractionAlreadyAcked) })
-		if res.Err != nil && !errors.Is(res.Err, rest.ErrInteractionAlreadyAcked) {
+			time.Millisecond*150)
+		if res.Err != nil {
 			log.Warn().Err(res.Err).Str("id", data.ID).Msg("failed to ack an interaction")
 			// cross our fingers and hope discord registered one of those requests, or will propagate the ack from the response body
 		}
@@ -157,7 +160,7 @@ func (router *Router) HTTPHandler() (http.HandlerFunc, error) {
 	}, nil
 }
 
-func (r *Router) routeInteraction(interaction discordgo.Interaction) (builder.Command, error) {
+func (r *router) routeInteraction(interaction discordgo.Interaction) (builder.Command, error) {
 	var matchKey string
 
 	switch interaction.Type {
@@ -187,16 +190,22 @@ func (r *Router) routeInteraction(interaction discordgo.Interaction) (builder.Co
 	return builder.Command{}, fmt.Errorf("failed to match %s to a command handler", matchKey)
 }
 
-func (r *Router) handleInteraction(interaction discordgo.Interaction, command builder.Command) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+func (r *router) handleInteraction(interaction discordgo.Interaction, command builder.Command) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	cCtx, err := common.NewContext(ctx, interaction, r.restClient, r.core)
+	cCtx, err := newContext(ctx, interaction, r.restClient, r.core, r.events)
 	if err != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
 		log.Err(err).Msg("failed to create a common.Context for a handler")
-		r.sendInteractionReply(ctx, interaction, discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed. Please try again in a few seconds."})
+		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{
+			Content: "Something unexpected happened and your command failed. Please try again in a few seconds.",
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						common.ButtonJoinPrimaryGuild("Need Help?"),
+					}},
+			},
+		})
 		return
 	}
 
@@ -208,18 +217,29 @@ func (r *Router) handleInteraction(interaction discordgo.Interaction, command bu
 	func() {
 		defer func() {
 			if rec := recover(); rec != nil {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-				defer cancel()
 				log.Error().Str("stack", string(debug.Stack())).Msg("panic in interaction handler")
-				r.sendInteractionReply(ctx, interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")})
+				r.sendInteractionReply(interaction, discordgo.InteractionResponseData{
+					Content: cCtx.Localize("common_error_unhandled_not_reported"),
+					Components: []discordgo.MessageComponent{
+						discordgo.ActionsRow{
+							Components: []discordgo.MessageComponent{
+								common.ButtonJoinPrimaryGuild(cCtx.Localize("buttons_join_primary_guild")),
+							}},
+					},
+				})
 			}
 		}()
 		err = handler(cCtx)
 		if err != nil {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
 			log.Err(err).Msg("handler returned an error")
-			r.sendInteractionReply(ctx, interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported")})
+			r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported"),
+				Components: []discordgo.MessageComponent{
+					discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							common.ButtonJoinPrimaryGuild(cCtx.Localize("buttons_join_primary_guild")),
+						}},
+				},
+			})
 			return
 		}
 	}()
@@ -233,23 +253,47 @@ func sendPingReply(w http.ResponseWriter) {
 	}
 }
 
-func (r *Router) sendInteractionReply(ctx context.Context, interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
-	var handler func() error
+func (r *router) sendInteractionReply(interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
+	var handler func(ctx context.Context) error
 
 	if slices.Contains(supportedInteractionTypes, interaction.Type) {
-		handler = func() error {
-			return r.restClient.UpdateOrSendInteractionResponse(ctx, interaction.AppID, interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &data, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
+		handler = func(ctx context.Context) error {
+			_, err := r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, data, nil)
+			return err
 		}
 	} else {
 		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
-		handler = func() error {
-			return r.restClient.UpdateOrSendInteractionResponse(ctx, interaction.AppID, interaction.ID, interaction.Token, discordgo.InteractionResponse{Data: &discordgo.InteractionResponseData{Content: "Something unexpected happened and your command failed."}, Type: discordgo.InteractionResponseChannelMessageWithSource}, nil)
+
+		printer, err := localization.NewPrinter("discord", language.English)
+		if err != nil {
+			log.Err(err).Msg("failed to create a new locale printer")
+			printer = func(_ string) string { return "Join Aftermath Official" } // we only need it for this one button
+		}
+
+		handler = func(ctx context.Context) error {
+			_, err := r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, discordgo.InteractionResponseData{
+				Content: "Something unexpected happened and your command failed.",
+				Components: []discordgo.MessageComponent{
+					discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							common.ButtonJoinPrimaryGuild(printer("buttons_join_primary_guild")),
+						}},
+				},
+			}, nil)
+			return err
 		}
 	}
 
-	err := handler()
-	if err != nil {
-		log.Err(err).Stack().Any("data", data).Str("id", interaction.ID).Msg("failed to send an interaction response")
+	res := retry.Retry(func() (struct{}, error) {
+		// use a background context for this
+		// since the command is already handled, there is not much point in using the route handler context timeout
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		err := handler(ctx)
+		return struct{}{}, err
+	}, 5, time.Second) // better late than never
+	if res.Err != nil {
+		log.Err(res.Err).Stack().Any("data", data).Str("id", interaction.ID).Msg("failed to send an interaction response")
 		return
 	}
 }

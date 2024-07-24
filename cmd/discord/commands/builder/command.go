@@ -16,7 +16,7 @@ const (
 	CommandTypeComponent commandType = iota
 )
 
-type CommandHandler func(*common.Context) error
+type CommandHandler func(common.Context) error
 
 type Command struct {
 	discordgo.ApplicationCommand
@@ -55,8 +55,15 @@ func (c Builder) Build() Command {
 		panic("command " + c.name + " is missing a match function")
 	}
 
-	nameLocalized := common.LocalizeKey(c.nameKey())
-	descLocalized := common.LocalizeKey(c.descKey())
+	var nameLocalized map[discordgo.Locale]string
+	if c.nameKey() != "" {
+		nameLocalized = common.LocalizeKey(c.nameKey())
+	}
+
+	var descLocalized map[discordgo.Locale]string
+	if c.descKey() != "" {
+		descLocalized = common.LocalizeKey(c.descKey())
+	}
 
 	var options []*discordgo.ApplicationCommandOption
 	for _, o := range c.options {

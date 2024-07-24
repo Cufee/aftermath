@@ -13,15 +13,20 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
+	"github.com/cufee/aftermath/internal/database/ent/db/gamemode"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 	"github.com/cufee/aftermath/internal/database/ent/schema"
 )
 
@@ -223,22 +228,46 @@ func init() {
 	discordinteraction.DefaultUpdatedAt = discordinteractionDescUpdatedAt.Default.(func() time.Time)
 	// discordinteraction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	discordinteraction.UpdateDefaultUpdatedAt = discordinteractionDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// discordinteractionDescCommand is the schema descriptor for command field.
-	discordinteractionDescCommand := discordinteractionFields[3].Descriptor()
-	// discordinteraction.CommandValidator is a validator for the "command" field. It is called by the builders before save.
-	discordinteraction.CommandValidator = discordinteractionDescCommand.Validators[0].(func(string) error)
+	// discordinteractionDescResult is the schema descriptor for result field.
+	discordinteractionDescResult := discordinteractionFields[3].Descriptor()
+	// discordinteraction.ResultValidator is a validator for the "result" field. It is called by the builders before save.
+	discordinteraction.ResultValidator = discordinteractionDescResult.Validators[0].(func(string) error)
 	// discordinteractionDescUserID is the schema descriptor for user_id field.
 	discordinteractionDescUserID := discordinteractionFields[4].Descriptor()
 	// discordinteraction.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	discordinteraction.UserIDValidator = discordinteractionDescUserID.Validators[0].(func(string) error)
-	// discordinteractionDescReferenceID is the schema descriptor for reference_id field.
-	discordinteractionDescReferenceID := discordinteractionFields[5].Descriptor()
-	// discordinteraction.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
-	discordinteraction.ReferenceIDValidator = discordinteractionDescReferenceID.Validators[0].(func(string) error)
+	// discordinteractionDescEventID is the schema descriptor for event_id field.
+	discordinteractionDescEventID := discordinteractionFields[5].Descriptor()
+	// discordinteraction.EventIDValidator is a validator for the "event_id" field. It is called by the builders before save.
+	discordinteraction.EventIDValidator = discordinteractionDescEventID.Validators[0].(func(string) error)
 	// discordinteractionDescID is the schema descriptor for id field.
 	discordinteractionDescID := discordinteractionFields[0].Descriptor()
 	// discordinteraction.DefaultID holds the default value on creation for the id field.
 	discordinteraction.DefaultID = discordinteractionDescID.Default.(func() string)
+	gamemapFields := schema.GameMap{}.Fields()
+	_ = gamemapFields
+	// gamemapDescCreatedAt is the schema descriptor for created_at field.
+	gamemapDescCreatedAt := gamemapFields[1].Descriptor()
+	// gamemap.DefaultCreatedAt holds the default value on creation for the created_at field.
+	gamemap.DefaultCreatedAt = gamemapDescCreatedAt.Default.(func() time.Time)
+	// gamemapDescUpdatedAt is the schema descriptor for updated_at field.
+	gamemapDescUpdatedAt := gamemapFields[2].Descriptor()
+	// gamemap.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	gamemap.DefaultUpdatedAt = gamemapDescUpdatedAt.Default.(func() time.Time)
+	// gamemap.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	gamemap.UpdateDefaultUpdatedAt = gamemapDescUpdatedAt.UpdateDefault.(func() time.Time)
+	gamemodeFields := schema.GameMode{}.Fields()
+	_ = gamemodeFields
+	// gamemodeDescCreatedAt is the schema descriptor for created_at field.
+	gamemodeDescCreatedAt := gamemodeFields[1].Descriptor()
+	// gamemode.DefaultCreatedAt holds the default value on creation for the created_at field.
+	gamemode.DefaultCreatedAt = gamemodeDescCreatedAt.Default.(func() time.Time)
+	// gamemodeDescUpdatedAt is the schema descriptor for updated_at field.
+	gamemodeDescUpdatedAt := gamemodeFields[2].Descriptor()
+	// gamemode.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	gamemode.DefaultUpdatedAt = gamemodeDescUpdatedAt.Default.(func() time.Time)
+	// gamemode.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	gamemode.UpdateDefaultUpdatedAt = gamemodeDescUpdatedAt.UpdateDefault.(func() time.Time)
 	leaderboardscoreFields := schema.LeaderboardScore{}.Fields()
 	_ = leaderboardscoreFields
 	// leaderboardscoreDescCreatedAt is the schema descriptor for created_at field.
@@ -255,6 +284,30 @@ func init() {
 	leaderboardscoreDescID := leaderboardscoreFields[0].Descriptor()
 	// leaderboardscore.DefaultID holds the default value on creation for the id field.
 	leaderboardscore.DefaultID = leaderboardscoreDescID.Default.(func() string)
+	moderationrequestFields := schema.ModerationRequest{}.Fields()
+	_ = moderationrequestFields
+	// moderationrequestDescCreatedAt is the schema descriptor for created_at field.
+	moderationrequestDescCreatedAt := moderationrequestFields[1].Descriptor()
+	// moderationrequest.DefaultCreatedAt holds the default value on creation for the created_at field.
+	moderationrequest.DefaultCreatedAt = moderationrequestDescCreatedAt.Default.(func() time.Time)
+	// moderationrequestDescUpdatedAt is the schema descriptor for updated_at field.
+	moderationrequestDescUpdatedAt := moderationrequestFields[2].Descriptor()
+	// moderationrequest.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	moderationrequest.DefaultUpdatedAt = moderationrequestDescUpdatedAt.Default.(func() time.Time)
+	// moderationrequest.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	moderationrequest.UpdateDefaultUpdatedAt = moderationrequestDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// moderationrequestDescReferenceID is the schema descriptor for reference_id field.
+	moderationrequestDescReferenceID := moderationrequestFields[6].Descriptor()
+	// moderationrequest.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
+	moderationrequest.ReferenceIDValidator = moderationrequestDescReferenceID.Validators[0].(func(string) error)
+	// moderationrequestDescRequestorID is the schema descriptor for requestor_id field.
+	moderationrequestDescRequestorID := moderationrequestFields[7].Descriptor()
+	// moderationrequest.RequestorIDValidator is a validator for the "requestor_id" field. It is called by the builders before save.
+	moderationrequest.RequestorIDValidator = moderationrequestDescRequestorID.Validators[0].(func(string) error)
+	// moderationrequestDescID is the schema descriptor for id field.
+	moderationrequestDescID := moderationrequestFields[0].Descriptor()
+	// moderationrequest.DefaultID holds the default value on creation for the id field.
+	moderationrequest.DefaultID = moderationrequestDescID.Default.(func() string)
 	sessionFields := schema.Session{}.Fields()
 	_ = sessionFields
 	// sessionDescCreatedAt is the schema descriptor for created_at field.
@@ -331,6 +384,34 @@ func init() {
 	usercontentDescID := usercontentFields[0].Descriptor()
 	// usercontent.DefaultID holds the default value on creation for the id field.
 	usercontent.DefaultID = usercontentDescID.Default.(func() string)
+	userrestrictionFields := schema.UserRestriction{}.Fields()
+	_ = userrestrictionFields
+	// userrestrictionDescCreatedAt is the schema descriptor for created_at field.
+	userrestrictionDescCreatedAt := userrestrictionFields[1].Descriptor()
+	// userrestriction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	userrestriction.DefaultCreatedAt = userrestrictionDescCreatedAt.Default.(func() time.Time)
+	// userrestrictionDescUpdatedAt is the schema descriptor for updated_at field.
+	userrestrictionDescUpdatedAt := userrestrictionFields[2].Descriptor()
+	// userrestriction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	userrestriction.DefaultUpdatedAt = userrestrictionDescUpdatedAt.Default.(func() time.Time)
+	// userrestriction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	userrestriction.UpdateDefaultUpdatedAt = userrestrictionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userrestrictionDescUserID is the schema descriptor for user_id field.
+	userrestrictionDescUserID := userrestrictionFields[5].Descriptor()
+	// userrestriction.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	userrestriction.UserIDValidator = userrestrictionDescUserID.Validators[0].(func(string) error)
+	// userrestrictionDescRestriction is the schema descriptor for restriction field.
+	userrestrictionDescRestriction := userrestrictionFields[6].Descriptor()
+	// userrestriction.RestrictionValidator is a validator for the "restriction" field. It is called by the builders before save.
+	userrestriction.RestrictionValidator = userrestrictionDescRestriction.Validators[0].(func(string) error)
+	// userrestrictionDescPublicReason is the schema descriptor for public_reason field.
+	userrestrictionDescPublicReason := userrestrictionFields[7].Descriptor()
+	// userrestriction.PublicReasonValidator is a validator for the "public_reason" field. It is called by the builders before save.
+	userrestriction.PublicReasonValidator = userrestrictionDescPublicReason.Validators[0].(func(string) error)
+	// userrestrictionDescID is the schema descriptor for id field.
+	userrestrictionDescID := userrestrictionFields[0].Descriptor()
+	// userrestriction.DefaultID holds the default value on creation for the id field.
+	userrestriction.DefaultID = userrestrictionDescID.Default.(func() string)
 	usersubscriptionFields := schema.UserSubscription{}.Fields()
 	_ = usersubscriptionFields
 	// usersubscriptionDescCreatedAt is the schema descriptor for created_at field.
@@ -429,4 +510,20 @@ func init() {
 	vehiclesnapshotDescID := vehiclesnapshotFields[0].Descriptor()
 	// vehiclesnapshot.DefaultID holds the default value on creation for the id field.
 	vehiclesnapshot.DefaultID = vehiclesnapshotDescID.Default.(func() string)
+	widgetsettingsFields := schema.WidgetSettings{}.Fields()
+	_ = widgetsettingsFields
+	// widgetsettingsDescCreatedAt is the schema descriptor for created_at field.
+	widgetsettingsDescCreatedAt := widgetsettingsFields[1].Descriptor()
+	// widgetsettings.DefaultCreatedAt holds the default value on creation for the created_at field.
+	widgetsettings.DefaultCreatedAt = widgetsettingsDescCreatedAt.Default.(func() time.Time)
+	// widgetsettingsDescUpdatedAt is the schema descriptor for updated_at field.
+	widgetsettingsDescUpdatedAt := widgetsettingsFields[2].Descriptor()
+	// widgetsettings.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	widgetsettings.DefaultUpdatedAt = widgetsettingsDescUpdatedAt.Default.(func() time.Time)
+	// widgetsettings.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	widgetsettings.UpdateDefaultUpdatedAt = widgetsettingsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// widgetsettingsDescID is the schema descriptor for id field.
+	widgetsettingsDescID := widgetsettingsFields[0].Descriptor()
+	// widgetsettings.DefaultID holds the default value on creation for the id field.
+	widgetsettings.DefaultID = widgetsettingsDescID.Default.(func() string)
 }

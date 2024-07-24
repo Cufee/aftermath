@@ -1,30 +1,54 @@
 package gateway
 
 import (
+	"context"
+
 	"github.com/bwmarrin/discordgo"
+	"github.com/cufee/aftermath/cmd/core"
+	"github.com/cufee/aftermath/cmd/discord"
+	"github.com/cufee/aftermath/cmd/discord/commands/builder"
+	"github.com/cufee/aftermath/cmd/discord/logic"
+	"github.com/cufee/aftermath/cmd/discord/middleware"
+	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/pkg/errors"
 )
 
 var _ Client = &gatewayClient{}
 
 type Client interface {
+	discord.Commander
+
+	Session(guildID string) *discordgo.Session
+
 	Connect() error
 	Handler(fn interface{}) func()
 	SetStatus(status status, text string, emoji *discordgo.Emoji) error
 }
 
 type gatewayClient struct {
-	session *discordgo.Session
+	core core.Client
+
+	rest       *rest.Client
+	session    *discordgo.Session
+	commands   []builder.Command
+	middleware []middleware.MiddlewareFunc
 }
 
-func NewClient(token string, intent discordgo.Intent) (*gatewayClient, error) {
+func NewClient(core core.Client, token string, intent discordgo.Intent) (*gatewayClient, error) {
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		return nil, err
 	}
 
+	rest, err := rest.NewClient(token)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create a new rest client")
+	}
+
 	dg.Identify.Intents = intent
 	return &gatewayClient{
+		core:    core,
+		rest:    rest,
 		session: dg,
 	}, nil
 }
@@ -38,6 +62,31 @@ func (c *gatewayClient) Connect() error {
 
 func (c *gatewayClient) Handler(fn interface{}) func() {
 	return c.session.AddHandler(fn)
+}
+
+func (c *gatewayClient) Session(guildID string) *discordgo.Session {
+	return c.session
+}
+
+/*
+Loads commands into the router, does not update bot commands through Discord API
+*/
+func (c *gatewayClient) LoadCommands(commands ...builder.Command) {
+	c.commands = append(c.commands, commands...)
+}
+
+/*
+Loads interactions into the router
+*/
+func (c *gatewayClient) LoadMiddleware(middleware ...middleware.MiddlewareFunc) {
+	c.middleware = append(c.middleware, middleware...)
+}
+
+/*
+Loads interactions into the router
+*/
+func (c *gatewayClient) UpdateLoadedCommands(ctx context.Context) error {
+	return logic.UpdateCommands(ctx, c.core.Database(), c.rest, c.commands)
 }
 
 type status int

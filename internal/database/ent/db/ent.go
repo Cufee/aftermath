@@ -20,15 +20,20 @@ import (
 	"github.com/cufee/aftermath/internal/database/ent/db/clan"
 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
+	"github.com/cufee/aftermath/internal/database/ent/db/gamemap"
+	"github.com/cufee/aftermath/internal/database/ent/db/gamemode"
 	"github.com/cufee/aftermath/internal/database/ent/db/leaderboardscore"
+	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
 	"github.com/cufee/aftermath/internal/database/ent/db/session"
 	"github.com/cufee/aftermath/internal/database/ent/db/user"
 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
+	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
+	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -97,15 +102,20 @@ func checkColumn(table, column string) error {
 			clan.Table:               clan.ValidColumn,
 			crontask.Table:           crontask.ValidColumn,
 			discordinteraction.Table: discordinteraction.ValidColumn,
+			gamemap.Table:            gamemap.ValidColumn,
+			gamemode.Table:           gamemode.ValidColumn,
 			leaderboardscore.Table:   leaderboardscore.ValidColumn,
+			moderationrequest.Table:  moderationrequest.ValidColumn,
 			session.Table:            session.ValidColumn,
 			user.Table:               user.ValidColumn,
 			userconnection.Table:     userconnection.ValidColumn,
 			usercontent.Table:        usercontent.ValidColumn,
+			userrestriction.Table:    userrestriction.ValidColumn,
 			usersubscription.Table:   usersubscription.ValidColumn,
 			vehicle.Table:            vehicle.ValidColumn,
 			vehicleaverage.Table:     vehicleaverage.ValidColumn,
 			vehiclesnapshot.Table:    vehiclesnapshot.ValidColumn,
+			widgetsettings.Table:     widgetsettings.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

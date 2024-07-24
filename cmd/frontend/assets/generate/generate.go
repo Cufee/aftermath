@@ -8,21 +8,21 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strings"
 
-	"github.com/cufee/aftermath/cmd/frontend/assets"
-	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
+	"github.com/rs/zerolog/log"
 
 	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/joho/godotenv"
 )
 
 var outDirPath = "../../public"
-var brandColor color.RGBA
+var brandColor color.NRGBA
 
-var cardColor = color.RGBA{7, 7, 7, 200}
+var cardColor = color.NRGBA{7, 7, 7, 200}
 
 func main() {
 	godotenv.Load("../../../../.env")
@@ -52,7 +52,7 @@ func generateWN8Icons() {
 			color = common.TextAlt
 		}
 		{
-			filename := assets.WN8IconFilename(float32(tier))
+			filename := wn8IconFilename(float32(tier))
 			img := common.AftermathLogo(color, common.DefaultLogoOptions())
 			f, err := os.Create(filepath.Join(outDirPath, "wn8", filename))
 			if err != nil {
@@ -65,7 +65,7 @@ func generateWN8Icons() {
 			f.Close()
 		}
 		{
-			filename := "small_" + assets.WN8IconFilename(float32(tier))
+			filename := "small_" + wn8IconFilename(float32(tier))
 			img := common.AftermathLogo(color, common.SmallLogoOptions())
 			f, err := os.Create(filepath.Join(outDirPath, "wn8", filename))
 			if err != nil {
@@ -148,7 +148,7 @@ func generateOGImages() {
 
 		ctx.DrawImage(imaging.Fill(obsBg, imageWidth, imageHeight, imaging.Center, imaging.Lanczos), 0, 0)
 		ctx.DrawRectangle(0, 0, float64(imageWidth), float64(imageHeight))
-		ctx.SetColor(color.RGBA{7, 7, 7, 200})
+		ctx.SetColor(color.NRGBA{7, 7, 7, 200})
 		ctx.Fill()
 
 		ctx.DrawImageAnchored(imaging.Fit(logo, logoSize, logoSize, imaging.Linear), imageWidth/2, imageHeight/2, 0.5, 0.5)
@@ -250,4 +250,12 @@ func generateOGImages() {
 		}
 		f.Close()
 	}
+}
+
+func wn8IconFilename(rating float32) string {
+	name := strings.ReplaceAll(strings.ToLower(common.GetWN8TierName(rating)), " ", "_")
+	if rating < 1 {
+		name = "invalid"
+	}
+	return name + ".png"
 }

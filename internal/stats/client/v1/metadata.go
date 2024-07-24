@@ -7,6 +7,7 @@ import (
 )
 
 type Metadata struct {
+	Replay  fetch.Replay
 	Stats   map[string]fetch.AccountStatsOverPeriod
 	Timings map[string]time.Duration
 	timers  map[string]time.Time

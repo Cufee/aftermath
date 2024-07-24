@@ -1,0 +1,99 @@
+package widgets
+
+import (
+	"errors"
+	"github.com/cufee/aftermath/cmd/frontend/components/widget"
+	"github.com/cufee/aftermath/cmd/frontend/handler"
+	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/models"
+	"net/http"
+)
+
+var EditSettings handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	user, err := ctx.SessionUser()
+	if err != nil {
+		return nil, nil, ctx.Redirect("/login", http.StatusTemporaryRedirect)
+	}
+
+	widgetID := ctx.Path("widgetId")
+	if widgetID == "" {
+		return nil, nil, ctx.Redirect("/app", http.StatusMovedPermanently)
+	}
+
+	options, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
+	if database.IsNotFound(err) {
+		return nil, nil, ctx.Err(err, "widget not found")
+	}
+	if options.UserID != user.ID {
+		return nil, nil, ctx.Err(err, "widget not found")
+	}
+	if err != nil {
+		return nil, nil, ctx.Err(err, "failed to get widget settings")
+	}
+	if options.AccountID == "" {
+		return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: models.Account{}}, nil), nil
+	}
+
+	account, err := ctx.Database().GetAccountByID(ctx.Context, options.AccountID)
+	if database.IsNotFound(err) {
+		return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: models.Account{}}, map[string]string{"account_id": "Invalid or private account selected"}), nil
+	}
+	if err != nil {
+		return nil, nil, errors.New("invalid account id")
+	}
+
+	return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: account}, nil), nil
+}
+
+templ WidgetConfiguratorPage(options widget.WidgetWithAccount, errors map[string]string) {
+	<div class="flex flex-col gap-4 basis-1/2 grow items-center">
+		<div class="flex flex-col gap-2 text-center">
+			<div role="alert" class="alert alert-warning max-w-2xl">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-6 w-6 shrink-0 stroke-current"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+					></path>
+				</svg>
+				<span>Changes will be applied to the live widget shortly after saving!</span>
+			</div>
+		</div>
+		<div class="flex justify-center w-full">
+			@widget.CustomOptionsForm(options, widgetOptionsSave(options.ID), templ.Attributes{
+				"hx-swap":   "outerHTML",
+				"hx-target": "#widget-style-settings",
+				"hx-select": "#widget-style-settings",
+				"hx-patch":  "/api/s/widget/custom/" + options.ID + "/",
+			}, errors)
+		</div>
+	</div>
+}
+
+templ widgetOptionsSave(id string) {
+	<div class="flex flex-row flex-wrap gap-2">
+		<button type="button" id={ "copy-widget-link-" + id } class="btn btn-primary transition-all min-w-28 duration-250 ease-in-out" onclick={ copyButtonAction(id) }>Copy Link</button>
+		<button type="submit" class="btn btn-info" disabled>Save and Apply</button>
+	</div>
+}
+
+script copyButtonAction(id string) {
+	const url = window.location.protocol + "//" + window.location.host + "/widget/custom/" + id + "/live/"
+	navigator.clipboard.writeText(url);
+	
+	const btn = document.getElementById("copy-widget-link"+id)
+	const oldText = btn.textContent
+	btn.textContent = "Copied!";
+	btn.classList.add("btn-success");
+	setTimeout(()=> {
+		btn.textContent = oldText;
+		btn.classList.remove("btn-success");
+	}, 2000)
+}

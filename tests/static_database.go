@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"time"
 
+	"github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -33,6 +35,12 @@ func (c *staticTestingDatabase) GetAccounts(ctx context.Context, ids []string) (
 	for _, id := range ids {
 		if a, ok := staticAccounts[id]; ok {
 			accounts = append(accounts, a)
+		} else {
+			accounts = append(accounts, models.Account{
+				ID:       id,
+				Nickname: "some_account_" + id,
+				Realm:    "NA",
+			})
 		}
 	}
 	return accounts, nil
@@ -41,7 +49,11 @@ func (c *staticTestingDatabase) GetAccountByID(ctx context.Context, id string) (
 	if account, ok := staticAccounts[id]; ok {
 		return account, nil
 	}
-	return models.Account{}, ErrNotFound
+	return models.Account{
+		ID:       id,
+		Realm:    "NA",
+		Nickname: "some_account" + id,
+	}, nil
 }
 func (c *staticTestingDatabase) GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error) {
 	return nil, errors.New("GetRealmAccountIDs not implemented")
@@ -101,14 +113,17 @@ func (c *staticTestingDatabase) UpsertUserWithPermissions(ctx context.Context, u
 	u.Permissions = perms
 	return u, nil
 }
-func (c *staticTestingDatabase) UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
-	return models.UserConnection{}, errors.New("UpdateConnection not implemented")
+func (c *staticTestingDatabase) GetUserConnection(ctx context.Context, id string) (models.UserConnection, error) {
+	return models.UserConnection{}, errors.New("GetConnection not implemented")
 }
-func (c *staticTestingDatabase) UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
-	return models.UserConnection{}, errors.New("UpsertConnection not implemented")
+func (c *staticTestingDatabase) UpdateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+	return connection, nil
 }
-func (c *staticTestingDatabase) DeleteConnection(ctx context.Context, connectionID string) error {
-	return errors.New("DeleteConnection not implemented")
+func (c *staticTestingDatabase) UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+	return connection, nil
+}
+func (c *staticTestingDatabase) DeleteUserConnection(ctx context.Context, userID, connectionID string) error {
+	return nil
 }
 
 func (c *staticTestingDatabase) GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.Query) ([]models.AccountSnapshot, error) {
@@ -175,11 +190,14 @@ func (c *staticTestingDatabase) GetCommandsByID(ctx context.Context, commandIDs 
 	return nil, errors.New("GetCommandsByID not implemented")
 }
 
-func (c *staticTestingDatabase) CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) error {
-	return errors.New("CreateDiscordInteraction not implemented")
+func (c *staticTestingDatabase) CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) (models.DiscordInteraction, error) {
+	return models.DiscordInteraction{}, errors.New("CreateDiscordInteraction not implemented")
 }
 func (c *staticTestingDatabase) GetDiscordInteraction(ctx context.Context, referenceID string) (models.DiscordInteraction, error) {
 	return models.DiscordInteraction{}, errors.New("GetDiscordInteraction not implemented")
+}
+func (c *staticTestingDatabase) FindDiscordInteractions(ctx context.Context, opts ...database.InteractionQuery) ([]models.DiscordInteraction, error) {
+	return nil, errors.New("FindDiscordInteractions not implemented")
 }
 func (c *staticTestingDatabase) DeleteExpiredInteractions(ctx context.Context, expiration time.Time) error {
 	return errors.New("DeleteExpiredInteractions not implemented")
@@ -216,4 +234,97 @@ func (c *staticTestingDatabase) GetLeaderboardScores(ctx context.Context, leader
 }
 func (c *staticTestingDatabase) DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time, kind models.ScoreType) error {
 	return errors.New("DeleteExpiredLeaderboardScores not implemented")
+}
+
+func (c *staticTestingDatabase) GetMap(ctx context.Context, id string) (types.Map, error) {
+	return types.Map{
+		ID:             "1",
+		LocalizedNames: map[language.Tag]string{language.English: "Mock Map Name"},
+	}, nil
+}
+func (c *staticTestingDatabase) UpsertMaps(ctx context.Context, maps map[string]types.Map) error {
+	return errors.New("UpsertMaps not implemented")
+}
+
+func (c *staticTestingDatabase) GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error) {
+	conn, _ := DefaultUserWithEdges.Connection(models.ConnectionTypeWargaming, nil)
+	return models.WidgetOptions{
+		ID:        "w1",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    DefaultUserWithEdges.ID,
+		AccountID: conn.ID,
+		Style: models.WidgetStyling{
+			UnratedOverview: models.WidgetCardStyle{
+				Visible:   true,
+				ShowTitle: true,
+			},
+		},
+	}, nil
+}
+func (c *staticTestingDatabase) GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error) {
+	s, err := c.GetWidgetSettings(ctx, userID)
+	return []models.WidgetOptions{s}, err
+}
+func (c *staticTestingDatabase) UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) (models.WidgetOptions, error) {
+	return settings, nil
+}
+func (c *staticTestingDatabase) CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) (models.WidgetOptions, error) {
+	settings.ID = fmt.Sprint(time.Now().Unix())
+	settings.UserID = userID
+	return settings, nil
+}
+
+func (c *staticTestingDatabase) GetGameModeNames(ctx context.Context, id string) (map[language.Tag]string, error) {
+	return nil, nil
+}
+func (c *staticTestingDatabase) UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) (map[string]error, error) {
+	return nil, nil
+}
+
+func (c *staticTestingDatabase) FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus, since time.Time) ([]models.ModerationRequest, error) {
+	return nil, errors.New("FindUserModerationRequests not implemented")
+}
+func (c *staticTestingDatabase) CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {
+	return models.ModerationRequest{}, errors.New("CreateModerationRequest not implemented")
+}
+func (c *staticTestingDatabase) GetModerationRequest(ctx context.Context, id string) (models.ModerationRequest, error) {
+	return models.ModerationRequest{}, errors.New("GetModerationRequest not implemented")
+}
+func (c *staticTestingDatabase) UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {
+	return models.ModerationRequest{}, errors.New("UpdateModerationRequest not implemented")
+}
+
+func (c *staticTestingDatabase) GetUserContent(ctx context.Context, id string) (models.UserContent, error) {
+	return models.UserContent{}, errors.New("GetUserContent not implemented")
+}
+func (c *staticTestingDatabase) GetUserContentFromRef(ctx context.Context, referenceID string, kind models.UserContentType) (models.UserContent, error) {
+	return models.UserContent{}, errors.New("GetUserContentFromRef not implemented")
+}
+func (c *staticTestingDatabase) FindUserContentFromRefs(ctx context.Context, kind models.UserContentType, referenceIDs ...string) ([]models.UserContent, error) {
+	return nil, errors.New("FindUserContentFromRefs not implemented")
+}
+func (c *staticTestingDatabase) CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	return models.UserContent{}, errors.New("CreateUserContent not implemented")
+}
+func (c *staticTestingDatabase) UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	return models.UserContent{}, errors.New("UpdateUserContent not implemented")
+}
+func (c *staticTestingDatabase) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	return models.UserContent{}, errors.New("UpsertUserContent not implemented")
+}
+func (c *staticTestingDatabase) DeleteUserContent(ctx context.Context, id string) error {
+	return errors.New("DeleteUserContent not implemented")
+}
+func (c *staticTestingDatabase) GetUserRestriction(ctx context.Context, id string) (models.UserRestriction, error) {
+	return models.UserRestriction{}, errors.New("GetUserRestriction not implemented")
+}
+func (c *staticTestingDatabase) GetUserRestrictions(ctx context.Context, userID string) ([]models.UserRestriction, error) {
+	return nil, errors.New("GetUserRestrictions not implemented")
+}
+func (c *staticTestingDatabase) CreateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error) {
+	return models.UserRestriction{}, errors.New("CreateUserRestriction not implemented")
+}
+func (c *staticTestingDatabase) UpdateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error) {
+	return models.UserRestriction{}, errors.New("UpdateUserRestriction not implemented")
 }

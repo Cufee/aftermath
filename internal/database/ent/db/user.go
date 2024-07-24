@@ -42,13 +42,21 @@ type UserEdges struct {
 	Subscriptions []*UserSubscription `json:"subscriptions,omitempty"`
 	// Connections holds the value of the connections edge.
 	Connections []*UserConnection `json:"connections,omitempty"`
+	// Widgets holds the value of the widgets edge.
+	Widgets []*WidgetSettings `json:"widgets,omitempty"`
 	// Content holds the value of the content edge.
 	Content []*UserContent `json:"content,omitempty"`
 	// Sessions holds the value of the sessions edge.
 	Sessions []*Session `json:"sessions,omitempty"`
+	// ModerationRequests holds the value of the moderation_requests edge.
+	ModerationRequests []*ModerationRequest `json:"moderation_requests,omitempty"`
+	// ModerationActions holds the value of the moderation_actions edge.
+	ModerationActions []*ModerationRequest `json:"moderation_actions,omitempty"`
+	// Restrictions holds the value of the restrictions edge.
+	Restrictions []*UserRestriction `json:"restrictions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [9]bool
 }
 
 // DiscordInteractionsOrErr returns the DiscordInteractions value or an error if the edge
@@ -78,10 +86,19 @@ func (e UserEdges) ConnectionsOrErr() ([]*UserConnection, error) {
 	return nil, &NotLoadedError{edge: "connections"}
 }
 
+// WidgetsOrErr returns the Widgets value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) WidgetsOrErr() ([]*WidgetSettings, error) {
+	if e.loadedTypes[3] {
+		return e.Widgets, nil
+	}
+	return nil, &NotLoadedError{edge: "widgets"}
+}
+
 // ContentOrErr returns the Content value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ContentOrErr() ([]*UserContent, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.Content, nil
 	}
 	return nil, &NotLoadedError{edge: "content"}
@@ -90,10 +107,37 @@ func (e UserEdges) ContentOrErr() ([]*UserContent, error) {
 // SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SessionsOrErr() ([]*Session, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.Sessions, nil
 	}
 	return nil, &NotLoadedError{edge: "sessions"}
+}
+
+// ModerationRequestsOrErr returns the ModerationRequests value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ModerationRequestsOrErr() ([]*ModerationRequest, error) {
+	if e.loadedTypes[6] {
+		return e.ModerationRequests, nil
+	}
+	return nil, &NotLoadedError{edge: "moderation_requests"}
+}
+
+// ModerationActionsOrErr returns the ModerationActions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ModerationActionsOrErr() ([]*ModerationRequest, error) {
+	if e.loadedTypes[7] {
+		return e.ModerationActions, nil
+	}
+	return nil, &NotLoadedError{edge: "moderation_actions"}
+}
+
+// RestrictionsOrErr returns the Restrictions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RestrictionsOrErr() ([]*UserRestriction, error) {
+	if e.loadedTypes[8] {
+		return e.Restrictions, nil
+	}
+	return nil, &NotLoadedError{edge: "restrictions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -188,6 +232,11 @@ func (u *User) QueryConnections() *UserConnectionQuery {
 	return NewUserClient(u.config).QueryConnections(u)
 }
 
+// QueryWidgets queries the "widgets" edge of the User entity.
+func (u *User) QueryWidgets() *WidgetSettingsQuery {
+	return NewUserClient(u.config).QueryWidgets(u)
+}
+
 // QueryContent queries the "content" edge of the User entity.
 func (u *User) QueryContent() *UserContentQuery {
 	return NewUserClient(u.config).QueryContent(u)
@@ -196,6 +245,21 @@ func (u *User) QueryContent() *UserContentQuery {
 // QuerySessions queries the "sessions" edge of the User entity.
 func (u *User) QuerySessions() *SessionQuery {
 	return NewUserClient(u.config).QuerySessions(u)
+}
+
+// QueryModerationRequests queries the "moderation_requests" edge of the User entity.
+func (u *User) QueryModerationRequests() *ModerationRequestQuery {
+	return NewUserClient(u.config).QueryModerationRequests(u)
+}
+
+// QueryModerationActions queries the "moderation_actions" edge of the User entity.
+func (u *User) QueryModerationActions() *ModerationRequestQuery {
+	return NewUserClient(u.config).QueryModerationActions(u)
+}
+
+// QueryRestrictions queries the "restrictions" edge of the User entity.
+func (u *User) QueryRestrictions() *UserRestrictionQuery {
+	return NewUserClient(u.config).QueryRestrictions(u)
 }
 
 // Update returns a builder for updating this User.

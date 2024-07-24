@@ -9,28 +9,31 @@ import (
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 )
 
-var DiscordBackgroundColor = color.RGBA{49, 51, 56, 255}
+var DiscordBackgroundColor = color.NRGBA{49, 51, 56, 255}
 
 var (
+	FontCustom func(float64) Font
 	FontXL     func() Font
 	Font2XL    func() Font
 	FontLarge  func() Font
 	FontMedium func() Font
 	FontSmall  func() Font
 
-	TextPrimary   = color.RGBA{255, 255, 255, 255}
-	TextSecondary = color.RGBA{204, 204, 204, 255}
-	TextAlt       = color.RGBA{150, 150, 150, 255}
+	TextPrimary   = color.NRGBA{255, 255, 255, 255}
+	TextSecondary = color.NRGBA{204, 204, 204, 255}
+	TextAlt       = color.NRGBA{150, 150, 150, 255}
 
-	TextSubscriptionPlus    = color.RGBA{72, 167, 250, 255}
-	TextSubscriptionPremium = color.RGBA{255, 223, 0, 255}
+	TextSubscriptionPlus    = color.NRGBA{72, 167, 250, 255}
+	TextSubscriptionPremium = color.NRGBA{255, 223, 0, 255}
 
-	DefaultCardColor        = color.RGBA{10, 10, 10, 180}
-	DefaultCardColorNoAlpha = color.RGBA{10, 10, 10, 255}
+	DefaultCardColor        = color.NRGBA{10, 10, 10, 180}
+	DefaultCardColorNoAlpha = color.NRGBA{10, 10, 10, 255}
+	ClanTagBackgroundColor  = color.NRGBA{10, 10, 10, 120}
 
-	ColorAftermathRed  = color.RGBA{255, 0, 120, 255}
-	ColorAftermathBlue = color.RGBA{72, 167, 250, 255}
+	ColorAftermathRed  = color.NRGBA{255, 0, 120, 255}
+	ColorAftermathBlue = color.NRGBA{72, 167, 250, 255}
 
+	BorderRadiusXL = 30.0
 	BorderRadiusLG = 25.0
 	BorderRadiusMD = 20.0
 	BorderRadiusSM = 15.0
@@ -67,6 +70,7 @@ func InitLoadedAssets() error {
 
 	FontXL = func() Font { return Font{size: 32, data: fontData} }
 	Font2XL = func() Font { return Font{size: 36, data: fontData} }
+	FontCustom = func(size float64) Font { return Font{size: size, data: fontData} }
 
 	FontLarge = func() Font { return Font{size: 24, data: fontData} }
 	FontMedium = func() Font { return Font{size: 18, data: fontData} }
@@ -121,7 +125,7 @@ func InitLoadedAssets() error {
 		Name: "Developer",
 		Icon: "images/icons/github",
 		Style: subscriptionPillStyle{
-			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: color.RGBA{64, 32, 128, 180}, BorderRadius: 15, PaddingX: 6, PaddingY: 5, Gap: 5, Height: 32},
+			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: color.NRGBA{64, 32, 128, 180}, BorderRadius: 15, PaddingX: 6, PaddingY: 5, Gap: 5, Height: 32},
 			Icon:      Style{Width: 20, Height: 20, BackgroundColor: TextPrimary},
 			Text:      Style{Font: FontSmall(), FontColor: TextPrimary, PaddingX: 5},
 		},

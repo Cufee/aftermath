@@ -8,11 +8,13 @@ import (
 	"time"
 
 	entsql "entgo.io/ent/dialect/sql"
+	"github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
+	"golang.org/x/text/language"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -44,6 +46,12 @@ type GlossaryClient interface {
 
 	UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) (map[string]error, error)
 	UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error)
+
+	GetMap(ctx context.Context, id string) (types.Map, error)
+	UpsertMaps(ctx context.Context, maps map[string]types.Map) error
+
+	GetGameModeNames(ctx context.Context, id string) (map[language.Tag]string, error)
+	UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) (map[string]error, error)
 }
 
 type UsersClient interface {
@@ -51,9 +59,23 @@ type UsersClient interface {
 	GetOrCreateUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error)
 	UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error)
 
-	UpdateConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
-	UpsertConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
-	DeleteConnection(ctx context.Context, connectionID string) error
+	GetUserConnection(ctx context.Context, connection string) (models.UserConnection, error)
+	UpdateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
+	UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
+	DeleteUserConnection(ctx context.Context, userID, connectionID string) error
+
+	GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error)
+	GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error)
+	UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) (models.WidgetOptions, error)
+	CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) (models.WidgetOptions, error)
+
+	GetUserContent(ctx context.Context, id string) (models.UserContent, error)
+	GetUserContentFromRef(ctx context.Context, referenceID string, kind models.UserContentType) (models.UserContent, error)
+	FindUserContentFromRefs(ctx context.Context, kind models.UserContentType, referenceIDs ...string) ([]models.UserContent, error)
+	CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
+	UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
+	UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
+	DeleteUserContent(ctx context.Context, id string) error
 }
 
 type SnapshotsClient interface {
@@ -94,9 +116,22 @@ type DiscordDataClient interface {
 	UpsertCommands(ctx context.Context, commands ...models.ApplicationCommand) error
 	GetCommandsByID(ctx context.Context, commandIDs ...string) ([]models.ApplicationCommand, error)
 
-	CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) error
-	GetDiscordInteraction(ctx context.Context, referenceID string) (models.DiscordInteraction, error)
+	CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) (models.DiscordInteraction, error)
+	GetDiscordInteraction(ctx context.Context, id string) (models.DiscordInteraction, error)
+	FindDiscordInteractions(ctx context.Context, opts ...InteractionQuery) ([]models.DiscordInteraction, error)
 	DeleteExpiredInteractions(ctx context.Context, expiration time.Time) error
+}
+
+type ModerationClient interface {
+	GetModerationRequest(ctx context.Context, id string) (models.ModerationRequest, error)
+	FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus, since time.Time) ([]models.ModerationRequest, error)
+	CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
+	UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
+
+	GetUserRestriction(ctx context.Context, id string) (models.UserRestriction, error)
+	GetUserRestrictions(ctx context.Context, userID string) ([]models.UserRestriction, error)
+	CreateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error)
+	UpdateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error)
 }
 
 type Client interface {
@@ -112,6 +147,7 @@ type Client interface {
 
 	DiscordDataClient
 
+	ModerationClient
 	Disconnect() error
 }
 

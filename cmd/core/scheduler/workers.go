@@ -8,8 +8,10 @@ import (
 	"io"
 	"time"
 
+	"github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/core/tasks"
+	"golang.org/x/text/language"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -132,45 +134,97 @@ func UpdateGlossaryWorker(client core.Client) func() {
 			return
 		}
 
+		// update vehicles
 		vf, err := zr.Open("assets/vehicles.json")
 		if err != nil {
 			log.Err(err).Msg("failed to open vehicles.json in assets.zip")
-			return
-		} else {
-			var vehicles map[string]models.Vehicle
-			err := json.NewDecoder(vf).Decode(&vehicles)
-			if err != nil {
-				log.Err(err).Msg("failed to decode vehicles.json")
-				return
-			}
 
-			vctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-			defer cancel()
-
-			_, err = client.Database().UpsertVehicles(vctx, vehicles)
-			if err != nil {
-				log.Err(err).Msg("failed to save vehicle glossary")
-				return
-			}
-
-			// load new glossary into the search memory cache
-			cctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
-			err = search.RefreshVehicleCache(cctx, client.Database())
-			if err != nil {
-				log.Err(err).Msg("failed to refresh glossary cache")
-				return
-			}
 		}
+		var vehicles map[string]models.Vehicle
+		err = json.NewDecoder(vf).Decode(&vehicles)
+		if err != nil {
+			log.Err(err).Msg("failed to decode vehicles.json")
+			return
+		}
+
+		vctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		defer cancel()
+
+		_, err = client.Database().UpsertVehicles(vctx, vehicles)
+		if err != nil {
+			log.Err(err).Msg("failed to save vehicle glossary")
+			return
+		}
+
+		// load new glossary into the search memory cache
+		cctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		err = search.RefreshVehicleCache(cctx, client.Database())
+		if err != nil {
+			log.Err(err).Msg("failed to refresh glossary cache")
+			return
+		}
+
+		// updates maps
+		mf, err := zr.Open("assets/maps.json")
+		if err != nil {
+			log.Err(err).Msg("failed to open maps.json in assets.zip")
+			return
+		}
+		var maps map[string]types.Map
+		err = json.NewDecoder(mf).Decode(&maps)
+		if err != nil {
+			log.Err(err).Msg("failed to decode maps.json")
+			return
+		}
+
+		mctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		err = client.Database().UpsertMaps(mctx, maps)
+		if err != nil {
+			log.Err(err).Msg("failed save maps glossary")
+			return
+		}
+
+		// update game modes
+		gmf, err := zr.Open("assets/game_modes.json")
+		if err != nil {
+			log.Err(err).Msg("failed to open game_modes.json in assets.zip")
+			return
+		}
+		var gameModes map[string]map[string]string
+		err = json.NewDecoder(gmf).Decode(&gameModes)
+		if err != nil {
+			log.Err(err).Msg("failed to decode maps.json")
+			return
+		}
+		var withTags = make(map[string]map[language.Tag]string)
+		for key, value := range gameModes {
+			localized := make(map[language.Tag]string)
+			for locale, name := range value {
+				localized[language.MustParse(locale)] = name
+			}
+			withTags[key] = localized
+		}
+
+		gmctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+
+		_, err = client.Database().UpsertGameModes(gmctx, withTags)
+		if err != nil {
+			log.Err(err).Msg("failed save game modes glossary")
+			return
+		}
+
 		log.Info().Msg("glossary cache updated")
 	}
 }
 
-func CreateLeaderboardTasksWorker(client core.Client, realm string, scoreType models.ScoreType) func() {
+func CleanupPubSubWorker(client core.Client) func() {
 	return func() {
-		err := tasks.CreateUpdateLeaderboardsTasks(client, realm, scoreType)
+		err := client.PubSub().Cleanup()
 		if err != nil {
-			log.Err(err).Str("realm", realm).Msg("failed to schedule leaderboard update tasks")
+			log.Err(err).Msg("failed to cleanup pubsub")
 		}
 	}
 }

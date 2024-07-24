@@ -11,34 +11,34 @@ type ratingColors struct {
 
 func GetWN8Colors(r float32) ratingColors {
 	if r > 0 && r < 301 {
-		return ratingColors{color.RGBA{255, 0, 0, 255}, color.White}
+		return ratingColors{color.NRGBA{255, 0, 0, 255}, color.White}
 	}
 	if r > 300 && r < 451 {
-		return ratingColors{color.RGBA{251, 83, 83, 255}, color.White}
+		return ratingColors{color.NRGBA{251, 83, 83, 255}, color.White}
 	}
 	if r > 450 && r < 651 {
-		return ratingColors{color.RGBA{255, 160, 49, 255}, color.White}
+		return ratingColors{color.NRGBA{255, 160, 49, 255}, color.White}
 	}
 	if r > 650 && r < 901 {
-		return ratingColors{color.RGBA{255, 244, 65, 255}, color.Black}
+		return ratingColors{color.NRGBA{255, 244, 65, 255}, color.Black}
 	}
 	if r > 900 && r < 1201 {
-		return ratingColors{color.RGBA{149, 245, 62, 255}, color.Black}
+		return ratingColors{color.NRGBA{149, 245, 62, 255}, color.Black}
 	}
 	if r > 1200 && r < 1601 {
-		return ratingColors{color.RGBA{103, 190, 51, 255}, color.Black}
+		return ratingColors{color.NRGBA{103, 190, 51, 255}, color.Black}
 	}
 	if r > 1600 && r < 2001 {
-		return ratingColors{color.RGBA{106, 236, 255, 255}, color.Black}
+		return ratingColors{color.NRGBA{106, 236, 255, 255}, color.Black}
 	}
 	if r > 2000 && r < 2451 {
-		return ratingColors{color.RGBA{46, 174, 193, 255}, color.White}
+		return ratingColors{color.NRGBA{46, 174, 193, 255}, color.White}
 	}
 	if r > 2450 && r < 2901 {
-		return ratingColors{color.RGBA{208, 108, 255, 255}, color.White}
+		return ratingColors{color.NRGBA{208, 108, 255, 255}, color.White}
 	}
 	if r > 2900 {
-		return ratingColors{color.RGBA{142, 65, 177, 255}, color.White}
+		return ratingColors{color.NRGBA{142, 65, 177, 255}, color.White}
 	}
 	return ratingColors{color.Transparent, color.Transparent}
 }

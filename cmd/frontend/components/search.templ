@@ -1,0 +1,157 @@
+package components
+
+import (
+	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/constants"
+)
+
+type PlayerSearch struct {
+	RealmSelect    string
+	SearchResults  string
+	NicknameInput  string
+	AccountIDInput string
+}
+
+func (p PlayerSearch) OnRealmSelect() templ.ComponentScript {
+	return searchOnRealmSelect(p.SearchResults, p.RealmSelect, p.NicknameInput, p.AccountIDInput)
+}
+func (p PlayerSearch) OnNicknameInput() templ.ComponentScript {
+	return searchOnNicknameInput(p.SearchResults, p.RealmSelect, p.NicknameInput, p.AccountIDInput)
+}
+func (p PlayerSearch) Scripts() templ.Component {
+	return logic.EmbedMinifiedScript(searchEventHandler(p.SearchResults, p.NicknameInput, p.AccountIDInput, constants.WargamingPublicAppID), p.SearchResults, p.NicknameInput, p.AccountIDInput, constants.WargamingPublicAppID)
+}
+
+templ (p PlayerSearch) RealmOptions(selected string) {
+	<option disabled selected?={ selected == "" }>Select a Server</option>
+	<option value="NA" selected?={ selected == "NA" }>North America</option>
+	<option value="EU" selected?={ selected == "EU" }>Europe</option>
+	<option value="AS" selected?={ selected == "AS" }>Asia</option>
+}
+
+script searchOnRealmSelect(searchResultsID, realmSelectID, nicknameInputID, accountIDInputID string) {
+	const accountIdError = () => document.querySelector(accountIDInputID+"_error");
+	const accountId = () => document.querySelector(accountIDInputID);
+	const results = () => document.querySelector(searchResultsID);
+	const select = () => document.querySelector(realmSelectID);
+	const realm = () => select().value;
+	// enable/disable field
+	const nickname = () => document.querySelector(nicknameInputID);
+	if (realm()) {
+		if (nickname().value.length >= 5) {
+			// if the input already exists - send a request
+			results().innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
+			const event = new CustomEvent("player-search", { detail: {query: nickname().value, realm: realm()} });
+			document.dispatchEvent(event);
+			return
+		}
+		nickname().disabled = false;
+		accountIdError()?.classList.add("hidden")
+	} else {
+		nickname().disabled = true;
+	}
+	// clear results
+	results().innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
+}
+
+script searchOnNicknameInput(searchResultsID, realmSelectID, nicknameInputID, accountIDInputID string) {
+	const accountIdError = () => document.querySelector(accountIDInputID+"_error");
+	const nickname = () => document.querySelector(nicknameInputID);
+	const results = () => document.querySelector(searchResultsID);
+	const select = () => document.querySelector(realmSelectID);
+	const realm = () => select().value;
+	if (!realm()) {
+		results().innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
+		nickname().disabled = true;
+		nickname().value = '';
+		return;
+	}
+	if (!nickname().value) {
+		results().innerHTML = '<span class="text-xs text-center cursor-default">Start typing to search</span>';
+		return;
+	}
+	if (nickname().value.length < 5) {
+		results().innerHTML = '<span class="text-xs text-center cursor-default">Continue typing to search</span>';
+		return;
+	}
+	accountIdError()?.classList.add("hidden")
+	const event = new CustomEvent("player-search", { detail: {query: nickname().value, realm: realm()} });
+	document.dispatchEvent(event);
+}
+
+script searchEventHandler(searchResultsID, nicknameInputID, accountIDInputID string, appId string) {
+	const results = () => document.querySelector(searchResultsID);
+	const nickname = () => document.querySelector(nicknameInputID);
+	const accountId = () => document.querySelector(accountIDInputID);
+
+	const setResultsLoading = () => {
+		results().innerHTML = '<li><span class="loading loading-dots loading-xs m-auto"></span></li>';
+	}
+
+	const selectAccount = (name, id) => {
+		nickname().value = name
+		accountId().value = id
+	}
+	window.amthSelectAccount = selectAccount
+
+
+	const getApiUrl = (realm, query) => {
+		let baseUrl = "";
+		switch (realm) {
+			case "NA":
+				baseUrl = "https://api.wotblitz.com/wotb";
+				break;
+			case "EU":
+				baseUrl = "https://api.wotblitz.eu/wotb";
+				break;
+			case "AS":
+				baseUrl = "https://api.wotblitz.asia/wotb";
+				break;
+			default:
+				return "";
+		}
+		return baseUrl + "/account/list/" + "?application_id=" + appId + "&limit=5" + "&search=" + query;
+	}
+
+	let debounceTimeout;
+	const debounceDelay = 500;
+
+	document.addEventListener(
+		"player-search",
+		(evt) => {
+			clearTimeout(debounceTimeout);
+			debounceTimeout = setTimeout(() => {
+				setResultsLoading()
+				
+				const { query, realm } = evt.detail;
+				const url = getApiUrl(realm, query);
+				if (!url) return;
+
+				fetch(url).then(res => res.json()).then(data => {
+					if (data.status != "ok") {
+						results().innerHTML = `<span class="text-xs text-center cursor-default">${data?.error?.message.toLocaleLowerCase().replaceAll("_", " ") || "Failed to get accounts"}</span>`;
+						nickname().disabled = false;
+						return;
+					}
+					const elements = []
+					for (const account of data.data?.reverse() || []) {
+						if (!account.account_id || !account.nickname) continue;
+						elements.push(`<li><button onclick="window.amthSelectAccount('${account.nickname}','${account.account_id}');return false;">${account.nickname}</button></li>`);
+					}
+					if (elements.length == 0) {
+						results().innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
+						nickname().disabled = false;
+						return;
+					}
+					results().innerHTML = elements.join("");
+					return;
+				}).catch(e => {
+					console.log("failed to search for accounts",e);
+					results().innerHTML = '<span class="text-xs text-center cursor-default">No players found</span>';
+					nickname().disabled = false;
+				});
+			}, debounceDelay);
+		},
+		false,
+	);
+}

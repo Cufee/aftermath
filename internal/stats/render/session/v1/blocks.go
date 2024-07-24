@@ -82,12 +82,12 @@ func vehicleComparisonIcon(session, career frame.Value) common.Block {
 	case session.Float() > career.Float():
 		icon, _ := assets.GetLoadedImage("triangle-up-solid")
 		ctx.DrawImage(imaging.Fill(icon, int(vehicleComparisonIconSize), int(vehicleComparisonIconSize), imaging.Center, imaging.Linear), 0, 0)
-		return common.NewImageContent(common.Style{BackgroundColor: color.RGBA{3, 201, 169, 255}}, ctx.Image())
+		return common.NewImageContent(common.Style{BackgroundColor: color.NRGBA{3, 201, 169, 255}}, ctx.Image())
 
 	case session.Float() < career.Float():
 		icon, _ := assets.GetLoadedImage("triangle-down-solid")
 		ctx.DrawImage(imaging.Fill(icon, int(vehicleComparisonIconSize), int(vehicleComparisonIconSize), imaging.Center, imaging.Linear), 0, 0)
-		return common.NewImageContent(common.Style{BackgroundColor: color.RGBA{231, 130, 141, 255}}, ctx.Image())
+		return common.NewImageContent(common.Style{BackgroundColor: color.NRGBA{231, 130, 141, 255}}, ctx.Image())
 
 	case session.Float() == career.Float():
 		ctx.DrawRectangle(vehicleComparisonIconSize*0.2, (vehicleComparisonIconSize-2)/2, vehicleComparisonIconSize*0.8, 2)

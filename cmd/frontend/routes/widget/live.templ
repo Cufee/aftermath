@@ -5,51 +5,100 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend/components/widget"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/constants"
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/client/v1"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/pkg/errors"
 	"golang.org/x/text/language"
+	"net/http"
 	"slices"
 	"strconv"
 	"time"
 )
 
-var PersonalLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
-	userID := ctx.Path("userId")
-	if userID == "" {
-		return nil, nil, errors.New("invalid account id")
+var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	widgetID := ctx.Path("widgetId")
+	if widgetID == "" {
+		return nil, nil, ctx.Redirect("/app", http.StatusMovedPermanently)
 	}
 
-	account, err := ctx.Fetch().Account(ctx.Context, userID)
+	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
 	if err != nil {
-		return nil, nil, errors.New("invalid account id")
+		if database.IsNotFound(err) {
+			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
+		}
+		return layouts.StyleOnly, nil, ctx.Err(err, "failed to get widget settings")
+	}
+	if settings.AccountID == "" {
+		return layouts.StyleOnly, nil, ctx.Error("bad widget settings, missing account id")
+	}
+
+	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
+	if err != nil {
+		if database.IsNotFound(err) {
+			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
+		}
+		return layouts.StyleOnly, nil, errors.New("invalid account id")
+	}
+	if account.Private {
+		return layouts.StyleOnly, nil, ctx.Error("private accounts cannot be tracked")
 	}
 
 	var opts = []client.RequestOption{client.WithWN8()}
-	if ref := ctx.Query("ref"); ref != "" {
-		opts = append(opts, client.WithReferenceID(ref))
+	if settings.SessionRefID != "" {
+		opts = append(opts, client.WithReferenceID(settings.SessionRefID))
 	}
-	if t := ctx.Query("type"); t != "" && slices.Contains(models.SnapshotType("").Values(), t) {
-		opts = append(opts, client.WithType(models.SnapshotType(t)))
-	}
-
 	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
 	if err != nil {
-		return nil, nil, err
+		if errors.As(err, fetch.ErrSessionNotFound) {
+			cards, _, err = ctx.Client.Stats(language.English).EmptySessionCards(ctx.Context, account.ID)
+			if err == nil {
+				return layouts.StyleOnly, customLiveWidget(settings.ID, widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
+			}
+		}
+		return layouts.StyleOnly, nil, err
 	}
 
-	var wopts = []widget.WidgetOption{widget.WithAutoReload()}
-	if v, err := strconv.Atoi(ctx.Query("vl")); err == nil && v >= 0 && v <= 10 {
-		wopts = append(wopts, widget.WithVehicleLimit(int(v)))
-	}
-	if v := ctx.Query("or"); v != "" {
-		wopts = append(wopts, widget.WithRatingOverview(v == "1"))
-	}
-	if v := ctx.Query("ou"); v != "" {
-		wopts = append(wopts, widget.WithUnratedOverview(v == "1"))
-	}
+	return layouts.StyleOnly, customLiveWidget(settings.ID, widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
+}
 
-	return layouts.Main, liveWidget(widget.Widget(account, cards, wopts...)), nil
+templ customLiveWidget(id string, widget templ.Component) {
+	<div class="min-w-max">
+		@widget
+	</div>
+	<style>
+    :root { background-color: rgba(0, 0, 0, 0); white-space: nowrap; }
+  </style>
+	@logic.EmbedMinifiedScript(customLiveWidgetScript(logic.StringIfElse("ws", "wss", constants.DevMode), constants.FrontendHost, id), logic.StringIfElse("ws", "wss", constants.DevMode), constants.FrontendHost, id)
+}
+
+script customLiveWidgetScript(protocol, host, id string) {
+	const socket = new WebSocket(`${protocol}://${host}/api/p/realtime/widget/custom/${id}/`);
+	socket.addEventListener("open", (event) => {
+		console.log("connected")
+	});
+	socket.addEventListener("message", (event) => {
+		try {
+			const data = JSON.parse(event.data)
+			if (data.command === "reload") {
+				window.location.reload();
+			}
+		} catch (e) {
+			console.error(r)
+			setTimeout(() => {window.location.reload();}, 5000);
+		}
+	});
+	socket.addEventListener("error", (event) => {
+		console.error(event.data)
+		setTimeout(() => {window.location.reload();}, 5000);
+	});
+	socket.addEventListener("close", (event) => {
+		console.error(event.data)
+		setTimeout(() => {window.location.reload();}, 5000);
+	});
 }
 
 var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {

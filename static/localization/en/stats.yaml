@@ -1,11 +1,14 @@
 # Check README.md for schema
 
-
 - key: label_victory
   value: Victory
 
 - key: label_assisted_combined
+  value: Assisted+
+- key: label_assisted
   value: Assisted
+- key: label_blocked
+  value: Blocked
 
 - key: label_ranked_rating
   value: Rating
@@ -42,7 +45,7 @@
   value: Regular Battle
 - key: label_highlight_avg_damage
   value: Best Performance
-  
+
 - key: label_game_mode_rating
   value: Rating Battle
 - key: label_survival_percent
@@ -83,3 +86,19 @@
   value: Unknown
 - key: label_accuracy
   value: Accuracy
+
+# game modes not present in game files
+- key: game_mode_unknown
+  value: Unknown
+- key: game_mode_lunar
+  value: Lunar
+- key: game_mode_training
+  value: Training Room
+- key: game_mode_tutorial
+  value: Tutorial
+
+# game mode tags
+- key: tag_tournament
+  value: Tournament
+- key: tag_quick_tournament
+  value: Quick Tournament

@@ -13,6 +13,7 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/realtime"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/cufee/aftermath/tests"
@@ -44,7 +45,9 @@ func main() {
 		log.Fatal().Msgf("localization#LoadAssets failed %s", err)
 	}
 
-	coreClient := core.NewClient(tests.StaticTestingFetch(), nil, tests.StaticTestingDatabase())
+	pubsub := realtime.NewClient()
+
+	coreClient := core.NewClient(tests.StaticTestingFetch(), nil, tests.StaticTestingDatabase(), pubsub)
 	handlers, err := frontend.Handlers(coreClient)
 	if err != nil {
 		panic(err)
@@ -52,7 +55,7 @@ func main() {
 
 	handlers = append(handlers, redirectHandlersFromEnv()...)
 
-	listen := server.NewServer(os.Getenv("PORT"), handlers...)
+	listen := server.NewServer(os.Getenv("PORT"), handlers)
 	listen()
 }
 

@@ -30,8 +30,17 @@ type CronTask func(*sql.Selector)
 // DiscordInteraction is the predicate function for discordinteraction builders.
 type DiscordInteraction func(*sql.Selector)
 
+// GameMap is the predicate function for gamemap builders.
+type GameMap func(*sql.Selector)
+
+// GameMode is the predicate function for gamemode builders.
+type GameMode func(*sql.Selector)
+
 // LeaderboardScore is the predicate function for leaderboardscore builders.
 type LeaderboardScore func(*sql.Selector)
+
+// ModerationRequest is the predicate function for moderationrequest builders.
+type ModerationRequest func(*sql.Selector)
 
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
@@ -45,6 +54,9 @@ type UserConnection func(*sql.Selector)
 // UserContent is the predicate function for usercontent builders.
 type UserContent func(*sql.Selector)
 
+// UserRestriction is the predicate function for userrestriction builders.
+type UserRestriction func(*sql.Selector)
+
 // UserSubscription is the predicate function for usersubscription builders.
 type UserSubscription func(*sql.Selector)
 
@@ -56,3 +68,6 @@ type VehicleAverage func(*sql.Selector)
 
 // VehicleSnapshot is the predicate function for vehiclesnapshot builders.
 type VehicleSnapshot func(*sql.Selector)
+
+// WidgetSettings is the predicate function for widgetsettings builders.
+type WidgetSettings func(*sql.Selector)

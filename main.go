@@ -21,20 +21,23 @@ import (
 	"github.com/cufee/aftermath/cmd/core/tasks"
 	"github.com/cufee/aftermath/cmd/discord/alerts"
 	"github.com/cufee/aftermath/cmd/discord/commands"
+	_ "github.com/cufee/aftermath/cmd/discord/commands/private"
+	"github.com/cufee/aftermath/cmd/discord/commands/public"
 	"github.com/cufee/aftermath/cmd/discord/gateway"
+	"github.com/cufee/aftermath/cmd/discord/router"
 	"github.com/cufee/aftermath/cmd/frontend"
 	"github.com/disintegration/imaging"
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/cmd/core/server"
 	"github.com/cufee/aftermath/cmd/core/server/handlers/private"
-	"github.com/cufee/aftermath/cmd/discord"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
+	"github.com/cufee/aftermath/internal/realtime"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 
 	"github.com/cufee/aftermath/internal/log"
@@ -48,7 +51,9 @@ import (
 	"net/http/pprof"
 )
 
+//go:generate templ generate
 //go:generate go generate ./internal/assets
+//go:generate go generate ./internal/database/ent
 //go:generate go generate ./cmd/frontend/assets/generate
 
 //go:embed static/*
@@ -60,6 +65,8 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
 	}
+
+	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db)
 
 	// Logger
 	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
@@ -80,8 +87,8 @@ func main() {
 		alertClient.Reader(pr, zerolog.ErrorLevel)
 	}
 
-	// Discord Gateway
-	gw, err := discordGatewayFromEnv()
+	// Discord Gateway - commands public commands are handled through the gateway
+	gw, err := discordGatewayFromEnv(liveCoreClient)
 	if err != nil {
 		log.Fatal().Err(err).Msg("discordGatewayFromEnv failed")
 	}
@@ -89,8 +96,7 @@ func main() {
 	globalCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db)
-	stopQueue, err := startQueueFromEnv(globalCtx, db, cacheCoreClient.Wargaming())
+	stopQueue, err := startQueueFromEnv(globalCtx, cacheCoreClient)
 	if err != nil {
 		log.Fatal().Err(err).Msg("startQueueFromEnv failed")
 	}
@@ -101,8 +107,7 @@ func main() {
 		log.Fatal().Err(err).Msg("startSchedulerFromEnv failed")
 	}
 
-	// update vehicle cache in the background on start
-	go scheduler.UpdateGlossaryWorker(cacheCoreClient)()
+	scheduler.UpdateGlossaryWorker(liveCoreClient)()
 
 	// Load some init options to registered admin accounts and etc
 	logic.ApplyInitOptions(liveCoreClient.Database())
@@ -132,6 +137,10 @@ func main() {
 				Func: private.LoadAccountsHandler(cacheCoreClient),
 			},
 			{
+				Path: "POST /v1/connections/import",
+				Func: private.ImportConnections(cacheCoreClient),
+			},
+			{
 				Path: "POST /v1/snapshots/{realm}",
 				Func: private.SaveRealmSnapshots(cacheCoreClient),
 			},
@@ -146,13 +155,13 @@ func main() {
 		log.Fatal().Err(err).Msg("frontend#Handlers failed")
 	}
 
-	discordHandlers := discordHandlersFromEnv(liveCoreClient)
-	// POST /discord/public/callback
+	discordInternalHandlers := discordInternalHandlersFromEnv(liveCoreClient)
 	// POST /discord/internal/callback
+	// POST /discord/public/callback
 
 	var handlers []server.Handler
-	handlers = append(handlers, discordHandlers...)
 	handlers = append(handlers, frontendHandlers...)
+	handlers = append(handlers, discordInternalHandlers...)
 	handlers = append(handlers, redirectHandlersFromEnv()...)
 
 	port := os.Getenv("PORT")
@@ -171,9 +180,9 @@ func main() {
 	log.Info().Msg("finished cleanup tasks")
 }
 
-func discordGatewayFromEnv() (gateway.Client, error) {
+func discordGatewayFromEnv(core core.Client) (gateway.Client, error) {
 	// discord gateway
-	gw, err := gateway.NewClient(constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages)
+	gw, err := gateway.NewClient(core, constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a gateway client")
 	}
@@ -188,7 +197,7 @@ func discordGatewayFromEnv() (gateway.Client, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encode help image")
 	}
-	_ = gw.Handler(commands.MentionHandler(buf.Bytes()))
+	_ = gw.Handler(public.MentionHandler(buf.Bytes()))
 
 	err = gw.Connect()
 	if err != nil {
@@ -199,30 +208,67 @@ func discordGatewayFromEnv() (gateway.Client, error) {
 	return gw, nil
 }
 
-func discordHandlersFromEnv(coreClient core.Client) []server.Handler {
+func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
+
 	var handlers []server.Handler
 
 	// main Discord with all the user-facing command
 	{
-		mainDiscordHandler, err := discord.NewRouterHandler(coreClient, constants.DiscordPrimaryToken, constants.DiscordPrimaryPublicKey, commands.LoadedPublic.Compose()...)
+		log.Debug().Msg("setting up a public commands router")
+
+		router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, constants.DiscordPrimaryPublicKey, constants.DiscordEventFirehoseEnabled)
 		if err != nil {
 			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
 		}
+
+		router.LoadCommands(public.Help().Build())
+		router.LoadCommands(commands.LoadedPublic.Compose()...)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+		defer cancel()
+
+		err = router.UpdateLoadedCommands(ctx)
+		if err != nil {
+			log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
+		}
+
+		fn, err := router.HTTPHandler()
+		if err != nil {
+			log.Fatal().Msgf("router#HTTPHandler failed %s", err)
+		}
 		handlers = append(handlers, server.Handler{
 			Path: "POST /discord/public/callback",
-			Func: mainDiscordHandler,
+			Func: fn,
 		})
 	}
 
 	// secondary Discord bot with mod/admin commands - permissions are still checked
 	if constants.DiscordPrivateBotEnabled {
-		internalDiscordHandler, err := discord.NewRouterHandler(coreClient, constants.DiscordPrivateToken, constants.DiscordPrivatePublicKey, commands.LoadedInternal.Compose()...)
+		log.Debug().Msg("setting up an internal commands router")
+
+		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, constants.DiscordPrivatePublicKey, false)
 		if err != nil {
-			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
+			log.Fatal().Msgf("discord#NewHTTPRouter failed %s", err)
 		}
+
+		router.LoadCommands(commands.LoadedInternal.Compose()...)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+		defer cancel()
+
+		err = router.UpdateLoadedCommands(ctx)
+		if err != nil {
+			log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
+		}
+
+		fn, err := router.HTTPHandler()
+		if err != nil {
+			log.Fatal().Msgf("router#HTTPHandler failed %s", err)
+		}
+
 		handlers = append(handlers, server.Handler{
 			Path: "POST /discord/internal/callback",
-			Func: internalDiscordHandler,
+			Func: fn,
 		})
 	}
 
@@ -238,20 +284,7 @@ func startSchedulerFromEnv(ctx context.Context, coreClient core.Client) (func(),
 	return s.Start(ctx)
 }
 
-func startQueueFromEnv(ctx context.Context, db database.Client, wgClient wargaming.Client) (func(), error) {
-	bsClient, err := blitzstars.NewClient(constants.BlitzStarsApiURL, time.Second*10)
-	if err != nil {
-		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
-	}
-
-	// Fetch client
-	client, err := fetch.NewMultiSourceClient(wgClient, bsClient, db)
-	if err != nil {
-		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
-	}
-
-	// Queue - pulls tasks from database and runs the logic
-	coreClient := core.NewClient(client, wgClient, db)
+func startQueueFromEnv(ctx context.Context, coreClient core.Client) (func(), error) {
 	q := queue.New(constants.SchedulerConcurrentWorkers, func() (core.Client, error) {
 		return coreClient, nil
 	})
@@ -279,7 +312,10 @@ func coreClientsFromEnv(db database.Client) (core.Client, core.Client) {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
 
-	return core.NewClient(liveFetchClient, liveClient, db), core.NewClient(cacheFetchClient, cacheClient, db)
+	// PubSub client - shared across fetch clients
+	pubsub := realtime.NewClient()
+
+	return core.NewClient(liveFetchClient, liveClient, db, pubsub), core.NewClient(cacheFetchClient, cacheClient, db, pubsub)
 }
 
 func loadStaticAssets(static fs.FS) {

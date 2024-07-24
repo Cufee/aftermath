@@ -30,8 +30,14 @@ type Tx struct {
 	CronTask *CronTaskClient
 	// DiscordInteraction is the client for interacting with the DiscordInteraction builders.
 	DiscordInteraction *DiscordInteractionClient
+	// GameMap is the client for interacting with the GameMap builders.
+	GameMap *GameMapClient
+	// GameMode is the client for interacting with the GameMode builders.
+	GameMode *GameModeClient
 	// LeaderboardScore is the client for interacting with the LeaderboardScore builders.
 	LeaderboardScore *LeaderboardScoreClient
+	// ModerationRequest is the client for interacting with the ModerationRequest builders.
+	ModerationRequest *ModerationRequestClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// User is the client for interacting with the User builders.
@@ -40,6 +46,8 @@ type Tx struct {
 	UserConnection *UserConnectionClient
 	// UserContent is the client for interacting with the UserContent builders.
 	UserContent *UserContentClient
+	// UserRestriction is the client for interacting with the UserRestriction builders.
+	UserRestriction *UserRestrictionClient
 	// UserSubscription is the client for interacting with the UserSubscription builders.
 	UserSubscription *UserSubscriptionClient
 	// Vehicle is the client for interacting with the Vehicle builders.
@@ -48,6 +56,8 @@ type Tx struct {
 	VehicleAverage *VehicleAverageClient
 	// VehicleSnapshot is the client for interacting with the VehicleSnapshot builders.
 	VehicleSnapshot *VehicleSnapshotClient
+	// WidgetSettings is the client for interacting with the WidgetSettings builders.
+	WidgetSettings *WidgetSettingsClient
 
 	// lazily loaded.
 	client     *Client
@@ -187,15 +197,20 @@ func (tx *Tx) init() {
 	tx.Clan = NewClanClient(tx.config)
 	tx.CronTask = NewCronTaskClient(tx.config)
 	tx.DiscordInteraction = NewDiscordInteractionClient(tx.config)
+	tx.GameMap = NewGameMapClient(tx.config)
+	tx.GameMode = NewGameModeClient(tx.config)
 	tx.LeaderboardScore = NewLeaderboardScoreClient(tx.config)
+	tx.ModerationRequest = NewModerationRequestClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserConnection = NewUserConnectionClient(tx.config)
 	tx.UserContent = NewUserContentClient(tx.config)
+	tx.UserRestriction = NewUserRestrictionClient(tx.config)
 	tx.UserSubscription = NewUserSubscriptionClient(tx.config)
 	tx.Vehicle = NewVehicleClient(tx.config)
 	tx.VehicleAverage = NewVehicleAverageClient(tx.config)
 	tx.VehicleSnapshot = NewVehicleSnapshotClient(tx.config)
+	tx.WidgetSettings = NewWidgetSettingsClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

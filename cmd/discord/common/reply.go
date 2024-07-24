@@ -1,91 +1,147 @@
 package common
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+
 	"github.com/cufee/aftermath/cmd/discord/rest"
-	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/retry"
 )
 
-type reply struct {
-	ctx *Context
+type Reply struct {
+	ctx Context
 
-	text       []string
-	files      []rest.File
-	components []discordgo.MessageComponent
-	embeds     []*discordgo.MessageEmbed
+	internal replyInternal
 }
 
-func (r reply) Choices(data ...*discordgo.ApplicationCommandOptionChoice) error {
-	ctx, cancel := context.WithTimeout(r.ctx.Context, time.Millisecond*3000)
-	defer cancel()
-	err := r.ctx.rest.UpdateOrSendInteractionResponse(ctx, r.ctx.interaction.AppID, r.ctx.interaction.ID, r.ctx.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &discordgo.InteractionResponseData{Choices: data}}, nil)
-	if err != nil {
-		log.Err(err).Str("interactionId", r.ctx.interaction.ID).Msg("failed to send an autocomplete response")
+type replyInternal struct {
+	Hint       string
+	Text       []string
+	Files      []rest.File
+	Embeds     []*discordgo.MessageEmbed
+	Components []discordgo.MessageComponent
+	Choices    []*discordgo.ApplicationCommandOptionChoice
+
+	IncludeAds    bool
+	eventMetadata map[string]any
+}
+
+func WithRetry(fn func() (discordgo.Message, error), tries ...int) (discordgo.Message, error) {
+	var triesCnt = 5
+	if len(tries) > 0 && tries[0] > 0 {
+		triesCnt = tries[0]
 	}
-	return nil
-
+	res := retry.Retry(fn, triesCnt, time.Second)
+	return res.Data, res.Err
 }
 
-func (r reply) Text(message ...string) reply {
-	r.text = append(r.text, message...)
+func ContextReply(ctx Context) Reply {
+	return Reply{ctx: ctx}
+}
+
+func (r Reply) Peek() replyInternal {
+	return r.internal
+}
+
+func (r Reply) Choices(data ...*discordgo.ApplicationCommandOptionChoice) Reply {
+	r.internal.Choices = append(r.internal.Choices, data...)
 	return r
 }
 
-func (r reply) Format(format string, args ...any) reply {
-	r.text = append(r.text, fmt.Sprintf(r.ctx.Localize(format), args...))
+func (r Reply) Metadata() map[string]any {
+	if r.internal.eventMetadata != nil {
+		return r.internal.eventMetadata
+	}
+	return make(map[string]any)
+}
+
+func (r Reply) WithMeta(data map[string]any) Reply {
+	meta := r.Metadata()
+	for key, value := range data {
+		meta[key] = value
+	}
 	return r
 }
 
-func (r reply) File(data []byte, name string) reply {
+func (r Reply) Hint(text string) Reply {
+	r.internal.Hint = text
+	return r
+}
+
+func (r Reply) Text(message ...string) Reply {
+	r.internal.Text = append(r.internal.Text, message...)
+	return r
+}
+
+func (r Reply) Format(format string, args ...any) Reply {
+	r.internal.Text = append(r.internal.Text, fmt.Sprintf(r.ctx.Localize(format), args...))
+	return r
+}
+
+func (r Reply) File(data []byte, name string) Reply {
 	if data == nil {
+		r.internal.Files = make([]rest.File, 0)
 		return r
 	}
-	r.files = append(r.files, rest.File{Data: data, Name: name})
+	r.internal.Files = append(r.internal.Files, rest.File{Data: data, Name: name})
 	return r
 }
 
-func (r reply) Component(components ...discordgo.MessageComponent) reply {
-	for _, c := range components {
-		if c == nil {
-			continue
-		}
-		r.components = append(r.components, c)
+func (r Reply) Component(components ...discordgo.MessageComponent) Reply {
+	if len(components) == 1 && components[0] == nil {
+		r.internal.Components = make([]discordgo.MessageComponent, 0)
+		return r
 	}
+
+	r.internal.Components = append(r.internal.Components, components...)
 	return r
 }
 
-func (r reply) Embed(embeds ...*discordgo.MessageEmbed) reply {
-	for _, e := range embeds {
-		if e == nil {
-			continue
-		}
-		r.embeds = append(r.embeds, e)
+func (r Reply) Embed(embeds ...*discordgo.MessageEmbed) Reply {
+	if len(embeds) == 1 && embeds[0] == nil {
+		r.internal.Embeds = make([]*discordgo.MessageEmbed, 0)
+		return r
 	}
+
+	r.internal.Embeds = append(r.internal.Embeds, embeds...)
 	return r
 }
 
-func (r reply) Send(content ...string) error {
-	r.text = append(r.text, content...)
-	return r.ctx.respond(r.data())
+func (r Reply) WithAds() Reply {
+	r.internal.IncludeAds = true
+	return r
 }
 
-func (r reply) data() (discordgo.InteractionResponse, []rest.File) {
+func (r Reply) Send(content ...string) error {
+	_, err := r.Message(content...)
+	return err
+}
+
+func (r Reply) Message(content ...string) (discordgo.Message, error) {
+	r.internal.Text = append(r.internal.Text, content...)
+	return r.ctx.InteractionResponse(r)
+}
+
+func (r replyInternal) Build(localize func(string) string) (discordgo.InteractionResponseData, []rest.File) {
 	var content []string
-	for _, t := range r.text {
-		content = append(content, r.ctx.Localize(t))
+	for _, t := range r.Text {
+		content = append(content, localize(t))
+	}
+	if r.Hint != "" {
+		content = append(content, "-# "+localize(r.Hint))
 	}
 
-	return discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content:    strings.Join(content, "\n"),
-			Components: r.components,
-			Embeds:     r.embeds,
-		},
-	}, r.files
+	data := discordgo.InteractionResponseData{
+		Content:    strings.Join(content, "\n"),
+		Components: r.Components,
+		Choices:    r.Choices,
+		Embeds:     r.Embeds,
+	}
+	if r.Files != nil {
+		data.Attachments = &[]*discordgo.MessageAttachment{} // clear existing attachments
+	}
+	return data, r.Files
 }
