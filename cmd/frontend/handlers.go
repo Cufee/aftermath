@@ -70,7 +70,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 	app.GET("/widgets/{widgetId}", widgets.EditSettings)
 
 	secureApi := srv.Group("/api/s", middleware.SessionCheck)
-	secureApi.PATCH("/widget/custom", wa.CreateCustomWidget)
+	secureApi.POST("/widget/custom", wa.CreateCustomWidget)
 	secureApi.PATCH("/widget/custom/{widgetId}", wa.UpdateCustomWidget)
 	secureApi.PATCH("/widget/custom/{widgetId}/action", wa.QuickAction)
 	secureApi.PATCH("/widget/custom/{widgetId}/session", wa.ResetSession)
