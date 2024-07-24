@@ -28,6 +28,9 @@ var (
 
 var (
 	DiscordContentModerationChannelID = mustGetEnv("DISCORD_CONTENT_MODERATION_CHANNEL_ID")
+
+	DiscordEventFirehoseEnabled   = os.Getenv("DISCORD_EVENT_FIREHOSE_CHANNEL_ID") != ""
+	DiscordEventFirehoseChannelID = mustGetEnv("DISCORD_EVENT_FIREHOSE_CHANNEL_ID", func() bool { return !DiscordEventFirehoseEnabled })
 )
 
 var (

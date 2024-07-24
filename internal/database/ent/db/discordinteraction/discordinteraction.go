@@ -97,7 +97,7 @@ var (
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type models.DiscordInteractionType) error {
 	switch _type {
-	case "modal", "command", "component", "autocomplete", "automated_message":
+	case "unknown", "modal", "command", "follow_up", "component", "autocomplete", "automated_message":
 		return nil
 	default:
 		return fmt.Errorf("discordinteraction: invalid enum value for type field: %q", _type)

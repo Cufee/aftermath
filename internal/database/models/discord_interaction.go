@@ -9,8 +9,10 @@ import (
 type DiscordInteractionType string
 
 const (
+	InteractionTypeUnknown          = "unknown"
 	InteractionTypeModal            = "modal"
 	InteractionTypeCommand          = "command"
+	InteractionTypeFollowUp         = "follow_up"
 	InteractionTypeComponent        = "component"
 	InteractionTypeAutocomplete     = "autocomplete"
 	InteractionTypeAutomatedMessage = "automated_message"
@@ -19,8 +21,10 @@ const (
 // Values provides list valid values for Enum.
 func (DiscordInteractionType) Values() []string {
 	return []string{
+		InteractionTypeUnknown,
 		InteractionTypeModal,
 		InteractionTypeCommand,
+		InteractionTypeFollowUp,
 		InteractionTypeComponent,
 		InteractionTypeAutocomplete,
 		InteractionTypeAutomatedMessage,

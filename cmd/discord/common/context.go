@@ -42,7 +42,6 @@ type Context interface {
 
 	CreateDMChannel(ctx context.Context, userID string) (discordgo.Channel, error)
 
-	SaveInteractionEvent(metadata map[string]any) error
 	InteractionResponse(reply Reply) (discordgo.Message, error)
 	InteractionFollowUp(reply Reply) (discordgo.Message, error)
 }

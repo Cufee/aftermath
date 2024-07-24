@@ -8,6 +8,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/rest"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
@@ -66,16 +67,53 @@ func newContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 	return c, nil
 }
 
-func (c *routeContext) SaveInteractionEvent(metadata map[string]any) error {
-	return nil
+func (c *routeContext) saveInteractionEvent(msg discordgo.Message, msgErr error, reply common.Reply) {
+	data := models.DiscordInteraction{
+		EventID:   c.ID(),
+		Locale:    c.locale,
+		UserID:    c.user.ID,
+		GuildID:   c.interaction.GuildID,
+		ChannelID: c.interaction.ChannelID,
+		MessageID: msg.ID,
+		Meta:      reply.Metadata(),
+		Type:      models.InteractionTypeUnknown,
+	}
+	if c.isCommand() {
+		data.Type = models.InteractionTypeCommand
+	}
+	if c.isComponentInteraction() {
+		data.Type = models.InteractionTypeComponent
+	}
+	if c.isAutocompleteInteraction() {
+		data.Type = models.InteractionTypeAutocomplete
+	}
+	if msgErr != nil {
+		data.Result = "error"
+		data.Meta["error"] = msgErr.Error()
+	} else {
+		data.Result = "ok"
+	}
+
+	// save event to db
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	err := c.core.Database().CreateDiscordInteraction(ctx, data)
+	if err != nil {
+		log.Err(err).Msg("failed to save interaction event")
+	}
+
+	if constants.DiscordEventFirehoseEnabled {
+		// send event to the channel
+	}
 }
 func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Message, error) {
 	data, files := reply.Peek().Build(c.localize)
 	select {
 	case <-c.Context.Done():
+		go c.saveInteractionEvent(discordgo.Message{}, c.Context.Err(), reply)
 		return discordgo.Message{}, c.Context.Err()
 	default:
-		return common.WithRetry(func() (discordgo.Message, error) {
+		msg, err := common.WithRetry(func() (discordgo.Message, error) {
 			// since we already finished handling the interaction, there is no need to use the handler context
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 			defer cancel()
@@ -89,6 +127,9 @@ func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 			}
 			return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data, files)
 		})
+
+		go c.saveInteractionEvent(msg, err, reply)
+		return msg, err
 	}
 }
 
@@ -96,13 +137,17 @@ func (c *routeContext) InteractionFollowUp(reply common.Reply) (discordgo.Messag
 	data, files := reply.Peek().Build(c.localize)
 	select {
 	case <-c.Context.Done():
+		go c.saveInteractionEvent(discordgo.Message{}, c.Context.Err(), reply)
 		return discordgo.Message{}, c.Context.Err()
 	default:
 		return common.WithRetry(func() (discordgo.Message, error) {
 			// since we already finished handling the interaction, there is no need to use the handler context
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
-			return c.rest.SendInteractionFollowup(ctx, c.interaction.AppID, c.interaction.Token, data, files)
+			msg, err := c.rest.SendInteractionFollowup(ctx, c.interaction.AppID, c.interaction.Token, data, files)
+
+			go c.saveInteractionEvent(msg, err, reply)
+			return msg, err
 		})
 	}
 }
@@ -221,11 +266,14 @@ func (c *routeContext) DeleteResponse(ctx context.Context) error {
 }
 func (c *routeContext) CreateMessage(ctx context.Context, channelID string, reply common.Reply) (discordgo.Message, error) {
 	data, files := reply.Peek().Build(c.localize)
-	return c.rest.CreateMessage(ctx, channelID, discordgo.MessageSend{
+	msg, err := c.rest.CreateMessage(ctx, channelID, discordgo.MessageSend{
 		Content:    data.Content,
 		Components: data.Components,
 		Embeds:     data.Embeds,
 	}, files)
+
+	go c.saveInteractionEvent(msg, err, reply)
+	return msg, err
 }
 func (c *routeContext) UpdateMessage(ctx context.Context, channelID string, messageID string, reply common.Reply) (discordgo.Message, error) {
 	data, files := reply.Peek().Build(c.localize)
@@ -241,7 +289,10 @@ func (c *routeContext) UpdateMessage(ctx context.Context, channelID string, mess
 	if data.Embeds != nil {
 		edit.Embeds = &data.Embeds
 	}
-	return c.rest.UpdateMessage(ctx, channelID, messageID, edit, files)
+	msg, err := c.rest.UpdateMessage(ctx, channelID, messageID, edit, files)
+
+	go c.saveInteractionEvent(msg, err, reply)
+	return msg, err
 }
 func (c *routeContext) CreateDMChannel(ctx context.Context, userID string) (discordgo.Channel, error) {
 	return c.rest.CreateDMChannel(ctx, userID)

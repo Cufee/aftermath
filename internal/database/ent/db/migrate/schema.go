@@ -285,7 +285,7 @@ var (
 		{Name: "guild_id", Type: field.TypeString},
 		{Name: "channel_id", Type: field.TypeString},
 		{Name: "message_id", Type: field.TypeString},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"modal", "command", "component", "autocomplete", "automated_message"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"unknown", "modal", "command", "follow_up", "component", "autocomplete", "automated_message"}},
 		{Name: "locale", Type: field.TypeString},
 		{Name: "metadata", Type: field.TypeJSON},
 		{Name: "user_id", Type: field.TypeString},
