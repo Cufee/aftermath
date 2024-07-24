@@ -212,7 +212,7 @@ func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
 	{
 		log.Debug().Msg("setting up a public commands router")
 
-		router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, constants.DiscordPrimaryPublicKey)
+		router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, constants.DiscordPrimaryPublicKey, constants.DiscordEventFirehoseEnabled)
 		if err != nil {
 			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
 		}
@@ -242,7 +242,7 @@ func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
 	if constants.DiscordPrivateBotEnabled {
 		log.Debug().Msg("setting up an internal commands router")
 
-		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, constants.DiscordPrivatePublicKey)
+		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, constants.DiscordPrivatePublicKey, false)
 		if err != nil {
 			log.Fatal().Msgf("discord#NewHTTPRouter failed %s", err)
 		}

@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -26,14 +27,15 @@ type routeContext struct {
 	locale   language.Tag
 	localize localization.Printer
 
-	core core.Client
+	core   core.Client
+	events *eventsClient
 
 	rest        *rest.Client
 	interaction discordgo.Interaction
 }
 
-func newContext(ctx context.Context, interaction discordgo.Interaction, rest *rest.Client, client core.Client) (common.Context, error) {
-	c := &routeContext{Context: ctx, locale: language.English, core: client, rest: rest, interaction: interaction}
+func newContext(ctx context.Context, interaction discordgo.Interaction, rest *rest.Client, client core.Client, events *eventsClient) (common.Context, error) {
+	c := &routeContext{Context: ctx, locale: language.English, core: client, rest: rest, interaction: interaction, events: events}
 
 	if interaction.User != nil {
 		c.member = *interaction.User
@@ -97,13 +99,14 @@ func (c *routeContext) saveInteractionEvent(msg discordgo.Message, msgErr error,
 	// save event to db
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	err := c.core.Database().CreateDiscordInteraction(ctx, data)
+	data, err := c.core.Database().CreateDiscordInteraction(ctx, data)
 	if err != nil {
 		log.Err(err).Msg("failed to save interaction event")
 	}
 
-	if constants.DiscordEventFirehoseEnabled {
-		// send event to the channel
+	if constants.DiscordEventFirehoseEnabled && c.events != nil {
+		content := fmt.Sprintf("```ID: %s\nResult: %s\nError: %v\nEventID: %s\nUserID: %s\nGuildID: %s\nChannelID: %s\nMessageID: %s```", data.ID, data.Result, data.Meta["error"], data.EventID, data.UserID, data.GuildID, data.ChannelID, data.MessageID)
+		c.events.push(content)
 	}
 }
 func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Message, error) {

@@ -88,11 +88,13 @@ func init() {
 			Handler(func(ctx common.Context) error {
 				data, ok := ctx.ComponentData()
 				if !ok {
-					return ctx.Error("failed to get component data on interaction command")
+					log.Error().Msg("failed to get component data on interaction command")
+					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
 				interactionID := strings.ReplaceAll(data.CustomID, "refresh_stats_from_button_", "")
 				if interactionID == "" {
-					return ctx.Error("failed to get interaction id from custom id")
+					log.Error().Str("id", data.CustomID).Msg("failed to get interaction id from custom id")
+					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
 
 				interaction, err := ctx.Core().Database().GetDiscordInteraction(ctx.Ctx(), interactionID)
@@ -142,7 +144,7 @@ func init() {
 					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
 
-				button, saveErr := ioptions.refreshButton(ctx)
+				button, saveErr := ioptions.refreshButton(ctx, interaction.EventID)
 				if saveErr != nil {
 					// nil button will not cause an error and will be ignored
 					log.Err(err).Str("interactionId", ctx.ID()).Str("command", "session").Msg("failed to save discord interaction")

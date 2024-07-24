@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/discord"
@@ -11,6 +12,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/logic"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/cmd/discord/rest"
+	"github.com/cufee/aftermath/internal/constants"
 )
 
 type Router interface {
@@ -18,22 +20,30 @@ type Router interface {
 	HTTPHandler() (http.HandlerFunc, error)
 }
 
-func NewRouter(coreClient core.Client, token, publicKey string) (*router, error) {
+func NewRouter(coreClient core.Client, token, publicKey string, firehoseEnabled bool) (*router, error) {
 	restClient, err := rest.NewClient(token)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a new rest client :%w", err)
 	}
 
-	return &router{
+	r := router{
 		core:       coreClient,
 		token:      token,
 		publicKey:  publicKey,
 		restClient: restClient,
-	}, nil
+	}
+
+	if firehoseEnabled && constants.DiscordEventFirehoseEnabled {
+		r.events = newEventsClient(restClient, constants.DiscordEventFirehoseWebhookURL, time.Second*30)
+		go r.events.start()
+	}
+
+	return &r, nil
 }
 
 type router struct {
-	core core.Client
+	core   core.Client
+	events *eventsClient
 
 	token      string
 	publicKey  string

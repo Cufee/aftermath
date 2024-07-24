@@ -190,8 +190,8 @@ func (c *staticTestingDatabase) GetCommandsByID(ctx context.Context, commandIDs 
 	return nil, errors.New("GetCommandsByID not implemented")
 }
 
-func (c *staticTestingDatabase) CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) error {
-	return errors.New("CreateDiscordInteraction not implemented")
+func (c *staticTestingDatabase) CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) (models.DiscordInteraction, error) {
+	return models.DiscordInteraction{}, errors.New("CreateDiscordInteraction not implemented")
 }
 func (c *staticTestingDatabase) GetDiscordInteraction(ctx context.Context, referenceID string) (models.DiscordInteraction, error) {
 	return models.DiscordInteraction{}, errors.New("GetDiscordInteraction not implemented")

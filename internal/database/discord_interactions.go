@@ -12,13 +12,13 @@ import (
 	"golang.org/x/text/language"
 )
 
-func (c client) CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) error {
+func (c client) CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) (models.DiscordInteraction, error) {
 	user, err := c.db.User.Get(ctx, data.UserID)
 	if err != nil {
-		return errors.Wrap(err, "failed to get user")
+		return models.DiscordInteraction{}, errors.Wrap(err, "failed to get user")
 	}
 
-	return c.db.DiscordInteraction.Create().
+	record, err := c.db.DiscordInteraction.Create().
 		SetChannelID(data.ChannelID).
 		SetEventID(data.EventID).
 		SetGuildID(data.GuildID).
@@ -27,7 +27,12 @@ func (c client) CreateDiscordInteraction(ctx context.Context, data models.Discor
 		SetMetadata(data.Meta).
 		SetResult(data.Result).
 		SetType(data.Type).
-		SetUser(user).Exec(ctx)
+		SetUser(user).Save(ctx)
+	if err != nil {
+		return models.DiscordInteraction{}, err
+	}
+
+	return toDiscordInteraction(record), nil
 }
 
 func (c client) GetDiscordInteraction(ctx context.Context, id string) (models.DiscordInteraction, error) {
