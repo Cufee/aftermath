@@ -21,6 +21,11 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes
 		glossary = make(map[string]models.Vehicle)
 	}
 
+	playerBlocks := defaultBlocks
+	if replay.GameMode.Special {
+		playerBlocks = blocksNoWN8
+	}
+
 	var cards Cards
 	cards.Header.Outcome = replay.Outcome
 	cards.Header.Result = options.Printer()("label_" + string(replay.Outcome))
@@ -43,7 +48,7 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes
 		vehicle := glossary[player.VehicleID]
 		vehicle.ID = player.VehicleID
 		name := fmt.Sprintf("%s %s", common.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
-		card, err := playerToCard(player, name, defaultBlocks, options.Printer())
+		card, err := playerToCard(player, name, playerBlocks, options.Printer())
 		if err != nil {
 			return cards, err
 		}
@@ -54,7 +59,7 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes
 		vehicle := glossary[player.VehicleID]
 		vehicle.ID = player.VehicleID
 		name := fmt.Sprintf("%s %s", common.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
-		card, err := playerToCard(player, name, defaultBlocks, options.Printer())
+		card, err := playerToCard(player, name, playerBlocks, options.Printer())
 		if err != nil {
 			return cards, err
 		}

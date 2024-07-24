@@ -35,7 +35,7 @@ var (
 
 var (
 	ImageUploadMaxSize  int64 = 1_000 * 1_000 * 2 // ~2MB - assuming 1000x1000 16Bit image at 2 bytes per pixel
-	ReplayUploadMaxSize int64 = 1_000_000         // ~1MB - replays are typically significantly smaller than this
+	ReplayUploadMaxSize int64 = 1_000_000 * 3     // ~3MB - replays are typically significantly smaller than this
 )
 
 var (

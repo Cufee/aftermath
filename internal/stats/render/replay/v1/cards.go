@@ -18,6 +18,8 @@ func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) str
 	statsStyle := statsRowStyle()
 	cardStyle := defaultCardStyle(0, 0)
 
+	var footerHintTag string
+
 	var playerNameWidth float64
 	statsSizes := make(map[prepare.Tag]float64)
 	for _, card := range append(cards.Allies, cards.Enemies...) {
@@ -36,6 +38,10 @@ func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) str
 				statsSizes["wn8_icon"] = playerWN8IconSize + statsStyle.Gap/2
 			}
 			statsSizes[block.Tag] = max(statsSizes[block.Tag], w)
+
+			if block.Tag == rp.TagDamageAssistedCombined {
+				footerHintTag = fmt.Sprintf("%s + %s", printer("label_"+rp.TagDamageAssisted.String()), printer("label_"+rp.TagDamageBlocked.String()))
+			}
 		}
 	}
 
@@ -59,7 +65,9 @@ func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) str
 			footer = append(footer, "Asia")
 		}
 		footer = append(footer, replay.BattleTime.Format("Jan 2, 2006"))
-		footer = append(footer, fmt.Sprintf("%s + %s", printer("label_"+rp.TagDamageAssisted.String()), printer("label_"+rp.TagDamageBlocked.String())))
+		if footerHintTag != "" {
+			footer = append(footer, footerHintTag)
+		}
 
 		footerBlock := common.NewFooterCard(strings.Join(footer, " • "))
 		footerImage, err := footerBlock.Render()
