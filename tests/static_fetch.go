@@ -30,6 +30,9 @@ func (c *staticTestingFetch) Account(ctx context.Context, id string) (models.Acc
 func (c *staticTestingFetch) Search(ctx context.Context, nickname, realm string) (types.Account, error) {
 	return types.Account{}, nil
 }
+func (c *staticTestingFetch) BroadSearch(ctx context.Context, nickname string) ([]fetch.AccountWithRealm, error) {
+	return nil, nil
+}
 func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts ...fetch.StatsOption) (fetch.AccountStatsOverPeriod, error) {
 	account, err := c.Account(ctx, id)
 	if err != nil {

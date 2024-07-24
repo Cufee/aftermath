@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
@@ -50,16 +49,9 @@ func init() {
 						ioptions.BackgroundID = content.ID
 					}
 
-				case options.Nickname != "" && options.Server != "":
-					// nickname provided and server selected - lookup the account
-					account, err := ctx.Core().Fetch().Search(ctx.Ctx(), options.Nickname, options.Server)
-					if err != nil {
-						if err.Error() == "no results found" {
-							return ctx.Reply().Format("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server)).Send()
-						}
-						return ctx.Err(err)
-					}
-					accountID = fmt.Sprint(account.ID)
+				case options.AccountID != "":
+					// account selected from autocomplete
+					accountID = options.AccountID
 
 					if img, content, err := logic.GetBackgroundImageFromRef(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
 						opts = append(opts, stats.WithBackground(img))

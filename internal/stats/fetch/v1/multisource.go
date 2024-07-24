@@ -56,6 +56,65 @@ func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string) 
 	return accounts[0], nil
 }
 
+func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string) ([]AccountWithRealm, error) {
+	data := make(chan AccountWithRealm, 9)
+	errors := make(chan error, 3)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		accounts, err := c.wargaming.SearchAccounts(ctx, "NA", nickname)
+		if err != nil {
+			errors <- err
+			return
+		}
+		for _, a := range accounts {
+			data <- AccountWithRealm{a, "NA"}
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		accounts, err := c.wargaming.SearchAccounts(ctx, "EU", nickname)
+		if err != nil {
+			errors <- err
+			return
+		}
+		for _, a := range accounts {
+			data <- AccountWithRealm{a, "EU"}
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		accounts, err := c.wargaming.SearchAccounts(ctx, "AS", nickname)
+		if err != nil {
+			errors <- err
+			return
+		}
+		for _, a := range accounts {
+			data <- AccountWithRealm{a, "AS"}
+		}
+	}()
+	wg.Wait()
+	close(data)
+	close(errors)
+
+	// return first error
+	if len(errors) == 3 || (len(data) == 0 && len(errors) > 0) {
+		for err := range errors {
+			return nil, err
+		}
+	}
+
+	var accounts []AccountWithRealm
+	for a := range data {
+		accounts = append(accounts, a)
+	}
+
+	return accounts, nil
+}
+
 /*
 Gets account info from wg and updates cache
 */

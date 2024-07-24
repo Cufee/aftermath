@@ -27,7 +27,7 @@ func init() {
 				),
 				builder.NewOption("accounts", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
 					builder.NewOption("search", discordgo.ApplicationCommandOptionSubCommand).Options(
-						commands.NicknameAndServerOptions...,
+						commands.NicknameOption,
 					),
 				),
 				builder.NewOption("tasks", discordgo.ApplicationCommandOptionSubCommandGroup).Options(
@@ -63,9 +63,12 @@ func init() {
 					return ctx.Reply().Send("```" + string(data) + "```")
 
 				case "accounts_search":
-					nickname, _ := opts.Value("nickname").(string)
-					server, _ := opts.Value("server").(string)
-					result, err := ctx.Core().Fetch().Search(ctx.Ctx(), nickname, server)
+					opts := commands.GetDefaultStatsOptions(ctx.Options())
+					if opts.AccountID == "" {
+						return ctx.Reply().Send("invalid account id")
+					}
+
+					result, err := ctx.Core().Fetch().Account(ctx.Ctx(), opts.AccountID)
 					if err != nil {
 						return ctx.Reply().Send("Fetch#Search: " + err.Error())
 					}

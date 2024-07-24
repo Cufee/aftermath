@@ -221,15 +221,23 @@ func (c *routeContext) isAutocompleteInteraction() bool {
 }
 
 func (c *routeContext) ID() string {
+	var id string
 	if c.isCommand() {
 		d, _ := c.CommandData()
-		return d.Name
+		id = d.Name
 	}
 	if c.isComponentInteraction() {
 		d, _ := c.ComponentData()
-		return d.CustomID
+		id = d.CustomID
 	}
-	return ""
+	if c.isAutocompleteInteraction() {
+		d, _ := c.AutocompleteData()
+		id = d.Name
+	}
+	if id != "" {
+		return id
+	}
+	return "unknown"
 }
 
 func (c *routeContext) Options() common.Options {

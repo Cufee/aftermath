@@ -15,6 +15,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
@@ -30,6 +31,7 @@ func init() {
 					Params(builder.SetNameKey("command_option_links_add_name"), builder.SetDescKey("command_option_links_add_desc")).
 					Options(
 						builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
+							Autocomplete().
 							Required().
 							Min(5).
 							Max(30).
@@ -90,8 +92,8 @@ func init() {
 					return ctx.Error("received an unexpected subcommand: " + subcommand)
 
 				case "verify":
-					options := commands.GetDefaultStatsOptions(subOptions)
-					realm := strings.ToLower(options.Server)
+					server, _ := ctx.Options().Value("server").(string)
+					realm := strings.ToLower(server)
 					loginURL := fmt.Sprintf("%s/r/verify/%s", constants.FrontendURL, realm)
 					return ctx.Reply().Format("command_links_verify_response_fmt", ctx.Localize("common_label_realm_"+realm), loginURL).Send()
 
@@ -193,23 +195,19 @@ func init() {
 						return ctx.Reply().Send(message)
 					}
 
-					account, err := ctx.Core().Fetch().Search(ctx.Ctx(), options.Nickname, options.Server)
-					if err != nil {
-						if err.Error() == "no results found" {
-							return ctx.Reply().Format("stats_error_nickname_not_fount_fmt", options.Nickname, strings.ToUpper(options.Server)).Send()
-						}
-						return ctx.Err(err)
+					if options.AccountID == "" {
+						return ctx.Reply().Format("stats_error_nickname_not_fount_fmt", options.NicknameSearch).Send()
 					}
 
 					var found bool
 					for _, conn := range wgConnections {
-						if conn.ReferenceID == fmt.Sprint(account.ID) {
+						if conn.ReferenceID == options.AccountID {
 							conn.Metadata["verified"] = false
 							found = true
 						}
-						conn.Metadata["default"] = conn.ReferenceID == fmt.Sprint(account.ID)
+						conn.Metadata["default"] = conn.ReferenceID == options.AccountID
 
-						_, err = ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), conn)
+						_, err := ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), conn)
 						if err != nil {
 							return ctx.Err(err)
 						}
@@ -218,7 +216,7 @@ func init() {
 						meta := make(map[string]any)
 						meta["verified"] = false
 						meta["default"] = true
-						_, err = ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), models.UserConnection{
+						_, err := ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), models.UserConnection{
 							Type:        models.ConnectionTypeWargaming,
 							ReferenceID: fmt.Sprint(account.ID),
 							UserID:      ctx.User().ID,
@@ -235,7 +233,7 @@ func init() {
 						_, _ = ctx.Core().Fetch().Account(c, id) // Make sure the account is cached
 					}(fmt.Sprint(account.ID))
 
-					return ctx.Reply().Format("command_links_linked_successfully_fmt", account.Nickname, strings.ToUpper(options.Server)).Send()
+					return ctx.Reply().Format("command_links_linked_successfully_fmt", account.Nickname, strings.ToUpper(options.Realm)).Send()
 				}
 			}),
 	)

@@ -21,33 +21,22 @@ var DaysOption = builder.NewOption("days", discordgo.ApplicationCommandOptionInt
 	)
 
 var VehicleOption = builder.NewOption("tank", discordgo.ApplicationCommandOptionString).
+	Autocomplete().
 	Min(3).
 	Max(32).
-	Autocomplete().
 	Params(
 		builder.SetNameKey("common_option_stats_tank_name"),
 		builder.SetDescKey("common_option_stats_tank_description"),
 	)
 
-var NicknameAndServerOptions = []builder.Option{
-	builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
-		Min(5).
-		Max(30).
-		Params(
-			builder.SetNameKey("common_option_stats_nickname_name"),
-			builder.SetDescKey("common_option_stats_nickname_description"),
-		),
-	builder.NewOption("server", discordgo.ApplicationCommandOptionString).
-		Params(
-			builder.SetNameKey("common_option_stats_realm_name"),
-			builder.SetDescKey("common_option_stats_realm_description"),
-		).
-		Choices(
-			builder.NewChoice("realm_na", "na").Params(builder.SetNameKey("common_label_realm_na")),
-			builder.NewChoice("realm_eu", "eu").Params(builder.SetNameKey("common_label_realm_eu")),
-			builder.NewChoice("realm_as", "as").Params(builder.SetNameKey("common_label_realm_as")),
-		),
-}
+var NicknameOption = builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
+	Autocomplete().
+	Min(5).
+	Max(30).
+	Params(
+		builder.SetNameKey("common_option_stats_nickname_name"),
+		builder.SetDescKey("common_option_stats_nickname_description"),
+	)
 
 var UserOption = builder.NewOption("user", discordgo.ApplicationCommandOptionUser).
 	Params(
@@ -55,37 +44,35 @@ var UserOption = builder.NewOption("user", discordgo.ApplicationCommandOptionUse
 		builder.SetDescKey("common_option_stats_user_description"),
 	)
 
-var DefaultStatsOptions = append([]builder.Option{
+var DefaultStatsOptions = []builder.Option{
 	DaysOption,
+	NicknameOption,
 	VehicleOption,
 	UserOption,
-}, NicknameAndServerOptions...)
+}
 
 type StatsOptions struct {
-	PeriodStart time.Time
-	Days        int
-	Server      string
-	Nickname    string
-	UserID      string
-	TankSearch  string
-	TankID      string
+	PeriodStart    time.Time
+	Days           int
+	NicknameSearch string
+	AccountID      string
+	Realm          string
+	UserID         string
+	TankSearch     string
+	TankID         string
 }
 
 func (o StatsOptions) Validate(ctx common.Context) (string, bool) {
 	// check if the name is valid
-	if o.UserID == "" && o.Nickname != "" && !ValidatePlayerName(o.Nickname) {
-		return "errors_generic_nickname_invalid", false
-	}
-	if o.UserID == "" && o.Nickname != "" && o.Server == "" {
-		// entering nickname also requires to enter the server
-		return "errors_generic_nickname_requires_server", false
+	if o.UserID == "" && o.NicknameSearch != "" && o.AccountID == "" {
+		return "nickname_autocomplete_not_found", false
 	}
 
 	if o.UserID != "" && o.UserID == ctx.User().ID {
 		// mentioning self is redundant - this should not prevent the command from working though
 		return "stats_error_mentioned_self_non_blocking", true
 	}
-	if o.UserID != "" && o.Nickname != "" {
+	if o.UserID != "" && o.NicknameSearch != "" {
 		// mentioning a user and providing a nickname is redundant
 		return "stats_error_too_many_arguments_non_blocking", true
 	}
@@ -99,8 +86,15 @@ func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataO
 	if strings.HasPrefix(options.TankSearch, "valid#vehicle#") {
 		options.TankID = strings.TrimPrefix(options.TankSearch, "valid#vehicle#")
 	}
-	options.Nickname, _ = common.GetOption[string](data, "nickname")
-	options.Server, _ = common.GetOption[string](data, "server")
+	options.NicknameSearch, _ = common.GetOption[string](data, "nickname")
+	if strings.HasPrefix(options.NicknameSearch, "valid#account#") {
+		data := strings.Split(strings.TrimPrefix(options.NicknameSearch, "valid#account#"), "#")
+		if len(data) == 2 {
+			options.Realm = data[1]
+			options.AccountID = data[0]
+		}
+	}
+
 	options.UserID, _ = common.GetOption[string](data, "user")
 
 	if days, _ := common.GetOption[float64](data, "days"); days > 0 {
