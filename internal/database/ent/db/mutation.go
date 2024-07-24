@@ -13,8 +13,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/adevent"
-	"github.com/cufee/aftermath/internal/database/ent/db/admessage"
 	"github.com/cufee/aftermath/internal/database/ent/db/appconfiguration"
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
 	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
@@ -52,8 +50,6 @@ const (
 	// Node types.
 	TypeAccount            = "Account"
 	TypeAccountSnapshot    = "AccountSnapshot"
-	TypeAdEvent            = "AdEvent"
-	TypeAdMessage          = "AdMessage"
 	TypeAppConfiguration   = "AppConfiguration"
 	TypeApplicationCommand = "ApplicationCommand"
 	TypeAuthNonce          = "AuthNonce"
@@ -1969,1485 +1965,6 @@ func (m *AccountSnapshotMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown AccountSnapshot edge %s", name)
-}
-
-// AdEventMutation represents an operation that mutates the AdEvent nodes in the graph.
-type AdEventMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	user_id       *string
-	guild_id      *string
-	channel_id    *string
-	locale        *string
-	message_id    *string
-	metadata      *map[string]interface{}
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*AdEvent, error)
-	predicates    []predicate.AdEvent
-}
-
-var _ ent.Mutation = (*AdEventMutation)(nil)
-
-// adeventOption allows management of the mutation configuration using functional options.
-type adeventOption func(*AdEventMutation)
-
-// newAdEventMutation creates new mutation for the AdEvent entity.
-func newAdEventMutation(c config, op Op, opts ...adeventOption) *AdEventMutation {
-	m := &AdEventMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeAdEvent,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withAdEventID sets the ID field of the mutation.
-func withAdEventID(id string) adeventOption {
-	return func(m *AdEventMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *AdEvent
-		)
-		m.oldValue = func(ctx context.Context) (*AdEvent, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().AdEvent.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withAdEvent sets the old AdEvent of the mutation.
-func withAdEvent(node *AdEvent) adeventOption {
-	return func(m *AdEventMutation) {
-		m.oldValue = func(context.Context) (*AdEvent, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m AdEventMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m AdEventMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("db: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of AdEvent entities.
-func (m *AdEventMutation) SetID(id string) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *AdEventMutation) ID() (id string, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *AdEventMutation) IDs(ctx context.Context) ([]string, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []string{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().AdEvent.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *AdEventMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *AdEventMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the AdEvent entity.
-// If the AdEvent object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdEventMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *AdEventMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *AdEventMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *AdEventMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the AdEvent entity.
-// If the AdEvent object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdEventMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *AdEventMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetUserID sets the "user_id" field.
-func (m *AdEventMutation) SetUserID(s string) {
-	m.user_id = &s
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *AdEventMutation) UserID() (r string, exists bool) {
-	v := m.user_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the AdEvent entity.
-// If the AdEvent object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdEventMutation) OldUserID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *AdEventMutation) ResetUserID() {
-	m.user_id = nil
-}
-
-// SetGuildID sets the "guild_id" field.
-func (m *AdEventMutation) SetGuildID(s string) {
-	m.guild_id = &s
-}
-
-// GuildID returns the value of the "guild_id" field in the mutation.
-func (m *AdEventMutation) GuildID() (r string, exists bool) {
-	v := m.guild_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldGuildID returns the old "guild_id" field's value of the AdEvent entity.
-// If the AdEvent object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdEventMutation) OldGuildID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldGuildID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldGuildID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldGuildID: %w", err)
-	}
-	return oldValue.GuildID, nil
-}
-
-// ResetGuildID resets all changes to the "guild_id" field.
-func (m *AdEventMutation) ResetGuildID() {
-	m.guild_id = nil
-}
-
-// SetChannelID sets the "channel_id" field.
-func (m *AdEventMutation) SetChannelID(s string) {
-	m.channel_id = &s
-}
-
-// ChannelID returns the value of the "channel_id" field in the mutation.
-func (m *AdEventMutation) ChannelID() (r string, exists bool) {
-	v := m.channel_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldChannelID returns the old "channel_id" field's value of the AdEvent entity.
-// If the AdEvent object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdEventMutation) OldChannelID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldChannelID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldChannelID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldChannelID: %w", err)
-	}
-	return oldValue.ChannelID, nil
-}
-
-// ResetChannelID resets all changes to the "channel_id" field.
-func (m *AdEventMutation) ResetChannelID() {
-	m.channel_id = nil
-}
-
-// SetLocale sets the "locale" field.
-func (m *AdEventMutation) SetLocale(s string) {
-	m.locale = &s
-}
-
-// Locale returns the value of the "locale" field in the mutation.
-func (m *AdEventMutation) Locale() (r string, exists bool) {
-	v := m.locale
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLocale returns the old "locale" field's value of the AdEvent entity.
-// If the AdEvent object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdEventMutation) OldLocale(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLocale is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLocale requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLocale: %w", err)
-	}
-	return oldValue.Locale, nil
-}
-
-// ResetLocale resets all changes to the "locale" field.
-func (m *AdEventMutation) ResetLocale() {
-	m.locale = nil
-}
-
-// SetMessageID sets the "message_id" field.
-func (m *AdEventMutation) SetMessageID(s string) {
-	m.message_id = &s
-}
-
-// MessageID returns the value of the "message_id" field in the mutation.
-func (m *AdEventMutation) MessageID() (r string, exists bool) {
-	v := m.message_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMessageID returns the old "message_id" field's value of the AdEvent entity.
-// If the AdEvent object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdEventMutation) OldMessageID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMessageID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMessageID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMessageID: %w", err)
-	}
-	return oldValue.MessageID, nil
-}
-
-// ResetMessageID resets all changes to the "message_id" field.
-func (m *AdEventMutation) ResetMessageID() {
-	m.message_id = nil
-}
-
-// SetMetadata sets the "metadata" field.
-func (m *AdEventMutation) SetMetadata(value map[string]interface{}) {
-	m.metadata = &value
-}
-
-// Metadata returns the value of the "metadata" field in the mutation.
-func (m *AdEventMutation) Metadata() (r map[string]interface{}, exists bool) {
-	v := m.metadata
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMetadata returns the old "metadata" field's value of the AdEvent entity.
-// If the AdEvent object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdEventMutation) OldMetadata(ctx context.Context) (v map[string]interface{}, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMetadata requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMetadata: %w", err)
-	}
-	return oldValue.Metadata, nil
-}
-
-// ClearMetadata clears the value of the "metadata" field.
-func (m *AdEventMutation) ClearMetadata() {
-	m.metadata = nil
-	m.clearedFields[adevent.FieldMetadata] = struct{}{}
-}
-
-// MetadataCleared returns if the "metadata" field was cleared in this mutation.
-func (m *AdEventMutation) MetadataCleared() bool {
-	_, ok := m.clearedFields[adevent.FieldMetadata]
-	return ok
-}
-
-// ResetMetadata resets all changes to the "metadata" field.
-func (m *AdEventMutation) ResetMetadata() {
-	m.metadata = nil
-	delete(m.clearedFields, adevent.FieldMetadata)
-}
-
-// Where appends a list predicates to the AdEventMutation builder.
-func (m *AdEventMutation) Where(ps ...predicate.AdEvent) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the AdEventMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *AdEventMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.AdEvent, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *AdEventMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *AdEventMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (AdEvent).
-func (m *AdEventMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *AdEventMutation) Fields() []string {
-	fields := make([]string, 0, 8)
-	if m.created_at != nil {
-		fields = append(fields, adevent.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, adevent.FieldUpdatedAt)
-	}
-	if m.user_id != nil {
-		fields = append(fields, adevent.FieldUserID)
-	}
-	if m.guild_id != nil {
-		fields = append(fields, adevent.FieldGuildID)
-	}
-	if m.channel_id != nil {
-		fields = append(fields, adevent.FieldChannelID)
-	}
-	if m.locale != nil {
-		fields = append(fields, adevent.FieldLocale)
-	}
-	if m.message_id != nil {
-		fields = append(fields, adevent.FieldMessageID)
-	}
-	if m.metadata != nil {
-		fields = append(fields, adevent.FieldMetadata)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *AdEventMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case adevent.FieldCreatedAt:
-		return m.CreatedAt()
-	case adevent.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case adevent.FieldUserID:
-		return m.UserID()
-	case adevent.FieldGuildID:
-		return m.GuildID()
-	case adevent.FieldChannelID:
-		return m.ChannelID()
-	case adevent.FieldLocale:
-		return m.Locale()
-	case adevent.FieldMessageID:
-		return m.MessageID()
-	case adevent.FieldMetadata:
-		return m.Metadata()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *AdEventMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case adevent.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case adevent.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case adevent.FieldUserID:
-		return m.OldUserID(ctx)
-	case adevent.FieldGuildID:
-		return m.OldGuildID(ctx)
-	case adevent.FieldChannelID:
-		return m.OldChannelID(ctx)
-	case adevent.FieldLocale:
-		return m.OldLocale(ctx)
-	case adevent.FieldMessageID:
-		return m.OldMessageID(ctx)
-	case adevent.FieldMetadata:
-		return m.OldMetadata(ctx)
-	}
-	return nil, fmt.Errorf("unknown AdEvent field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *AdEventMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case adevent.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case adevent.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case adevent.FieldUserID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
-	case adevent.FieldGuildID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetGuildID(v)
-		return nil
-	case adevent.FieldChannelID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetChannelID(v)
-		return nil
-	case adevent.FieldLocale:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLocale(v)
-		return nil
-	case adevent.FieldMessageID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMessageID(v)
-		return nil
-	case adevent.FieldMetadata:
-		v, ok := value.(map[string]interface{})
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMetadata(v)
-		return nil
-	}
-	return fmt.Errorf("unknown AdEvent field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *AdEventMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *AdEventMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *AdEventMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown AdEvent numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *AdEventMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(adevent.FieldMetadata) {
-		fields = append(fields, adevent.FieldMetadata)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *AdEventMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *AdEventMutation) ClearField(name string) error {
-	switch name {
-	case adevent.FieldMetadata:
-		m.ClearMetadata()
-		return nil
-	}
-	return fmt.Errorf("unknown AdEvent nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *AdEventMutation) ResetField(name string) error {
-	switch name {
-	case adevent.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case adevent.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case adevent.FieldUserID:
-		m.ResetUserID()
-		return nil
-	case adevent.FieldGuildID:
-		m.ResetGuildID()
-		return nil
-	case adevent.FieldChannelID:
-		m.ResetChannelID()
-		return nil
-	case adevent.FieldLocale:
-		m.ResetLocale()
-		return nil
-	case adevent.FieldMessageID:
-		m.ResetMessageID()
-		return nil
-	case adevent.FieldMetadata:
-		m.ResetMetadata()
-		return nil
-	}
-	return fmt.Errorf("unknown AdEvent field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *AdEventMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *AdEventMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *AdEventMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *AdEventMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *AdEventMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *AdEventMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *AdEventMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown AdEvent unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *AdEventMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown AdEvent edge %s", name)
-}
-
-// AdMessageMutation represents an operation that mutates the AdMessage nodes in the graph.
-type AdMessageMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	enabled       *bool
-	weight        *int
-	addweight     *int
-	chance        *float32
-	addchance     *float32
-	message       *map[language.Tag]string
-	metadata      *map[string]interface{}
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*AdMessage, error)
-	predicates    []predicate.AdMessage
-}
-
-var _ ent.Mutation = (*AdMessageMutation)(nil)
-
-// admessageOption allows management of the mutation configuration using functional options.
-type admessageOption func(*AdMessageMutation)
-
-// newAdMessageMutation creates new mutation for the AdMessage entity.
-func newAdMessageMutation(c config, op Op, opts ...admessageOption) *AdMessageMutation {
-	m := &AdMessageMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeAdMessage,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withAdMessageID sets the ID field of the mutation.
-func withAdMessageID(id string) admessageOption {
-	return func(m *AdMessageMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *AdMessage
-		)
-		m.oldValue = func(ctx context.Context) (*AdMessage, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().AdMessage.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withAdMessage sets the old AdMessage of the mutation.
-func withAdMessage(node *AdMessage) admessageOption {
-	return func(m *AdMessageMutation) {
-		m.oldValue = func(context.Context) (*AdMessage, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m AdMessageMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m AdMessageMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("db: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of AdMessage entities.
-func (m *AdMessageMutation) SetID(id string) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *AdMessageMutation) ID() (id string, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *AdMessageMutation) IDs(ctx context.Context) ([]string, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []string{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().AdMessage.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *AdMessageMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *AdMessageMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the AdMessage entity.
-// If the AdMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMessageMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *AdMessageMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *AdMessageMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *AdMessageMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the AdMessage entity.
-// If the AdMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMessageMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *AdMessageMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetEnabled sets the "enabled" field.
-func (m *AdMessageMutation) SetEnabled(b bool) {
-	m.enabled = &b
-}
-
-// Enabled returns the value of the "enabled" field in the mutation.
-func (m *AdMessageMutation) Enabled() (r bool, exists bool) {
-	v := m.enabled
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldEnabled returns the old "enabled" field's value of the AdMessage entity.
-// If the AdMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMessageMutation) OldEnabled(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEnabled is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEnabled requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEnabled: %w", err)
-	}
-	return oldValue.Enabled, nil
-}
-
-// ResetEnabled resets all changes to the "enabled" field.
-func (m *AdMessageMutation) ResetEnabled() {
-	m.enabled = nil
-}
-
-// SetWeight sets the "weight" field.
-func (m *AdMessageMutation) SetWeight(i int) {
-	m.weight = &i
-	m.addweight = nil
-}
-
-// Weight returns the value of the "weight" field in the mutation.
-func (m *AdMessageMutation) Weight() (r int, exists bool) {
-	v := m.weight
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldWeight returns the old "weight" field's value of the AdMessage entity.
-// If the AdMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMessageMutation) OldWeight(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldWeight is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldWeight requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldWeight: %w", err)
-	}
-	return oldValue.Weight, nil
-}
-
-// AddWeight adds i to the "weight" field.
-func (m *AdMessageMutation) AddWeight(i int) {
-	if m.addweight != nil {
-		*m.addweight += i
-	} else {
-		m.addweight = &i
-	}
-}
-
-// AddedWeight returns the value that was added to the "weight" field in this mutation.
-func (m *AdMessageMutation) AddedWeight() (r int, exists bool) {
-	v := m.addweight
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetWeight resets all changes to the "weight" field.
-func (m *AdMessageMutation) ResetWeight() {
-	m.weight = nil
-	m.addweight = nil
-}
-
-// SetChance sets the "chance" field.
-func (m *AdMessageMutation) SetChance(f float32) {
-	m.chance = &f
-	m.addchance = nil
-}
-
-// Chance returns the value of the "chance" field in the mutation.
-func (m *AdMessageMutation) Chance() (r float32, exists bool) {
-	v := m.chance
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldChance returns the old "chance" field's value of the AdMessage entity.
-// If the AdMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMessageMutation) OldChance(ctx context.Context) (v float32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldChance is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldChance requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldChance: %w", err)
-	}
-	return oldValue.Chance, nil
-}
-
-// AddChance adds f to the "chance" field.
-func (m *AdMessageMutation) AddChance(f float32) {
-	if m.addchance != nil {
-		*m.addchance += f
-	} else {
-		m.addchance = &f
-	}
-}
-
-// AddedChance returns the value that was added to the "chance" field in this mutation.
-func (m *AdMessageMutation) AddedChance() (r float32, exists bool) {
-	v := m.addchance
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetChance resets all changes to the "chance" field.
-func (m *AdMessageMutation) ResetChance() {
-	m.chance = nil
-	m.addchance = nil
-}
-
-// SetMessage sets the "message" field.
-func (m *AdMessageMutation) SetMessage(value map[language.Tag]string) {
-	m.message = &value
-}
-
-// Message returns the value of the "message" field in the mutation.
-func (m *AdMessageMutation) Message() (r map[language.Tag]string, exists bool) {
-	v := m.message
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMessage returns the old "message" field's value of the AdMessage entity.
-// If the AdMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMessageMutation) OldMessage(ctx context.Context) (v map[language.Tag]string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMessage is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMessage requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMessage: %w", err)
-	}
-	return oldValue.Message, nil
-}
-
-// ResetMessage resets all changes to the "message" field.
-func (m *AdMessageMutation) ResetMessage() {
-	m.message = nil
-}
-
-// SetMetadata sets the "metadata" field.
-func (m *AdMessageMutation) SetMetadata(value map[string]interface{}) {
-	m.metadata = &value
-}
-
-// Metadata returns the value of the "metadata" field in the mutation.
-func (m *AdMessageMutation) Metadata() (r map[string]interface{}, exists bool) {
-	v := m.metadata
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMetadata returns the old "metadata" field's value of the AdMessage entity.
-// If the AdMessage object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdMessageMutation) OldMetadata(ctx context.Context) (v map[string]interface{}, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMetadata requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMetadata: %w", err)
-	}
-	return oldValue.Metadata, nil
-}
-
-// ClearMetadata clears the value of the "metadata" field.
-func (m *AdMessageMutation) ClearMetadata() {
-	m.metadata = nil
-	m.clearedFields[admessage.FieldMetadata] = struct{}{}
-}
-
-// MetadataCleared returns if the "metadata" field was cleared in this mutation.
-func (m *AdMessageMutation) MetadataCleared() bool {
-	_, ok := m.clearedFields[admessage.FieldMetadata]
-	return ok
-}
-
-// ResetMetadata resets all changes to the "metadata" field.
-func (m *AdMessageMutation) ResetMetadata() {
-	m.metadata = nil
-	delete(m.clearedFields, admessage.FieldMetadata)
-}
-
-// Where appends a list predicates to the AdMessageMutation builder.
-func (m *AdMessageMutation) Where(ps ...predicate.AdMessage) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the AdMessageMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *AdMessageMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.AdMessage, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *AdMessageMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *AdMessageMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (AdMessage).
-func (m *AdMessageMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *AdMessageMutation) Fields() []string {
-	fields := make([]string, 0, 7)
-	if m.created_at != nil {
-		fields = append(fields, admessage.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, admessage.FieldUpdatedAt)
-	}
-	if m.enabled != nil {
-		fields = append(fields, admessage.FieldEnabled)
-	}
-	if m.weight != nil {
-		fields = append(fields, admessage.FieldWeight)
-	}
-	if m.chance != nil {
-		fields = append(fields, admessage.FieldChance)
-	}
-	if m.message != nil {
-		fields = append(fields, admessage.FieldMessage)
-	}
-	if m.metadata != nil {
-		fields = append(fields, admessage.FieldMetadata)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *AdMessageMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case admessage.FieldCreatedAt:
-		return m.CreatedAt()
-	case admessage.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case admessage.FieldEnabled:
-		return m.Enabled()
-	case admessage.FieldWeight:
-		return m.Weight()
-	case admessage.FieldChance:
-		return m.Chance()
-	case admessage.FieldMessage:
-		return m.Message()
-	case admessage.FieldMetadata:
-		return m.Metadata()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *AdMessageMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case admessage.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case admessage.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case admessage.FieldEnabled:
-		return m.OldEnabled(ctx)
-	case admessage.FieldWeight:
-		return m.OldWeight(ctx)
-	case admessage.FieldChance:
-		return m.OldChance(ctx)
-	case admessage.FieldMessage:
-		return m.OldMessage(ctx)
-	case admessage.FieldMetadata:
-		return m.OldMetadata(ctx)
-	}
-	return nil, fmt.Errorf("unknown AdMessage field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *AdMessageMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case admessage.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case admessage.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case admessage.FieldEnabled:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetEnabled(v)
-		return nil
-	case admessage.FieldWeight:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetWeight(v)
-		return nil
-	case admessage.FieldChance:
-		v, ok := value.(float32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetChance(v)
-		return nil
-	case admessage.FieldMessage:
-		v, ok := value.(map[language.Tag]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMessage(v)
-		return nil
-	case admessage.FieldMetadata:
-		v, ok := value.(map[string]interface{})
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMetadata(v)
-		return nil
-	}
-	return fmt.Errorf("unknown AdMessage field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *AdMessageMutation) AddedFields() []string {
-	var fields []string
-	if m.addweight != nil {
-		fields = append(fields, admessage.FieldWeight)
-	}
-	if m.addchance != nil {
-		fields = append(fields, admessage.FieldChance)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *AdMessageMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case admessage.FieldWeight:
-		return m.AddedWeight()
-	case admessage.FieldChance:
-		return m.AddedChance()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *AdMessageMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case admessage.FieldWeight:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddWeight(v)
-		return nil
-	case admessage.FieldChance:
-		v, ok := value.(float32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddChance(v)
-		return nil
-	}
-	return fmt.Errorf("unknown AdMessage numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *AdMessageMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(admessage.FieldMetadata) {
-		fields = append(fields, admessage.FieldMetadata)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *AdMessageMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *AdMessageMutation) ClearField(name string) error {
-	switch name {
-	case admessage.FieldMetadata:
-		m.ClearMetadata()
-		return nil
-	}
-	return fmt.Errorf("unknown AdMessage nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *AdMessageMutation) ResetField(name string) error {
-	switch name {
-	case admessage.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case admessage.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case admessage.FieldEnabled:
-		m.ResetEnabled()
-		return nil
-	case admessage.FieldWeight:
-		m.ResetWeight()
-		return nil
-	case admessage.FieldChance:
-		m.ResetChance()
-		return nil
-	case admessage.FieldMessage:
-		m.ResetMessage()
-		return nil
-	case admessage.FieldMetadata:
-		m.ResetMetadata()
-		return nil
-	}
-	return fmt.Errorf("unknown AdMessage field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *AdMessageMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *AdMessageMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *AdMessageMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *AdMessageMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *AdMessageMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *AdMessageMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *AdMessageMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown AdMessage unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *AdMessageMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown AdMessage edge %s", name)
 }
 
 // AppConfigurationMutation represents an operation that mutates the AppConfiguration nodes in the graph.
@@ -6905,11 +5422,14 @@ type DiscordInteractionMutation struct {
 	id            *string
 	created_at    *time.Time
 	updated_at    *time.Time
-	command       *string
-	reference_id  *string
+	result        *string
+	event_id      *string
+	guild_id      *string
+	channel_id    *string
+	message_id    *string
 	_type         *models.DiscordInteractionType
 	locale        *string
-	options       *models.DiscordInteractionOptions
+	metadata      *map[string]interface{}
 	clearedFields map[string]struct{}
 	user          *string
 	cleareduser   bool
@@ -7094,40 +5614,40 @@ func (m *DiscordInteractionMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetCommand sets the "command" field.
-func (m *DiscordInteractionMutation) SetCommand(s string) {
-	m.command = &s
+// SetResult sets the "result" field.
+func (m *DiscordInteractionMutation) SetResult(s string) {
+	m.result = &s
 }
 
-// Command returns the value of the "command" field in the mutation.
-func (m *DiscordInteractionMutation) Command() (r string, exists bool) {
-	v := m.command
+// Result returns the value of the "result" field in the mutation.
+func (m *DiscordInteractionMutation) Result() (r string, exists bool) {
+	v := m.result
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCommand returns the old "command" field's value of the DiscordInteraction entity.
+// OldResult returns the old "result" field's value of the DiscordInteraction entity.
 // If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DiscordInteractionMutation) OldCommand(ctx context.Context) (v string, err error) {
+func (m *DiscordInteractionMutation) OldResult(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCommand is only allowed on UpdateOne operations")
+		return v, errors.New("OldResult is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCommand requires an ID field in the mutation")
+		return v, errors.New("OldResult requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCommand: %w", err)
+		return v, fmt.Errorf("querying old value for OldResult: %w", err)
 	}
-	return oldValue.Command, nil
+	return oldValue.Result, nil
 }
 
-// ResetCommand resets all changes to the "command" field.
-func (m *DiscordInteractionMutation) ResetCommand() {
-	m.command = nil
+// ResetResult resets all changes to the "result" field.
+func (m *DiscordInteractionMutation) ResetResult() {
+	m.result = nil
 }
 
 // SetUserID sets the "user_id" field.
@@ -7166,40 +5686,148 @@ func (m *DiscordInteractionMutation) ResetUserID() {
 	m.user = nil
 }
 
-// SetReferenceID sets the "reference_id" field.
-func (m *DiscordInteractionMutation) SetReferenceID(s string) {
-	m.reference_id = &s
+// SetEventID sets the "event_id" field.
+func (m *DiscordInteractionMutation) SetEventID(s string) {
+	m.event_id = &s
 }
 
-// ReferenceID returns the value of the "reference_id" field in the mutation.
-func (m *DiscordInteractionMutation) ReferenceID() (r string, exists bool) {
-	v := m.reference_id
+// EventID returns the value of the "event_id" field in the mutation.
+func (m *DiscordInteractionMutation) EventID() (r string, exists bool) {
+	v := m.event_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldReferenceID returns the old "reference_id" field's value of the DiscordInteraction entity.
+// OldEventID returns the old "event_id" field's value of the DiscordInteraction entity.
 // If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DiscordInteractionMutation) OldReferenceID(ctx context.Context) (v string, err error) {
+func (m *DiscordInteractionMutation) OldEventID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldReferenceID is only allowed on UpdateOne operations")
+		return v, errors.New("OldEventID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldReferenceID requires an ID field in the mutation")
+		return v, errors.New("OldEventID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldReferenceID: %w", err)
+		return v, fmt.Errorf("querying old value for OldEventID: %w", err)
 	}
-	return oldValue.ReferenceID, nil
+	return oldValue.EventID, nil
 }
 
-// ResetReferenceID resets all changes to the "reference_id" field.
-func (m *DiscordInteractionMutation) ResetReferenceID() {
-	m.reference_id = nil
+// ResetEventID resets all changes to the "event_id" field.
+func (m *DiscordInteractionMutation) ResetEventID() {
+	m.event_id = nil
+}
+
+// SetGuildID sets the "guild_id" field.
+func (m *DiscordInteractionMutation) SetGuildID(s string) {
+	m.guild_id = &s
+}
+
+// GuildID returns the value of the "guild_id" field in the mutation.
+func (m *DiscordInteractionMutation) GuildID() (r string, exists bool) {
+	v := m.guild_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGuildID returns the old "guild_id" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldGuildID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGuildID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGuildID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGuildID: %w", err)
+	}
+	return oldValue.GuildID, nil
+}
+
+// ResetGuildID resets all changes to the "guild_id" field.
+func (m *DiscordInteractionMutation) ResetGuildID() {
+	m.guild_id = nil
+}
+
+// SetChannelID sets the "channel_id" field.
+func (m *DiscordInteractionMutation) SetChannelID(s string) {
+	m.channel_id = &s
+}
+
+// ChannelID returns the value of the "channel_id" field in the mutation.
+func (m *DiscordInteractionMutation) ChannelID() (r string, exists bool) {
+	v := m.channel_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChannelID returns the old "channel_id" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldChannelID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChannelID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChannelID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChannelID: %w", err)
+	}
+	return oldValue.ChannelID, nil
+}
+
+// ResetChannelID resets all changes to the "channel_id" field.
+func (m *DiscordInteractionMutation) ResetChannelID() {
+	m.channel_id = nil
+}
+
+// SetMessageID sets the "message_id" field.
+func (m *DiscordInteractionMutation) SetMessageID(s string) {
+	m.message_id = &s
+}
+
+// MessageID returns the value of the "message_id" field in the mutation.
+func (m *DiscordInteractionMutation) MessageID() (r string, exists bool) {
+	v := m.message_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMessageID returns the old "message_id" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldMessageID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMessageID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMessageID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMessageID: %w", err)
+	}
+	return oldValue.MessageID, nil
+}
+
+// ResetMessageID resets all changes to the "message_id" field.
+func (m *DiscordInteractionMutation) ResetMessageID() {
+	m.message_id = nil
 }
 
 // SetType sets the "type" field.
@@ -7274,40 +5902,40 @@ func (m *DiscordInteractionMutation) ResetLocale() {
 	m.locale = nil
 }
 
-// SetOptions sets the "options" field.
-func (m *DiscordInteractionMutation) SetOptions(mio models.DiscordInteractionOptions) {
-	m.options = &mio
+// SetMetadata sets the "metadata" field.
+func (m *DiscordInteractionMutation) SetMetadata(value map[string]interface{}) {
+	m.metadata = &value
 }
 
-// Options returns the value of the "options" field in the mutation.
-func (m *DiscordInteractionMutation) Options() (r models.DiscordInteractionOptions, exists bool) {
-	v := m.options
+// Metadata returns the value of the "metadata" field in the mutation.
+func (m *DiscordInteractionMutation) Metadata() (r map[string]interface{}, exists bool) {
+	v := m.metadata
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldOptions returns the old "options" field's value of the DiscordInteraction entity.
+// OldMetadata returns the old "metadata" field's value of the DiscordInteraction entity.
 // If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DiscordInteractionMutation) OldOptions(ctx context.Context) (v models.DiscordInteractionOptions, err error) {
+func (m *DiscordInteractionMutation) OldMetadata(ctx context.Context) (v map[string]interface{}, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOptions is only allowed on UpdateOne operations")
+		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOptions requires an ID field in the mutation")
+		return v, errors.New("OldMetadata requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOptions: %w", err)
+		return v, fmt.Errorf("querying old value for OldMetadata: %w", err)
 	}
-	return oldValue.Options, nil
+	return oldValue.Metadata, nil
 }
 
-// ResetOptions resets all changes to the "options" field.
-func (m *DiscordInteractionMutation) ResetOptions() {
-	m.options = nil
+// ResetMetadata resets all changes to the "metadata" field.
+func (m *DiscordInteractionMutation) ResetMetadata() {
+	m.metadata = nil
 }
 
 // ClearUser clears the "user" edge to the User entity.
@@ -7371,21 +5999,30 @@ func (m *DiscordInteractionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DiscordInteractionMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, discordinteraction.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, discordinteraction.FieldUpdatedAt)
 	}
-	if m.command != nil {
-		fields = append(fields, discordinteraction.FieldCommand)
+	if m.result != nil {
+		fields = append(fields, discordinteraction.FieldResult)
 	}
 	if m.user != nil {
 		fields = append(fields, discordinteraction.FieldUserID)
 	}
-	if m.reference_id != nil {
-		fields = append(fields, discordinteraction.FieldReferenceID)
+	if m.event_id != nil {
+		fields = append(fields, discordinteraction.FieldEventID)
+	}
+	if m.guild_id != nil {
+		fields = append(fields, discordinteraction.FieldGuildID)
+	}
+	if m.channel_id != nil {
+		fields = append(fields, discordinteraction.FieldChannelID)
+	}
+	if m.message_id != nil {
+		fields = append(fields, discordinteraction.FieldMessageID)
 	}
 	if m._type != nil {
 		fields = append(fields, discordinteraction.FieldType)
@@ -7393,8 +6030,8 @@ func (m *DiscordInteractionMutation) Fields() []string {
 	if m.locale != nil {
 		fields = append(fields, discordinteraction.FieldLocale)
 	}
-	if m.options != nil {
-		fields = append(fields, discordinteraction.FieldOptions)
+	if m.metadata != nil {
+		fields = append(fields, discordinteraction.FieldMetadata)
 	}
 	return fields
 }
@@ -7408,18 +6045,24 @@ func (m *DiscordInteractionMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case discordinteraction.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case discordinteraction.FieldCommand:
-		return m.Command()
+	case discordinteraction.FieldResult:
+		return m.Result()
 	case discordinteraction.FieldUserID:
 		return m.UserID()
-	case discordinteraction.FieldReferenceID:
-		return m.ReferenceID()
+	case discordinteraction.FieldEventID:
+		return m.EventID()
+	case discordinteraction.FieldGuildID:
+		return m.GuildID()
+	case discordinteraction.FieldChannelID:
+		return m.ChannelID()
+	case discordinteraction.FieldMessageID:
+		return m.MessageID()
 	case discordinteraction.FieldType:
 		return m.GetType()
 	case discordinteraction.FieldLocale:
 		return m.Locale()
-	case discordinteraction.FieldOptions:
-		return m.Options()
+	case discordinteraction.FieldMetadata:
+		return m.Metadata()
 	}
 	return nil, false
 }
@@ -7433,18 +6076,24 @@ func (m *DiscordInteractionMutation) OldField(ctx context.Context, name string) 
 		return m.OldCreatedAt(ctx)
 	case discordinteraction.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case discordinteraction.FieldCommand:
-		return m.OldCommand(ctx)
+	case discordinteraction.FieldResult:
+		return m.OldResult(ctx)
 	case discordinteraction.FieldUserID:
 		return m.OldUserID(ctx)
-	case discordinteraction.FieldReferenceID:
-		return m.OldReferenceID(ctx)
+	case discordinteraction.FieldEventID:
+		return m.OldEventID(ctx)
+	case discordinteraction.FieldGuildID:
+		return m.OldGuildID(ctx)
+	case discordinteraction.FieldChannelID:
+		return m.OldChannelID(ctx)
+	case discordinteraction.FieldMessageID:
+		return m.OldMessageID(ctx)
 	case discordinteraction.FieldType:
 		return m.OldType(ctx)
 	case discordinteraction.FieldLocale:
 		return m.OldLocale(ctx)
-	case discordinteraction.FieldOptions:
-		return m.OldOptions(ctx)
+	case discordinteraction.FieldMetadata:
+		return m.OldMetadata(ctx)
 	}
 	return nil, fmt.Errorf("unknown DiscordInteraction field %s", name)
 }
@@ -7468,12 +6117,12 @@ func (m *DiscordInteractionMutation) SetField(name string, value ent.Value) erro
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case discordinteraction.FieldCommand:
+	case discordinteraction.FieldResult:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCommand(v)
+		m.SetResult(v)
 		return nil
 	case discordinteraction.FieldUserID:
 		v, ok := value.(string)
@@ -7482,12 +6131,33 @@ func (m *DiscordInteractionMutation) SetField(name string, value ent.Value) erro
 		}
 		m.SetUserID(v)
 		return nil
-	case discordinteraction.FieldReferenceID:
+	case discordinteraction.FieldEventID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetReferenceID(v)
+		m.SetEventID(v)
+		return nil
+	case discordinteraction.FieldGuildID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGuildID(v)
+		return nil
+	case discordinteraction.FieldChannelID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChannelID(v)
+		return nil
+	case discordinteraction.FieldMessageID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMessageID(v)
 		return nil
 	case discordinteraction.FieldType:
 		v, ok := value.(models.DiscordInteractionType)
@@ -7503,12 +6173,12 @@ func (m *DiscordInteractionMutation) SetField(name string, value ent.Value) erro
 		}
 		m.SetLocale(v)
 		return nil
-	case discordinteraction.FieldOptions:
-		v, ok := value.(models.DiscordInteractionOptions)
+	case discordinteraction.FieldMetadata:
+		v, ok := value.(map[string]interface{})
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOptions(v)
+		m.SetMetadata(v)
 		return nil
 	}
 	return fmt.Errorf("unknown DiscordInteraction field %s", name)
@@ -7565,14 +6235,23 @@ func (m *DiscordInteractionMutation) ResetField(name string) error {
 	case discordinteraction.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case discordinteraction.FieldCommand:
-		m.ResetCommand()
+	case discordinteraction.FieldResult:
+		m.ResetResult()
 		return nil
 	case discordinteraction.FieldUserID:
 		m.ResetUserID()
 		return nil
-	case discordinteraction.FieldReferenceID:
-		m.ResetReferenceID()
+	case discordinteraction.FieldEventID:
+		m.ResetEventID()
+		return nil
+	case discordinteraction.FieldGuildID:
+		m.ResetGuildID()
+		return nil
+	case discordinteraction.FieldChannelID:
+		m.ResetChannelID()
+		return nil
+	case discordinteraction.FieldMessageID:
+		m.ResetMessageID()
 		return nil
 	case discordinteraction.FieldType:
 		m.ResetType()
@@ -7580,8 +6259,8 @@ func (m *DiscordInteractionMutation) ResetField(name string) error {
 	case discordinteraction.FieldLocale:
 		m.ResetLocale()
 		return nil
-	case discordinteraction.FieldOptions:
-		m.ResetOptions()
+	case discordinteraction.FieldMetadata:
+		m.ResetMetadata()
 		return nil
 	}
 	return fmt.Errorf("unknown DiscordInteraction field %s", name)

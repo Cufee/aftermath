@@ -8,7 +8,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/cufee/aftermath/cmd/discord/rest"
-	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/retry"
 )
 
@@ -19,12 +18,15 @@ type Reply struct {
 }
 
 type replyInternal struct {
-	IncludeAds bool
 	Hint       string
 	Text       []string
 	Files      []rest.File
-	Components []discordgo.MessageComponent
 	Embeds     []*discordgo.MessageEmbed
+	Components []discordgo.MessageComponent
+	Choices    []*discordgo.ApplicationCommandOptionChoice
+
+	IncludeAds    bool
+	eventMetadata map[string]any
 }
 
 func WithRetry(fn func() (discordgo.Message, error), tries ...int) (discordgo.Message, error) {
@@ -44,9 +46,24 @@ func (r Reply) Peek() replyInternal {
 	return r.internal
 }
 
-func (r Reply) Choices(data ...*discordgo.ApplicationCommandOptionChoice) error {
-	_, err := r.ctx.InteractionResponse(discordgo.InteractionResponseData{Choices: data}, nil)
-	return err
+func (r Reply) Choices(data ...*discordgo.ApplicationCommandOptionChoice) Reply {
+	r.internal.Choices = append(r.internal.Choices, data...)
+	return r
+}
+
+func (r Reply) Metadata() map[string]any {
+	if r.internal.eventMetadata != nil {
+		return r.internal.eventMetadata
+	}
+	return make(map[string]any)
+}
+
+func (r Reply) WithMeta(data map[string]any) Reply {
+	meta := r.Metadata()
+	for key, value := range data {
+		meta[key] = value
+	}
+	return r
 }
 
 func (r Reply) Hint(text string) Reply {
@@ -66,6 +83,7 @@ func (r Reply) Format(format string, args ...any) Reply {
 
 func (r Reply) File(data []byte, name string) Reply {
 	if data == nil {
+		r.internal.Files = make([]rest.File, 0)
 		return r
 	}
 	r.internal.Files = append(r.internal.Files, rest.File{Data: data, Name: name})
@@ -103,25 +121,11 @@ func (r Reply) Send(content ...string) error {
 }
 
 func (r Reply) Message(content ...string) (discordgo.Message, error) {
-	if r.internal.IncludeAds {
-		defer func() {
-			data, send := r.newMessageAd()
-			if !send {
-				return
-			}
-
-			_, err := r.ctx.InteractionFollowUp(data, nil)
-			if err != nil {
-				log.Err(err).Msg("failed to send an interaction ad followup")
-			}
-		}()
-	}
-
 	r.internal.Text = append(r.internal.Text, content...)
-	return r.ctx.InteractionResponse(r.internal.Data(r.ctx.Localize))
+	return r.ctx.InteractionResponse(r)
 }
 
-func (r replyInternal) Data(localize func(string) string) (discordgo.InteractionResponseData, []rest.File) {
+func (r replyInternal) Build(localize func(string) string) (discordgo.InteractionResponseData, []rest.File) {
 	var content []string
 	for _, t := range r.Text {
 		content = append(content, localize(t))
@@ -130,11 +134,14 @@ func (r replyInternal) Data(localize func(string) string) (discordgo.Interaction
 		content = append(content, "-# "+localize(r.Hint))
 	}
 
-	var clearAttachments []*discordgo.MessageAttachment
-	return discordgo.InteractionResponseData{
-		Content:     strings.Join(content, "\n"),
-		Components:  r.Components,
-		Embeds:      r.Embeds,
-		Attachments: &clearAttachments,
-	}, r.Files
+	data := discordgo.InteractionResponseData{
+		Content:    strings.Join(content, "\n"),
+		Components: r.Components,
+		Choices:    r.Choices,
+		Embeds:     r.Embeds,
+	}
+	if r.Files != nil {
+		data.Attachments = &[]*discordgo.MessageAttachment{} // clear existing attachments
+	}
+	return data, r.Files
 }

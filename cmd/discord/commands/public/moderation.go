@@ -10,6 +10,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/cmd/frontend/logic"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
@@ -125,6 +126,7 @@ func init() {
 					directMessageContent = "fancy_moderation_request_approved"
 
 				case "feature-ban":
+					banExpiresAt := time.Now().Add(constants.DefaultFeatureBanDuration)
 					// issue a feature ban
 					restriction := models.UserRestriction{
 						UserID:           request.RequestorID,
@@ -132,14 +134,14 @@ func init() {
 						Restriction:      permissions.CreatePersonalContent.Add(permissions.UpdatePersonalContent),
 						PublicReason:     "Uploading inappropriate content with /fancy command. This restriction cannot be appealed.",
 						ModeratorComment: "moderator issued a feature ban using an action button",
-						ExpiresAt:        time.Now().Add(time.Hour * 24 * 180), // 180 days
+						ExpiresAt:        banExpiresAt,
 					}
 					restriction.AddEvent(ctx.User().ID, "restriction created", "restriction issued from a /fancy image review message")
 					restriction, err = ctx.Core().Database().CreateUserRestriction(ctx.Ctx(), restriction)
 					if err != nil {
 						return ctx.Reply().Send("Failed to create a user restriction", err.Error())
 					}
-					directMessageContent = fmt.Sprintf(ctx.Localize("fancy_moderation_request_declined_and_banned_fmt"), "180")
+					directMessageContent = fmt.Sprintf(ctx.Localize("fancy_moderation_request_declined_and_banned_fmt"), banExpiresAt.Unix())
 					request.ModeratorComment = "moderator chose to issue a feature ban"
 					fallthrough
 				case "decline":

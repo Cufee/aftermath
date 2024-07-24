@@ -17,8 +17,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/adevent"
-	"github.com/cufee/aftermath/internal/database/ent/db/admessage"
 	"github.com/cufee/aftermath/internal/database/ent/db/appconfiguration"
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
 	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
@@ -52,10 +50,6 @@ type Client struct {
 	Account *AccountClient
 	// AccountSnapshot is the client for interacting with the AccountSnapshot builders.
 	AccountSnapshot *AccountSnapshotClient
-	// AdEvent is the client for interacting with the AdEvent builders.
-	AdEvent *AdEventClient
-	// AdMessage is the client for interacting with the AdMessage builders.
-	AdMessage *AdMessageClient
 	// AppConfiguration is the client for interacting with the AppConfiguration builders.
 	AppConfiguration *AppConfigurationClient
 	// ApplicationCommand is the client for interacting with the ApplicationCommand builders.
@@ -109,8 +103,6 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Account = NewAccountClient(c.config)
 	c.AccountSnapshot = NewAccountSnapshotClient(c.config)
-	c.AdEvent = NewAdEventClient(c.config)
-	c.AdMessage = NewAdMessageClient(c.config)
 	c.AppConfiguration = NewAppConfigurationClient(c.config)
 	c.ApplicationCommand = NewApplicationCommandClient(c.config)
 	c.AuthNonce = NewAuthNonceClient(c.config)
@@ -225,8 +217,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:             cfg,
 		Account:            NewAccountClient(cfg),
 		AccountSnapshot:    NewAccountSnapshotClient(cfg),
-		AdEvent:            NewAdEventClient(cfg),
-		AdMessage:          NewAdMessageClient(cfg),
 		AppConfiguration:   NewAppConfigurationClient(cfg),
 		ApplicationCommand: NewApplicationCommandClient(cfg),
 		AuthNonce:          NewAuthNonceClient(cfg),
@@ -268,8 +258,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:             cfg,
 		Account:            NewAccountClient(cfg),
 		AccountSnapshot:    NewAccountSnapshotClient(cfg),
-		AdEvent:            NewAdEventClient(cfg),
-		AdMessage:          NewAdMessageClient(cfg),
 		AppConfiguration:   NewAppConfigurationClient(cfg),
 		ApplicationCommand: NewApplicationCommandClient(cfg),
 		AuthNonce:          NewAuthNonceClient(cfg),
@@ -319,11 +307,11 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Account, c.AccountSnapshot, c.AdEvent, c.AdMessage, c.AppConfiguration,
-		c.ApplicationCommand, c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction,
-		c.GameMap, c.GameMode, c.LeaderboardScore, c.ModerationRequest, c.Session,
-		c.User, c.UserConnection, c.UserContent, c.UserRestriction, c.UserSubscription,
-		c.Vehicle, c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
+		c.Account, c.AccountSnapshot, c.AppConfiguration, c.ApplicationCommand,
+		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.GameMap, c.GameMode,
+		c.LeaderboardScore, c.ModerationRequest, c.Session, c.User, c.UserConnection,
+		c.UserContent, c.UserRestriction, c.UserSubscription, c.Vehicle,
+		c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
 	} {
 		n.Use(hooks...)
 	}
@@ -333,11 +321,11 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Account, c.AccountSnapshot, c.AdEvent, c.AdMessage, c.AppConfiguration,
-		c.ApplicationCommand, c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction,
-		c.GameMap, c.GameMode, c.LeaderboardScore, c.ModerationRequest, c.Session,
-		c.User, c.UserConnection, c.UserContent, c.UserRestriction, c.UserSubscription,
-		c.Vehicle, c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
+		c.Account, c.AccountSnapshot, c.AppConfiguration, c.ApplicationCommand,
+		c.AuthNonce, c.Clan, c.CronTask, c.DiscordInteraction, c.GameMap, c.GameMode,
+		c.LeaderboardScore, c.ModerationRequest, c.Session, c.User, c.UserConnection,
+		c.UserContent, c.UserRestriction, c.UserSubscription, c.Vehicle,
+		c.VehicleAverage, c.VehicleSnapshot, c.WidgetSettings,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -350,10 +338,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Account.mutate(ctx, m)
 	case *AccountSnapshotMutation:
 		return c.AccountSnapshot.mutate(ctx, m)
-	case *AdEventMutation:
-		return c.AdEvent.mutate(ctx, m)
-	case *AdMessageMutation:
-		return c.AdMessage.mutate(ctx, m)
 	case *AppConfigurationMutation:
 		return c.AppConfiguration.mutate(ctx, m)
 	case *ApplicationCommandMutation:
@@ -726,272 +710,6 @@ func (c *AccountSnapshotClient) mutate(ctx context.Context, m *AccountSnapshotMu
 		return (&AccountSnapshotDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("db: unknown AccountSnapshot mutation op: %q", m.Op())
-	}
-}
-
-// AdEventClient is a client for the AdEvent schema.
-type AdEventClient struct {
-	config
-}
-
-// NewAdEventClient returns a client for the AdEvent from the given config.
-func NewAdEventClient(c config) *AdEventClient {
-	return &AdEventClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `adevent.Hooks(f(g(h())))`.
-func (c *AdEventClient) Use(hooks ...Hook) {
-	c.hooks.AdEvent = append(c.hooks.AdEvent, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `adevent.Intercept(f(g(h())))`.
-func (c *AdEventClient) Intercept(interceptors ...Interceptor) {
-	c.inters.AdEvent = append(c.inters.AdEvent, interceptors...)
-}
-
-// Create returns a builder for creating a AdEvent entity.
-func (c *AdEventClient) Create() *AdEventCreate {
-	mutation := newAdEventMutation(c.config, OpCreate)
-	return &AdEventCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of AdEvent entities.
-func (c *AdEventClient) CreateBulk(builders ...*AdEventCreate) *AdEventCreateBulk {
-	return &AdEventCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *AdEventClient) MapCreateBulk(slice any, setFunc func(*AdEventCreate, int)) *AdEventCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &AdEventCreateBulk{err: fmt.Errorf("calling to AdEventClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*AdEventCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &AdEventCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for AdEvent.
-func (c *AdEventClient) Update() *AdEventUpdate {
-	mutation := newAdEventMutation(c.config, OpUpdate)
-	return &AdEventUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *AdEventClient) UpdateOne(ae *AdEvent) *AdEventUpdateOne {
-	mutation := newAdEventMutation(c.config, OpUpdateOne, withAdEvent(ae))
-	return &AdEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *AdEventClient) UpdateOneID(id string) *AdEventUpdateOne {
-	mutation := newAdEventMutation(c.config, OpUpdateOne, withAdEventID(id))
-	return &AdEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for AdEvent.
-func (c *AdEventClient) Delete() *AdEventDelete {
-	mutation := newAdEventMutation(c.config, OpDelete)
-	return &AdEventDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *AdEventClient) DeleteOne(ae *AdEvent) *AdEventDeleteOne {
-	return c.DeleteOneID(ae.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AdEventClient) DeleteOneID(id string) *AdEventDeleteOne {
-	builder := c.Delete().Where(adevent.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &AdEventDeleteOne{builder}
-}
-
-// Query returns a query builder for AdEvent.
-func (c *AdEventClient) Query() *AdEventQuery {
-	return &AdEventQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeAdEvent},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a AdEvent entity by its id.
-func (c *AdEventClient) Get(ctx context.Context, id string) (*AdEvent, error) {
-	return c.Query().Where(adevent.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *AdEventClient) GetX(ctx context.Context, id string) *AdEvent {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *AdEventClient) Hooks() []Hook {
-	return c.hooks.AdEvent
-}
-
-// Interceptors returns the client interceptors.
-func (c *AdEventClient) Interceptors() []Interceptor {
-	return c.inters.AdEvent
-}
-
-func (c *AdEventClient) mutate(ctx context.Context, m *AdEventMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&AdEventCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&AdEventUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&AdEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&AdEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("db: unknown AdEvent mutation op: %q", m.Op())
-	}
-}
-
-// AdMessageClient is a client for the AdMessage schema.
-type AdMessageClient struct {
-	config
-}
-
-// NewAdMessageClient returns a client for the AdMessage from the given config.
-func NewAdMessageClient(c config) *AdMessageClient {
-	return &AdMessageClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `admessage.Hooks(f(g(h())))`.
-func (c *AdMessageClient) Use(hooks ...Hook) {
-	c.hooks.AdMessage = append(c.hooks.AdMessage, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `admessage.Intercept(f(g(h())))`.
-func (c *AdMessageClient) Intercept(interceptors ...Interceptor) {
-	c.inters.AdMessage = append(c.inters.AdMessage, interceptors...)
-}
-
-// Create returns a builder for creating a AdMessage entity.
-func (c *AdMessageClient) Create() *AdMessageCreate {
-	mutation := newAdMessageMutation(c.config, OpCreate)
-	return &AdMessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of AdMessage entities.
-func (c *AdMessageClient) CreateBulk(builders ...*AdMessageCreate) *AdMessageCreateBulk {
-	return &AdMessageCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *AdMessageClient) MapCreateBulk(slice any, setFunc func(*AdMessageCreate, int)) *AdMessageCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &AdMessageCreateBulk{err: fmt.Errorf("calling to AdMessageClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*AdMessageCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &AdMessageCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for AdMessage.
-func (c *AdMessageClient) Update() *AdMessageUpdate {
-	mutation := newAdMessageMutation(c.config, OpUpdate)
-	return &AdMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *AdMessageClient) UpdateOne(am *AdMessage) *AdMessageUpdateOne {
-	mutation := newAdMessageMutation(c.config, OpUpdateOne, withAdMessage(am))
-	return &AdMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *AdMessageClient) UpdateOneID(id string) *AdMessageUpdateOne {
-	mutation := newAdMessageMutation(c.config, OpUpdateOne, withAdMessageID(id))
-	return &AdMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for AdMessage.
-func (c *AdMessageClient) Delete() *AdMessageDelete {
-	mutation := newAdMessageMutation(c.config, OpDelete)
-	return &AdMessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *AdMessageClient) DeleteOne(am *AdMessage) *AdMessageDeleteOne {
-	return c.DeleteOneID(am.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AdMessageClient) DeleteOneID(id string) *AdMessageDeleteOne {
-	builder := c.Delete().Where(admessage.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &AdMessageDeleteOne{builder}
-}
-
-// Query returns a query builder for AdMessage.
-func (c *AdMessageClient) Query() *AdMessageQuery {
-	return &AdMessageQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeAdMessage},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a AdMessage entity by its id.
-func (c *AdMessageClient) Get(ctx context.Context, id string) (*AdMessage, error) {
-	return c.Query().Where(admessage.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *AdMessageClient) GetX(ctx context.Context, id string) *AdMessage {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *AdMessageClient) Hooks() []Hook {
-	return c.hooks.AdMessage
-}
-
-// Interceptors returns the client interceptors.
-func (c *AdMessageClient) Interceptors() []Interceptor {
-	return c.inters.AdMessage
-}
-
-func (c *AdMessageClient) mutate(ctx context.Context, m *AdMessageMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&AdMessageCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&AdMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&AdMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&AdMessageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("db: unknown AdMessage mutation op: %q", m.Op())
 	}
 }
 
@@ -3978,18 +3696,18 @@ func (c *WidgetSettingsClient) mutate(ctx context.Context, m *WidgetSettingsMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Account, AccountSnapshot, AdEvent, AdMessage, AppConfiguration,
-		ApplicationCommand, AuthNonce, Clan, CronTask, DiscordInteraction, GameMap,
-		GameMode, LeaderboardScore, ModerationRequest, Session, User, UserConnection,
-		UserContent, UserRestriction, UserSubscription, Vehicle, VehicleAverage,
-		VehicleSnapshot, WidgetSettings []ent.Hook
+		Account, AccountSnapshot, AppConfiguration, ApplicationCommand, AuthNonce, Clan,
+		CronTask, DiscordInteraction, GameMap, GameMode, LeaderboardScore,
+		ModerationRequest, Session, User, UserConnection, UserContent, UserRestriction,
+		UserSubscription, Vehicle, VehicleAverage, VehicleSnapshot,
+		WidgetSettings []ent.Hook
 	}
 	inters struct {
-		Account, AccountSnapshot, AdEvent, AdMessage, AppConfiguration,
-		ApplicationCommand, AuthNonce, Clan, CronTask, DiscordInteraction, GameMap,
-		GameMode, LeaderboardScore, ModerationRequest, Session, User, UserConnection,
-		UserContent, UserRestriction, UserSubscription, Vehicle, VehicleAverage,
-		VehicleSnapshot, WidgetSettings []ent.Interceptor
+		Account, AccountSnapshot, AppConfiguration, ApplicationCommand, AuthNonce, Clan,
+		CronTask, DiscordInteraction, GameMap, GameMode, LeaderboardScore,
+		ModerationRequest, Session, User, UserConnection, UserContent, UserRestriction,
+		UserSubscription, Vehicle, VehicleAverage, VehicleSnapshot,
+		WidgetSettings []ent.Interceptor
 	}
 )
 

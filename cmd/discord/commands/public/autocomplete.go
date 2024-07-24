@@ -39,12 +39,12 @@ func init() {
 
 				}
 				if len(linkedAccounts) < 1 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"})
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"}).Send()
 				}
 
 				accounts, err := ctx.Core().Database().GetAccounts(ctx.Ctx(), linkedAccounts)
 				if err != nil {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"})
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"}).Send()
 				}
 
 				var longestName int
@@ -58,7 +58,7 @@ func init() {
 				for _, a := range accounts {
 					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: accountToRow(a, longestName, currentDefault == a.ID), Value: fmt.Sprintf("valid#%s#%s#%s", a.ID, a.Nickname, a.Realm)})
 				}
-				return ctx.Reply().Choices(opts...)
+				return ctx.Reply().Choices(opts...).Send()
 			}),
 	)
 
@@ -76,25 +76,25 @@ func init() {
 				if options.TankID != "" {
 					vehicle, ok := search.GetVehicleFromCache(ctx.Locale(), options.TankID)
 					if !ok {
-						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"})
+						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"}).Send()
 					}
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)})
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)}).Send()
 				}
 
 				if len(options.TankSearch) < 3 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_enough_length"), Value: "error#stats_autocomplete_not_enough_length"})
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_enough_length"), Value: "error#stats_autocomplete_not_enough_length"}).Send()
 				}
 
 				vehicles, ok := search.SearchVehicles(ctx.Locale(), options.TankSearch, 5)
 				if !ok || len(vehicles) < 1 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"})
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"}).Send()
 				}
 
 				var opts []*discordgo.ApplicationCommandOptionChoice
 				for _, v := range vehicles {
 					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(v.Tier), v.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", v.ID)})
 				}
-				return ctx.Reply().Choices(opts...)
+				return ctx.Reply().Choices(opts...).Send()
 			}),
 	)
 }

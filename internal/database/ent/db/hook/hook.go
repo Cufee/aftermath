@@ -33,30 +33,6 @@ func (f AccountSnapshotFunc) Mutate(ctx context.Context, m db.Mutation) (db.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.AccountSnapshotMutation", m)
 }
 
-// The AdEventFunc type is an adapter to allow the use of ordinary
-// function as AdEvent mutator.
-type AdEventFunc func(context.Context, *db.AdEventMutation) (db.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f AdEventFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
-	if mv, ok := m.(*db.AdEventMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.AdEventMutation", m)
-}
-
-// The AdMessageFunc type is an adapter to allow the use of ordinary
-// function as AdMessage mutator.
-type AdMessageFunc func(context.Context, *db.AdMessageMutation) (db.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f AdMessageFunc) Mutate(ctx context.Context, m db.Mutation) (db.Value, error) {
-	if mv, ok := m.(*db.AdMessageMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *db.AdMessageMutation", m)
-}
-
 // The AppConfigurationFunc type is an adapter to allow the use of ordinary
 // function as AppConfiguration mutator.
 type AppConfigurationFunc func(context.Context, *db.AppConfigurationMutation) (db.Value, error)

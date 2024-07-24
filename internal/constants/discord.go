@@ -1,6 +1,9 @@
 package constants
 
-import "os"
+import (
+	"os"
+	"time"
+)
 
 var (
 	DiscordBotInviteURL          = mustGetEnv("BOT_INVITE_LINK")
@@ -28,6 +31,10 @@ var (
 )
 
 var (
-	ImageUploadMaxSize  int64 = 1_000 * 1_000 * 3 // assuming 24Bit image at 3 bytes per pixel
-	ReplayUploadMaxSize int64 = 1_000_000
+	ImageUploadMaxSize  int64 = 1_000 * 1_000 * 2 // ~2MB - assuming 1000x1000 16Bit image at 2 bytes per pixel
+	ReplayUploadMaxSize int64 = 1_000_000         // ~1MB - replays are typically significantly smaller than this
+)
+
+var (
+	DefaultFeatureBanDuration time.Duration = time.Hour * 24 * 180 // 180 days
 )

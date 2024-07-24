@@ -132,7 +132,7 @@
 - key: fancy_moderation_request_declined
   value: "**Your recent image moderation request was declined**\nIt looks like the image you have uploaded did not pass out safety standards. You background will not be updated."
 - key: fancy_moderation_request_declined_and_banned_fmt
-  value: "**Your recent image moderation request was declined**\nIt looks like you have tried to upload an image that is against Aftermath Terms Of Service. As a result, your account will be restricted from uploading custom content for %s days. This decision is final and cannot be appealed."
+  value: "**Your recent image moderation request was declined**\nIt looks like you have tried to upload an image that is against Aftermath Terms Of Service. As a result, your account will be restricted from uploading custom content until <t:%d:D>. This decision is final and cannot be appealed."
 
 # Common command options
 # days

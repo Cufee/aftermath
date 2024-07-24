@@ -20,18 +20,24 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// FieldCommand holds the string denoting the command field in the database.
-	FieldCommand = "command"
+	// FieldResult holds the string denoting the result field in the database.
+	FieldResult = "result"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldReferenceID holds the string denoting the reference_id field in the database.
-	FieldReferenceID = "reference_id"
+	// FieldEventID holds the string denoting the event_id field in the database.
+	FieldEventID = "event_id"
+	// FieldGuildID holds the string denoting the guild_id field in the database.
+	FieldGuildID = "guild_id"
+	// FieldChannelID holds the string denoting the channel_id field in the database.
+	FieldChannelID = "channel_id"
+	// FieldMessageID holds the string denoting the message_id field in the database.
+	FieldMessageID = "message_id"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
 	// FieldLocale holds the string denoting the locale field in the database.
 	FieldLocale = "locale"
-	// FieldOptions holds the string denoting the options field in the database.
-	FieldOptions = "options"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the discordinteraction in the database.
@@ -50,12 +56,15 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-	FieldCommand,
+	FieldResult,
 	FieldUserID,
-	FieldReferenceID,
+	FieldEventID,
+	FieldGuildID,
+	FieldChannelID,
+	FieldMessageID,
 	FieldType,
 	FieldLocale,
-	FieldOptions,
+	FieldMetadata,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -75,12 +84,12 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// CommandValidator is a validator for the "command" field. It is called by the builders before save.
-	CommandValidator func(string) error
+	// ResultValidator is a validator for the "result" field. It is called by the builders before save.
+	ResultValidator func(string) error
 	// UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	UserIDValidator func(string) error
-	// ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
-	ReferenceIDValidator func(string) error
+	// EventIDValidator is a validator for the "event_id" field. It is called by the builders before save.
+	EventIDValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
@@ -88,7 +97,7 @@ var (
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type models.DiscordInteractionType) error {
 	switch _type {
-	case "stats":
+	case "modal", "command", "component", "autocomplete", "automated_message":
 		return nil
 	default:
 		return fmt.Errorf("discordinteraction: invalid enum value for type field: %q", _type)
@@ -113,9 +122,9 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByCommand orders the results by the command field.
-func ByCommand(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCommand, opts...).ToFunc()
+// ByResult orders the results by the result field.
+func ByResult(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResult, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the user_id field.
@@ -123,9 +132,24 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
-// ByReferenceID orders the results by the reference_id field.
-func ByReferenceID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldReferenceID, opts...).ToFunc()
+// ByEventID orders the results by the event_id field.
+func ByEventID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEventID, opts...).ToFunc()
+}
+
+// ByGuildID orders the results by the guild_id field.
+func ByGuildID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGuildID, opts...).ToFunc()
+}
+
+// ByChannelID orders the results by the channel_id field.
+func ByChannelID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChannelID, opts...).ToFunc()
+}
+
+// ByMessageID orders the results by the message_id field.
+func ByMessageID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMessageID, opts...).ToFunc()
 }
 
 // ByType orders the results by the type field.

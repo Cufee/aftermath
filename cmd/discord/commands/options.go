@@ -61,7 +61,7 @@ var DefaultStatsOptions = append([]builder.Option{
 	UserOption,
 }, NicknameAndServerOptions...)
 
-type statsOptions struct {
+type StatsOptions struct {
 	PeriodStart time.Time
 	Days        int
 	Server      string
@@ -71,7 +71,7 @@ type statsOptions struct {
 	TankID      string
 }
 
-func (o statsOptions) Validate(ctx common.Context) (string, bool) {
+func (o StatsOptions) Validate(ctx common.Context) (string, bool) {
 	// check if the name is valid
 	if o.UserID == "" && o.Nickname != "" && !ValidatePlayerName(o.Nickname) {
 		return "errors_generic_nickname_invalid", false
@@ -92,8 +92,8 @@ func (o statsOptions) Validate(ctx common.Context) (string, bool) {
 	return "", true
 }
 
-func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataOption) statsOptions {
-	var options statsOptions
+func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataOption) StatsOptions {
+	var options StatsOptions
 
 	options.TankSearch, _ = common.GetOption[string](data, "tank")
 	if strings.HasPrefix(options.TankSearch, "valid#vehicle#") {

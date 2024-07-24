@@ -214,7 +214,7 @@ func init() {
 								discordgo.Button{Style: discordgo.DangerButton, Label: "Feature Ban", CustomID: "moderation_image_feature_ban_button#" + request.ID},
 							}},
 					).
-					Format("## New Moderation Request\n### *image submitted from /fancy*\n**ID**: `%s`\n**User:** <@%s>\nPlease review the attached image and use the buttons below to take an action.\n- We should not allow any kind of NSFW or suggestive content - this includes an intent. If there is something ever remotely sus, decline it.\n- Some users will upload NSFW content or attempt to scribble over the image to bypass the filer. In such cases, we should issue a permanent feature ban.\n*A feature ban will disable all content uploading features for the user.*", request.ID, ctx.User().ID).
+					Format("## New Moderation Request\n### *image submitted from /fancy*\n**ID**: `%s`\n**User:** <@%s>\nPlease review the attached image and use the buttons below to take an action.\n- We should not allow any kind of NSFW or suggestive content - this includes an intent. If there is something ever remotely sus, decline it.\n- Some users will upload NSFW content or attempt to scribble over the image to bypass the filer. In such cases, we should issue a permanent feature ban.\n*A feature ban will disable all content uploading features of the user for %s.*", request.ID, ctx.User().ID, constants.DefaultFeatureBanDuration.String()).
 					File(buf.Bytes(), "user_background.png"),
 				)
 				if err != nil {

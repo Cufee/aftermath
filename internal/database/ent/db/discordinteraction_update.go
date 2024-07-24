@@ -36,34 +36,6 @@ func (diu *DiscordInteractionUpdate) SetUpdatedAt(t time.Time) *DiscordInteracti
 	return diu
 }
 
-// SetCommand sets the "command" field.
-func (diu *DiscordInteractionUpdate) SetCommand(s string) *DiscordInteractionUpdate {
-	diu.mutation.SetCommand(s)
-	return diu
-}
-
-// SetNillableCommand sets the "command" field if the given value is not nil.
-func (diu *DiscordInteractionUpdate) SetNillableCommand(s *string) *DiscordInteractionUpdate {
-	if s != nil {
-		diu.SetCommand(*s)
-	}
-	return diu
-}
-
-// SetReferenceID sets the "reference_id" field.
-func (diu *DiscordInteractionUpdate) SetReferenceID(s string) *DiscordInteractionUpdate {
-	diu.mutation.SetReferenceID(s)
-	return diu
-}
-
-// SetNillableReferenceID sets the "reference_id" field if the given value is not nil.
-func (diu *DiscordInteractionUpdate) SetNillableReferenceID(s *string) *DiscordInteractionUpdate {
-	if s != nil {
-		diu.SetReferenceID(*s)
-	}
-	return diu
-}
-
 // SetType sets the "type" field.
 func (diu *DiscordInteractionUpdate) SetType(mit models.DiscordInteractionType) *DiscordInteractionUpdate {
 	diu.mutation.SetType(mit)
@@ -92,17 +64,9 @@ func (diu *DiscordInteractionUpdate) SetNillableLocale(s *string) *DiscordIntera
 	return diu
 }
 
-// SetOptions sets the "options" field.
-func (diu *DiscordInteractionUpdate) SetOptions(mio models.DiscordInteractionOptions) *DiscordInteractionUpdate {
-	diu.mutation.SetOptions(mio)
-	return diu
-}
-
-// SetNillableOptions sets the "options" field if the given value is not nil.
-func (diu *DiscordInteractionUpdate) SetNillableOptions(mio *models.DiscordInteractionOptions) *DiscordInteractionUpdate {
-	if mio != nil {
-		diu.SetOptions(*mio)
-	}
+// SetMetadata sets the "metadata" field.
+func (diu *DiscordInteractionUpdate) SetMetadata(m map[string]interface{}) *DiscordInteractionUpdate {
+	diu.mutation.SetMetadata(m)
 	return diu
 }
 
@@ -149,16 +113,6 @@ func (diu *DiscordInteractionUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (diu *DiscordInteractionUpdate) check() error {
-	if v, ok := diu.mutation.Command(); ok {
-		if err := discordinteraction.CommandValidator(v); err != nil {
-			return &ValidationError{Name: "command", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.command": %w`, err)}
-		}
-	}
-	if v, ok := diu.mutation.ReferenceID(); ok {
-		if err := discordinteraction.ReferenceIDValidator(v); err != nil {
-			return &ValidationError{Name: "reference_id", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.reference_id": %w`, err)}
-		}
-	}
 	if v, ok := diu.mutation.GetType(); ok {
 		if err := discordinteraction.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.type": %w`, err)}
@@ -191,20 +145,14 @@ func (diu *DiscordInteractionUpdate) sqlSave(ctx context.Context) (n int, err er
 	if value, ok := diu.mutation.UpdatedAt(); ok {
 		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := diu.mutation.Command(); ok {
-		_spec.SetField(discordinteraction.FieldCommand, field.TypeString, value)
-	}
-	if value, ok := diu.mutation.ReferenceID(); ok {
-		_spec.SetField(discordinteraction.FieldReferenceID, field.TypeString, value)
-	}
 	if value, ok := diu.mutation.GetType(); ok {
 		_spec.SetField(discordinteraction.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := diu.mutation.Locale(); ok {
 		_spec.SetField(discordinteraction.FieldLocale, field.TypeString, value)
 	}
-	if value, ok := diu.mutation.Options(); ok {
-		_spec.SetField(discordinteraction.FieldOptions, field.TypeJSON, value)
+	if value, ok := diu.mutation.Metadata(); ok {
+		_spec.SetField(discordinteraction.FieldMetadata, field.TypeJSON, value)
 	}
 	_spec.AddModifiers(diu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, diu.driver, _spec); err != nil {
@@ -231,34 +179,6 @@ type DiscordInteractionUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (diuo *DiscordInteractionUpdateOne) SetUpdatedAt(t time.Time) *DiscordInteractionUpdateOne {
 	diuo.mutation.SetUpdatedAt(t)
-	return diuo
-}
-
-// SetCommand sets the "command" field.
-func (diuo *DiscordInteractionUpdateOne) SetCommand(s string) *DiscordInteractionUpdateOne {
-	diuo.mutation.SetCommand(s)
-	return diuo
-}
-
-// SetNillableCommand sets the "command" field if the given value is not nil.
-func (diuo *DiscordInteractionUpdateOne) SetNillableCommand(s *string) *DiscordInteractionUpdateOne {
-	if s != nil {
-		diuo.SetCommand(*s)
-	}
-	return diuo
-}
-
-// SetReferenceID sets the "reference_id" field.
-func (diuo *DiscordInteractionUpdateOne) SetReferenceID(s string) *DiscordInteractionUpdateOne {
-	diuo.mutation.SetReferenceID(s)
-	return diuo
-}
-
-// SetNillableReferenceID sets the "reference_id" field if the given value is not nil.
-func (diuo *DiscordInteractionUpdateOne) SetNillableReferenceID(s *string) *DiscordInteractionUpdateOne {
-	if s != nil {
-		diuo.SetReferenceID(*s)
-	}
 	return diuo
 }
 
@@ -290,17 +210,9 @@ func (diuo *DiscordInteractionUpdateOne) SetNillableLocale(s *string) *DiscordIn
 	return diuo
 }
 
-// SetOptions sets the "options" field.
-func (diuo *DiscordInteractionUpdateOne) SetOptions(mio models.DiscordInteractionOptions) *DiscordInteractionUpdateOne {
-	diuo.mutation.SetOptions(mio)
-	return diuo
-}
-
-// SetNillableOptions sets the "options" field if the given value is not nil.
-func (diuo *DiscordInteractionUpdateOne) SetNillableOptions(mio *models.DiscordInteractionOptions) *DiscordInteractionUpdateOne {
-	if mio != nil {
-		diuo.SetOptions(*mio)
-	}
+// SetMetadata sets the "metadata" field.
+func (diuo *DiscordInteractionUpdateOne) SetMetadata(m map[string]interface{}) *DiscordInteractionUpdateOne {
+	diuo.mutation.SetMetadata(m)
 	return diuo
 }
 
@@ -360,16 +272,6 @@ func (diuo *DiscordInteractionUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (diuo *DiscordInteractionUpdateOne) check() error {
-	if v, ok := diuo.mutation.Command(); ok {
-		if err := discordinteraction.CommandValidator(v); err != nil {
-			return &ValidationError{Name: "command", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.command": %w`, err)}
-		}
-	}
-	if v, ok := diuo.mutation.ReferenceID(); ok {
-		if err := discordinteraction.ReferenceIDValidator(v); err != nil {
-			return &ValidationError{Name: "reference_id", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.reference_id": %w`, err)}
-		}
-	}
 	if v, ok := diuo.mutation.GetType(); ok {
 		if err := discordinteraction.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.type": %w`, err)}
@@ -419,20 +321,14 @@ func (diuo *DiscordInteractionUpdateOne) sqlSave(ctx context.Context) (_node *Di
 	if value, ok := diuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := diuo.mutation.Command(); ok {
-		_spec.SetField(discordinteraction.FieldCommand, field.TypeString, value)
-	}
-	if value, ok := diuo.mutation.ReferenceID(); ok {
-		_spec.SetField(discordinteraction.FieldReferenceID, field.TypeString, value)
-	}
 	if value, ok := diuo.mutation.GetType(); ok {
 		_spec.SetField(discordinteraction.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := diuo.mutation.Locale(); ok {
 		_spec.SetField(discordinteraction.FieldLocale, field.TypeString, value)
 	}
-	if value, ok := diuo.mutation.Options(); ok {
-		_spec.SetField(discordinteraction.FieldOptions, field.TypeJSON, value)
+	if value, ok := diuo.mutation.Metadata(); ok {
+		_spec.SetField(discordinteraction.FieldMetadata, field.TypeJSON, value)
 	}
 	_spec.AddModifiers(diuo.modifiers...)
 	_node = &DiscordInteraction{config: diuo.config}

@@ -33,10 +33,7 @@ func init() {
 				var accountID string
 				var opts = []stats.RequestOption{stats.WithWN8(), stats.WithVehicleID(options.TankID)}
 
-				ioptions := models.DiscordInteractionOptions{
-					PeriodStart: options.PeriodStart,
-					VehicleID:   options.TankID,
-				}
+				ioptions := statsOptions{StatsOptions: options}
 
 				switch {
 				case options.UserID != "":
@@ -50,7 +47,7 @@ func init() {
 
 					if img, content, err := logic.GetBackgroundImageFromRef(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
 						opts = append(opts, stats.WithBackground(img))
-						ioptions.BackgroundContentID = content.ID
+						ioptions.BackgroundID = content.ID
 					}
 
 				case options.Nickname != "" && options.Server != "":
@@ -66,7 +63,7 @@ func init() {
 
 					if img, content, err := logic.GetBackgroundImageFromRef(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
 						opts = append(opts, stats.WithBackground(img))
-						ioptions.BackgroundContentID = content.ID
+						ioptions.BackgroundID = content.ID
 					}
 
 				default:
@@ -80,7 +77,7 @@ func init() {
 					background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
 					if img, err := logic.UserContentToImage(background); err == nil {
 						opts = append(opts, stats.WithBackground(img))
-						ioptions.BackgroundContentID = background.ID
+						ioptions.BackgroundID = background.ID
 					}
 				}
 
@@ -90,7 +87,7 @@ func init() {
 				}
 
 				ioptions.AccountID = accountID
-				button, saveErr := saveInteractionData(ctx, "stats", ioptions)
+				button, saveErr := ioptions.refreshButton(ctx)
 				if saveErr != nil {
 					// nil button will not cause an error and will be ignored
 					log.Err(err).Str("interactionId", ctx.ID()).Str("command", "session").Msg("failed to save discord interaction")

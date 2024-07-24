@@ -50,9 +50,9 @@ func (dic *DiscordInteractionCreate) SetNillableUpdatedAt(t *time.Time) *Discord
 	return dic
 }
 
-// SetCommand sets the "command" field.
-func (dic *DiscordInteractionCreate) SetCommand(s string) *DiscordInteractionCreate {
-	dic.mutation.SetCommand(s)
+// SetResult sets the "result" field.
+func (dic *DiscordInteractionCreate) SetResult(s string) *DiscordInteractionCreate {
+	dic.mutation.SetResult(s)
 	return dic
 }
 
@@ -62,9 +62,27 @@ func (dic *DiscordInteractionCreate) SetUserID(s string) *DiscordInteractionCrea
 	return dic
 }
 
-// SetReferenceID sets the "reference_id" field.
-func (dic *DiscordInteractionCreate) SetReferenceID(s string) *DiscordInteractionCreate {
-	dic.mutation.SetReferenceID(s)
+// SetEventID sets the "event_id" field.
+func (dic *DiscordInteractionCreate) SetEventID(s string) *DiscordInteractionCreate {
+	dic.mutation.SetEventID(s)
+	return dic
+}
+
+// SetGuildID sets the "guild_id" field.
+func (dic *DiscordInteractionCreate) SetGuildID(s string) *DiscordInteractionCreate {
+	dic.mutation.SetGuildID(s)
+	return dic
+}
+
+// SetChannelID sets the "channel_id" field.
+func (dic *DiscordInteractionCreate) SetChannelID(s string) *DiscordInteractionCreate {
+	dic.mutation.SetChannelID(s)
+	return dic
+}
+
+// SetMessageID sets the "message_id" field.
+func (dic *DiscordInteractionCreate) SetMessageID(s string) *DiscordInteractionCreate {
+	dic.mutation.SetMessageID(s)
 	return dic
 }
 
@@ -80,9 +98,9 @@ func (dic *DiscordInteractionCreate) SetLocale(s string) *DiscordInteractionCrea
 	return dic
 }
 
-// SetOptions sets the "options" field.
-func (dic *DiscordInteractionCreate) SetOptions(mio models.DiscordInteractionOptions) *DiscordInteractionCreate {
-	dic.mutation.SetOptions(mio)
+// SetMetadata sets the "metadata" field.
+func (dic *DiscordInteractionCreate) SetMetadata(m map[string]interface{}) *DiscordInteractionCreate {
+	dic.mutation.SetMetadata(m)
 	return dic
 }
 
@@ -162,12 +180,12 @@ func (dic *DiscordInteractionCreate) check() error {
 	if _, ok := dic.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`db: missing required field "DiscordInteraction.updated_at"`)}
 	}
-	if _, ok := dic.mutation.Command(); !ok {
-		return &ValidationError{Name: "command", err: errors.New(`db: missing required field "DiscordInteraction.command"`)}
+	if _, ok := dic.mutation.Result(); !ok {
+		return &ValidationError{Name: "result", err: errors.New(`db: missing required field "DiscordInteraction.result"`)}
 	}
-	if v, ok := dic.mutation.Command(); ok {
-		if err := discordinteraction.CommandValidator(v); err != nil {
-			return &ValidationError{Name: "command", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.command": %w`, err)}
+	if v, ok := dic.mutation.Result(); ok {
+		if err := discordinteraction.ResultValidator(v); err != nil {
+			return &ValidationError{Name: "result", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.result": %w`, err)}
 		}
 	}
 	if _, ok := dic.mutation.UserID(); !ok {
@@ -178,13 +196,22 @@ func (dic *DiscordInteractionCreate) check() error {
 			return &ValidationError{Name: "user_id", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.user_id": %w`, err)}
 		}
 	}
-	if _, ok := dic.mutation.ReferenceID(); !ok {
-		return &ValidationError{Name: "reference_id", err: errors.New(`db: missing required field "DiscordInteraction.reference_id"`)}
+	if _, ok := dic.mutation.EventID(); !ok {
+		return &ValidationError{Name: "event_id", err: errors.New(`db: missing required field "DiscordInteraction.event_id"`)}
 	}
-	if v, ok := dic.mutation.ReferenceID(); ok {
-		if err := discordinteraction.ReferenceIDValidator(v); err != nil {
-			return &ValidationError{Name: "reference_id", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.reference_id": %w`, err)}
+	if v, ok := dic.mutation.EventID(); ok {
+		if err := discordinteraction.EventIDValidator(v); err != nil {
+			return &ValidationError{Name: "event_id", err: fmt.Errorf(`db: validator failed for field "DiscordInteraction.event_id": %w`, err)}
 		}
+	}
+	if _, ok := dic.mutation.GuildID(); !ok {
+		return &ValidationError{Name: "guild_id", err: errors.New(`db: missing required field "DiscordInteraction.guild_id"`)}
+	}
+	if _, ok := dic.mutation.ChannelID(); !ok {
+		return &ValidationError{Name: "channel_id", err: errors.New(`db: missing required field "DiscordInteraction.channel_id"`)}
+	}
+	if _, ok := dic.mutation.MessageID(); !ok {
+		return &ValidationError{Name: "message_id", err: errors.New(`db: missing required field "DiscordInteraction.message_id"`)}
 	}
 	if _, ok := dic.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`db: missing required field "DiscordInteraction.type"`)}
@@ -197,8 +224,8 @@ func (dic *DiscordInteractionCreate) check() error {
 	if _, ok := dic.mutation.Locale(); !ok {
 		return &ValidationError{Name: "locale", err: errors.New(`db: missing required field "DiscordInteraction.locale"`)}
 	}
-	if _, ok := dic.mutation.Options(); !ok {
-		return &ValidationError{Name: "options", err: errors.New(`db: missing required field "DiscordInteraction.options"`)}
+	if _, ok := dic.mutation.Metadata(); !ok {
+		return &ValidationError{Name: "metadata", err: errors.New(`db: missing required field "DiscordInteraction.metadata"`)}
 	}
 	if _, ok := dic.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New(`db: missing required edge "DiscordInteraction.user"`)}
@@ -246,13 +273,25 @@ func (dic *DiscordInteractionCreate) createSpec() (*DiscordInteraction, *sqlgrap
 		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := dic.mutation.Command(); ok {
-		_spec.SetField(discordinteraction.FieldCommand, field.TypeString, value)
-		_node.Command = value
+	if value, ok := dic.mutation.Result(); ok {
+		_spec.SetField(discordinteraction.FieldResult, field.TypeString, value)
+		_node.Result = value
 	}
-	if value, ok := dic.mutation.ReferenceID(); ok {
-		_spec.SetField(discordinteraction.FieldReferenceID, field.TypeString, value)
-		_node.ReferenceID = value
+	if value, ok := dic.mutation.EventID(); ok {
+		_spec.SetField(discordinteraction.FieldEventID, field.TypeString, value)
+		_node.EventID = value
+	}
+	if value, ok := dic.mutation.GuildID(); ok {
+		_spec.SetField(discordinteraction.FieldGuildID, field.TypeString, value)
+		_node.GuildID = value
+	}
+	if value, ok := dic.mutation.ChannelID(); ok {
+		_spec.SetField(discordinteraction.FieldChannelID, field.TypeString, value)
+		_node.ChannelID = value
+	}
+	if value, ok := dic.mutation.MessageID(); ok {
+		_spec.SetField(discordinteraction.FieldMessageID, field.TypeString, value)
+		_node.MessageID = value
 	}
 	if value, ok := dic.mutation.GetType(); ok {
 		_spec.SetField(discordinteraction.FieldType, field.TypeEnum, value)
@@ -262,9 +301,9 @@ func (dic *DiscordInteractionCreate) createSpec() (*DiscordInteraction, *sqlgrap
 		_spec.SetField(discordinteraction.FieldLocale, field.TypeString, value)
 		_node.Locale = value
 	}
-	if value, ok := dic.mutation.Options(); ok {
-		_spec.SetField(discordinteraction.FieldOptions, field.TypeJSON, value)
-		_node.Options = value
+	if value, ok := dic.mutation.Metadata(); ok {
+		_spec.SetField(discordinteraction.FieldMetadata, field.TypeJSON, value)
+		_node.Metadata = value
 	}
 	if nodes := dic.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

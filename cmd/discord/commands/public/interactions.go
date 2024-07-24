@@ -73,7 +73,7 @@ func newStatsRefreshButton(data models.DiscordInteraction) discordgo.MessageComp
 				ID:   "1255647885723435048",
 				Name: "aftermath_refresh",
 			},
-			CustomID: fmt.Sprintf("refresh_stats_from_button_%s", data.ReferenceID),
+			CustomID: fmt.Sprintf("refresh_stats_from_button_%s", data.ID),
 		}},
 	}
 }
@@ -100,10 +100,16 @@ func init() {
 					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
 
-				var opts = []stats.RequestOption{stats.WithWN8(), stats.WithVehicleID(interaction.Options.VehicleID)}
+				ioptions, err := statsOptions{}.fromInteraction(interaction)
+				if err != nil {
+					log.Warn().Err(err).Msg("failed to decode stats options for a refresh button")
+					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
+				}
 
-				if interaction.Options.BackgroundContentID != "" {
-					background, _ := ctx.Core().Database().GetUserContent(ctx.Ctx(), interaction.Options.BackgroundContentID)
+				var opts = []stats.RequestOption{stats.WithWN8(), stats.WithVehicleID(ioptions.TankID)}
+
+				if ioptions.BackgroundID != "" {
+					background, _ := ctx.Core().Database().GetUserContent(ctx.Ctx(), ioptions.BackgroundID)
 					if img, err := logic.UserContentToImage(background); err == nil {
 						opts = append(opts, stats.WithBackground(img))
 					}
@@ -111,9 +117,9 @@ func init() {
 
 				var image stats.Image
 				var meta stats.Metadata
-				switch interaction.Command {
+				switch interaction.EventID {
 				case "stats":
-					img, mt, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, opts...)
+					img, mt, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), ioptions.AccountID, ioptions.PeriodStart, opts...)
 					if err != nil {
 						return ctx.Err(err)
 					}
@@ -121,7 +127,7 @@ func init() {
 					meta = mt
 
 				case "session":
-					img, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), interaction.Options.AccountID, interaction.Options.PeriodStart, opts...)
+					img, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), ioptions.AccountID, ioptions.PeriodStart, opts...)
 					if err != nil {
 						if errors.Is(err, fetch.ErrSessionNotFound) || errors.Is(err, stats.ErrAccountNotTracked) {
 							return ctx.Reply().Send("stats_refresh_interaction_error_expired")
@@ -132,11 +138,11 @@ func init() {
 					meta = mt
 
 				default:
-					log.Error().Str("customId", data.CustomID).Str("command", interaction.Command).Msg("received an unexpected component interaction callback")
+					log.Error().Str("customId", data.CustomID).Str("command", interaction.EventID).Msg("received an unexpected component interaction callback")
 					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
 
-				button, saveErr := saveInteractionData(ctx, interaction.Command, interaction.Options)
+				button, saveErr := ioptions.refreshButton(ctx)
 				if saveErr != nil {
 					// nil button will not cause an error and will be ignored
 					log.Err(err).Str("interactionId", ctx.ID()).Str("command", "session").Msg("failed to save discord interaction")
@@ -157,7 +163,7 @@ func init() {
 					timings = append(timings, "```")
 				}
 
-				return ctx.Reply().WithAds().File(buf.Bytes(), interaction.Command+"_command_by_aftermath.png").Component(button).Text(timings...).Send()
+				return ctx.Reply().WithAds().File(buf.Bytes(), interaction.EventID+"_command_by_aftermath.png").Component(button).Text(timings...).Send()
 			}),
 	)
 }

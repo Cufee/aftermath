@@ -7,8 +7,6 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/adevent"
-	"github.com/cufee/aftermath/internal/database/ent/db/admessage"
 	"github.com/cufee/aftermath/internal/database/ent/db/appconfiguration"
 	"github.com/cufee/aftermath/internal/database/ent/db/applicationcommand"
 	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
@@ -98,46 +96,6 @@ func init() {
 	accountsnapshotDescID := accountsnapshotFields[0].Descriptor()
 	// accountsnapshot.DefaultID holds the default value on creation for the id field.
 	accountsnapshot.DefaultID = accountsnapshotDescID.Default.(func() string)
-	adeventFields := schema.AdEvent{}.Fields()
-	_ = adeventFields
-	// adeventDescCreatedAt is the schema descriptor for created_at field.
-	adeventDescCreatedAt := adeventFields[1].Descriptor()
-	// adevent.DefaultCreatedAt holds the default value on creation for the created_at field.
-	adevent.DefaultCreatedAt = adeventDescCreatedAt.Default.(func() time.Time)
-	// adeventDescUpdatedAt is the schema descriptor for updated_at field.
-	adeventDescUpdatedAt := adeventFields[2].Descriptor()
-	// adevent.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	adevent.DefaultUpdatedAt = adeventDescUpdatedAt.Default.(func() time.Time)
-	// adevent.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	adevent.UpdateDefaultUpdatedAt = adeventDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// adeventDescUserID is the schema descriptor for user_id field.
-	adeventDescUserID := adeventFields[3].Descriptor()
-	// adevent.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	adevent.UserIDValidator = adeventDescUserID.Validators[0].(func(string) error)
-	// adeventDescChannelID is the schema descriptor for channel_id field.
-	adeventDescChannelID := adeventFields[5].Descriptor()
-	// adevent.ChannelIDValidator is a validator for the "channel_id" field. It is called by the builders before save.
-	adevent.ChannelIDValidator = adeventDescChannelID.Validators[0].(func(string) error)
-	// adeventDescID is the schema descriptor for id field.
-	adeventDescID := adeventFields[0].Descriptor()
-	// adevent.DefaultID holds the default value on creation for the id field.
-	adevent.DefaultID = adeventDescID.Default.(func() string)
-	admessageFields := schema.AdMessage{}.Fields()
-	_ = admessageFields
-	// admessageDescCreatedAt is the schema descriptor for created_at field.
-	admessageDescCreatedAt := admessageFields[1].Descriptor()
-	// admessage.DefaultCreatedAt holds the default value on creation for the created_at field.
-	admessage.DefaultCreatedAt = admessageDescCreatedAt.Default.(func() time.Time)
-	// admessageDescUpdatedAt is the schema descriptor for updated_at field.
-	admessageDescUpdatedAt := admessageFields[2].Descriptor()
-	// admessage.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	admessage.DefaultUpdatedAt = admessageDescUpdatedAt.Default.(func() time.Time)
-	// admessage.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	admessage.UpdateDefaultUpdatedAt = admessageDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// admessageDescID is the schema descriptor for id field.
-	admessageDescID := admessageFields[0].Descriptor()
-	// admessage.DefaultID holds the default value on creation for the id field.
-	admessage.DefaultID = admessageDescID.Default.(func() string)
 	appconfigurationFields := schema.AppConfiguration{}.Fields()
 	_ = appconfigurationFields
 	// appconfigurationDescCreatedAt is the schema descriptor for created_at field.
@@ -270,18 +228,18 @@ func init() {
 	discordinteraction.DefaultUpdatedAt = discordinteractionDescUpdatedAt.Default.(func() time.Time)
 	// discordinteraction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	discordinteraction.UpdateDefaultUpdatedAt = discordinteractionDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// discordinteractionDescCommand is the schema descriptor for command field.
-	discordinteractionDescCommand := discordinteractionFields[3].Descriptor()
-	// discordinteraction.CommandValidator is a validator for the "command" field. It is called by the builders before save.
-	discordinteraction.CommandValidator = discordinteractionDescCommand.Validators[0].(func(string) error)
+	// discordinteractionDescResult is the schema descriptor for result field.
+	discordinteractionDescResult := discordinteractionFields[3].Descriptor()
+	// discordinteraction.ResultValidator is a validator for the "result" field. It is called by the builders before save.
+	discordinteraction.ResultValidator = discordinteractionDescResult.Validators[0].(func(string) error)
 	// discordinteractionDescUserID is the schema descriptor for user_id field.
 	discordinteractionDescUserID := discordinteractionFields[4].Descriptor()
 	// discordinteraction.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	discordinteraction.UserIDValidator = discordinteractionDescUserID.Validators[0].(func(string) error)
-	// discordinteractionDescReferenceID is the schema descriptor for reference_id field.
-	discordinteractionDescReferenceID := discordinteractionFields[5].Descriptor()
-	// discordinteraction.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
-	discordinteraction.ReferenceIDValidator = discordinteractionDescReferenceID.Validators[0].(func(string) error)
+	// discordinteractionDescEventID is the schema descriptor for event_id field.
+	discordinteractionDescEventID := discordinteractionFields[5].Descriptor()
+	// discordinteraction.EventIDValidator is a validator for the "event_id" field. It is called by the builders before save.
+	discordinteraction.EventIDValidator = discordinteractionDescEventID.Validators[0].(func(string) error)
 	// discordinteractionDescID is the schema descriptor for id field.
 	discordinteractionDescID := discordinteractionFields[0].Descriptor()
 	// discordinteraction.DefaultID holds the default value on creation for the id field.

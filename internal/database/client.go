@@ -117,7 +117,8 @@ type DiscordDataClient interface {
 	GetCommandsByID(ctx context.Context, commandIDs ...string) ([]models.ApplicationCommand, error)
 
 	CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) error
-	GetDiscordInteraction(ctx context.Context, referenceID string) (models.DiscordInteraction, error)
+	GetDiscordInteraction(ctx context.Context, id string) (models.DiscordInteraction, error)
+	FindDiscordInteractions(ctx context.Context, opts ...InteractionQuery) ([]models.DiscordInteraction, error)
 	DeleteExpiredInteractions(ctx context.Context, expiration time.Time) error
 }
 

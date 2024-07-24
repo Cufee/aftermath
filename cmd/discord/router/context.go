@@ -66,7 +66,11 @@ func newContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 	return c, nil
 }
 
-func (c *routeContext) InteractionResponse(data discordgo.InteractionResponseData, files []rest.File) (discordgo.Message, error) {
+func (c *routeContext) SaveInteractionEvent(metadata map[string]any) error {
+	return nil
+}
+func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Message, error) {
+	data, files := reply.Peek().Build(c.localize)
 	select {
 	case <-c.Context.Done():
 		return discordgo.Message{}, c.Context.Err()
@@ -88,7 +92,8 @@ func (c *routeContext) InteractionResponse(data discordgo.InteractionResponseDat
 	}
 }
 
-func (c *routeContext) InteractionFollowUp(data discordgo.InteractionResponseData, files []rest.File) (discordgo.Message, error) {
+func (c *routeContext) InteractionFollowUp(reply common.Reply) (discordgo.Message, error) {
+	data, files := reply.Peek().Build(c.localize)
 	select {
 	case <-c.Context.Done():
 		return discordgo.Message{}, c.Context.Err()
@@ -215,7 +220,7 @@ func (c *routeContext) DeleteResponse(ctx context.Context) error {
 	return c.rest.DeleteInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token)
 }
 func (c *routeContext) CreateMessage(ctx context.Context, channelID string, reply common.Reply) (discordgo.Message, error) {
-	data, files := reply.Peek().Data(c.localize)
+	data, files := reply.Peek().Build(c.localize)
 	return c.rest.CreateMessage(ctx, channelID, discordgo.MessageSend{
 		Content:    data.Content,
 		Components: data.Components,
@@ -223,7 +228,7 @@ func (c *routeContext) CreateMessage(ctx context.Context, channelID string, repl
 	}, files)
 }
 func (c *routeContext) UpdateMessage(ctx context.Context, channelID string, messageID string, reply common.Reply) (discordgo.Message, error) {
-	data, files := reply.Peek().Data(c.localize)
+	data, files := reply.Peek().Build(c.localize)
 	edit := discordgo.MessageEdit{
 		Attachments: data.Attachments,
 	}

@@ -24,18 +24,24 @@ type DiscordInteraction struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// Command holds the value of the "command" field.
-	Command string `json:"command,omitempty"`
+	// Result holds the value of the "result" field.
+	Result string `json:"result,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
-	// ReferenceID holds the value of the "reference_id" field.
-	ReferenceID string `json:"reference_id,omitempty"`
+	// EventID holds the value of the "event_id" field.
+	EventID string `json:"event_id,omitempty"`
+	// GuildID holds the value of the "guild_id" field.
+	GuildID string `json:"guild_id,omitempty"`
+	// ChannelID holds the value of the "channel_id" field.
+	ChannelID string `json:"channel_id,omitempty"`
+	// MessageID holds the value of the "message_id" field.
+	MessageID string `json:"message_id,omitempty"`
 	// Type holds the value of the "type" field.
 	Type models.DiscordInteractionType `json:"type,omitempty"`
 	// Locale holds the value of the "locale" field.
 	Locale string `json:"locale,omitempty"`
-	// Options holds the value of the "options" field.
-	Options models.DiscordInteractionOptions `json:"options,omitempty"`
+	// Metadata holds the value of the "metadata" field.
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DiscordInteractionQuery when eager-loading is set.
 	Edges        DiscordInteractionEdges `json:"edges"`
@@ -67,9 +73,9 @@ func (*DiscordInteraction) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case discordinteraction.FieldOptions:
+		case discordinteraction.FieldMetadata:
 			values[i] = new([]byte)
-		case discordinteraction.FieldID, discordinteraction.FieldCommand, discordinteraction.FieldUserID, discordinteraction.FieldReferenceID, discordinteraction.FieldType, discordinteraction.FieldLocale:
+		case discordinteraction.FieldID, discordinteraction.FieldResult, discordinteraction.FieldUserID, discordinteraction.FieldEventID, discordinteraction.FieldGuildID, discordinteraction.FieldChannelID, discordinteraction.FieldMessageID, discordinteraction.FieldType, discordinteraction.FieldLocale:
 			values[i] = new(sql.NullString)
 		case discordinteraction.FieldCreatedAt, discordinteraction.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -106,11 +112,11 @@ func (di *DiscordInteraction) assignValues(columns []string, values []any) error
 			} else if value.Valid {
 				di.UpdatedAt = value.Time
 			}
-		case discordinteraction.FieldCommand:
+		case discordinteraction.FieldResult:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field command", values[i])
+				return fmt.Errorf("unexpected type %T for field result", values[i])
 			} else if value.Valid {
-				di.Command = value.String
+				di.Result = value.String
 			}
 		case discordinteraction.FieldUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -118,11 +124,29 @@ func (di *DiscordInteraction) assignValues(columns []string, values []any) error
 			} else if value.Valid {
 				di.UserID = value.String
 			}
-		case discordinteraction.FieldReferenceID:
+		case discordinteraction.FieldEventID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field reference_id", values[i])
+				return fmt.Errorf("unexpected type %T for field event_id", values[i])
 			} else if value.Valid {
-				di.ReferenceID = value.String
+				di.EventID = value.String
+			}
+		case discordinteraction.FieldGuildID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field guild_id", values[i])
+			} else if value.Valid {
+				di.GuildID = value.String
+			}
+		case discordinteraction.FieldChannelID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field channel_id", values[i])
+			} else if value.Valid {
+				di.ChannelID = value.String
+			}
+		case discordinteraction.FieldMessageID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field message_id", values[i])
+			} else if value.Valid {
+				di.MessageID = value.String
 			}
 		case discordinteraction.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -136,12 +160,12 @@ func (di *DiscordInteraction) assignValues(columns []string, values []any) error
 			} else if value.Valid {
 				di.Locale = value.String
 			}
-		case discordinteraction.FieldOptions:
+		case discordinteraction.FieldMetadata:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field options", values[i])
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &di.Options); err != nil {
-					return fmt.Errorf("unmarshal field options: %w", err)
+				if err := json.Unmarshal(*value, &di.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
 				}
 			}
 		default:
@@ -191,14 +215,23 @@ func (di *DiscordInteraction) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(di.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("command=")
-	builder.WriteString(di.Command)
+	builder.WriteString("result=")
+	builder.WriteString(di.Result)
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(di.UserID)
 	builder.WriteString(", ")
-	builder.WriteString("reference_id=")
-	builder.WriteString(di.ReferenceID)
+	builder.WriteString("event_id=")
+	builder.WriteString(di.EventID)
+	builder.WriteString(", ")
+	builder.WriteString("guild_id=")
+	builder.WriteString(di.GuildID)
+	builder.WriteString(", ")
+	builder.WriteString("channel_id=")
+	builder.WriteString(di.ChannelID)
+	builder.WriteString(", ")
+	builder.WriteString("message_id=")
+	builder.WriteString(di.MessageID)
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", di.Type))
@@ -206,8 +239,8 @@ func (di *DiscordInteraction) String() string {
 	builder.WriteString("locale=")
 	builder.WriteString(di.Locale)
 	builder.WriteString(", ")
-	builder.WriteString("options=")
-	builder.WriteString(fmt.Sprintf("%v", di.Options))
+	builder.WriteString("metadata=")
+	builder.WriteString(fmt.Sprintf("%v", di.Metadata))
 	builder.WriteByte(')')
 	return builder.String()
 }

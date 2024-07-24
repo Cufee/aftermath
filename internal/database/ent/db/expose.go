@@ -30,32 +30,6 @@ func (as *AccountSnapshot) ScanValues(columns []string) ([]any, error) {
 	return as.scanValues(columns)
 }
 
-func (ae *AdEvent) AssignValues(columns []string, values []any) error {
-	if ae == nil {
-		return fmt.Errorf("AdEvent(nil)")
-	}
-	return ae.assignValues(columns, values)
-}
-func (ae *AdEvent) ScanValues(columns []string) ([]any, error) {
-	if ae == nil {
-		return nil, fmt.Errorf("AdEvent(nil)")
-	}
-	return ae.scanValues(columns)
-}
-
-func (am *AdMessage) AssignValues(columns []string, values []any) error {
-	if am == nil {
-		return fmt.Errorf("AdMessage(nil)")
-	}
-	return am.assignValues(columns, values)
-}
-func (am *AdMessage) ScanValues(columns []string) ([]any, error) {
-	if am == nil {
-		return nil, fmt.Errorf("AdMessage(nil)")
-	}
-	return am.scanValues(columns)
-}
-
 func (ac *AppConfiguration) AssignValues(columns []string, values []any) error {
 	if ac == nil {
 		return fmt.Errorf("AppConfiguration(nil)")

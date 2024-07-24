@@ -1,7 +1,6 @@
 package models
 
 import (
-	"slices"
 	"time"
 
 	"golang.org/x/text/language"
@@ -10,43 +9,37 @@ import (
 type DiscordInteractionType string
 
 const (
-	InteractionTypeStats = "stats"
+	InteractionTypeModal            = "modal"
+	InteractionTypeCommand          = "command"
+	InteractionTypeComponent        = "component"
+	InteractionTypeAutocomplete     = "autocomplete"
+	InteractionTypeAutomatedMessage = "automated_message"
 )
-
-var discordInteractionTypes = []DiscordInteractionType{
-	InteractionTypeStats,
-}
 
 // Values provides list valid values for Enum.
 func (DiscordInteractionType) Values() []string {
-	var kinds []string
-	for _, s := range discordInteractionTypes {
-		kinds = append(kinds, string(s))
+	return []string{
+		InteractionTypeModal,
+		InteractionTypeCommand,
+		InteractionTypeComponent,
+		InteractionTypeAutocomplete,
+		InteractionTypeAutomatedMessage,
 	}
-	return kinds
-}
-
-func (s DiscordInteractionType) Valid() bool {
-	return slices.Contains(discordInteractionTypes, s)
 }
 
 type DiscordInteraction struct {
 	ID        string
 	CreatedAt time.Time
 
-	UserID      string
-	Command     string
-	ReferenceID string
+	Result    string
+	UserID    string
+	GuildID   string
+	ChannelID string
+	MessageID string
 
-	Type   DiscordInteractionType
-	Locale language.Tag
+	EventID string
+	Locale  language.Tag
+	Type    DiscordInteractionType
 
-	Options DiscordInteractionOptions
-}
-
-type DiscordInteractionOptions struct {
-	BackgroundContentID string
-	PeriodStart         time.Time
-	AccountID           string
-	VehicleID           string
+	Meta map[string]any
 }

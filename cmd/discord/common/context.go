@@ -6,7 +6,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/cufee/aftermath/cmd/core"
-	"github.com/cufee/aftermath/cmd/discord/rest"
 
 	"github.com/cufee/aftermath/internal/database/models"
 
@@ -43,8 +42,9 @@ type Context interface {
 
 	CreateDMChannel(ctx context.Context, userID string) (discordgo.Channel, error)
 
-	InteractionResponse(data discordgo.InteractionResponseData, files []rest.File) (discordgo.Message, error)
-	InteractionFollowUp(data discordgo.InteractionResponseData, files []rest.File) (discordgo.Message, error)
+	SaveInteractionEvent(metadata map[string]any) error
+	InteractionResponse(reply Reply) (discordgo.Message, error)
+	InteractionFollowUp(reply Reply) (discordgo.Message, error)
 }
 
 func (o Options) Value(name string) any {

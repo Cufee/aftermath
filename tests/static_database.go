@@ -196,6 +196,9 @@ func (c *staticTestingDatabase) CreateDiscordInteraction(ctx context.Context, da
 func (c *staticTestingDatabase) GetDiscordInteraction(ctx context.Context, referenceID string) (models.DiscordInteraction, error) {
 	return models.DiscordInteraction{}, errors.New("GetDiscordInteraction not implemented")
 }
+func (c *staticTestingDatabase) FindDiscordInteractions(ctx context.Context, opts ...database.InteractionQuery) ([]models.DiscordInteraction, error) {
+	return nil, errors.New("FindDiscordInteractions not implemented")
+}
 func (c *staticTestingDatabase) DeleteExpiredInteractions(ctx context.Context, expiration time.Time) error {
 	return errors.New("DeleteExpiredInteractions not implemented")
 }
