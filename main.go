@@ -137,6 +137,10 @@ func main() {
 				Func: private.LoadAccountsHandler(cacheCoreClient),
 			},
 			{
+				Path: "POST /v1/connections/import",
+				Func: private.ImportConnections(cacheCoreClient),
+			},
+			{
 				Path: "POST /v1/snapshots/{realm}",
 				Func: private.SaveRealmSnapshots(cacheCoreClient),
 			},
