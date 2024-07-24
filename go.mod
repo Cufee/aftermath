@@ -1,12 +1,12 @@
 module github.com/cufee/aftermath
 
-go 1.22.3
+go 1.22.5
 
 require (
 	entgo.io/ent v0.13.1
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
-	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/a-h/templ v0.2.731
+	github.com/PuerkitoBio/goquery v1.9.2
+	github.com/a-h/templ v0.2.747
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/cufee/aftermath-assets v0.1.0
 	github.com/cufee/am-wg-proxy-next/v2 v2.1.8
@@ -24,23 +24,22 @@ require (
 	github.com/matryer/is v1.4.1
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/nlpodyssey/gopickle v0.3.0
-	github.com/pierrec/lz4/v4 v4.1.21
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
-	github.com/tdewolff/minify/v2 v2.20.34
+	github.com/tdewolff/minify/v2 v2.20.37
 	go.dedis.ch/protobuf v1.0.11
-	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8
-	golang.org/x/image v0.17.0
+	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
+	golang.org/x/image v0.18.0
 	golang.org/x/sync v0.7.0
 	golang.org/x/text v0.16.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	ariga.io/atlas v0.24.0 // indirect
+	ariga.io/atlas v0.25.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/andybalholm/cascadia v1.3.1 // indirect
+	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-openapi/inflect v0.21.0 // indirect
@@ -55,11 +54,11 @@ require (
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/tdewolff/parse/v2 v2.7.15 // indirect
-	github.com/zclconf/go-cty v1.14.4 // indirect
+	github.com/zclconf/go-cty v1.15.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.25.0 // indirect
-	golang.org/x/mod v0.18.0 // indirect
+	golang.org/x/mod v0.19.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
-	golang.org/x/tools v0.22.0 // indirect
+	golang.org/x/tools v0.23.0 // indirect
 )
