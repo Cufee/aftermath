@@ -94,7 +94,8 @@ func init() {
 
 				var opts []*discordgo.ApplicationCommandOptionChoice
 				for _, v := range vehicles {
-					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(v.Tier), v.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", v.ID)})
+					content := fmt.Sprintf("%s %s", prepare.IntToRoman(v.Tier), v.Name(ctx.Locale()))
+					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: content, Value: fmt.Sprintf("valid#vehicle#%s", v.ID)})
 				}
 				return ctx.Reply().Choices(opts...).Send()
 			}),
