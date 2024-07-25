@@ -120,7 +120,7 @@ func init() {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("[%s] %s", account.Realm, account.Nickname)}).Send()
 				}
 
-				if len(options.NicknameSearch) < 5 {
+				if len(options.NicknameSearch) < 3 {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_enough_length"), Value: "error#nickname_autocomplete_not_enough_length"}).Send()
 				}
 
