@@ -94,7 +94,8 @@ func init() {
 
 				var opts []*discordgo.ApplicationCommandOptionChoice
 				for _, v := range vehicles {
-					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(v.Tier), v.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", v.ID)})
+					content := fmt.Sprintf("%s %s", prepare.IntToRoman(v.Tier), v.Name(ctx.Locale()))
+					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: content, Value: fmt.Sprintf("valid#vehicle#%s", v.ID)})
 				}
 				return ctx.Reply().Choices(opts...).Send()
 			}),
@@ -123,12 +124,19 @@ func init() {
 				if len(options.NicknameSearch) < 5 {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_enough_length"), Value: "error#nickname_autocomplete_not_enough_length"}).Send()
 				}
+				if !commands.ValidatePlayerName(options.NicknameSearch) {
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_invalid_input"), Value: "error#nickname_autocomplete_invalid_input"}).Send()
+				}
 
 				accounts, err := ctx.Core().Fetch().BroadSearch(ctx.Ctx(), options.NicknameSearch)
 				if err != nil {
 					log.Err(err).Msg("failed to broad search accounts")
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
 				}
+				if len(accounts) < 1 {
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
+				}
+
 				slices.SortFunc(accounts, func(a, b fetch.AccountWithRealm) int {
 					return strings.Compare(b.Realm+b.Nickname, a.Realm+a.Nickname)
 				})

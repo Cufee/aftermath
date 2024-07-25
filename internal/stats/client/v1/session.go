@@ -33,7 +33,7 @@ func (c *client) EmptySessionCards(ctx context.Context, accountId string) (prepa
 		return prepare.Cards{}, meta, err
 	}
 
-	printer, err := localization.NewPrinter("stats", c.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", c.locale)
 	if err != nil {
 		return prepare.Cards{}, meta, err
 	}
@@ -81,7 +81,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 		return prepare.Cards{}, meta, err
 	}
 
-	printer, err := localization.NewPrinter("stats", c.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", c.locale)
 	if err != nil {
 		return prepare.Cards{}, meta, err
 	}
@@ -161,7 +161,7 @@ func (c *client) SessionImage(ctx context.Context, accountId string, from time.T
 		return nil, meta, err
 	}
 
-	printer, err := localization.NewPrinter("stats", c.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", c.locale)
 	if err != nil {
 		return nil, meta, err
 	}

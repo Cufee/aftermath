@@ -161,7 +161,7 @@ func TestRenderReplay(t *testing.T) {
 
 	wg, _ := wargamingClientsFromEnv()
 
-	printer, err := localization.NewPrinter("stats", language.English)
+	printer, err := localization.NewPrinterWithFallback("stats", language.English)
 	is.NoErr(err)
 
 	file, err := os.ReadFile("tests/replay_2.wotbreplay")

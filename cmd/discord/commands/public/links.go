@@ -28,7 +28,7 @@ func init() {
 			Options(
 				builder.NewOption("add", discordgo.ApplicationCommandOptionSubCommand).
 					Params(builder.SetNameKey("command_option_links_add_name"), builder.SetDescKey("command_option_links_add_desc")).
-					Options(commands.NicknameOption),
+					Options(commands.NicknameOption.Required()),
 				builder.NewOption("favorite", discordgo.ApplicationCommandOptionSubCommand).
 					Params(builder.SetNameKey("command_option_links_fav_name"), builder.SetDescKey("command_option_links_fav_desc")).
 					Options(

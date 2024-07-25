@@ -59,7 +59,7 @@ func newContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 		c.locale = common.LocaleToLanguageTag(c.interaction.Locale)
 	}
 
-	printer, err := localization.NewPrinter("discord", c.locale)
+	printer, err := localization.NewPrinterWithFallback("discord", c.locale)
 	if err != nil {
 		log.Err(err).Msg("failed to get a localization printer for context")
 		c.localize = func(s string) string { return s }
@@ -122,7 +122,7 @@ func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 			defer cancel()
 
 			if c.interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
-				msg, err := c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &data}, files)
+				msg, err := c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &data}, nil)
 				if errors.Is(err, rest.ErrInteractionAlreadyAcked) {
 					err = nil
 				}

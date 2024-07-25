@@ -34,7 +34,7 @@ func MentionHandler(errorImage []byte) func(s *discordgo.Session, e *discordgo.M
 					locale = common.LocaleToLanguageTag(discordgo.Locale(mention.Locale))
 				}
 
-				printer, err := localization.NewPrinter("discord", locale)
+				printer, err := localization.NewPrinterWithFallback("discord", locale)
 				if err != nil {
 					log.Err(err).Msg("failed to get a localization printer for context")
 					printer = func(s string) string { return s }
@@ -83,7 +83,8 @@ func init() {
 		builder.NewCommand("refresh_stats_from_button").
 			Middleware(middleware.RequirePermissions(permissions.UseImageCommands, permissions.UseTextCommands)).
 			ComponentType(func(customID string) bool {
-				return strings.HasPrefix(customID, "refresh_stats_from_button_")
+				return strings.HasPrefix(customID, "refresh_stats_from_button_") ||
+					strings.HasPrefix(customID, "session_refresh_") // legacy buttons
 			}).
 			Handler(func(ctx common.Context) error {
 				data, ok := ctx.ComponentData()
