@@ -182,7 +182,7 @@ func init() {
 					Reply().
 					Component(nil).
 					Format("## Moderation Request (Actioned)\n*image submitted from /fancy*\n**User:** <@%s>\n**Action:** %s\n**Moderator:** <@%s>", request.RequestorID, action, ctx.User().ID)
-				if action != "approve" {
+				if action == "feature-ban" {
 					reply = reply.File(nil, "") // remove the attachment
 				}
 
