@@ -264,7 +264,7 @@ func (r *router) sendInteractionReply(interaction discordgo.Interaction, data di
 	} else {
 		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
 
-		printer, err := localization.NewPrinter("discord", language.English)
+		printer, err := localization.NewPrinterWithFallback("discord", language.English)
 		if err != nil {
 			log.Err(err).Msg("failed to create a new locale printer")
 			printer = func(_ string) string { return "Join Aftermath Official" } // we only need it for this one button

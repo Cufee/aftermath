@@ -19,7 +19,7 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 
 	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
-	printer, err := localization.NewPrinter("stats", r.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", r.locale)
 	if err != nil {
 		return prepare.Cards{}, meta, err
 	}
@@ -70,7 +70,7 @@ func (r *client) PeriodImage(ctx context.Context, accountId string, from time.Ti
 		return nil, meta, err
 	}
 
-	printer, err := localization.NewPrinter("stats", r.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", r.locale)
 	if err != nil {
 		return nil, meta, err
 	}
