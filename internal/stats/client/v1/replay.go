@@ -20,7 +20,7 @@ func (r *client) ReplayCards(ctx context.Context, replayURL string, o ...Request
 
 	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
-	printer, err := localization.NewPrinter("stats", r.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", r.locale)
 	if err != nil {
 		return prepare.Cards{}, meta, err
 	}
@@ -70,7 +70,7 @@ func (r *client) ReplayImage(ctx context.Context, replayURL string, o ...Request
 		return nil, meta, err
 	}
 
-	printer, err := localization.NewPrinter("stats", r.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", r.locale)
 	if err != nil {
 		return nil, meta, err
 	}
