@@ -83,7 +83,8 @@ func init() {
 		builder.NewCommand("refresh_stats_from_button").
 			Middleware(middleware.RequirePermissions(permissions.UseImageCommands, permissions.UseTextCommands)).
 			ComponentType(func(customID string) bool {
-				return strings.HasPrefix(customID, "refresh_stats_from_button_")
+				return strings.HasPrefix(customID, "refresh_stats_from_button_") ||
+					strings.HasPrefix(customID, "session_refresh_") // legacy buttons
 			}).
 			Handler(func(ctx common.Context) error {
 				data, ok := ctx.ComponentData()
