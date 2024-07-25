@@ -15,7 +15,6 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
@@ -174,13 +173,18 @@ func init() {
 						return ctx.Reply().Send(message)
 					}
 
+					account, err := ctx.Core().Fetch().Account(ctx.Ctx(), options.AccountID)
+					if err != nil {
+						return ctx.Reply().Send("nickname_autocomplete_not_found")
+					}
+
 					var found bool
 					for _, conn := range wgConnections {
-						if conn.ReferenceID == options.AccountID {
+						if conn.ReferenceID == account.ID {
 							conn.Metadata["verified"] = false
 							found = true
 						}
-						conn.Metadata["default"] = conn.ReferenceID == options.AccountID
+						conn.Metadata["default"] = conn.ReferenceID == account.ID
 
 						_, err := ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), conn)
 						if err != nil {
