@@ -178,10 +178,15 @@ func init() {
 					return ctx.Reply().Hint("no action was performed").Send("Failed to update request", err.Error())
 				}
 
-				_, err = ctx.UpdateMessage(ctx.Ctx(), ctx.RawInteraction().ChannelID, messageID, ctx.Reply().
-					Format("## Moderation Request (Actioned)\n*image submitted from /fancy*\n**User:** <@%s>\n**Action:** %s\n**Moderator:** <@%s>", request.RequestorID, string(request.ActionStatus), ctx.User().ID).
-					Component(nil),
-				)
+				reply := ctx.
+					Reply().
+					Component(nil).
+					Format("## Moderation Request (Actioned)\n*image submitted from /fancy*\n**User:** <@%s>\n**Action:** %s\n**Moderator:** <@%s>", request.RequestorID, action, ctx.User().ID)
+				if action != "approve" {
+					reply = reply.File(nil, "") // remove the attachment
+				}
+
+				_, err = ctx.UpdateMessage(ctx.Ctx(), ctx.RawInteraction().ChannelID, messageID, reply)
 				if err != nil {
 					return ctx.Reply().Send("Failed to update request message", err.Error())
 				}
