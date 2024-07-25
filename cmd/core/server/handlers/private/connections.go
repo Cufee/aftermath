@@ -37,16 +37,16 @@ func ImportConnections(client core.Client) http.HandlerFunc {
 				return
 			}
 
-			existing, ok := user.Connection(models.ConnectionTypeWargaming, nil)
-			if !ok {
-				existing.UserID = connection.UserID
-				existing.Type = models.ConnectionTypeWargaming
-			}
-			existing.Metadata = make(map[string]any)
+			existing, _ := user.Connection(models.ConnectionTypeWargaming, nil)
+			existing.UserID = connection.UserID
+			existing.Type = models.ConnectionTypeWargaming
+			existing.Metadata = map[string]any{"default": true}
 			existing.ReferenceID = connection.AccountID
 			_, err = client.Database().UpsertUserConnection(context.Background(), existing)
 			if err != nil {
+				log.Err(err).Msg("failed to upsert a connection")
 				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
 		}
 
