@@ -42,7 +42,7 @@ func ImportConnections(client core.Client) http.HandlerFunc {
 				existing.UserID = connection.UserID
 				existing.Type = models.ConnectionTypeWargaming
 			}
-			existing.Metadata = make(map[string]any)
+			existing.Metadata = map[string]any{"default": true}
 			existing.ReferenceID = connection.AccountID
 			_, err = client.Database().UpsertUserConnection(context.Background(), existing)
 			if err != nil {
