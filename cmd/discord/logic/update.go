@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"os"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
@@ -83,7 +84,7 @@ func UpdateCommands(ctx context.Context, db database.Client, rest *rest.Client, 
 			if err != nil {
 				return err
 			}
-			if data.cached == nil || data.cached.Hash != hash {
+			if data.cached == nil || data.cached.Hash != hash || os.Getenv("FORCE_UPDATE_DISCORD_COMMANDS") == "true" {
 				log.Debug().Str("name", data.current.Name).Str("id", data.current.ID).Msg("updating a global command")
 				hash, err := logic.HashAny(data.requested.ApplicationCommand)
 				if err != nil {

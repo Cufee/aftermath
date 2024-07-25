@@ -107,7 +107,7 @@ func main() {
 		log.Fatal().Err(err).Msg("startSchedulerFromEnv failed")
 	}
 
-	scheduler.UpdateGlossaryWorker(liveCoreClient)()
+	go scheduler.UpdateGlossaryWorker(liveCoreClient)()
 
 	// Load some init options to registered admin accounts and etc
 	logic.ApplyInitOptions(liveCoreClient.Database())

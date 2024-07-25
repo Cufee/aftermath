@@ -15,7 +15,6 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/ent/db/account"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
@@ -29,28 +28,7 @@ func init() {
 			Options(
 				builder.NewOption("add", discordgo.ApplicationCommandOptionSubCommand).
 					Params(builder.SetNameKey("command_option_links_add_name"), builder.SetDescKey("command_option_links_add_desc")).
-					Options(
-						builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
-							Autocomplete().
-							Required().
-							Min(5).
-							Max(30).
-							Params(
-								builder.SetNameKey("common_option_stats_nickname_name"),
-								builder.SetDescKey("common_option_stats_nickname_description"),
-							),
-						builder.NewOption("server", discordgo.ApplicationCommandOptionString).
-							Required().
-							Params(
-								builder.SetNameKey("common_option_stats_realm_name"),
-								builder.SetDescKey("common_option_stats_realm_description"),
-							).
-							Choices(
-								builder.NewChoice("realm_na", "NA").Params(builder.SetNameKey("common_label_realm_na")),
-								builder.NewChoice("realm_eu", "EU").Params(builder.SetNameKey("common_label_realm_eu")),
-								builder.NewChoice("realm_as", "AS").Params(builder.SetNameKey("common_label_realm_as")),
-							),
-					),
+					Options(commands.NicknameOption),
 				builder.NewOption("favorite", discordgo.ApplicationCommandOptionSubCommand).
 					Params(builder.SetNameKey("command_option_links_fav_name"), builder.SetDescKey("command_option_links_fav_desc")).
 					Options(
@@ -195,17 +173,18 @@ func init() {
 						return ctx.Reply().Send(message)
 					}
 
-					if options.AccountID == "" {
-						return ctx.Reply().Format("stats_error_nickname_not_fount_fmt", options.NicknameSearch).Send()
+					account, err := ctx.Core().Fetch().Account(ctx.Ctx(), options.AccountID)
+					if err != nil {
+						return ctx.Reply().Send("nickname_autocomplete_not_found")
 					}
 
 					var found bool
 					for _, conn := range wgConnections {
-						if conn.ReferenceID == options.AccountID {
+						if conn.ReferenceID == account.ID {
 							conn.Metadata["verified"] = false
 							found = true
 						}
-						conn.Metadata["default"] = conn.ReferenceID == options.AccountID
+						conn.Metadata["default"] = conn.ReferenceID == account.ID
 
 						_, err := ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), conn)
 						if err != nil {
