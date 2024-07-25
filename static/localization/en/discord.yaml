@@ -278,7 +278,7 @@
   context: Failed to find required data in order to refresh stats/session
 
 - key: stats_autocomplete_not_found
-  value: "No tanks found matching the name you have entered. Please select a tank from the autocompletion list."
+  value: "Nothing found. Please select a tank from the autocompletion list"
   context: Search returned no results when a user was typing the tank name in autocomplete
 
 - key: stats_autocomplete_not_enough_length
@@ -286,7 +286,7 @@
   context: Shown when a user just started typing and there are not enough characters to search
 
 - key: nickname_autocomplete_not_found
-  value: "No players found matching the name you have entered. Please select a name from the autocompletion list."
+  value: "Nothing found. Please select a nickname from the autocompletion list"
   context: Search returned no results when a user was typing the name in autocomplete
 
 - key: nickname_autocomplete_not_enough_length

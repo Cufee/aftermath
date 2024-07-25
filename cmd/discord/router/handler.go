@@ -254,34 +254,30 @@ func sendPingReply(w http.ResponseWriter) {
 }
 
 func (r *router) sendInteractionReply(interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
-	var handler func(ctx context.Context) error
+	// some interactions already have a failed UI state
+	if interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
+		log.Error().Str("id", interaction.ID).Msg("autocomplete interaction failed")
+		return
+	}
 
-	if slices.Contains(supportedInteractionTypes, interaction.Type) {
-		handler = func(ctx context.Context) error {
-			_, err := r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, data, nil)
-			return err
-		}
-	} else {
-		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
-
+	// if the interaction type is unknown, make a new error response
+	if !slices.Contains(supportedInteractionTypes, interaction.Type) {
 		printer, err := localization.NewPrinterWithFallback("discord", language.English)
 		if err != nil {
 			log.Err(err).Msg("failed to create a new locale printer")
 			printer = func(_ string) string { return "Join Aftermath Official" } // we only need it for this one button
 		}
 
-		handler = func(ctx context.Context) error {
-			_, err := r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, discordgo.InteractionResponseData{
-				Content: "Something unexpected happened and your command failed.",
-				Components: []discordgo.MessageComponent{
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							common.ButtonJoinPrimaryGuild(printer("buttons_join_primary_guild")),
-						}},
-				},
-			}, nil)
-			return err
+		data = discordgo.InteractionResponseData{
+			Content: "Something unexpected happened and your command failed.",
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						common.ButtonJoinPrimaryGuild(printer("buttons_join_primary_guild")),
+					}},
+			},
 		}
+		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
 	}
 
 	res := retry.Retry(func() (struct{}, error) {
@@ -289,7 +285,8 @@ func (r *router) sendInteractionReply(interaction discordgo.Interaction, data di
 		// since the command is already handled, there is not much point in using the route handler context timeout
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
-		err := handler(ctx)
+
+		_, err := r.restClient.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, data, nil)
 		return struct{}{}, err
 	}, 5, time.Second) // better late than never
 	if res.Err != nil {

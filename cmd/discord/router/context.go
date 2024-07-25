@@ -122,7 +122,7 @@ func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 			defer cancel()
 
 			if c.interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
-				msg, err := c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &data}, files)
+				msg, err := c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Type: discordgo.InteractionApplicationCommandAutocompleteResult, Data: &data}, nil)
 				if errors.Is(err, rest.ErrInteractionAlreadyAcked) {
 					err = nil
 				}
