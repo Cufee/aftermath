@@ -61,8 +61,7 @@ func newContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 
 	printer, err := localization.NewPrinter("discord", c.locale)
 	if err != nil {
-		log.Err(err).Msg("failed to get a localization printer for context")
-		c.localize = func(s string) string { return s }
+		c.localize, _ = localization.NewPrinter("discord", language.English)
 	} else {
 		c.localize = printer
 	}
