@@ -133,6 +133,10 @@ func init() {
 					log.Err(err).Msg("failed to broad search accounts")
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
 				}
+				if len(accounts) < 1 {
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
+				}
+
 				slices.SortFunc(accounts, func(a, b fetch.AccountWithRealm) int {
 					return strings.Compare(b.Realm+b.Nickname, a.Realm+a.Nickname)
 				})
