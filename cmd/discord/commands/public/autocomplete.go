@@ -123,6 +123,9 @@ func init() {
 				if len(options.NicknameSearch) < 5 {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_enough_length"), Value: "error#nickname_autocomplete_not_enough_length"}).Send()
 				}
+				if !commands.ValidatePlayerName(options.NicknameSearch) {
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_invalid_input"), Value: "error#nickname_autocomplete_invalid_input"}).Send()
+				}
 
 				accounts, err := ctx.Core().Fetch().BroadSearch(ctx.Ctx(), options.NicknameSearch)
 				if err != nil {
