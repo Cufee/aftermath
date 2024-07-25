@@ -251,6 +251,16 @@
   value: "Looks like you don't have a Blitz account linked yet. Give the `/links` command a shot."
   context: No Blitz account linked
 
+- key: stats_error_nickname_invalid
+  value: "This does not look like a valid player name, make sure you are using your in-game name."
+  context: Invalid Blitz username provided
+  notes: This does not mean it was not found, just that the input provided cannot possibly be a valid nickname
+
+- key: nickname_autocomplete_invalid_input
+  value: "This does not look like a valid player name, make sure you are using your in-game name"
+  context: Invalid Blitz username provided
+  notes: This does not mean it was not found, just that the input provided cannot possibly be a valid nickname
+
 - key: stats_error_nickname_not_fount_fmt
   value: "I was not able to find a player named **%s**. Was the name spelled correctly?"
   context: Invalid Blitz username provided
