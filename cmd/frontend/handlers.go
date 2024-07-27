@@ -42,7 +42,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 	// https://go.dev/blog/routing-enhancements
 	srv := App(core)
 
-	root := srv.Group("/")
+	root := srv.Group("/", middleware.CatchPanic)
 	root.GET("/", routes.Index)
 	root.GET("/login", routes.LoginStatic)
 	root.GET("/error", routes.GenericError)
@@ -57,19 +57,19 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 	legal.GET("/privacy-policy", routes.PrivacyPolicy)
 	legal.GET("/terms-of-service", routes.TermsOfService)
 
-	widget := srv.Group("/widget")
+	widget := srv.Group("/widget", middleware.CatchPanic)
 	widget.GET("/", w.WidgetHome)
 	widget.GET("/account/{accountId}", w.WidgetPreview)
 	widget.GET("/account/{accountId}/live", w.LiveWidget)
 	widget.GET("/custom/{widgetId}/live", w.CustomLiveWidget)
 	widget.GET("/custom", handler.Redirect("/app/widget", http.StatusMovedPermanently))
 
-	app := srv.Group("/app", middleware.SessionCheck)
+	app := srv.Group("/app", middleware.SessionCheck, middleware.CatchPanic)
 	app.GET("/", a.Index)
 	app.GET("/widgets/new", widgets.NewCustom)
 	app.GET("/widgets/{widgetId}", widgets.EditSettings)
 
-	secureApi := srv.Group("/api/s", middleware.SessionCheck)
+	secureApi := srv.Group("/api/s", middleware.SessionCheck, middleware.CatchPanic)
 	secureApi.POST("/widget/custom", wa.CreateCustomWidget)
 	secureApi.PATCH("/widget/custom/{widgetId}", wa.UpdateCustomWidget)
 	secureApi.PATCH("/widget/custom/{widgetId}/action", wa.QuickAction)
@@ -78,7 +78,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 	secureApi.DELETE("/connections/{connectionId}", api.RemoveConnection)
 	secureApi.PATCH("/connections/{connectionId}/default", api.SetDefaultConnection)
 
-	publicApi := srv.Group("/api/p")
+	publicApi := srv.Group("/api/p", middleware.CatchPanic)
 	publicApi.GET("/login", api.Login)
 	publicApi.GET("/auth/discord", auth.DiscordRedirect)
 	publicApi.GET("/auth/wargaming/login/{realm}", auth.WargamingBegin)
@@ -87,7 +87,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 	publicApi.GET("/widget/mock", wa.MockWidget)
 	publicApi.GET("/realtime/widget/custom/{widgetId}", realtime.WidgetSettings)
 
-	redirect := srv.Group("/r")
+	redirect := srv.Group("/r", middleware.CatchPanic)
 	redirect.GET("/verify/{realm}", r.VerifyFromDiscord)
 
 	return srv.Handlers(), nil
