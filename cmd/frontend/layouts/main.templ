@@ -24,7 +24,9 @@ templ main(head templ.Component, navbar templ.Component, children ...templ.Compo
 			</div>
 			<main class="mx-auto max-w-7xl w-full grow flex flex-col gap-2 underline-offset-4 p-4">
 				for _, render := range children {
-					@render
+					if render != nil {
+						@render
+					}
 				}
 			</main>
 			@components.Footer()
