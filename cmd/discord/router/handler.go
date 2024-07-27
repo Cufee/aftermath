@@ -209,30 +209,11 @@ func (r *router) handleInteraction(interaction discordgo.Interaction, command bu
 		return
 	}
 
-	handler := command.Handler
-	for i := len(command.Middleware) - 1; i >= 0; i-- {
-		handler = command.Middleware[i](cCtx, handler)
-	}
-
-	func() {
-		defer func() {
-			if rec := recover(); rec != nil {
-				log.Error().Str("stack", string(debug.Stack())).Msg("panic in interaction handler")
-				r.sendInteractionReply(interaction, discordgo.InteractionResponseData{
-					Content: cCtx.Localize("common_error_unhandled_not_reported"),
-					Components: []discordgo.MessageComponent{
-						discordgo.ActionsRow{
-							Components: []discordgo.MessageComponent{
-								common.ButtonJoinPrimaryGuild(cCtx.Localize("buttons_join_primary_guild")),
-							}},
-					},
-				})
-			}
-		}()
-		err = handler(cCtx)
-		if err != nil {
-			log.Err(err).Msg("handler returned an error")
-			r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported"),
+	defer func() {
+		if rec := recover(); rec != nil {
+			log.Error().Str("stack", string(debug.Stack())).Msg("panic in interaction handler")
+			r.sendInteractionReply(interaction, discordgo.InteractionResponseData{
+				Content: cCtx.Localize("common_error_unhandled_not_reported"),
 				Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
@@ -240,9 +221,28 @@ func (r *router) handleInteraction(interaction discordgo.Interaction, command bu
 						}},
 				},
 			})
-			return
 		}
 	}()
+
+	handler := command.Handler
+	for i := len(command.Middleware) - 1; i >= 0; i-- {
+		handler = command.Middleware[i](cCtx, handler)
+	}
+
+	err = handler(cCtx)
+	if err != nil {
+		log.Err(err).Msg("handler returned an error")
+		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported"),
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						common.ButtonJoinPrimaryGuild(cCtx.Localize("buttons_join_primary_guild")),
+					}},
+			},
+		})
+		return
+	}
+
 }
 
 func sendPingReply(w http.ResponseWriter) {
