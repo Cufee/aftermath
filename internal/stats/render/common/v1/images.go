@@ -4,6 +4,7 @@ import (
 	"image"
 	"math"
 
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
 
 	"github.com/disintegration/imaging"
@@ -83,6 +84,12 @@ func renderImages(images []image.Image, style Style) (image.Image, error) {
 	}
 
 	for i, img := range images {
+		if img == nil {
+			err := errors.New("one of the images is nil")
+			log.Err(err).Stack().Msg("a nil image was passed to render")
+			return nil, err
+		}
+
 		posX, posY := lastX, lastY
 
 		imgWidth := float64(img.Bounds().Dx())
