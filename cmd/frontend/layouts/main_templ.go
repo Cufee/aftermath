@@ -61,9 +61,11 @@ func main(head templ.Component, navbar templ.Component, children ...templ.Compon
 			return templ_7745c5c3_Err
 		}
 		for _, render := range children {
-			templ_7745c5c3_Err = render.Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+			if render != nil {
+				templ_7745c5c3_Err = render.Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</main>")
