@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
@@ -221,7 +222,7 @@ func (c client) FindDiscordInteractions(ctx context.Context, opts ...Interaction
 		apply(&query)
 	}
 
-	records, err := c.db.DiscordInteraction.Query().Where(query.build()...).Limit(query.limit).All(ctx)
+	records, err := c.db.DiscordInteraction.Query().Where(query.build()...).Limit(query.limit).Order(discordinteraction.ByCreatedAt(sql.OrderDesc())).All(ctx)
 	if err != nil {
 		return nil, err
 	}
