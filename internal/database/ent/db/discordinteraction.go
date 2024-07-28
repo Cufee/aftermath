@@ -32,6 +32,8 @@ type DiscordInteraction struct {
 	EventID string `json:"event_id,omitempty"`
 	// GuildID holds the value of the "guild_id" field.
 	GuildID string `json:"guild_id,omitempty"`
+	// Snowflake holds the value of the "snowflake" field.
+	Snowflake string `json:"snowflake,omitempty"`
 	// ChannelID holds the value of the "channel_id" field.
 	ChannelID string `json:"channel_id,omitempty"`
 	// MessageID holds the value of the "message_id" field.
@@ -75,7 +77,7 @@ func (*DiscordInteraction) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case discordinteraction.FieldMetadata:
 			values[i] = new([]byte)
-		case discordinteraction.FieldID, discordinteraction.FieldResult, discordinteraction.FieldUserID, discordinteraction.FieldEventID, discordinteraction.FieldGuildID, discordinteraction.FieldChannelID, discordinteraction.FieldMessageID, discordinteraction.FieldType, discordinteraction.FieldLocale:
+		case discordinteraction.FieldID, discordinteraction.FieldResult, discordinteraction.FieldUserID, discordinteraction.FieldEventID, discordinteraction.FieldGuildID, discordinteraction.FieldSnowflake, discordinteraction.FieldChannelID, discordinteraction.FieldMessageID, discordinteraction.FieldType, discordinteraction.FieldLocale:
 			values[i] = new(sql.NullString)
 		case discordinteraction.FieldCreatedAt, discordinteraction.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -135,6 +137,12 @@ func (di *DiscordInteraction) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field guild_id", values[i])
 			} else if value.Valid {
 				di.GuildID = value.String
+			}
+		case discordinteraction.FieldSnowflake:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field snowflake", values[i])
+			} else if value.Valid {
+				di.Snowflake = value.String
 			}
 		case discordinteraction.FieldChannelID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -226,6 +234,9 @@ func (di *DiscordInteraction) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("guild_id=")
 	builder.WriteString(di.GuildID)
+	builder.WriteString(", ")
+	builder.WriteString("snowflake=")
+	builder.WriteString(di.Snowflake)
 	builder.WriteString(", ")
 	builder.WriteString("channel_id=")
 	builder.WriteString(di.ChannelID)

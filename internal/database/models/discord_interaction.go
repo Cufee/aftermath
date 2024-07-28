@@ -35,6 +35,7 @@ type DiscordInteraction struct {
 	ID        string
 	CreatedAt time.Time
 
+	Snowflake string
 	Result    string
 	UserID    string
 	GuildID   string

@@ -283,6 +283,7 @@ var (
 		{Name: "result", Type: field.TypeString},
 		{Name: "event_id", Type: field.TypeString},
 		{Name: "guild_id", Type: field.TypeString},
+		{Name: "snowflake", Type: field.TypeString, Default: ""},
 		{Name: "channel_id", Type: field.TypeString},
 		{Name: "message_id", Type: field.TypeString},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"unknown", "modal", "command", "follow_up", "component", "autocomplete", "automated_message"}},
@@ -298,7 +299,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "discord_interactions_users_discord_interactions",
-				Columns:    []*schema.Column{DiscordInteractionsColumns[11]},
+				Columns:    []*schema.Column{DiscordInteractionsColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -312,7 +313,12 @@ var (
 			{
 				Name:    "discordinteraction_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{DiscordInteractionsColumns[11]},
+				Columns: []*schema.Column{DiscordInteractionsColumns[12]},
+			},
+			{
+				Name:    "discordinteraction_snowflake",
+				Unique:  false,
+				Columns: []*schema.Column{DiscordInteractionsColumns[6]},
 			},
 			{
 				Name:    "discordinteraction_created_at",
@@ -322,12 +328,12 @@ var (
 			{
 				Name:    "discordinteraction_user_id_type_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{DiscordInteractionsColumns[11], DiscordInteractionsColumns[8], DiscordInteractionsColumns[1]},
+				Columns: []*schema.Column{DiscordInteractionsColumns[12], DiscordInteractionsColumns[9], DiscordInteractionsColumns[1]},
 			},
 			{
 				Name:    "discordinteraction_channel_id_type_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{DiscordInteractionsColumns[6], DiscordInteractionsColumns[8], DiscordInteractionsColumns[1]},
+				Columns: []*schema.Column{DiscordInteractionsColumns[7], DiscordInteractionsColumns[9], DiscordInteractionsColumns[1]},
 			},
 		},
 	}
