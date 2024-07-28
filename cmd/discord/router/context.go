@@ -72,7 +72,7 @@ func newContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 func (c *routeContext) saveInteractionEvent(msg discordgo.Message, msgErr error, reply common.Reply) {
 	meta := reply.Metadata()
 	i := c.interaction
-	i.Token = "<redacted>"
+	i.Token = "..."
 	meta["interaction"] = i
 
 	data := models.DiscordInteraction{
