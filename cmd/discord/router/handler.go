@@ -198,7 +198,7 @@ func (r *router) handleInteraction(interaction discordgo.Interaction, command bu
 	if err != nil {
 		log.Err(err).Msg("failed to create a common.Context for a handler")
 		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{
-			Content: "Something unexpected happened and your command failed. Please try again in a few seconds.",
+			Content: "Something unexpected happened and your command failed. Please try again in a few seconds." + "\n-# " + interaction.ID,
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
@@ -213,7 +213,7 @@ func (r *router) handleInteraction(interaction discordgo.Interaction, command bu
 		if rec := recover(); rec != nil {
 			log.Error().Str("stack", string(debug.Stack())).Msg("panic in interaction handler")
 			r.sendInteractionReply(interaction, discordgo.InteractionResponseData{
-				Content: cCtx.Localize("common_error_unhandled_not_reported"),
+				Content: cCtx.Localize("common_error_unhandled_not_reported") + "\n-# " + interaction.ID,
 				Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
@@ -232,7 +232,7 @@ func (r *router) handleInteraction(interaction discordgo.Interaction, command bu
 	err = handler(cCtx)
 	if err != nil {
 		log.Err(err).Msg("handler returned an error")
-		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported"),
+		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported") + "\n-# " + interaction.ID,
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{

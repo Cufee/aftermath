@@ -74,6 +74,20 @@ func (dic *DiscordInteractionCreate) SetGuildID(s string) *DiscordInteractionCre
 	return dic
 }
 
+// SetSnowflake sets the "snowflake" field.
+func (dic *DiscordInteractionCreate) SetSnowflake(s string) *DiscordInteractionCreate {
+	dic.mutation.SetSnowflake(s)
+	return dic
+}
+
+// SetNillableSnowflake sets the "snowflake" field if the given value is not nil.
+func (dic *DiscordInteractionCreate) SetNillableSnowflake(s *string) *DiscordInteractionCreate {
+	if s != nil {
+		dic.SetSnowflake(*s)
+	}
+	return dic
+}
+
 // SetChannelID sets the "channel_id" field.
 func (dic *DiscordInteractionCreate) SetChannelID(s string) *DiscordInteractionCreate {
 	dic.mutation.SetChannelID(s)
@@ -166,6 +180,10 @@ func (dic *DiscordInteractionCreate) defaults() {
 		v := discordinteraction.DefaultUpdatedAt()
 		dic.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := dic.mutation.Snowflake(); !ok {
+		v := discordinteraction.DefaultSnowflake
+		dic.mutation.SetSnowflake(v)
+	}
 	if _, ok := dic.mutation.ID(); !ok {
 		v := discordinteraction.DefaultID()
 		dic.mutation.SetID(v)
@@ -206,6 +224,9 @@ func (dic *DiscordInteractionCreate) check() error {
 	}
 	if _, ok := dic.mutation.GuildID(); !ok {
 		return &ValidationError{Name: "guild_id", err: errors.New(`db: missing required field "DiscordInteraction.guild_id"`)}
+	}
+	if _, ok := dic.mutation.Snowflake(); !ok {
+		return &ValidationError{Name: "snowflake", err: errors.New(`db: missing required field "DiscordInteraction.snowflake"`)}
 	}
 	if _, ok := dic.mutation.ChannelID(); !ok {
 		return &ValidationError{Name: "channel_id", err: errors.New(`db: missing required field "DiscordInteraction.channel_id"`)}
@@ -284,6 +305,10 @@ func (dic *DiscordInteractionCreate) createSpec() (*DiscordInteraction, *sqlgrap
 	if value, ok := dic.mutation.GuildID(); ok {
 		_spec.SetField(discordinteraction.FieldGuildID, field.TypeString, value)
 		_node.GuildID = value
+	}
+	if value, ok := dic.mutation.Snowflake(); ok {
+		_spec.SetField(discordinteraction.FieldSnowflake, field.TypeString, value)
+		_node.Snowflake = value
 	}
 	if value, ok := dic.mutation.ChannelID(); ok {
 		_spec.SetField(discordinteraction.FieldChannelID, field.TypeString, value)

@@ -76,6 +76,7 @@ func (c *routeContext) saveInteractionEvent(msg discordgo.Message, msgErr error,
 	meta["interaction"] = i
 
 	data := models.DiscordInteraction{
+		Snowflake: c.InteractionID(),
 		ID:        c.interaction.ID,
 		EventID:   c.ID(),
 		MessageID: msg.ID,
@@ -111,7 +112,7 @@ func (c *routeContext) saveInteractionEvent(msg discordgo.Message, msgErr error,
 	}
 
 	if constants.DiscordEventFirehoseEnabled && c.events != nil {
-		content := fmt.Sprintf("```ID: %s\nResult: %s\nError: %v\nEventID: %s\nUserID: %s\nGuildID: %s\nChannelID: %s\nMessageID: %s```", data.ID, data.Result, data.Meta["error"], data.EventID, data.UserID, data.GuildID, data.ChannelID, data.MessageID)
+		content := fmt.Sprintf("```ID: %s\nSnowflake: %s\nResult: %s\nError: %v\nEventID: %s\nUserID: %s\nGuildID: %s\nChannelID: %s\nMessageID: %s```", data.ID, data.Snowflake, data.Result, data.Meta["error"], data.EventID, data.UserID, data.GuildID, data.ChannelID, data.MessageID)
 		c.events.push(content)
 	}
 }
@@ -207,7 +208,7 @@ func (c *routeContext) Err(err error) error {
 		Components: []discordgo.MessageComponent{
 			common.ButtonJoinPrimaryGuild(c.localize("buttons_have_a_question_question")),
 		}}
-	return c.Reply().Component(button).Send("common_error_unhandled_reported")
+	return c.Reply().Hint(c.interaction.ID).Component(button).Send("common_error_unhandled_reported")
 }
 
 func (c *routeContext) Error(message string) error {

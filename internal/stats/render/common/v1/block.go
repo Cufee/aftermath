@@ -121,7 +121,6 @@ func (content contentBlocks) Render(style Style) (image.Image, error) {
 		img, err := block.Render()
 		if err == nil && img == nil {
 			err = errors.New("image is nil for content type " + content.Type().String())
-			log.Err(err).Stack().Msg("a nil image was passed to render")
 		}
 		if err != nil {
 			return nil, err
@@ -147,7 +146,6 @@ func (content contentBlocks) renderAsync(style Style) (image.Image, error) {
 			img, err := b.Render()
 			if err == nil && img == nil {
 				err = errors.New("image is nil for content type " + content.Type().String())
-				log.Err(err).Stack().Msg("a nil image was passed to render")
 			}
 			if err != nil {
 				select {

@@ -96,6 +96,11 @@ func GuildID(v string) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldEQ(FieldGuildID, v))
 }
 
+// Snowflake applies equality check predicate on the "snowflake" field. It's identical to SnowflakeEQ.
+func Snowflake(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldEQ(FieldSnowflake, v))
+}
+
 // ChannelID applies equality check predicate on the "channel_id" field. It's identical to ChannelIDEQ.
 func ChannelID(v string) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldEQ(FieldChannelID, v))
@@ -449,6 +454,71 @@ func GuildIDEqualFold(v string) predicate.DiscordInteraction {
 // GuildIDContainsFold applies the ContainsFold predicate on the "guild_id" field.
 func GuildIDContainsFold(v string) predicate.DiscordInteraction {
 	return predicate.DiscordInteraction(sql.FieldContainsFold(FieldGuildID, v))
+}
+
+// SnowflakeEQ applies the EQ predicate on the "snowflake" field.
+func SnowflakeEQ(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldEQ(FieldSnowflake, v))
+}
+
+// SnowflakeNEQ applies the NEQ predicate on the "snowflake" field.
+func SnowflakeNEQ(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldNEQ(FieldSnowflake, v))
+}
+
+// SnowflakeIn applies the In predicate on the "snowflake" field.
+func SnowflakeIn(vs ...string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldIn(FieldSnowflake, vs...))
+}
+
+// SnowflakeNotIn applies the NotIn predicate on the "snowflake" field.
+func SnowflakeNotIn(vs ...string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldNotIn(FieldSnowflake, vs...))
+}
+
+// SnowflakeGT applies the GT predicate on the "snowflake" field.
+func SnowflakeGT(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldGT(FieldSnowflake, v))
+}
+
+// SnowflakeGTE applies the GTE predicate on the "snowflake" field.
+func SnowflakeGTE(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldGTE(FieldSnowflake, v))
+}
+
+// SnowflakeLT applies the LT predicate on the "snowflake" field.
+func SnowflakeLT(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldLT(FieldSnowflake, v))
+}
+
+// SnowflakeLTE applies the LTE predicate on the "snowflake" field.
+func SnowflakeLTE(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldLTE(FieldSnowflake, v))
+}
+
+// SnowflakeContains applies the Contains predicate on the "snowflake" field.
+func SnowflakeContains(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldContains(FieldSnowflake, v))
+}
+
+// SnowflakeHasPrefix applies the HasPrefix predicate on the "snowflake" field.
+func SnowflakeHasPrefix(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldHasPrefix(FieldSnowflake, v))
+}
+
+// SnowflakeHasSuffix applies the HasSuffix predicate on the "snowflake" field.
+func SnowflakeHasSuffix(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldHasSuffix(FieldSnowflake, v))
+}
+
+// SnowflakeEqualFold applies the EqualFold predicate on the "snowflake" field.
+func SnowflakeEqualFold(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldEqualFold(FieldSnowflake, v))
+}
+
+// SnowflakeContainsFold applies the ContainsFold predicate on the "snowflake" field.
+func SnowflakeContainsFold(v string) predicate.DiscordInteraction {
+	return predicate.DiscordInteraction(sql.FieldContainsFold(FieldSnowflake, v))
 }
 
 // ChannelIDEQ applies the EQ predicate on the "channel_id" field.
