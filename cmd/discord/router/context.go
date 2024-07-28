@@ -208,7 +208,7 @@ func (c *routeContext) Err(err error) error {
 		Components: []discordgo.MessageComponent{
 			common.ButtonJoinPrimaryGuild(c.localize("buttons_have_a_question_question")),
 		}}
-	return c.Reply().Component(button).Send("common_error_unhandled_reported")
+	return c.Reply().Hint(c.interaction.ID).Component(button).Send("common_error_unhandled_reported")
 }
 
 func (c *routeContext) Error(message string) error {
