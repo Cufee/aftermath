@@ -19,15 +19,17 @@ func (c client) CreateDiscordInteraction(ctx context.Context, data models.Discor
 	}
 
 	record, err := c.db.DiscordInteraction.Create().
+		SetLocale(data.Locale.String()).
 		SetChannelID(data.ChannelID).
+		SetMessageID(data.MessageID).
 		SetEventID(data.EventID).
 		SetGuildID(data.GuildID).
-		SetLocale(data.Locale.String()).
-		SetMessageID(data.MessageID).
 		SetMetadata(data.Meta).
 		SetResult(data.Result).
 		SetType(data.Type).
-		SetUser(user).Save(ctx)
+		SetID(data.ID).
+		SetUser(user).
+		Save(ctx)
 	if err != nil {
 		return models.DiscordInteraction{}, err
 	}

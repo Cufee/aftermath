@@ -70,15 +70,21 @@ func newContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 }
 
 func (c *routeContext) saveInteractionEvent(msg discordgo.Message, msgErr error, reply common.Reply) {
+	meta := reply.Metadata()
+	i := c.interaction
+	i.Token = "<redacted>"
+	meta["interaction"] = i
+
 	data := models.DiscordInteraction{
+		ID:        c.interaction.ID,
 		EventID:   c.ID(),
+		MessageID: msg.ID,
 		Locale:    c.locale,
 		UserID:    c.user.ID,
 		GuildID:   c.interaction.GuildID,
 		ChannelID: c.interaction.ChannelID,
-		MessageID: msg.ID,
-		Meta:      reply.Metadata(),
 		Type:      models.InteractionTypeUnknown,
+		Meta:      meta,
 	}
 	if c.isCommand() {
 		data.Type = models.InteractionTypeCommand
