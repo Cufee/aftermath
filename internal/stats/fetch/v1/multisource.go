@@ -289,7 +289,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	// if a session exists in the database, we don't need BlitzStars and have better data
 
 	// return career stats if stats are requested for 0 or 90+ days, we do not track that far
-	if days := time.Since(periodStart).Hours() / 24; days > 90 || days < 1 {
+	if days := time.Since(periodStart).Hours() / 24; days >= 91 || days < 1 {
 		group.Wait()
 		if current.Err != nil {
 			return AccountStatsOverPeriod{}, current.Err
@@ -345,7 +345,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		apply(&options)
 	}
 
-	if days := time.Since(sessionStart).Hours() / 24; sessionStart.IsZero() || days > 90 {
+	if days := time.Since(sessionStart).Hours() / 24; sessionStart.IsZero() || days >= 91 {
 		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, ErrInvalidSessionStart
 	}
 
@@ -490,7 +490,7 @@ func (c *multiSourceClient) PlayersAchievementsLeaderboard(ctx context.Context, 
 		apply(&options)
 	}
 
-	if days := time.Since(from).Hours() / 24; from.IsZero() || days > 90 {
+	if days := time.Since(from).Hours() / 24; from.IsZero() || days >= 91 {
 		return nil, ErrInvalidSessionStart
 	}
 
