@@ -62,7 +62,7 @@ func (o statsOptions) refreshButton(ctx common.Context, id string) (discordgo.Me
 	return newStatsRefreshButton(interaction), nil
 }
 
-var validNicknameSeparatorChars = []string{"-", "@", "#", "*", "&", "%", "$"}
+var validNicknameSeparatorChars = []string{"!", "@", "#", "$", "%", "^", "&", "*", "-", "=", "+"}
 var validFuzzyServers = map[string]string{
 	"na":            "NA",
 	"north america": "NA",

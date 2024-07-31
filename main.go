@@ -87,14 +87,14 @@ func main() {
 		alertClient.Reader(pr, zerolog.ErrorLevel)
 	}
 
+	globalCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// Discord Gateway - commands public commands are handled through the gateway
-	gw, err := discordGatewayFromEnv(liveCoreClient)
+	gw, err := discordGatewayFromEnv(globalCtx, liveCoreClient)
 	if err != nil {
 		log.Fatal().Err(err).Msg("discordGatewayFromEnv failed")
 	}
-
-	globalCtx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	stopQueue, err := startQueueFromEnv(globalCtx, cacheCoreClient)
 	if err != nil {
@@ -180,7 +180,7 @@ func main() {
 	log.Info().Msg("finished cleanup tasks")
 }
 
-func discordGatewayFromEnv(core core.Client) (gateway.Client, error) {
+func discordGatewayFromEnv(ctx context.Context, core core.Client) (gateway.Client, error) {
 	// discord gateway
 	gw, err := gateway.NewClient(core, constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages)
 	if err != nil {
@@ -203,7 +203,21 @@ func discordGatewayFromEnv(core core.Client) (gateway.Client, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "gateway client failed to connect")
 	}
+
 	gw.SetStatus(gateway.StatusListening, "/help", nil)
+	go func(ctx context.Context) {
+		// update the status every hour
+		ticker := time.NewTicker(time.Hour * 1)
+		for {
+			select {
+			case <-ctx.Done():
+				ticker.Stop()
+				return
+			case <-ticker.C:
+				gw.SetStatus(gateway.StatusListening, "/help", nil)
+			}
+		}
+	}(ctx)
 
 	return gw, nil
 }
