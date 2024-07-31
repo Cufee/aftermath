@@ -58,6 +58,32 @@ func init() {
 						ioptions.BackgroundID = content.ID
 					}
 
+				case options.NicknameSearch != "" && options.AccountID == "":
+					// nickname provided, but user did not select an option from autocomplete
+					accounts, err := accountsFromBadInput(ctx.Ctx(), ctx.Core().Fetch(), options.NicknameSearch)
+					if err != nil {
+						return ctx.Err(err)
+					}
+					if len(accounts) == 0 {
+						return ctx.Reply().Send("stats_account_not_found")
+					}
+
+					realms := make(map[string]struct{})
+					for _, a := range accounts {
+						realms[a.Realm] = struct{}{}
+					}
+					if len(realms) > 1 {
+						reply, err := realmSelectButtons(ctx, ctx.ID(), accounts)
+						if err != nil {
+							return ctx.Err(err)
+						}
+						return reply.Send()
+					}
+
+					// one or more options on the same server - just pick the first one
+					message = "stats_bad_nickname_input_hint"
+					accountID = fmt.Sprint(accounts[0].ID)
+
 				default:
 					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
 					if !hasDefaultAccount {

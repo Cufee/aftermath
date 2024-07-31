@@ -172,6 +172,9 @@ func init() {
 					if !valid {
 						return ctx.Reply().Send(message)
 					}
+					if options.AccountID == "" {
+						return ctx.Reply().Send("links_error_no_account_selected")
+					}
 
 					account, err := ctx.Core().Fetch().Account(ctx.Ctx(), options.AccountID)
 					if err != nil {
