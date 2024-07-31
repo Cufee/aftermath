@@ -63,14 +63,6 @@ type StatsOptions struct {
 }
 
 func (o StatsOptions) Validate(ctx common.Context) (string, bool) {
-	// check if the name is valid
-	if o.UserID == "" && o.NicknameSearch != "" && !ValidatePlayerName(o.NicknameSearch) {
-		return "stats_error_nickname_invalid", false
-	}
-	if o.UserID == "" && o.NicknameSearch != "" && o.AccountID == "" {
-		return "nickname_autocomplete_not_found", false
-	}
-
 	if o.UserID != "" && o.UserID == ctx.User().ID {
 		// mentioning self is redundant - this should not prevent the command from working though
 		return "stats_error_mentioned_self_non_blocking", true
@@ -109,5 +101,5 @@ func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataO
 }
 
 func ValidatePlayerName(name string) bool {
-	return strings.HasPrefix(name, "valid#account#") || !validNameRegex.MatchString(name)
+	return len(name) > 3 && len(name) < 24 && strings.HasPrefix(name, "valid#account#") || !validNameRegex.MatchString(name)
 }

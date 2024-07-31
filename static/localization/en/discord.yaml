@@ -248,7 +248,7 @@
   context: User mentioned someone AND provided a nickname, this will not cause an error
 
 - key: stats_error_connection_not_found_personal
-  value: "Looks like you don't have a Blitz account linked yet. Give the `/links` command a shot."
+  value: "Looks like you don't have a Blitz account linked yet. Give the `/links add` command a shot."
   context: No Blitz account linked
 
 - key: stats_error_nickname_invalid
@@ -260,10 +260,6 @@
   value: "This does not look like a valid player name, make sure you are using your in-game name"
   context: Invalid Blitz username provided
   notes: This does not mean it was not found, just that the input provided cannot possibly be a valid nickname
-
-- key: stats_error_nickname_not_fount_fmt
-  value: "I was not able to find a player named **%s**. Was the name spelled correctly?"
-  context: Invalid Blitz username provided
 
 - key: session_error_account_was_not_tracked
   value: "Aftermath just started tracking this account. Please play a few battles before using this command again."
@@ -284,6 +280,18 @@
 - key: stats_autocomplete_not_enough_length
   value: "Continue typing to search for available tanks..."
   context: Shown when a user just started typing and there are not enough characters to search
+
+- key: stats_multiple_accounts_found
+  value: "### It looks like there are multiple Blitz accounts matching your search, please select one using the buttons below."
+  context: Shown when a user did not select an account from autocomplete, but did provide some input (nickname)
+
+- key: stats_bad_nickname_input_hint
+  value: "Wrong account? When searching for a Blitz account by nickname, try selecting a specific account from the results shown as you type"
+  context: Shown when a user did not select an account from autocomplete, but did provide some input (nickname). This is a hint that does not trigger an error
+
+- key: stats_account_not_found
+  value: "It looks like there are no Blitz accounts matching your search, please select an option from the list of accounts that is shown as you type in the nickname."
+  context: Shown when a user did not select an account from autocomplete, but did provide some input (nickname), and this input was invalid
 
 - key: nickname_autocomplete_not_found
   value: "Nothing found. Please select a nickname from the autocompletion list"
@@ -326,11 +334,8 @@
   context: User provided a link AND a file, this will not cause an error
 
   # /links errors
-- key: links_error_missing_input
-  value: "I need both the nickname and server to find your account."
-  context: Nickname or server not provided
 - key: links_error_too_many_connections
-  value: "It looks like you have reached the limit for the number of Blitz accounts linked.\nTry removing an existing account with `/accounts unlink` before adding a new one."
+  value: "It looks like you have reached the limit for the number of Blitz accounts linked.\nTry removing an existing account with `/links remove` before adding a new one."
   context: User reached their connection limit for Blitz accounts
 - key: links_error_connection_not_found
   value: "I was not able to find a linked account with this nickname. Try adding a new one with `/links add`."
@@ -340,6 +345,9 @@
   context: Failed to find the selected account by ID
 - key: links_error_no_accounts_linked
   value: "You don't have any linked accounts."
+- key: links_error_no_account_selected
+  value: "It looks like you did not select an account from the options provided. Please pick one of the accounts shown as you type."
+  context: USer did not select an account from the autocompletion options
 
 # /fancy errors
 - key: fancy_errors_upload_timeout_fmt

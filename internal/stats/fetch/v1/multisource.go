@@ -50,7 +50,7 @@ func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string) 
 		return types.Account{}, err
 	}
 	if len(accounts) < 1 {
-		return types.Account{}, errors.New("no results found")
+		return types.Account{}, AccountNotFound
 	}
 
 	return accounts[0], nil
