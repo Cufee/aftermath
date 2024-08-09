@@ -40,10 +40,10 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 
 					label := block.Label
 					if block.Tag == prepare.TagWN8 {
-						label = common.GetWN8TierName(block.Value.Float())
+						label = common.GetWN8TierName(block.Value().Float())
 					}
 					labelSize := common.MeasureString(label, labelStyle.Font)
-					valueSize := common.MeasureString(block.Value.String(), valueStyle.Font)
+					valueSize := common.MeasureString(block.Value().String(), valueStyle.Font)
 
 					overviewColumnWidth = common.Max(overviewColumnWidth, common.Max(labelSize.TotalWidth+overviewSpecialRatingPillStyle(nil).PaddingX*2, valueSize.TotalWidth))
 				}
@@ -69,7 +69,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 				highlightBlocksMaxCount = common.Max(highlightBlocksMaxCount, float64(len(highlight.Blocks)))
 				for _, block := range highlight.Blocks {
 					labelSize := common.MeasureString(block.Label, highlightStyle.blockLabel.Font)
-					valueSize := common.MeasureString(block.Value.String(), highlightStyle.blockValue.Font)
+					valueSize := common.MeasureString(block.Value().String(), highlightStyle.blockValue.Font)
 					highlightBlockMaxSize = common.Max(highlightBlockMaxSize, valueSize.TotalWidth, labelSize.TotalWidth)
 				}
 			}
@@ -155,7 +155,7 @@ func newHighlightCard(style highlightStyle, card period.VehicleCard) common.Bloc
 	var contentRow []common.Block
 	for _, block := range card.Blocks {
 		contentRow = append(contentRow, common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter},
-			common.NewTextContent(style.blockValue, block.Value.String()),
+			common.NewTextContent(style.blockValue, block.Value().String()),
 			common.NewTextContent(style.blockLabel, block.Label),
 		))
 	}

@@ -31,7 +31,7 @@ func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) str
 
 		// Measure stats value and label
 		for _, block := range card.Blocks {
-			valueSize := common.MeasureString(block.Value.String(), common.FontLarge())
+			valueSize := common.MeasureString(block.Value().String(), common.FontLarge())
 			labelSize := common.MeasureString(block.Label, common.FontSmall())
 			w := max(valueSize.TotalWidth, labelSize.TotalWidth)
 			if block.Tag == prepare.TagWN8 {

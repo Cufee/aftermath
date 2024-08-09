@@ -11,6 +11,18 @@ import (
 	"golang.org/x/text/language"
 )
 
+type cardBuilder struct {
+	session  fetch.AccountStatsOverPeriod
+	career   fetch.AccountStatsOverPeriod
+	glossary map[string]models.Vehicle
+}
+
+func (b *cardBuilder) vehicle(id string) models.Vehicle {
+	vehicle, _ := b.glossary[id]
+	vehicle.ID = id
+	return vehicle
+}
+
 func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]models.Vehicle, opts ...common.Option) (Cards, error) {
 	options := common.DefaultOptions
 	for _, apply := range opts {
@@ -20,11 +32,13 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		glossary = make(map[string]models.Vehicle)
 	}
 
+	builder := cardBuilder{session, career, glossary}
+
 	var cards Cards
 
 	// Rating battles overview
 	if options.VehicleID == "" {
-		card, err := makeOverviewCard(
+		card, err := builder.makeOverviewCard(
 			ratingOverviewBlocks,
 			session.RatingBattles.StatsFrame,
 			career.RatingBattles.StatsFrame,
@@ -46,7 +60,9 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		sessionFrame := session.RegularBattles.StatsFrame
 		careerFrame := career.RegularBattles.StatsFrame
 		overviewLabel := "label_overview_unrated"
+		blocks := unratedOverviewBlocks
 		if options.VehicleID != "" {
+			blocks = unratedOverviewBlocksSingleVehicle
 			sessionFrame = frame.StatsFrame{}
 			careerFrame = frame.StatsFrame{}
 			s, ok := session.RegularBattles.Vehicles[options.VehicleID]
@@ -62,8 +78,8 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 			overviewLabel = fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
 		}
 
-		card, err := makeOverviewCard(
-			unratedOverviewBlocks,
+		card, err := builder.makeOverviewCard(
+			blocks,
 			sessionFrame,
 			careerFrame,
 			overviewLabel,
@@ -93,17 +109,14 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 			break
 		}
 
-		glossary := glossary[data.VehicleID]
-		glossary.ID = data.VehicleID
-
-		card, err := makeVehicleCard(
+		card, err := builder.makeVehicleCard(
+			data.VehicleID,
 			[]common.Tag{common.TagWN8},
 			common.CardTypeRatingVehicle,
 			data,
 			career.RatingBattles.Vehicles[data.VehicleID],
 			options.Printer(),
 			options.Locale(),
-			glossary,
 		)
 		if err != nil {
 			return Cards{}, err
@@ -127,17 +140,14 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 			continue
 		}
 
-		glossary := glossary[data.VehicleID]
-		glossary.ID = data.VehicleID
-
-		card, err := makeVehicleCard(
+		card, err := builder.makeVehicleCard(
+			data.VehicleID,
 			vehicleBlocks,
 			common.CardTypeVehicle,
 			data,
 			career.RegularBattles.Vehicles[data.VehicleID],
 			options.Printer(),
 			options.Locale(),
-			glossary,
 		)
 		if err != nil {
 			return Cards{}, err
@@ -157,16 +167,13 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	}
 
 	for _, data := range highlightedVehicles {
-		glossary := glossary[data.Vehicle.VehicleID]
-		glossary.ID = data.Vehicle.VehicleID
-
-		card, err := makeHighlightCard(
+		card, err := builder.makeHighlightCard(
+			data.Vehicle.VehicleID,
 			data.Highlight,
 			data.Vehicle,
 			frame.VehicleStatsFrame{},
 			options.Printer(),
 			options.Locale(),
-			glossary,
 		)
 		if err != nil {
 			return Cards{}, err
@@ -177,7 +184,7 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 	return cards, nil
 }
 
-func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag, glossary models.Vehicle) (VehicleCard, error) {
+func (b *cardBuilder) makeVehicleCard(vehicleID string, presets []common.Tag, cardType common.CardType, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag) (VehicleCard, error) {
 	var sFrame, cFrame frame.StatsFrame
 	if session.StatsFrame != nil {
 		sFrame = *session.StatsFrame
@@ -188,7 +195,7 @@ func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, ca
 
 	var blocks []common.StatsBlock[BlockData]
 	for _, preset := range presets {
-		block, err := presetToBlock(preset, sFrame, cFrame)
+		block, err := b.presetToBlock(preset, sFrame, cFrame)
 		if err != nil {
 			return VehicleCard{}, err
 		}
@@ -197,14 +204,14 @@ func makeVehicleCard(presets []common.Tag, cardType common.CardType, session, ca
 	}
 
 	return VehicleCard{
-		Meta:   common.IntToRoman(glossary.Tier),
-		Title:  glossary.Name(locale),
+		Meta:   common.IntToRoman(b.vehicle(vehicleID).Tier),
+		Title:  b.vehicle(vehicleID).Name(locale),
 		Type:   cardType,
 		Blocks: blocks,
 	}, nil
 }
 
-func makeHighlightCard(highlight common.Highlight, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag, glossary models.Vehicle) (VehicleCard, error) {
+func (b *cardBuilder) makeHighlightCard(vehicleID string, highlight common.Highlight, session, career frame.VehicleStatsFrame, printer func(string) string, locale language.Tag) (VehicleCard, error) {
 	var sFrame, cFrame frame.StatsFrame
 	if session.StatsFrame != nil {
 		sFrame = *session.StatsFrame
@@ -215,7 +222,7 @@ func makeHighlightCard(highlight common.Highlight, session, career frame.Vehicle
 
 	var blocks []common.StatsBlock[BlockData]
 	for _, preset := range highlight.Blocks {
-		block, err := presetToBlock(preset, sFrame, cFrame)
+		block, err := b.presetToBlock(preset, sFrame, cFrame)
 		if err != nil {
 			return VehicleCard{}, err
 		}
@@ -225,13 +232,13 @@ func makeHighlightCard(highlight common.Highlight, session, career frame.Vehicle
 
 	return VehicleCard{
 		Meta:   printer(highlight.Label),
-		Title:  common.IntToRoman(glossary.Tier) + " " + glossary.Name(locale),
+		Title:  common.IntToRoman(b.vehicle(vehicleID).Tier) + " " + b.vehicle(vehicleID).Name(locale),
 		Type:   common.CardTypeHighlight,
 		Blocks: blocks,
 	}, nil
 }
 
-func makeOverviewCard(columns []overviewColumnBlocks, session, career frame.StatsFrame, label string, printer func(string) string, replace func(common.Tag) common.Tag) (OverviewCard, error) {
+func (b *cardBuilder) makeOverviewCard(columns []overviewColumnBlocks, session, career frame.StatsFrame, label string, printer func(string) string, replace func(common.Tag) common.Tag) (OverviewCard, error) {
 	var blocks []OverviewColumn
 	for _, columnBlocks := range columns {
 		var column []common.StatsBlock[BlockData]
@@ -240,7 +247,7 @@ func makeOverviewCard(columns []overviewColumnBlocks, session, career frame.Stat
 			if replace != nil {
 				preset = replace(p)
 			}
-			block, err := presetToBlock(preset, session, career)
+			block, err := b.presetToBlock(preset, session, career)
 			if err != nil {
 				return OverviewCard{}, err
 			}

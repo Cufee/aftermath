@@ -10,7 +10,7 @@ func statsBlockToBlock(stats prepare.StatsBlock[replay.BlockData], width float64
 	value := common.NewTextContent(common.Style{
 		Font:      common.FontLarge(),
 		FontColor: common.TextPrimary,
-	}, stats.Value.String())
+	}, stats.Value().String())
 
 	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Width: width},
 		value,
