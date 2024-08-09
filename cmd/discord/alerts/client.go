@@ -36,6 +36,9 @@ func NewClient(token string, webhookURL string) (*alertClient, error) {
 
 func (c *alertClient) Error(ctx context.Context, message, codeBlock string) error {
 	content := fmt.Sprintf("%s\n```%s```", message, codeBlock)
+	if len(content) > 1999 {
+		content = content[:1999]
+	}
 	return c.rest.PostWebhookMessage(ctx, c.webhookURL, discordgo.WebhookParams{
 		Content:  content,
 		Username: constants.FrontendAppName + " Error Report",

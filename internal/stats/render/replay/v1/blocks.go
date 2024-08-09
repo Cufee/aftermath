@@ -66,7 +66,7 @@ func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card repla
 	for _, block := range card.Blocks {
 		rightBlocks = append(rightBlocks, statsBlockToBlock(block, sizes[block.Tag]))
 		if block.Tag == prepare.TagWN8 {
-			rightBlocks = append(rightBlocks, playerWN8Icon(block.Value))
+			rightBlocks = append(rightBlocks, playerWN8Icon(block.Value()))
 		}
 	}
 	rightBlock := common.NewBlocksContent(statsRowStyle(), rightBlocks...)

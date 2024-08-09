@@ -16,8 +16,8 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width 
 	blockStyle := vehicleBlockStyle()
 	switch block.Tag {
 	case prepare.TagWN8:
-		ratingColors := common.GetWN8Colors(block.Value.Float())
-		if block.Value.Float() <= 0 {
+		ratingColors := common.GetWN8Colors(block.Value().Float())
+		if block.Value().Float() <= 0 {
 			ratingColors.Content = common.TextAlt
 			ratingColors.Background = common.TextAlt
 		}
@@ -27,32 +27,32 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width 
 		column = append(column, common.NewImageContent(common.Style{Width: specialRatingIconSize, Height: specialRatingIconSize}, iconTop))
 
 		pillColor := ratingColors.Background
-		if block.Value.Float() < 0 {
+		if block.Value().Float() < 0 {
 			pillColor = color.Transparent
 		}
 		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
-			common.NewTextContent(blockStyle.session, block.Data.Session.String()),
+			common.NewTextContent(blockStyle.session, block.Data.Session().String()),
 			common.NewBlocksContent(
 				overviewSpecialRatingPillStyle(pillColor),
-				common.NewTextContent(overviewSpecialRatingLabelStyle(ratingColors.Content), common.GetWN8TierName(block.Value.Float())),
+				common.NewTextContent(overviewSpecialRatingLabelStyle(ratingColors.Content), common.GetWN8TierName(block.Value().Float())),
 			),
 		))
 		return common.NewBlocksContent(specialRatingColumnStyle(), column...)
 
 	case prepare.TagRankedRating:
 		var column []common.Block
-		icon, ok := common.GetRatingIcon(block.Value, specialRatingIconSize)
+		icon, ok := common.GetRatingIcon(block.Value(), specialRatingIconSize)
 		if ok {
 			column = append(column, icon)
 		}
 		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
-			blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session.String()), block.Data.Session, block.Data.Career),
+			blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()),
 		))
 		return common.NewBlocksContent(specialRatingColumnStyle(), column...)
 
 	default:
 		return common.NewBlocksContent(statsBlockStyle(width),
-			common.NewTextContent(blockStyle.session, block.Data.Session.String()),
+			common.NewTextContent(blockStyle.session, block.Data.Session().String()),
 			common.NewTextContent(blockStyle.label, block.Label),
 		)
 	}

@@ -31,7 +31,7 @@ func uniqueStatsBlock(style overviewStyle, stats prepare.StatsBlock[period.Block
 func defaultStatsBlock(style overviewStyle, stats prepare.StatsBlock[period.BlockData]) common.Block {
 	valueStyle, labelStyle := style.block(stats)
 
-	blocks := []common.Block{common.NewTextContent(valueStyle, stats.Value.String())}
+	blocks := []common.Block{common.NewTextContent(valueStyle, stats.Value().String())}
 	blocks = append(blocks, common.NewTextContent(labelStyle, stats.Label))
 
 	return common.NewBlocksContent(style.blockContainer, blocks...)
@@ -41,10 +41,10 @@ func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockDa
 	var blocks []common.Block
 
 	valueStyle, labelStyle := style.block(stats)
-	valueBlock := common.NewTextContent(valueStyle, stats.Value.String())
+	valueBlock := common.NewTextContent(valueStyle, stats.Value().String())
 
-	ratingColors := common.GetWN8Colors(stats.Value.Float())
-	if stats.Value.Float() <= 0 {
+	ratingColors := common.GetWN8Colors(stats.Value().Float())
+	if stats.Value().Float() <= 0 {
 		ratingColors.Content = common.TextAlt
 		ratingColors.Background = common.TextAlt
 	}
@@ -55,9 +55,9 @@ func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockDa
 	style.blockContainer.Gap = 5
 	blocks = append(blocks, common.NewBlocksContent(style.blockContainer, iconBlockTop, valueBlock))
 
-	if stats.Value.Float() >= 0 {
+	if stats.Value().Float() >= 0 {
 		labelStyle.FontColor = ratingColors.Content
-		blocks = append(blocks, common.NewBlocksContent(overviewSpecialRatingPillStyle(ratingColors.Background), common.NewTextContent(labelStyle, common.GetWN8TierName(stats.Value.Float()))))
+		blocks = append(blocks, common.NewBlocksContent(overviewSpecialRatingPillStyle(ratingColors.Background), common.NewTextContent(labelStyle, common.GetWN8TierName(stats.Value().Float()))))
 	}
 
 	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Gap: 0}, blocks...)
