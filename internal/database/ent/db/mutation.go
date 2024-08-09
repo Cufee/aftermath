@@ -5425,6 +5425,7 @@ type DiscordInteractionMutation struct {
 	result        *string
 	event_id      *string
 	guild_id      *string
+	snowflake     *string
 	channel_id    *string
 	message_id    *string
 	_type         *models.DiscordInteractionType
@@ -5758,6 +5759,42 @@ func (m *DiscordInteractionMutation) ResetGuildID() {
 	m.guild_id = nil
 }
 
+// SetSnowflake sets the "snowflake" field.
+func (m *DiscordInteractionMutation) SetSnowflake(s string) {
+	m.snowflake = &s
+}
+
+// Snowflake returns the value of the "snowflake" field in the mutation.
+func (m *DiscordInteractionMutation) Snowflake() (r string, exists bool) {
+	v := m.snowflake
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSnowflake returns the old "snowflake" field's value of the DiscordInteraction entity.
+// If the DiscordInteraction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DiscordInteractionMutation) OldSnowflake(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSnowflake is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSnowflake requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSnowflake: %w", err)
+	}
+	return oldValue.Snowflake, nil
+}
+
+// ResetSnowflake resets all changes to the "snowflake" field.
+func (m *DiscordInteractionMutation) ResetSnowflake() {
+	m.snowflake = nil
+}
+
 // SetChannelID sets the "channel_id" field.
 func (m *DiscordInteractionMutation) SetChannelID(s string) {
 	m.channel_id = &s
@@ -5999,7 +6036,7 @@ func (m *DiscordInteractionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DiscordInteractionMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, discordinteraction.FieldCreatedAt)
 	}
@@ -6017,6 +6054,9 @@ func (m *DiscordInteractionMutation) Fields() []string {
 	}
 	if m.guild_id != nil {
 		fields = append(fields, discordinteraction.FieldGuildID)
+	}
+	if m.snowflake != nil {
+		fields = append(fields, discordinteraction.FieldSnowflake)
 	}
 	if m.channel_id != nil {
 		fields = append(fields, discordinteraction.FieldChannelID)
@@ -6053,6 +6093,8 @@ func (m *DiscordInteractionMutation) Field(name string) (ent.Value, bool) {
 		return m.EventID()
 	case discordinteraction.FieldGuildID:
 		return m.GuildID()
+	case discordinteraction.FieldSnowflake:
+		return m.Snowflake()
 	case discordinteraction.FieldChannelID:
 		return m.ChannelID()
 	case discordinteraction.FieldMessageID:
@@ -6084,6 +6126,8 @@ func (m *DiscordInteractionMutation) OldField(ctx context.Context, name string) 
 		return m.OldEventID(ctx)
 	case discordinteraction.FieldGuildID:
 		return m.OldGuildID(ctx)
+	case discordinteraction.FieldSnowflake:
+		return m.OldSnowflake(ctx)
 	case discordinteraction.FieldChannelID:
 		return m.OldChannelID(ctx)
 	case discordinteraction.FieldMessageID:
@@ -6144,6 +6188,13 @@ func (m *DiscordInteractionMutation) SetField(name string, value ent.Value) erro
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetGuildID(v)
+		return nil
+	case discordinteraction.FieldSnowflake:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSnowflake(v)
 		return nil
 	case discordinteraction.FieldChannelID:
 		v, ok := value.(string)
@@ -6246,6 +6297,9 @@ func (m *DiscordInteractionMutation) ResetField(name string) error {
 		return nil
 	case discordinteraction.FieldGuildID:
 		m.ResetGuildID()
+		return nil
+	case discordinteraction.FieldSnowflake:
+		m.ResetSnowflake()
 		return nil
 	case discordinteraction.FieldChannelID:
 		m.ResetChannelID()

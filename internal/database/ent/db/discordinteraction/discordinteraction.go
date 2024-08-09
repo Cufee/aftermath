@@ -28,6 +28,8 @@ const (
 	FieldEventID = "event_id"
 	// FieldGuildID holds the string denoting the guild_id field in the database.
 	FieldGuildID = "guild_id"
+	// FieldSnowflake holds the string denoting the snowflake field in the database.
+	FieldSnowflake = "snowflake"
 	// FieldChannelID holds the string denoting the channel_id field in the database.
 	FieldChannelID = "channel_id"
 	// FieldMessageID holds the string denoting the message_id field in the database.
@@ -60,6 +62,7 @@ var Columns = []string{
 	FieldUserID,
 	FieldEventID,
 	FieldGuildID,
+	FieldSnowflake,
 	FieldChannelID,
 	FieldMessageID,
 	FieldType,
@@ -90,6 +93,8 @@ var (
 	UserIDValidator func(string) error
 	// EventIDValidator is a validator for the "event_id" field. It is called by the builders before save.
 	EventIDValidator func(string) error
+	// DefaultSnowflake holds the default value on creation for the "snowflake" field.
+	DefaultSnowflake string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
@@ -140,6 +145,11 @@ func ByEventID(opts ...sql.OrderTermOption) OrderOption {
 // ByGuildID orders the results by the guild_id field.
 func ByGuildID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGuildID, opts...).ToFunc()
+}
+
+// BySnowflake orders the results by the snowflake field.
+func BySnowflake(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSnowflake, opts...).ToFunc()
 }
 
 // ByChannelID orders the results by the channel_id field.

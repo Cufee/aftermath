@@ -36,6 +36,20 @@ func (diu *DiscordInteractionUpdate) SetUpdatedAt(t time.Time) *DiscordInteracti
 	return diu
 }
 
+// SetSnowflake sets the "snowflake" field.
+func (diu *DiscordInteractionUpdate) SetSnowflake(s string) *DiscordInteractionUpdate {
+	diu.mutation.SetSnowflake(s)
+	return diu
+}
+
+// SetNillableSnowflake sets the "snowflake" field if the given value is not nil.
+func (diu *DiscordInteractionUpdate) SetNillableSnowflake(s *string) *DiscordInteractionUpdate {
+	if s != nil {
+		diu.SetSnowflake(*s)
+	}
+	return diu
+}
+
 // SetType sets the "type" field.
 func (diu *DiscordInteractionUpdate) SetType(mit models.DiscordInteractionType) *DiscordInteractionUpdate {
 	diu.mutation.SetType(mit)
@@ -145,6 +159,9 @@ func (diu *DiscordInteractionUpdate) sqlSave(ctx context.Context) (n int, err er
 	if value, ok := diu.mutation.UpdatedAt(); ok {
 		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := diu.mutation.Snowflake(); ok {
+		_spec.SetField(discordinteraction.FieldSnowflake, field.TypeString, value)
+	}
 	if value, ok := diu.mutation.GetType(); ok {
 		_spec.SetField(discordinteraction.FieldType, field.TypeEnum, value)
 	}
@@ -179,6 +196,20 @@ type DiscordInteractionUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (diuo *DiscordInteractionUpdateOne) SetUpdatedAt(t time.Time) *DiscordInteractionUpdateOne {
 	diuo.mutation.SetUpdatedAt(t)
+	return diuo
+}
+
+// SetSnowflake sets the "snowflake" field.
+func (diuo *DiscordInteractionUpdateOne) SetSnowflake(s string) *DiscordInteractionUpdateOne {
+	diuo.mutation.SetSnowflake(s)
+	return diuo
+}
+
+// SetNillableSnowflake sets the "snowflake" field if the given value is not nil.
+func (diuo *DiscordInteractionUpdateOne) SetNillableSnowflake(s *string) *DiscordInteractionUpdateOne {
+	if s != nil {
+		diuo.SetSnowflake(*s)
+	}
 	return diuo
 }
 
@@ -320,6 +351,9 @@ func (diuo *DiscordInteractionUpdateOne) sqlSave(ctx context.Context) (_node *Di
 	}
 	if value, ok := diuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(discordinteraction.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := diuo.mutation.Snowflake(); ok {
+		_spec.SetField(discordinteraction.FieldSnowflake, field.TypeString, value)
 	}
 	if value, ok := diuo.mutation.GetType(); ok {
 		_spec.SetField(discordinteraction.FieldType, field.TypeEnum, value)

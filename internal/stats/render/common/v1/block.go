@@ -20,6 +20,9 @@ type blockContentType int
 func (t blockContentType) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("%d", t)), nil
 }
+func (t blockContentType) String() string {
+	return fmt.Sprintf("%d", t)
+}
 
 const (
 	BlockContentTypeText blockContentType = iota
@@ -116,6 +119,9 @@ func (content contentBlocks) Render(style Style) (image.Image, error) {
 	var images []image.Image
 	for _, block := range content.blocks {
 		img, err := block.Render()
+		if err == nil && img == nil {
+			err = errors.New("image is nil for content type " + content.Type().String())
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -138,6 +144,9 @@ func (content contentBlocks) renderAsync(style Style) (image.Image, error) {
 			defer wg.Done()
 
 			img, err := b.Render()
+			if err == nil && img == nil {
+				err = errors.New("image is nil for content type " + content.Type().String())
+			}
 			if err != nil {
 				select {
 				case errCh <- err:

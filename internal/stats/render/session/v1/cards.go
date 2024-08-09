@@ -223,11 +223,11 @@ func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], sessionS
 	for _, block := range blocks {
 		var width float64
 		{
-			size := common.MeasureString(block.Data.Session.String(), sessionStyle.Font)
+			size := common.MeasureString(block.Data.Session().String(), sessionStyle.Font)
 			width = common.Max(width, size.TotalWidth+sessionStyle.PaddingX*2)
 		}
 		{
-			size := common.MeasureString(block.Data.Career.String(), careerStyle.Font)
+			size := common.MeasureString(block.Data.Career().String(), careerStyle.Font)
 			width = common.Max(width, size.TotalWidth+careerStyle.PaddingX*2)
 		}
 		{
@@ -256,7 +256,7 @@ func highlightedVehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData
 	for _, block := range blocks {
 		var width float64
 		{
-			size := common.MeasureString(block.Data.Session.String(), sessionStyle.Font)
+			size := common.MeasureString(block.Data.Session().String(), sessionStyle.Font)
 			width = common.Max(width, size.TotalWidth+sessionStyle.PaddingX*2)
 		}
 		{
@@ -283,13 +283,13 @@ func overviewColumnBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], s
 	for _, block := range blocks {
 		// adjust width if this column includes a special icon
 		if block.Tag == prepare.TagWN8 {
-			tierNameSize := common.MeasureString(common.GetWN8TierName(block.Value.Float()), overviewSpecialRatingLabelStyle(nil).Font)
+			tierNameSize := common.MeasureString(common.GetWN8TierName(block.Value().Float()), overviewSpecialRatingLabelStyle(nil).Font)
 			tierNameWithPadding := tierNameSize.TotalWidth + overviewSpecialRatingPillStyle(nil).PaddingX*2
 			presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], specialRatingIconSize, tierNameWithPadding)
 			contentWidth = common.Max(contentWidth, tierNameWithPadding)
 		}
 		if block.Tag == prepare.TagRankedRating {
-			valueSize := common.MeasureString(block.Value.String(), overviewSpecialRatingLabelStyle(nil).Font)
+			valueSize := common.MeasureString(block.Value().String(), overviewSpecialRatingLabelStyle(nil).Font)
 			presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], specialRatingIconSize, valueSize.TotalWidth)
 			contentWidth = common.Max(contentWidth, valueSize.TotalWidth)
 		}
@@ -304,9 +304,9 @@ func makeVehicleCard(vehicle session.VehicleCard, blockSizes map[string]float64,
 		style := vehicleBlockStyle()
 		var blockContent []common.Block
 		if blockShouldHaveCompareIcon(block) {
-			blockContent = append(blockContent, blockWithVehicleIcon(common.NewTextContent(style.session, block.Data.Session.String()), block.Data.Session, block.Data.Career))
+			blockContent = append(blockContent, blockWithVehicleIcon(common.NewTextContent(style.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()))
 		} else {
-			blockContent = append(blockContent, common.NewTextContent(style.session, block.Data.Session.String()))
+			blockContent = append(blockContent, common.NewTextContent(style.session, block.Data.Session().String()))
 		}
 
 		containerStyle := statsBlockStyle(blockSizes[block.Tag.String()])
@@ -315,7 +315,7 @@ func makeVehicleCard(vehicle session.VehicleCard, blockSizes map[string]float64,
 		)
 
 		if block.Tag == prepare.TagWN8 {
-			vehicleWN8 = block.Value
+			vehicleWN8 = block.Value()
 		}
 	}
 
@@ -336,7 +336,7 @@ func makeVehicleHighlightCard(vehicle session.VehicleCard, blockSizes map[string
 	for _, block := range vehicle.Blocks {
 		content = append(content,
 			common.NewBlocksContent(statsBlockStyle(blockSizes[block.Tag.String()]),
-				common.NewTextContent(style.session, block.Data.Session.String()),
+				common.NewTextContent(style.session, block.Data.Session().String()),
 				common.NewTextContent(style.label, block.Label),
 			),
 		)
@@ -384,12 +384,12 @@ func makeOverviewCard(card session.OverviewCard, columnSizes map[string]float64,
 				col = makeSpecialRatingColumn(block, blockWidth)
 			} else if blockShouldHaveCompareIcon(block) {
 				col = common.NewBlocksContent(statsBlockStyle(blockWidth),
-					blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session.String()), block.Data.Session, block.Data.Career),
+					blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()),
 					common.NewTextContent(blockStyle.label, block.Label),
 				)
 			} else {
 				col = common.NewBlocksContent(statsBlockStyle(blockWidth),
-					common.NewTextContent(blockStyle.session, block.Data.Session.String()),
+					common.NewTextContent(blockStyle.session, block.Data.Session().String()),
 					common.NewTextContent(blockStyle.label, block.Label),
 				)
 			}

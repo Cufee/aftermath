@@ -240,6 +240,10 @@ func init() {
 	discordinteractionDescEventID := discordinteractionFields[5].Descriptor()
 	// discordinteraction.EventIDValidator is a validator for the "event_id" field. It is called by the builders before save.
 	discordinteraction.EventIDValidator = discordinteractionDescEventID.Validators[0].(func(string) error)
+	// discordinteractionDescSnowflake is the schema descriptor for snowflake field.
+	discordinteractionDescSnowflake := discordinteractionFields[7].Descriptor()
+	// discordinteraction.DefaultSnowflake holds the default value on creation for the snowflake field.
+	discordinteraction.DefaultSnowflake = discordinteractionDescSnowflake.Default.(string)
 	// discordinteractionDescID is the schema descriptor for id field.
 	discordinteractionDescID := discordinteractionFields[0].Descriptor()
 	// discordinteraction.DefaultID holds the default value on creation for the id field.

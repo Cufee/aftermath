@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
@@ -19,15 +20,17 @@ func (c client) CreateDiscordInteraction(ctx context.Context, data models.Discor
 	}
 
 	record, err := c.db.DiscordInteraction.Create().
+		SetLocale(data.Locale.String()).
+		SetSnowflake(data.Snowflake).
 		SetChannelID(data.ChannelID).
+		SetMessageID(data.MessageID).
 		SetEventID(data.EventID).
 		SetGuildID(data.GuildID).
-		SetLocale(data.Locale.String()).
-		SetMessageID(data.MessageID).
 		SetMetadata(data.Meta).
 		SetResult(data.Result).
 		SetType(data.Type).
-		SetUser(user).Save(ctx)
+		SetUser(user).
+		Save(ctx)
 	if err != nil {
 		return models.DiscordInteraction{}, err
 	}
@@ -55,6 +58,7 @@ func toDiscordInteraction(record *db.DiscordInteraction) models.DiscordInteracti
 		Result:    record.Result,
 		UserID:    record.UserID,
 		GuildID:   record.GuildID,
+		Snowflake: record.Snowflake,
 		ChannelID: record.ChannelID,
 		MessageID: record.MessageID,
 
@@ -71,6 +75,7 @@ func toDiscordInteraction(record *db.DiscordInteraction) models.DiscordInteracti
 
 type interactionQuery struct {
 	id           []string
+	snowflake    []string
 	userID       []string
 	guildID      []string
 	channelID    []string
@@ -93,6 +98,14 @@ func (q *interactionQuery) build() []predicate.DiscordInteraction {
 			where = append(where, discordinteraction.ID(q.id[0]))
 		} else {
 			where = append(where, discordinteraction.IDIn(q.id...))
+		}
+	}
+	// Snowflake
+	if q.snowflake != nil {
+		if len(q.snowflake) == 1 {
+			where = append(where, discordinteraction.Snowflake(q.snowflake[0]))
+		} else {
+			where = append(where, discordinteraction.SnowflakeIn(q.snowflake...))
 		}
 	}
 	// UserID
@@ -197,6 +210,11 @@ func WithSentAfter(after time.Time) InteractionQuery {
 		iq.createdAfter = &after
 	}
 }
+func WithSnowflake(id string) InteractionQuery {
+	return func(iq *interactionQuery) {
+		iq.snowflake = append(iq.snowflake, id)
+	}
+}
 
 func (c client) FindDiscordInteractions(ctx context.Context, opts ...InteractionQuery) ([]models.DiscordInteraction, error) {
 	var query interactionQuery
@@ -204,7 +222,7 @@ func (c client) FindDiscordInteractions(ctx context.Context, opts ...Interaction
 		apply(&query)
 	}
 
-	records, err := c.db.DiscordInteraction.Query().Where(query.build()...).Limit(query.limit).All(ctx)
+	records, err := c.db.DiscordInteraction.Query().Where(query.build()...).Limit(query.limit).Order(discordinteraction.ByCreatedAt(sql.OrderDesc())).All(ctx)
 	if err != nil {
 		return nil, err
 	}

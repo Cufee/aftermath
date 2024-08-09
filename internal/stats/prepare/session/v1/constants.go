@@ -13,13 +13,19 @@ type overviewColumnBlocks struct {
 var unratedOverviewBlocks = []overviewColumnBlocks{
 	{[]common.Tag{common.TagBattles, common.TagWinrate}, BlockFlavorDefault},
 	{[]common.Tag{common.TagWN8}, BlockFlavorWN8},
-	{[]common.Tag{common.TagAvgDamage, common.TagDamageRatio}, BlockFlavorDefault},
+	{[]common.Tag{common.TagAvgTier, common.TagAvgDamage}, BlockFlavorDefault},
+}
+
+var unratedOverviewBlocksSingleVehicle = []overviewColumnBlocks{
+	{[]common.Tag{common.TagBattles, common.TagWinrate}, BlockFlavorDefault},
+	{[]common.Tag{common.TagWN8}, BlockFlavorWN8},
+	{[]common.Tag{common.TagDamageRatio, common.TagAvgDamage}, BlockFlavorDefault},
 }
 
 var ratingOverviewBlocks = []overviewColumnBlocks{
 	{[]common.Tag{common.TagBattles, common.TagWinrate}, BlockFlavorDefault},
-	{[]common.Tag{common.TagRankedRating}, BlockFlavorRating},
-	{[]common.Tag{common.TagAvgDamage, common.TagDamageRatio}, BlockFlavorDefault},
+	{[]common.Tag{common.TagWN8}, BlockFlavorWN8},
+	{[]common.Tag{common.TagDamageRatio, common.TagAvgDamage}, BlockFlavorDefault},
 }
 
 var vehicleBlocks = []common.Tag{common.TagBattles, common.TagWinrate, common.TagAvgDamage, common.TagWN8}
@@ -50,8 +56,22 @@ type OverviewCard common.StatsCard[OverviewColumn, string]
 type VehicleCard common.StatsCard[common.StatsBlock[BlockData], string]
 
 type BlockData struct {
-	Session frame.Value `json:"session"`
-	Career  frame.Value `json:"career"`
+	S frame.Value `json:"session"`
+	C frame.Value `json:"career"`
+}
+
+func (d *BlockData) Session() frame.Value {
+	if d.S == nil {
+		return frame.InvalidValue
+	}
+	return d.S
+}
+
+func (d *BlockData) Career() frame.Value {
+	if d.C == nil {
+		return frame.InvalidValue
+	}
+	return d.C
 }
 
 type blockFlavor string

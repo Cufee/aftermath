@@ -90,15 +90,15 @@ func presetToBlock(player replay.Player, preset common.Tag, printer func(string)
 
 	switch preset {
 	case TagDamageBlocked:
-		block.Value = player.Performance.DamageBlocked
+		block.SetValue(player.Performance.DamageBlocked)
 		block.Localize(printer)
 		return block, nil
 	case TagDamageAssisted:
-		block.Value = player.Performance.DamageAssisted
+		block.SetValue(player.Performance.DamageAssisted)
 		block.Localize(printer)
 		return block, nil
 	case TagDamageAssistedCombined:
-		block.Value = player.Performance.DamageAssisted + player.Performance.DamageBlocked
+		block.SetValue(player.Performance.DamageAssisted + player.Performance.DamageBlocked)
 		block.Localize(printer)
 		return block, nil
 	}

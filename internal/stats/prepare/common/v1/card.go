@@ -28,7 +28,18 @@ type StatsBlock[D any] struct {
 	Data  D           `json:"data"`
 	Tag   Tag         `json:"tag"`
 	Label string      `json:"label"`
-	Value frame.Value `json:"value"`
+	V     frame.Value `json:"value"`
+}
+
+func (b *StatsBlock[D]) Value() frame.Value {
+	if b.V == nil {
+		return frame.InvalidValue
+	}
+	return b.V
+}
+
+func (b *StatsBlock[D]) SetValue(value frame.Value) {
+	b.V = value
 }
 
 func NewBlock[D any](tag Tag, data D) StatsBlock[D] {
@@ -44,7 +55,7 @@ func (block *StatsBlock[D]) FillValue(stats frame.StatsFrame, args ...any) error
 	if err != nil {
 		return err
 	}
-	block.Value = value
+	block.V = value
 	return nil
 }
 
@@ -76,14 +87,17 @@ func PresetValue(preset Tag, stats frame.StatsFrame, args ...any) (frame.Value, 
 		return stats.DamageReceived, nil
 	case TagAvgTier:
 		if len(args) != 2 {
+			println("invalid args length")
 			return frame.InvalidValue, errors.New("invalid args length for avg_tier")
 		}
 		vehicles, ok := args[0].(map[string]frame.VehicleStatsFrame)
 		if !ok {
+			println("invalid arg0")
 			return frame.InvalidValue, errors.New("invalid args for avg_tier, first arg should be vehicles")
 		}
 		glossary, ok := args[1].(map[string]models.Vehicle)
 		if !ok {
+			println("invalid arg1")
 			return frame.InvalidValue, errors.New("invalid args for avg_tier, second arg should be glossary")
 		}
 		return avgTierValue(vehicles, glossary), nil

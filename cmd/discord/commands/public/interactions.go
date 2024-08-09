@@ -132,8 +132,11 @@ func init() {
 				case "session":
 					img, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), ioptions.AccountID, ioptions.PeriodStart, opts...)
 					if err != nil {
-						if errors.Is(err, fetch.ErrSessionNotFound) || errors.Is(err, stats.ErrAccountNotTracked) {
-							return ctx.Reply().Send("stats_refresh_interaction_error_expired")
+						if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && ioptions.Days < 1) {
+							return ctx.Reply().Send("session_error_account_was_not_tracked")
+						}
+						if errors.Is(err, fetch.ErrSessionNotFound) {
+							return ctx.Reply().Send("session_error_no_session_for_period")
 						}
 						return ctx.Err(err)
 					}
