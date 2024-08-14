@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"os"
 	"runtime/debug"
 	"time"
 
@@ -17,7 +18,7 @@ Register a command router handler for all gateway commands
 */
 func (gw *gatewayClient) RouterHandler() {
 	gw.Handler(func(s *discordgo.Session, e *discordgo.InteractionCreate) {
-		c, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		c, cancel := context.WithTimeout(context.Background(), time.Second*30)
 		defer cancel()
 
 		if e == nil {
@@ -27,7 +28,7 @@ func (gw *gatewayClient) RouterHandler() {
 		ctx, err := newContext(c, gw, *e.Interaction)
 		if err != nil {
 			log.Error().Str("interaction", e.ID).Str("type", e.Type.String()).Msg("failed to create an event context")
-			sendRawError(gw.rest, e.Interaction, "common_error_unhandled_reported")
+			sendRawError(gw.rest, e.Interaction, "Something unexpected happened and your command failed.\n*This error was reported automatically, you can also reach out to our team on Aftermath Official*")
 			return
 		}
 
@@ -79,10 +80,15 @@ func (gw *gatewayClient) RouterHandler() {
 						return
 					}
 				}
+
 				// Run command handler
 				err := cmd.Handler(ctx)
 				if err != nil {
 					log.Err(err).Str("interaction", e.ID).Str("type", e.Type.String()).Msg("interaction handler failed")
+					if os.IsTimeout(err) {
+						sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported")+"\n-# "+e.ID)
+						return
+					}
 					sendError(ctx, ctx.Localize("common_error_unhandled_reported")+"\n-# "+e.ID)
 					return
 				}
