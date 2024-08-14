@@ -157,7 +157,6 @@ func main() {
 
 	discordInternalHandlers := discordInternalHandlersFromEnv(liveCoreClient)
 	// POST /discord/internal/callback
-	// POST /discord/public/callback
 
 	var handlers []server.Handler
 	handlers = append(handlers, frontendHandlers...)
@@ -175,6 +174,7 @@ func main() {
 	sig := <-c
 	log.Info().Msgf("received %s, exiting after cleanup", sig.String())
 	gw.SetStatus(gateway.StatusYellow, "🔄 Updating...", nil)
+	gw.Disconnect()
 	cancel()
 	stopScheduler()
 	log.Info().Msg("finished cleanup tasks")
@@ -187,6 +187,19 @@ func discordGatewayFromEnv(ctx context.Context, core core.Client) (gateway.Clien
 		return nil, errors.Wrap(err, "failed to create a gateway client")
 	}
 
+	log.Debug().Msg("setting up a public commands router")
+	gw.LoadCommands(commands.LoadedPublic.Compose()...)
+	gw.LoadCommands(public.Help().Build())
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	err = gw.UpdateLoadedCommands(ctx)
+	if err != nil {
+		log.Fatal().Msgf("gateway#UpdateLoadedCommands failed %s", err)
+	}
+	gw.RouterHandler()
+
 	helpImage, ok := assets.GetLoadedImage("discord-help")
 	if !ok {
 		return nil, errors.New("discord-help image is not loaded")
@@ -197,7 +210,7 @@ func discordGatewayFromEnv(ctx context.Context, core core.Client) (gateway.Clien
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encode help image")
 	}
-	_ = gw.Handler(public.MentionHandler(buf.Bytes()))
+	gw.Handler(public.MentionHandler(buf.Bytes()))
 
 	err = gw.Connect()
 	if err != nil {
@@ -223,39 +236,7 @@ func discordGatewayFromEnv(ctx context.Context, core core.Client) (gateway.Clien
 }
 
 func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
-
 	var handlers []server.Handler
-
-	// main Discord with all the user-facing command
-	{
-		log.Debug().Msg("setting up a public commands router")
-
-		router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, constants.DiscordPrimaryPublicKey, constants.DiscordEventFirehoseEnabled)
-		if err != nil {
-			log.Fatal().Msgf("discord#NewRouterHandler failed %s", err)
-		}
-
-		router.LoadCommands(public.Help().Build())
-		router.LoadCommands(commands.LoadedPublic.Compose()...)
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-		defer cancel()
-
-		err = router.UpdateLoadedCommands(ctx)
-		if err != nil {
-			log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
-		}
-
-		fn, err := router.HTTPHandler()
-		if err != nil {
-			log.Fatal().Msgf("router#HTTPHandler failed %s", err)
-		}
-		handlers = append(handlers, server.Handler{
-			Path: "POST /discord/public/callback",
-			Func: fn,
-		})
-	}
-
 	// secondary Discord bot with mod/admin commands - permissions are still checked
 	if constants.DiscordPrivateBotEnabled {
 		log.Debug().Msg("setting up an internal commands router")

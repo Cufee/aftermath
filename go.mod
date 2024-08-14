@@ -26,6 +26,7 @@ require (
 	github.com/nlpodyssey/gopickle v0.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0
+	github.com/servusdei2018/shards/v2 v2.4.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tdewolff/minify/v2 v2.20.37
 	go.dedis.ch/protobuf v1.0.11
