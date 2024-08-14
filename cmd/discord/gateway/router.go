@@ -28,7 +28,7 @@ func (gw *gatewayClient) RouterHandler() {
 		ctx, err := newContext(c, gw, *e.Interaction)
 		if err != nil {
 			log.Error().Str("interaction", e.ID).Str("type", e.Type.String()).Msg("failed to create an event context")
-			sendRawError(gw.rest, e.Interaction, "Something unexpected happened and your command failed.\n*This error was reported automatically, you can also reach out to our team on Aftermath Official*")
+			sendRawError(gw.rest, e.Interaction, "Something unexpected happened and your command failed.\n*This error was reported automatically, you can also reach out to our team on Aftermath Official*", false)
 			return
 		}
 
@@ -86,7 +86,7 @@ func (gw *gatewayClient) RouterHandler() {
 				if err != nil {
 					log.Err(err).Str("interaction", e.ID).Str("type", e.Type.String()).Msg("interaction handler failed")
 					if os.IsTimeout(err) {
-						sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported")+"\n-# "+e.ID)
+						sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported")+"\n-# "+e.ID, true)
 						return
 					}
 					sendError(ctx, ctx.Localize("common_error_unhandled_reported")+"\n-# "+e.ID)
@@ -115,20 +115,34 @@ func sendError(ctx common.Context, message string) {
 	}
 }
 
-func sendRawError(rest *rest.Client, interaction *discordgo.Interaction, message string) {
+func sendRawError(rest *rest.Client, interaction *discordgo.Interaction, message string, acked bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
-	_, err := rest.SendInteractionResponse(ctx, interaction.ID, interaction.Token, discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
+
+	var err error
+	if acked {
+		_, err = rest.SendInteractionResponse(ctx, interaction.ID, interaction.Token, discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: message + "\n-# " + interaction.ID,
+				Components: []discordgo.MessageComponent{
+					discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							common.ButtonJoinPrimaryGuild("Need Help?"),
+						}},
+				},
+			}}, nil)
+	} else {
+		_, err = rest.UpdateInteractionResponse(ctx, interaction.AppID, interaction.Token, discordgo.InteractionResponseData{
 			Content: message + "\n-# " + interaction.ID,
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
 					Components: []discordgo.MessageComponent{
 						common.ButtonJoinPrimaryGuild("Need Help?"),
 					}},
-			},
-		}}, nil)
+			}}, nil)
+	}
+
 	if err != nil {
 		log.Err(err).Msg("failed to send an interaction response")
 	}
