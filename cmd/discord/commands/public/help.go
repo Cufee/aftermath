@@ -15,17 +15,12 @@ import (
 var euCron = cronexpr.MustParse("0 1 * * *")
 var naCron = cronexpr.MustParse("0 9 * * *")
 var asiaCron = cronexpr.MustParse("0 18 * * *")
-var fancyCron = cronexpr.MustParse("0 0 */7 * *")
 
 func sessionResetTimes(localize func(string) string) string {
 	return fmt.Sprintf(localize("commands_help_refresh_times_fmt"),
 		naCron.Next(now()).Unix(), naCron.Next(now()).Unix(),
 		euCron.Next(now()).Unix(), euCron.Next(now()).Unix(),
 		asiaCron.Next(now()).Unix(), asiaCron.Next(now()).Unix())
-}
-
-func backgroundResetTime() string {
-	return fmt.Sprintf("<t:%d:R>", fancyCron.Next(now()).Unix())
 }
 
 func now() time.Time {
@@ -37,7 +32,7 @@ func sendHelpResponse(ctx common.Context) error {
 }
 
 func reply(ctx common.Context) common.Reply {
-	return ctx.Reply().Format("commands_help_message_fmt", sessionResetTimes(ctx.Localize), backgroundResetTime()).
+	return ctx.Reply().Format("commands_help_message_fmt", sessionResetTimes(ctx.Localize)).
 		Component(
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{

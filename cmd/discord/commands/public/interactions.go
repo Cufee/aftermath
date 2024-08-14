@@ -48,7 +48,7 @@ func MentionHandler(errorImage []byte) func(s *discordgo.Session, e *discordgo.M
 					return
 				}
 
-				_, err = s.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{Content: fmt.Sprintf(printer("commands_help_message_fmt"), sessionResetTimes(printer), backgroundResetTime()), Components: []discordgo.MessageComponent{
+				_, err = s.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{Content: fmt.Sprintf(printer("commands_help_message_fmt"), sessionResetTimes(printer)), Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
 							common.ButtonInviteAftermath(printer("buttons_add_aftermath_to_your_server")),
