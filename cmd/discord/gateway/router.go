@@ -32,15 +32,7 @@ func (gw *gatewayClient) RouterHandler() {
 			return
 		}
 
-		defer func() {
-			if rec := recover(); rec != nil {
-				log.Error().Str("stack", string(debug.Stack())).Msg("panic in interaction handler")
-				sendError(ctx, ctx.Localize("common_error_unhandled_reported")+"\n-# "+e.ID)
-			}
-		}()
-
 		var matchKey string
-
 		switch e.Type {
 		case discordgo.InteractionApplicationCommand:
 			data, _ := e.Data.(discordgo.ApplicationCommandInteractionData)
@@ -55,13 +47,18 @@ func (gw *gatewayClient) RouterHandler() {
 				matchKey = "autocomplete_" + data.Name + "_" + key
 			}
 		}
-
 		if matchKey == "" {
 			log.Error().Str("interaction", e.ID).Str("type", e.Type.String()).Msg("match key not found for interaction")
-			sendError(ctx, ctx.Localize("common_error_unhandled_reported"))
+			sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported"), false)
 			return
 		}
 
+		defer func() {
+			if rec := recover(); rec != nil {
+				log.Error().Str("stack", string(debug.Stack())).Msg("panic in interaction handler")
+				sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported"), true)
+			}
+		}()
 		for _, cmd := range gw.commands {
 			if cmd.Match(matchKey) {
 				if e.Type != discordgo.InteractionApplicationCommandAutocomplete {
@@ -75,8 +72,8 @@ func (gw *gatewayClient) RouterHandler() {
 						Data: &payload,
 					})
 					if err != nil {
-						log.Err(err).Str("interaction", e.ID).Str("type", e.Type.String()).Msg("interaction handler failed")
-						sendError(ctx, ctx.Localize("common_error_unhandled_reported")+"\n-# "+e.ID)
+						log.Err(err).Str("interaction", e.ID).Str("type", e.Type.String()).Msg("failed to ack an interaction")
+						sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported"), false)
 						return
 					}
 				}
@@ -86,10 +83,10 @@ func (gw *gatewayClient) RouterHandler() {
 				if err != nil {
 					log.Err(err).Str("interaction", e.ID).Str("type", e.Type.String()).Msg("interaction handler failed")
 					if os.IsTimeout(err) {
-						sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported")+"\n-# "+e.ID, true)
+						sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported"), true)
 						return
 					}
-					sendError(ctx, ctx.Localize("common_error_unhandled_reported")+"\n-# "+e.ID)
+					sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported"), true)
 					return
 				}
 				return
@@ -98,21 +95,7 @@ func (gw *gatewayClient) RouterHandler() {
 
 		// Error
 		log.Error().Str("interaction", e.ID).Str("type", e.Type.String()).Str("key", matchKey).Msg("failed to match to a command handler")
-		sendError(ctx, ctx.Localize("common_error_unhandled_reported"))
 	})
-}
-
-func sendError(ctx common.Context, message string) {
-	err := ctx.
-		Reply().
-		Component(discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_join_primary_guild")),
-			}}).
-		Send(message)
-	if err != nil {
-		log.Err(err).Msg("failed to send an interaction response")
-	}
 }
 
 func sendRawError(rest *rest.Client, interaction *discordgo.Interaction, message string, acked bool) {
@@ -120,7 +103,7 @@ func sendRawError(rest *rest.Client, interaction *discordgo.Interaction, message
 	defer cancel()
 
 	var err error
-	if acked {
+	if !acked {
 		_, err = rest.SendInteractionResponse(ctx, interaction.ID, interaction.Token, discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
