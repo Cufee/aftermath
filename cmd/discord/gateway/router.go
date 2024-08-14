@@ -64,7 +64,6 @@ func (gw *gatewayClient) RouterHandler() {
 		for _, cmd := range gw.commands {
 			if cmd.Match(matchKey) {
 				if e.Type != discordgo.InteractionApplicationCommandAutocomplete {
-
 					// Ack the interaction
 					payload := discordgo.InteractionResponseData{}
 					if cmd.Ephemeral {
@@ -111,20 +110,22 @@ func sendError(ctx common.Context, message string) {
 }
 
 func sendRawError(rest *rest.Client, interaction *discordgo.Interaction, message string) {
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-	// defer cancel()
-	// _, err := rest.SendInteractionResponse(ctx, interaction.ID, interaction.Token, discordgo.InteractionResponse{
-	// 	Content: "Something unexpected happened and your command failed. Please try again in a few seconds." + "\n-# " + interaction.ID,
-	// 	Components: []discordgo.MessageComponent{
-	// 		discordgo.ActionsRow{
-	// 			Components: []discordgo.MessageComponent{
-	// 				common.ButtonJoinPrimaryGuild("Need Help?"),
-	// 			}},
-	// 	}},
-	// 	nil)
-	// if err != nil {
-	// 	log.Err(err).Msg("failed to send an interaction response")
-	// }
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
+	_, err := rest.SendInteractionResponse(ctx, interaction.ID, interaction.Token, discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: message + "\n-# " + interaction.ID,
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						common.ButtonJoinPrimaryGuild("Need Help?"),
+					}},
+			},
+		}}, nil)
+	if err != nil {
+		log.Err(err).Msg("failed to send an interaction response")
+	}
 }
 
 func fullAutocompleteName(options []*discordgo.ApplicationCommandInteractionDataOption) (string, bool) {
