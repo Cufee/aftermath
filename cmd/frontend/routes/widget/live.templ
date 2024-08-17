@@ -53,7 +53,7 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 	}
 	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
 	if err != nil {
-		if errors.As(err, fetch.ErrSessionNotFound) {
+		if errors.Is(err, fetch.ErrSessionNotFound) {
 			cards, _, err = ctx.Client.Stats(language.English).EmptySessionCards(ctx.Context, account.ID)
 			if err == nil {
 				return layouts.StyleOnly, customLiveWidget(settings.ID, widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil

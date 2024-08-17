@@ -19,7 +19,6 @@ Deploying Aftermath is relatively simple. You can build the binary manually, use
   - If you are planning to track a lot of users, add proxies for Wargaming API in the following format: `user:password@host:port?wgAppId=your_app_id&maxRps=20`
   - Read through all variables prefixed with `INIT_`. Those will allow you to create admin user accounts and etc.
 - Head over to General and click on Deploy.
-- Once the app is deployed and everything looks good in Logs, set the INTERACTIONS ENDPOINT URL under General Information in Discord Application settings to `https://yourdomain/discord/callback`. For example, `https://amth.one/discord/callback`.
 - You can start using Discord commands now!
 
 ### Locally with Docker Compose
