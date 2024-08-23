@@ -3,58 +3,82 @@ package common
 import (
 	"image"
 	"image/color"
+	"math"
 
 	"github.com/fogleman/gg"
 )
 
 type LogoSizingOptions struct {
-	Lines int
-
-	LineStep  int
-	LineWidth float64
-	Jump      float64
+	Lines     int
 	Gap       float64
+	BaseWidth float64
+}
+
+func (opts LogoSizingOptions) LineHeightAt(i int) float64 {
+	h := opts.BaseWidth + (opts.BaseWidth / 2 * math.Pow(float64(i+1), 1.5))
+
+	if i > opts.Lines/2 {
+		h = opts.LineHeightAt(opts.Lines - i - 1)
+	}
+	return h
+}
+func (opts LogoSizingOptions) LineWidthAt(i int) float64 {
+	return opts.BaseWidth
+}
+func (opts LogoSizingOptions) LineOffsetAt(i int) float64 {
+	o := opts.BaseWidth * math.Pow(float64(i), 1.25)
+	if i > opts.Lines/2 {
+		o = opts.LineOffsetAt(opts.Lines - i - 1)
+	}
+	return o
 }
 
 func (opts LogoSizingOptions) Height() int {
-	return ((opts.Lines/2+1)*opts.LineStep + (opts.Lines/2)*int(opts.Jump))
+	var maxHeight int
+	for line := range opts.Lines {
+		maxHeight = Max(maxHeight, int(math.RoundToEven(opts.LineHeightAt(line)+opts.LineOffsetAt(line))))
+	}
+	return maxHeight
 }
 func (opts LogoSizingOptions) Width() int {
-	return opts.Lines * (int(opts.LineWidth + opts.Gap))
+	var totalWidth int = int(math.RoundToEven(opts.Gap * float64(opts.Lines-1)))
+	for line := range opts.Lines {
+		totalWidth += int(math.RoundToEven(opts.LineWidthAt(line)))
+	}
+	return totalWidth
 }
 
 func DefaultLogoOptions() LogoSizingOptions {
 	return LogoSizingOptions{
-		Gap:       4,
-		Jump:      7,
 		Lines:     7,
-		LineStep:  12,
-		LineWidth: 6,
+		BaseWidth: 12,
+		Gap:       3,
 	}
 }
 
 func SmallLogoOptions() LogoSizingOptions {
 	return LogoSizingOptions{
-		Gap:       2,
-		Jump:      6,
 		Lines:     5,
-		LineStep:  8,
-		LineWidth: 6,
+		BaseWidth: 7,
+		Gap:       1,
 	}
 }
 
 func AftermathLogo(fillColor color.Color, opts LogoSizingOptions) image.Image {
 	ctx := gg.NewContext(opts.Width(), opts.Height())
 	for line := range opts.Lines {
-		height := opts.LineStep + opts.LineStep*line
-
-		offset := float64(opts.Height() - height - (line * int(opts.Jump)))
-		if line > opts.Lines/2 {
-			height = opts.LineStep + opts.LineStep*(opts.Lines-line-1)
-			offset = float64(opts.Height() - height - ((opts.Lines - line - 1) * int(opts.Jump)))
+		var xPos = 0.0
+		for prev := range line {
+			xPos += (opts.LineWidthAt(prev) + opts.Gap)
 		}
-
-		ctx.DrawRoundedRectangle((opts.Gap/2)+float64(line*(int(opts.LineWidth+opts.Gap))), offset, opts.LineWidth, float64(height), opts.LineWidth/2)
+		height := opts.LineHeightAt(line)
+		ctx.DrawRoundedRectangle(
+			xPos, // x
+			float64(opts.Height())-opts.LineOffsetAt(line)-height, // y
+			opts.LineWidthAt(line),  // w
+			opts.LineHeightAt(line), // h
+			opts.BaseWidth/2,        // border radius
+		)
 		ctx.SetColor(fillColor)
 		ctx.Fill()
 		ctx.ClearPath()

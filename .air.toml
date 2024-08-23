@@ -13,4 +13,4 @@ app_port = 9092
 
 [log]
 # Only show main log (silences watcher, build, runner)
-main_only = false
+main_only = true

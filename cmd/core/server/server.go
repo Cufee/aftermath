@@ -3,6 +3,8 @@ package server
 import (
 	"net/http"
 	"time"
+
+	"github.com/cufee/aftermath/internal/log"
 )
 
 type Handler struct {
@@ -28,6 +30,7 @@ func NewServer(port string, handlers []Handler, middleware ...func(http.Handler)
 		Handler:      finalHandler,
 	}
 	return func() {
+		log.Info().Str("port", port).Msg("starting a public server")
 		panic(srv.ListenAndServe())
 	}
 }
