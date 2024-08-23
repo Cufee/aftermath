@@ -178,8 +178,8 @@ func generateDiscordLogo() {
 	filename := "images/discord/logo.png"
 
 	opts := common.DefaultLogoOptions()
-	opts.Gap *= 10
 	opts.BaseWidth *= 10
+	opts.Gap *= 10
 
 	padding := 80
 	img := imaging.Fit(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Linear)
