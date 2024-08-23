@@ -148,9 +148,7 @@ func generateDiscordHelpImage(printer func(string) string) {
 			}
 		}
 
-		opts := common.DefaultLogoOptions()
-		logo := common.AftermathLogo(brandColor, opts)
-
+		logo := common.AftermathLogo(brandColor, common.DefaultLogoOptions())
 		ctx.DrawImage(imaging.Fit(logo, iconSize, iconSize, imaging.Linear), padding+((inputHeight-iconSize)/2), padding*2)
 
 		f, err := os.Create(filepath.Join(outDirPath, filename))
@@ -173,20 +171,17 @@ type point struct {
 }
 
 func generateDiscordLogo() {
+	log.Debug().Msg("generating discord logo image")
+
 	filename := "images/discord/logo.png"
 
-	opts := common.DefaultLogoOptions()
-	opts.Gap *= 10
-	opts.Jump *= 10
-	opts.LineStep *= 10
-	opts.LineWidth *= 10
-
+	opts := common.LargeLogoOptions()
 	padding := 80
-	img := imaging.Fill(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Center, imaging.Linear)
-	nctx := gg.NewContext(img.Bounds().Dx()+padding, img.Bounds().Dy()+padding)
+	img := imaging.Fit(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Linear)
+	nctx := gg.NewContext(256+padding, 256+padding)
 	nctx.SetColor(color.NRGBA{30, 31, 34, 255})
 	nctx.Clear()
-	nctx.DrawImage(img, padding/2, padding/4)
+	nctx.DrawImageAnchored(img, nctx.Width()/2, nctx.Height()/2, 0.5, 0.5)
 
 	f, err := os.Create(filepath.Join(outDirPath, filename))
 	if err != nil {
