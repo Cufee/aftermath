@@ -64,6 +64,14 @@ func SmallLogoOptions() LogoSizingOptions {
 	}
 }
 
+func LargeLogoOptions() LogoSizingOptions {
+	return LogoSizingOptions{
+		Lines:     7,
+		BaseWidth: 60,
+		Gap:       30,
+	}
+}
+
 func AftermathLogo(fillColor color.Color, opts LogoSizingOptions) image.Image {
 	ctx := gg.NewContext(opts.Width(), opts.Height())
 	for line := range opts.Lines {

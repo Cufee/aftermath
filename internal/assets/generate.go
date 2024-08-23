@@ -148,9 +148,7 @@ func generateDiscordHelpImage(printer func(string) string) {
 			}
 		}
 
-		opts := common.DefaultLogoOptions()
-		logo := common.AftermathLogo(brandColor, opts)
-
+		logo := common.AftermathLogo(brandColor, common.DefaultLogoOptions())
 		ctx.DrawImage(imaging.Fit(logo, iconSize, iconSize, imaging.Linear), padding+((inputHeight-iconSize)/2), padding*2)
 
 		f, err := os.Create(filepath.Join(outDirPath, filename))
@@ -177,10 +175,7 @@ func generateDiscordLogo() {
 
 	filename := "images/discord/logo.png"
 
-	opts := common.DefaultLogoOptions()
-	opts.BaseWidth *= 10
-	opts.Gap *= 10
-
+	opts := common.LargeLogoOptions()
 	padding := 80
 	img := imaging.Fit(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Linear)
 	nctx := gg.NewContext(256+padding, 256+padding)
