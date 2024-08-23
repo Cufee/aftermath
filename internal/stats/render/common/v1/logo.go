@@ -15,7 +15,7 @@ type LogoSizingOptions struct {
 }
 
 func (opts LogoSizingOptions) LineHeightAt(i int) float64 {
-	h := opts.BaseWidth + (opts.BaseWidth / 2 * math.Pow(float64(i+1), 1.5))
+	h := opts.BaseWidth + (opts.BaseWidth / 2 * math.Pow(float64(i+1), 1.75))
 
 	if i > opts.Lines/2 {
 		h = opts.LineHeightAt(opts.Lines - i - 1)
@@ -51,7 +51,7 @@ func (opts LogoSizingOptions) Width() int {
 func DefaultLogoOptions() LogoSizingOptions {
 	return LogoSizingOptions{
 		Lines:     7,
-		BaseWidth: 12,
+		BaseWidth: 6,
 		Gap:       3,
 	}
 }
@@ -59,8 +59,8 @@ func DefaultLogoOptions() LogoSizingOptions {
 func SmallLogoOptions() LogoSizingOptions {
 	return LogoSizingOptions{
 		Lines:     5,
-		BaseWidth: 7,
-		Gap:       1,
+		BaseWidth: 6,
+		Gap:       3,
 	}
 }
 
