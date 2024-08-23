@@ -86,12 +86,7 @@ func generateLogoOptions() {
 	for _, size := range []int{16, 32, 64, 128, 256, 512} {
 		filename := fmt.Sprintf("icon/%d.png", size)
 
-		opts := common.DefaultLogoOptions()
-		opts.Gap *= 10
-		opts.Jump *= 10
-		opts.LineStep *= 10
-		opts.LineWidth *= 10
-
+		opts := common.LargeLogoOptions()
 		img := common.AftermathLogo(brandColor, opts)
 		f, err := os.Create(filepath.Join(outDirPath, filename))
 		if err != nil {
@@ -132,12 +127,7 @@ func generateOGImages() {
 
 	{
 		filename := "og/widget.jpg"
-		opts := common.DefaultLogoOptions()
-		opts.Gap *= 10
-		opts.Jump *= 10
-		opts.LineStep *= 10
-		opts.LineWidth *= 10
-
+		opts := common.LargeLogoOptions()
 		logo := common.AftermathLogo(brandColor, opts)
 		ctx := gg.NewContext(imageWidth, imageHeight)
 
@@ -167,12 +157,7 @@ func generateOGImages() {
 
 	{
 		filename := "og/default.jpg"
-		opts := common.DefaultLogoOptions()
-		opts.Gap *= 10
-		opts.Jump *= 10
-		opts.LineStep *= 10
-		opts.LineWidth *= 10
-
+		opts := common.LargeLogoOptions()
 		logo := common.AftermathLogo(brandColor, opts)
 		ctx := gg.NewContext(imageWidth, imageHeight)
 
@@ -197,12 +182,7 @@ func generateOGImages() {
 
 	{
 		filename := "og/verify.jpg"
-		opts := common.DefaultLogoOptions()
-		opts.Gap *= 10
-		opts.Jump *= 10
-		opts.LineStep *= 10
-		opts.LineWidth *= 10
-
+		opts := common.LargeLogoOptions()
 		logo := common.AftermathLogo(brandColor, opts)
 		ctx := gg.NewContext(imageWidth, imageHeight)
 

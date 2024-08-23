@@ -165,7 +165,6 @@ func main() {
 
 	port := os.Getenv("PORT")
 	servePublic := server.NewServer(port, handlers, log.NewMiddleware(log.Logger()))
-	log.Info().Str("port", port).Msg("starting a public server")
 	go servePublic()
 
 	c := make(chan os.Signal, 1)
@@ -180,7 +179,7 @@ func main() {
 	log.Info().Msg("finished cleanup tasks")
 }
 
-func discordGatewayFromEnv(ctx context.Context, core core.Client) (gateway.Client, error) {
+func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway.Client, error) {
 	// discord gateway
 	gw, err := gateway.NewClient(core, constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages)
 	if err != nil {
@@ -191,7 +190,7 @@ func discordGatewayFromEnv(ctx context.Context, core core.Client) (gateway.Clien
 	gw.LoadCommands(commands.LoadedPublic.Compose()...)
 	gw.LoadCommands(public.Help().Build())
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	ctx, cancel := context.WithTimeout(globalCtx, time.Second*30)
 	defer cancel()
 
 	err = gw.UpdateLoadedCommands(ctx)
@@ -230,7 +229,7 @@ func discordGatewayFromEnv(ctx context.Context, core core.Client) (gateway.Clien
 				gw.SetStatus(gateway.StatusListening, "/help", nil)
 			}
 		}
-	}(ctx)
+	}(globalCtx)
 
 	return gw, nil
 }
