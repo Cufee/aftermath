@@ -1,15 +1,13 @@
 package common
 
 import (
-	"context"
 	"fmt"
 	"image"
 	"image/color"
 	"strings"
-	"sync"
 
-	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
@@ -112,18 +110,18 @@ func (content contentBlocks) Render(style Style) (image.Image, error) {
 	}
 
 	// avoid the overhead of mutex and goroutines if it is not required
-	if len(content.blocks) > 1 {
+	if len(content.blocks) > 3 {
 		return content.renderAsync(style)
 	}
 
 	var images []image.Image
 	for _, block := range content.blocks {
 		img, err := block.Render()
-		if err == nil && img == nil {
-			err = errors.New("image is nil for content type " + content.Type().String())
-		}
 		if err != nil {
 			return nil, err
+		}
+		if img == nil {
+			return nil, errors.New("image is nil for content type " + content.Type().String())
 		}
 		images = append(images, img)
 	}
@@ -131,48 +129,29 @@ func (content contentBlocks) Render(style Style) (image.Image, error) {
 }
 
 func (content contentBlocks) renderAsync(style Style) (image.Image, error) {
-	var mx sync.Mutex
-	var wg sync.WaitGroup
 	images := make([]image.Image, len(content.blocks))
-
-	errCh := make(chan error)
-	ctx, cancel := context.WithCancel(context.Background())
+	var g errgroup.Group
 
 	for i, block := range content.blocks {
-		wg.Add(1)
-		go func(i int, b Block) {
-			defer wg.Done()
-
-			img, err := b.Render()
-			if err == nil && img == nil {
-				err = errors.New("image is nil for content type " + content.Type().String())
-			}
+		i, block := i, block // Create new variables for closure
+		g.Go(func() error {
+			img, err := block.Render()
 			if err != nil {
-				select {
-				case errCh <- err:
-					cancel()
-				default:
-					log.Err(err).Any("type", b.content.Type()).Msg("unhandled error while rendering a block")
-				}
-				return
+				return err
 			}
-			mx.Lock()
+			if img == nil {
+				return fmt.Errorf("image is nil for content type %s", content.Type())
+			}
 			images[i] = img
-			mx.Unlock()
-		}(i, block)
+			return nil
+		})
 	}
-	go func() {
-		wg.Wait()
-		cancel()
-		close(errCh)
-	}()
 
-	select {
-	case <-ctx.Done():
-		return renderImages(images, style)
-	case err := <-errCh:
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
+
+	return renderImages(images, style)
 }
 
 func (content contentBlocks) Type() blockContentType {
