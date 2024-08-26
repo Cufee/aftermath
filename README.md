@@ -34,5 +34,13 @@ Deploying Aftermath is relatively simple. You can build the binary manually, use
 - Start all services with `docker compose up -d`
 - You can start using Discord commands now!
 
-## On Source Code and Licensing
-Aftermath is a **source-available** project, **not** open source. Please note that this means you are not permitted to freely modify and redistribute any part of this codebase. For more information, refer to the specific licensing terms provided in the LICENSE file.
+## Licensing
+Aftermath is licensed under a dual licensing model:
+
+1. **Open Source License**: The project is available under the GNU Affero General Public License version 3 (AGPL-3.0), making it free and open source for non-commercial and some commercial uses.
+
+2. **Commercial License**: For uses not compatible with the AGPL-3.0, such as using the software for commercial hosting without disclosing source code, a separate commercial license is available.
+
+This dual approach allows for open collaboration while also providing options for commercial use cases. For more details, please refer to the LICENSE.md file in this repository.
+
+For commercial licensing inquiries, please contact license@byvko.dev.
