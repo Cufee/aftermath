@@ -111,19 +111,19 @@ func (content contentBlocks) Render(style Style) (image.Image, error) {
 		return nil, errors.New("block content cannot be empty")
 	}
 
-	// avoid the overhead of mutex and goroutines if it is not required
-	if len(content.blocks) > 1 {
-		return content.renderAsync(style)
-	}
+	// // avoid the overhead of mutex and goroutines if it is not required
+	// if len(content.blocks) > 1 {
+	// 	return content.renderAsync(style)
+	// }
 
 	var images []image.Image
 	for _, block := range content.blocks {
 		img, err := block.Render()
-		if err == nil && img == nil {
-			err = errors.New("image is nil for content type " + content.Type().String())
-		}
 		if err != nil {
 			return nil, err
+		}
+		if img == nil {
+			return nil, errors.New("image is nil for content type " + content.Type().String())
 		}
 		images = append(images, img)
 	}

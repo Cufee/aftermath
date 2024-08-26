@@ -85,9 +85,8 @@ func renderImages(images []image.Image, style Style) (image.Image, error) {
 
 	for i, img := range images {
 		if img == nil {
-			err := errors.New("one of the images is nil")
-			log.Err(err).Stack().Msg("a nil image was passed to render")
-			return nil, err
+			log.Error().Stack().Msg("a nil image was passed to render")
+			return nil, errors.New("one of the images is nil")
 		}
 
 		posX, posY := lastX, lastY
