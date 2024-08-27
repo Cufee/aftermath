@@ -101,16 +101,3 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push-service.outputs.digest }}
           push-to-registry: true
-
-  deploy:
-    needs: build-and-push-amd64-image
-    environment: dokploy-${{ github.ref_name }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Redeploy the application using the latest image
-        env:
-          WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
-        if: env.WEBHOOK_URL != ''
-        uses: distributhor/workflow-webhook@v3
-        with:
-          webhook_url: ${{ env.WEBHOOK_URL }}
