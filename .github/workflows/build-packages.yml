@@ -24,9 +24,15 @@ jobs:
       id-token: write
       #
     steps:
+      # Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
-      # Setup docker buildx
+      # Setup Docker
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install colima
+        run: brew install colima
+        # Setup docker buildx
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
