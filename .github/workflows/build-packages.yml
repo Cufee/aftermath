@@ -75,10 +75,9 @@ jobs:
         id: push-service
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm64
-          context: .
           push: true
-          # platforms: linux/amd64,linux/arm64
+          context: .
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta-service.outputs.tags }}
           labels: ${{ steps.meta-service.outputs.labels }}
           file: Dockerfile
@@ -88,10 +87,9 @@ jobs:
         id: push-migrations
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm64
-          context: .
           push: true
-          # platforms: linux/amd64,linux/arm64
+          context: .
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta-migrations.outputs.tags }}
           labels: ${{ steps.meta-migrations.outputs.labels }}
           file: Dockerfile.migrate
