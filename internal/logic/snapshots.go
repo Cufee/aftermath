@@ -125,7 +125,11 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 
 		// get existing vehicle snapshots from db
-		existingLastBattleTimes, err := dbClient.GetVehicleLastBattleTimes(ctx, accountID, nil, models.SnapshotTypeDaily)
+		var opts []database.Query
+		if referenceID != "" {
+			opts = append(opts, database.WithReferenceIDIn(referenceID))
+		}
+		existingLastBattleTimes, err := dbClient.GetVehicleLastBattleTimes(ctx, accountID, nil, models.SnapshotTypeDaily, opts...)
 		if err != nil && !database.IsNotFound(err) {
 			accountErrors[accountID] = err
 			continue
