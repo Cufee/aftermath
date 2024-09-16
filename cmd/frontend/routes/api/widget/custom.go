@@ -310,7 +310,7 @@ var ResetSession handler.Partial = func(ctx *handler.Context) (templ.Component, 
 	go func(widgetID, accountID string) {
 		c, cancel := context.WithTimeout(context.Background(), time.Second*15)
 		defer cancel()
-		_, err := logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(accountID), false, widgetID, []string{accountID})
+		_, err := logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(accountID), true, widgetID, []string{accountID})
 		if err != nil {
 			log.Err(err).Str("widgetId", widgetID).Str("accountId", accountID).Msg("failed to refresh a session for widget")
 		}
