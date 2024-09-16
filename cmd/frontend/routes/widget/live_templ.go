@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"context"
+	"fmt"
 	"github.com/cufee/aftermath/cmd/frontend/components/widget"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
@@ -17,9 +18,12 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	backend "github.com/cufee/aftermath/internal/logic"
+	"github.com/cufee/aftermath/internal/realtime"
 	"github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
 	"net/http"
 	"slices"
@@ -55,13 +59,28 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 		return layouts.StyleOnly, nil, ctx.Error("private accounts cannot be tracked")
 	}
 
-	var opts = []client.RequestOption{client.WithWN8()}
-	if settings.SessionRefID != "" {
-		opts = append(opts, client.WithReferenceID(settings.SessionRefID))
-	}
+	var opts = []client.RequestOption{client.WithWN8(), client.WithReferenceID(settings.ID)}
 	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
 	if err != nil {
 		if errors.Is(err, fetch.ErrSessionNotFound) {
+			go func(widget, account string) {
+				c, cancel := context.WithTimeout(context.Background(), time.Second*15)
+				defer cancel()
+				_, err = backend.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(account), false, widget, []string{account})
+				if err != nil {
+					log.Err(err).Str("widgetId", widget).Str("account", account).Msg("failed to record a new session for an existing widget")
+					return
+				}
+
+				topicID := fmt.Sprintf("widget-settings-%s", widget)
+				pctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+				defer cancel()
+				err = ctx.PubSub().Send(pctx, realtime.Message{Topic: topicID, Strategy: realtime.RouteToAll, Data: "reload"})
+				if err != nil && !errors.Is(err, realtime.ErrInvalidTopic) && !errors.Is(err, realtime.ErrTopicHasNoListeners) {
+					log.Err(err).Str("topic", topicID).Str("widget", widgetID).Msg("failed to update the live widget through pubsub")
+				}
+			}(settings.ID, settings.AccountID)
+
 			cards, _, err = ctx.Client.Stats(language.English).EmptySessionCards(ctx.Context, account.ID)
 			if err == nil {
 				return layouts.StyleOnly, customLiveWidget(settings.ID, widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
