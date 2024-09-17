@@ -47,7 +47,7 @@ func filterActiveAccounts(ctx context.Context, dbClient database.Client, referen
 		if data.LastBattleTime < 1 {
 			continue
 		}
-		if s, ok := existingLastBattleTimes[id]; !force && (ok && data.LastBattleTime == int(s.Unix())) {
+		if s, ok := existingLastBattleTimes[id]; !force && (ok && !s.IsZero() && data.LastBattleTime == int(s.Unix())) {
 			// last snapshot is the same, we can skip it
 			continue
 		}
@@ -125,7 +125,11 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 
 		// get existing vehicle snapshots from db
-		existingLastBattleTimes, err := dbClient.GetVehicleLastBattleTimes(ctx, accountID, nil, models.SnapshotTypeDaily)
+		var opts []database.Query
+		if referenceID != "" {
+			opts = append(opts, database.WithReferenceIDIn(referenceID))
+		}
+		existingLastBattleTimes, err := dbClient.GetVehicleLastBattleTimes(ctx, accountID, nil, models.SnapshotTypeDaily, opts...)
 		if err != nil && !database.IsNotFound(err) {
 			accountErrors[accountID] = err
 			continue
@@ -155,7 +159,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		vehicleStats := fetch.WargamingVehiclesToFrame(vehicles.Data)
 		if len(vehicles.Data) > 0 {
 			for id, vehicle := range vehicleStats {
-				if s, ok := existingLastBattleTimes[id]; !force && ok && s.Equal(vehicle.LastBattleTime) {
+				if s, ok := existingLastBattleTimes[id]; !force && ok && !s.IsZero() && s.Equal(vehicle.LastBattleTime) {
 					// last snapshot is the same, we can skip it
 					continue
 				}
