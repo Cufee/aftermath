@@ -93,7 +93,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	session, career, err := c.fetchClient.SessionStats(ctx, accountId, from, opts.FetchOpts()...)
 	stop()
 	if err != nil {
-		if errors.Is(fetch.ErrSessionNotFound, err) {
+		if errors.Is(err, fetch.ErrSessionNotFound) {
 			go func(id string) {
 				// record a session in the background
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)

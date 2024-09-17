@@ -148,7 +148,7 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 
 	c, cancel := context.WithTimeout(ctx.Context, time.Second*5)
 	defer cancel()
-	_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(created.AccountID), true, created.ID, []string{created.AccountID})
+	_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(created.AccountID), false, created.ID, []string{created.AccountID})
 	if err != nil {
 		return nil, ctx.Err(err, "failed to create a new widget session")
 	}

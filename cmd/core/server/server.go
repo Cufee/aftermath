@@ -30,7 +30,7 @@ func NewServer(port string, handlers []Handler, middleware ...func(http.Handler)
 		Handler:      finalHandler,
 	}
 	return func() {
-		log.Info().Str("port", port).Msg("starting a public server")
+		log.Info().Str("port", port).Msg("starting a server")
 		panic(srv.ListenAndServe())
 	}
 }

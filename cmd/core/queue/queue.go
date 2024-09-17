@@ -72,7 +72,7 @@ func (q *queue) Start(ctx context.Context) (func(), error) {
 		pctx, cancel := context.WithTimeout(qctx, time.Second*5)
 		defer cancel()
 		err := q.pullAndEnqueueTasks(pctx, coreClint.Database())
-		if err != nil && !errors.Is(ErrQueueLocked, err) {
+		if err != nil && !errors.Is(err, ErrQueueLocked) {
 			log.Err(err).Msg("failed to pull tasks")
 		}
 	})
@@ -85,7 +85,7 @@ func (q *queue) Start(ctx context.Context) (func(), error) {
 	go q.startWorkers(qctx, func(_ string) {
 		if len(q.queued) < q.workerLimit/2 {
 			err := q.pullAndEnqueueTasks(qctx, coreClint.Database())
-			if err != nil && !errors.Is(ErrQueueLocked, err) {
+			if err != nil && !errors.Is(err, ErrQueueLocked) {
 				log.Err(err).Msg("failed to pull tasks")
 			}
 		}

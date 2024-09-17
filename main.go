@@ -145,7 +145,6 @@ func main() {
 				Func: private.SaveRealmSnapshots(cacheCoreClient),
 			},
 		}, log.NewMiddleware(log.Logger()))
-		log.Info().Str("port", constants.ServePrivateEndpointsPort).Msg("starting a private server")
 		go servePrivate()
 	}
 

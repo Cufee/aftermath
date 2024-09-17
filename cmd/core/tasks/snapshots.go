@@ -65,7 +65,7 @@ func CreateRecordSnapshotsTasks(client core.Client, realm string) error {
 		ScheduledAfter: time.Now(),
 		Data: map[string]string{
 			"realm": realm,
-			"force": "true",
+			"force": "false",
 		},
 		TriesLeft: 3,
 	}
