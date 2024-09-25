@@ -16,6 +16,38 @@ import (
 	"github.com/pkg/errors"
 )
 
+type AccountsWithReference map[string]string
+
+func WithReference(accountID string, referenceID string) AccountsWithReference {
+	var d AccountsWithReference = make(AccountsWithReference)
+	d[accountID] = referenceID
+	return d
+}
+
+func (d AccountsWithReference) ReferenceIDs() []string {
+	var slice []string
+	for _, reference := range d {
+		slice = append(slice, reference)
+	}
+	return slice
+}
+
+func (d AccountsWithReference) AccountIDs() []string {
+	var slice []string
+	for id := range d {
+		slice = append(slice, id)
+	}
+	return slice
+}
+
+func WithDefaultReference(ids []string) AccountsWithReference {
+	var d AccountsWithReference = make(AccountsWithReference)
+	for _, id := range ids {
+		d[id] = id
+	}
+	return d
+}
+
 type vehicleBattleData struct {
 	LastBattle time.Time
 	Battles    int
@@ -25,7 +57,7 @@ type vehicleBattleData struct {
 Filter passed in accounts and return active account ids
   - an account is considered active if it has played a battle since the last snapshot, or has no snapshots
 */
-func filterActiveAccounts(ctx context.Context, dbClient database.Client, referenceID string, accounts map[string]types.ExtendedAccount, force bool) ([]string, error) {
+func filterActiveAccounts(ctx context.Context, dbClient database.Client, input AccountsWithReference, accounts map[string]types.ExtendedAccount, force bool) ([]string, error) {
 	var ids []string
 	for id := range accounts {
 		ids = append(ids, id)
@@ -33,9 +65,8 @@ func filterActiveAccounts(ctx context.Context, dbClient database.Client, referen
 
 	// existing snapshots for accounts
 	var opts []database.Query
-	if referenceID != "" {
-		opts = append(opts, database.WithReferenceIDIn(referenceID))
-	}
+	opts = append(opts, database.WithReferenceIDIn(input.ReferenceIDs()...))
+
 	existingLastBattleTimes, err := dbClient.GetAccountLastBattleTimes(ctx, ids, models.SnapshotTypeDaily, opts...)
 	if err != nil && !database.IsNotFound(err) {
 		return nil, errors.Wrap(err, "failed to get existing snapshots")
@@ -56,8 +87,8 @@ func filterActiveAccounts(ctx context.Context, dbClient database.Client, referen
 	return needAnUpdate, nil
 }
 
-func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm string, force bool, referenceID string, accountIDs []string) (map[string]error, error) {
-	if len(accountIDs) < 1 {
+func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm string, force bool, input AccountsWithReference) (map[string]error, error) {
+	if len(input) < 1 {
 		return nil, nil
 	}
 	createdAt := time.Now()
@@ -65,12 +96,12 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	accounts, err := wgClient.BatchAccountByID(ctx, realm, accountIDs)
+	accounts, err := wgClient.BatchAccountByID(ctx, realm, input.AccountIDs())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to fetch accounts")
 	}
 
-	accountsNeedAnUpdate, err := filterActiveAccounts(ctx, dbClient, referenceID, accounts, force)
+	accountsNeedAnUpdate, err := filterActiveAccounts(ctx, dbClient, input, accounts, force)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +155,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			continue
 		}
 
-		accountRefID := referenceID
+		accountRefID := input[accountID]
 		if accountRefID == "" {
 			accountRefID = accountID
 		}
