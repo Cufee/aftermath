@@ -58,7 +58,7 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 			go func(widget, account string) {
 				c, cancel := context.WithTimeout(context.Background(), time.Second*15)
 				defer cancel()
-				_, err = backend.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(account), false, widget, []string{account})
+				_, err = backend.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(account), false, logic.WithReference(account, widget))
 				if err != nil {
 					log.Err(err).Str("widgetId", widget).Str("account", account).Msg("failed to record a new session for an existing widget")
 					return
