@@ -82,6 +82,9 @@ var gameModes = map[int]gameMode{
 	42: {42, "game_mode_gravitizing", true, nil},
 	43: {43, "game_mode_gravitizing", true, []string{"tournament"}},
 	44: {42, "game_mode_gravitizing", true, []string{"quick_tournament"}},
+	45: {45, "game_mode_tenvsten", false, nil},
+	46: {45, "game_mode_tenvsten", false, []string{"tournament"}},
+	47: {45, "game_mode_tenvsten", false, []string{"quick_tournament"}},
 }
 
 type Replay struct {
