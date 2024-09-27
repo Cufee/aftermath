@@ -24,7 +24,7 @@ var unratedOverviewBlocksSingleVehicle = []overviewColumnBlocks{
 
 var ratingOverviewBlocks = []overviewColumnBlocks{
 	{[]common.Tag{common.TagBattles, common.TagWinrate}, BlockFlavorDefault},
-	{[]common.Tag{common.TagWN8}, BlockFlavorWN8},
+	{[]common.Tag{common.TagRankedRating}, BlockFlavorRating},
 	{[]common.Tag{common.TagDamageRatio, common.TagAvgDamage}, BlockFlavorDefault},
 }
 
