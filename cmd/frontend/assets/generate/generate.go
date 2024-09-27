@@ -37,6 +37,7 @@ func main() {
 	}
 
 	generateWN8Icons()
+	generateRatingIcons()
 	generateLogoOptions()
 	generateOGImages()
 }
@@ -238,4 +239,20 @@ func wn8IconFilename(rating float32) string {
 		name = "invalid"
 	}
 	return name + ".png"
+}
+
+func generateRatingIcons() {
+	log.Debug().Msg("generating rating image assets")
+	{
+		img := common.AftermathLogo(common.TextAlt, common.DefaultLogoOptions())
+		f, err := os.Create(filepath.Join(outDirPath, "rating", "calibration.png"))
+		if err != nil {
+			panic(err)
+		}
+		err = png.Encode(f, img)
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+	}
 }

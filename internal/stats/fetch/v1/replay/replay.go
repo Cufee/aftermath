@@ -48,11 +48,11 @@ func (gm gameMode) String() string {
 }
 
 var gameModes = map[int]gameMode{
-	0:  {-1, "game_mode_unknown", false, nil},
-	2:  {2, "game_mode_training", false, nil},
+	0: {-1, "game_mode_unknown", false, nil},
+	2: {2, "game_mode_training", false, nil},
+	// 3:  GameModeCompany,
 	6:  {6, "game_mode_tutorial", true, nil},
 	18: {18, "game_mode_tutorial", true, nil},
-	// 3:  GameModeCompany,
 	1:  {1, "game_mode_regular", false, nil},
 	4:  {4, "game_mode_regular", true, []string{"tournament"}},
 	5:  {5, "game_mode_regular", true, []string{"quick_tournament"}},
@@ -82,6 +82,9 @@ var gameModes = map[int]gameMode{
 	42: {42, "game_mode_gravitizing", true, nil},
 	43: {43, "game_mode_gravitizing", true, []string{"tournament"}},
 	44: {42, "game_mode_gravitizing", true, []string{"quick_tournament"}},
+	45: {45, "game_mode_tenvsten", false, nil},
+	46: {45, "game_mode_tenvsten", false, []string{"tournament"}},
+	47: {45, "game_mode_tenvsten", false, []string{"quick_tournament"}},
 }
 
 type Replay struct {

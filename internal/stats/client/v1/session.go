@@ -71,7 +71,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 				defer cancel()
 
-				_, err := logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, c.wargaming.RealmFromAccountID(id), false, opts.referenceID, []string{id})
+				_, err := logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, c.wargaming.RealmFromAccountID(id), false, logic.WithReference(id, opts.referenceID))
 				if err != nil {
 					log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
 				}
@@ -93,13 +93,13 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	session, career, err := c.fetchClient.SessionStats(ctx, accountId, from, opts.FetchOpts()...)
 	stop()
 	if err != nil {
-		if errors.Is(fetch.ErrSessionNotFound, err) {
+		if errors.Is(err, fetch.ErrSessionNotFound) {
 			go func(id string) {
 				// record a session in the background
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 				defer cancel()
 
-				_, err := logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, c.wargaming.RealmFromAccountID(id), false, opts.referenceID, []string{id})
+				_, err := logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, c.wargaming.RealmFromAccountID(id), false, logic.WithReference(id, opts.referenceID))
 				if err != nil {
 					log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
 				}
