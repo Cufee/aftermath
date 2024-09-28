@@ -14,10 +14,10 @@ const DefaultAccountEU = "20000555006"
 const DefaultAccountAS = "30000666007"
 
 var staticAccounts = map[string]models.Account{
-	DefaultAccountNA:      {ID: DefaultAccountNA, Realm: "NA", Nickname: "Vovko_Vovko_Vovko", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan1", ClanTag: "TEST1"},
-	DefaultAccountNAShort: {ID: DefaultAccountNA, Realm: "NA", Nickname: "test_acc", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan1", ClanTag: "TEST1"},
-	DefaultAccountEU:      {ID: DefaultAccountEU, Realm: "EU", Nickname: "test_account_eu_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan2", ClanTag: "TEST2"},
-	DefaultAccountAS:      {ID: DefaultAccountAS, Realm: "AS", Nickname: "test_account_as_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan3", ClanTag: "TEST3"},
+	DefaultAccountNA:      {ID: DefaultAccountNA, Realm: "NA", Nickname: "Stylish_Player_One", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan1", ClanTag: "AMTH"},
+	DefaultAccountNAShort: {ID: DefaultAccountNA, Realm: "NA", Nickname: "test_acc", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan1", ClanTag: "AMTH"},
+	DefaultAccountEU:      {ID: DefaultAccountEU, Realm: "EU", Nickname: "test_account_eu_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan2", ClanTag: "AMTH"},
+	DefaultAccountAS:      {ID: DefaultAccountAS, Realm: "AS", Nickname: "test_account_as_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan3", ClanTag: "AMTH"},
 }
 
 var (
@@ -34,7 +34,7 @@ var (
 		EnemiesSpotted:       240,
 		CapturePoints:        0,
 		DroppedCapturePoints: 0,
-		Rating:               100,
+		Rating:               228,
 	}
 	DefaultStatsFrameBig2 = frame.StatsFrame{
 		Battles:              45,
@@ -49,7 +49,7 @@ var (
 		EnemiesSpotted:       240 / 2,
 		CapturePoints:        0,
 		DroppedCapturePoints: 0,
-		Rating:               100,
+		Rating:               228,
 	}
 	DefaultStatsFrameSmall1 = frame.StatsFrame{
 		Battles:              20,
@@ -64,7 +64,7 @@ var (
 		EnemiesSpotted:       24 * 2,
 		CapturePoints:        0,
 		DroppedCapturePoints: 0,
-		Rating:               100,
+		Rating:               228,
 	}
 	DefaultStatsFrameSmall2 = frame.StatsFrame{
 		Battles:              10,
@@ -79,7 +79,7 @@ var (
 		EnemiesSpotted:       24,
 		CapturePoints:        0,
 		DroppedCapturePoints: 0,
-		Rating:               100,
+		Rating:               228,
 	}
 )
 
