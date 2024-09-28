@@ -141,6 +141,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	stop()
 
 	stop = meta.Timer("prepare#NewCards")
+
 	cards, err := prepare.NewCards(session, career, glossary, opts.PrepareOpts(printer, c.locale)...)
 	stop()
 	if err != nil {

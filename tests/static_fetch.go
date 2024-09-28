@@ -94,6 +94,18 @@ func (c *staticTestingFetch) SessionStats(ctx context.Context, id string, sessio
 		return fetch.AccountStatsOverPeriod{}, fetch.AccountStatsOverPeriod{}, err
 	}
 
+	session.RegularBattles.SetWN8(3495)
+	career.RegularBattles.SetWN8(3495)
+
+	for id, stats := range session.RegularBattles.Vehicles {
+		stats.SetWN8(3495)
+		session.RegularBattles.Vehicles[id] = stats
+	}
+	for id, stats := range career.RegularBattles.Vehicles {
+		stats.SetWN8(3295)
+		career.RegularBattles.Vehicles[id] = stats
+	}
+
 	return session, career, nil
 }
 
