@@ -481,22 +481,6 @@ func (c *multiSourceClient) CurrentTankAverages(ctx context.Context) (map[string
 	return c.blitzstars.CurrentTankAverages(ctx)
 }
 
-func (c *multiSourceClient) PlayersAchievementsLeaderboard(ctx context.Context, playerID string, from time.Time, opts ...StatsOption) (any, error) {
-	// achievement snapshots are stored for overall stats and per vehicle
-	// for overall snapshot, reference ID should be accountID. for vehicles, reference should be vehicleID
-
-	var options = statsOptions{snapshotType: models.SnapshotTypeDaily}
-	for _, apply := range opts {
-		apply(&options)
-	}
-
-	if days := time.Since(from).Hours() / 24; from.IsZero() || days >= 91 {
-		return nil, ErrInvalidSessionStart
-	}
-
-	return nil, nil
-}
-
 func (c *multiSourceClient) ReplayRemote(ctx context.Context, fileURL string) (Replay, error) {
 	unpacked, err := replay.UnpackRemote(ctx, fileURL)
 	if err != nil {
