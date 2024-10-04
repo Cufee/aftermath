@@ -77,11 +77,8 @@ var validFuzzyServers = map[string]string{
 }
 
 func accountsFromBadInput(ctx context.Context, client fetch.Client, input string) ([]fetch.AccountWithRealm, error) {
-	println(input)
-
 	// input is most likely a valid account nickname
 	if commands.ValidatePlayerName(input) {
-		println("broad search")
 		return client.BroadSearch(ctx, input)
 	}
 
@@ -91,8 +88,6 @@ func accountsFromBadInput(ctx context.Context, client fetch.Client, input string
 		if len(split) != 2 {
 			continue
 		}
-
-		println(sep, input)
 
 		for value, realm := range validFuzzyServers {
 			var search string

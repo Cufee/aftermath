@@ -8,11 +8,17 @@ WORKDIR /workspace
 COPY go.mod go.sum ./
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go mod download
 
+# Install templ
+RUN go install github.com/a-h/templ/cmd/templ@latest
+
 COPY ./ ./
 
 # build a fully standalone binary with zero dependencies
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/assets
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./cmd/frontend/assets/generate
+
+RUN templ generate
+
 RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux go build -ldflags='-s -w' -trimpath -o /bin/aftermath .
 
 # Make a scratch container with required files and binary
