@@ -172,7 +172,6 @@ func main() {
 	sig := <-c
 	log.Info().Msgf("received %s, exiting after cleanup", sig.String())
 	gw.SetStatus(gateway.StatusYellow, "🔄 Updating...", nil)
-	gw.Disconnect()
 	cancel()
 	stopScheduler()
 	log.Info().Msg("finished cleanup tasks")
