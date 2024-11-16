@@ -73,7 +73,7 @@ func newStatsRefreshButton(data models.DiscordInteraction) discordgo.MessageComp
 				ID:   "1255647885723435048",
 				Name: "aftermath_refresh",
 			},
-			CustomID: fmt.Sprintf("refresh_stats_from_button_%s", data.ID),
+			CustomID: fmt.Sprintf("refresh_stats_from_button#%s", data.ID),
 		}},
 	}
 }
@@ -83,8 +83,10 @@ func init() {
 		builder.NewCommand("refresh_stats_from_button").
 			Middleware(middleware.RequirePermissions(permissions.UseImageCommands, permissions.UseTextCommands)).
 			ComponentType(func(customID string) bool {
-				return strings.HasPrefix(customID, "refresh_stats_from_button_") ||
-					strings.HasPrefix(customID, "session_refresh_") // legacy buttons
+				return strings.HasPrefix(customID, "refresh_stats_from_button#") ||
+					// legacy buttons
+					strings.HasPrefix(customID, "refresh_stats_from_button_") ||
+					strings.HasPrefix(customID, "session_refresh_")
 			}).
 			Handler(func(ctx common.Context) error {
 				data, ok := ctx.ComponentData()
@@ -92,7 +94,7 @@ func init() {
 					log.Error().Msg("failed to get component data on interaction command")
 					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
-				interactionID := strings.ReplaceAll(data.CustomID, "refresh_stats_from_button_", "")
+				interactionID := strings.ReplaceAll(data.CustomID, "refresh_stats_from_button#", "")
 				if interactionID == "" {
 					log.Error().Str("id", data.CustomID).Msg("failed to get interaction id from custom id")
 					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
