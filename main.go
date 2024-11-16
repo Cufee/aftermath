@@ -123,6 +123,10 @@ func main() {
 	if constants.ServePrivateEndpointsEnabled {
 		servePrivate := server.NewServer(constants.ServePrivateEndpointsPort, []server.Handler{
 			{
+				Path: "GET /metrics",
+				Func: instrument.Handler(),
+			},
+			{
 				Path: "GET /debug/profile/{name}",
 				Func: func(w http.ResponseWriter, r *http.Request) {
 					pprof.Handler(r.PathValue("name")).ServeHTTP(w, r)
@@ -168,8 +172,6 @@ func main() {
 
 	handlers = append(handlers, discordPublicHandlersFromEnv(liveCoreClient, instrument)...)   // POST /discord/public/callback
 	handlers = append(handlers, discordInternalHandlersFromEnv(liveCoreClient, instrument)...) // POST /discord/internal/callback
-
-	handlers = append(handlers, server.Handler{Path: "GET /prometheus", Func: instrument.Handler()})
 
 	port := os.Getenv("PORT")
 	servePublic := server.NewServer(port, handlers, log.NewMiddleware(log.Logger()))
