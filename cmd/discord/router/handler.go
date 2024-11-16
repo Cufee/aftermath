@@ -67,7 +67,7 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 		}
 		if !needsAck {
 			// discord requires a response within 3 seconds, allow 250ms on top of that to handle an error or timeout
-			ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*2750)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*2750)
 			defer cancel()
 
 			router.handleInteraction(ctx, data, cmd) // wait for the handler to finish
@@ -207,12 +207,6 @@ func sendPingReply(w http.ResponseWriter) {
 }
 
 func (r *router) sendInteractionReply(interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
-	// some interactions already have a failed UI state
-	if interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
-		log.Error().Str("id", interaction.ID).Msg("autocomplete interaction failed")
-		return
-	}
-
 	// if the interaction type is unknown, make a new error response
 	if !slices.Contains(supportedInteractionTypes, interaction.Type) {
 		printer, err := localization.NewPrinterWithFallback("discord", language.English)
@@ -231,6 +225,12 @@ func (r *router) sendInteractionReply(interaction discordgo.Interaction, data di
 			},
 		}
 		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
+	}
+
+	// autocomplete interactions require a reply within 3 seconds, but since the UI error state is decent, we can just skip the reply
+	if interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
+		log.Error().Str("content", data.Content).Str("id", interaction.ID).Msg("autocomplete interaction failed")
+		return
 	}
 
 	res := retry.Retry(func() (struct{}, error) {

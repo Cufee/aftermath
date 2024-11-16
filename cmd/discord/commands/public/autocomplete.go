@@ -133,11 +133,12 @@ func init() {
 
 				sCtx, cancel := context.WithTimeout(ctx.Ctx(), time.Millisecond*2500)
 				defer cancel()
+
 				accounts, err := ctx.Core().Fetch().BroadSearch(sCtx, options.NicknameSearch)
 				if err != nil {
-					if os.IsTimeout(err) {
-						log.Err(err).Msg("broad search accounts timed out")
-						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_timed_out"), Value: "error#nickname_autocomplete_timed_out"}).Send()
+					if os.IsTimeout(err) || sCtx.Err() != nil {
+						log.Err(sCtx.Err()).Msg("broad search accounts timed out")
+						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("wargaming_error_outage_short"), Value: "error#wargaming_error_outage_short"}).Send()
 					}
 
 					log.Err(err).Msg("failed to broad search accounts")
