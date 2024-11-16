@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"embed"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/fs"
@@ -154,13 +155,12 @@ func main() {
 		log.Fatal().Err(err).Msg("frontend#Handlers failed")
 	}
 
-	discordInternalHandlers := discordInternalHandlersFromEnv(liveCoreClient)
-	// POST /discord/internal/callback
-
 	var handlers []server.Handler
 	handlers = append(handlers, frontendHandlers...)
-	handlers = append(handlers, discordInternalHandlers...)
 	handlers = append(handlers, redirectHandlersFromEnv()...)
+
+	handlers = append(handlers, discordPublicHandlersFromEnv(liveCoreClient)...)   // POST /discord/public/callback
+	handlers = append(handlers, discordInternalHandlersFromEnv(liveCoreClient)...) // POST /discord/internal/callback
 
 	port := os.Getenv("PORT")
 	servePublic := server.NewServer(port, handlers, log.NewMiddleware(log.Logger()))
@@ -184,19 +184,6 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a gateway client")
 	}
-
-	log.Debug().Msg("setting up a public commands router")
-	gw.LoadCommands(commands.LoadedPublic.Compose()...)
-	gw.LoadCommands(public.Help().Build())
-
-	ctx, cancel := context.WithTimeout(globalCtx, time.Second*30)
-	defer cancel()
-
-	err = gw.UpdateLoadedCommands(ctx)
-	if err != nil {
-		log.Fatal().Msgf("gateway#UpdateLoadedCommands failed %s", err)
-	}
-	gw.RouterHandler()
 
 	helpImage, ok := assets.GetLoadedImage("discord-help")
 	if !ok {
@@ -233,13 +220,51 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway
 	return gw, nil
 }
 
+func discordPublicHandlersFromEnv(coreClient core.Client) []server.Handler {
+	var handlers []server.Handler
+
+	publicKey, err := hex.DecodeString(constants.DiscordPrimaryPublicKey)
+	if err != nil {
+		log.Fatal().Msg("invalid discord primary public key")
+	}
+
+	log.Debug().Msg("setting up a public commands router handlers")
+	router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, router.NewPublicKeyValidator(publicKey))
+	if err != nil {
+		log.Fatal().Msgf("router#NewRouterHandler failed %s", err)
+	}
+	router.LoadCommands(public.Help().Build())
+	router.LoadCommands(commands.LoadedPublic.Compose()...)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+	err = router.UpdateLoadedCommands(ctx)
+	if err != nil {
+		log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
+	}
+	fn, err := router.HTTPHandler()
+	if err != nil {
+		log.Fatal().Msgf("router#HTTPHandler failed %s", err)
+	}
+	handlers = append(handlers, server.Handler{
+		Path: "POST /discord/public/callback",
+		Func: fn,
+	})
+
+	return handlers
+}
+
 func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
 	var handlers []server.Handler
 	// secondary Discord bot with mod/admin commands - permissions are still checked
 	if constants.DiscordPrivateBotEnabled {
 		log.Debug().Msg("setting up an internal commands router")
 
-		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, constants.DiscordPrivatePublicKey, false)
+		publicKey, err := hex.DecodeString(constants.DiscordPrivatePublicKey)
+		if err != nil {
+			log.Fatal().Msg("invalid discord private public key")
+		}
+
+		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, router.NewPublicKeyValidator(publicKey))
 		if err != nil {
 			log.Fatal().Msgf("discord#NewHTTPRouter failed %s", err)
 		}

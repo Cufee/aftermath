@@ -70,7 +70,6 @@ func (c *gatewayClient) Disconnect() error {
 
 func (c *gatewayClient) Handler(fn interface{}) {
 	c.manager.AddHandler(fn)
-	return
 }
 
 func (c *gatewayClient) Session(guildID string) *discordgo.Session {
