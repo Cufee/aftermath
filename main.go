@@ -203,6 +203,15 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway
 
 	gw.SetStatus(gateway.StatusListening, "/help", nil)
 	go func(ctx context.Context) {
+		// the status update gets stuck sometimes, probably due to some Discord cache
+		time.Sleep(time.Second * 15)
+		gw.SetStatus(gateway.StatusListening, "/help", nil)
+
+		time.Sleep(time.Second * 45)
+		gw.SetStatus(gateway.StatusListening, "/help", nil)
+	}(globalCtx)
+
+	go func(ctx context.Context) {
 		// update the status every hour
 		ticker := time.NewTicker(time.Hour * 1)
 		for {
