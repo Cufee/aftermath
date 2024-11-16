@@ -1,9 +1,12 @@
 package public
 
 import (
+	"context"
 	"fmt"
+	"os"
 	"slices"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/bwmarrin/discordgo"
@@ -128,8 +131,15 @@ func init() {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_invalid_input"), Value: "error#nickname_autocomplete_invalid_input"}).Send()
 				}
 
-				accounts, err := ctx.Core().Fetch().BroadSearch(ctx.Ctx(), options.NicknameSearch)
+				sCtx, cancel := context.WithTimeout(ctx.Ctx(), time.Millisecond*2500)
+				defer cancel()
+				accounts, err := ctx.Core().Fetch().BroadSearch(sCtx, options.NicknameSearch)
 				if err != nil {
+					if os.IsTimeout(err) {
+						log.Err(err).Msg("broad search accounts timed out")
+						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_timed_out"), Value: "error#nickname_autocomplete_timed_out"}).Send()
+					}
+
 					log.Err(err).Msg("failed to broad search accounts")
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
 				}

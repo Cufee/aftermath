@@ -1,13 +1,9 @@
 package router
 
 import (
-	"bytes"
 	"context"
-	"crypto/ed25519"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"runtime/debug"
 	"slices"
@@ -27,64 +23,14 @@ import (
 
 var supportedInteractionTypes = []discordgo.InteractionType{discordgo.InteractionApplicationCommand, discordgo.InteractionMessageComponent, discordgo.InteractionApplicationCommandAutocomplete, discordgo.InteractionModalSubmit}
 
-// https://github.com/bsdlp/discord-interactions-go/blob/main/interactions/verify.go
-func verifyPublicKey(r *http.Request, key ed25519.PublicKey) bool {
-	var msg bytes.Buffer
-
-	signature := r.Header.Get("X-Signature-Ed25519")
-	if signature == "" {
-		return false
-	}
-
-	sig, err := hex.DecodeString(signature)
-	if err != nil {
-		return false
-	}
-
-	if len(sig) != ed25519.SignatureSize || sig[63]&224 != 0 {
-		return false
-	}
-
-	timestamp := r.Header.Get("X-Signature-Timestamp")
-	if timestamp == "" {
-		return false
-	}
-
-	msg.WriteString(timestamp)
-
-	defer r.Body.Close()
-	var body bytes.Buffer
-
-	// at the end of the function, copy the original body back into the request
-	defer func() {
-		r.Body = io.NopCloser(&body)
-	}()
-
-	// copy body into buffers
-	_, err = io.Copy(&msg, io.TeeReader(r.Body, &body))
-	if err != nil {
-		return false
-	}
-
-	return ed25519.Verify(key, msg.Bytes(), sig)
-}
-
 /*
 Returns a handler for the current router
 */
 func (router *router) HTTPHandler() (http.HandlerFunc, error) {
-	if router.publicKey == "" {
-		return nil, errors.New("missing publicKey")
-	}
-	hexDecodedKey, err := hex.DecodeString(router.publicKey)
-	if err != nil {
-		return nil, errors.New("invalid public key")
-	}
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		if ok := verifyPublicKey(r, hexDecodedKey); !ok {
+		if ok, _ := router.validator.Validate(r); !ok {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			log.Debug().Msg("invalid request received on callback handler")
 			return
@@ -120,7 +66,11 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 			return
 		}
 		if !needsAck {
-			router.handleInteraction(data, cmd) // we wait for the handler to reply
+			// discord requires a response within 3 seconds, allow 250ms on top of that to handle an error or timeout
+			ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*2750)
+			defer cancel()
+
+			router.handleInteraction(ctx, data, cmd) // wait for the handler to finish
 			return
 		}
 
@@ -156,7 +106,13 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 		}
 
 		// run the interaction handler
-		go router.handleInteraction(data, cmd)
+		go func() {
+			// while the limit for a deferred reply is on a scale of minutes, we probably do not want a user to wait that long
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*7)
+			defer cancel()
+
+			router.handleInteraction(ctx, data, cmd)
+		}()
 	}, nil
 }
 
@@ -190,10 +146,7 @@ func (r *router) routeInteraction(interaction discordgo.Interaction) (builder.Co
 	return builder.Command{}, fmt.Errorf("failed to match %s to a command handler", matchKey)
 }
 
-func (r *router) handleInteraction(interaction discordgo.Interaction, command builder.Command) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-
+func (r *router) handleInteraction(ctx context.Context, interaction discordgo.Interaction, command builder.Command) {
 	cCtx, err := newContext(ctx, interaction, r.restClient, r.core, r.events)
 	if err != nil {
 		log.Err(err).Msg("failed to create a common.Context for a handler")

@@ -28,9 +28,6 @@ var (
 
 var (
 	DiscordContentModerationChannelID = mustGetEnv("DISCORD_CONTENT_MODERATION_CHANNEL_ID")
-
-	DiscordEventFirehoseEnabled    = os.Getenv("DISCORD_EVENT_FIREHOSE_WEBHOOK_URL") != ""
-	DiscordEventFirehoseWebhookURL = mustGetEnv("DISCORD_EVENT_FIREHOSE_WEBHOOK_URL", func() bool { return !DiscordEventFirehoseEnabled })
 )
 
 var (

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"embed"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/fs"
@@ -222,8 +223,13 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway
 func discordPublicHandlersFromEnv(coreClient core.Client) []server.Handler {
 	var handlers []server.Handler
 
+	publicKey, err := hex.DecodeString(constants.DiscordPrimaryPublicKey)
+	if err != nil {
+		log.Fatal().Msg("invalid discord primary public key")
+	}
+
 	log.Debug().Msg("setting up a public commands router handlers")
-	router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, constants.DiscordPrimaryPublicKey, constants.DiscordEventFirehoseEnabled)
+	router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, router.NewPublicKeyValidator(publicKey))
 	if err != nil {
 		log.Fatal().Msgf("router#NewRouterHandler failed %s", err)
 	}
@@ -253,7 +259,12 @@ func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
 	if constants.DiscordPrivateBotEnabled {
 		log.Debug().Msg("setting up an internal commands router")
 
-		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, constants.DiscordPrivatePublicKey, false)
+		publicKey, err := hex.DecodeString(constants.DiscordPrivatePublicKey)
+		if err != nil {
+			log.Fatal().Msg("invalid discord private public key")
+		}
+
+		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, router.NewPublicKeyValidator(publicKey))
 		if err != nil {
 			log.Fatal().Msgf("discord#NewHTTPRouter failed %s", err)
 		}

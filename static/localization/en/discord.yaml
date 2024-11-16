@@ -297,6 +297,10 @@
   value: "Nothing found. Please select a nickname from the autocompletion list"
   context: Search returned no results when a user was typing the name in autocomplete
 
+- key: nickname_autocomplete_timed_out
+  value: "It looks like Wargaming are having some issues, please try again"
+  context: Request to search accounts timed out due to Wargaming being slow
+
 - key: nickname_autocomplete_not_enough_length
   value: "Continue typing to search for accounts..."
   context: Shown when a user just started typing and there are not enough characters to search
