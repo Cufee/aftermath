@@ -82,7 +82,7 @@ func (gw *gatewayClient) RouterHandler() {
 				err := cmd.Handler(ctx)
 				if err != nil {
 					log.Err(err).Str("interaction", e.ID).Str("type", e.Type.String()).Msg("interaction handler failed")
-					if os.IsTimeout(err) {
+					if os.IsTimeout(err) || ctx.Ctx().Err() != nil {
 						sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported"), true)
 						return
 					}

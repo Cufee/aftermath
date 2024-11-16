@@ -2,14 +2,12 @@ package router
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/rest"
-	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
@@ -109,11 +107,6 @@ func (c *routeContext) saveInteractionEvent(msg discordgo.Message, msgErr error,
 	data, err := c.core.Database().CreateDiscordInteraction(ctx, data)
 	if err != nil {
 		log.Err(err).Msg("failed to save interaction event")
-	}
-
-	if constants.DiscordEventFirehoseEnabled && c.events != nil {
-		content := fmt.Sprintf("```ID: %s\nSnowflake: %s\nResult: %s\nError: %v\nEventID: %s\nUserID: %s\nGuildID: %s\nChannelID: %s\nMessageID: %s```", data.ID, data.Snowflake, data.Result, data.Meta["error"], data.EventID, data.UserID, data.GuildID, data.ChannelID, data.MessageID)
-		c.events.push(content)
 	}
 }
 func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Message, error) {

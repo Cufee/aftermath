@@ -172,24 +172,46 @@ type point struct {
 
 func generateDiscordLogo() {
 	log.Debug().Msg("generating discord logo image")
+	{
+		filename := "images/discord/logo.png"
 
-	filename := "images/discord/logo.png"
+		opts := common.LargeLogoOptions()
+		padding := 80
+		img := imaging.Fit(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Linear)
+		nctx := gg.NewContext(256+padding, 256+padding)
+		nctx.SetColor(color.NRGBA{30, 31, 34, 255})
+		nctx.Clear()
+		nctx.DrawImage(img, padding/2+(256-img.Bounds().Dx())/2, padding/6+(256-img.Bounds().Dy())/2)
 
-	opts := common.LargeLogoOptions()
-	padding := 80
-	img := imaging.Fit(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Linear)
-	nctx := gg.NewContext(256+padding, 256+padding)
-	nctx.SetColor(color.NRGBA{30, 31, 34, 255})
-	nctx.Clear()
-	nctx.DrawImageAnchored(img, nctx.Width()/2, nctx.Height()/2, 0.5, 0.5)
-
-	f, err := os.Create(filepath.Join(outDirPath, filename))
-	if err != nil {
-		panic(err)
+		f, err := os.Create(filepath.Join(outDirPath, filename))
+		if err != nil {
+			panic(err)
+		}
+		err = png.Encode(f, nctx.Image())
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
 	}
-	err = png.Encode(f, nctx.Image())
-	if err != nil {
-		panic(err)
+	{
+		filename := "images/discord/logo_centered.png"
+
+		opts := common.LargeLogoOptions()
+		padding := 80
+		img := imaging.Fit(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Linear)
+		nctx := gg.NewContext(256+padding, 256+padding)
+		nctx.SetColor(color.NRGBA{30, 31, 34, 255})
+		nctx.Clear()
+		nctx.DrawImageAnchored(img, nctx.Width()/2, nctx.Height()/2, 0.5, 0.5)
+
+		f, err := os.Create(filepath.Join(outDirPath, filename))
+		if err != nil {
+			panic(err)
+		}
+		err = png.Encode(f, nctx.Image())
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
 	}
-	f.Close()
 }

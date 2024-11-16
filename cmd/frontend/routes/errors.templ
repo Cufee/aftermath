@@ -3,10 +3,13 @@ package routes
 import (
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
+	"net/http"
 )
 
 var GenericError handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	message := ctx.Query("message")
+	ctx.SetStatus(http.StatusInternalServerError)
+
 	return layouts.Main, genericErrorPage(message), nil
 }
 
@@ -18,6 +21,8 @@ templ genericErrorPage(message string) {
 
 var ErrorNotFound handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
 	message := "/" + ctx.Path("pathname") + " does not exist"
+	ctx.SetStatus(http.StatusNotFound)
+
 	return layouts.Main, notFoundPage(message), nil
 }
 
