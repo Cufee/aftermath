@@ -38,6 +38,7 @@ import (
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
+	"github.com/cufee/aftermath/internal/metrics"
 	"github.com/cufee/aftermath/internal/realtime"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 
@@ -74,6 +75,12 @@ func main() {
 	log.SetupGlobalLogger(func(l zerolog.Logger) zerolog.Logger {
 		return l.Level(level)
 	})
+
+	// Metrics instrument
+	instrument, err := metrics.NewInstrument()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to create a new metrics instrument")
+	}
 
 	if constants.DiscordAlertsEnabled {
 		alertClient, err := alerts.NewClient(constants.DiscordPrimaryToken, constants.DiscordAlertsWebhookURL)
@@ -115,6 +122,10 @@ func main() {
 
 	if constants.ServePrivateEndpointsEnabled {
 		servePrivate := server.NewServer(constants.ServePrivateEndpointsPort, []server.Handler{
+			{
+				Path: "GET /metrics",
+				Func: instrument.Handler(),
+			},
 			{
 				Path: "GET /debug/profile/{name}",
 				Func: func(w http.ResponseWriter, r *http.Request) {
@@ -159,8 +170,8 @@ func main() {
 	handlers = append(handlers, frontendHandlers...)
 	handlers = append(handlers, redirectHandlersFromEnv()...)
 
-	handlers = append(handlers, discordPublicHandlersFromEnv(liveCoreClient)...)   // POST /discord/public/callback
-	handlers = append(handlers, discordInternalHandlersFromEnv(liveCoreClient)...) // POST /discord/internal/callback
+	handlers = append(handlers, discordPublicHandlersFromEnv(liveCoreClient, instrument)...)   // POST /discord/public/callback
+	handlers = append(handlers, discordInternalHandlersFromEnv(liveCoreClient, instrument)...) // POST /discord/internal/callback
 
 	port := os.Getenv("PORT")
 	servePublic := server.NewServer(port, handlers, log.NewMiddleware(log.Logger()))
@@ -172,7 +183,6 @@ func main() {
 	sig := <-c
 	log.Info().Msgf("received %s, exiting after cleanup", sig.String())
 	gw.SetStatus(gateway.StatusYellow, "🔄 Updating...", nil)
-	gw.Disconnect()
 	cancel()
 	stopScheduler()
 	log.Info().Msg("finished cleanup tasks")
@@ -204,6 +214,15 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway
 
 	gw.SetStatus(gateway.StatusListening, "/help", nil)
 	go func(ctx context.Context) {
+		// the status update gets stuck sometimes, probably due to some Discord cache
+		time.Sleep(time.Second * 15)
+		gw.SetStatus(gateway.StatusListening, "/help", nil)
+
+		time.Sleep(time.Second * 45)
+		gw.SetStatus(gateway.StatusListening, "/help", nil)
+	}(globalCtx)
+
+	go func(ctx context.Context) {
 		// update the status every hour
 		ticker := time.NewTicker(time.Hour * 1)
 		for {
@@ -220,7 +239,10 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway
 	return gw, nil
 }
 
-func discordPublicHandlersFromEnv(coreClient core.Client) []server.Handler {
+func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Instrument) []server.Handler {
+	collector := metrics.NewDiscordCollector("public")
+	instrument.Register(collector)
+
 	var handlers []server.Handler
 
 	publicKey, err := hex.DecodeString(constants.DiscordPrimaryPublicKey)
@@ -233,6 +255,10 @@ func discordPublicHandlersFromEnv(coreClient core.Client) []server.Handler {
 	if err != nil {
 		log.Fatal().Msgf("router#NewRouterHandler failed %s", err)
 	}
+
+	// metrics middleware
+	router.LoadMiddleware(collector.Middleware())
+
 	router.LoadCommands(public.Help().Build())
 	router.LoadCommands(commands.LoadedPublic.Compose()...)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -253,7 +279,9 @@ func discordPublicHandlersFromEnv(coreClient core.Client) []server.Handler {
 	return handlers
 }
 
-func discordInternalHandlersFromEnv(coreClient core.Client) []server.Handler {
+func discordInternalHandlersFromEnv(coreClient core.Client, instrument metrics.Instrument) []server.Handler {
+	_ = instrument
+
 	var handlers []server.Handler
 	// secondary Discord bot with mod/admin commands - permissions are still checked
 	if constants.DiscordPrivateBotEnabled {

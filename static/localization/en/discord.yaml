@@ -378,7 +378,6 @@
   value: "It looks like Wargaming are having some temporary issues. Please try again in a few seconds."
   context: This error is sent whenever a request to WG fails for whatever reason
 
-
 - key: wargaming_error_outage_short
   value: "It looks like Wargaming are having some issues. Please try again"
   context: This error is sent whenever a request to WG fails for whatever reason. Short version
