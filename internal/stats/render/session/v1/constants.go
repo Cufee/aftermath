@@ -71,6 +71,7 @@ func overviewCardStyle(width float64) common.Style {
 	style.AlignItems = common.AlignItemsEnd
 	style.PaddingY = 20
 	// style.Debug = true
+	style.Gap = 10
 	return style
 }
 
