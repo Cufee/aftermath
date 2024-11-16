@@ -178,6 +178,9 @@ func (r *router) handleInteraction(ctx context.Context, interaction discordgo.In
 	}()
 
 	handler := command.Handler
+	for i := len(r.middleware) - 1; i >= 0; i-- {
+		handler = r.middleware[i](cCtx, handler)
+	}
 	for i := len(command.Middleware) - 1; i >= 0; i-- {
 		handler = command.Middleware[i](cCtx, handler)
 	}

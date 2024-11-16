@@ -160,7 +160,7 @@ func realmSelectButtons(ctx common.Context, id string, accounts []fetch.AccountW
 		row.Components = append(row.Components, discordgo.Button{
 			Label:    a.Realm,
 			Style:    discordgo.SecondaryButton,
-			CustomID: fmt.Sprintf("refresh_stats_from_button_%s", interaction.ID),
+			CustomID: fmt.Sprintf("refresh_stats_from_button#%s", interaction.ID),
 		})
 	}
 	return ctx.Reply().Hint("stats_bad_nickname_input_hint").Component(row).Text(strings.Join(message, "\n")), nil
