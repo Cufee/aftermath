@@ -156,7 +156,7 @@ func main() {
 				Path: "POST /v1/snapshots/{realm}",
 				Func: private.SaveRealmSnapshots(cacheCoreClient),
 			},
-		}, log.NewMiddleware(log.Logger()))
+		}, log.NewMiddleware(log.Logger(), "/metrics"))
 		go servePrivate()
 	}
 
