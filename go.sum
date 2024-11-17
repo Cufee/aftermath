@@ -26,8 +26,8 @@ github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSV
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/cufee/aftermath-assets v0.1.0 h1:r8p2mUN+h/cw1T6/oEX7bntD+lrL9Nz27GXOPa1mbqA=
 github.com/cufee/aftermath-assets v0.1.0/go.mod h1:6yCITCiz7POJnUMn1oohvadLA4z5YrFNo3p9EKgRdGU=
-github.com/cufee/am-wg-proxy-next/v2 v2.1.8 h1:wfbIyWmtgYMYtQqqWem3nIdh8skPM/1PN4v/L4WRVpk=
-github.com/cufee/am-wg-proxy-next/v2 v2.1.8/go.mod h1:+VxiIdbrdhHdRThASbVmZ5Fz4H6XPCzL3S2Ix6TO/84=
+github.com/cufee/am-wg-proxy-next/v2 v2.1.9 h1:yzHRulVFjpmLuYr8Oahl/npQFp2AWAWhLiM/KxWjFsk=
+github.com/cufee/am-wg-proxy-next/v2 v2.1.9/go.mod h1:+VxiIdbrdhHdRThASbVmZ5Fz4H6XPCzL3S2Ix6TO/84=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -28,8 +28,6 @@ Returns a handler for the current router
 */
 func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
 		if ok, _ := router.validator.Validate(r); !ok {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			log.Debug().Msg("invalid request received on callback handler")
@@ -51,6 +49,9 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 			return
 		}
 
+		// we validated the request and are working on it
+		w.WriteHeader(http.StatusProcessing)
+
 		cmd, err := router.routeInteraction(data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -71,6 +72,7 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 			func() (struct{}, error) {
 				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
 				defer cancel()
+
 				err := router.restClient.AckInteractionResponse(ctx, data.ID, data.Token, cmd.Ephemeral)
 				if errors.Is(err, rest.ErrInteractionAlreadyAcked) {
 					err = nil
@@ -83,6 +85,8 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 			log.Warn().Err(res.Err).Str("id", data.ID).Msg("failed to ack an interaction")
 			// cross our fingers and hope discord registered one of those requests, or will propagate the ack from the response body
 		}
+
+		w.WriteHeader(http.StatusAccepted)
 
 		// run the interaction handler
 		go func() {
@@ -126,7 +130,7 @@ func (r *router) routeInteraction(interaction discordgo.Interaction) (builder.Co
 }
 
 func (r *router) handleInteraction(ctx context.Context, interaction discordgo.Interaction, command builder.Command) {
-	cCtx, err := newContext(ctx, interaction, r.restClient, r.core, r.events)
+	cCtx, err := newContext(ctx, interaction, r.restClient, r.core)
 	if err != nil {
 		log.Err(err).Msg("failed to create a common.Context for a handler")
 		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{
@@ -181,6 +185,7 @@ func (r *router) handleInteraction(ctx context.Context, interaction discordgo.In
 }
 
 func sendPingReply(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusOK)
 	_, err := w.Write([]byte(fmt.Sprintf(`{"type": %d}`, discordgo.InteractionPing)))
 	if err != nil {
 		log.Err(err).Msg("failed to reply to a discord PING")

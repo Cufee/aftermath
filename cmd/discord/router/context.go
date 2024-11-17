@@ -25,15 +25,14 @@ type routeContext struct {
 	locale   language.Tag
 	localize localization.Printer
 
-	core   core.Client
-	events *eventsClient
+	core core.Client
 
 	rest        *rest.Client
 	interaction discordgo.Interaction
 }
 
-func newContext(ctx context.Context, interaction discordgo.Interaction, rest *rest.Client, client core.Client, events *eventsClient) (common.Context, error) {
-	c := &routeContext{Context: ctx, locale: language.English, core: client, rest: rest, interaction: interaction, events: events}
+func newContext(ctx context.Context, interaction discordgo.Interaction, rest *rest.Client, client core.Client) (common.Context, error) {
+	c := &routeContext{Context: ctx, locale: language.English, core: client, rest: rest, interaction: interaction}
 
 	if interaction.User != nil {
 		c.member = *interaction.User
