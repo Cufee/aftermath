@@ -44,8 +44,8 @@ func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Clie
 	}, nil
 }
 
-func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string) (types.Account, error) {
-	accounts, err := c.wargaming.SearchAccounts(ctx, realm, nickname)
+func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string, limit int) (types.Account, error) {
+	accounts, err := c.wargaming.SearchAccounts(ctx, realm, nickname, limit)
 	if err != nil {
 		return types.Account{}, err
 	}
@@ -56,14 +56,14 @@ func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string) 
 	return accounts[0], nil
 }
 
-func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string) ([]AccountWithRealm, error) {
+func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, limitPerRealm int) ([]AccountWithRealm, error) {
 	data := make(chan AccountWithRealm, 9)
 	errors := make(chan error, 3)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		accounts, err := c.wargaming.SearchAccounts(ctx, "NA", nickname)
+		accounts, err := c.wargaming.SearchAccounts(ctx, "NA", nickname, limitPerRealm)
 		if err != nil {
 			errors <- err
 			return
@@ -75,7 +75,7 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string) ([
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		accounts, err := c.wargaming.SearchAccounts(ctx, "EU", nickname)
+		accounts, err := c.wargaming.SearchAccounts(ctx, "EU", nickname, limitPerRealm)
 		if err != nil {
 			errors <- err
 			return
@@ -87,7 +87,7 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string) ([
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		accounts, err := c.wargaming.SearchAccounts(ctx, "AS", nickname)
+		accounts, err := c.wargaming.SearchAccounts(ctx, "AS", nickname, limitPerRealm)
 		if err != nil {
 			errors <- err
 			return
