@@ -174,7 +174,7 @@ func main() {
 	handlers = append(handlers, discordInternalHandlersFromEnv(liveCoreClient, instrument)...) // POST /discord/internal/callback
 
 	port := os.Getenv("PORT")
-	servePublic := server.NewServer(port, handlers, log.NewMiddleware(log.Logger()))
+	servePublic := server.NewServer(port, handlers, log.NewMiddleware(log.Logger(), "/discord/public/callback"))
 	go servePublic()
 
 	c := make(chan os.Signal, 1)
