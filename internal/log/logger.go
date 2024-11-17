@@ -26,13 +26,18 @@ func Err(err error) *zerolog.Event { return globalLogger.Err(err) }
 func Error() *zerolog.Event        { return globalLogger.Error() }
 func Fatal() *zerolog.Event        { return globalLogger.Fatal() }
 
-func NewMiddleware(logger zerolog.Logger) func(http.Handler) http.Handler {
+func NewMiddleware(logger zerolog.Logger, ignorePath ...string) func(http.Handler) http.Handler {
 	c := alice.New()
 
 	c = c.Append(hlog.NewHandler(logger))
 	c = c.Append(hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
 		if strings.HasPrefix(r.URL.Path, "/assets/") {
 			return
+		}
+		for _, path := range ignorePath {
+			if path == r.URL.Path {
+				return
+			}
 		}
 		hlog.FromRequest(r).Info().
 			Int("status", status).
