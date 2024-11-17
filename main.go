@@ -156,7 +156,7 @@ func main() {
 				Path: "POST /v1/snapshots/{realm}",
 				Func: private.SaveRealmSnapshots(cacheCoreClient),
 			},
-		}, log.NewMiddleware(log.Logger()))
+		}, log.NewMiddleware(log.Logger(), "/metrics"))
 		go servePrivate()
 	}
 
@@ -174,7 +174,7 @@ func main() {
 	handlers = append(handlers, discordInternalHandlersFromEnv(liveCoreClient, instrument)...) // POST /discord/internal/callback
 
 	port := os.Getenv("PORT")
-	servePublic := server.NewServer(port, handlers, log.NewMiddleware(log.Logger()))
+	servePublic := server.NewServer(port, handlers, log.NewMiddleware(log.Logger(), "/discord/public/callback"))
 	go servePublic()
 
 	c := make(chan os.Signal, 1)
