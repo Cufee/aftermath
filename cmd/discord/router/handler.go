@@ -130,7 +130,7 @@ func (r *router) routeInteraction(interaction discordgo.Interaction) (builder.Co
 }
 
 func (r *router) handleInteraction(ctx context.Context, interaction discordgo.Interaction, command builder.Command) {
-	cCtx, err := newContext(ctx, interaction, r.restClient, r.core, r.events)
+	cCtx, err := newContext(ctx, interaction, r.restClient, r.core)
 	if err != nil {
 		log.Err(err).Msg("failed to create a common.Context for a handler")
 		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{

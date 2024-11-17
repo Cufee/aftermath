@@ -45,8 +45,7 @@ func NewRouter(coreClient core.Client, token string, requestValidator RequestVal
 }
 
 type router struct {
-	core   core.Client
-	events *eventsClient
+	core core.Client
 
 	token      string
 	restClient *rest.Client
