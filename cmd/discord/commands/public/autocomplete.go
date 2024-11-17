@@ -134,7 +134,7 @@ func init() {
 				sCtx, cancel := context.WithTimeout(ctx.Ctx(), time.Millisecond*2500)
 				defer cancel()
 
-				accounts, err := ctx.Core().Fetch().BroadSearch(sCtx, options.NicknameSearch)
+				accounts, err := ctx.Core().Fetch().BroadSearch(sCtx, options.NicknameSearch, 2)
 				if err != nil {
 					if os.IsTimeout(err) || sCtx.Err() != nil {
 						log.Err(sCtx.Err()).Msg("broad search accounts timed out")

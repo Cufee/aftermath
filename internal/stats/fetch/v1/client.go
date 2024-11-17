@@ -54,8 +54,8 @@ type StatsWithVehicles struct {
 
 type Client interface {
 	Account(ctx context.Context, id string) (models.Account, error)
-	Search(ctx context.Context, nickname, realm string) (types.Account, error)
-	BroadSearch(ctx context.Context, nickname string) ([]AccountWithRealm, error)
+	Search(ctx context.Context, nickname, realm string, limit int) (types.Account, error)
+	BroadSearch(ctx context.Context, nickname string, limit int) ([]AccountWithRealm, error)
 	CurrentStats(ctx context.Context, id string, opts ...StatsOption) (AccountStatsOverPeriod, error)
 
 	PeriodStats(ctx context.Context, id string, from time.Time, opts ...StatsOption) (AccountStatsOverPeriod, error)
