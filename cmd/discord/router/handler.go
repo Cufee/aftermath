@@ -58,14 +58,7 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 			return
 		}
 
-		// ack the interaction proactively
-		payload, needsAck, err := deferredInteractionResponsePayload(data.Type, cmd.Ephemeral)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Err(err).Str("id", data.ID).Msg("failed to make an ack response payload")
-			return
-		}
-		if !needsAck {
+		if !shouldAckInteraction(data.Type) {
 			// discord requires a response within 3 seconds, allow 250ms on top of that to handle an error or timeout
 			ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*2750)
 			defer cancel()
@@ -76,33 +69,19 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 
 		res := retry.Retry(
 			func() (struct{}, error) {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*1000)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
 				defer cancel()
-				_, err := router.restClient.SendInteractionResponse(ctx, data.ID, data.Token, payload, nil)
+				err := router.restClient.AckInteractionResponse(ctx, data.ID, data.Token, cmd.Ephemeral)
 				if errors.Is(err, rest.ErrInteractionAlreadyAcked) {
 					err = nil
 				}
 				return struct{}{}, err
 			},
-			3,
-			time.Millisecond*150)
+			5,
+			time.Millisecond*250)
 		if res.Err != nil {
 			log.Warn().Err(res.Err).Str("id", data.ID).Msg("failed to ack an interaction")
 			// cross our fingers and hope discord registered one of those requests, or will propagate the ack from the response body
-		}
-
-		// write the ack into response, this typically does nothing/is flaky
-		body, err := json.Marshal(payload)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Err(err).Str("id", data.ID).Msg("failed to encode interaction ack payload")
-			return
-		}
-		_, err = w.Write(body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Err(err).Str("id", data.ID).Msg("failed to write interaction ack payload")
-			return
 		}
 
 		// run the interaction handler
@@ -251,26 +230,13 @@ func (r *router) sendInteractionReply(interaction discordgo.Interaction, data di
 	}
 }
 
-func deferredInteractionResponsePayload(t discordgo.InteractionType, ephemeral bool) (discordgo.InteractionResponse, bool, error) {
-	var response discordgo.InteractionResponse
-	if ephemeral {
-		if response.Data == nil {
-			response.Data = &discordgo.InteractionResponseData{}
-		}
-		response.Data.Flags = discordgo.MessageFlagsEphemeral
-	}
-
+func shouldAckInteraction(t discordgo.InteractionType) bool {
 	switch t {
 	case discordgo.InteractionApplicationCommand, discordgo.InteractionMessageComponent, discordgo.InteractionModalSubmit:
-		response.Type = discordgo.InteractionResponseDeferredChannelMessageWithSource
-	case discordgo.InteractionApplicationCommandAutocomplete:
-		return response, false, nil
-
+		return true
 	default:
-		return response, false, fmt.Errorf("interaction type %s not supported", t.String())
+		return false
 	}
-
-	return response, true, nil
 }
 
 func fullAutocompleteName(options []*discordgo.ApplicationCommandInteractionDataOption) (string, bool) {
