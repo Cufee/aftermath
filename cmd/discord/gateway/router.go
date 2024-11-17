@@ -62,15 +62,7 @@ func (gw *gatewayClient) RouterHandler() {
 		for _, cmd := range gw.commands {
 			if cmd.Match(matchKey) {
 				if e.Type != discordgo.InteractionApplicationCommandAutocomplete {
-					// Ack the interaction
-					payload := discordgo.InteractionResponseData{}
-					if cmd.Ephemeral {
-						payload.Flags = discordgo.MessageFlagsEphemeral
-					}
-					err = s.InteractionRespond(e.Interaction, &discordgo.InteractionResponse{
-						Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-						Data: &payload,
-					})
+					err := gw.rest.AckInteractionResponse(ctx.Ctx(), e.Interaction.ID, e.Interaction.Token, cmd.Ephemeral)
 					if err != nil {
 						log.Err(err).Str("interaction", e.ID).Str("type", e.Type.String()).Msg("failed to ack an interaction")
 						sendRawError(gw.rest, e.Interaction, ctx.Localize("common_error_unhandled_reported"), false)

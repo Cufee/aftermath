@@ -193,6 +193,11 @@ func (c *Client) do(ctx context.Context, makeReq func() (*http.Request, error), 
 	}
 
 	if target != nil {
+		if res.Header.Get("Content-Type") != "application/json" {
+			log.Warn().Msg("discord api returned invalid headers when json response body was expected")
+			return nil
+		}
+
 		err = json.NewDecoder(res.Body).Decode(target)
 		if err != nil {
 			return fmt.Errorf("failed to decode response body :%w", err)
