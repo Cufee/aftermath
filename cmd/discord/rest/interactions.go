@@ -11,6 +11,34 @@ type File struct {
 	Name string
 }
 
+func (c *Client) AckInteractionResponse(ctx context.Context, interactionID, token string, ephemeral bool) error {
+	payload := discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+	}
+	if ephemeral {
+		payload.Data = &discordgo.InteractionResponseData{
+			Flags: discordgo.MessageFlagsEphemeral,
+		}
+	}
+
+	req, err := c.requestWithFiles("POST", discordgo.EndpointInteractionResponse(interactionID, token), payload, nil)
+	if err != nil {
+		return err
+	}
+	return c.do(ctx, req, nil)
+}
+
+func (c *Client) SendAutocompleteResponse(ctx context.Context, interactionID, token string, data []*discordgo.ApplicationCommandOptionChoice) error {
+	req, err := c.requestWithFiles("POST", discordgo.EndpointInteractionResponse(interactionID, token), discordgo.InteractionResponse{
+		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
+		Data: &discordgo.InteractionResponseData{Choices: data},
+	}, nil)
+	if err != nil {
+		return err
+	}
+	return c.do(ctx, req, nil)
+}
+
 func (c *Client) SendInteractionResponse(ctx context.Context, interactionID, token string, data discordgo.InteractionResponse, files []File) (discordgo.Message, error) {
 	req, err := c.requestWithFiles("POST", discordgo.EndpointInteractionResponse(interactionID, token), data, files)
 	if err != nil {
