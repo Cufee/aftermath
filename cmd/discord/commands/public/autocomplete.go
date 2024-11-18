@@ -117,11 +117,18 @@ func init() {
 				options := commands.GetDefaultStatsOptions(ctx.Options())
 				// if the account was already found, return the account
 				if options.AccountID != "" {
-					account, err := ctx.Core().Fetch().Account(ctx.Ctx(), options.AccountID)
+					fCtx, cancel := context.WithTimeout(ctx.Ctx(), time.Millisecond*2500)
+					defer cancel()
+
+					account, err := ctx.Core().Fetch().Account(fCtx, options.AccountID)
 					if err != nil {
+						if os.IsTimeout(err) || fCtx.Err() != nil {
+							log.Err(fCtx.Err()).Msg("account fetch for autocompletion timed out")
+							return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("wargaming_error_outage_short"), Value: "error#wargaming_error_outage_short"}).Send()
+						}
 						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
 					}
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("[%s] %s", account.Realm, account.Nickname)}).Send()
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("[%s] %s", account.Realm, account.Nickname), Value: fmt.Sprintf("valid#account#%s#%s", account.ID, account.Realm)}).Send()
 				}
 
 				if len(options.NicknameSearch) < 5 {
@@ -137,7 +144,7 @@ func init() {
 				accounts, err := ctx.Core().Fetch().BroadSearch(sCtx, options.NicknameSearch, 2)
 				if err != nil {
 					if os.IsTimeout(err) || sCtx.Err() != nil {
-						log.Err(sCtx.Err()).Msg("broad search accounts timed out")
+						log.Err(sCtx.Err()).Msg("broad search accounts for autocompletion timed out")
 						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("wargaming_error_outage_short"), Value: "error#wargaming_error_outage_short"}).Send()
 					}
 
