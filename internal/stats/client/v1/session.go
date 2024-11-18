@@ -60,24 +60,20 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	stop := meta.Timer("database#GetAccountByID")
 	_, err := c.database.GetAccountByID(ctx, accountId)
 	stop()
-	if err != nil {
-		if database.IsNotFound(err) {
-			_, err := c.fetchClient.Account(ctx, accountId) // this will cache the account
-			if err != nil {
-				return prepare.Cards{}, meta, err
-			}
-			go func(id string) {
-				// record a session in the background
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-				defer cancel()
+	if database.IsNotFound(err) {
+		// record a session in the background
+		go func(id string) {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+			defer cancel()
 
-				_, err := logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, c.wargaming.RealmFromAccountID(id), false, logic.WithReference(id, opts.referenceID))
-				if err != nil {
-					log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
-				}
-			}(accountId)
-			return prepare.Cards{}, meta, ErrAccountNotTracked
-		}
+			_, err := logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, c.wargaming.RealmFromAccountID(id), false, logic.WithReference(id, opts.referenceID))
+			if err != nil {
+				log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
+			}
+		}(accountId)
+		return prepare.Cards{}, meta, ErrAccountNotTracked
+	}
+	if err != nil {
 		return prepare.Cards{}, meta, err
 	}
 

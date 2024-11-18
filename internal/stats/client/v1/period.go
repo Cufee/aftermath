@@ -5,7 +5,10 @@ import (
 	"slices"
 	"time"
 
+	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/period/v1"
@@ -23,6 +26,23 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 	if err != nil {
 		return prepare.Cards{}, meta, err
 	}
+
+	// cache account and record session snapshots
+	go func(id string) {
+		_, err = r.database.GetAccountByID(ctx, accountId)
+		if !database.IsNotFound(err) {
+			// account was found or some other error happened - no need to do anything here
+			return
+		}
+		// record a session in the background
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		defer cancel()
+
+		_, err := logic.RecordAccountSnapshots(ctx, r.wargaming, r.database, r.wargaming.RealmFromAccountID(id), false, logic.WithReference(id, opts.referenceID))
+		if err != nil {
+			log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
+		}
+	}(accountId)
 
 	stop := meta.Timer("fetchClient#PeriodStats")
 	stats, err := r.fetchClient.PeriodStats(ctx, accountId, from, opts.FetchOpts()...)
