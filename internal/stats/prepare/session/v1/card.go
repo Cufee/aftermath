@@ -75,6 +75,10 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 
 		if options.VehicleID != "" {
 			blocks = unratedOverviewBlocksSingleVehicle
+			if options.UnratedColumns != nil {
+				blocks = options.UnratedColumns
+			}
+
 			sessionFrame = frame.StatsFrame{}
 			careerFrame = frame.StatsFrame{}
 			s, ok := session.RegularBattles.Vehicles[options.VehicleID]
