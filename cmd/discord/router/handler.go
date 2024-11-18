@@ -194,6 +194,11 @@ func sendPingReply(w http.ResponseWriter) {
 }
 
 func (r *router) sendInteractionReply(interaction discordgo.Interaction, data discordgo.InteractionResponseData) {
+	// autocomplete interactions require a reply within 3 seconds, but since the UI error state is decent, we can just skip the reply
+	if interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
+		return
+	}
+
 	// if the interaction type is unknown, make a new error response
 	if !slices.Contains(supportedInteractionTypes, interaction.Type) {
 		printer, err := localization.NewPrinterWithFallback("discord", language.English)
@@ -212,12 +217,6 @@ func (r *router) sendInteractionReply(interaction discordgo.Interaction, data di
 			},
 		}
 		log.Error().Stack().Any("data", data).Str("id", interaction.ID).Msg("unknown interaction type received")
-	}
-
-	// autocomplete interactions require a reply within 3 seconds, but since the UI error state is decent, we can just skip the reply
-	if interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
-		log.Error().Str("content", data.Content).Str("id", interaction.ID).Msg("autocomplete interaction failed")
-		return
 	}
 
 	res := retry.Retry(func() (struct{}, error) {
