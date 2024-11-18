@@ -61,7 +61,9 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 	widget.GET("/", w.WidgetHome)
 	widget.GET("/account/{accountId}", w.WidgetPreview)
 	widget.GET("/account/{accountId}/live", w.LiveWidget)
+	widget.GET("/account/{accountId}/live/json", w.LiveWidgetJSON)
 	widget.GET("/custom/{widgetId}/live", w.CustomLiveWidget)
+	widget.GET("/custom/{widgetId}/live/json", w.CustomLiveWidgetJSON)
 	widget.GET("/custom", handler.Redirect("/app/widget", http.StatusMovedPermanently))
 
 	app := srv.Group("/app", middleware.SessionCheck, middleware.CatchPanic)
