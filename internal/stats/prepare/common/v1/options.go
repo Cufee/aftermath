@@ -1,13 +1,21 @@
 package common
 
-import "golang.org/x/text/language"
+import (
+	"golang.org/x/text/language"
+)
 
-var DefaultOptions = options{}
+func DefaultOptions() options {
+	return options{}
+}
 
 type options struct {
 	VehicleID     string
 	localePrinter func(string) string
 	locale        *language.Tag
+
+	VehicleTags    []Tag
+	RatingColumns  []TagColumn[string]
+	UnratedColumns []TagColumn[string]
 }
 
 func (o options) Printer() func(s string) string {
@@ -31,4 +39,13 @@ func WithPrinter(printer func(string) string, locale language.Tag) func(*options
 }
 func WithVehicleID(vid string) func(*options) {
 	return func(o *options) { o.VehicleID = vid }
+}
+func WithVehicleTags(tags ...Tag) func(*options) {
+	return func(o *options) { o.VehicleTags = tags }
+}
+func WithRatingColumns(columns ...TagColumn[string]) func(*options) {
+	return func(o *options) { o.RatingColumns = columns }
+}
+func WithUnratedColumns(columns ...TagColumn[string]) func(*options) {
+	return func(o *options) { o.UnratedColumns = columns }
 }

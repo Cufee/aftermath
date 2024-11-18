@@ -13,7 +13,7 @@ import (
 )
 
 func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes map[language.Tag]string, opts ...common.Option) (Cards, error) {
-	options := common.DefaultOptions
+	options := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&options)
 	}

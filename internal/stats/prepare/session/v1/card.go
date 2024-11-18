@@ -18,13 +18,13 @@ type cardBuilder struct {
 }
 
 func (b *cardBuilder) vehicle(id string) models.Vehicle {
-	vehicle, _ := b.glossary[id]
+	vehicle := b.glossary[id]
 	vehicle.ID = id
 	return vehicle
 }
 
 func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]models.Vehicle, opts ...common.Option) (Cards, error) {
-	options := common.DefaultOptions
+	options := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&options)
 	}
@@ -36,31 +36,43 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 
 	var cards Cards
 
-	// Rating battles overview
-	if options.VehicleID == "" {
-		card, err := builder.makeOverviewCard(
-			ratingOverviewBlocks,
-			session.RatingBattles.StatsFrame,
-			career.RatingBattles.StatsFrame,
-			"label_overview_rating",
-			options.Printer(),
-			func(t common.Tag) common.Tag {
-				if t == common.TagWN8 {
-					return common.TagRankedRating
-				}
-				return t
-			},
-		)
-		if err != nil {
-			return Cards{}, err
+	{ // Rating battles overview
+		var ratingColumns = ratingOverviewBlocks
+		if options.RatingColumns != nil {
+			ratingColumns = options.RatingColumns
 		}
-		cards.Rating.Overview = card
+
+		// Rating battles overview
+		if options.VehicleID == "" {
+			card, err := builder.makeOverviewCard(
+				ratingColumns,
+				session.RatingBattles.StatsFrame,
+				career.RatingBattles.StatsFrame,
+				"label_overview_rating",
+				options.Printer(),
+				func(t common.Tag) common.Tag {
+					if t == common.TagWN8 {
+						return common.TagRankedRating
+					}
+					return t
+				},
+			)
+			if err != nil {
+				return Cards{}, err
+			}
+			cards.Rating.Overview = card
+		}
 	}
 	{ // Regular battles overview
 		sessionFrame := session.RegularBattles.StatsFrame
 		careerFrame := career.RegularBattles.StatsFrame
 		overviewLabel := "label_overview_unrated"
+
 		blocks := unratedOverviewBlocks
+		if options.UnratedColumns != nil {
+			blocks = options.UnratedColumns
+		}
+
 		if options.VehicleID != "" {
 			blocks = unratedOverviewBlocksSingleVehicle
 			sessionFrame = frame.StatsFrame{}
@@ -96,65 +108,72 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		return cards, nil
 	}
 
-	// Rating battles vehicles
-	var ratingVehicles []frame.VehicleStatsFrame
-	for _, vehicle := range session.RatingBattles.Vehicles {
-		ratingVehicles = append(ratingVehicles, vehicle)
-	}
-	slices.SortFunc(ratingVehicles, func(a, b frame.VehicleStatsFrame) int {
-		return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
-	})
-	for _, data := range ratingVehicles {
-		if len(cards.Rating.Vehicles) >= 10 {
-			break
+	{ // Rating battles vehicles
+		var ratingVehicles []frame.VehicleStatsFrame
+		for _, vehicle := range session.RatingBattles.Vehicles {
+			ratingVehicles = append(ratingVehicles, vehicle)
 		}
+		slices.SortFunc(ratingVehicles, func(a, b frame.VehicleStatsFrame) int {
+			return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
+		})
+		for _, data := range ratingVehicles {
+			if len(cards.Rating.Vehicles) >= 10 {
+				break
+			}
 
-		card, err := builder.makeVehicleCard(
-			data.VehicleID,
-			[]common.Tag{common.TagWN8},
-			common.CardTypeRatingVehicle,
-			data,
-			career.RatingBattles.Vehicles[data.VehicleID],
-			options.Printer(),
-			options.Locale(),
-		)
-		if err != nil {
-			return Cards{}, err
+			card, err := builder.makeVehicleCard(
+				data.VehicleID,
+				[]common.Tag{common.TagWN8},
+				common.CardTypeRatingVehicle,
+				data,
+				career.RatingBattles.Vehicles[data.VehicleID],
+				options.Printer(),
+				options.Locale(),
+			)
+			if err != nil {
+				return Cards{}, err
+			}
+			cards.Rating.Vehicles = append(cards.Rating.Vehicles, card)
 		}
-		cards.Rating.Vehicles = append(cards.Rating.Vehicles, card)
-	}
-
-	// Regular battles vehicles
-	var unratedVehicles []frame.VehicleStatsFrame
-	for _, vehicle := range session.RegularBattles.Vehicles {
-		unratedVehicles = append(unratedVehicles, vehicle)
-	}
-	slices.SortFunc(unratedVehicles, func(a, b frame.VehicleStatsFrame) int {
-		return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
-	})
-	for _, data := range unratedVehicles {
-		if len(cards.Unrated.Vehicles) >= 10 {
-			break
-		}
-		if data.Battles < 1 {
-			continue
-		}
-
-		card, err := builder.makeVehicleCard(
-			data.VehicleID,
-			vehicleBlocks,
-			common.CardTypeVehicle,
-			data,
-			career.RegularBattles.Vehicles[data.VehicleID],
-			options.Printer(),
-			options.Locale(),
-		)
-		if err != nil {
-			return Cards{}, err
-		}
-		cards.Unrated.Vehicles = append(cards.Unrated.Vehicles, card)
 	}
 
+	{ // Regular battles vehicles
+		var unratedVehicles []frame.VehicleStatsFrame
+		for _, vehicle := range session.RegularBattles.Vehicles {
+			unratedVehicles = append(unratedVehicles, vehicle)
+		}
+		slices.SortFunc(unratedVehicles, func(a, b frame.VehicleStatsFrame) int {
+			return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
+		})
+
+		blocks := vehicleBlocks
+		if options.VehicleTags != nil {
+			blocks = options.VehicleTags
+		}
+
+		for _, data := range unratedVehicles {
+			if len(cards.Unrated.Vehicles) >= 10 {
+				break
+			}
+			if data.Battles < 1 {
+				continue
+			}
+
+			card, err := builder.makeVehicleCard(
+				data.VehicleID,
+				blocks,
+				common.CardTypeVehicle,
+				data,
+				career.RegularBattles.Vehicles[data.VehicleID],
+				options.Printer(),
+				options.Locale(),
+			)
+			if err != nil {
+				return Cards{}, err
+			}
+			cards.Unrated.Vehicles = append(cards.Unrated.Vehicles, card)
+		}
+	}
 	// Vehicle Highlights
 	var minVehicleBattles = 1
 	if len(session.RegularBattles.Vehicles) > 0 {
@@ -238,11 +257,11 @@ func (b *cardBuilder) makeHighlightCard(vehicleID string, highlight common.Highl
 	}, nil
 }
 
-func (b *cardBuilder) makeOverviewCard(columns []overviewColumnBlocks, session, career frame.StatsFrame, label string, printer func(string) string, replace func(common.Tag) common.Tag) (OverviewCard, error) {
+func (b *cardBuilder) makeOverviewCard(columns []common.TagColumn[string], session, career frame.StatsFrame, label string, printer func(string) string, replace func(common.Tag) common.Tag) (OverviewCard, error) {
 	var blocks []OverviewColumn
 	for _, columnBlocks := range columns {
 		var column []common.StatsBlock[BlockData]
-		for _, p := range columnBlocks.blocks {
+		for _, p := range columnBlocks.Tags {
 			preset := p
 			if replace != nil {
 				preset = replace(p)
@@ -255,7 +274,7 @@ func (b *cardBuilder) makeOverviewCard(columns []overviewColumnBlocks, session, 
 			column = append(column, block)
 		}
 		blocks = append(blocks, OverviewColumn{
-			Flavor: columnBlocks.flavor,
+			Flavor: blockFlavor(columnBlocks.Meta),
 			Blocks: column,
 		})
 	}

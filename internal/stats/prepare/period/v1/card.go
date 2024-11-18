@@ -11,7 +11,7 @@ import (
 )
 
 func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Vehicle, opts ...common.Option) (Cards, error) {
-	options := common.DefaultOptions
+	options := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&options)
 	}
@@ -29,7 +29,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 	}
 	for _, column := range overviewBlocks {
 		var columnBlocks []common.StatsBlock[BlockData]
-		for _, preset := range column.blocks {
+		for _, preset := range column.Tags {
 			var block common.StatsBlock[BlockData]
 			b, err := presetToBlock(preset, overviewUnrated, stats.RegularBattles.Vehicles, glossary)
 			if err != nil {
@@ -47,7 +47,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 			cards.Overview.Title = fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
 		}
 		cards.Overview.Type = common.CardTypeOverview
-		cards.Overview.Blocks = append(cards.Overview.Blocks, OverviewColumn{columnBlocks, column.flavor})
+		cards.Overview.Blocks = append(cards.Overview.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
 	}
 
 	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 || options.VehicleID != "" {
