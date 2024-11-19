@@ -3,6 +3,7 @@ package widget
 import (
 	"context"
 	"fmt"
+	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/frontend/components/widget"
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/cmd/frontend/layouts"
@@ -14,6 +15,7 @@ import (
 	"github.com/cufee/aftermath/internal/realtime"
 	"github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
@@ -23,42 +25,40 @@ import (
 	"time"
 )
 
-var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
-	widgetID := ctx.Path("widgetId")
-	if widgetID == "" {
-		return nil, nil, ctx.Redirect("/app", http.StatusMovedPermanently)
-	}
+type widgetEndpointResponse struct {
+	Options models.WidgetStyling `json:"options,omitempty"`
+	Account models.Account       `json:"account"`
+	Cards   session.Cards        `json:"cards"`
+}
 
-	settings, err := ctx.Database().GetWidgetSettings(ctx.Context, widgetID)
+func customWidgetFromID(ctx context.Context, core core.Client, widgetID string) (widgetEndpointResponse, error) {
+	settings, err := core.Database().GetWidgetSettings(ctx, widgetID)
 	if err != nil {
-		if database.IsNotFound(err) {
-			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
-		}
-		return layouts.StyleOnly, nil, ctx.Err(err, "failed to get widget settings")
+		return widgetEndpointResponse{}, err
 	}
 	if settings.AccountID == "" {
-		return layouts.StyleOnly, nil, ctx.Error("bad widget settings, missing account id")
+		return widgetEndpointResponse{}, errors.New("bad widget settings, missing account id")
 	}
 
-	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
+	account, err := core.Database().GetAccountByID(ctx, settings.AccountID)
 	if err != nil {
 		if database.IsNotFound(err) {
-			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
+			return widgetEndpointResponse{}, err
 		}
-		return layouts.StyleOnly, nil, errors.New("invalid account id")
+		return widgetEndpointResponse{}, errors.New("invalid account id")
 	}
 	if account.Private {
-		return layouts.StyleOnly, nil, ctx.Error("private accounts cannot be tracked")
+		return widgetEndpointResponse{}, errors.New("private accounts cannot be tracked")
 	}
 
 	var opts = []client.RequestOption{client.WithWN8(), client.WithReferenceID(settings.ID)}
-	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
+	cards, _, err := core.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
 	if err != nil {
 		if errors.Is(err, fetch.ErrSessionNotFound) {
 			go func(widget, account string) {
 				c, cancel := context.WithTimeout(context.Background(), time.Second*15)
 				defer cancel()
-				_, err = backend.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(account), false, backend.WithReference(account, widget))
+				_, err = backend.RecordAccountSnapshots(c, core.Wargaming(), core.Database(), core.Wargaming().RealmFromAccountID(account), false, backend.WithReference(account, widget))
 				if err != nil {
 					log.Err(err).Str("widgetId", widget).Str("account", account).Msg("failed to record a new session for an existing widget")
 					return
@@ -67,21 +67,49 @@ var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, 
 				topicID := fmt.Sprintf("widget-settings-%s", widget)
 				pctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
 				defer cancel()
-				err = ctx.PubSub().Send(pctx, realtime.Message{Topic: topicID, Strategy: realtime.RouteToAll, Data: "reload"})
+				err = core.PubSub().Send(pctx, realtime.Message{Topic: topicID, Strategy: realtime.RouteToAll, Data: "reload"})
 				if err != nil && !errors.Is(err, realtime.ErrInvalidTopic) && !errors.Is(err, realtime.ErrTopicHasNoListeners) {
-					log.Err(err).Str("topic", topicID).Str("widget", widgetID).Msg("failed to update the live widget through pubsub")
+					log.Err(err).Str("topic", topicID).Str("widget", settings.ID).Msg("failed to update the live widget through pubsub")
 				}
 			}(settings.ID, settings.AccountID)
 
-			cards, _, err = ctx.Client.Stats(language.English).EmptySessionCards(ctx.Context, account.ID)
+			cards, _, err = core.Stats(language.English).EmptySessionCards(ctx, account.ID)
 			if err == nil {
-				return layouts.StyleOnly, customLiveWidget(settings.ID, widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
+				return widgetEndpointResponse{Account: account, Cards: cards, Options: settings.Style}, nil
 			}
 		}
-		return layouts.StyleOnly, nil, err
+		return widgetEndpointResponse{}, err
+	}
+	return widgetEndpointResponse{Account: account, Cards: cards, Options: settings.Style}, nil
+}
+
+var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
+	widgetID := ctx.Path("widgetId")
+	if widgetID == "" {
+		return nil, nil, ctx.Redirect("/app", http.StatusMovedPermanently)
 	}
 
-	return layouts.StyleOnly, customLiveWidget(settings.ID, widget.Widget(account, cards, widget.WithAutoReload(), widget.WithStyle(settings.Style))), nil
+	widgetData, err := customWidgetFromID(ctx.Context, ctx.Client, widgetID)
+	if err != nil {
+		if database.IsNotFound(err) {
+			return nil, nil, ctx.Redirect("/app", http.StatusTemporaryRedirect)
+		}
+		return layouts.StyleOnly, nil, ctx.Err(err, err.Error())
+	}
+	return layouts.StyleOnly, customLiveWidget(widgetID, widget.Widget(widgetData.Account, widgetData.Cards, widget.WithAutoReload(), widget.WithStyle(&widgetData.Options))), nil
+}
+
+var CustomLiveWidgetJSON handler.Endpoint = func(ctx *handler.Context) error {
+	widgetID := ctx.Path("widgetId")
+	if widgetID == "" {
+		return ctx.Redirect("/app", http.StatusMovedPermanently)
+	}
+
+	widgetData, err := customWidgetFromID(ctx.Context, ctx.Client, widgetID)
+	if err != nil {
+		return ctx.JSON(map[string]string{"error": err.Error()})
+	}
+	return ctx.JSON(widgetData)
 }
 
 templ customLiveWidget(id string, widget templ.Component) {
@@ -144,7 +172,7 @@ var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.
 		return nil, nil, err
 	}
 
-	var wopts = []widget.WidgetOption{widget.WithAutoReload()}
+	var wopts = widget.WidgetOptions{widget.WithAutoReload()}
 	if v, err := strconv.Atoi(ctx.Query("vl")); err == nil && v >= 0 && v <= 10 {
 		wopts = append(wopts, widget.WithVehicleLimit(int(v)))
 	}
@@ -156,6 +184,44 @@ var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.
 	}
 
 	return layouts.StyleOnly, liveWidget(widget.Widget(account, cards, wopts...)), nil
+}
+
+var LiveWidgetJSON handler.Endpoint = func(ctx *handler.Context) error {
+	accountID := ctx.Path("accountId")
+	if accountID == "" {
+		return ctx.JSON(map[string]string{"error": "invalid account id"})
+	}
+
+	account, err := ctx.Fetch().Account(ctx.Context, accountID)
+	if err != nil {
+		return ctx.JSON(map[string]string{"error": "invalid account id"})
+	}
+
+	var opts = []client.RequestOption{client.WithWN8()}
+	if ref := ctx.Query("ref"); ref != "" {
+		opts = append(opts, client.WithReferenceID(ref))
+	}
+	if t := ctx.Query("type"); t != "" && slices.Contains(models.SnapshotType("").Values(), t) {
+		opts = append(opts, client.WithType(models.SnapshotType(t)))
+	}
+
+	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
+	if err != nil {
+		return ctx.JSON(map[string]string{"error": err.Error()})
+	}
+
+	var wopts = widget.WidgetOptions{widget.WithAutoReload()}
+	if v, err := strconv.Atoi(ctx.Query("vl")); err == nil && v >= 0 && v <= 10 {
+		wopts = append(wopts, widget.WithVehicleLimit(int(v)))
+	}
+	if v := ctx.Query("or"); v != "" {
+		wopts = append(wopts, widget.WithRatingOverview(v == "1"))
+	}
+	if v := ctx.Query("ou"); v != "" {
+		wopts = append(wopts, widget.WithUnratedOverview(v == "1"))
+	}
+
+	return ctx.JSON(widgetEndpointResponse{Account: account, Cards: cards, Options: wopts.Style()})
 }
 
 templ liveWidget(widget templ.Component) {

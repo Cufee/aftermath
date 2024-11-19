@@ -6,15 +6,10 @@ import (
 
 const TagAvgTier common.Tag = "avg_tier"
 
-type overviewColumnBlocks struct {
-	blocks []common.Tag
-	flavor blockFlavor
-}
-
-var overviewBlocks = []overviewColumnBlocks{
-	{[]common.Tag{common.TagBattles, common.TagWinrate, common.TagAccuracy}, BlockFlavorDefault},
-	{[]common.Tag{common.TagWN8}, BlockFlavorSpecial},
-	{[]common.Tag{TagAvgTier, common.TagAvgDamage, common.TagDamageRatio}, BlockFlavorDefault},
+var overviewBlocks = []common.TagColumn[string]{
+	{Tags: []common.Tag{common.TagBattles, common.TagWinrate, common.TagAccuracy}, Meta: string(BlockFlavorDefault)},
+	{Tags: []common.Tag{common.TagWN8}, Meta: string(BlockFlavorSpecial)},
+	{Tags: []common.Tag{TagAvgTier, common.TagAvgDamage, common.TagDamageRatio}, Meta: string(BlockFlavorDefault)},
 }
 var highlights = []common.Highlight{common.HighlightBattles, common.HighlightWN8, common.HighlightAvgDamage}
 

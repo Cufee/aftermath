@@ -9,6 +9,15 @@ import (
 )
 
 type WidgetOption func(*widget)
+type WidgetOptions []WidgetOption
+
+func (o WidgetOptions) Style() models.WidgetStyling {
+	widget := widget{style: models.DefaultWidgetStyle}
+	for _, apply := range o {
+		apply(&widget)
+	}
+	return widget.style
+}
 
 func WithAutoReload() WidgetOption {
 	return func(w *widget) { w.autoReload = true }
@@ -28,8 +37,11 @@ func WithFlavor(flavor models.WidgetFlavor) WidgetOption {
 func WithHead(componeent templ.Component) WidgetOption {
 	return func(w *widget) { w.head = componeent }
 }
-func WithStyle(style models.WidgetStyling) WidgetOption {
-	return func(w *widget) { w.style = style }
+func WithStyle(style *models.WidgetStyling) WidgetOption {
+	if style == nil {
+		return func(w *widget) {}
+	}
+	return func(w *widget) { w.style = *style }
 }
 
 func Widget(account models.Account, cards prepare.Cards, options ...WidgetOption) templ.Component {
