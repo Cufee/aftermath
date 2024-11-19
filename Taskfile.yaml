@@ -48,6 +48,15 @@ tasks:
           DATABASE_PATH: $DATABASE_PATH
           DATABASE_NAME: tests.db
 
+  build-widget:
+    desc: Build amth-widget js assets
+    dir: cmd/frontend/widget
+    cmds:
+      - bun run build
+      - rm -rf ../public/js/widget
+      - mkdir -p ../public/js/widget
+      - cp dist/components/* ../public/js/widget/
+
   dev:
     desc: Start a local dev server
     cmds:

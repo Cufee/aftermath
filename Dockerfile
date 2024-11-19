@@ -1,4 +1,17 @@
-FROM golang:1.22.5-bookworm as builder
+# Build javascript
+FROM oven/bun:latest as builder-js
+
+WORKDIR /workspace
+
+COPY ./cmd/frontend/widget/package.json ./
+RUN bun install
+
+COPY ./cmd/frontend/widget/ ./
+
+RUN bun run build
+
+# Build app
+FROM golang:1.22.5-bookworm as builder-go
 
 ARG BRAND_FLAVOR=red
 ENV BRAND_FLAVOR $BRAND_FLAVOR
@@ -19,6 +32,9 @@ RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./cmd/frontend/assets/
 
 RUN templ generate
 
+# Copy js assets
+COPY --from=builder-js /workspace/dist/components/* ./cmd/frontend/public/js/widget/
+
 RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux go build -ldflags='-s -w' -trimpath -o /bin/aftermath .
 
 # Make a scratch container with required files and binary
@@ -26,8 +42,8 @@ FROM debian:stable-slim
 
 ENV TZ=Europe/Berlin
 ENV ZONEINFO=/zoneinfo.zip
-COPY --from=builder /bin/aftermath /usr/bin/aftermath
-COPY --from=builder /usr/local/go/lib/time/zoneinfo.zip /
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder-go /bin/aftermath /usr/bin/aftermath
+COPY --from=builder-go /usr/local/go/lib/time/zoneinfo.zip /
+COPY --from=builder-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENTRYPOINT [ "aftermath" ]

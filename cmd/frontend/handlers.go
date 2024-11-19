@@ -51,7 +51,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 
 	assets := srv.Group("/assets")
 	assets.GET("/", handler.Redirect("/", http.StatusMovedPermanently))
-	assets.GET("/{_...}", NewAssetsHandler(assetsFS))
+	assets.GET("/{_...}", NewAssetsHandler(assetsFS), middleware.AllowOrigin("*"))
 
 	legal := srv.Group("/legal")
 	legal.GET("/privacy-policy", routes.PrivacyPolicy)
