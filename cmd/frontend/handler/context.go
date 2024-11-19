@@ -214,7 +214,11 @@ func (ctx *Context) String(format string, args ...any) error {
 
 func (ctx *Context) JSON(data any) error {
 	ctx.w.Header().Set("Content-Type", "application/json")
-	return json.NewEncoder(ctx.w).Encode(data)
+	err := json.NewEncoder(ctx.w).Encode(data)
+	if err != nil {
+		ctx.w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err.Error())))
+	}
+	return nil
 }
 
 func (ctx *Context) Redirect(path string, code int) error {

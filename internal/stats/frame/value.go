@@ -1,6 +1,8 @@
 package frame
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type ValueInt int
 
@@ -12,6 +14,9 @@ func (value ValueInt) String() string {
 
 func (value ValueInt) Float() float32 {
 	return float32(value)
+}
+func (value ValueInt) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + value.String() + `"`), nil
 }
 
 type ValueFloatDecimal float32
@@ -26,6 +31,10 @@ func (value ValueFloatDecimal) Float() float32 {
 	return float32(value)
 }
 
+func (value ValueFloatDecimal) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + value.String() + `"`), nil
+}
+
 type ValueFloatPercent float32
 
 var _ Value = ValueFloatPercent(0)
@@ -36,6 +45,10 @@ func (value ValueFloatPercent) String() string {
 
 func (value ValueFloatPercent) Float() float32 {
 	return float32(value)
+}
+
+func (value ValueFloatPercent) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + value.String() + `"`), nil
 }
 
 type valueInvalid struct{}
@@ -55,7 +68,7 @@ func (value valueInvalid) Equals(compareTo Value) bool {
 }
 
 func (value valueInvalid) MarshalJSON() ([]byte, error) {
-	return []byte("-1"), nil
+	return []byte(`"-1"`), nil
 }
 
 var InvalidValue = valueInvalid{}
@@ -80,6 +93,10 @@ func (value ValueSpecialRating) String() string {
 
 func (value ValueSpecialRating) Float() float32 {
 	return float32(value.int())
+}
+
+func (value ValueSpecialRating) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + value.String() + `"`), nil
 }
 
 type Value interface {
