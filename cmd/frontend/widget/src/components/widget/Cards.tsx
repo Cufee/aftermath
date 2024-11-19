@@ -59,10 +59,10 @@ const vehicleBlockSizes = (vehicles: Vehicle[], style: VehiclesStyle): Record<nu
 
 export default ({ cards, options }: { cards: Cards | null; options: Options | null }) => {
   if (!cards) {
-    return <div class="bg-indigo-500 p-6 rounded-md flex justify-center">invalid cards data</div>;
+    return <div>invalid cards data</div>;
   }
   if (!options) {
-    return <div class="bg-indigo-500 p-6 rounded-md flex justify-center">invalid options data</div>;
+    return <div>invalid options data</div>;
   }
 
   const overviewSizes = overviewColumnSizes({ ...cards.rating.overview, style: options.rating }, { ...cards.unrated.overview, style: options.unrated });
@@ -82,7 +82,7 @@ const OverviewCard = ({ data, style, columnSizes }: { data: Overview; style: Car
   return (
     <div class="flex flex-col gap-2 card overview-card grow">
       {style.showTitle && <span class="text-center text-gray-300 title">{data.title}</span>}
-      <div class="columns overview-columns justify-around flex flex-row gap-2 items-center bg-black rounded-xl bg-opacity-80 p-4">
+      <div class="columns overview-columns justify-around flex flex-row gap-2 items-center bg-black rounded-3xl bg-opacity-80 p-4">
         {data.blocks.map((column, i) => (
           <Column column={column} style={style} width={columnSizes[i]} />
         ))}
@@ -97,7 +97,7 @@ const VehicleCard = ({ data, style, blockSizes }: { data: Vehicle; style: Vehicl
   };
 
   return (
-    <div class="flex flex-col gap-2 card vehicle-card grow bg-black rounded-lg bg-opacity-80 p-4">
+    <div class="flex flex-col gap-2 card vehicle-card grow bg-black rounded-3xl bg-opacity-80 p-4">
       {style.showTitle && (
         <div class="flex flex-row gap-2 justify-between">
           <span class="text-gray-300 title">{data.title}</span>

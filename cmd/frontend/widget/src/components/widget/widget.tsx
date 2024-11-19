@@ -86,6 +86,7 @@ export class Widget {
 
   @Method()
   async setOptions(opts: Options) {
+    console.debug('updated settings');
     this.widgetOptions = opts;
   }
 
