@@ -5,27 +5,22 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
-type overviewColumnBlocks struct {
-	blocks []common.Tag
-	flavor blockFlavor
+var unratedOverviewBlocks = []common.TagColumn[string]{
+	{Tags: []common.Tag{common.TagBattles, common.TagWinrate}, Meta: string(BlockFlavorDefault)},
+	{Tags: []common.Tag{common.TagWN8}, Meta: string(BlockFlavorWN8)},
+	{Tags: []common.Tag{common.TagAvgTier, common.TagAvgDamage}, Meta: string(BlockFlavorDefault)},
 }
 
-var unratedOverviewBlocks = []overviewColumnBlocks{
-	{[]common.Tag{common.TagBattles, common.TagWinrate}, BlockFlavorDefault},
-	{[]common.Tag{common.TagWN8}, BlockFlavorWN8},
-	{[]common.Tag{common.TagAvgTier, common.TagAvgDamage}, BlockFlavorDefault},
+var unratedOverviewBlocksSingleVehicle = []common.TagColumn[string]{
+	{Tags: []common.Tag{common.TagBattles, common.TagWinrate}, Meta: string(BlockFlavorDefault)},
+	{Tags: []common.Tag{common.TagWN8}, Meta: string(BlockFlavorWN8)},
+	{Tags: []common.Tag{common.TagDamageRatio, common.TagAvgDamage}, Meta: string(BlockFlavorDefault)},
 }
 
-var unratedOverviewBlocksSingleVehicle = []overviewColumnBlocks{
-	{[]common.Tag{common.TagBattles, common.TagWinrate}, BlockFlavorDefault},
-	{[]common.Tag{common.TagWN8}, BlockFlavorWN8},
-	{[]common.Tag{common.TagDamageRatio, common.TagAvgDamage}, BlockFlavorDefault},
-}
-
-var ratingOverviewBlocks = []overviewColumnBlocks{
-	{[]common.Tag{common.TagBattles, common.TagWinrate}, BlockFlavorDefault},
-	{[]common.Tag{common.TagRankedRating}, BlockFlavorRating},
-	{[]common.Tag{common.TagDamageRatio, common.TagAvgDamage}, BlockFlavorDefault},
+var ratingOverviewBlocks = []common.TagColumn[string]{
+	{Tags: []common.Tag{common.TagBattles, common.TagWinrate}, Meta: string(BlockFlavorDefault)},
+	{Tags: []common.Tag{common.TagRankedRating}, Meta: string(BlockFlavorRating)},
+	{Tags: []common.Tag{common.TagDamageRatio, common.TagAvgDamage}, Meta: string(BlockFlavorDefault)},
 }
 
 var vehicleBlocks = []common.Tag{common.TagBattles, common.TagWinrate, common.TagAvgDamage, common.TagWN8}

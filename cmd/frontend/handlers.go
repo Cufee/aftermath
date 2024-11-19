@@ -51,7 +51,7 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 
 	assets := srv.Group("/assets")
 	assets.GET("/", handler.Redirect("/", http.StatusMovedPermanently))
-	assets.GET("/{_...}", NewAssetsHandler(assetsFS))
+	assets.GET("/{_...}", NewAssetsHandler(assetsFS), middleware.AllowOrigin("*"))
 
 	legal := srv.Group("/legal")
 	legal.GET("/privacy-policy", routes.PrivacyPolicy)
@@ -61,7 +61,9 @@ func Handlers(core core.Client) ([]server.Handler, error) {
 	widget.GET("/", w.WidgetHome)
 	widget.GET("/account/{accountId}", w.WidgetPreview)
 	widget.GET("/account/{accountId}/live", w.LiveWidget)
+	widget.GET("/account/{accountId}/live/json", w.LiveWidgetJSON, middleware.AllowOrigin("*"))
 	widget.GET("/custom/{widgetId}/live", w.CustomLiveWidget)
+	widget.GET("/custom/{widgetId}/live/json", w.CustomLiveWidgetJSON, middleware.AllowOrigin("*"))
 	widget.GET("/custom", handler.Redirect("/app/widget", http.StatusMovedPermanently))
 
 	app := srv.Group("/app", middleware.SessionCheck, middleware.CatchPanic)

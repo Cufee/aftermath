@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -208,7 +208,17 @@ func (ctx *Context) Error(format string, args ...any) error {
 }
 
 func (ctx *Context) String(format string, args ...any) error {
-	return ctx.r.Write(bytes.NewBufferString(fmt.Sprintf(format, args...)))
+	_, err := ctx.w.Write([]byte(fmt.Sprintf(format, args...)))
+	return err
+}
+
+func (ctx *Context) JSON(data any) error {
+	ctx.w.Header().Set("Content-Type", "application/json")
+	err := json.NewEncoder(ctx.w).Encode(data)
+	if err != nil {
+		ctx.w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err.Error())))
+	}
+	return nil
 }
 
 func (ctx *Context) Redirect(path string, code int) error {

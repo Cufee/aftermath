@@ -18,6 +18,10 @@ type requestOptions struct {
 	promoText       []string
 	vehicleID       string
 	withWN8         bool
+
+	vehicleTags    []prepare.Tag
+	ratingColumns  []prepare.TagColumn[string]
+	unratedColumns []prepare.TagColumn[string]
 }
 
 type RequestOption func(o *requestOptions)
@@ -70,6 +74,15 @@ func (o requestOptions) PrepareOpts(printer func(string) string, locale language
 	popts = append(popts, prepare.WithPrinter(printer, locale))
 	if o.vehicleID != "" {
 		popts = append(popts, prepare.WithVehicleID(o.vehicleID))
+	}
+	if o.vehicleTags != nil {
+		popts = append(popts, prepare.WithVehicleTags(o.vehicleTags...))
+	}
+	if o.ratingColumns != nil {
+		popts = append(popts, prepare.WithRatingColumns(o.ratingColumns...))
+	}
+	if o.unratedColumns != nil {
+		popts = append(popts, prepare.WithUnratedColumns(o.unratedColumns...))
 	}
 	return popts
 }

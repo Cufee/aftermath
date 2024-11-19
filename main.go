@@ -57,6 +57,7 @@ import (
 //go:generate go generate ./internal/assets
 //go:generate go generate ./internal/database/ent
 //go:generate go generate ./cmd/frontend/assets/generate
+//go:generate task build-widget
 
 //go:embed static/*
 var static embed.FS

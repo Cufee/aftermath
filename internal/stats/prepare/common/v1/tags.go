@@ -4,6 +4,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+type TagColumn[T any] struct {
+	Tags []Tag
+	Meta T
+}
+
 type Tag string
 
 func (t Tag) String() string {

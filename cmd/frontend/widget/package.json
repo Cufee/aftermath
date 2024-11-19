@@ -1,0 +1,50 @@
+{
+  "name": "amth-widget",
+  "version": "0.0.1",
+  "description": "Stencil Component Starter",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "collection": "dist/collection/collection-manifest.json",
+  "collection:main": "dist/collection/index.js",
+  "unpkg": "dist/amth-widget/amth-widget.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/amth-widget.esm.js",
+      "require": "./dist/amth-widget.cjs.js"
+    },
+    "./widget": {
+      "import": "./dist/components/widget.js",
+      "types": "./dist/components/widget.d.ts"
+    },
+    "./settings": {
+      "import": "./dist/components/settings.js",
+      "types": "./dist/components/settings.d.ts"
+    },
+    "./loader": {
+      "import": "./loader/index.js",
+      "require": "./loader/index.cjs",
+      "types": "./loader/index.d.ts"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ionic-team/stencil-component-starter.git"
+  },
+  "files": [
+    "dist/",
+    "loader/"
+  ],
+  "scripts": {
+    "build": "stencil build",
+    "start": "stencil build --dev --watch --serve",
+    "generate": "stencil generate"
+  },
+  "devDependencies": {
+    "@stencil/core": "^4.7.0",
+    "@types/node": "^16.18.11",
+    "stencil-tailwind-plugin": "^1.8.0",
+    "tailwindcss": "^3.4.15"
+  },
+  "license": "MIT"
+}

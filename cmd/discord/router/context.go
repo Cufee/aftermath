@@ -123,11 +123,16 @@ func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 			if c.interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
 				err := c.rest.SendAutocompleteResponse(ctx, c.interaction.ID, c.interaction.Token, data.Choices)
 				if errors.Is(err, rest.ErrInteractionAlreadyAcked) {
-					err = nil
+					return discordgo.Message{}, nil
 				}
 				return discordgo.Message{}, err
 			}
-			return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data, files)
+			msg, err := c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data, files)
+			if errors.Is(err, rest.ErrUnknownInteraction) {
+				// Discord did not propagate the ack yet
+				return c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Data: &data, Type: discordgo.InteractionResponseChannelMessageWithSource}, files)
+			}
+			return msg, err
 		})
 
 		go c.saveInteractionEvent(msg, err, reply)
