@@ -1,6 +1,25 @@
 interface WidgetData {
   account: Account;
   cards: Cards;
+  options: Options;
+}
+
+interface Options {
+  flavor: string;
+  rating: CardStyle;
+  unrated: CardStyle;
+  vehicles: VehiclesStyle;
+}
+
+interface CardStyle {
+  visible: boolean;
+  showTitle: boolean;
+  showCareer: boolean;
+  showLabel: boolean;
+  blocks: string[] | null;
+}
+interface VehiclesStyle extends CardStyle {
+  limit: number;
 }
 
 interface Cards {
@@ -10,7 +29,6 @@ interface Cards {
 
 interface Rating {
   overview: Overview;
-  vehicles: Vehicle[];
 }
 
 interface Unrated {

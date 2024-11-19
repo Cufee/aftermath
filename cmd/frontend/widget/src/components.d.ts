@@ -23,9 +23,11 @@ export namespace Components {
           * Data to initialize the widget with
          */
         "initialData"?: string;
+        "options": () => Promise<Options | null>;
         "refresh": () => Promise<void>;
         "setAccountId": (id: string) => Promise<void>;
         "setAutoReload": (value: boolean) => Promise<void>;
+        "setOptions": (opts: Options) => Promise<void>;
         "setWidgetId": (id: string) => Promise<void>;
         /**
           * Custom widget ID

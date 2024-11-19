@@ -10,3 +10,10 @@ func AllowOrigin(value string) handler.Middleware {
 		return next
 	}
 }
+
+func AllowCurrentOrigin() handler.Middleware {
+	return func(ctx *handler.Context, next func(ctx *handler.Context) error) func(ctx *handler.Context) error {
+		ctx.SetHeader("Access-Control-Allow-Origin", ctx.GetHeader("Origin"))
+		return next
+	}
+}

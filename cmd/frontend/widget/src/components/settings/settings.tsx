@@ -12,6 +12,11 @@ export class Settings {
   @Prop({ attribute: 'widget-id' }) widgetId: string;
 
   render() {
+    const widget = document.getElementById(this.widgetId);
+    if (!widget) {
+      return <div>Widget not found</div>;
+    }
+
     return <div>Settings for {this.widgetId}</div>;
   }
 }

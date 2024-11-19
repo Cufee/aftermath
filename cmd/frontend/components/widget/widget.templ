@@ -9,6 +9,15 @@ import (
 )
 
 type WidgetOption func(*widget)
+type WidgetOptions []WidgetOption
+
+func (o WidgetOptions) Style() models.WidgetStyling {
+	widget := widget{style: models.DefaultWidgetStyle}
+	for _, apply := range o {
+		apply(&widget)
+	}
+	return widget.style
+}
 
 func WithAutoReload() WidgetOption {
 	return func(w *widget) { w.autoReload = true }

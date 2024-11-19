@@ -36,7 +36,9 @@ export class Widget {
   @State() fetchInProgress: boolean = false;
 
   @State() error: string | null = null;
-  @State() data: WidgetData | null = null;
+  @State() widgetCards: Cards | null = null;
+  @State() widgetOptions: Options | null = null;
+  @State() widgetAccount: Account | null = null;
   @State() websocket: WebSocket | null = null;
   @State() autoReloadTimer: NodeJS.Timer | null = null;
 
@@ -47,8 +49,12 @@ export class Widget {
     this.setAutoReload(this.autoReload);
 
     if (this.initialData) {
-      this.data = this.parseWidgetData(this.initialData);
-      if (this.data) {
+      const data = this.parseWidgetData(this.initialData);
+      if (data) {
+        this.accountId = data.account.id;
+        this.widgetCards = data.cards;
+        this.widgetAccount = data.account;
+        this.widgetOptions = data.options;
         this.loadingSpinner = false;
         return;
       }
@@ -64,27 +70,45 @@ export class Widget {
         if (res.ok !== true) {
           this.error = res.error;
         } else {
-          this.data = res.data;
+          this.accountId = res.data.account.id;
+          this.widgetCards = res.data.cards;
+          this.widgetAccount = res.data.account;
+          this.widgetOptions = this.widgetOptions || res.data.options;
         }
       })
       .finally(() => (this.loadingSpinner = false));
   }
 
   @Method()
-  async setAccountId(id: string) {
-    this.loadingSpinner = true;
-    this.accountId = id;
-    this.widgetId = '';
-    this.data = null;
-    this.refresh();
+  async options(): Promise<Options | null> {
+    return this.widgetOptions ?? null;
   }
 
   @Method()
+  async setOptions(opts: Options) {
+    this.widgetOptions = opts;
+  }
+
+  // removes widget id, replaces account id, does not change options
+  @Method()
+  async setAccountId(id: string) {
+    this.loadingSpinner = true;
+    this.widgetAccount = null;
+    this.widgetCards = null;
+    this.accountId = id;
+    this.widgetId = '';
+    this.refresh();
+  }
+
+  // removes account id, replaces widget id, removes options
+  @Method()
   async setWidgetId(id: string) {
     this.loadingSpinner = true;
+    this.widgetOptions = null;
+    this.widgetAccount = null;
+    this.widgetCards = null;
     this.accountId = '';
     this.widgetId = id;
-    this.data = null;
     this.refresh();
   }
 
@@ -137,7 +161,10 @@ export class Widget {
           console.error('failed to fetch widget data', result.error);
           return;
         }
-        this.data = result.data;
+        this.accountId = result.data.account.id;
+        this.widgetCards = result.data.cards;
+        this.widgetAccount = result.data.account;
+        this.widgetOptions = result.data.options;
       }
     });
   }
@@ -157,13 +184,12 @@ export class Widget {
     if (this.fetchInProgress) return;
     this.fetchInProgress = true;
 
-    const accountId = this.data?.account.id || this.accountId;
-    if (!accountId && !this.widgetId) {
+    if (!this.accountId && !this.widgetId) {
       return { ok: false, error: 'account-id or widget-id parameter is required' };
     }
 
     const apiDomain = this.apiHostOverwrite ?? this.defaultApiDomain;
-    const endpoint = !!accountId ? `/widget/account/${accountId}/live/json/` : `/widget/custom/${this.widgetId}/live/json/`;
+    const endpoint = !!this.accountId ? `/widget/account/${this.accountId}/live/json/` : `/widget/custom/${this.widgetId}/live/json/`;
     try {
       const url = apiDomain + endpoint;
       console.debug(url);
@@ -183,13 +209,13 @@ export class Widget {
   }
 
   private fetchDataOnBattle() {
-    if (!!this.error || !this.data || !this.data.account.id || !this.data.account.realm || this.fetchInProgress) return;
+    if (!!this.error || !this.widgetAccount || this.fetchInProgress) return;
 
-    const lastBattleTime = Date.parse(this.data.account.lastBattleTime);
+    const lastBattleTime = Date.parse(this.widgetAccount.lastBattleTime);
     if (!lastBattleTime || Number.isNaN(lastBattleTime)) return;
 
     let apiHost = '';
-    switch (this.data.account.realm) {
+    switch (this.widgetAccount.realm) {
       case 'na':
         apiHost = 'wotblitz.com';
         break;
@@ -200,14 +226,14 @@ export class Widget {
         apiHost = 'wotblitz.asia';
         break;
       default:
-        console.error('invalid account realm', this.data.account.realm);
+        console.error('invalid account realm', this.widgetAccount.realm);
         return;
     }
 
-    fetch(`https://api.${apiHost}/wotb/account/info/?application_id=f44aa6f863c9327c63ba26be3db0d07f&account_id=${this.data.account.id}&fields=last_battle_time`)
+    fetch(`https://api.${apiHost}/wotb/account/info/?application_id=f44aa6f863c9327c63ba26be3db0d07f&account_id=${this.widgetAccount.id}&fields=last_battle_time`)
       .then(response => response.json())
       .then(async data => {
-        if (data.data[this.data.account.id.toString()].last_battle_time <= lastBattleTime) {
+        if (data.data[this.widgetAccount.id.toString()].last_battle_time <= lastBattleTime) {
           console.debug('no new battles since last refresh');
         }
         console.debug('found a new battle since last refresh, fetching new data');
@@ -217,7 +243,9 @@ export class Widget {
           console.error('failed to fetch widget data', result.error);
           return;
         }
-        this.data = result.data;
+        this.widgetCards = result.data.cards;
+        this.widgetAccount = result.data.account;
+        this.widgetOptions = this.widgetOptions || result.data.options;
       })
       .catch(error => {
         console.error('request to wargaming api failed', error);
@@ -232,6 +260,6 @@ export class Widget {
       return <div>error: {this.error}</div>;
     }
 
-    return <Cards data={this.data} />;
+    return <Cards cards={this.widgetCards} options={this.widgetOptions} />;
   }
 }
