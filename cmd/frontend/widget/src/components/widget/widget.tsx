@@ -60,6 +60,7 @@ export class Widget {
       }
     }
     this.refresh();
+    this.initWebSocketConnection();
   }
 
   @Method()
