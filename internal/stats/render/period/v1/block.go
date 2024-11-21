@@ -6,7 +6,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
-func statsBlocksToColumnBlock(style overviewStyle, statsBlocks []prepare.StatsBlock[period.BlockData]) (common.Block, error) {
+func statsBlocksToColumnBlock(style overviewStyle, statsBlocks []prepare.StatsBlock[period.BlockData, string]) (common.Block, error) {
 	var content []common.Block
 
 	for _, statsBlock := range statsBlocks {
@@ -19,7 +19,7 @@ func statsBlocksToColumnBlock(style overviewStyle, statsBlocks []prepare.StatsBl
 	return common.NewBlocksContent(style.container, content...), nil
 }
 
-func uniqueStatsBlock(style overviewStyle, stats prepare.StatsBlock[period.BlockData]) common.Block {
+func uniqueStatsBlock(style overviewStyle, stats prepare.StatsBlock[period.BlockData, string]) common.Block {
 	switch stats.Tag {
 	case prepare.TagWN8:
 		return uniqueBlockWN8(style, stats)
@@ -28,7 +28,7 @@ func uniqueStatsBlock(style overviewStyle, stats prepare.StatsBlock[period.Block
 	}
 }
 
-func defaultStatsBlock(style overviewStyle, stats prepare.StatsBlock[period.BlockData]) common.Block {
+func defaultStatsBlock(style overviewStyle, stats prepare.StatsBlock[period.BlockData, string]) common.Block {
 	valueStyle, labelStyle := style.block(stats)
 
 	blocks := []common.Block{common.NewTextContent(valueStyle, stats.Value().String())}
@@ -37,7 +37,7 @@ func defaultStatsBlock(style overviewStyle, stats prepare.StatsBlock[period.Bloc
 	return common.NewBlocksContent(style.blockContainer, blocks...)
 }
 
-func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockData]) common.Block {
+func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockData, string]) common.Block {
 	var blocks []common.Block
 
 	valueStyle, labelStyle := style.block(stats)

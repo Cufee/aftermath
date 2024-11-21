@@ -47,6 +47,7 @@ export class Widget {
 
   componentWillLoad() {
     this.setAutoReload(this.autoReload);
+    this.initWebSocketConnection();
 
     if (this.initialData) {
       const data = this.parseWidgetData(this.initialData);
@@ -60,7 +61,6 @@ export class Widget {
       }
     }
     this.refresh();
-    this.initWebSocketConnection();
   }
 
   @Method()
@@ -153,11 +153,15 @@ export class Widget {
       let data: { command: string } | null = null;
       try {
         data = JSON.parse(event.data);
+        console.debug('realtime api message', data);
       } catch (error) {
         console.error('invalid message received on websocket', error);
+        return;
       }
 
       if (data.command === 'reload') {
+        console.debug('realtime api requested a reload');
+
         const result = await this.fetchWidgetData();
         if (result.ok !== true) {
           console.error('failed to fetch widget data', result.error);

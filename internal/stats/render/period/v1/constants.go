@@ -21,7 +21,7 @@ type highlightStyle struct {
 	blockValue common.Style
 }
 
-func (s *overviewStyle) block(block prepare.StatsBlock[period.BlockData]) (common.Style, common.Style) {
+func (s *overviewStyle) block(block prepare.StatsBlock[period.BlockData, string]) (common.Style, common.Style) {
 	switch block.Data.Flavor {
 	case period.BlockFlavorSpecial:
 		return common.Style{FontColor: common.TextPrimary, Font: common.FontXL()}, common.Style{FontColor: common.TextAlt, Font: common.FontSmall()}

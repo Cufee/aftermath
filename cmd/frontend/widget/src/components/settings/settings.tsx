@@ -27,7 +27,6 @@ export class Settings {
       const target = document.getElementById(this.widgetId);
       if (!target?.['options']) {
         this.error = 'Widget not found';
-        this.loadingState = false;
         return;
       }
       this.widget = target as any;

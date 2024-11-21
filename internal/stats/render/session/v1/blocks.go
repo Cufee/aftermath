@@ -12,7 +12,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
-func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData], width float64) common.Block {
+func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData, string], width float64) common.Block {
 	blockStyle := vehicleBlockStyle()
 	switch block.Tag {
 	case prepare.TagWN8:
@@ -105,6 +105,6 @@ func blockWithDoubleVehicleIcon(block common.Block, session, career frame.Value)
 	return common.NewBlocksContent(common.Style{}, blankBlock(vehicleComparisonIconSize, 1), block, vehicleComparisonIcon(session, career))
 }
 
-func blockShouldHaveCompareIcon(block prepare.StatsBlock[session.BlockData]) bool {
+func blockShouldHaveCompareIcon(block prepare.StatsBlock[session.BlockData, string]) bool {
 	return block.Tag != prepare.TagBattles
 }

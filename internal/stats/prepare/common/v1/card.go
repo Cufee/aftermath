@@ -24,33 +24,34 @@ type StatsCard[B, M any] struct {
 	Meta   M        `json:"meta,omitempty"`
 }
 
-type StatsBlock[D any] struct {
+type StatsBlock[D, M any] struct {
 	Data  D           `json:"data"`
 	Tag   Tag         `json:"tag"`
 	Label string      `json:"label"`
 	V     frame.Value `json:"value"`
+	Meta  M           `json:"meta,omitempty"`
 }
 
-func (b *StatsBlock[D]) Value() frame.Value {
+func (b *StatsBlock[D, M]) Value() frame.Value {
 	if b.V == nil {
 		return frame.InvalidValue
 	}
 	return b.V
 }
 
-func (b *StatsBlock[D]) SetValue(value frame.Value) {
+func (b *StatsBlock[D, M]) SetValue(value frame.Value) {
 	b.V = value
 }
 
-func NewBlock[D any](tag Tag, data D) StatsBlock[D] {
-	return StatsBlock[D]{Tag: tag, Label: "label_" + tag.String(), Data: data}
+func NewBlock[D, M any](tag Tag, data D) StatsBlock[D, M] {
+	return StatsBlock[D, M]{Tag: tag, Label: "label_" + tag.String(), Data: data}
 }
 
-func (block *StatsBlock[D]) Localize(printer func(string) string) {
+func (block *StatsBlock[D, M]) Localize(printer func(string) string) {
 	block.Label = printer(block.Label)
 }
 
-func (block *StatsBlock[D]) FillValue(stats frame.StatsFrame, args ...any) error {
+func (block *StatsBlock[D, M]) FillValue(stats frame.StatsFrame, args ...any) error {
 	value, err := PresetValue(block.Tag, stats, args...)
 	if err != nil {
 		return err

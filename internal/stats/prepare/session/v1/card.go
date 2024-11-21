@@ -216,7 +216,7 @@ func (b *cardBuilder) makeVehicleCard(vehicleID string, presets []common.Tag, ca
 		cFrame = *career.StatsFrame
 	}
 
-	var blocks []common.StatsBlock[BlockData]
+	var blocks []common.StatsBlock[BlockData, string]
 	for _, preset := range presets {
 		block, err := b.presetToBlock(preset, sFrame, cFrame)
 		if err != nil {
@@ -243,7 +243,7 @@ func (b *cardBuilder) makeHighlightCard(vehicleID string, highlight common.Highl
 		cFrame = *career.StatsFrame
 	}
 
-	var blocks []common.StatsBlock[BlockData]
+	var blocks []common.StatsBlock[BlockData, string]
 	for _, preset := range highlight.Blocks {
 		block, err := b.presetToBlock(preset, sFrame, cFrame)
 		if err != nil {
@@ -264,7 +264,7 @@ func (b *cardBuilder) makeHighlightCard(vehicleID string, highlight common.Highl
 func (b *cardBuilder) makeOverviewCard(columns []common.TagColumn[string], session, career frame.StatsFrame, label string, printer func(string) string, replace func(common.Tag) common.Tag) (OverviewCard, error) {
 	var blocks []OverviewColumn
 	for _, columnBlocks := range columns {
-		var column []common.StatsBlock[BlockData]
+		var column []common.StatsBlock[BlockData, string]
 		for _, p := range columnBlocks.Tags {
 			preset := p
 			if replace != nil {
