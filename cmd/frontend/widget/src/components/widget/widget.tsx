@@ -22,11 +22,11 @@ export class Widget {
   /**
    * Overwrite Aftermath WebSocket host
    */
-  @Prop({ attribute: 'ws-overwrite' }) wsHostOverwrite?: string;
+  @Prop({ attribute: 'ws-overwrite' }) wsHost: string = 'wss://amth.one';
   /**
    * Overwrite Aftermath API host for all requests
    */
-  @Prop({ attribute: 'api-overwrite' }) apiHostOverwrite?: string;
+  @Prop({ attribute: 'api-overwrite' }) apiHost: string = 'https://amth.one';
   /**
    * Data to initialize the widget with
    */
@@ -41,9 +41,6 @@ export class Widget {
   @State() widgetAccount: Account | null = null;
   @State() websocket: WebSocket | null = null;
   @State() autoReloadTimer: NodeJS.Timer | null = null;
-
-  private defaultApiDomain = 'https://amth.one';
-  private defaultWsDomain = 'wss://amth.one';
 
   componentWillLoad() {
     this.setAutoReload(this.autoReload);
@@ -130,7 +127,7 @@ export class Widget {
   private initWebSocketConnection() {
     if (!this.widgetId || this.websocket) return;
 
-    this.websocket = new WebSocket(`${this.wsHostOverwrite ?? this.defaultWsDomain}/api/p/realtime/widget/custom/${this.widgetId}/`);
+    this.websocket = new WebSocket(`${this.wsHost}/api/p/realtime/widget/custom/${this.widgetId}/`);
     this.websocket.addEventListener('open', () => {
       console.debug('connected to realtime api');
     });
@@ -167,6 +164,7 @@ export class Widget {
           console.error('failed to fetch widget data', result.error);
           return;
         }
+        console.log(result.data);
         this.accountId = result.data.account.id;
         this.widgetCards = result.data.cards;
         this.widgetAccount = result.data.account;
@@ -194,10 +192,9 @@ export class Widget {
       return { ok: false, error: 'account-id or widget-id parameter is required' };
     }
 
-    const apiDomain = this.apiHostOverwrite ?? this.defaultApiDomain;
     const endpoint = !!this.accountId ? `/widget/account/${this.accountId}/live/json/` : `/widget/custom/${this.widgetId}/live/json/`;
     try {
-      const url = apiDomain + endpoint;
+      const url = this.apiHost + endpoint;
       console.debug(url);
       const res = await fetch(url);
       const data = await res.json();
@@ -266,6 +263,6 @@ export class Widget {
       return <div>error: {this.error}</div>;
     }
 
-    return <Cards cards={this.widgetCards} options={this.widgetOptions} />;
+    return <Cards cards={this.widgetCards} options={this.widgetOptions} assetsDomain={this.apiHost} />;
   }
 }

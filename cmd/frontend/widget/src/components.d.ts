@@ -14,7 +14,7 @@ export namespace Components {
         /**
           * Overwrite Aftermath API host for all requests
          */
-        "apiHostOverwrite"?: string;
+        "apiHost": string;
         /**
           * If set to true, the widget will automatically fetch data when needed
          */
@@ -36,7 +36,7 @@ export namespace Components {
         /**
           * Overwrite Aftermath WebSocket host
          */
-        "wsHostOverwrite"?: string;
+        "wsHost": string;
     }
     interface AmthWidgetSettings {
         /**
@@ -72,7 +72,7 @@ declare namespace LocalJSX {
         /**
           * Overwrite Aftermath API host for all requests
          */
-        "apiHostOverwrite"?: string;
+        "apiHost"?: string;
         /**
           * If set to true, the widget will automatically fetch data when needed
          */
@@ -88,7 +88,7 @@ declare namespace LocalJSX {
         /**
           * Overwrite Aftermath WebSocket host
          */
-        "wsHostOverwrite"?: string;
+        "wsHost"?: string;
     }
     interface AmthWidgetSettings {
         /**

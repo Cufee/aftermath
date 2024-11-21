@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/cufee/aftermath/cmd/frontend/assets"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/frame"
@@ -223,6 +224,7 @@ func (b *cardBuilder) makeVehicleCard(vehicleID string, presets []common.Tag, ca
 			return VehicleCard{}, err
 		}
 		block.Localize(printer)
+		block.Meta = specialIconPath(preset, sFrame, true)
 		blocks = append(blocks, block)
 	}
 
@@ -275,6 +277,7 @@ func (b *cardBuilder) makeOverviewCard(columns []common.TagColumn[string], sessi
 				return OverviewCard{}, err
 			}
 			block.Localize(printer)
+			block.Meta = specialIconPath(preset, session, false)
 			column = append(column, block)
 		}
 		blocks = append(blocks, OverviewColumn{
@@ -287,4 +290,17 @@ func (b *cardBuilder) makeOverviewCard(columns []common.TagColumn[string], sessi
 		Title:  printer(label),
 		Blocks: blocks,
 	}, nil
+}
+
+func specialIconPath(preset common.Tag, frame frame.StatsFrame, small bool) string {
+	if preset == common.TagWN8 && small {
+		return assets.WN8IconPathSmall(frame.WN8().Float())
+	}
+	if preset == common.TagWN8 {
+		return assets.WN8IconPath(frame.WN8().Float())
+	}
+	if preset == common.TagRankedRating {
+		return assets.RatingIconPath(frame.Rating.Float())
+	}
+	return ""
 }
