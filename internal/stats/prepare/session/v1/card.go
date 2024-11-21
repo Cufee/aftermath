@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/cufee/aftermath/cmd/frontend/assets"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/frame"
@@ -216,13 +217,14 @@ func (b *cardBuilder) makeVehicleCard(vehicleID string, presets []common.Tag, ca
 		cFrame = *career.StatsFrame
 	}
 
-	var blocks []common.StatsBlock[BlockData]
+	var blocks []common.StatsBlock[BlockData, string]
 	for _, preset := range presets {
 		block, err := b.presetToBlock(preset, sFrame, cFrame)
 		if err != nil {
 			return VehicleCard{}, err
 		}
 		block.Localize(printer)
+		block.Meta = specialIconPath(preset, sFrame, true)
 		blocks = append(blocks, block)
 	}
 
@@ -243,7 +245,7 @@ func (b *cardBuilder) makeHighlightCard(vehicleID string, highlight common.Highl
 		cFrame = *career.StatsFrame
 	}
 
-	var blocks []common.StatsBlock[BlockData]
+	var blocks []common.StatsBlock[BlockData, string]
 	for _, preset := range highlight.Blocks {
 		block, err := b.presetToBlock(preset, sFrame, cFrame)
 		if err != nil {
@@ -264,7 +266,7 @@ func (b *cardBuilder) makeHighlightCard(vehicleID string, highlight common.Highl
 func (b *cardBuilder) makeOverviewCard(columns []common.TagColumn[string], session, career frame.StatsFrame, label string, printer func(string) string, replace func(common.Tag) common.Tag) (OverviewCard, error) {
 	var blocks []OverviewColumn
 	for _, columnBlocks := range columns {
-		var column []common.StatsBlock[BlockData]
+		var column []common.StatsBlock[BlockData, string]
 		for _, p := range columnBlocks.Tags {
 			preset := p
 			if replace != nil {
@@ -275,6 +277,7 @@ func (b *cardBuilder) makeOverviewCard(columns []common.TagColumn[string], sessi
 				return OverviewCard{}, err
 			}
 			block.Localize(printer)
+			block.Meta = specialIconPath(preset, session, false)
 			column = append(column, block)
 		}
 		blocks = append(blocks, OverviewColumn{
@@ -287,4 +290,17 @@ func (b *cardBuilder) makeOverviewCard(columns []common.TagColumn[string], sessi
 		Title:  printer(label),
 		Blocks: blocks,
 	}, nil
+}
+
+func specialIconPath(preset common.Tag, frame frame.StatsFrame, small bool) string {
+	if preset == common.TagWN8 && small {
+		return assets.WN8IconPathSmall(frame.WN8().Float())
+	}
+	if preset == common.TagWN8 {
+		return assets.WN8IconPath(frame.WN8().Float())
+	}
+	if preset == common.TagRankedRating {
+		return assets.RatingIconPath(frame.Rating.Float())
+	}
+	return ""
 }

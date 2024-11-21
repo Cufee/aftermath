@@ -57,7 +57,7 @@ const vehicleBlockSizes = (vehicles: Vehicle[], style: VehiclesStyle): Record<nu
   return columnSizes;
 };
 
-export default ({ cards, options }: { cards: Cards | null; options: Options | null }) => {
+export default ({ cards, options, assetsDomain }: { cards: Cards | null; options: Options | null; assetsDomain: string }) => {
   if (!cards) {
     return <div>invalid cards data</div>;
   }
@@ -70,38 +70,41 @@ export default ({ cards, options }: { cards: Cards | null; options: Options | nu
 
   return (
     <div class="flex flex-col gap-2 min-w-fit">
-      {options.rating.visible && <OverviewCard data={cards.rating.overview} style={options.rating} columnSizes={overviewSizes} />}
-      {options.unrated.visible && <OverviewCard data={cards.unrated.overview} style={options.unrated} columnSizes={overviewSizes} />}
+      {options.rating.visible && <OverviewCard data={cards.rating.overview} style={options.rating} columnSizes={overviewSizes} assetsDomain={assetsDomain} />}
+      {options.unrated.visible && <OverviewCard data={cards.unrated.overview} style={options.unrated} columnSizes={overviewSizes} assetsDomain={assetsDomain} />}
       {options.vehicles.visible &&
-        cards.unrated.vehicles.slice(0, options.vehicles.limit).map(vehicle => <VehicleCard data={vehicle} style={options.vehicles} blockSizes={vehicleSizes} />)}
+        cards.unrated.vehicles
+          .slice(0, options.vehicles.limit)
+          .map(vehicle => <VehicleCard data={vehicle} style={options.vehicles} blockSizes={vehicleSizes} assetsDomain={assetsDomain} />)}
     </div>
   );
 };
 
-const OverviewCard = ({ data, style, columnSizes }: { data: Overview; style: CardStyle; columnSizes: Record<number, number> }) => {
+const OverviewCard = ({ data, style, columnSizes, assetsDomain }: { data: Overview; style: CardStyle; columnSizes: Record<number, number>; assetsDomain: string }) => {
   return (
     <div class="flex flex-col gap-2 card overview-card grow">
       {style.showTitle && <span class="text-center text-gray-300 title">{data.title}</span>}
       <div class="columns overview-columns justify-around flex flex-row gap-2 items-center bg-black rounded-3xl bg-opacity-80 p-4">
         {data.blocks.map((column, i) => (
-          <Column column={column} style={style} width={columnSizes[i]} />
+          <Column column={column} style={style} width={columnSizes[i]} assetsDomain={assetsDomain} />
         ))}
       </div>
     </div>
   );
 };
 
-const VehicleCard = ({ data, style, blockSizes }: { data: Vehicle; style: VehiclesStyle; blockSizes: Record<number, number> }) => {
+const VehicleCard = ({ data, style, blockSizes, assetsDomain }: { data: Vehicle; style: VehiclesStyle; blockSizes: Record<number, number>; assetsDomain: string }) => {
   const css = (i: number) => {
     return { 'min-width': `${blockSizes[i] || 0}em` };
   };
+  const iconPath = data.blocks.find(b => ['wn8', 'ranked_rating'].includes(b.tag)).meta;
 
   return (
     <div class="flex flex-col gap-2 card vehicle-card grow bg-black rounded-3xl bg-opacity-80 p-4">
       {style.showTitle && (
         <div class="flex flex-row gap-2 justify-between">
           <span class="text-gray-300 title">{data.title}</span>
-          <img src="" class="w-5 h-5" />
+          {iconPath && <img src={assetsDomain + iconPath} class="w-5 h-5" />}
         </div>
       )}
       <div class="blocks vehicle-blocks flex flex-row gap-2 items-center justify-around">
@@ -115,14 +118,16 @@ const VehicleCard = ({ data, style, blockSizes }: { data: Vehicle; style: Vehicl
   );
 };
 
-const Column = ({ column, style, width }: { column: BlockColumn; style: CardStyle; width: number }) => {
+const Column = ({ column, style, width, assetsDomain }: { column: BlockColumn; style: CardStyle; width: number; assetsDomain: string }) => {
   const css: Record<string, string> = {};
   css['min-width'] = `${width || 0}em`;
 
   if (['rating', 'wn8'].includes(column.flavor)) {
+    const iconPath = column.blocks.find(b => ['wn8', 'ranked_rating'].includes(b.tag)).meta;
+
     return (
       <div class="flex flex-col items-center justify-center column overview-column special-overview-column gap-1" style={css}>
-        <img src="" class="w-16 h-16" />
+        {iconPath && <img src={assetsDomain + iconPath} class="w-16 h-16" />}
         {column.blocks.map(block => (
           <Block block={block} style={style} />
         ))}

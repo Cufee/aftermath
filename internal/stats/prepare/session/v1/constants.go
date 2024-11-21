@@ -43,12 +43,12 @@ type RatingCards struct {
 }
 
 type OverviewColumn struct {
-	Blocks []common.StatsBlock[BlockData] `json:"blocks"`
-	Flavor blockFlavor                    `json:"flavor"`
+	Blocks []common.StatsBlock[BlockData, string] `json:"blocks"`
+	Flavor blockFlavor                            `json:"flavor"`
 }
 
 type OverviewCard common.StatsCard[OverviewColumn, string]
-type VehicleCard common.StatsCard[common.StatsBlock[BlockData], string]
+type VehicleCard common.StatsCard[common.StatsBlock[BlockData, string], string]
 
 type BlockData struct {
 	S frame.Value `json:"session"`

@@ -5,10 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
     <title>Stencil Component Starter</title>
 
-    <script type="module" src="https://amth.one/assets/js/widget/amth-widget.js"></script>
+    <script type="module" src="/build/amth-widget.esm.js"></script>
+    <script nomodule src="/build/amth-widget.js"></script>
   </head>
   <body>
-    <amth-widget-settings widget-id="widget-580832666"></amth-widget-settings>
-    <amth-widget auto-reload="false" widget-id="clz0nbiw9000q01obzge71ysh"></amth-widget>
+    <amth-widget
+      id="widget-580832666"
+      auto-reload="true"
+      widget-id="cm15992ar0000lb0vri13q186"
+      ws-overwrite="ws://localhost:3000"
+      api-overwrite="http://localhost:3000"
+    ></amth-widget>
   </body>
 </html>

@@ -85,8 +85,8 @@ func playerToCard(player replay.Player, vehicleName string, blocks []common.Tag,
 	return card, nil
 }
 
-func presetToBlock(player replay.Player, preset common.Tag, printer func(string) string) (common.StatsBlock[BlockData], error) {
-	block := common.StatsBlock[BlockData](common.NewBlock(preset, BlockData{}))
+func presetToBlock(player replay.Player, preset common.Tag, printer func(string) string) (common.StatsBlock[BlockData, string], error) {
+	block := common.StatsBlock[BlockData, string](common.NewBlock[BlockData, string](preset, BlockData{}))
 
 	switch preset {
 	case TagDamageBlocked:
