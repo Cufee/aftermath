@@ -70,8 +70,8 @@ export default ({ cards, options, assetsDomain }: { cards: Cards | null; options
 
   return (
     <div class="flex flex-col gap-2 min-w-fit">
-      {options.rating.visible && <OverviewCard data={cards.rating.overview} style={options.rating} columnSizes={overviewSizes} assetsDomain={assetsDomain} />}
       {options.unrated.visible && <OverviewCard data={cards.unrated.overview} style={options.unrated} columnSizes={overviewSizes} assetsDomain={assetsDomain} />}
+      {options.rating.visible && <OverviewCard data={cards.rating.overview} style={options.rating} columnSizes={overviewSizes} assetsDomain={assetsDomain} />}
       {options.vehicles.visible &&
         cards.unrated.vehicles
           .slice(0, options.vehicles.limit)
@@ -100,7 +100,7 @@ const VehicleCard = ({ data, style, blockSizes, assetsDomain }: { data: Vehicle;
   const iconPath = data.blocks.find(b => ['wn8', 'ranked_rating'].includes(b.tag)).meta;
 
   return (
-    <div class="flex flex-col gap-2 card vehicle-card grow bg-black rounded-3xl bg-opacity-80 p-4">
+    <div class="flex flex-col gap-2 card vehicle-card grow bg-black rounded-3xl bg-opacity-80 py-4 px-6">
       {style.showTitle && (
         <div class="flex flex-row gap-2 justify-between">
           <span class="text-gray-300 title">{data.title}</span>
