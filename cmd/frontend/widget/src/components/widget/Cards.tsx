@@ -104,7 +104,7 @@ const VehicleCard = ({ data, style, blockSizes, assetsDomain }: { data: Vehicle;
       {style.showTitle && (
         <div class="flex flex-row gap-2 justify-between">
           <span class="text-gray-300 title">{data.title}</span>
-          {iconPath && <img src={assetsDomain + iconPath} class="w-5 h-5" />}
+          {iconPath && <img src={assetsDomain + iconPath} class="size-5" />}
         </div>
       )}
       <div class="blocks vehicle-blocks flex flex-row gap-2 items-center justify-around">
@@ -127,7 +127,7 @@ const Column = ({ column, style, width, assetsDomain }: { column: BlockColumn; s
 
     return (
       <div class="flex flex-col items-center justify-center column overview-column special-overview-column gap-1" style={css}>
-        {iconPath && <img src={assetsDomain + iconPath} class="w-16 h-16" />}
+        {iconPath && <img src={assetsDomain + iconPath} class="size-16" />}
         {column.blocks.map(block => (
           <Block block={block} style={style} />
         ))}
