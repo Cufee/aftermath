@@ -132,11 +132,11 @@ templ (w defaultWidget) specialOverviewColumn(column session.OverviewColumn) {
 	<div class="flex flex-col items-center justify-center column overview-column special-overview-column gap-1">
 		for _, block := range column.Blocks {
 			if column.Flavor == session.BlockFlavorRating {
-				<img src={ assets.RatingIconPath(block.Value().Float()) } class="w-16 h-16"/>
+				<img src={ assets.RatingIconPath(block.Value().Float()) } class="size-16"/>
 				@w.block(block, w.style.RatingOverview)
 			}
 			if column.Flavor == session.BlockFlavorWN8 {
-				<img src={ assets.WN8IconPath(block.Value().Float()) } class="w-18 h-18"/>
+				<img src={ assets.WN8IconPath(block.Value().Float()) } class="size-16"/>
 				@w.block(block, w.style.UnratedOverview)
 			}
 		}
