@@ -192,7 +192,7 @@ export class Widget {
       return { ok: false, error: 'account-id or widget-id parameter is required' };
     }
 
-    const endpoint = !!this.accountId ? `/widget/account/${this.accountId}/live/json/` : `/widget/custom/${this.widgetId}/live/json/`;
+    const endpoint = !this.widgetId ? `/widget/account/${this.accountId}/live/json/` : `/widget/custom/${this.widgetId}/live/json/`;
     try {
       const url = this.apiHost + endpoint;
       console.debug(url);
