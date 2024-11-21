@@ -6,7 +6,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
-func statsBlockToBlock(stats prepare.StatsBlock[replay.BlockData], width float64) common.Block {
+func statsBlockToBlock(stats prepare.StatsBlock[replay.BlockData, string], width float64) common.Block {
 	value := common.NewTextContent(common.Style{
 		Font:      common.FontLarge(),
 		FontColor: common.TextPrimary,

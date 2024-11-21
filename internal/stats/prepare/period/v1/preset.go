@@ -6,8 +6,8 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
-func presetToBlock(preset common.Tag, stats frame.StatsFrame, vehicles map[string]frame.VehicleStatsFrame, glossary map[string]models.Vehicle) (common.StatsBlock[BlockData], error) {
-	block := common.StatsBlock[BlockData](common.NewBlock(preset, BlockData{}))
+func presetToBlock(preset common.Tag, stats frame.StatsFrame, vehicles map[string]frame.VehicleStatsFrame, glossary map[string]models.Vehicle) (common.StatsBlock[BlockData, string], error) {
+	block := common.StatsBlock[BlockData, string](common.NewBlock[BlockData, string](preset, BlockData{}))
 
 	switch preset {
 	case common.TagWN8:

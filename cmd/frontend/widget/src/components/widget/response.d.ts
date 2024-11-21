@@ -60,6 +60,7 @@ interface Block {
   tag: string;
   label: string;
   value: string;
+  meta?: string;
 }
 
 interface Data {

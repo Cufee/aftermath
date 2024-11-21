@@ -19,12 +19,12 @@ type Cards struct {
 }
 
 type OverviewColumn struct {
-	Blocks []common.StatsBlock[BlockData]
+	Blocks []common.StatsBlock[BlockData, string]
 	Flavor blockFlavor
 }
 
 type OverviewCard common.StatsCard[OverviewColumn, string]
-type VehicleCard common.StatsCard[common.StatsBlock[BlockData], string]
+type VehicleCard common.StatsCard[common.StatsBlock[BlockData, string], string]
 
 type BlockData struct {
 	Flavor blockFlavor `json:"flavor"`

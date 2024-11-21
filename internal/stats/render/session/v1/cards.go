@@ -216,7 +216,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	return segments, nil
 }
 
-func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], sessionStyle, careerStyle, labelStyle, containerStyle common.Style) (map[string]float64, float64) {
+func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], sessionStyle, careerStyle, labelStyle, containerStyle common.Style) (map[string]float64, float64) {
 	presetBlockWidth := make(map[string]float64)
 	var contentWidth float64
 	var maxBlockWidth float64
@@ -249,7 +249,7 @@ func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], sessionS
 	return presetBlockWidth, contentWidth
 }
 
-func highlightedVehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], sessionStyle, _, labelStyle, containerStyle common.Style) (map[string]float64, float64) {
+func highlightedVehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], sessionStyle, _, labelStyle, containerStyle common.Style) (map[string]float64, float64) {
 	presetBlockWidth := make(map[string]float64)
 	var contentWidth float64
 	var maxBlockWidth float64
@@ -278,7 +278,7 @@ func highlightedVehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData
 	return presetBlockWidth, contentWidth
 }
 
-func overviewColumnBlocksWidth(blocks []prepare.StatsBlock[session.BlockData], sessionStyle, careerStyle, labelStyle, containerStyle common.Style) (map[string]float64, float64) {
+func overviewColumnBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], sessionStyle, careerStyle, labelStyle, containerStyle common.Style) (map[string]float64, float64) {
 	presetBlockWidth, contentWidth := vehicleBlocksWidth(blocks, sessionStyle, careerStyle, labelStyle, containerStyle)
 	for _, block := range blocks {
 		// adjust width if this column includes a special icon

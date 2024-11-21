@@ -20,7 +20,7 @@ type Cards struct {
 	Enemies []Card     `json:"enemies"`
 }
 
-type Card common.StatsCard[common.StatsBlock[BlockData], CardMeta]
+type Card common.StatsCard[common.StatsBlock[BlockData, string], CardMeta]
 
 type HeaderCard struct {
 	Outcome      replay.Outcome
