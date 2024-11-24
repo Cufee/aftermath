@@ -164,6 +164,11 @@ func init() {
 				return strings.HasPrefix(customID, "fancy_image_submit#")
 			}).
 			Handler(func(ctx common.Context) error {
+				helpButton := discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
+					}}
+
 				data, ok := ctx.ComponentData()
 				if !ok {
 					return ctx.Error("failed to get component data on interaction command")
@@ -171,6 +176,23 @@ func init() {
 				contentID := strings.ReplaceAll(data.CustomID, "fancy_image_submit#", "")
 				if contentID == "" {
 					return ctx.Error("failed to get content id from custom id")
+				}
+
+				// check if a user has a pending/recent request
+				pending, err := ctx.Core().Database().FindUserModerationRequests(ctx.Ctx(), ctx.User().ID, []string{"background-upload"}, []models.ModerationStatus{models.ModerationStatusSubmitted, models.ModerationStatusApproved, models.ModerationStatusDeclined}, time.Now().Add(-time.Hour*72))
+				if err != nil && !database.IsNotFound(err) {
+					return ctx.Err(err)
+				}
+				slices.SortFunc(pending, func(a, b models.ModerationRequest) int {
+					return b.CreatedAt.Compare(a.CreatedAt)
+				})
+				for _, req := range pending {
+					if req.ActionStatus == models.ModerationStatusSubmitted {
+						return ctx.Reply().Component(helpButton).Send("fancy_errors_pending_request_exists")
+					}
+					if time.Since(req.CreatedAt) < time.Hour*24 {
+						return ctx.Reply().Component(helpButton).Format("fancy_errors_upload_timeout_fmt", req.CreatedAt.Add(time.Hour*24).Unix()).Send()
+					}
 				}
 
 				content, err := ctx.Core().Database().GetUserContent(ctx.Ctx(), contentID)

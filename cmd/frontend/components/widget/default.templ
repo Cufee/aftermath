@@ -93,7 +93,7 @@ templ (w defaultWidget) vehicleCard(card vehicleExtended, style models.WidgetVeh
 				<span class="text-gray-300 title">
 					{ card.Title }
 				</span>
-				<img src={ assets.WN8IconPathSmall(card.wn8.Float()) } class="w-5 h-5"/>
+				<img src={ assets.WN8IconPathSmall(card.wn8.Float()) } class="size-5"/>
 			</div>
 		}
 		<div class={ fmt.Sprintf("blocks vehicle-blocks grid grid-cols-%d gap-1 items-center", len(card.Blocks)) }>
