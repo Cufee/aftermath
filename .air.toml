@@ -7,9 +7,9 @@ send_interrupt = true
 stop_on_error = true
 
 [proxy]
-enabled = true
+enabled = false
 proxy_port = 8080
-app_port = 9092
+app_port = 3000
 
 [log]
 # Only show main log (silences watcher, build, runner)

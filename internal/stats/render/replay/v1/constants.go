@@ -17,7 +17,15 @@ var (
 	hpBarBgColorEnemies = color.NRGBA{R: 120, G: 80, B: 80, A: 120}
 
 	protagonistColor = color.NRGBA{255, 223, 0, 255}
-	outcomeIconSize  = 30.0
+
+	outcomeIconSize       = 30.0
+	outcomeIconColorRed   = color.NRGBA{R: 255, G: 120, B: 120, A: 255}
+	outcomeIconBgColorRed = color.NRGBA{R: 120, G: 80, B: 80, A: 120}
+
+	outcomeIconColorGreen   = color.NRGBA{R: 120, G: 255, B: 120, A: 255}
+	outcomeIconBgColorGreen = color.NRGBA{R: 80, G: 120, B: 80, A: 120}
+
+	outcomeIconColorYellow = color.NRGBA{255, 223, 0, 180}
 
 	playerWN8IconSize = 25.0
 	playerCardPadding = (80 - hpBarHeight) / 2

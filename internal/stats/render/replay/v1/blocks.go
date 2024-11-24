@@ -3,7 +3,6 @@ package replay
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"math"
 
 	fetch "github.com/cufee/aftermath/internal/stats/fetch/v1/replay"
@@ -20,15 +19,17 @@ func newTitleBlock(replay replay.Cards, width float64) common.Block {
 	style.JustifyContent = common.JustifyContentSpaceBetween
 	style.Direction = common.DirectionHorizontal
 	style.AlignItems = common.AlignItemsCenter
-	style.PaddingX = playerCardPadding
+	style.PaddingX = playerCardPadding + hpBarWidth/2
+
+	allyIcon, enemyIcon := outcomeIcons(replay.Header.Outcome)
 
 	return common.NewBlocksContent(style,
-		outcomeIcon(replay.Header.Outcome),
+		allyIcon,
 		common.NewTextContent(common.Style{
 			Font:      common.FontLarge(),
 			FontColor: common.TextPrimary,
 		}, fmt.Sprintf("%s - %s", replay.Header.MapName, replay.Header.GameMode)),
-		common.NewEmptyContent(outcomeIconSize, outcomeIconSize))
+		enemyIcon)
 }
 
 func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card replay.Card, player fetch.Player, ally, protagonist bool) common.Block {
@@ -109,21 +110,26 @@ func playerNameBlock(player fetch.Player, protagonist bool) common.Block {
 
 var outcomeIconCache image.Image
 
-func outcomeIcon(outcome fetch.Outcome) common.Block {
+func outcomeIcons(outcome fetch.Outcome) (common.Block, common.Block) {
 	if outcomeIconCache == nil {
 		flagIcon, _ := assets.GetLoadedImage("flag")
 		outcomeIconCache = imaging.Fit(flagIcon, int(outcomeIconSize), int(outcomeIconSize), imaging.Linear)
 	}
 
-	iconColor := color.NRGBA{255, 240, 0, 180}
+	allyIconColor := outcomeIconBgColorGreen
+	enemyIconColor := outcomeIconBgColorRed
 	if outcome == fetch.OutcomeVictory {
-		iconColor = color.NRGBA{46, 204, 113, 180}
+		allyIconColor = outcomeIconColorGreen
 	}
 	if outcome == fetch.OutcomeDefeat {
-		iconColor = color.NRGBA{242, 38, 19, 180}
+		enemyIconColor = outcomeIconColorRed
+	}
+	if outcome == fetch.OutcomeDraw {
+		allyIconColor = outcomeIconColorYellow
+		enemyIconColor = outcomeIconColorYellow
 	}
 
-	return common.NewImageContent(common.Style{BackgroundColor: iconColor}, outcomeIconCache)
+	return common.NewImageContent(common.Style{BackgroundColor: allyIconColor}, outcomeIconCache), common.NewImageContent(common.Style{BackgroundColor: enemyIconColor}, outcomeIconCache)
 }
 
 func playerWN8Icon(value frame.Value) common.Block {
