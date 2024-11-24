@@ -155,51 +155,53 @@ func TestRenderReplay(t *testing.T) {
 
 	loadStaticAssets(static)
 
-	db, err := newDatabaseClientFromEnv()
-	is.NoErr(err)
-
+	db := tests.StaticTestingDatabase()
 	wg, _ := wargamingClientsFromEnv()
 
 	printer, err := localization.NewPrinterWithFallback("stats", language.English)
 	is.NoErr(err)
 
-	file, err := os.ReadFile("tests/replay_2.wotbreplay")
-	is.NoErr(err)
-
 	fetch, err := fetch.NewMultiSourceClient(wg, nil, db)
 	is.NoErr(err)
 
-	replay, err := fetch.Replay(context.Background(), bytes.NewReader(file), int64(len(file)))
-	is.NoErr(err)
-
-	var vehicles []string
-	for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
-		if id := player.VehicleID; !slices.Contains(vehicles, id) {
-			vehicles = append(vehicles, id)
-		}
-	}
-
-	glossary, err := db.GetVehicles(context.Background(), vehicles)
-	is.NoErr(err)
-
-	gameModeNames, err := db.GetGameModeNames(context.Background(), replay.GameMode.String())
-	is.NoErr(err)
-
-	bgImage := "static://bg-default"
-
-	{
-		cards, err := prepare.NewCards(replay, glossary, gameModeNames, common.WithPrinter(printer, language.English))
+	replayFiles := []string{"replay_defeat.wotbreplay", "replay_victory.wotbreplay", "replay_draw.wotbreplay"}
+	for _, name := range replayFiles {
+		file, err := os.ReadFile("tests/" + name)
 		is.NoErr(err)
 
-		image, err := render.CardsToImage(replay, cards, rc.WithBackgroundURL(bgImage), rc.WithPrinter(printer))
-		assert.NoError(t, err, "failed to render a replay image")
-		assert.NotNil(t, image, "image is nil")
+		replay, err := fetch.Replay(context.Background(), bytes.NewReader(file), int64(len(file)))
+		is.NoErr(err)
 
-		f, err := os.Create("tmp/render_test_replay.png")
-		assert.NoError(t, err, "failed to create a file")
-		defer f.Close()
+		var vehicles []string
+		for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
+			if id := player.VehicleID; !slices.Contains(vehicles, id) {
+				vehicles = append(vehicles, id)
+			}
+		}
 
-		err = imaging.Save(image, "tmp/render_test_replay.png")
-		assert.NoError(t, err, "failed to encode a png image")
+		glossary, err := db.GetVehicles(context.Background(), vehicles)
+		is.NoErr(err)
+
+		gameModeNames, err := db.GetGameModeNames(context.Background(), replay.GameMode.String())
+		is.NoErr(err)
+
+		bgImage := "static://bg-default"
+
+		{
+			cards, err := prepare.NewCards(replay, glossary, gameModeNames, common.WithPrinter(printer, language.English))
+			is.NoErr(err)
+
+			image, err := render.CardsToImage(replay, cards, rc.WithBackgroundURL(bgImage), rc.WithPrinter(printer))
+			assert.NoError(t, err, "failed to render a replay image")
+			assert.NotNil(t, image, "image is nil")
+
+			out := "tmp/render_test_" + name + ".png"
+			f, err := os.Create(out)
+			assert.NoError(t, err, "failed to create a file")
+			defer f.Close()
+
+			err = imaging.Save(image, out)
+			assert.NoError(t, err, "failed to encode a png image")
+		}
 	}
 }

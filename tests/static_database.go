@@ -276,7 +276,7 @@ func (c *staticTestingDatabase) CreateWidgetSettings(ctx context.Context, userID
 }
 
 func (c *staticTestingDatabase) GetGameModeNames(ctx context.Context, id string) (map[language.Tag]string, error) {
-	return nil, nil
+	return map[language.Tag]string{}, nil
 }
 func (c *staticTestingDatabase) UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) (map[string]error, error) {
 	return nil, nil
