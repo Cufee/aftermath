@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -127,13 +128,15 @@ func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 				}
 				return discordgo.Message{}, err
 			}
-			msg, err := c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data, files)
-			if errors.Is(err, rest.ErrUnknownInteraction) {
-				// Discord did not propagate the ack yet
-				return c.rest.SendInteractionResponse(ctx, c.interaction.ID, c.interaction.Token, discordgo.InteractionResponse{Data: &data, Type: discordgo.InteractionResponseChannelMessageWithSource}, files)
-			}
-			return msg, err
+			return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data.Interaction(), files)
 		})
+		if errors.Is(err, rest.ErrUnknownInteraction) || errors.Is(err, rest.ErrUnknownWebhook) {
+			// Discord did not propagate the ack, this happens on low usage discord servers sometimes
+			message := data.Message()
+			errorMessage := fmt.Sprintf(c.localize("discord_error_invalid_interaction_fmt"), c.Member().ID)
+			message.Content = errorMessage + message.Content
+			msg, err = c.rest.CreateMessage(c.Ctx(), c.interaction.ChannelID, message, files)
+		}
 
 		go c.saveInteractionEvent(msg, err, reply)
 		return msg, err
@@ -151,7 +154,7 @@ func (c *routeContext) InteractionFollowUp(reply common.Reply) (discordgo.Messag
 			// since we already finished handling the interaction, there is no need to use the handler context
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
-			msg, err := c.rest.SendInteractionFollowup(ctx, c.interaction.AppID, c.interaction.Token, data, files)
+			msg, err := c.rest.SendInteractionFollowup(ctx, c.interaction.AppID, c.interaction.Token, data.Interaction(), files)
 
 			go c.saveInteractionEvent(msg, err, reply)
 			return msg, err

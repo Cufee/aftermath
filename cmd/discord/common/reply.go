@@ -29,6 +29,23 @@ type replyInternal struct {
 	eventMetadata map[string]any
 }
 
+type ResponseData discordgo.InteractionResponseData
+
+func (d ResponseData) Interaction() discordgo.InteractionResponseData {
+	return discordgo.InteractionResponseData(d)
+}
+
+func (d ResponseData) Message() discordgo.MessageSend {
+	return discordgo.MessageSend{
+		Content:         d.Content,
+		Embeds:          d.Embeds,
+		TTS:             d.TTS,
+		Components:      d.Components,
+		AllowedMentions: d.AllowedMentions,
+		Flags:           d.Flags,
+	}
+}
+
 func WithRetry(fn func() (discordgo.Message, error), tries ...int) (discordgo.Message, error) {
 	var triesCnt = 5
 	if len(tries) > 0 && tries[0] > 0 {
@@ -125,7 +142,7 @@ func (r Reply) Message(content ...string) (discordgo.Message, error) {
 	return r.ctx.InteractionResponse(r)
 }
 
-func (r replyInternal) Build(localize func(string) string) (discordgo.InteractionResponseData, []rest.File) {
+func (r replyInternal) Build(localize func(string) string) (ResponseData, []rest.File) {
 	var content []string
 	for _, t := range r.Text {
 		content = append(content, localize(t))
@@ -143,5 +160,5 @@ func (r replyInternal) Build(localize func(string) string) (discordgo.Interactio
 	if r.Files != nil {
 		data.Attachments = &[]*discordgo.MessageAttachment{} // clear existing attachments
 	}
-	return data, r.Files
+	return ResponseData(data), r.Files
 }

@@ -379,3 +379,8 @@
 - key: wargaming_error_outage_short
   value: "It looks like Wargaming are having some issues. Please try again"
   context: This error is sent whenever a request to WG fails for whatever reason. Short version
+
+  # Discord specific errors
+- key: discord_error_invalid_interaction_fmt
+  value: "-# <@%s> used a command\n**It looks like Discord is having some issues at the moment.**\nAftermath replies might be delayed, but we will try our best to make things work!\n"
+  context: Discord sometimes does not process the interaction ack corrctly, this will lead to an infinite "Aftermath is thinking" message, but we still reply
