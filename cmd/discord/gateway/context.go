@@ -125,7 +125,7 @@ func (c *eventContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 				}
 				return discordgo.Message{}, err
 			}
-			return c.gw.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data, files)
+			return c.gw.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data.Interaction(), files)
 		})
 
 		go c.saveInteractionEvent(msg, err, reply)
@@ -144,7 +144,7 @@ func (c *eventContext) InteractionFollowUp(reply common.Reply) (discordgo.Messag
 			// since we already finished handling the interaction, there is no need to use the handler context
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
-			msg, err := c.gw.rest.SendInteractionFollowup(ctx, c.interaction.AppID, c.interaction.Token, data, files)
+			msg, err := c.gw.rest.SendInteractionFollowup(ctx, c.interaction.AppID, c.interaction.Token, data.Interaction(), files)
 
 			go c.saveInteractionEvent(msg, err, reply)
 			return msg, err
