@@ -91,7 +91,7 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 		// run the interaction handler
 		go func() {
 			// while the limit for a deferred reply is on a scale of minutes, we probably do not want a user to wait that long
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*7)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 			defer cancel()
 
 			router.handleInteraction(ctx, data, cmd)
