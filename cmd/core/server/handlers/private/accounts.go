@@ -87,7 +87,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 							return
 						}
 
-						var inserts []models.Account
+						var inserts []*models.Account
 						for id, account := range data {
 							if id == "" && account.ID == 0 {
 								log.Warn().Str("reason", "id is blank").Msg("wargaming returned a bad account")
@@ -103,10 +103,12 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 								account.Nickname = "@Hidden"
 								private = true
 							}
-							inserts = append(inserts, fetch.WargamingToAccount(realm, account, types.ClanMember{}, private))
+
+							update := fetch.WargamingToAccount(realm, account, types.ClanMember{}, private)
+							inserts = append(inserts, &update)
 						}
 
-						accErr, err := client.Database().UpsertAccounts(ctx, inserts)
+						accErr, err := client.Database().UpsertAccounts(ctx, inserts...)
 						if err != nil {
 							log.Err(err).Msg("failed to upsert accounts")
 						}

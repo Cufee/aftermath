@@ -36,7 +36,7 @@ type AccountsClient interface {
 	GetAccountByID(ctx context.Context, id string) (models.Account, error)
 	GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error)
 	AccountSetPrivate(ctx context.Context, id string, value bool) error
-	UpsertAccounts(ctx context.Context, accounts []models.Account) (map[string]error, error)
+	UpsertAccounts(ctx context.Context, accounts ...*models.Account) (map[string]error, error)
 }
 
 type GlossaryClient interface {
@@ -85,17 +85,10 @@ type SnapshotsClient interface {
 	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
 	GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
 
-	CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) error
-	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) error
+	CreateAccountSnapshots(ctx context.Context, snapshots ...*models.AccountSnapshot) error
+	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...*models.VehicleSnapshot) error
 
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
-}
-
-type LeaderboardsClient interface {
-	CreateLeaderboardScores(ctx context.Context, scores ...models.LeaderboardScore) error
-	GetLeaderboardScores(ctx context.Context, leaderboardID string, scoreType models.ScoreType, options ...Query) ([]models.LeaderboardScore, error)
-
-	DeleteExpiredLeaderboardScores(ctx context.Context, expiration time.Time, scoreType models.ScoreType) error
 }
 
 type TasksClient interface {
@@ -141,7 +134,6 @@ type Client interface {
 	GlossaryClient
 	AccountsClient
 	SnapshotsClient
-	LeaderboardsClient
 
 	TasksClient
 

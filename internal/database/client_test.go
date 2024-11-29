@@ -43,10 +43,10 @@ func TestConcurrentWrites(t *testing.T) {
 		v.AccountID = id
 		v.ReferenceID = id
 		fn = append(fn, func() {
-			_, err := client.UpsertAccounts(ctx, []models.Account{{ID: id, Realm: "test", Nickname: "test_account"}})
+			_, err := client.UpsertAccounts(ctx, &models.Account{ID: id, Realm: "test", Nickname: "test_account"})
 			is.NoErr(err)
 
-			err = client.CreateAccountVehicleSnapshots(ctx, id, v)
+			err = client.CreateAccountVehicleSnapshots(ctx, id, &v)
 			is.NoErr(err)
 		})
 	}

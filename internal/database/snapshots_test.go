@@ -26,7 +26,7 @@ func TestGetVehicleSnapshots(t *testing.T) {
 	client.db.VehicleSnapshot.Delete().Where().Exec(ctx)
 	defer client.db.VehicleSnapshot.Delete().Exec(ctx)
 
-	_, err = client.UpsertAccounts(ctx, []models.Account{{ID: "a1", Realm: "test", Nickname: "test_account"}})
+	_, err = client.UpsertAccounts(ctx, &models.Account{ID: "a1", Realm: "test", Nickname: "test_account"})
 	assert.NoError(t, err, "failed to upsert an account")
 
 	createdAtVehicle1 := time.Date(2023, 6, 1, 0, 0, 0, 0, time.UTC)
@@ -92,7 +92,7 @@ func TestGetVehicleSnapshots(t *testing.T) {
 	}
 
 	{ // create snapshots
-		snapshots := []models.VehicleSnapshot{vehicle1, vehicle2, vehicle3, vehicle4, vehicle5, vehicle6}
+		snapshots := []*models.VehicleSnapshot{&vehicle1, &vehicle2, &vehicle3, &vehicle4, &vehicle5, &vehicle6}
 		err := client.CreateAccountVehicleSnapshots(ctx, "a1", snapshots...)
 		assert.NoError(t, err, "create vehicle snapshot should not error")
 	}

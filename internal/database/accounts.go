@@ -60,7 +60,7 @@ func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Accoun
 	return accounts, nil
 }
 
-func (c *client) UpsertAccounts(ctx context.Context, accounts []models.Account) (map[string]error, error) {
+func (c *client) UpsertAccounts(ctx context.Context, accounts ...*models.Account) (map[string]error, error) {
 	if len(accounts) < 1 {
 		return nil, nil
 	}
@@ -69,7 +69,7 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts []models.Account) 
 	accountsMap := make(map[string]*models.Account)
 	for _, a := range accounts {
 		ids = append(ids, a.ID)
-		accountsMap[a.ID] = &a
+		accountsMap[a.ID] = a
 	}
 
 	records, err := c.db.Account.Query().Where(account.IDIn(ids...)).All(ctx)

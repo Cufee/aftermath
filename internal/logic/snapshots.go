@@ -16,6 +16,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	accountsPool         = newPool[models.Account]()
+	vehicleSnapshotsPool = newPool[models.VehicleSnapshot]()
+	accountSnapshotsPool = newPool[models.AccountSnapshot]()
+)
+
 type AccountsWithReference map[string]string
 
 func WithReference(accountID string, referenceID string) AccountsWithReference {
@@ -143,10 +149,10 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 	group.Wait()
 
 	var accountErrors = make(map[string]error)
-	var accountUpdates = make(map[string]models.Account)
+	var accountUpdates = make(map[string]*models.Account)
 
-	var accountSnapshots []models.AccountSnapshot
-	var vehicleSnapshots = make(map[string][]models.VehicleSnapshot)
+	var accountSnapshots []*models.AccountSnapshot
+	var vehicleSnapshots = make(map[string][]*models.VehicleSnapshot)
 
 	for _, accountID := range accountsNeedAnUpdate {
 		vehicles := accountVehicles[accountID]
@@ -162,7 +168,10 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 
 		snapshotStats := fetch.WargamingToStats(realm, accounts[accountID], clans[accountID], vehicles.Data)
 		{ // account snapshot
-			accountSnapshots = append(accountSnapshots, models.AccountSnapshot{
+			sht := accountSnapshotsPool.Get()
+			defer accountSnapshotsPool.Put(sht)
+
+			*sht = models.AccountSnapshot{
 				Type:           models.SnapshotTypeDaily,
 				CreatedAt:      createdAt,
 				ReferenceID:    accountRefID,
@@ -170,8 +179,14 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 				LastBattleTime: snapshotStats.LastBattleTime,
 				RatingBattles:  snapshotStats.RatingBattles.StatsFrame,
 				RegularBattles: snapshotStats.RegularBattles.StatsFrame,
-			})
-			accountUpdates[accountID] = snapshotStats.Account
+			}
+			accountSnapshots = append(accountSnapshots, sht)
+
+			asht := accountsPool.Get()
+			defer accountsPool.Put(asht)
+
+			*asht = snapshotStats.Account
+			accountUpdates[accountID] = asht
 		}
 
 		// vehicle snapshots
@@ -180,7 +195,11 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		if len(vehicles.Data) > 0 {
 			for id, vehicle := range vehicleStats {
 				vehicleLastBattleTimes[id] = vehicleBattleData{vehicle.LastBattleTime, int(vehicle.Battles.Float())}
-				vehicleSnapshots[accountID] = append(vehicleSnapshots[accountID], models.VehicleSnapshot{
+
+				sht := vehicleSnapshotsPool.Get()
+				defer vehicleSnapshotsPool.Put(sht)
+
+				*sht = models.VehicleSnapshot{
 					Type:           models.SnapshotTypeDaily,
 					LastBattleTime: vehicle.LastBattleTime,
 					Stats:          *vehicle.StatsFrame,
@@ -188,7 +207,8 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 					ReferenceID:    accountRefID,
 					AccountID:      accountID,
 					CreatedAt:      createdAt,
-				})
+				}
+				vehicleSnapshots[accountID] = append(vehicleSnapshots[accountID], sht)
 			}
 		}
 	}
@@ -212,7 +232,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 
 		// update account cache, non critical and should not fail the flow
-		_, err = dbClient.UpsertAccounts(ctx, []models.Account{accountUpdates[accountSnapshot.AccountID]})
+		_, err = dbClient.UpsertAccounts(ctx, accountUpdates[accountSnapshot.AccountID])
 		if err != nil {
 			log.Err(err).Str("accountId", accountSnapshot.AccountID).Msg("failed to upsert account")
 		}
