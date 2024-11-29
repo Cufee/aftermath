@@ -103,7 +103,7 @@ func (c *client) GetVehicleLastBattleTimes(ctx context.Context, accountID string
 }
 
 // create vehicle snapshots for a specific account
-func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...models.VehicleSnapshot) error {
+func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...*models.VehicleSnapshot) error {
 	if len(snapshots) < 1 {
 		return nil
 	}
@@ -249,7 +249,7 @@ func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []str
 	return lastBattles, nil
 }
 
-func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...models.AccountSnapshot) error {
+func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...*models.AccountSnapshot) error {
 	if len(snapshots) < 1 {
 		return nil
 	}
