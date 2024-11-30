@@ -12,7 +12,6 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -38,7 +37,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 		w.Write([]byte(fmt.Sprintf("working on %d accounts", len(accounts)-len(existing))))
 		log.Info().Int("count", len(accounts)-len(existing)).Msg("importing accounts")
 
-		go func(accounts []string, existing []models.Account) {
+		go func(accounts []string, existing []*models.Account) {
 			existingMap := make(map[string]struct{}, len(existing))
 			for _, a := range existing {
 				existingMap[a.ID] = struct{}{}
@@ -104,8 +103,8 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 								private = true
 							}
 
-							update := fetch.WargamingToAccount(realm, account, types.ClanMember{}, private)
-							inserts = append(inserts, &update)
+							update := fetch.WargamingToAccount(realm, &account, nil, private)
+							inserts = append(inserts, update)
 						}
 
 						accErr, err := client.Database().UpsertAccounts(ctx, inserts...)

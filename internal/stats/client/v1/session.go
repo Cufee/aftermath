@@ -17,7 +17,7 @@ import (
 )
 
 func (c *client) EmptySessionCards(ctx context.Context, accountId string) (prepare.Cards, Metadata, error) {
-	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
+	meta := newMeta()
 
 	stop := meta.Timer("database#GetAccountByID")
 	account, err := c.database.GetAccountByID(ctx, accountId)
@@ -39,7 +39,7 @@ func (c *client) EmptySessionCards(ctx context.Context, accountId string) (prepa
 	}
 
 	stop = meta.Timer("prepare#NewCards")
-	cards, err := prepare.NewCards(fetch.AccountStatsOverPeriod{Account: account}, fetch.AccountStatsOverPeriod{Account: account}, nil, common.WithPrinter(printer, c.locale))
+	cards, err := prepare.NewCards(&fetch.AccountStatsOverPeriod{Account: account}, &fetch.AccountStatsOverPeriod{Account: account}, nil, common.WithPrinter(printer, c.locale))
 	stop()
 	if err != nil {
 		return prepare.Cards{}, meta, err
@@ -55,7 +55,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 		apply(&opts)
 	}
 
-	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
+	meta := newMeta()
 
 	stop := meta.Timer("database#GetAccountByID")
 	_, err := c.database.GetAccountByID(ctx, accountId)

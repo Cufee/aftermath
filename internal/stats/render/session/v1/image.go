@@ -20,7 +20,7 @@ type vehicleWN8 struct {
 	sortKey int
 }
 
-func CardsToImage(session, career fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts ...common.Option) (image.Image, error) {
+func CardsToImage(session, career *fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts ...common.Option) (image.Image, error) {
 	o := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&o)

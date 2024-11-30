@@ -32,12 +32,12 @@ var EditSettings handler.Page = func(ctx *handler.Context) (handler.Layout, temp
 		return nil, nil, ctx.Err(err, "failed to get widget settings")
 	}
 	if options.AccountID == "" {
-		return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: models.Account{}}, nil), nil
+		return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: &models.Account{}}, nil), nil
 	}
 
 	account, err := ctx.Database().GetAccountByID(ctx.Context, options.AccountID)
 	if database.IsNotFound(err) {
-		return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: models.Account{}}, map[string]string{"account_id": "Invalid or private account selected"}), nil
+		return layouts.Main, WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: options, Account: &models.Account{}}, map[string]string{"account_id": "Invalid or private account selected"}), nil
 	}
 	if err != nil {
 		return nil, nil, errors.New("invalid account id")

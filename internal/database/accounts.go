@@ -9,8 +9,8 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 )
 
-func toAccount(model *db.Account) models.Account {
-	account := models.Account{
+func toAccount(model *db.Account) *models.Account {
+	account := &models.Account{
 		ID:             model.ID,
 		Realm:          model.Realm,
 		Nickname:       model.Nickname,
@@ -34,15 +34,15 @@ func (c *client) GetRealmAccountIDs(ctx context.Context, realm string) ([]string
 	return result, nil
 }
 
-func (c *client) GetAccountByID(ctx context.Context, id string) (models.Account, error) {
+func (c *client) GetAccountByID(ctx context.Context, id string) (*models.Account, error) {
 	result, err := c.db.Account.Query().Where(account.ID(id)).WithClan().First(ctx)
 	if err != nil {
-		return models.Account{}, err
+		return nil, err
 	}
 	return toAccount(result), nil
 }
 
-func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Account, error) {
+func (c *client) GetAccounts(ctx context.Context, ids []string) ([]*models.Account, error) {
 	if len(ids) < 1 {
 		return nil, nil
 	}
@@ -52,7 +52,7 @@ func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Accoun
 		return nil, err
 	}
 
-	var accounts []models.Account
+	var accounts []*models.Account
 	for _, a := range result {
 		accounts = append(accounts, toAccount(a))
 	}

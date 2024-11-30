@@ -11,7 +11,7 @@ import (
 
 type WidgetWithAccount struct {
 	models.WidgetOptions
-	Account models.Account
+	Account *models.Account
 }
 
 templ WidgetCard(widget WidgetWithAccount) {
