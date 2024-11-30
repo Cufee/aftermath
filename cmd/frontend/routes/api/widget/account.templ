@@ -48,7 +48,7 @@ var AccountWidget handler.Partial = func(ctx *handler.Context) (templ.Component,
 		wopts = append(wopts, widget.WithUnratedOverview(v == "1"))
 	}
 
-	return accountWidget(widget.Widget(account, cards, wopts...)), nil
+	return accountWidget(widget.Widget(*account, cards, wopts...)), nil
 }
 
 templ accountWidget(widget templ.Component) {

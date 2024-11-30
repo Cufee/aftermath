@@ -12,7 +12,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
-func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes map[language.Tag]string, opts ...common.Option) (Cards, error) {
+func NewCards(replay *fetch.Replay, glossary map[string]models.Vehicle, gameModes map[language.Tag]string, opts ...common.Option) (Cards, error) {
 	options := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&options)

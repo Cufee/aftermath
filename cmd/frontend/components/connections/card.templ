@@ -7,7 +7,7 @@ import (
 
 type ConnectionWithAccount struct {
 	models.UserConnection
-	Account models.Account
+	Account *models.Account
 }
 
 templ ConnectionCard(connection ConnectionWithAccount, defaultConnID string) {
