@@ -189,7 +189,11 @@ func (r *StatsFrame) WN8(averages ...any) Value {
 /*
 Add all values from a passed in frame to the current frame
 */
-func (r *StatsFrame) Add(other StatsFrame) {
+func (r *StatsFrame) Add(other *StatsFrame) {
+	if other == nil || r == nil {
+		return
+	}
+
 	r.Battles += other.Battles
 	r.BattlesWon += other.BattlesWon
 	r.BattlesSurvived += other.BattlesSurvived
@@ -221,7 +225,11 @@ func (r *StatsFrame) Add(other StatsFrame) {
 /*
 Subtract all values of the passed in frame from the current frame
 */
-func (r *StatsFrame) Subtract(other StatsFrame) {
+func (r *StatsFrame) Subtract(other *StatsFrame) {
+	if other == nil || r == nil {
+		return
+	}
+
 	r.Battles -= other.Battles
 	r.BattlesWon -= other.BattlesWon
 	r.BattlesSurvived -= other.BattlesSurvived
@@ -264,8 +272,8 @@ type VehicleStatsFrame struct {
 /*
 Add all values from a passed in frame to the current frame
 */
-func (r *VehicleStatsFrame) Add(other VehicleStatsFrame) {
-	r.StatsFrame.Add(*other.StatsFrame)
+func (r *VehicleStatsFrame) Add(other *VehicleStatsFrame) {
+	r.StatsFrame.Add(other.StatsFrame)
 	if other.MarkOfMastery > r.MarkOfMastery {
 		r.MarkOfMastery = other.MarkOfMastery
 	}
@@ -277,8 +285,8 @@ func (r *VehicleStatsFrame) Add(other VehicleStatsFrame) {
 /*
 Subtract all values of the passed in frame from the current frame
 */
-func (r *VehicleStatsFrame) Subtract(other VehicleStatsFrame) {
-	r.StatsFrame.Subtract(*other.StatsFrame)
+func (r *VehicleStatsFrame) Subtract(other *VehicleStatsFrame) {
+	r.StatsFrame.Subtract(other.StatsFrame)
 	if other.MarkOfMastery > r.MarkOfMastery {
 		r.MarkOfMastery = other.MarkOfMastery
 	}

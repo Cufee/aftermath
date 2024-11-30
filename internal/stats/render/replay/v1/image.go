@@ -19,7 +19,7 @@ type playerWN8 struct {
 	sortKey int
 }
 
-func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option) (image.Image, error) {
+func CardsToImage(replay *fetch.Replay, cards replay.Cards, opts ...common.Option) (image.Image, error) {
 	o := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&o)

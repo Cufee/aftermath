@@ -7,10 +7,18 @@ import (
 )
 
 type Metadata struct {
-	Replay  fetch.Replay
-	Stats   map[string]fetch.AccountStatsOverPeriod
+	Replay  *fetch.Replay
+	Stats   map[string]*fetch.AccountStatsOverPeriod
 	Timings map[string]time.Duration
 	timers  map[string]time.Time
+}
+
+func newMeta() Metadata {
+	return Metadata{
+		Stats:   make(map[string]*fetch.AccountStatsOverPeriod),
+		Timings: make(map[string]time.Duration),
+		timers:  make(map[string]time.Time),
+	}
 }
 
 func (m *Metadata) Timer(name string) func() {

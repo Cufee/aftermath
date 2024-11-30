@@ -76,7 +76,7 @@ var validFuzzyServers = map[string]string{
 	"asia":          "AS",
 }
 
-func accountsFromBadInput(ctx context.Context, client fetch.Client, input string) ([]fetch.AccountWithRealm, error) {
+func accountsFromBadInput(ctx context.Context, client fetch.Client, input string) ([]*fetch.AccountWithRealm, error) {
 	// input is most likely a valid account nickname
 	if commands.ValidatePlayerName(input) {
 		return client.BroadSearch(ctx, input, 2)
@@ -112,15 +112,15 @@ func accountsFromBadInput(ctx context.Context, client fetch.Client, input string
 			if account.ID == 0 {
 				return nil, nil // nothing found
 			}
-			return []fetch.AccountWithRealm{{Account: account, Realm: realm}}, nil
+			return []*fetch.AccountWithRealm{{Account: *account, Realm: realm}}, nil
 		}
 	}
 
 	return nil, nil
 }
 
-func realmSelectButtons(ctx common.Context, id string, accounts []fetch.AccountWithRealm) (common.Reply, error) {
-	realmAccounts := make(map[string]fetch.AccountWithRealm)
+func realmSelectButtons(ctx common.Context, id string, accounts []*fetch.AccountWithRealm) (common.Reply, error) {
+	realmAccounts := make(map[string]*fetch.AccountWithRealm)
 	for _, a := range accounts {
 		if _, ok := realmAccounts[a.Realm]; !ok {
 			realmAccounts[a.Realm] = a

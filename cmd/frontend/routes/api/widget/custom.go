@@ -130,7 +130,7 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 		if data.AccountID != nil {
 			account.ID = *data.AccountID
 		}
-		return widgets.NewWidgetPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: account}, map[string]string{"account_id": "You need to select a user from the list of search results."}), nil
+		return widgets.NewWidgetPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: &account}, map[string]string{"account_id": "You need to select a user from the list of search results."}), nil
 	}
 
 	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
@@ -198,7 +198,7 @@ var UpdateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 		if data.AccountID != nil {
 			account.ID = *data.AccountID
 		}
-		return widgets.WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: account}, map[string]string{"account_id": "You need to select a user from the list of search results."}), nil
+		return widgets.WidgetConfiguratorPage(widget.WidgetWithAccount{WidgetOptions: settings, Account: &account}, map[string]string{"account_id": "You need to select a user from the list of search results."}), nil
 	}
 
 	account, err := ctx.Database().GetAccountByID(ctx.Context, settings.AccountID)
