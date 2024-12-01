@@ -1,8 +1,9 @@
 package private
 
 import (
-	"encoding/json"
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands"

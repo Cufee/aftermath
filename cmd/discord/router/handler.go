@@ -2,12 +2,13 @@ package router
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"runtime/debug"
 	"slices"
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/pkg/errors"
 	"golang.org/x/text/language"

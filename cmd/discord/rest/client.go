@@ -3,7 +3,6 @@ package rest
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
