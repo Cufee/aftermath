@@ -8,8 +8,8 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
-	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
+	"github.com/nao1215/imaging"
 )
 
 func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData, string], width float64) common.Block {

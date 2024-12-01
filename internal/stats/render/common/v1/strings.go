@@ -21,7 +21,9 @@ func MeasureString(text string, font Font) stringSize {
 		return stringSize{}
 	}
 
-	face := font.Face()
+	face, close := font.Face()
+	defer close()
+
 	measureCtx := gg.NewContext(1, 1)
 	measureCtx.SetFontFace(face)
 

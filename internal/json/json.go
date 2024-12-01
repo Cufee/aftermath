@@ -3,10 +3,8 @@ package json
 import (
 	"io"
 
-	jsoniter "github.com/json-iterator/go"
+	"github.com/goccy/go-json"
 )
-
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 func Unmarshal(data []byte, v interface{}) error {
 	return json.Unmarshal(data, v)
@@ -20,10 +18,10 @@ func MarshalIndent(v interface{}, prefix string, indent string) ([]byte, error) 
 	return json.MarshalIndent(v, prefix, indent)
 }
 
-func NewDecoder(reader io.Reader) *jsoniter.Decoder {
+func NewDecoder(reader io.Reader) *json.Decoder {
 	return json.NewDecoder(reader)
 }
 
-func NewEncoder(writer io.Writer) *jsoniter.Encoder {
+func NewEncoder(writer io.Writer) *json.Encoder {
 	return json.NewEncoder(writer)
 }

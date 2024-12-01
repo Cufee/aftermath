@@ -11,8 +11,8 @@ import (
 
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
-	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
+	"github.com/nao1215/imaging"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
 

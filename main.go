@@ -27,7 +27,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/gateway"
 	"github.com/cufee/aftermath/cmd/discord/router"
 	"github.com/cufee/aftermath/cmd/frontend"
-	"github.com/disintegration/imaging"
+	"github.com/nao1215/imaging"
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/cmd/core/server"
