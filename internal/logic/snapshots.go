@@ -166,10 +166,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			accountRefID = accountID
 		}
 
-		account := accounts[accountID]
-		clan := clans[accountID]
-
-		snapshotStats := fetch.WargamingToStats(realm, &account, &clan, vehicles.Data)
+		snapshotStats := fetch.WargamingToStats(realm, accounts[accountID], clans[accountID], vehicles.Data)
 		{ // account snapshot
 			sht := accountSnapshotsPool.Get()
 			defer accountSnapshotsPool.Put(sht)
@@ -188,7 +185,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			asht := accountsPool.Get()
 			defer accountsPool.Put(asht)
 
-			asht = snapshotStats.Account
+			*asht = snapshotStats.Account
 			accountUpdates[accountID] = asht
 		}
 

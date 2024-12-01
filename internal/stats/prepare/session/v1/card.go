@@ -13,8 +13,8 @@ import (
 )
 
 type cardBuilder struct {
-	session  *fetch.AccountStatsOverPeriod
-	career   *fetch.AccountStatsOverPeriod
+	session  fetch.AccountStatsOverPeriod
+	career   fetch.AccountStatsOverPeriod
 	glossary map[string]models.Vehicle
 }
 
@@ -24,7 +24,7 @@ func (b *cardBuilder) vehicle(id string) models.Vehicle {
 	return vehicle
 }
 
-func NewCards(session, career *fetch.AccountStatsOverPeriod, glossary map[string]models.Vehicle, opts ...common.Option) (Cards, error) {
+func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]models.Vehicle, opts ...common.Option) (Cards, error) {
 	options := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&options)

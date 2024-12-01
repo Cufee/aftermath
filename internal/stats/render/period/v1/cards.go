@@ -14,7 +14,7 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 )
 
-func generateCards(stats *fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
+func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
 	if len(cards.Overview.Blocks) == 0 && len(cards.Highlights) == 0 {
 		log.Error().Msg("player cards slice is 0 length, this should not happen")
 		return common.Segments{}, errors.New("no cards provided")

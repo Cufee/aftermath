@@ -17,8 +17,8 @@ func timestampToTime(timestamp int) time.Time {
 	return time.Unix(int64(timestamp), 0)
 }
 
-func WargamingToAccount(realm string, account *types.ExtendedAccount, clan *types.ClanMember, private bool) *models.Account {
-	a := &models.Account{
+func WargamingToAccount(realm string, account types.ExtendedAccount, clan types.ClanMember, private bool) models.Account {
+	a := models.Account{
 		ID:       strconv.Itoa(account.ID),
 		Realm:    realm,
 		Nickname: account.Nickname,
@@ -27,14 +27,14 @@ func WargamingToAccount(realm string, account *types.ExtendedAccount, clan *type
 		CreatedAt:      timestampToTime(account.CreatedAt),
 		LastBattleTime: timestampToTime(account.LastBattleTime),
 	}
-	if clan != nil && clan.ClanID > 0 {
+	if clan.ClanID > 0 {
 		a.ClanTag = clan.Clan.Tag
 		a.ClanID = strconv.Itoa(clan.ClanID)
 	}
 	return a
 }
 
-func WargamingToStats(realm string, accountData *types.ExtendedAccount, clanMember *types.ClanMember, vehicleData []types.VehicleStatsFrame) *AccountStatsOverPeriod {
+func WargamingToStats(realm string, accountData types.ExtendedAccount, clanMember types.ClanMember, vehicleData []types.VehicleStatsFrame) AccountStatsOverPeriod {
 	stats := AccountStatsOverPeriod{
 		Realm: realm,
 		// we got the stats, so the account is obv not private at this point
@@ -56,7 +56,7 @@ func WargamingToStats(realm string, accountData *types.ExtendedAccount, clanMemb
 		stats.PeriodEnd = stats.PeriodStart
 	}
 
-	return &stats
+	return stats
 }
 
 func WargamingToFrame(wg types.StatsFrame) frame.StatsFrame {
@@ -125,10 +125,10 @@ func blitzstarsToStats(vehicles map[string]frame.VehicleStatsFrame, histories ma
 
 		if selectedEntry.Stats.Battles < int(vehicle.Battles) {
 			selectedFrame := WargamingToFrame(selectedEntry.Stats)
-			vehicle.StatsFrame.Subtract(&selectedFrame)
+			vehicle.StatsFrame.Subtract(selectedFrame)
 
 			stats.Vehicles[vehicle.VehicleID] = vehicle
-			stats.Add(vehicle.StatsFrame)
+			stats.Add(*vehicle.StatsFrame)
 		}
 	}
 

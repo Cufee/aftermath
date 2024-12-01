@@ -155,7 +155,7 @@ func init() {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
 				}
 
-				slices.SortFunc(accounts, func(a, b *fetch.AccountWithRealm) int {
+				slices.SortFunc(accounts, func(a, b fetch.AccountWithRealm) int {
 					return strings.Compare(b.Realm+b.Nickname, a.Realm+a.Nickname)
 				})
 
@@ -168,7 +168,7 @@ func init() {
 	)
 }
 
-func accountToRow(account *models.Account, padding int, isDefault bool) string {
+func accountToRow(account models.Account, padding int, isDefault bool) string {
 	var row string
 	row += "[" + account.Realm + "] "
 	row += account.Nickname + strings.Repeat(" ", padding-utf8.RuneCountInString(account.Nickname))

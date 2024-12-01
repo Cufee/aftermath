@@ -75,12 +75,12 @@ func customWidgetFromID(ctx context.Context, core core.Client, widgetID string) 
 
 			cards, _, err = core.Stats(language.English).EmptySessionCards(ctx, account.ID)
 			if err == nil {
-				return widgetEndpointResponse{Account: *account, Cards: cards, Options: settings.Style}, nil
+				return widgetEndpointResponse{Account: account, Cards: cards, Options: settings.Style}, nil
 			}
 		}
 		return widgetEndpointResponse{}, err
 	}
-	return widgetEndpointResponse{Account: *account, Cards: cards, Options: settings.Style}, nil
+	return widgetEndpointResponse{Account: account, Cards: cards, Options: settings.Style}, nil
 }
 
 var CustomLiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Component, error) {
@@ -183,7 +183,7 @@ var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.
 		wopts = append(wopts, widget.WithUnratedOverview(v == "1"))
 	}
 
-	return layouts.StyleOnly, liveWidget(widget.Widget(*account, cards, wopts...)), nil
+	return layouts.StyleOnly, liveWidget(widget.Widget(account, cards, wopts...)), nil
 }
 
 var LiveWidgetJSON handler.Endpoint = func(ctx *handler.Context) error {
@@ -221,7 +221,7 @@ var LiveWidgetJSON handler.Endpoint = func(ctx *handler.Context) error {
 		wopts = append(wopts, widget.WithUnratedOverview(v == "1"))
 	}
 
-	return ctx.JSON(widgetEndpointResponse{Account: *account, Cards: cards, Options: wopts.Style()})
+	return ctx.JSON(widgetEndpointResponse{Account: account, Cards: cards, Options: wopts.Style()})
 }
 
 templ liveWidget(widget templ.Component) {
