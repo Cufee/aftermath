@@ -10,7 +10,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
-func generateCards(replay *fetch.Replay, cards rp.Cards, printer func(string) string) (common.Segments, error) {
+func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) string) (common.Segments, error) {
 	var segments common.Segments
 
 	var alliesBlocks, enemiesBlocks []common.Block

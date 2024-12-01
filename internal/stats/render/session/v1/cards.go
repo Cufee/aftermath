@@ -12,7 +12,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
-func cardsToSegments(session, _ *fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
+func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
 	var (
 		renderUnratedVehiclesCount = 3 // minimum number of vehicle cards
 		// primary cards

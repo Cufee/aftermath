@@ -44,19 +44,19 @@ func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Clie
 	}, nil
 }
 
-func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string, limit int) (*types.Account, error) {
+func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string, limit int) (types.Account, error) {
 	accounts, err := c.wargaming.SearchAccounts(ctx, realm, nickname, limit)
 	if err != nil {
-		return nil, err
+		return types.Account{}, err
 	}
 	if len(accounts) < 1 {
-		return nil, AccountNotFound
+		return types.Account{}, AccountNotFound
 	}
 
-	return &accounts[0], nil
+	return accounts[0], nil
 }
 
-func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, limitPerRealm int) ([]*AccountWithRealm, error) {
+func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, limitPerRealm int) ([]AccountWithRealm, error) {
 	data := make(chan AccountWithRealm, 9)
 	errors := make(chan error, 3)
 	var wg sync.WaitGroup
@@ -107,9 +107,9 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 		}
 	}
 
-	var accounts []*AccountWithRealm
+	var accounts []AccountWithRealm
 	for a := range data {
-		accounts = append(accounts, &a)
+		accounts = append(accounts, a)
 	}
 
 	return accounts, nil
@@ -118,7 +118,7 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 /*
 Gets account info from wg and updates cache
 */
-func (c *multiSourceClient) Account(ctx context.Context, id string) (*models.Account, error) {
+func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Account, error) {
 	realm := c.wargaming.RealmFromAccountID(id)
 
 	var group sync.WaitGroup
@@ -127,39 +127,38 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (*models.Acc
 	var clan types.ClanMember
 	var wgAccount retry.DataWithErr[types.ExtendedAccount]
 
-	go func(account *retry.DataWithErr[types.ExtendedAccount]) {
+	go func() {
 		defer group.Done()
 
-		*account = retry.Retry(func() (types.ExtendedAccount, error) {
+		wgAccount = retry.Retry(func() (types.ExtendedAccount, error) {
 			return c.wargaming.AccountByID(ctx, realm, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
-	}(&wgAccount)
-
-	go func(clan *types.ClanMember) {
+	}()
+	go func() {
 		defer group.Done()
 		// we should not retry this request since it is not critical and will fail on accounts without a clan
-		*clan, _ = c.wargaming.AccountClan(ctx, realm, id)
-	}(&clan)
+		clan, _ = c.wargaming.AccountClan(ctx, realm, id)
+	}()
 
 	group.Wait()
 
 	if wgAccount.Err != nil {
-		return nil, wgAccount.Err
+		return models.Account{}, wgAccount.Err
 	}
 
-	account := WargamingToAccount(realm, &wgAccount.Data, &clan, false)
-	{
+	account := WargamingToAccount(realm, wgAccount.Data, clan, false)
+	go func(account models.Account) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
 
-		aErr, err := c.database.UpsertAccounts(ctx, account)
+		aErr, err := c.database.UpsertAccounts(ctx, &account)
 		if err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
 		if err := aErr[account.ID]; err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
-	}
+	}(account)
 
 	return account, nil
 }
@@ -169,7 +168,7 @@ Get live account stats from wargaming
   - Each request will be retried c.retriesPerRequest times
   - This function will assume the player ID is valid and optimistically run all request concurrently, returning the first error once all request finish
 */
-func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ...StatsOption) (*AccountStatsOverPeriod, error) {
+func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ...StatsOption) (AccountStatsOverPeriod, error) {
 	var options statsOptions
 	for _, apply := range opts {
 		apply(&options)
@@ -182,24 +181,22 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 
 	var clan types.ClanMember
 	var account retry.DataWithErr[types.ExtendedAccount]
-	var vehicles = retry.DataWithErr[[]types.VehicleStatsFrame]{Data: make([]types.VehicleStatsFrame, 0, 300)}
+	var vehicles retry.DataWithErr[[]types.VehicleStatsFrame]
 	var averages retry.DataWithErr[map[string]frame.StatsFrame]
 
-	go func(ctx context.Context, realm, id string, account *retry.DataWithErr[types.ExtendedAccount]) {
+	go func() {
 		defer group.Done()
 
-		*account = retry.Retry(func() (types.ExtendedAccount, error) {
+		account = retry.Retry(func() (types.ExtendedAccount, error) {
 			return c.wargaming.AccountByID(ctx, realm, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
-	}(ctx, realm, id, &account)
-
-	go func(ctx context.Context, realm, id string, clan *types.ClanMember) {
+	}()
+	go func() {
 		defer group.Done()
 		// we should not retry this request since it is not critical and will fail on accounts without a clan
-		*clan, _ = c.wargaming.AccountClan(ctx, realm, id)
-	}(ctx, realm, id, &clan)
-
-	go func(ctx context.Context, realm, id string, vehicles *retry.DataWithErr[[]types.VehicleStatsFrame], averages *retry.DataWithErr[map[string]frame.StatsFrame]) {
+		clan, _ = c.wargaming.AccountClan(ctx, realm, id)
+	}()
+	go func() {
 		defer group.Done()
 
 		var vehicleIDs []string // nil array will return all vehicles
@@ -207,7 +204,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 			vehicleIDs = append(vehicleIDs, options.vehicleID)
 		}
 
-		*vehicles = retry.Retry(func() ([]types.VehicleStatsFrame, error) {
+		vehicles = retry.Retry(func() ([]types.VehicleStatsFrame, error) {
 			return c.wargaming.AccountVehicles(ctx, realm, id, vehicleIDs)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 
@@ -221,44 +218,44 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 			ids = append(ids, tid)
 		}
 		a, err := c.database.GetVehicleAverages(ctx, ids)
-		*averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
-	}(ctx, realm, id, &vehicles, &averages)
+		averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
+	}()
 
 	group.Wait()
 
 	if account.Err != nil {
-		return nil, account.Err
+		return AccountStatsOverPeriod{}, account.Err
 	}
 	if vehicles.Err != nil {
-		return nil, vehicles.Err
+		return AccountStatsOverPeriod{}, vehicles.Err
 	}
 	if averages.Err != nil {
 		// not critical, this will only affect WN8
 		log.Err(averages.Err).Msg("failed to get tank averages")
 	}
 
-	stats := WargamingToStats(realm, &account.Data, &clan, vehicles.Data)
+	stats := WargamingToStats(realm, account.Data, clan, vehicles.Data)
 	if options.withWN8 {
 		stats.AddWN8(averages.Data)
 	}
 
-	{
+	go func(account models.Account) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		aErr, err := c.database.UpsertAccounts(ctx, stats.Account)
+		aErr, err := c.database.UpsertAccounts(ctx, &account)
 		if err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
-		if err := aErr[stats.Account.ID]; err != nil {
+		if err := aErr[account.ID]; err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
-	}
+	}(stats.Account)
 
 	return stats, nil
 }
 
-func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodStart time.Time, opts ...StatsOption) (*AccountStatsOverPeriod, error) {
+func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, error) {
 	var options statsOptions
 	for _, apply := range opts {
 		apply(&options)
@@ -266,15 +263,15 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 
 	var histories retry.DataWithErr[map[int][]blitzstars.TankHistoryEntry]
 	var averages retry.DataWithErr[map[string]frame.StatsFrame]
-	var current retry.DataWithErr[*AccountStatsOverPeriod]
+	var current retry.DataWithErr[AccountStatsOverPeriod]
 
 	var group sync.WaitGroup
 	group.Add(1)
-	go func(current *retry.DataWithErr[*AccountStatsOverPeriod], averages *retry.DataWithErr[map[string]frame.StatsFrame]) {
+	go func() {
 		defer group.Done()
 
 		stats, err := c.CurrentStats(ctx, id, opts...)
-		*current = retry.DataWithErr[*AccountStatsOverPeriod]{Data: stats, Err: err}
+		current = retry.DataWithErr[AccountStatsOverPeriod]{Data: stats, Err: err}
 
 		if err != nil || stats.RegularBattles.Battles < 1 || !options.withWN8 {
 			return
@@ -285,8 +282,8 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 			ids = append(ids, id)
 		}
 		a, err := c.database.GetVehicleAverages(ctx, ids)
-		*averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
-	}(&current, &averages)
+		averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
+	}()
 
 	// TODO: lookup a session from the database first
 	// if a session exists in the database, we don't need BlitzStars and have better data
@@ -295,7 +292,7 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	if days := time.Since(periodStart).Hours() / 24; days >= 91 || days < 1 {
 		group.Wait()
 		if current.Err != nil {
-			return nil, current.Err
+			return AccountStatsOverPeriod{}, current.Err
 		}
 		if averages.Err != nil {
 			// not critical, this will only affect WN8
@@ -310,20 +307,20 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	}
 
 	group.Add(1)
-	go func(histories *retry.DataWithErr[map[int][]blitzstars.TankHistoryEntry]) {
+	go func() {
 		defer group.Done()
-		*histories = retry.Retry(func() (map[int][]blitzstars.TankHistoryEntry, error) {
+		histories = retry.Retry(func() (map[int][]blitzstars.TankHistoryEntry, error) {
 			return c.blitzstars.AccountTankHistories(ctx, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
-	}(&histories)
+	}()
 
 	// wait for all requests to finish and check errors
 	group.Wait()
 	if current.Err != nil {
-		return nil, current.Err
+		return AccountStatsOverPeriod{}, current.Err
 	}
 	if histories.Err != nil {
-		return nil, histories.Err
+		return AccountStatsOverPeriod{}, histories.Err
 	}
 	if averages.Err != nil {
 		// not critical, this will only affect WN8
@@ -342,14 +339,14 @@ func (c *multiSourceClient) PeriodStats(ctx context.Context, id string, periodSt
 	return stats, nil
 }
 
-func (c *multiSourceClient) SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (*AccountStatsOverPeriod, *AccountStatsOverPeriod, error) {
+func (c *multiSourceClient) SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error) {
 	var options = statsOptions{snapshotType: models.SnapshotTypeDaily, referenceID: id}
 	for _, apply := range opts {
 		apply(&options)
 	}
 
 	if days := time.Since(sessionStart).Hours() / 24; sessionStart.IsZero() || days >= 91 {
-		return nil, nil, ErrInvalidSessionStart
+		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, ErrInvalidSessionStart
 	}
 
 	sessionBefore := sessionStart
@@ -357,15 +354,15 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	var accountSnapshot retry.DataWithErr[models.AccountSnapshot]
 	var vehiclesSnapshots retry.DataWithErr[[]models.VehicleSnapshot]
 	var averages retry.DataWithErr[map[string]frame.StatsFrame]
-	var current retry.DataWithErr[*AccountStatsOverPeriod]
+	var current retry.DataWithErr[AccountStatsOverPeriod]
 
 	var group sync.WaitGroup
 	group.Add(1)
-	go func(current *retry.DataWithErr[*AccountStatsOverPeriod], averages *retry.DataWithErr[map[string]frame.StatsFrame]) {
+	go func() {
 		defer group.Done()
 
 		stats, err := c.CurrentStats(ctx, id, opts...)
-		*current = retry.DataWithErr[*AccountStatsOverPeriod]{Data: stats, Err: err}
+		current = retry.DataWithErr[AccountStatsOverPeriod]{Data: stats, Err: err}
 
 		if err != nil || stats.RegularBattles.Battles < 1 || !options.withWN8 {
 			return
@@ -376,11 +373,11 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 			ids = append(ids, id)
 		}
 		a, err := c.database.GetVehicleAverages(ctx, ids)
-		*averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
-	}(&current, &averages)
+		averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
+	}()
 
 	group.Add(1)
-	go func(account *retry.DataWithErr[models.AccountSnapshot], vehicles *retry.DataWithErr[[]models.VehicleSnapshot]) {
+	go func() {
 		var opts = []database.Query{database.WithCreatedBefore(sessionBefore)}
 		if options.referenceID != "" {
 			opts = append(opts, database.WithReferenceIDIn(options.referenceID))
@@ -389,34 +386,34 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		defer group.Done()
 		s, err := c.database.GetAccountSnapshots(ctx, []string{id}, options.snapshotType, opts...)
 		if err != nil {
-			*account = retry.DataWithErr[models.AccountSnapshot]{Err: err}
+			accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Err: err}
 			return
 		}
 		if len(s) < 1 {
-			*account = retry.DataWithErr[models.AccountSnapshot]{Err: new(db.NotFoundError)}
+			accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Err: new(db.NotFoundError)}
 			return
 		}
-		*account = retry.DataWithErr[models.AccountSnapshot]{Data: s[0]}
+		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s[0]}
 
-		var vIDs []string
+		var vehicles []string
 		if options.vehicleID != "" {
-			vIDs = append(vIDs, options.vehicleID)
+			vehicles = append(vehicles, options.vehicleID)
 		}
 
-		v, err := c.database.GetVehicleSnapshots(ctx, id, vIDs, options.snapshotType, opts...)
-		*vehicles = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
-	}(&accountSnapshot, &vehiclesSnapshots)
+		v, err := c.database.GetVehicleSnapshots(ctx, id, vehicles, options.snapshotType, opts...)
+		vehiclesSnapshots = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
+	}()
 
 	// wait for all requests to finish and check errors
 	group.Wait()
 	if current.Err != nil {
-		return nil, nil, current.Err
+		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, current.Err
 	}
 	if accountSnapshot.Err != nil {
 		if database.IsNotFound(accountSnapshot.Err) {
-			return nil, nil, ErrSessionNotFound
+			return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, ErrSessionNotFound
 		}
-		return nil, nil, accountSnapshot.Err
+		return AccountStatsOverPeriod{}, AccountStatsOverPeriod{}, accountSnapshot.Err
 	}
 	if averages.Err != nil {
 		// not critical, this will only affect WN8
@@ -426,11 +423,11 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	session := current.Data
 	session.PeriodEnd = time.Now()
 	session.PeriodStart = accountSnapshot.Data.LastBattleTime
-	session.RatingBattles.StatsFrame.Subtract(&accountSnapshot.Data.RatingBattles)
-	session.RegularBattles.StatsFrame.Subtract(&accountSnapshot.Data.RegularBattles)
+	session.RatingBattles.StatsFrame.Subtract(accountSnapshot.Data.RatingBattles)
+	session.RegularBattles.StatsFrame.Subtract(accountSnapshot.Data.RegularBattles)
 	session.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, len(current.Data.RegularBattles.Vehicles))
 
-	career := &AccountStatsOverPeriod{
+	career := AccountStatsOverPeriod{
 		Realm:          current.Data.Realm,
 		Account:        current.Data.Account,
 		LastBattleTime: accountSnapshot.Data.LastBattleTime,
@@ -466,7 +463,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 
 		sessionFrame := current
 		stats := *current.StatsFrame
-		stats.Subtract(&snapshot.Stats)
+		stats.Subtract(snapshot.Stats)
 		sessionFrame.StatsFrame = &stats
 		session.RegularBattles.Vehicles[id] = sessionFrame
 	}
@@ -484,23 +481,23 @@ func (c *multiSourceClient) CurrentTankAverages(ctx context.Context) (map[string
 	return c.blitzstars.CurrentTankAverages(ctx)
 }
 
-func (c *multiSourceClient) ReplayRemote(ctx context.Context, fileURL string) (*Replay, error) {
+func (c *multiSourceClient) ReplayRemote(ctx context.Context, fileURL string) (Replay, error) {
 	unpacked, err := replay.UnpackRemote(ctx, fileURL)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to unpack a remote replay")
+		return Replay{}, errors.Wrap(err, "failed to unpack a remote replay")
 	}
 	return c.replay(ctx, unpacked)
 }
 
-func (c *multiSourceClient) Replay(ctx context.Context, file io.ReaderAt, size int64) (*Replay, error) {
+func (c *multiSourceClient) Replay(ctx context.Context, file io.ReaderAt, size int64) (Replay, error) {
 	unpacked, err := replay.Unpack(file, size)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to unpack a remote replay")
+		return Replay{}, errors.Wrap(err, "failed to unpack a remote replay")
 	}
 	return c.replay(ctx, unpacked)
 }
 
-func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.UnpackedReplay) (*Replay, error) {
+func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.UnpackedReplay) (Replay, error) {
 	replay := replay.Prettify(unpacked.BattleResult, unpacked.Meta)
 
 	var vehicles []string
@@ -527,8 +524,8 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 
 	mapData, err := c.database.GetMap(ctx, replay.MapID)
 	if err != nil && !database.IsNotFound(err) {
-		return nil, errors.Wrap(err, "failed to get map glossary")
+		return Replay{}, errors.Wrap(err, "failed to get map glossary")
 	}
 
-	return &Replay{mapData, replay, c.wargaming.RealmFromAccountID(replay.Protagonist.ID)}, nil
+	return Replay{mapData, replay, c.wargaming.RealmFromAccountID(replay.Protagonist.ID)}, nil
 }

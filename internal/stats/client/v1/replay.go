@@ -7,6 +7,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/replay/v1"
 )
@@ -17,7 +18,7 @@ func (r *client) ReplayCards(ctx context.Context, replayURL string, o ...Request
 		apply(&opts)
 	}
 
-	meta := newMeta()
+	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
 	printer, err := localization.NewPrinterWithFallback("stats", r.locale)
 	if err != nil {

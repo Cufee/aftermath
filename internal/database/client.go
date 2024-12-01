@@ -32,8 +32,8 @@ type AuthClient interface {
 }
 
 type AccountsClient interface {
-	GetAccounts(ctx context.Context, ids []string) ([]*models.Account, error)
-	GetAccountByID(ctx context.Context, id string) (*models.Account, error)
+	GetAccounts(ctx context.Context, ids []string) ([]models.Account, error)
+	GetAccountByID(ctx context.Context, id string) (models.Account, error)
 	GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error)
 	AccountSetPrivate(ctx context.Context, id string, value bool) error
 	UpsertAccounts(ctx context.Context, accounts ...*models.Account) (map[string]error, error)

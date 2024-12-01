@@ -30,13 +30,13 @@ func (c *staticTestingDatabase) Disconnect() error {
 	return nil
 }
 
-func (c *staticTestingDatabase) GetAccounts(ctx context.Context, ids []string) ([]*models.Account, error) {
-	var accounts []*models.Account
+func (c *staticTestingDatabase) GetAccounts(ctx context.Context, ids []string) ([]models.Account, error) {
+	var accounts []models.Account
 	for _, id := range ids {
 		if a, ok := staticAccounts[id]; ok {
-			accounts = append(accounts, &a)
+			accounts = append(accounts, a)
 		} else {
-			accounts = append(accounts, &models.Account{
+			accounts = append(accounts, models.Account{
 				ID:       id,
 				Nickname: "some_account_" + id,
 				Realm:    "NA",
@@ -45,11 +45,11 @@ func (c *staticTestingDatabase) GetAccounts(ctx context.Context, ids []string) (
 	}
 	return accounts, nil
 }
-func (c *staticTestingDatabase) GetAccountByID(ctx context.Context, id string) (*models.Account, error) {
+func (c *staticTestingDatabase) GetAccountByID(ctx context.Context, id string) (models.Account, error) {
 	if account, ok := staticAccounts[id]; ok {
-		return &account, nil
+		return account, nil
 	}
-	return &models.Account{
+	return models.Account{
 		ID:       id,
 		Realm:    "NA",
 		Nickname: "some_account" + id,

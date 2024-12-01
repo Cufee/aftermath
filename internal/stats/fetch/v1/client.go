@@ -18,7 +18,7 @@ type AccountWithRealm struct {
 type AccountStatsOverPeriod struct {
 	Realm string `json:"realm"`
 
-	Account *models.Account `json:"account"`
+	Account models.Account `json:"account"`
 
 	PeriodStart time.Time `json:"start"`
 	PeriodEnd   time.Time `json:"end"`
@@ -53,16 +53,16 @@ type StatsWithVehicles struct {
 }
 
 type Client interface {
-	Account(ctx context.Context, id string) (*models.Account, error)
-	Search(ctx context.Context, nickname, realm string, limit int) (*types.Account, error)
-	BroadSearch(ctx context.Context, nickname string, limit int) ([]*AccountWithRealm, error)
-	CurrentStats(ctx context.Context, id string, opts ...StatsOption) (*AccountStatsOverPeriod, error)
+	Account(ctx context.Context, id string) (models.Account, error)
+	Search(ctx context.Context, nickname, realm string, limit int) (types.Account, error)
+	BroadSearch(ctx context.Context, nickname string, limit int) ([]AccountWithRealm, error)
+	CurrentStats(ctx context.Context, id string, opts ...StatsOption) (AccountStatsOverPeriod, error)
 
-	PeriodStats(ctx context.Context, id string, from time.Time, opts ...StatsOption) (*AccountStatsOverPeriod, error)
-	SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (*AccountStatsOverPeriod, *AccountStatsOverPeriod, error)
+	PeriodStats(ctx context.Context, id string, from time.Time, opts ...StatsOption) (AccountStatsOverPeriod, error)
+	SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error)
 
-	ReplayRemote(ctx context.Context, fileURL string) (*Replay, error)
-	Replay(ctx context.Context, file io.ReaderAt, size int64) (*Replay, error)
+	ReplayRemote(ctx context.Context, fileURL string) (Replay, error)
+	Replay(ctx context.Context, file io.ReaderAt, size int64) (Replay, error)
 	CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error)
 }
 
