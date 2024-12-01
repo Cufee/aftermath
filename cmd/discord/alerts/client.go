@@ -2,13 +2,14 @@ package alerts
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/rest"
@@ -56,10 +57,13 @@ func (c *alertClient) Reader(r io.ReadCloser, levels ...zerolog.Level) {
 
 	go func() {
 		dec := json.NewDecoder(r)
+		var decoded = make(map[string]any)
+		var marshaled = make([]byte, 1000)
 
 		for {
-			var e = make(map[string]any)
-			err := dec.Decode(&e)
+			decoded = map[string]any{}
+
+			err := dec.Decode(&decoded)
 			if err == io.EOF {
 				return
 			}
@@ -68,19 +72,19 @@ func (c *alertClient) Reader(r io.ReadCloser, levels ...zerolog.Level) {
 				continue
 			}
 
-			level, ok := e["level"].(string)
+			level, ok := decoded["level"].(string)
 			if !ok || !slices.Contains(levelSlice, level) {
 				continue
 			}
-			data, err := json.MarshalIndent(e, "", "  ")
+			marshaled, err = json.MarshalIndent(decoded, "", "  ")
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "marshaling log failed: %v\n", err)
 				continue
 			}
-			message, _ := e["message"].(string)
+			message, _ := decoded["message"].(string)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			err = c.Error(ctx, "**["+strings.ToUpper(level)+"]**: "+message, string(data))
+			err = c.Error(ctx, "**["+strings.ToUpper(level)+"]**: "+message, string(marshaled))
 			cancel()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "failed to report an error: %v\n", err)

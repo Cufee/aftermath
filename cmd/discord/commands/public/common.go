@@ -2,10 +2,11 @@ package public
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands"

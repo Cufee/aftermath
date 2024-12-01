@@ -2,13 +2,14 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/a-h/templ"
 	"github.com/cufee/aftermath/cmd/core"

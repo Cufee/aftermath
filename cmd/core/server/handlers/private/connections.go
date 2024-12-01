@@ -2,8 +2,9 @@ package private
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/internal/database"

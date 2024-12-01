@@ -2,11 +2,12 @@ package private
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 	"sync"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/internal/database/models"

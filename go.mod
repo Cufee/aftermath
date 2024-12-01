@@ -9,7 +9,7 @@ require (
 	github.com/a-h/templ v0.2.747
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/cufee/aftermath-assets v0.1.0
-	github.com/cufee/am-wg-proxy-next/v2 v2.1.9
+	github.com/cufee/am-wg-proxy-next/v2 v2.1.11
 	github.com/disintegration/imaging v1.6.2
 	github.com/fogleman/gg v1.3.0
 	github.com/go-co-op/gocron v1.37.0
@@ -18,6 +18,7 @@ require (
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
+	github.com/json-iterator/go v1.1.12
 	github.com/justinas/alice v1.2.0
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/lucsky/cuid v1.2.1
@@ -55,6 +56,8 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect

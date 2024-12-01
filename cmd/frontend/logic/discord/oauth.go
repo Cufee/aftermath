@@ -1,12 +1,13 @@
 package discord
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/internal/constants"

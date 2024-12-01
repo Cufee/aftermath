@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
-	"encoding/json"
 	"io"
 	"time"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/github"
+	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/search"
 )
