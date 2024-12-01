@@ -21,17 +21,17 @@ type vehicleWN8 struct {
 }
 
 func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts ...common.Option) (image.Image, error) {
+	segments, err := CardsToSegments(stats, cards, subs, opts...)
+	if err != nil {
+		return nil, err
+	}
+
 	o := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&o)
 	}
 
-	segments, err := generateCards(stats, cards, subs, o)
-	if err != nil {
-		return nil, err
-	}
-
-	if o.Background != nil {
+	if o.Background != nil && !o.BackgroundIsCustom {
 		var values []vehicleWN8
 		for _, vehicle := range stats.RegularBattles.Vehicles {
 			if wn8 := vehicle.WN8(); !frame.InvalidValue.Equals(wn8) {
@@ -55,6 +55,7 @@ func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs [
 		if patternSeed == 0 {
 			patternSeed = int(time.Now().Unix())
 		}
+
 		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed, 0.5)
 	}
 

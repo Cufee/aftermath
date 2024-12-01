@@ -59,7 +59,7 @@ func init() {
 
 				background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
 				if img, err := logic.UserContentToImage(background); err == nil {
-					opts = append(opts, stats.WithBackground(img))
+					opts = append(opts, stats.WithBackground(img, true))
 					ioptions.BackgroundID = background.ID
 				}
 

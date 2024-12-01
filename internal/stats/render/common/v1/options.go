@@ -8,10 +8,11 @@ import (
 )
 
 type Options struct {
-	VehicleID  string
-	PromoText  []string
-	Background image.Image
-	Printer    func(string) string
+	VehicleID          string
+	PromoText          []string
+	Background         image.Image
+	BackgroundIsCustom bool
+	Printer            func(string) string
 }
 
 func DefaultOptions() Options {
@@ -37,20 +38,22 @@ func WithPrinter(printer func(string) string) Option {
 	}
 }
 
-func WithBackgroundURL(bgURL string) Option {
+func WithBackgroundURL(bgURL string, isCustom bool) Option {
 	if strings.HasPrefix(bgURL, "static://") {
 		img, ok := assets.GetLoadedImage(strings.ReplaceAll(bgURL, "static://", ""))
 		if ok {
 			return func(o *Options) {
 				o.Background = img
+				o.BackgroundIsCustom = isCustom
 			}
 		}
 	}
 	return func(o *Options) {}
 }
 
-func WithBackground(image image.Image) Option {
+func WithBackground(image image.Image, isCustom bool) Option {
 	return func(o *Options) {
+		o.BackgroundIsCustom = isCustom
 		o.Background = image
 	}
 }

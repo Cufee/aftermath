@@ -11,6 +11,20 @@ import (
 	"github.com/nao1215/imaging"
 )
 
+func AddGlassMaskedBackground(content, background image.Image, mask *image.Alpha, style Style) image.Image {
+	if background == nil || mask == nil {
+		return content
+	}
+
+	background = imaging.Fill(background, content.Bounds().Dx(), content.Bounds().Dy(), imaging.Center, imaging.Linear)
+	blurred, err := BlurWithMask(background, mask, DefaultBackgroundBlur, GlassEffectBackgroundBlur)
+	if err == nil {
+		background = blurred
+	}
+
+	return AddBackground(content, background, style)
+}
+
 func AddBackground(content, background image.Image, style Style) image.Image {
 	if background == nil {
 		return content
@@ -26,9 +40,14 @@ func AddBackground(content, background image.Image, style Style) image.Image {
 	clipRoundedRect(frameCtx, style.BorderRadius)
 
 	// Resize the background image to fit the cards
-	bgImage := imaging.Fill(background, frameCtx.Width(), frameCtx.Height(), imaging.Center, imaging.NearestNeighbor)
-	bgImage = imaging.Blur(bgImage, style.Blur)
-	frameCtx.DrawImage(bgImage, 0, 0)
+	if background.Bounds().Dx() != frameCtx.Width() || background.Bounds().Dy() != frameCtx.Height() {
+		background = imaging.Fill(background, frameCtx.Width(), frameCtx.Height(), imaging.Center, imaging.NearestNeighbor)
+	}
+	if style.Blur > 0 {
+		background = imaging.Blur(background, style.Blur)
+	}
+
+	frameCtx.DrawImage(background, 0, 0)
 	frameCtx.DrawImage(content, 0, 0)
 
 	return frameCtx.Image()

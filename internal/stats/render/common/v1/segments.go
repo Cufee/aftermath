@@ -33,7 +33,7 @@ func (s *Segments) AddFooter(blocks ...Block) {
 	s.footer = append(s.footer, blocks...)
 }
 
-func (s *Segments) ContentMask(opts ...Option) (image.Image, error) {
+func (s *Segments) ContentMask(opts ...Option) (*image.Alpha, error) {
 	options := DefaultOptions()
 	for _, apply := range opts {
 		apply(&options)
@@ -48,15 +48,29 @@ func (s *Segments) ContentMask(opts ...Option) (image.Image, error) {
 	}
 
 	bounds := s.rendered.content.Bounds()
-	mask := image.NewGray(bounds)
+	mask := image.NewAlpha(bounds)
 
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			_, _, _, a := s.rendered.content.At(x, y).RGBA()
-			if a > 0 { // Non-transparent pixel
-				mask.Set(x, y, color.Gray{Y: 255}) // Set to white
-			} else { // Transparent pixel
-				mask.Set(x, y, color.Gray{Y: 0}) // Set to black
+	for y := bounds.Min.Y + 1; y < bounds.Max.Y-1; y++ {
+		for x := bounds.Min.X + 1; x < bounds.Max.X-1; x++ {
+			if _, _, _, a := s.rendered.content.At(x, y).RGBA(); a > 0 {
+				// Check neighboring pixels for alpha
+				if _, _, _, a := s.rendered.content.At(x-1, y).RGBA(); a == 0 { // left
+					mask.SetAlpha(x, y, color.Alpha{A: 0})
+					continue
+				}
+				if _, _, _, a := s.rendered.content.At(x+1, y).RGBA(); a == 0 { // right
+					mask.SetAlpha(x, y, color.Alpha{A: 0})
+					continue
+				}
+				if _, _, _, a := s.rendered.content.At(x, y+1).RGBA(); a == 0 { // top
+					mask.SetAlpha(x, y, color.Alpha{A: 0})
+					continue
+				}
+				if _, _, _, a := s.rendered.content.At(x, y-1).RGBA(); a == 0 { // bottom
+					mask.SetAlpha(x, y, color.Alpha{A: 0})
+					continue
+				}
+				mask.SetAlpha(x, y, color.Alpha{A: 255})
 			}
 		}
 	}
@@ -124,8 +138,13 @@ func (s *Segments) Render(opts ...Option) (image.Image, error) {
 			s.rendered.content = content
 		}
 
-		b := NewImageContent(Style{}, AddBackground(s.rendered.content, options.Background, Style{Blur: DefaultBackgroundBlur, BorderRadius: 42.5}))
-		*block = retry.DataWithErr[Block]{Data: b}
+		bgMask, err := s.ContentMask(opts...)
+		if err != nil {
+			block.Err = err
+			return
+		}
+
+		block.Data = NewImageContent(Style{}, AddGlassMaskedBackground(s.rendered.content, options.Background, bgMask, Style{BorderRadius: 42.5}))
 	}(&contentBlock)
 
 	go func(block *retry.DataWithErr[*Block]) {
