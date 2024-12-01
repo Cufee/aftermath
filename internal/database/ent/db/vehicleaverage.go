@@ -3,7 +3,7 @@
 package db
 
 import (
-	"encoding/json"
+	"github.com/cufee/aftermath/internal/json"
 	"fmt"
 	"strings"
 	"time"
