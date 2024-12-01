@@ -2,6 +2,7 @@ package common
 
 import (
 	"image"
+	"image/color"
 	"sync"
 
 	"github.com/cufee/aftermath/internal/retry"
@@ -12,6 +13,12 @@ type Segments struct {
 	header  []Block
 	content []Block
 	footer  []Block
+
+	rendered struct {
+		header  image.Image
+		content image.Image
+		footer  image.Image
+	}
 }
 
 func (s *Segments) AddHeader(blocks ...Block) {
@@ -26,6 +33,69 @@ func (s *Segments) AddFooter(blocks ...Block) {
 	s.footer = append(s.footer, blocks...)
 }
 
+func (s *Segments) ContentMask(opts ...Option) (image.Image, error) {
+	options := DefaultOptions()
+	for _, apply := range opts {
+		apply(&options)
+	}
+
+	if s.rendered.content == nil {
+		content, err := s.renderContent(options)
+		if err != nil {
+			return nil, err
+		}
+		s.rendered.content = content
+	}
+
+	bounds := s.rendered.content.Bounds()
+	mask := image.NewGray(bounds)
+
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			_, _, _, a := s.rendered.content.At(x, y).RGBA()
+			if a > 0 { // Non-transparent pixel
+				mask.Set(x, y, color.Gray{Y: 255}) // Set to white
+			} else { // Transparent pixel
+				mask.Set(x, y, color.Gray{Y: 0}) // Set to black
+			}
+		}
+	}
+
+	return mask, nil
+}
+
+func (s *Segments) renderHeader(_ Options) (image.Image, error) {
+	header := NewBlocksContent(
+		Style{
+			Direction:  DirectionVertical,
+			AlignItems: AlignItemsCenter,
+			Gap:        10,
+		}, s.header...)
+	return header.Render()
+}
+
+func (s *Segments) renderFooter(_ Options) (image.Image, error) {
+	footer := NewBlocksContent(
+		Style{
+			Direction:  DirectionVertical,
+			AlignItems: AlignItemsCenter,
+			Gap:        10,
+		}, s.footer...)
+	return footer.Render()
+}
+
+func (s *Segments) renderContent(_ Options) (image.Image, error) {
+	mainSegment := NewBlocksContent(
+		Style{
+			Direction:  DirectionVertical,
+			AlignItems: AlignItemsCenter,
+			PaddingX:   20,
+			PaddingY:   20,
+			Gap:        10,
+		}, s.content...)
+	return mainSegment.Render()
+}
+
 func (s *Segments) Render(opts ...Option) (image.Image, error) {
 	if len(s.content) < 1 {
 		return nil, errors.New("segments.content cannot be empty")
@@ -37,65 +107,79 @@ func (s *Segments) Render(opts ...Option) (image.Image, error) {
 	}
 
 	var wg sync.WaitGroup
-	var headerBlock *Block
+	var headerBlock retry.DataWithErr[*Block]
+	var footerBlock retry.DataWithErr[*Block]
 	var contentBlock retry.DataWithErr[Block]
-	var footerBlock *Block
 
 	wg.Add(3)
-	go func() {
+	go func(block *retry.DataWithErr[Block]) {
 		defer wg.Done()
-		mainSegment := NewBlocksContent(
-			Style{
-				Direction:  DirectionVertical,
-				AlignItems: AlignItemsCenter,
-				PaddingX:   20,
-				PaddingY:   20,
-				Gap:        10,
-			}, s.content...)
-		mainSegmentImg, err := mainSegment.Render()
-		if err != nil {
-			contentBlock = retry.DataWithErr[Block]{Err: err}
-			return
+
+		if s.rendered.content == nil {
+			content, err := s.renderContent(options)
+			if err != nil {
+				*block = retry.DataWithErr[Block]{Err: err}
+				return
+			}
+			s.rendered.content = content
 		}
-		mainSegmentBlock := NewImageContent(Style{}, AddBackground(mainSegmentImg, options.Background, Style{Blur: DefaultBackgroundBlur, BorderRadius: 42.5}))
-		contentBlock = retry.DataWithErr[Block]{Data: mainSegmentBlock}
-	}()
-	go func() {
+
+		b := NewImageContent(Style{}, AddBackground(s.rendered.content, options.Background, Style{Blur: DefaultBackgroundBlur, BorderRadius: 42.5}))
+		*block = retry.DataWithErr[Block]{Data: b}
+	}(&contentBlock)
+
+	go func(block *retry.DataWithErr[*Block]) {
 		defer wg.Done()
 		if len(s.header) > 0 {
-			header := NewBlocksContent(
-				Style{
-					Direction:  DirectionVertical,
-					AlignItems: AlignItemsCenter,
-					Gap:        10,
-				}, s.header...)
-			headerBlock = &header
+			if s.rendered.header == nil {
+				header, err := s.renderHeader(options)
+				if err != nil {
+					block.Err = err
+					return
+				}
+				s.rendered.header = header
+			}
+
+			b := NewImageContent(Style{AlignItems: AlignItemsCenter, JustifyContent: JustifyContentCenter}, s.rendered.header)
+			block.Data = &b
 		}
-	}()
-	go func() {
+	}(&headerBlock)
+	go func(block *retry.DataWithErr[*Block]) {
 		defer wg.Done()
 		if len(s.footer) > 0 {
-			footer := NewBlocksContent(
-				Style{
-					Direction:  DirectionVertical,
-					AlignItems: AlignItemsCenter,
-					Gap:        10,
-				}, s.footer...)
-			footerBlock = &footer
+			if s.rendered.footer == nil {
+				footer, err := s.renderFooter(options)
+				if err != nil {
+					block.Err = err
+					return
+				}
+				s.rendered.footer = footer
+			}
+
+			b := NewImageContent(Style{AlignItems: AlignItemsCenter, JustifyContent: JustifyContentCenter}, s.rendered.footer)
+			block.Data = &b
 		}
-	}()
+	}(&footerBlock)
 	wg.Wait()
 
 	var frameBlocks []Block
-	if headerBlock != nil {
-		frameBlocks = append(frameBlocks, *headerBlock)
+	if headerBlock.Err != nil {
+		return nil, headerBlock.Err
 	}
+	if headerBlock.Data != nil {
+		frameBlocks = append(frameBlocks, *headerBlock.Data)
+	}
+
 	if contentBlock.Err != nil {
 		return nil, contentBlock.Err
 	}
 	frameBlocks = append(frameBlocks, contentBlock.Data)
-	if footerBlock != nil {
-		frameBlocks = append(frameBlocks, *footerBlock)
+
+	if footerBlock.Err != nil {
+		return nil, footerBlock.Err
+	}
+	if footerBlock.Data != nil {
+		frameBlocks = append(frameBlocks, *footerBlock.Data)
 	}
 
 	frame := NewBlocksContent(
