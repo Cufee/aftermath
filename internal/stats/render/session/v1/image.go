@@ -60,3 +60,17 @@ func CardsToImage(session, career fetch.AccountStatsOverPeriod, cards session.Ca
 
 	return segments.Render(func(opt *common.Options) { opt.Background = o.Background })
 }
+
+func CardsToSegments(session, career fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts ...common.Option) (*common.Segments, error) {
+	o := common.DefaultOptions()
+	for _, apply := range opts {
+		apply(&o)
+	}
+
+	segments, err := cardsToSegments(session, career, cards, subs, o)
+	if err != nil {
+		return nil, err
+	}
+
+	return &segments, nil
+}

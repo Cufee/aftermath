@@ -54,3 +54,17 @@ func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option
 
 	return segments.Render(func(op *common.Options) { op.Background = o.Background })
 }
+
+func CardsToSegments(replay fetch.Replay, cards replay.Cards, opts ...common.Option) (*common.Segments, error) {
+	o := common.DefaultOptions()
+	for _, apply := range opts {
+		apply(&o)
+	}
+
+	segments, err := generateCards(replay, cards, o.Printer)
+	if err != nil {
+		return nil, err
+	}
+
+	return &segments, nil
+}
