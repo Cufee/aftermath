@@ -17,7 +17,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/encoding"
 	"github.com/cufee/aftermath/internal/log"
-	"github.com/disintegration/imaging"
+	"github.com/nao1215/imaging"
 	"github.com/pkg/errors"
 )
 

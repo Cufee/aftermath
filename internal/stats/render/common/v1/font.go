@@ -18,9 +18,10 @@ func (f *Font) Valid() bool {
 	return f.data != nil && f.size > 0
 }
 
-func (f *Font) Face() font.Face {
+func (f *Font) Face() (font.Face, func() error) {
 	ttf, _ := truetype.Parse(f.data)
-	return truetype.NewFace(ttf, &truetype.Options{
+	face := truetype.NewFace(ttf, &truetype.Options{
 		Size: f.size,
 	})
+	return face, face.Close
 }

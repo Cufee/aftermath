@@ -7,8 +7,8 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
 
-	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
+	"github.com/nao1215/imaging"
 )
 
 func AddBackground(content, background image.Image, style Style) image.Image {

@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
+	"github.com/nao1215/imaging"
 )
 
 type blockContentType int
@@ -72,7 +72,10 @@ func (content contentText) Render(style Style) (image.Image, error) {
 	ctx := gg.NewContext(int(size.TotalWidth+(style.PaddingX*2)), int(size.TotalHeight+(style.PaddingY*2)))
 
 	// Render text
-	ctx.SetFontFace(style.Font.Face())
+	face, close := style.Font.Face()
+	defer close()
+
+	ctx.SetFontFace(face)
 	ctx.SetColor(style.FontColor)
 
 	var lastX, lastY float64 = style.PaddingX, style.PaddingY + 1

@@ -4,8 +4,8 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
+	"github.com/nao1215/imaging"
 )
 
 type frameOptions struct {

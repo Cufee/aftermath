@@ -11,7 +11,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 	"github.com/cufee/aftermath/internal/stats/render/assets"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
-	"github.com/disintegration/imaging"
+	"github.com/nao1215/imaging"
 )
 
 func newTitleBlock(replay replay.Cards, width float64) common.Block {

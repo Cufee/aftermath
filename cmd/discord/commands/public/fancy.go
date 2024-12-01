@@ -22,8 +22,8 @@ import (
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
 	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
-	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
+	"github.com/nao1215/imaging"
 )
 
 func init() {
