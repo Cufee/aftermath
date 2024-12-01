@@ -116,7 +116,7 @@ func init() {
 				if ioptions.BackgroundID != "" {
 					background, _ := ctx.Core().Database().GetUserContent(ctx.Ctx(), ioptions.BackgroundID)
 					if img, err := logic.UserContentToImage(background); err == nil {
-						opts = append(opts, stats.WithBackground(img))
+						opts = append(opts, stats.WithBackground(img, true))
 					}
 				}
 

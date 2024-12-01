@@ -11,7 +11,8 @@ import (
 	"github.com/nao1215/imaging"
 )
 
-var DefaultBackgroundBlur = 10.0
+var DefaultBackgroundBlur float64 = 2.5
+var GlassEffectBackgroundBlur float64 = DefaultBackgroundBlur * 10
 
 var globalLogoCacheMx sync.Mutex
 var globalLogoCache = make(map[color.Color]image.Image)
@@ -29,9 +30,9 @@ func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed
 		}
 	}
 
-	size := 20
-	overlay := NewBrandedBackground(background.Bounds().Dx()*2, background.Bounds().Dy()*2, size, size/2, colors, seed)
-	return imaging.OverlayCenter(background, overlay, 75)
+	size := 10
+	overlay := NewBrandedBackground(background.Bounds().Dx()*2, background.Bounds().Dy()*2, size, size, colors, seed)
+	return imaging.OverlayCenter(background, overlay, 0.5)
 }
 
 func DefaultBrandedOverlay(colors []color.Color, seed int) image.Image {
@@ -151,4 +152,17 @@ func pickRotationRad(r *rand.Rand) float64 {
 	// Clamp the rotation angle between -2.5π and 2.5π radians
 	rotationRad := -2.5*math.Pi + (r.Float64() * (5 * math.Pi))
 	return rotationRad
+}
+
+func BlurWithMask(content image.Image, mask *image.Alpha, blur, maskBlur float64) (image.Image, error) {
+	ctx := gg.NewContext(content.Bounds().Dx(), content.Bounds().Dy())
+	err := ctx.SetMask(mask)
+	if err != nil {
+		return nil, err
+	}
+	ctx.DrawImage(imaging.Blur(content, maskBlur), 0, 0)
+
+	content = imaging.Blur(content, blur)
+	content = imaging.OverlayCenter(content, ctx.Image(), 1) // paste masked content on top of content
+	return content, nil
 }

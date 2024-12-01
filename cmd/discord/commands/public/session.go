@@ -47,7 +47,7 @@ func init() {
 					accountID = defaultAccount.ReferenceID
 
 					if img, content, err := logic.GetBackgroundImageFromRef(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
-						opts = append(opts, stats.WithBackground(img))
+						opts = append(opts, stats.WithBackground(img, true))
 						ioptions.BackgroundID = content.ID
 					}
 
@@ -56,7 +56,7 @@ func init() {
 					accountID = options.AccountID
 
 					if img, content, err := logic.GetBackgroundImageFromRef(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
-						opts = append(opts, stats.WithBackground(img))
+						opts = append(opts, stats.WithBackground(img, true))
 						ioptions.BackgroundID = content.ID
 					}
 
@@ -96,7 +96,7 @@ func init() {
 
 					background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
 					if img, err := logic.UserContentToImage(background); err == nil {
-						opts = append(opts, stats.WithBackground(img))
+						opts = append(opts, stats.WithBackground(img, true))
 						ioptions.BackgroundID = background.ID
 					}
 				}

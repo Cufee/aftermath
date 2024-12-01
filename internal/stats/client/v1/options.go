@@ -11,13 +11,14 @@ import (
 )
 
 type requestOptions struct {
-	snapshotType    models.SnapshotType
-	backgroundImage image.Image
-	backgroundURL   string
-	referenceID     string
-	promoText       []string
-	vehicleID       string
-	withWN8         bool
+	snapshotType       models.SnapshotType
+	backgroundImage    image.Image
+	backgroundURL      string
+	backgroundIsCustom bool
+	referenceID        string
+	promoText          []string
+	vehicleID          string
+	withWN8            bool
 
 	vehicleTags    []prepare.Tag
 	ratingColumns  []prepare.TagColumn[string]
@@ -41,11 +42,11 @@ func WithPromoText(text ...string) RequestOption {
 func WithType(t models.SnapshotType) RequestOption {
 	return func(o *requestOptions) { o.snapshotType = t }
 }
-func WithBackgroundURL(url string) RequestOption {
-	return func(o *requestOptions) { o.backgroundURL = url }
+func WithBackgroundURL(url string, isCustom bool) RequestOption {
+	return func(o *requestOptions) { o.backgroundURL = url; o.backgroundIsCustom = isCustom }
 }
-func WithBackground(image image.Image) RequestOption {
-	return func(o *requestOptions) { o.backgroundImage = image }
+func WithBackground(image image.Image, isCustom bool) RequestOption {
+	return func(o *requestOptions) { o.backgroundImage = image; o.backgroundIsCustom = isCustom }
 }
 
 func (o requestOptions) RenderOpts(printer func(string) string) []common.Option {
@@ -60,11 +61,11 @@ func (o requestOptions) RenderOpts(printer func(string) string) []common.Option 
 		copts = append(copts, common.WithPrinter(printer))
 	}
 	if o.backgroundImage != nil {
-		copts = append(copts, common.WithBackground(o.backgroundImage))
+		copts = append(copts, common.WithBackground(o.backgroundImage, o.backgroundIsCustom))
 	} else if o.backgroundURL != "" {
-		copts = append(copts, common.WithBackgroundURL(o.backgroundURL))
+		copts = append(copts, common.WithBackgroundURL(o.backgroundURL, o.backgroundIsCustom))
 	} else {
-		copts = append(copts, common.WithBackgroundURL("static://bg-default"))
+		copts = append(copts, common.WithBackgroundURL("static://bg-default", false))
 	}
 	return copts
 }

@@ -20,17 +20,17 @@ type playerWN8 struct {
 }
 
 func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option) (image.Image, error) {
+	segments, err := CardsToSegments(replay, cards, opts...)
+	if err != nil {
+		return nil, err
+	}
+
 	o := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&o)
 	}
 
-	segments, err := generateCards(replay, cards, o.Printer)
-	if err != nil {
-		return nil, err
-	}
-
-	if o.Background != nil {
+	if o.Background != nil && !o.BackgroundIsCustom {
 		var values []playerWN8
 		for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
 			if wn8 := player.Performance.WN8(); !frame.InvalidValue.Equals(wn8) {
@@ -53,4 +53,18 @@ func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option
 	}
 
 	return segments.Render(func(op *common.Options) { op.Background = o.Background })
+}
+
+func CardsToSegments(replay fetch.Replay, cards replay.Cards, opts ...common.Option) (*common.Segments, error) {
+	o := common.DefaultOptions()
+	for _, apply := range opts {
+		apply(&o)
+	}
+
+	segments, err := generateCards(replay, cards, o.Printer)
+	if err != nil {
+		return nil, err
+	}
+
+	return &segments, nil
 }
