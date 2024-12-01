@@ -157,15 +157,18 @@ func (q *queue) startWorkers(ctx context.Context, onComplete func(id string)) {
 				q.activeTasksMx.Lock()
 				q.activeTasks[task.ID] = &struct{}{}
 				q.activeTasksMx.Unlock()
+				defer func() {
+					q.activeTasksMx.Lock()
+					delete(q.activeTasks, task.ID)
+					q.activeTasksMx.Unlock()
+					// free limiter channel
+					<-q.workerLimiter
+				}()
+
 				// run task handler
 				q.processTask(task)
-				// free limiter channel
-				<-q.workerLimiter
-				q.activeTasksMx.Lock()
-				delete(q.activeTasks, task.ID)
-				q.activeTasksMx.Unlock()
 				if onComplete != nil {
-					go onComplete(task.ID)
+					onComplete(task.ID)
 				}
 			}(task)
 
@@ -253,5 +256,4 @@ func (q *queue) processTask(task models.Task) {
 	if err != nil {
 		log.Err(err).Msg("failed to update a task")
 	}
-
 }
