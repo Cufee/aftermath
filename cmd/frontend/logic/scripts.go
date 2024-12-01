@@ -3,8 +3,9 @@ package logic
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"io"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/a-h/templ"
 	"github.com/tdewolff/minify/v2"

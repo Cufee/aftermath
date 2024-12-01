@@ -2,9 +2,10 @@ package blitzstars
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )

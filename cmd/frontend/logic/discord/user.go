@@ -1,9 +1,10 @@
 package discord
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/internal/log"

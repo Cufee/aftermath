@@ -4,11 +4,12 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
-	"encoding/json"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/log"

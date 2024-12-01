@@ -1,10 +1,11 @@
 package realtime
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/cufee/aftermath/cmd/frontend/handler"
 	"github.com/cufee/aftermath/internal/realtime"
