@@ -384,3 +384,8 @@
 - key: discord_error_invalid_interaction_fmt
   value: "-# <@%s> used a command\n**It looks like Discord is having some issues at the moment.**\nAftermath replies might be delayed, but we will try our best to make things work!\n"
   context: Discord sometimes does not process the interaction ack corrctly, this will lead to an infinite "Aftermath is thinking" message, but we still reply
+
+# Blitz Stars specific errors
+- key: blitz_stars_error_service_down
+  value: "Some of your career stats rely on BlitzStars, which is currently unavailable. However, most other commands, including sessions, are still working."
+  context: BlitzStars goes down with 500 sometimes, this is a message to describe what happened

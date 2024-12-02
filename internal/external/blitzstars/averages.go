@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/cufee/aftermath/internal/json"
+	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
@@ -47,7 +48,7 @@ func (c client) CurrentTankAverages(ctx context.Context) (map[string]frame.Stats
 
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("bad status code: %d", res.StatusCode)
+		return nil, errors.Wrapf(ErrServiceUnavailable, "bad status code: %d", res.StatusCode)
 	}
 
 	var averages []VehicleAverages

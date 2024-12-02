@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/cufee/aftermath/internal/json"
+	"github.com/pkg/errors"
 
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
@@ -30,7 +31,7 @@ func (c client) AccountTankHistories(ctx context.Context, accountId string) (map
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("bad status code: %d", res.StatusCode)
+		return nil, errors.Wrapf(ErrServiceUnavailable, "bad status code: %d", res.StatusCode)
 	}
 
 	var histories []TankHistoryEntry
