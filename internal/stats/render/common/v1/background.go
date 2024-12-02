@@ -11,8 +11,8 @@ import (
 	"github.com/nao1215/imaging"
 )
 
-var DefaultBackgroundBlur float64 = 2.5
-var GlassEffectBackgroundBlur float64 = DefaultBackgroundBlur * 10
+var DefaultBackgroundBlur float64 = 5
+var GlassEffectBackgroundBlur float64 = DefaultBackgroundBlur * 5
 
 var globalLogoCacheMx sync.Mutex
 var globalLogoCache = make(map[color.Color]image.Image)
