@@ -30,24 +30,15 @@ func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed
 		}
 	}
 
-	size := 10
-	overlay := NewBrandedBackground(background.Bounds().Dx()*2, background.Bounds().Dy()*2, size, size, colors, seed)
+	size := 7
+	overlay := NewBrandedBackground(background.Bounds().Dx()*2, background.Bounds().Dy()*2, size, size/2, colors, seed)
 	return imaging.OverlayCenter(background, overlay, 0.5)
-}
-
-func DefaultBrandedOverlay(colors []color.Color, seed int) image.Image {
-	if len(colors) < 1 {
-		colors = DefaultLogoColorOptions
-	}
-
-	size := 15
-	return NewBrandedBackground(500, 500, size, -size/2, colors, seed)
 }
 
 func NewBrandedBackground(width, height, logoSize, padding int, colors []color.Color, hashSeed int) image.Image {
 	// 2/3 of the image should be left for logos
-	rows := Max((height-padding*2)*2/3/logoSize, 2)
-	cols := Max((width-padding*2)*2/3/logoSize, 2)
+	rows := Max((height-padding*2)/3/logoSize, 2)
+	cols := Max((width-padding*2)/3/logoSize, 2)
 	// the rest is gaps
 	xGapsTotal := width - padding*2 - (cols)*logoSize
 	yGapsTotal := height - padding*2 - (rows)*logoSize
