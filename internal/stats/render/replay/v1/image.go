@@ -11,6 +11,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
+	"github.com/nao1215/imaging"
 )
 
 type playerWN8 struct {
@@ -49,6 +50,13 @@ func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option
 		if patternSeed == 0 {
 			patternSeed = int(time.Now().Unix())
 		}
+
+		bounds, err := segments.ContentBounds(opts...)
+		if err != nil {
+			return nil, err
+		}
+
+		o.Background = imaging.Resize(o.Background, bounds.Dx(), bounds.Dy(), imaging.Gaussian)
 		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed, 0.35)
 	}
 

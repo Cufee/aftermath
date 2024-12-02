@@ -27,14 +27,14 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+var bgImage = "static://test_user_background"
+
 func TestRenderSession(t *testing.T) {
 	// Logger
 	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
 	zerolog.SetGlobalLevel(level)
 
 	loadStaticAssets(static)
-
-	bgImage := "static://bg-default"
 
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 	t.Run("generate content mask before generating image", func(t *testing.T) {
@@ -77,7 +77,7 @@ func TestRenderSession(t *testing.T) {
 	})
 
 	t.Run("render session image for large nickname", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, false), client.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, true), client.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -90,7 +90,7 @@ func TestRenderSession(t *testing.T) {
 	})
 
 	t.Run("render session image for large nickname and no vehicles", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, false), client.WithVehicleID("0"), client.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, true), client.WithVehicleID("0"), client.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -110,8 +110,6 @@ func TestRenderPeriod(t *testing.T) {
 
 	loadStaticAssets(static)
 
-	bgImage := "static://bg-default"
-
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 
 	t.Run("render period image for small nickname", func(t *testing.T) {
@@ -128,7 +126,7 @@ func TestRenderPeriod(t *testing.T) {
 	})
 
 	t.Run("render period image for large nickname", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, false), client.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, true), client.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -141,7 +139,7 @@ func TestRenderPeriod(t *testing.T) {
 	})
 
 	t.Run("render period image with large name no highlights", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, false), client.WithVehicleID("0"), client.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, true), client.WithVehicleID("0"), client.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -154,7 +152,7 @@ func TestRenderPeriod(t *testing.T) {
 	})
 
 	t.Run("render period image with small name and no highlights", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithBackgroundURL(bgImage, false), client.WithVehicleID("0"), client.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithBackgroundURL(bgImage, true), client.WithVehicleID("0"), client.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -207,13 +205,11 @@ func TestRenderReplay(t *testing.T) {
 			gameModeNames, err := db.GetGameModeNames(context.Background(), replay.GameMode.String())
 			is.NoErr(err)
 
-			bgImage := "static://bg-default"
-
 			{
 				cards, err := prepare.NewCards(replay, glossary, gameModeNames, common.WithPrinter(printer, language.English))
 				is.NoErr(err)
 
-				image, err := render.CardsToImage(replay, cards, rc.WithBackgroundURL(bgImage, false), rc.WithPrinter(printer))
+				image, err := render.CardsToImage(replay, cards, rc.WithBackgroundURL(bgImage, true), rc.WithPrinter(printer))
 				assert.NoError(t, err, "failed to render a replay image")
 				assert.NotNil(t, image, "image is nil")
 

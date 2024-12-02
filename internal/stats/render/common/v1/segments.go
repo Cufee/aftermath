@@ -33,13 +33,30 @@ func (s *Segments) AddFooter(blocks ...Block) {
 	s.footer = append(s.footer, blocks...)
 }
 
-func (s *Segments) ContentMask(opts ...Option) (*image.Alpha, error) {
-	options := DefaultOptions()
-	for _, apply := range opts {
-		apply(&options)
+func (s *Segments) ContentBounds(opts ...Option) (image.Rectangle, error) {
+	if s.rendered.content == nil {
+		options := DefaultOptions()
+		for _, apply := range opts {
+			apply(&options)
+		}
+
+		content, err := s.renderContent(options)
+		if err != nil {
+			return image.Rect(0, 0, 0, 0), err
+		}
+		s.rendered.content = content
 	}
 
+	return s.rendered.content.Bounds(), nil
+}
+
+func (s *Segments) ContentMask(opts ...Option) (*image.Alpha, error) {
 	if s.rendered.content == nil {
+		options := DefaultOptions()
+		for _, apply := range opts {
+			apply(&options)
+		}
+
 		content, err := s.renderContent(options)
 		if err != nil {
 			return nil, err

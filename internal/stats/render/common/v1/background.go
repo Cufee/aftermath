@@ -30,7 +30,7 @@ func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed
 		}
 	}
 
-	size := 7
+	size := 24
 	overlay := NewBrandedBackground(background.Bounds().Dx()*2, background.Bounds().Dy()*2, size, size/2, colors, seed)
 	return imaging.OverlayCenter(background, overlay, 0.5)
 }
