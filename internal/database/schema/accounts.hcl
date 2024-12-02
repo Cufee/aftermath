@@ -1,4 +1,4 @@
-table "accounts" {
+table "account" {
   schema = schema.main
   column "id" {
     null = false
@@ -42,7 +42,7 @@ table "accounts" {
   }
   foreign_key "account_clan_id_clan_id_fk" {
     columns     = [column.clan_id]
-    ref_columns = [table.clans.column.id]
+    ref_columns = [table.clan.column.id]
     on_update   = NO_ACTION
     on_delete   = SET_NULL
   }
@@ -63,7 +63,7 @@ table "accounts" {
   }
 }
 
-table "clans" {
+table "clan" {
   schema = schema.main
   column "id" {
     null = false
@@ -108,7 +108,7 @@ table "clans" {
   }
 }
 
-table "account_snapshots" {
+table "account_snapshot" {
   schema = schema.main
   column "id" {
     null = false
@@ -159,7 +159,7 @@ table "account_snapshots" {
   }
   foreign_key "account_account_id_snapshot_account_id_fk" {
     columns     = [column.account_id]
-    ref_columns = [table.accounts.column.id]
+    ref_columns = [table.account.column.id]
     on_update   = NO_ACTION
     on_delete   = CASCADE
   }
@@ -180,7 +180,7 @@ table "account_snapshots" {
   }
 }
 
-table "vehicle_snapshots" {
+table "vehicle_snapshot" {
   schema = schema.main
   column "id" {
     null = false
@@ -227,7 +227,7 @@ table "vehicle_snapshots" {
   }
   foreign_key "vehicle_snapshot_account_id_account_id_fk" {
     columns     = [column.account_id]
-    ref_columns = [table.accounts.column.id]
+    ref_columns = [table.account.column.id]
     on_update   = NO_ACTION
     on_delete   = CASCADE
   }

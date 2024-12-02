@@ -3,15 +3,15 @@ package database
 import (
 	"context"
 
-	"github.com/cufee/aftermath/internal/database/gen/model"
-	"github.com/cufee/aftermath/internal/database/gen/table"
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	s "github.com/go-jet/jet/v2/sqlite"
 )
 
 type accountWithClan struct {
-	model.Accounts
-	Clan *model.Clans
+	m.Accounts
+	Clan *m.Clans
 }
 
 func toAccount(model *accountWithClan) models.Account {
@@ -31,11 +31,11 @@ func toAccount(model *accountWithClan) models.Account {
 }
 
 func (c *client) GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error) {
-	stmt := s.SELECT(table.Accounts.ID).
-		FROM(table.Accounts).
-		WHERE(table.Accounts.Realm.EQ(s.UPPER(s.String(realm))))
+	stmt := s.SELECT(t.Accounts.ID).
+		FROM(t.Accounts).
+		WHERE(t.Accounts.Realm.EQ(s.UPPER(s.String(realm))))
 
-	var result []model.Accounts
+	var result []m.Accounts
 	err := stmt.Query(c.db, &result)
 	if err != nil {
 		return nil, err
@@ -50,9 +50,9 @@ func (c *client) GetRealmAccountIDs(ctx context.Context, realm string) ([]string
 }
 
 func (c *client) GetAccountByID(ctx context.Context, id string) (models.Account, error) {
-	stmt := s.SELECT(table.Accounts.AllColumns, table.Clans.ID, table.Clans.Tag).
-		FROM(table.Accounts.INNER_JOIN(table.Clans, table.Clans.ID.EQ(table.Accounts.ClanID))).
-		WHERE(table.Accounts.ID.EQ(s.String(id)))
+	stmt := s.SELECT(t.Accounts.AllColumns, t.Clans.ID, t.Clans.Tag).
+		FROM(t.Accounts.INNER_JOIN(t.Clans, t.Clans.ID.EQ(t.Accounts.ClanID))).
+		WHERE(t.Accounts.ID.EQ(s.String(id)))
 
 	var result accountWithClan
 	err := stmt.Query(c.db, &result)
@@ -67,9 +67,9 @@ func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Accoun
 		return nil, nil
 	}
 
-	stmt := s.SELECT(table.Accounts.AllColumns, table.Clans.ID, table.Clans.Tag).
-		FROM(table.Accounts.INNER_JOIN(table.Clans, table.Clans.ID.EQ(table.Accounts.ClanID))).
-		WHERE(table.Accounts.ID.IN(toStringSlice(ids...)...))
+	stmt := s.SELECT(t.Accounts.AllColumns, t.Clans.ID, t.Clans.Tag).
+		FROM(t.Accounts.INNER_JOIN(t.Clans, t.Clans.ID.EQ(t.Accounts.ClanID))).
+		WHERE(t.Accounts.ID.IN(toStringSlice(ids...)...))
 
 	var result []accountWithClan
 	err := stmt.Query(c.db, &result)
@@ -85,7 +85,30 @@ func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Accoun
 	return accounts, nil
 }
 
-// func (c *client) UpsertAccounts(ctx context.Context, accounts ...*models.Account) (map[string]error, error) {
+func (c *client) UpsertAccounts(ctx context.Context, accounts ...*models.Account) (map[string]error, error) {
+	if len(accounts) < 1 {
+		return nil, nil
+	}
+
+	errors := make(map[string]error, len(accounts))
+	for _, a := range accounts {
+		stmt := t.Accounts.INSERT(t.Accounts.MutableColumns).
+			MODEL(a).
+			ON_CONFLICT(t.Accounts.ID).
+			DO_UPDATE(
+				s.SET(
+					// t.Accounts.ClanID.SET(t.Accounts.ClanID), // TODO: This is a fk, handle clan row creation
+					t.Accounts.Private.SET(t.Accounts.Private),
+					t.Accounts.Nickname.SET(t.Accounts.Nickname),
+					t.Accounts.LastBattleTime.SET(t.Accounts.LastBattleTime),
+				),
+			)
+		errors[a.ID] = stmt.Query(c.db, nil)
+	}
+
+	return errors, nil
+}
+
 // 	if len(accounts) < 1 {
 // 		return nil, nil
 // 	}
