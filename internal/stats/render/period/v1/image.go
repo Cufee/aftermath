@@ -12,6 +12,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	"github.com/cufee/aftermath/internal/stats/render/common/v1"
+	"github.com/nao1215/imaging"
 )
 
 type vehicleWN8 struct {
@@ -56,10 +57,16 @@ func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs [
 			patternSeed = int(time.Now().Unix())
 		}
 
+		bounds, err := segments.ContentBounds(opts...)
+		if err != nil {
+			return nil, err
+		}
+
+		o.Background = imaging.Resize(o.Background, bounds.Dx(), bounds.Dy(), imaging.Gaussian)
 		o.Background = common.AddDefaultBrandedOverlay(o.Background, accentColors, patternSeed, 0.5)
 	}
 
-	return segments.Render(func(op *common.Options) { op.Background = o.Background })
+	return segments.Render(func(op *common.Options) { op.Background = o.Background; op.BackgroundIsCustom = o.BackgroundIsCustom })
 }
 
 func CardsToSegments(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts ...common.Option) (*common.Segments, error) {
