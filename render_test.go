@@ -34,7 +34,7 @@ func TestRenderSession(t *testing.T) {
 
 	loadStaticAssets(static)
 
-	bgImage := "static://test_bg_2"
+	bgImage := "static://test_user_background"
 
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 	t.Run("generate content mask before generating image", func(t *testing.T) {
