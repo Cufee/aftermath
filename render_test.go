@@ -27,7 +27,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-var bgImage = "static://test_user_background"
+var bgImage = "static://bg-default"
+var bgIsCustom = false
 
 func TestRenderSession(t *testing.T) {
 	// Logger
@@ -77,7 +78,7 @@ func TestRenderSession(t *testing.T) {
 	})
 
 	t.Run("render session image for large nickname", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, true), client.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -90,7 +91,7 @@ func TestRenderSession(t *testing.T) {
 	})
 
 	t.Run("render session image for large nickname and no vehicles", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, true), client.WithVehicleID("0"), client.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithVehicleID("0"), client.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -126,7 +127,7 @@ func TestRenderPeriod(t *testing.T) {
 	})
 
 	t.Run("render period image for large nickname", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, true), client.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -139,7 +140,7 @@ func TestRenderPeriod(t *testing.T) {
 	})
 
 	t.Run("render period image with large name no highlights", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, true), client.WithVehicleID("0"), client.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithVehicleID("0"), client.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -152,7 +153,7 @@ func TestRenderPeriod(t *testing.T) {
 	})
 
 	t.Run("render period image with small name and no highlights", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithBackgroundURL(bgImage, true), client.WithVehicleID("0"), client.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithVehicleID("0"), client.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -209,7 +210,7 @@ func TestRenderReplay(t *testing.T) {
 				cards, err := prepare.NewCards(replay, glossary, gameModeNames, common.WithPrinter(printer, language.English))
 				is.NoErr(err)
 
-				image, err := render.CardsToImage(replay, cards, rc.WithBackgroundURL(bgImage, true), rc.WithPrinter(printer))
+				image, err := render.CardsToImage(replay, cards, rc.WithBackgroundURL(bgImage, bgIsCustom), rc.WithPrinter(printer))
 				assert.NoError(t, err, "failed to render a replay image")
 				assert.NotNil(t, image, "image is nil")
 
