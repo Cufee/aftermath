@@ -9,6 +9,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/go-jet/jet/v2/sqlite"
+	"github.com/lucsky/cuid"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -138,7 +139,26 @@ type Client interface {
 }
 
 type client struct {
-	db *sql.DB
+	options clientOptions
+	db      *sql.DB
+}
+
+func (c *client) newID() string {
+	return cuid.New()
+}
+
+func (c *client) query(ctx context.Context, stmt sqlite.Statement, dst interface{}) error {
+	if c.options.debug {
+		println("SQL Query:", stmt.DebugSql())
+	}
+	return stmt.QueryContext(ctx, c.db, dst)
+}
+
+func (c *client) exec(ctx context.Context, stmt sqlite.Statement) (sql.Result, error) {
+	if c.options.debug {
+		println("SQL Exec:", stmt.DebugSql())
+	}
+	return stmt.ExecContext(ctx, c.db)
 }
 
 func (c *client) withTx(ctx context.Context, fn func(tx *sql.Tx) error) error {
@@ -195,7 +215,8 @@ func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) 
 	sqldb.SetMaxOpenConns(1)
 
 	return &client{
-		db: sqldb,
+		options: opts,
+		db:      sqldb,
 	}, nil
 }
 

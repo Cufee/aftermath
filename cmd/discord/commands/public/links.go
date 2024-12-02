@@ -94,7 +94,7 @@ func init() {
 					}
 
 					var content = []string{fmt.Sprintf(ctx.Localize("command_links_set_default_successfully_fmt"), nickname, realm)}
-					if updated.Metadata["verified"] != true {
+					if updated.Verified != true {
 						content = append(content, ctx.Localize("command_links_verify_cta"))
 					}
 					return ctx.Reply().Text(content...).Send()
@@ -184,7 +184,7 @@ func init() {
 					var found bool
 					for _, conn := range wgConnections {
 						if conn.ReferenceID == account.ID {
-							conn.Metadata["verified"] = false
+							conn.Verified = false
 							found = true
 						}
 						conn.Metadata["default"] = conn.ReferenceID == account.ID
@@ -196,10 +196,10 @@ func init() {
 					}
 					if !found {
 						meta := make(map[string]any)
-						meta["verified"] = false
 						meta["default"] = true
 						_, err := ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), models.UserConnection{
 							Type:        models.ConnectionTypeWargaming,
+							Verified:    false,
 							ReferenceID: fmt.Sprint(account.ID),
 							UserID:      ctx.User().ID,
 							Metadata:    meta,

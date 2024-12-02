@@ -2,10 +2,12 @@ package database
 
 // import (
 // 	"context"
+// 	"time"
 
-// 	"github.com/cufee/aftermath/internal/database/ent/db"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
-// 	"github.com/cufee/aftermath/internal/stats/frame"
+// 	m "github.com/cufee/aftermath/internal/database/gen/model"
+// 	t "github.com/cufee/aftermath/internal/database/gen/table"
+// 	"github.com/cufee/aftermath/internal/database/models"
+// 	s "github.com/go-jet/jet/v2/sqlite"
 // )
 
 // func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error) {

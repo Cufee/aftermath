@@ -19,11 +19,13 @@ tasks:
 
   db-generate:
     desc: generate models from database schema
-    cmd: go run github.com/stephenafamo/bob/gen/bobgen-sqlite@latest
+    cmd: jet -dsn="file://${DATABASE_PATH}/${DATABASE_NAME}" -schema=dvds -path=./internal/database/gen
 
   db-migrate:
     desc: generate migrations
-    cmd: atlas migrate hash --env local && atlas migrate diff --env local
+    cmds: 
+      - echo "Generating migrations for $DATABASE_PATH/$DATABASE_NAME"
+      - atlas migrate hash --env local && atlas migrate diff --env local
 
   db-migrate-apply:
     desc: apply migrations using atlas
@@ -38,9 +40,7 @@ tasks:
     dotenv:
       - ".env.test"
     cmds:
-      - atlas migrate hash --env local && atlas migrate diff --env local
       - atlas migrate apply --env local
-      - task: db-generate
 
   build-widget:
     desc: Build amth-widget js assets

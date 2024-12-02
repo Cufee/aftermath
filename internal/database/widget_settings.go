@@ -2,11 +2,12 @@ package database
 
 // import (
 // 	"context"
+// 	"time"
 
-// 	"github.com/cufee/aftermath/internal/database/ent/db"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/widgetsettings"
+// 	m "github.com/cufee/aftermath/internal/database/gen/model"
+// 	t "github.com/cufee/aftermath/internal/database/gen/table"
 // 	"github.com/cufee/aftermath/internal/database/models"
+// 	s "github.com/go-jet/jet/v2/sqlite"
 // )
 
 // func toWidgetOptions(record *db.WidgetSettings) models.WidgetOptions {

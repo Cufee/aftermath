@@ -18,6 +18,7 @@ import (
 	render "github.com/cufee/aftermath/internal/stats/render/replay/v1"
 	session "github.com/cufee/aftermath/internal/stats/render/session/v1"
 	"github.com/cufee/aftermath/tests"
+	"github.com/cufee/aftermath/tests/env"
 	"github.com/matryer/is"
 	"github.com/nao1215/imaging"
 	"github.com/rs/zerolog"
@@ -31,6 +32,8 @@ var bgImage = "static://bg-default"
 var bgIsCustom = false
 
 func TestRenderSession(t *testing.T) {
+	env.LoadTestEnv(t)
+
 	// Logger
 	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
 	zerolog.SetGlobalLevel(level)

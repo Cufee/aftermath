@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/cufee/aftermath/internal/database/gen/model"
 	"github.com/cufee/aftermath/internal/permissions"
 )
 
@@ -85,4 +86,24 @@ func (u User) Content(kind UserContentType) (UserContent, bool) {
 		}
 	}
 	return UserContent{}, false
+}
+
+func ToUser(record *model.User, connections []model.UserConnection, subscriptions []model.UserSubscription, content []model.UserContent, restrictions []model.UserRestriction) User {
+	user := User{
+		ID:          record.ID,
+		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
+	}
+	for _, c := range connections {
+		user.Connections = append(user.Connections, ToUserConnection(&c))
+	}
+	for _, s := range subscriptions {
+		user.Subscriptions = append(user.Subscriptions, ToUserSubscription(&s))
+	}
+	for _, c := range content {
+		user.Uploads = append(user.Uploads, ToUserContent(&c))
+	}
+	for _, r := range restrictions {
+		user.Restrictions = append(user.Restrictions, ToUserRestriction(&r))
+	}
+	return user
 }

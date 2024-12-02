@@ -4,11 +4,10 @@ package database
 // 	"context"
 // 	"time"
 
-// 	"github.com/cufee/aftermath/internal/database/ent/db"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/crontask"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
+// 	m "github.com/cufee/aftermath/internal/database/gen/model"
+// 	t "github.com/cufee/aftermath/internal/database/gen/table"
+// 	"github.com/cufee/aftermath/internal/database/models"
+// 	s "github.com/go-jet/jet/v2/sqlite"
 // )
 
 // func (c *client) DeleteExpiredTasks(ctx context.Context, expiration time.Time) error {

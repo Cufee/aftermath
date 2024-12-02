@@ -1,6 +1,12 @@
 package models
 
-import "github.com/cufee/aftermath/internal/permissions"
+import (
+	"time"
+
+	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/json"
+	"github.com/cufee/aftermath/internal/permissions"
+)
 
 type ConnectionType string
 
@@ -22,11 +28,49 @@ func (ConnectionType) Values() []string {
 type UserConnection struct {
 	ID string `json:"id"`
 
-	Type ConnectionType `json:"type"`
+	Type     ConnectionType `json:"type"`
+	Verified bool           `json:"verified"`
 
 	UserID      string                  `json:"userId"`
 	ReferenceID string                  `json:"referenceId"`
 	Permissions permissions.Permissions `json:"permissions"`
 
 	Metadata map[string]any `json:"metadata"`
+}
+
+func ToUserConnection(record *model.UserConnection) UserConnection {
+	c := UserConnection{
+		ID:          record.ID,
+		Type:        ConnectionType(record.Type),
+		Verified:    record.Verified,
+		UserID:      record.UserID,
+		ReferenceID: record.ReferenceID,
+		Metadata:    make(map[string]any, 0),
+	}
+	if record.Permissions != nil {
+		c.Permissions = permissions.Parse(*record.Permissions, permissions.Blank)
+	}
+	if c.Metadata == nil {
+		c.Metadata = make(map[string]any)
+	}
+	return c
+}
+
+func FromUserConnection(record *UserConnection) model.UserConnection {
+	perms := record.Permissions.Encode()
+	c := model.UserConnection{
+		ID:          record.ID,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Type:        string(record.Type),
+		Verified:    record.Verified,
+		ReferenceID: record.ReferenceID,
+		Permissions: &perms,
+		UserID:      record.UserID,
+	}
+	if data, err := json.Marshal(record.Metadata); err == nil {
+		s := string(data)
+		c.Metadata = &s
+	}
+	return c
 }

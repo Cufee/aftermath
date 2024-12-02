@@ -3,6 +3,8 @@ package models
 import (
 	"time"
 
+	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/json"
 	"github.com/pkg/errors"
 )
 
@@ -32,4 +34,20 @@ func (n Session) Valid() error {
 		return nil
 	}
 	return ErrSessionInvalid
+}
+
+func ToSession(record *model.Session) Session {
+	session := Session{
+		ID:       record.ID,
+		UserID:   record.UserID,
+		PublicID: record.PublicID,
+
+		CreatedAt: record.CreatedAt,
+		UpdatedAt: record.UpdatedAt,
+		ExpiresAt: record.ExpiresAt,
+
+		Meta: make(map[string]string, 0),
+	}
+	json.Unmarshal([]byte(record.Metadata), &session.Meta)
+	return session
 }

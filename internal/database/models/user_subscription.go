@@ -4,6 +4,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/cufee/aftermath/internal/database/gen/model"
 	"github.com/cufee/aftermath/internal/permissions"
 )
 
@@ -73,4 +74,15 @@ type UserSubscription struct {
 	ExpiresAt   time.Time
 	ReferenceID string
 	Permissions permissions.Permissions
+}
+
+func ToUserSubscription(record *model.UserSubscription) UserSubscription {
+	return UserSubscription{
+		ID:          record.ID,
+		Type:        SubscriptionType(record.Type),
+		UserID:      record.UserID,
+		ReferenceID: record.ReferenceID,
+		ExpiresAt:   record.ExpiresAt,
+		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
+	}
 }

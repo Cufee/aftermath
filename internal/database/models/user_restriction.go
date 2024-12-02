@@ -3,6 +3,8 @@ package models
 import (
 	"time"
 
+	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/permissions"
 )
 
@@ -45,4 +47,24 @@ type RestrictionUpdate struct {
 	ModeratorID string
 	Summary     string
 	Context     string
+}
+
+func ToUserRestriction(record *model.UserRestriction) UserRestriction {
+	r := UserRestriction{
+		ID:     record.ID,
+		Type:   UserRestrictionType(record.Type),
+		UserID: record.UserID,
+
+		CreatedAt: record.CreatedAt,
+		UpdatedAt: record.UpdatedAt,
+		ExpiresAt: record.ExpiresAt,
+
+		ModeratorComment: record.ModeratorComment,
+		PublicReason:     record.PublicReason,
+		Restriction:      permissions.Parse(record.Restriction, permissions.Blank),
+
+		Events: make([]RestrictionUpdate, 0),
+	}
+	json.Unmarshal([]byte(record.Events), &r.Events)
+	return r
 }

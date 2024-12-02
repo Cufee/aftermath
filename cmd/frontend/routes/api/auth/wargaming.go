@@ -57,7 +57,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 	for _, conn := range connections {
 		conn.Metadata["default"] = conn.ReferenceID == accountID
 		if conn.ReferenceID == accountID {
-			conn.Metadata["verified"] = true
+			conn.Verified = true
 			found = true
 		}
 
@@ -71,7 +71,8 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 			Type:        models.ConnectionTypeWargaming,
 			UserID:      user.ID,
 			ReferenceID: accountID,
-			Metadata:    map[string]any{"verified": true, "default": true},
+			Verified:    true,
+			Metadata:    map[string]any{"default": true},
 		}
 		_, err := ctx.Database().UpsertUserConnection(ctx.Context, conn)
 		if err != nil {

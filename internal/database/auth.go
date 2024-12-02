@@ -1,70 +1,73 @@
 package database
 
-// import (
-// 	"context"
-// 	"time"
+import (
+	"context"
+	"time"
 
-// 	"github.com/cufee/aftermath/internal/database/ent/db"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/session"
-// 	"github.com/cufee/aftermath/internal/database/models"
-// )
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/json"
+	s "github.com/go-jet/jet/v2/sqlite"
+)
 
-// func toAuthNonce(record *db.AuthNonce) models.AuthNonce {
-// 	return models.AuthNonce{
-// 		ID:         record.ID,
-// 		Active:     record.Active,
-// 		PublicID:   record.PublicID,
-// 		Identifier: record.Identifier,
-// 		Meta:       record.Metadata,
+func (c *client) CreateAuthNonce(ctx context.Context, publicID, identifier string, expiresAt time.Time, meta map[string]string) (models.AuthNonce, error) {
+	insert := m.AuthNonce{
+		ID:         c.newID(),
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+		Active:     true,
+		ExpiresAt:  expiresAt,
+		Identifier: identifier,
+		PublicID:   publicID,
+	}
+	if meta != nil {
+		metaEncoded, err := json.Marshal(meta)
+		if err != nil {
+			return models.AuthNonce{}, err
+		}
+		insert.Metadata = string(metaEncoded)
+	}
 
-// 		CreatedAt: record.CreatedAt,
-// 		UpdatedAt: record.UpdatedAt,
-// 		ExpiresAt: record.ExpiresAt,
-// 	}
-// }
+	var result m.AuthNonce
+	stmt := t.AuthNonce.
+		INSERT(t.AuthNonce.AllColumns).
+		MODEL(insert).
+		RETURNING(t.AuthNonce.AllColumns)
+	err := c.query(ctx, stmt, &result)
+	if err != nil {
+		return models.AuthNonce{}, err
+	}
 
-// func (c *client) CreateAuthNonce(ctx context.Context, publicID, identifier string, expiresAt time.Time, meta map[string]string) (models.AuthNonce, error) {
-// 	record, err := c.db.AuthNonce.Create().SetActive(true).SetExpiresAt(expiresAt).SetIdentifier(identifier).SetPublicID(publicID).SetMetadata(meta).Save(ctx)
-// 	if err != nil {
-// 		return models.AuthNonce{}, err
-// 	}
+	nonce := models.ToAuthNonce(&result)
+	return nonce, nonce.Valid()
+}
 
-// 	nonce := toAuthNonce(record)
-// 	return nonce, nonce.Valid()
-// }
+func (c *client) FindAuthNonce(ctx context.Context, publicID string) (models.AuthNonce, error) {
+	var record m.AuthNonce
+	stmt := t.AuthNonce.
+		SELECT(t.AuthNonce.AllColumns).
+		WHERE(t.AuthNonce.PublicID.EQ(s.String(publicID)))
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.AuthNonce{}, err
+	}
 
-// func (c *client) FindAuthNonce(ctx context.Context, publicID string) (models.AuthNonce, error) {
-// 	record, err := c.db.AuthNonce.Query().Where(authnonce.PublicID(publicID), authnonce.Active(true), authnonce.ExpiresAtGT(time.Now())).First(ctx)
-// 	if err != nil {
-// 		return models.AuthNonce{}, err
-// 	}
+	nonce := models.ToAuthNonce(&record)
+	return nonce, nonce.Valid()
+}
 
-// 	nonce := toAuthNonce(record)
-// 	return nonce, nonce.Valid()
-// }
-
-// func (c *client) SetAuthNonceActive(ctx context.Context, nonceID string, active bool) error {
-// 	err := c.db.AuthNonce.UpdateOneID(nonceID).SetActive(active).Exec(ctx)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func toSession(record *db.Session) models.Session {
-// 	return models.Session{
-// 		ID:       record.ID,
-// 		UserID:   record.UserID,
-// 		PublicID: record.PublicID,
-// 		Meta:     record.Metadata,
-
-// 		CreatedAt: record.CreatedAt,
-// 		UpdatedAt: record.UpdatedAt,
-// 		ExpiresAt: record.ExpiresAt,
-// 	}
-// }
+func (c *client) SetAuthNonceActive(ctx context.Context, nonceID string, active bool) error {
+	stmt := t.AuthNonce.
+		UPDATE().
+		SET(t.AuthNonce.Active.SET(s.Bool(active))).
+		WHERE(t.AuthNonce.ID.EQ(s.String(nonceID)))
+	_, err := c.exec(ctx, stmt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // func (c *client) CreateSession(ctx context.Context, publicID, userID string, expiresAt time.Time, meta map[string]string) (models.Session, error) {
 // 	user, err := c.GetOrCreateUserByID(ctx, userID)

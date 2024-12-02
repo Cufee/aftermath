@@ -1,220 +1,182 @@
 package database
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"time"
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"time"
 
-// 	"github.com/cufee/aftermath/internal/database/ent/db"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/user"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/userconnection"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/usercontent"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
-// 	"github.com/cufee/aftermath/internal/database/ent/db/usersubscription"
-// 	"github.com/cufee/aftermath/internal/database/models"
-// 	"github.com/cufee/aftermath/internal/permissions"
-// )
+	"github.com/cufee/aftermath/internal/database/gen/model"
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/permissions"
+	s "github.com/go-jet/jet/v2/sqlite"
+)
 
-// func toUser(record *db.User, connections []*db.UserConnection, subscriptions []*db.UserSubscription, content []*db.UserContent, restrictions []*db.UserRestriction) models.User {
-// 	user := models.User{
-// 		ID:          record.ID,
-// 		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
-// 	}
-// 	for _, c := range connections {
-// 		user.Connections = append(user.Connections, toUserConnection(c))
-// 	}
-// 	for _, s := range subscriptions {
-// 		user.Subscriptions = append(user.Subscriptions, toUserSubscription(s))
-// 	}
-// 	for _, c := range content {
-// 		user.Uploads = append(user.Uploads, toUserContent(c))
-// 	}
-// 	for _, r := range restrictions {
-// 		user.Restrictions = append(user.Restrictions, toUserRestriction(r))
-// 	}
-// 	return user
-// }
+type userOpts struct {
+	get struct {
+		content       bool
+		connections   bool
+		subscriptions bool
+	}
+	insert struct {
+		username    *string
+		permissions *permissions.Permissions
+	}
+}
 
-// func toUserRestriction(record *db.UserRestriction) models.UserRestriction {
-// 	return models.UserRestriction{
-// 		ID:     record.ID,
-// 		Type:   record.Type,
-// 		UserID: record.UserID,
+type UserQueryOptions []UserQueryOption
 
-// 		CreatedAt: record.CreatedAt,
-// 		UpdatedAt: record.UpdatedAt,
-// 		ExpiresAt: record.ExpiresAt,
+func (o UserQueryOptions) ToOptions() userOpts {
+	var opts userOpts
+	for _, apply := range o {
+		apply(&opts)
+	}
+	return opts
+}
 
-// 		ModeratorComment: record.ModeratorComment,
-// 		PublicReason:     record.PublicReason,
-// 		Restriction:      permissions.Parse(record.Restriction, permissions.Blank),
-// 		Events:           record.Events,
-// 	}
-// }
+type UserQueryOption func(*userOpts)
 
-// func toUserConnection(record *db.UserConnection) models.UserConnection {
-// 	c := models.UserConnection{
-// 		ID:          record.ID,
-// 		Type:        record.Type,
-// 		UserID:      record.UserID,
-// 		ReferenceID: record.ReferenceID,
-// 		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
-// 		Metadata:    record.Metadata,
-// 	}
-// 	if c.Metadata == nil {
-// 		c.Metadata = make(map[string]any)
-// 	}
-// 	return c
-// }
+func WithConnections() UserQueryOption {
+	return func(ugo *userOpts) {
+		ugo.get.connections = true
+	}
+}
+func WithSubscriptions() UserQueryOption {
+	return func(ugo *userOpts) {
+		ugo.get.subscriptions = true
+	}
+}
+func WithContent() UserQueryOption {
+	return func(ugo *userOpts) {
+		ugo.get.content = true
+	}
+}
 
-// func toUserSubscription(record *db.UserSubscription) models.UserSubscription {
-// 	return models.UserSubscription{
-// 		ID:          record.ID,
-// 		Type:        record.Type,
-// 		UserID:      record.UserID,
-// 		ReferenceID: record.ReferenceID,
-// 		ExpiresAt:   record.ExpiresAt,
-// 		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
-// 	}
-// }
+func AddPermissions(perms permissions.Permissions) UserQueryOption {
+	return func(ugo *userOpts) {
+		ugo.insert.permissions = &perms
+	}
+}
+func AddUsername(name string) UserQueryOption {
+	return func(ugo *userOpts) {
+		ugo.insert.username = &name
+	}
+}
 
-// func toUserContent(record *db.UserContent) models.UserContent {
-// 	c := models.UserContent{
-// 		ID:          record.ID,
-// 		Type:        record.Type,
-// 		UserID:      record.UserID,
-// 		ReferenceID: record.ReferenceID,
+/*
+Gets or creates a user with specified ID
+  - assumes the ID is valid
+*/
+func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...UserQueryOption) (models.User, error) {
+	usr, err := c.GetUserByID(ctx, id, opts...)
+	if err == nil {
+		return usr, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return models.User{}, err
+	}
 
-// 		Value: record.Value,
-// 		Meta:  record.Metadata,
+	options := UserQueryOptions(opts).ToOptions()
+	user := m.User{
+		ID:          id,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Permissions: permissions.User.String(),
+	}
+	if options.insert.permissions != nil {
+		user.Permissions = permissions.User.Add(*options.insert.permissions).String()
+	}
+	if options.insert.username != nil {
+		user.Username = *options.insert.username
+	}
 
-// 		CreatedAt: record.CreatedAt,
-// 		UpdatedAt: record.UpdatedAt,
-// 	}
-// 	if c.Meta == nil {
-// 		c.Meta = make(map[string]any)
-// 	}
-// 	return c
-// }
+	stmt := t.User.
+		INSERT(t.User.AllColumns).
+		MODEL(user).
+		RETURNING(t.User.AllColumns)
 
-// type userGetOpts struct {
-// 	content       bool
-// 	connections   bool
-// 	subscriptions bool
-// }
+	err = c.query(ctx, stmt, &user)
+	if err != nil {
+		return models.User{}, err
+	}
 
-// type UserGetOptions []UserGetOption
+	return models.ToUser(&user, nil, nil, nil, nil), nil
+}
 
-// func (o UserGetOptions) ToOptions() userGetOpts {
-// 	var opts userGetOpts
-// 	for _, apply := range o {
-// 		apply(&opts)
-// 	}
-// 	return opts
-// }
+/*
+Gets a user with specified ID
+  - assumes the ID is valid
+*/
+func (c *client) GetUserByID(ctx context.Context, id string, opts ...UserQueryOption) (models.User, error) {
+	options := UserQueryOptions(opts).ToOptions()
 
-// type UserGetOption func(*userGetOpts)
+	var from s.ReadableTable = t.User.LEFT_JOIN(t.UserRestriction, t.UserRestriction.UserID.EQ(t.User.ID))
+	projections := []s.Projection{t.UserRestriction.AllColumns}
 
-// func WithConnections() UserGetOption {
-// 	return func(ugo *userGetOpts) {
-// 		ugo.connections = true
-// 	}
-// }
-// func WithSubscriptions() UserGetOption {
-// 	return func(ugo *userGetOpts) {
-// 		ugo.subscriptions = true
-// 	}
-// }
-// func WithContent() UserGetOption {
-// 	return func(ugo *userGetOpts) {
-// 		ugo.content = true
-// 	}
-// }
+	if options.get.subscriptions {
+		from = from.LEFT_JOIN(t.UserSubscription, t.UserSubscription.UserID.EQ(t.User.ID))
+		projections = append(projections, t.UserSubscription.AllColumns)
+	}
+	if options.get.connections {
+		from = from.LEFT_JOIN(t.UserConnection, t.UserConnection.UserID.EQ(t.User.ID))
+		projections = append(projections, t.UserConnection.AllColumns)
+	}
+	if options.get.content {
+		from = from.LEFT_JOIN(t.UserContent, t.UserContent.UserID.EQ(t.User.ID))
+		projections = append(projections, t.UserContent.AllColumns)
+	}
 
-// /*
-// Gets or creates a user with specified ID
-//   - assumes the ID is valid
-// */
-// func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error) {
-// 	user, err := c.GetUserByID(ctx, id, opts...)
-// 	if err != nil && !IsNotFound(err) {
-// 		return models.User{}, err
-// 	}
+	stmt := s.
+		SELECT(t.User.AllColumns, projections...).
+		FROM(from).
+		WHERE(t.User.ID.EQ(s.String(id)))
 
-// 	if IsNotFound(err) {
-// 		record, err := c.db.User.Create().SetID(id).SetPermissions(permissions.User.String()).Save(ctx)
-// 		if err != nil {
-// 			return models.User{}, err
-// 		}
-// 		user = toUser(record, nil, nil, nil, nil)
-// 	}
+	var record struct {
+		m.User
+		Restrictions []m.UserRestriction
 
-// 	return user, nil
-// }
+		Content       []m.UserContent
+		Connections   []m.UserConnection
+		Subscriptions []m.UserSubscription
+	}
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.User{}, err
+	}
 
-// /*
-// Gets a user with specified ID
-//   - assumes the ID is valid
-// */
-// func (c *client) GetUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error) {
-// 	var options userGetOpts
-// 	for _, apply := range opts {
-// 		apply(&options)
-// 	}
+	return models.ToUser(&record.User, record.Connections, record.Subscriptions, record.Content, record.Restrictions), nil
+}
 
-// 	query := c.db.User.Query().Where(user.ID(id)).WithRestrictions(func(urq *db.UserRestrictionQuery) { urq.Where(userrestriction.ExpiresAtGT(time.Now())) })
-// 	if options.subscriptions {
-// 		query = query.WithSubscriptions(func(usq *db.UserSubscriptionQuery) { usq.Where(usersubscription.ExpiresAtGT(time.Now())) })
-// 	}
-// 	if options.connections {
-// 		query = query.WithConnections()
-// 	}
-// 	if options.content {
-// 		query.WithContent()
-// 	}
+func (c *client) GetUserConnection(ctx context.Context, id string) (models.UserConnection, error) {
+	stmt := t.UserConnection.
+		SELECT(t.UserConnection.AllColumns).
+		WHERE(t.UserConnection.ID.EQ(s.String(id)))
 
-// 	record, err := query.Only(ctx)
-// 	if err != nil {
-// 		return models.User{}, err
-// 	}
+	var record model.UserConnection
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.UserConnection{}, err
+	}
 
-// 	return toUser(record, record.Edges.Connections, record.Edges.Subscriptions, record.Edges.Content, record.Edges.Restrictions), nil
-// }
+	return models.ToUserConnection(&record), nil
+}
 
-// func (c *client) UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error) {
-// 	record, err := c.db.User.UpdateOneID(userID).SetPermissions(perms.String()).Save(ctx)
-// 	if err != nil && !IsNotFound(err) {
-// 		return models.User{}, err
-// 	}
+func (c *client) CreateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+	model := models.FromUserConnection(&connection)
+	stmt := t.UserConnection.
+		INSERT(t.UserConnection.AllColumns).
+		MODEL(model).
+		RETURNING(t.UserConnection.AllColumns)
 
-// 	if IsNotFound(err) {
-// 		record, err = c.db.User.Create().SetID(userID).SetPermissions(perms.String()).Save(ctx)
-// 		if err != nil {
-// 			return models.User{}, err
-// 		}
-// 	}
+	err := c.query(ctx, stmt, &model)
+	if err != nil {
+		return models.UserConnection{}, err
+	}
 
-// 	return toUser(record, nil, nil, nil, nil), nil
-// }
-
-// func (c *client) GetUserConnection(ctx context.Context, id string) (models.UserConnection, error) {
-// 	record, err := c.db.UserConnection.Get(ctx, id)
-// 	return toUserConnection(record), err
-// }
-
-// func (c *client) CreateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
-// 	record, err := c.db.UserConnection.Create().
-// 		SetUser(c.db.User.GetX(ctx, connection.UserID)).
-// 		SetPermissions(connection.Permissions.String()).
-// 		SetReferenceID(connection.ReferenceID).
-// 		SetMetadata(connection.Metadata).
-// 		SetType(connection.Type).
-// 		Save(ctx)
-// 	if err != nil {
-// 		return models.UserConnection{}, err
-// 	}
-// 	return toUserConnection(record), err
-// }
+	return models.ToUserConnection(&model), err
+}
 
 // func (c *client) UpdateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 // 	record, err := c.db.UserConnection.UpdateOneID(connection.ID).

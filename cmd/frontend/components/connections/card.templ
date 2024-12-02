@@ -32,7 +32,7 @@ templ ConnectionCard(connection ConnectionWithAccount, defaultConnID string) {
 						</span>
 					}
 				</div>
-				if connection.Metadata["verified"] != true {
+				if !connection.Verified {
 					<form action={ templ.URL("/api/p/auth/wargaming/login/" + connection.Account.Realm) }>
 						<button type="submit" class="verify-button btn btn-sm btn-info flex flex-row flex-nowrap items-center justify-between gap-1 font-normal">
 							<span>Verify</span>

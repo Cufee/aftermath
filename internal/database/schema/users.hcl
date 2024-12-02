@@ -55,6 +55,16 @@ table "user_connection" {
     null = false
     type = text
   }
+  column "verified" {
+    null = false
+    type = bool
+    default = false
+  }
+  column "selected" {
+    null = false
+    type = bool
+    default = false
+  }
   column "reference_id" {
     null = false
     type = text

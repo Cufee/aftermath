@@ -3,6 +3,8 @@ package models
 import (
 	"time"
 
+	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/json"
 	"github.com/pkg/errors"
 )
 
@@ -31,4 +33,21 @@ func (n AuthNonce) Valid() error {
 		return nil
 	}
 	return ErrInvalidNonce
+}
+
+func ToAuthNonce(record *model.AuthNonce) AuthNonce {
+	nonce := AuthNonce{
+		ID:         record.ID,
+		Active:     record.Active,
+		PublicID:   record.PublicID,
+		Identifier: record.Identifier,
+
+		CreatedAt: record.CreatedAt,
+		UpdatedAt: record.UpdatedAt,
+		ExpiresAt: record.ExpiresAt,
+
+		Meta: make(map[string]string, 0),
+	}
+	json.Unmarshal([]byte(record.Metadata), &nonce.Meta)
+	return nonce
 }
