@@ -6,7 +6,10 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/stats/frame"
+	"github.com/pkg/errors"
 )
+
+var ErrServiceUnavailable = errors.New("blitz stars unavailable")
 
 type Client interface {
 	CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error)

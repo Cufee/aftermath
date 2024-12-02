@@ -12,6 +12,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
@@ -125,6 +126,12 @@ func init() {
 				switch interaction.EventID {
 				case "stats":
 					img, mt, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), ioptions.AccountID, ioptions.PeriodStart, opts...)
+					if errors.Is(err, blitzstars.ErrServiceUnavailable) {
+						return ctx.Reply().
+							Hint(ctx.InteractionID()).
+							Component(discordgo.ActionsRow{Components: []discordgo.MessageComponent{common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question"))}}).
+							Send("blitz_stars_error_service_down")
+					}
 					if err != nil {
 						return ctx.Err(err)
 					}

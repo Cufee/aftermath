@@ -11,6 +11,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
@@ -86,6 +87,12 @@ func init() {
 					return ctx.Error("invalid subcommand in /my - " + subcommand)
 				}
 				if err != nil {
+					if errors.Is(err, blitzstars.ErrServiceUnavailable) {
+						return ctx.Reply().
+							Hint(ctx.InteractionID()).
+							Component(discordgo.ActionsRow{Components: []discordgo.MessageComponent{common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question"))}}).
+							Send("blitz_stars_error_service_down")
+					}
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
 						return ctx.Reply().Send("session_error_account_was_not_tracked")
 					}

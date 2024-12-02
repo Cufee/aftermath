@@ -36,7 +36,7 @@ func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed
 }
 
 func NewBrandedBackground(width, height, logoSize, padding int, colors []color.Color, hashSeed int) image.Image {
-	// 2/3 of the image should be left for logos
+	// 1/3 of the image should be left for logos
 	rows := Max((height-padding*2)/3/logoSize, 2)
 	cols := Max((width-padding*2)/3/logoSize, 2)
 	// the rest is gaps
