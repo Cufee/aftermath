@@ -1,0 +1,3 @@
+sqlite:
+  pkgname: "gen"
+  output: "internal/database/gen/models"

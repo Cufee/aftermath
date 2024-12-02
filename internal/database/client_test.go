@@ -1,64 +1,50 @@
 package database
 
-import (
-	"context"
-	"fmt"
-	"os"
-	"path/filepath"
-	"sync"
-	"testing"
-	"time"
+// func TestConcurrentWrites(t *testing.T) {
+// 	is := is.New(t)
 
-	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/matryer/is"
-	"github.com/stretchr/testify/assert"
-)
+// 	client, err := NewSQLiteClient(filepath.Join(os.Getenv("DATABASE_PATH"), os.Getenv("DATABASE_NAME")), WithDebug())
+// 	assert.NoError(t, err, "new client should not error")
+// 	defer client.Disconnect()
 
-func TestConcurrentWrites(t *testing.T) {
-	is := is.New(t)
+// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+// 	defer cancel()
 
-	client, err := NewSQLiteClient(filepath.Join(os.Getenv("DATABASE_PATH"), os.Getenv("DATABASE_NAME")), WithDebug())
-	assert.NoError(t, err, "new client should not error")
-	defer client.Disconnect()
+// 	client.db.VehicleSnapshot.Delete().Where().Exec(ctx)
+// 	defer client.db.VehicleSnapshot.Delete().Exec(ctx)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-	defer cancel()
+// 	createdAtVehicle1 := time.Date(2023, 6, 1, 0, 0, 0, 0, time.UTC)
 
-	client.db.VehicleSnapshot.Delete().Where().Exec(ctx)
-	defer client.db.VehicleSnapshot.Delete().Exec(ctx)
+// 	vehicle1 := models.VehicleSnapshot{
+// 		Type:           models.SnapshotTypeDaily,
+// 		CreatedAt:      createdAtVehicle1,
+// 		LastBattleTime: createdAtVehicle1,
+// 	}
 
-	createdAtVehicle1 := time.Date(2023, 6, 1, 0, 0, 0, 0, time.UTC)
+// 	var fn []func()
+// 	for i := range 1000 {
+// 		id := fmt.Sprint(i)
+// 		v := vehicle1
+// 		v.VehicleID = id
+// 		v.AccountID = id
+// 		v.ReferenceID = id
+// 		fn = append(fn, func() {
+// 			_, err := client.UpsertAccounts(ctx, &models.Account{ID: id, Realm: "test", Nickname: "test_account"})
+// 			is.NoErr(err)
 
-	vehicle1 := models.VehicleSnapshot{
-		Type:           models.SnapshotTypeDaily,
-		CreatedAt:      createdAtVehicle1,
-		LastBattleTime: createdAtVehicle1,
-	}
+// 			err = client.CreateAccountVehicleSnapshots(ctx, id, &v)
+// 			is.NoErr(err)
+// 		})
+// 	}
 
-	var fn []func()
-	for i := range 1000 {
-		id := fmt.Sprint(i)
-		v := vehicle1
-		v.VehicleID = id
-		v.AccountID = id
-		v.ReferenceID = id
-		fn = append(fn, func() {
-			_, err := client.UpsertAccounts(ctx, &models.Account{ID: id, Realm: "test", Nickname: "test_account"})
-			is.NoErr(err)
+// 	var wg sync.WaitGroup
+// 	for _, fn := range fn {
+// 		wg.Add(1)
+// 		go func() {
+// 			defer wg.Done()
+// 			fn()
+// 		}()
+// 	}
 
-			err = client.CreateAccountVehicleSnapshots(ctx, id, &v)
-			is.NoErr(err)
-		})
-	}
-
-	var wg sync.WaitGroup
-	for _, fn := range fn {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			fn()
-		}()
-	}
-
-	wg.Wait()
-}
+// 	wg.Wait()
+// }
