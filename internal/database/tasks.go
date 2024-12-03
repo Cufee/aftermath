@@ -125,41 +125,52 @@ func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task
 	})
 }
 
-// /*
-// AbandonTasks retrieves tasks by ids and marks them as scheduled, adding a log noting it was abandoned
-// */
-// func (c *client) AbandonTasks(ctx context.Context, ids ...string) error {
-// 	if len(ids) < 1 {
-// 		return nil
-// 	}
+/*
+AbandonTasks retrieves tasks by ids and marks them as scheduled, adding a log entry
+*/
+func (c *client) AbandonTasks(ctx context.Context, ids ...string) error {
+	if len(ids) < 1 {
+		return nil
+	}
 
-// 	var tasks []models.Task
-// 	err := c.withTx(ctx, func(tx *transaction) error {
-// 		records, err := tx.CronTask.Query().Where(crontask.IDIn(ids...)).All(ctx)
-// 		if err != nil {
-// 			return err
-// 		}
+	return c.withTx(ctx, func(tx *transaction) error {
+		stmt := t.CronTask.SELECT(t.CronTask.AllColumns).WHERE(t.CronTask.ID.IN(stringsToExp(ids)...))
 
-// 		now := time.Now()
-// 		for _, r := range records {
-// 			t := toCronTask(r)
-// 			t.OnUpdated()
+		var records []m.CronTask
+		err := tx.query(ctx, stmt, &records)
+		if err != nil {
+			return err
+		}
 
-// 			t.Status = models.TaskStatusScheduled
-// 			t.LogAttempt(models.TaskLog{
-// 				Comment:   "task was abandoned",
-// 				Timestamp: now,
-// 			})
-// 			tasks = append(tasks, t)
-// 		}
-// 		return nil
-// 	})
-// 	if err != nil {
-// 		return err
-// 	}
+		now := time.Now()
+		for _, r := range records {
+			task := models.ToCronTask(&r)
+			task.OnUpdated()
 
-// 	return c.UpdateTasks(ctx, tasks...)
-// }
+			task.Status = models.TaskStatusScheduled
+			task.LogAttempt(models.TaskLog{
+				Comment:   "task was abandoned",
+				Timestamp: now,
+			})
+
+			stmt := t.CronTask.
+				UPDATE(
+					t.CronTask.Logs,
+					t.CronTask.Status,
+					t.CronTask.LastRun,
+					t.CronTask.UpdatedAt,
+				).
+				MODEL(task.Model()).
+				WHERE(t.CronTask.ID.EQ(s.String(task.ID)))
+
+			_, err := tx.exec(ctx, stmt)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
 
 func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
 	if len(tasks) < 1 {
@@ -200,35 +211,39 @@ func (c *client) GetTasks(ctx context.Context, ids ...string) ([]models.Task, er
 	return tasks, nil
 }
 
-// /*
-// UpdateTasks will update all tasks passed in
-//   - the following fields will be replaced: targets, status, leastRun, scheduleAfterm logs, data
-//   - this func will block until all other calls to task update funcs are done
-// */
-// func (c *client) UpdateTasks(ctx context.Context, tasks ...models.Task) error {
-// 	if len(tasks) < 1 {
-// 		return nil
-// 	}
+/*
+UpdateTasks will update all tasks passed in
+*/
+func (c *client) UpdateTasks(ctx context.Context, tasks ...models.Task) error {
+	if len(tasks) < 1 {
+		return nil
+	}
 
-// 	return c.withTx(ctx, func(tx *db.Tx) error {
-// 		for _, t := range tasks {
-// 			t.OnUpdated()
+	return c.withTx(ctx, func(tx *transaction) error {
+		for _, task := range tasks {
+			task.OnUpdated()
+			stmt := t.CronTask.
+				UPDATE(
+					t.CronTask.UpdatedAt,
+					t.CronTask.Targets,
+					t.CronTask.Logs,
+					t.CronTask.Status,
+					t.CronTask.ScheduledAfter,
+					t.CronTask.TriesLeft,
+					t.CronTask.LastRun,
+					t.CronTask.Data,
+				).
+				MODEL(task.Model()).
+				WHERE(t.CronTask.ID.EQ(s.String(task.ID)))
 
-// 			err := tx.CronTask.UpdateOneID(t.ID).
-// 				SetData(t.Data).
-// 				SetLogs(t.Logs).
-// 				SetStatus(t.Status).
-// 				SetTargets(t.Targets).
-// 				SetLastRun(t.LastRun).
-// 				SetScheduledAfter(t.ScheduledAfter).
-// 				Exec(ctx)
-// 			if err != nil {
-// 				return err
-// 			}
-// 		}
-// 		return nil
-// 	})
-// }
+			_, err := tx.exec(ctx, stmt)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
 
 /*
 DeleteTasks will delete all tasks matching by ids
