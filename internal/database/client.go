@@ -130,7 +130,7 @@ type Client interface {
 	AuthClient
 	UsersClient
 
-	// GlossaryClient
+	GlossaryClient
 	AccountsClient
 	// SnapshotsClient
 
