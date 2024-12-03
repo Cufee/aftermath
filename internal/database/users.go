@@ -6,11 +6,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/cufee/aftermath/internal/database/gen/model"
 	m "github.com/cufee/aftermath/internal/database/gen/model"
 	t "github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
+	"github.com/cufee/aftermath/internal/utils"
 	s "github.com/go-jet/jet/v2/sqlite"
 )
 
@@ -149,18 +149,104 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...UserQueryOp
 	return models.ToUser(&record.User, record.Connections, record.Subscriptions, record.Content, record.Restrictions), nil
 }
 
+type connectionOpts struct {
+	get struct {
+		kind     *models.ConnectionType
+		verified *bool
+		selected *bool
+	}
+	// insert struct {
+	// 	verified *bool
+	// 	selected *bool
+	// }
+}
+
+type connectionQueryOptions []ConnectionQueryOption
+
+type ConnectionQueryOption func(*connectionOpts)
+
+func (o connectionQueryOptions) ToOptions() connectionOpts {
+	var opts connectionOpts
+	for _, apply := range o {
+		apply(&opts)
+	}
+	return opts
+}
+
+// func SetVerified(verified bool) ConnectionQueryOption {
+// 	return func(ugo *connectionOpts) {
+// 		ugo.insert.verified = utils.Pointer(verified)
+// 	}
+// }
+
+// func SetSelected(selected bool) ConnectionQueryOption {
+// 	return func(ugo *connectionOpts) {
+// 		ugo.insert.selected = utils.Pointer(selected)
+// 	}
+// }
+
+func ConnectionType(kind models.ConnectionType) ConnectionQueryOption {
+	return func(ugo *connectionOpts) {
+		ugo.get.kind = &kind
+	}
+}
+
+func ConnectionVerified(verified bool) ConnectionQueryOption {
+	return func(ugo *connectionOpts) {
+		ugo.get.verified = utils.Pointer(verified)
+	}
+}
+
+func ConnectionSelected(selected bool) ConnectionQueryOption {
+	return func(ugo *connectionOpts) {
+		ugo.get.selected = utils.Pointer(selected)
+	}
+}
+
 func (c *client) GetUserConnection(ctx context.Context, id string) (models.UserConnection, error) {
 	stmt := t.UserConnection.
 		SELECT(t.UserConnection.AllColumns).
 		WHERE(t.UserConnection.ID.EQ(s.String(id)))
 
-	var record model.UserConnection
+	var record m.UserConnection
 	err := c.query(ctx, stmt, &record)
 	if err != nil {
 		return models.UserConnection{}, err
 	}
 
 	return models.ToUserConnection(&record), nil
+}
+
+func (c *client) FindUserConnections(ctx context.Context, userID string, opts ...ConnectionQueryOption) ([]models.UserConnection, error) {
+	options := connectionQueryOptions(opts).ToOptions()
+
+	where := []s.BoolExpression{t.UserConnection.UserID.EQ(s.String(userID))}
+	if options.get.kind != nil {
+		where = append(where, t.UserConnection.Type.EQ(s.String(string(*options.get.kind))))
+	}
+	if options.get.verified != nil {
+		where = append(where, t.UserConnection.Verified.EQ(s.Bool(*options.get.verified)))
+	}
+	if options.get.selected != nil {
+		where = append(where, t.UserConnection.Selected.EQ(s.Bool(*options.get.selected)))
+	}
+
+	stmt := t.UserConnection.
+		SELECT(t.UserConnection.AllColumns).
+		WHERE(s.AND(where...))
+
+	var records []m.UserConnection
+	err := c.query(ctx, stmt, &records)
+	if err != nil {
+		return nil, err
+	}
+
+	var connections []models.UserConnection
+	for _, r := range records {
+		connections = append(connections, models.ToUserConnection(&r))
+	}
+
+	return connections, nil
 }
 
 func (c *client) CreateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
@@ -178,126 +264,154 @@ func (c *client) CreateUserConnection(ctx context.Context, connection models.Use
 	return models.ToUserConnection(&model), err
 }
 
-// func (c *client) UpdateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
-// 	record, err := c.db.UserConnection.UpdateOneID(connection.ID).
-// 		SetMetadata(connection.Metadata).
-// 		SetPermissions(connection.Permissions.String()).
-// 		SetReferenceID(connection.ReferenceID).
-// 		SetType(connection.Type).
-// 		Save(ctx)
-// 	if err != nil {
-// 		return models.UserConnection{}, err
-// 	}
-// 	return toUserConnection(record), err
-// }
+func (c *client) UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error) {
+	stmt := t.UserConnection.
+		UPDATE(
+			t.UserConnection.UpdatedAt,
+			t.UserConnection.Type,
+			t.UserConnection.Verified,
+			t.UserConnection.Selected,
+			t.UserConnection.ReferenceID,
+			t.UserConnection.Permissions,
+			t.UserConnection.Metadata,
+		).
+		MODEL(models.FromUserConnection(&connection)).
+		WHERE(t.UserConnection.ID.EQ(s.String(id))).
+		RETURNING(t.UserConnection.AllColumns)
 
-// func (c *client) UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
-// 	if connection.ID == "" {
-// 		return c.CreateUserConnection(ctx, connection)
-// 	}
+	var record m.UserConnection
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.UserConnection{}, err
+	}
 
-// 	connection, err := c.UpdateUserConnection(ctx, connection)
-// 	if err != nil && !IsNotFound(err) {
-// 		return models.UserConnection{}, err
-// 	}
-// 	if IsNotFound(err) {
-// 		return c.CreateUserConnection(ctx, connection)
-// 	}
+	return models.ToUserConnection(&record), nil
 
-// 	return connection, nil
-// }
+}
 
-// func (c *client) DeleteUserConnection(ctx context.Context, userID, connectionID string) error {
-// 	_, err := c.db.UserConnection.Delete().Where(userconnection.ID(connectionID), userconnection.UserID(userID)).Exec(ctx)
-// 	return err
-// }
+func (c *client) UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+	if connection.ID == "" {
+		return c.CreateUserConnection(ctx, connection)
+	}
 
-// func (c *client) GetUserContent(ctx context.Context, id string) (models.UserContent, error) {
-// 	record, err := c.db.UserContent.Get(ctx, id)
-// 	if err != nil {
-// 		return models.UserContent{}, err
-// 	}
+	connection, err := c.UpdateUserConnection(ctx, connection.ID, connection)
+	if errors.Is(err, sql.ErrNoRows) {
+		return c.CreateUserConnection(ctx, connection)
+	}
+	return connection, err
+}
 
-// 	return toUserContent(record), nil
-// }
+func (c *client) DeleteUserConnection(ctx context.Context, userID, connectionID string) error {
+	stmt := t.UserConnection.DELETE().WHERE(s.AND(t.UserConnection.ID.EQ(s.String(connectionID)), t.UserConnection.UserID.EQ(s.String(userID))))
+	_, err := c.exec(ctx, stmt)
+	return err
+}
 
-// func (c *client) GetUserContentFromRef(ctx context.Context, referenceID string, kind models.UserContentType) (models.UserContent, error) {
-// 	record, err := c.db.UserContent.Query().Where(usercontent.ReferenceID(referenceID), usercontent.TypeEQ(kind)).First(ctx)
-// 	if err != nil {
-// 		return models.UserContent{}, err
-// 	}
+func (c *client) GetUserContent(ctx context.Context, id string) (models.UserContent, error) {
+	stmt := t.UserContent.
+		SELECT(t.UserContent.AllColumns).
+		WHERE(t.UserContent.ID.EQ(s.String(id)))
 
-// 	return toUserContent(record), nil
-// }
+	var record m.UserContent
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.UserContent{}, err
+	}
 
-// func (c *client) FindUserContentFromRefs(ctx context.Context, kind models.UserContentType, referenceIDs ...string) ([]models.UserContent, error) {
-// 	if len(referenceIDs) < 1 {
-// 		return nil, errors.New("at least one reference id is required")
-// 	}
+	return models.ToUserContent(&record), nil
 
-// 	records, err := c.db.UserContent.Query().Where(usercontent.ReferenceIDIn(referenceIDs...), usercontent.TypeEQ(kind)).All(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+}
 
-// 	var content []models.UserContent
-// 	for _, r := range records {
-// 		content = append(content, toUserContent(r))
-// 	}
+func (c *client) GetUserContentFromRef(ctx context.Context, referenceID string, kind models.UserContentType) (models.UserContent, error) {
+	stmt := t.UserContent.
+		SELECT(t.UserContent.AllColumns).
+		WHERE(s.AND(
+			t.UserContent.Type.EQ(s.String(string(kind))),
+			t.UserContent.ReferenceID.EQ(s.String(referenceID)),
+		))
 
-// 	return content, nil
-// }
+	var record m.UserContent
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.UserContent{}, err
+	}
 
-// func (c *client) CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
-// 	user, err := c.db.User.Get(ctx, content.UserID)
-// 	if err != nil {
-// 		return models.UserContent{}, err
-// 	}
+	return models.ToUserContent(&record), nil
+}
 
-// 	record, err := c.db.UserContent.Create().
-// 		SetMetadata(content.Meta).
-// 		SetReferenceID(content.ReferenceID).
-// 		SetType(content.Type).
-// 		SetUser(user).
-// 		SetValue(content.Value).
-// 		Save(ctx)
-// 	if err != nil {
-// 		return models.UserContent{}, err
-// 	}
+func (c *client) FindUserContentFromRefs(ctx context.Context, kind models.UserContentType, referenceIDs ...string) ([]models.UserContent, error) {
+	if len(referenceIDs) < 1 {
+		return nil, errors.New("at least one reference id is required")
+	}
 
-// 	return toUserContent(record), nil
-// }
+	stmt := t.UserContent.
+		SELECT(t.UserContent.AllColumns).
+		WHERE(s.AND(
+			t.UserContent.Type.EQ(s.String(string(kind))),
+			t.UserContent.ReferenceID.IN(toStringSlice(referenceIDs...)...),
+		))
 
-// func (c *client) UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
-// 	record, err := c.db.UserContent.UpdateOneID(content.ID).
-// 		SetMetadata(content.Meta).
-// 		SetReferenceID(content.ReferenceID).
-// 		SetType(content.Type).
-// 		SetValue(content.Value).
-// 		Save(ctx)
-// 	if err != nil {
-// 		return models.UserContent{}, err
-// 	}
+	var record []m.UserContent
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return toUserContent(record), nil
-// }
+	var content []models.UserContent
+	for _, c := range record {
+		content = append(content, models.ToUserContent(&c))
+	}
 
-// func (c *client) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
-// 	id, err := c.db.UserContent.Query().Where(usercontent.UserID(content.UserID), usercontent.TypeEQ(content.Type)).FirstID(ctx)
-// 	if IsNotFound(err) {
-// 		return c.CreateUserContent(ctx, content)
-// 	}
+	return content, nil
+}
 
-// 	content.ID = id
-// 	return c.UpdateUserContent(ctx, content)
+func (c *client) CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	model := models.FromUserContent(&content)
+	stmt := t.UserContent.
+		INSERT(t.UserContent.AllColumns).
+		MODEL(model).
+		RETURNING()
 
-// }
+	var record m.UserContent
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.UserContent{}, err
+	}
 
-// func (c *client) DeleteUserContent(ctx context.Context, id string) error {
-// 	err := c.db.UserContent.DeleteOneID(id).Exec(ctx)
-// 	if err != nil {
-// 		return err
-// 	}
+	return models.ToUserContent(&record), nil
 
-// 	return nil
-// }
+}
+
+func (c *client) UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	stmt := t.UserContent.
+		UPDATE(
+			t.UserContent.UpdatedAt,
+			t.UserContent.Type,
+			t.UserContent.UserID,
+			t.UserContent.ReferenceID,
+			t.UserContent.Value,
+			t.UserContent.Metadata,
+		).
+		MODEL(models.FromUserContent(&content)).
+		RETURNING()
+
+	var record m.UserContent
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.UserContent{}, err
+	}
+
+	return models.ToUserContent(&record), nil
+}
+
+func (c *client) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	if content.ID != "" {
+		return c.UpdateUserContent(ctx, content)
+	}
+	return c.CreateUserContent(ctx, content)
+}
+
+func (c *client) DeleteUserContent(ctx context.Context, id string) error {
+	_, err := c.exec(ctx, t.UserContent.DELETE().WHERE(t.UserContent.ID.EQ(s.String(id))))
+	return err
+}

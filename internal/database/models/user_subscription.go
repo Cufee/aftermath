@@ -6,6 +6,8 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/gen/model"
 	"github.com/cufee/aftermath/internal/permissions"
+	"github.com/cufee/aftermath/internal/utils"
+	"github.com/lucsky/cuid"
 )
 
 type SubscriptionType string
@@ -78,7 +80,7 @@ type UserSubscription struct {
 
 func ToUserSubscription(record *model.UserSubscription) UserSubscription {
 	return UserSubscription{
-		ID:          record.ID,
+		ID:          utils.StringOr(record.ID, cuid.New()),
 		Type:        SubscriptionType(record.Type),
 		UserID:      record.UserID,
 		ReferenceID: record.ReferenceID,

@@ -5,6 +5,8 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/gen/model"
 	"github.com/cufee/aftermath/internal/json"
+	"github.com/cufee/aftermath/internal/utils"
+	"github.com/lucsky/cuid"
 	"github.com/pkg/errors"
 )
 
@@ -49,5 +51,22 @@ func ToSession(record *model.Session) Session {
 		Meta: make(map[string]string, 0),
 	}
 	json.Unmarshal([]byte(record.Metadata), &session.Meta)
+	return session
+}
+
+func FromSession(record *Session) model.Session {
+	session := model.Session{
+		ID:       utils.StringOr(record.ID, cuid.New()),
+		UserID:   record.UserID,
+		PublicID: record.PublicID,
+
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		ExpiresAt: record.ExpiresAt,
+	}
+	if record.Meta != nil {
+		data, _ := json.Marshal(record.Meta)
+		session.Metadata = string(data)
+	}
 	return session
 }

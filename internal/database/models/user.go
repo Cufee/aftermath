@@ -35,30 +35,22 @@ func (u User) HasPermission(values ...permissions.Permissions) bool {
 	return perms.Has(values...)
 }
 
-func (u User) Connection(kind ConnectionType, conditions map[string]any) (UserConnection, bool) {
-	valid, ok := u.FilterConnections(kind, conditions)
-	if !ok {
+func (u User) Connection(kind ConnectionType, verified, selected *bool) (UserConnection, bool) {
+	if len(u.Connections) < 1 {
 		return UserConnection{}, false
 	}
-	return valid[0], true
-}
 
-func (u User) FilterConnections(kind ConnectionType, conditions map[string]any) ([]UserConnection, bool) {
-	var valid []UserConnection
-
-outerLoop:
-	for _, connection := range u.Connections {
-		if connection.Type == kind {
-			for key, value := range conditions {
-				if connection.Metadata[key] != value {
-					continue outerLoop
-				}
-			}
-			valid = append(valid, connection)
+	for _, conn := range u.Connections {
+		if ok := verified != nil; ok && (conn.Verified != *verified) {
+			continue
 		}
+		if ok := selected != nil; ok && (conn.Selected != *selected) {
+			continue
+		}
+		return conn, true
 	}
 
-	return valid, len(valid) > 0
+	return UserConnection{}, false
 }
 
 func (u User) Subscription(kind SubscriptionType) (UserSubscription, bool) {

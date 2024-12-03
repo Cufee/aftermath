@@ -60,7 +60,7 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 			}
 		}
 	}
-	defaultConn, _ := user.Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
+	defaultConn, _ := user.Connection(models.ConnectionTypeWargaming, nil, true)
 
 	return layouts.Main, index(connections, defaultConn.ID, 3, widgets, constants.WidgetAccountLimit), nil
 }

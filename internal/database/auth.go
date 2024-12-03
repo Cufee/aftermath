@@ -9,6 +9,7 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/json"
 	s "github.com/go-jet/jet/v2/sqlite"
+	"github.com/lucsky/cuid"
 )
 
 func (c *client) CreateAuthNonce(ctx context.Context, publicID, identifier string, expiresAt time.Time, meta map[string]string) (models.AuthNonce, error) {
@@ -69,36 +70,61 @@ func (c *client) SetAuthNonceActive(ctx context.Context, nonceID string, active 
 	return nil
 }
 
-// func (c *client) CreateSession(ctx context.Context, publicID, userID string, expiresAt time.Time, meta map[string]string) (models.Session, error) {
-// 	user, err := c.GetOrCreateUserByID(ctx, userID)
-// 	if err != nil {
-// 		return models.Session{}, err
-// 	}
+func (c *client) CreateSession(ctx context.Context, publicID, userID string, expiresAt time.Time, meta map[string]string) (models.Session, error) {
+	model := m.Session{
+		ID:        cuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		ExpiresAt: expiresAt,
+		PublicID:  publicID,
+		UserID:    userID,
+	}
+	if meta != nil {
+		data, err := json.Marshal(meta)
+		if err != nil {
+			return models.Session{}, err
+		}
+		model.Metadata = string(data)
+	}
 
-// 	record, err := c.db.Session.Create().SetPublicID(publicID).SetUser(c.db.User.GetX(ctx, user.ID)).SetExpiresAt(expiresAt).SetMetadata(meta).Save(ctx)
-// 	if err != nil {
-// 		return models.Session{}, err
-// 	}
+	stmt := t.Session.
+		INSERT().
+		MODEL(model).
+		RETURNING()
 
-// 	nonce := toSession(record)
-// 	return nonce, nonce.Valid()
-// }
+	var record m.Session
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.Session{}, err
+	}
 
-// func (c *client) FindSession(ctx context.Context, publicID string) (models.Session, error) {
-// 	record, err := c.db.Session.Query().Where(session.PublicID(publicID), session.ExpiresAtGT(time.Now())).First(ctx)
-// 	if err != nil {
-// 		return models.Session{}, err
-// 	}
+	return models.ToSession(&record), nil
+}
 
-// 	session := toSession(record)
-// 	return session, session.Valid()
-// }
+func (c *client) FindSession(ctx context.Context, publicID string) (models.Session, error) {
+	stmt := t.Session.
+		SELECT(t.Session.AllColumns).
+		WHERE(t.Session.PublicID.EQ(s.String(publicID)))
 
-// func (c *client) SetSessionExpiresAt(ctx context.Context, sessionID string, expiresAt time.Time) error {
-// 	err := c.db.Session.UpdateOneID(sessionID).SetExpiresAt(expiresAt).Exec(ctx)
-// 	if err != nil {
-// 		return err
-// 	}
+	var record m.Session
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.Session{}, err
+	}
 
-// 	return nil
-// }
+	session := models.ToSession(&record)
+	return session, session.Valid()
+}
+
+func (c *client) SetSessionExpiresAt(ctx context.Context, sessionID string, expiresAt time.Time) error {
+	stmt := t.Session.
+		UPDATE(t.Session.ExpiresAt).
+		WHERE(t.Session.ID.EQ(s.String(sessionID))).
+		SET(t.Session.ExpiresAt.SET(s.DATETIME(expiresAt)))
+
+	_, err := c.exec(ctx, stmt)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -5,6 +5,8 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/gen/model"
 	"github.com/cufee/aftermath/internal/json"
+	"github.com/cufee/aftermath/internal/utils"
+	"github.com/lucsky/cuid"
 )
 
 type UserContentType string
@@ -66,5 +68,24 @@ func ToUserContent(record *model.UserContent) UserContent {
 		UpdatedAt: record.UpdatedAt,
 	}
 	json.Unmarshal([]byte(record.Metadata), &c.Meta)
+	return c
+}
+
+func FromUserContent(record *UserContent) model.UserContent {
+	c := model.UserContent{
+		ID:        utils.StringOr(record.ID, cuid.New()),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+
+		Type:        string(record.Type),
+		UserID:      record.UserID,
+		ReferenceID: record.ReferenceID,
+
+		Value: record.Value,
+	}
+	if record.Meta != nil {
+		data, _ := json.Marshal(record.Meta)
+		c.Metadata = string(data)
+	}
 	return c
 }

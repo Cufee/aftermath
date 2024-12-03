@@ -24,9 +24,9 @@ func ToApplicationCommand(record *model.ApplicationCommand) ApplicationCommand {
 
 func FromApplicationCommand(record *ApplicationCommand) model.ApplicationCommand {
 	return model.ApplicationCommand{
+		ID:          record.ID,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
-		ID:          record.ID,
 		Name:        record.Name,
 		OptionsHash: record.Hash,
 		Version:     record.Version,

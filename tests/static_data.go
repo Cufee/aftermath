@@ -117,16 +117,18 @@ func DefaultVehicleStatsFrameSmall2(id string) frame.VehicleStatsFrame {
 
 var (
 	DefaultUserWithEdges = models.User{ID: "user1", Connections: []models.UserConnection{
-		Connection(DefaultAccountNA, models.ConnectionTypeWargaming, map[string]any{"verified": false}),
-		Connection(DefaultAccountEU, models.ConnectionTypeWargaming, map[string]any{"default": true}),
+		Connection(DefaultAccountNA, models.ConnectionTypeWargaming, false, true),
+		Connection(DefaultAccountEU, models.ConnectionTypeWargaming, true, false),
+		Connection(DefaultAccountAS, models.ConnectionTypeWargaming, false, false),
 	}}
 )
 
-func Connection(id string, kind models.ConnectionType, meta map[string]any) models.UserConnection {
+func Connection(id string, kind models.ConnectionType, verified, selected bool) models.UserConnection {
 	return models.UserConnection{
 		ID:          fmt.Sprint(time.Now().Nanosecond()),
 		ReferenceID: id,
 		Type:        kind,
-		Metadata:    meta,
+		Selected:    selected,
+		Verified:    verified,
 	}
 }

@@ -6,6 +6,8 @@ import (
 	"github.com/cufee/aftermath/internal/database/gen/model"
 	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/permissions"
+	"github.com/cufee/aftermath/internal/utils"
+	"github.com/lucsky/cuid"
 )
 
 type ConnectionType string
@@ -30,6 +32,7 @@ type UserConnection struct {
 
 	Type     ConnectionType `json:"type"`
 	Verified bool           `json:"verified"`
+	Selected bool           `json:"selected"`
 
 	UserID      string                  `json:"userId"`
 	ReferenceID string                  `json:"referenceId"`
@@ -59,7 +62,7 @@ func ToUserConnection(record *model.UserConnection) UserConnection {
 func FromUserConnection(record *UserConnection) model.UserConnection {
 	perms := record.Permissions.Encode()
 	c := model.UserConnection{
-		ID:          record.ID,
+		ID:          utils.StringOr(record.ID, cuid.New()),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 		Type:        string(record.Type),

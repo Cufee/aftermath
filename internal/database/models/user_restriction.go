@@ -6,6 +6,8 @@ import (
 	"github.com/cufee/aftermath/internal/database/gen/model"
 	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/permissions"
+	"github.com/cufee/aftermath/internal/utils"
+	"github.com/lucsky/cuid"
 )
 
 type UserRestrictionType string
@@ -51,7 +53,7 @@ type RestrictionUpdate struct {
 
 func ToUserRestriction(record *model.UserRestriction) UserRestriction {
 	r := UserRestriction{
-		ID:     record.ID,
+		ID:     utils.StringOr(record.ID, cuid.New()),
 		Type:   UserRestrictionType(record.Type),
 		UserID: record.UserID,
 

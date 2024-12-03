@@ -1,6 +1,13 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/json"
+	"github.com/cufee/aftermath/internal/utils"
+	"github.com/lucsky/cuid"
+)
 
 type WidgetFlavor string
 
@@ -67,4 +74,53 @@ type WidgetCardStyle struct {
 type WidgetVehicleCardStyle struct {
 	WidgetCardStyle
 	Limit int `json:"limit"`
+}
+
+func ToWidgetOptions(record *model.WidgetSettings) WidgetOptions {
+	o := WidgetOptions{
+		ID:        record.ID,
+		CreatedAt: record.CreatedAt,
+		UpdatedAt: record.UpdatedAt,
+
+		UserID:    record.UserID,
+		AccountID: record.ReferenceID,
+	}
+	if record.Title != nil {
+		o.Title = *record.Title
+	}
+	if record.SessionFrom != nil {
+		o.SessionFrom = *record.SessionFrom
+	}
+	if record.SessionReferenceID != nil {
+		o.SessionRefID = *record.SessionReferenceID
+	}
+	json.Unmarshal([]byte(record.Styles), &o.Style)
+	json.Unmarshal([]byte(record.Metadata), &o.Meta)
+	return o
+}
+
+func FromWidgetOptions(record *WidgetOptions) model.WidgetSettings {
+	s := model.WidgetSettings{
+		ID:          utils.StringOr(record.ID, cuid.New()),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		ReferenceID: record.AccountID,
+		UserID:      record.UserID,
+	}
+	if record.Title != "" {
+		s.Title = &record.Title
+	}
+	if !record.SessionFrom.IsZero() {
+		s.SessionFrom = &record.SessionFrom
+	}
+	if record.SessionRefID != "" {
+		s.SessionReferenceID = &record.SessionRefID
+	}
+	if record.Meta != nil {
+		data, _ := json.Marshal(record.Meta)
+		s.Metadata = string(data)
+	}
+	data, _ := json.Marshal(record.Style)
+	s.Styles = string(data)
+	return s
 }

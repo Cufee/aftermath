@@ -129,7 +129,7 @@ func init() {
 							continue
 						}
 						linkedAccounts = append(linkedAccounts, conn.ReferenceID)
-						if def, _ := conn.Metadata["default"].(bool); def {
+						if conn.Selected {
 							currentDefault = conn.ReferenceID
 						}
 					}
@@ -187,7 +187,7 @@ func init() {
 							conn.Verified = false
 							found = true
 						}
-						conn.Metadata["default"] = conn.ReferenceID == account.ID
+						conn.Selected = conn.ReferenceID == account.ID
 
 						_, err := ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), conn)
 						if err != nil {
@@ -195,14 +195,12 @@ func init() {
 						}
 					}
 					if !found {
-						meta := make(map[string]any)
-						meta["default"] = true
 						_, err := ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), models.UserConnection{
 							Type:        models.ConnectionTypeWargaming,
 							Verified:    false,
+							Selected:    true,
 							ReferenceID: fmt.Sprint(account.ID),
 							UserID:      ctx.User().ID,
-							Metadata:    meta,
 						})
 						if err != nil {
 							return ctx.Err(err)

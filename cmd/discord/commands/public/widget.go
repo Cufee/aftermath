@@ -30,7 +30,7 @@ func init() {
 				if len(parts) == 4 && parts[0] == "valid" {
 					accountID = parts[1]
 				} else {
-					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
+					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, nil, true)
 					if !hasDefaultAccount {
 						return ctx.Reply().Format("commands_widget_message_fmt", constants.FrontendURL+"/widget/").Send()
 					}

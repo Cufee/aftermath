@@ -1,92 +1,92 @@
 package database
 
-// import (
-// 	"context"
-// 	"time"
+import (
+	"context"
 
-// 	m "github.com/cufee/aftermath/internal/database/gen/model"
-// 	t "github.com/cufee/aftermath/internal/database/gen/table"
-// 	"github.com/cufee/aftermath/internal/database/models"
-// 	s "github.com/go-jet/jet/v2/sqlite"
-// )
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/models"
+	s "github.com/go-jet/jet/v2/sqlite"
+)
 
-// func toWidgetOptions(record *db.WidgetSettings) models.WidgetOptions {
-// 	return models.WidgetOptions{
-// 		ID:        record.ID,
-// 		CreatedAt: record.CreatedAt,
-// 		UpdatedAt: record.UpdatedAt,
+func (c *client) GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error) {
+	stmt := t.WidgetSettings.
+		SELECT(t.WidgetSettings.AllColumns).
+		WHERE(t.WidgetSettings.ID.EQ(s.String(settingsID)))
 
-// 		Title:        record.Title,
-// 		UserID:       record.UserID,
-// 		AccountID:    record.ReferenceID,
-// 		SessionFrom:  record.SessionFrom,
-// 		SessionRefID: record.SessionReferenceID,
+	var record m.WidgetSettings
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.WidgetOptions{}, err
+	}
+	return models.ToWidgetOptions(&record), nil
+}
 
-// 		Style: record.Styles,
-// 		Meta:  record.Metadata,
-// 	}
-// }
+func (c *client) GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error) {
+	where := []s.BoolExpression{t.WidgetSettings.UserID.EQ(s.String(userID))}
+	if referenceID != nil {
+		where = append(where, t.WidgetSettings.ReferenceID.IN(toStringSlice(referenceID...)...))
+	}
 
-// func (c *client) GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error) {
-// 	record, err := c.db.WidgetSettings.Get(ctx, settingsID)
-// 	if err != nil {
-// 		return models.WidgetOptions{}, err
-// 	}
-// 	return toWidgetOptions(record), nil
-// }
+	stmt := t.WidgetSettings.
+		SELECT(t.WidgetSettings.AllColumns).
+		WHERE(s.AND(where...))
 
-// func (c *client) GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error) {
-// 	var where = []predicate.WidgetSettings{widgetsettings.UserID(userID)}
-// 	if referenceID != nil {
-// 		where = append(where, widgetsettings.ReferenceIDIn(referenceID...))
-// 	}
+	var record []m.WidgetSettings
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return nil, err
+	}
 
-// 	records, err := c.db.WidgetSettings.Query().Where(where...).All(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	var settings []models.WidgetOptions
+	for _, r := range record {
+		settings = append(settings, models.ToWidgetOptions(&r))
+	}
 
-// 	var options []models.WidgetOptions
-// 	for _, r := range records {
-// 		options = append(options, toWidgetOptions(r))
-// 	}
-// 	return options, nil
-// }
+	return settings, nil
+}
 
-// func (c *client) CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) (models.WidgetOptions, error) {
-// 	user, err := c.db.User.Get(ctx, userID)
-// 	if err != nil {
-// 		return models.WidgetOptions{}, err
-// 	}
+func (c *client) CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) (models.WidgetOptions, error) {
+	settings.UserID = userID
+	model := models.FromWidgetOptions(&settings)
 
-// 	created, err := c.db.WidgetSettings.Create().
-// 		SetTitle(settings.Title).
-// 		SetMetadata(settings.Meta).
-// 		SetReferenceID(settings.AccountID).
-// 		SetSessionFrom(settings.SessionFrom).
-// 		SetSessionReferenceID(settings.SessionRefID).
-// 		SetStyles(settings.Style).
-// 		SetUser(user).
-// 		Save(ctx)
-// 	if err != nil {
-// 		return models.WidgetOptions{}, err
-// 	}
+	stmt := t.WidgetSettings.
+		INSERT(t.WidgetSettings.AllColumns).
+		MODEL(model).
+		RETURNING(t.WidgetSettings.AllColumns)
 
-// 	return toWidgetOptions(created), nil
-// }
+	var record m.WidgetSettings
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.WidgetOptions{}, err
+	}
 
-// func (c *client) UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) (models.WidgetOptions, error) {
-// 	updated, err := c.db.WidgetSettings.UpdateOneID(id).
-// 		SetTitle(settings.Title).
-// 		SetMetadata(settings.Meta).
-// 		SetReferenceID(settings.AccountID).
-// 		SetSessionFrom(settings.SessionFrom).
-// 		SetSessionReferenceID(settings.SessionRefID).
-// 		SetStyles(settings.Style).
-// 		Save(ctx)
-// 	if err != nil {
-// 		return models.WidgetOptions{}, err
-// 	}
+	return models.ToWidgetOptions(&record), nil
+}
 
-// 	return toWidgetOptions(updated), nil
-// }
+func (c *client) UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) (models.WidgetOptions, error) {
+	model := models.FromWidgetOptions(&settings)
+
+	stmt := t.WidgetSettings.
+		UPDATE(
+			t.WidgetSettings.UpdatedAt,
+			t.WidgetSettings.ReferenceID,
+			t.WidgetSettings.Title,
+			t.WidgetSettings.SessionFrom,
+			t.WidgetSettings.Metadata,
+			t.WidgetSettings.Styles,
+			t.WidgetSettings.UserID,
+			t.WidgetSettings.SessionReferenceID,
+		).
+		MODEL(model).
+		WHERE(t.WidgetSettings.ID.EQ(s.String(id))).
+		RETURNING(t.WidgetSettings.AllColumns)
+
+	var record m.WidgetSettings
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.WidgetOptions{}, err
+	}
+
+	return models.ToWidgetOptions(&record), nil
+}

@@ -30,13 +30,15 @@ func UpdateDefaultUserConnection(ctx context.Context, db database.Client, userID
 	}
 
 	var connection models.UserConnection
-	connections, _ := user.FilterConnections(models.ConnectionTypeWargaming, nil)
-	for _, conn := range connections {
+	for _, conn := range user.Connections {
+		if conn.Type != models.ConnectionTypeWargaming {
+			continue
+		}
 		if conn.ReferenceID == referenceID {
 			connection = conn
 		}
 
-		conn.Metadata["default"] = conn.ReferenceID == referenceID
+		conn.Selected = conn.ReferenceID == referenceID
 		_, err := db.UpdateUserConnection(ctx, conn)
 		if err != nil {
 			if database.IsNotFound(err) {
@@ -58,7 +60,7 @@ func UpdateDefaultUserConnection(ctx context.Context, db database.Client, userID
 		}
 
 		content.ReferenceID = userID
-		if c.Metadata["verified"] == true {
+		if c.Verified == true {
 			content.ReferenceID = r
 
 			// check if there is an existing record for the same account and update it to not reference the account anymore

@@ -38,7 +38,7 @@ func init() {
 						continue
 					}
 					linkedAccounts = append(linkedAccounts, conn.ReferenceID)
-					if def, _ := conn.Metadata["default"].(bool); def {
+					if conn.Selected {
 						currentDefault = conn.ReferenceID
 					}
 
