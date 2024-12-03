@@ -138,7 +138,7 @@ type Client interface {
 
 	DiscordDataClient
 
-	// ModerationClient
+	ModerationClient
 	Disconnect() error
 }
 
