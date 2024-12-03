@@ -62,7 +62,7 @@ func (c *client) UpsertCommands(ctx context.Context, commands ...models.Applicat
 		for _, command := range commands {
 			stmt := t.ApplicationCommand.
 				INSERT(t.ApplicationCommand.AllColumns).
-				MODEL(models.FromApplicationCommand(&command)).
+				MODEL(command.Model()).
 				ON_CONFLICT(t.ApplicationCommand.ID).
 				DO_UPDATE(
 					s.SET(

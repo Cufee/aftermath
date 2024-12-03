@@ -99,7 +99,7 @@ func ToWidgetOptions(record *model.WidgetSettings) WidgetOptions {
 	return o
 }
 
-func FromWidgetOptions(record *WidgetOptions) model.WidgetSettings {
+func (record *WidgetOptions) Model() model.WidgetSettings {
 	s := model.WidgetSettings{
 		ID:          utils.StringOr(record.ID, cuid.New()),
 		CreatedAt:   time.Now(),

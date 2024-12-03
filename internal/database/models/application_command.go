@@ -22,7 +22,7 @@ func ToApplicationCommand(record *model.ApplicationCommand) ApplicationCommand {
 	}
 }
 
-func FromApplicationCommand(record *ApplicationCommand) model.ApplicationCommand {
+func (record *ApplicationCommand) Model() model.ApplicationCommand {
 	return model.ApplicationCommand{
 		ID:          record.ID,
 		CreatedAt:   time.Now(),

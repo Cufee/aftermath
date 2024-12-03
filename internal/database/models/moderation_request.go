@@ -1,6 +1,13 @@
 package models
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+
+	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/utils"
+	"github.com/lucsky/cuid"
+)
 
 type ModerationStatus string
 
@@ -34,4 +41,64 @@ type ModerationRequest struct {
 	ModeratorID      *string
 	ModeratorComment string
 	Data             map[string]any
+}
+
+func ToModerationRequest(r *model.ModerationRequest) ModerationRequest {
+	req := ModerationRequest{
+		ID:        r.ID,
+		UpdateAt:  r.UpdatedAt,
+		CreatedAt: r.CreatedAt,
+
+		ReferenceID: r.ReferenceID,
+		RequestorID: r.RequestorID,
+
+		ActionStatus: ModerationStatus(r.ActionStatus),
+		ModeratorID:  r.ModeratorID,
+		Data:         make(map[string]any, 0),
+	}
+	if r.Context != nil {
+		req.RequestContext = *r.Context
+	}
+	if r.ActionReason != nil {
+		req.ActionReason = *r.ActionReason
+	}
+	if r.ModeratorComment != nil {
+		req.ModeratorComment = *r.ModeratorComment
+	}
+
+	if r.Data != "" {
+		json.Unmarshal([]byte(r.Data), &req.Data)
+	}
+
+	return req
+}
+
+func (r ModerationRequest) Model() model.ModerationRequest {
+	req := model.ModerationRequest{
+		ID:        utils.StringOr(r.ID, cuid.New()),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+
+		ReferenceID: r.ReferenceID,
+		RequestorID: r.RequestorID,
+
+		ActionStatus: string(r.ActionStatus),
+		ModeratorID:  r.ModeratorID,
+	}
+	if r.RequestContext != "" {
+		req.Context = &r.RequestContext
+	}
+	if r.ActionReason != "" {
+		req.ActionReason = &r.ActionReason
+	}
+	if r.ModeratorComment != "" {
+		req.ModeratorComment = &r.ModeratorComment
+	}
+
+	if r.Data != nil {
+		data, _ := json.Marshal(r.Data)
+		req.Data = string(data)
+	}
+
+	return req
 }

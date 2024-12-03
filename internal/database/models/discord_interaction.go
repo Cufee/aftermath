@@ -78,7 +78,7 @@ func ToDiscordInteraction(record *model.DiscordInteraction) DiscordInteraction {
 	return i
 }
 
-func FromDiscordInteraction(record *DiscordInteraction) model.DiscordInteraction {
+func (record *DiscordInteraction) Model() model.DiscordInteraction {
 	i := model.DiscordInteraction{
 		ID:        utils.StringOr(record.ID, cuid.New()),
 		CreatedAt: time.Now(),

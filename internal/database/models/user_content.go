@@ -71,7 +71,7 @@ func ToUserContent(record *model.UserContent) UserContent {
 	return c
 }
 
-func FromUserContent(record *UserContent) model.UserContent {
+func (record *UserContent) Model() model.UserContent {
 	c := model.UserContent{
 		ID:        utils.StringOr(record.ID, cuid.New()),
 		CreatedAt: time.Now(),

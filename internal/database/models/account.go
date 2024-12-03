@@ -19,7 +19,7 @@ type Account struct {
 	ClanTag string `json:"clanTag"`
 }
 
-func ToAccount(a *Account) model.Account {
+func (a *Account) Model() model.Account {
 	model := model.Account{
 		ID:               a.ID,
 		CreatedAt:        time.Now(),
@@ -36,7 +36,7 @@ func ToAccount(a *Account) model.Account {
 	return model
 }
 
-func FromAccount(r *model.Account, clan *model.Clan) Account {
+func ToAccount(r *model.Account, clan *model.Clan) Account {
 	account := Account{
 		ID:             r.ID,
 		Realm:          r.Realm,

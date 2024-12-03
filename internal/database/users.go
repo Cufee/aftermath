@@ -250,7 +250,7 @@ func (c *client) FindUserConnections(ctx context.Context, userID string, opts ..
 }
 
 func (c *client) CreateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
-	model := models.FromUserConnection(&connection)
+	model := connection.Model()
 	stmt := t.UserConnection.
 		INSERT(t.UserConnection.AllColumns).
 		MODEL(model).
@@ -265,6 +265,7 @@ func (c *client) CreateUserConnection(ctx context.Context, connection models.Use
 }
 
 func (c *client) UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error) {
+	model := connection.Model()
 	stmt := t.UserConnection.
 		UPDATE(
 			t.UserConnection.UpdatedAt,
@@ -275,17 +276,16 @@ func (c *client) UpdateUserConnection(ctx context.Context, id string, connection
 			t.UserConnection.Permissions,
 			t.UserConnection.Metadata,
 		).
-		MODEL(models.FromUserConnection(&connection)).
+		MODEL(model).
 		WHERE(t.UserConnection.ID.EQ(s.String(id))).
 		RETURNING(t.UserConnection.AllColumns)
 
-	var record m.UserConnection
-	err := c.query(ctx, stmt, &record)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.UserConnection{}, err
 	}
 
-	return models.ToUserConnection(&record), nil
+	return models.ToUserConnection(&model), nil
 
 }
 
@@ -366,23 +366,23 @@ func (c *client) FindUserContentFromRefs(ctx context.Context, kind models.UserCo
 }
 
 func (c *client) CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
-	model := models.FromUserContent(&content)
+	model := content.Model()
 	stmt := t.UserContent.
 		INSERT(t.UserContent.AllColumns).
 		MODEL(model).
 		RETURNING()
 
-	var record m.UserContent
-	err := c.query(ctx, stmt, &record)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.UserContent{}, err
 	}
 
-	return models.ToUserContent(&record), nil
+	return models.ToUserContent(&model), nil
 
 }
 
 func (c *client) UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	model := content.Model()
 	stmt := t.UserContent.
 		UPDATE(
 			t.UserContent.UpdatedAt,
@@ -392,16 +392,15 @@ func (c *client) UpdateUserContent(ctx context.Context, content models.UserConte
 			t.UserContent.Value,
 			t.UserContent.Metadata,
 		).
-		MODEL(models.FromUserContent(&content)).
+		MODEL(model).
 		RETURNING()
 
-	var record m.UserContent
-	err := c.query(ctx, stmt, &record)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.UserContent{}, err
 	}
 
-	return models.ToUserContent(&record), nil
+	return models.ToUserContent(&model), nil
 }
 
 func (c *client) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {

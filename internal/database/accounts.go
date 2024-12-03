@@ -46,7 +46,7 @@ func (c *client) GetAccountByID(ctx context.Context, id string) (models.Account,
 		return models.Account{}, err
 	}
 
-	return models.FromAccount(&result.Account, result.Clan), nil
+	return models.ToAccount(&result.Account, result.Clan), nil
 }
 
 func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Account, error) {
@@ -67,7 +67,7 @@ func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Accoun
 
 	var accounts []models.Account
 	for _, a := range result {
-		accounts = append(accounts, models.FromAccount(&a.Account, a.Clan))
+		accounts = append(accounts, models.ToAccount(&a.Account, a.Clan))
 	}
 
 	return accounts, nil
@@ -83,7 +83,7 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts ...*models.Account
 		for _, a := range accounts {
 			stmt := t.Account.
 				INSERT(t.Account.AllColumns).
-				MODEL(models.ToAccount(a)).
+				MODEL(a.Model()).
 				ON_CONFLICT(t.Account.ID).
 				DO_UPDATE(
 					s.SET(

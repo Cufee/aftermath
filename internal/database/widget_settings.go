@@ -48,24 +48,23 @@ func (c *client) GetUserWidgetSettings(ctx context.Context, userID string, refer
 
 func (c *client) CreateWidgetSettings(ctx context.Context, userID string, settings models.WidgetOptions) (models.WidgetOptions, error) {
 	settings.UserID = userID
-	model := models.FromWidgetOptions(&settings)
+	model := settings.Model()
 
 	stmt := t.WidgetSettings.
 		INSERT(t.WidgetSettings.AllColumns).
 		MODEL(model).
 		RETURNING(t.WidgetSettings.AllColumns)
 
-	var record m.WidgetSettings
-	err := c.query(ctx, stmt, &record)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.WidgetOptions{}, err
 	}
 
-	return models.ToWidgetOptions(&record), nil
+	return models.ToWidgetOptions(&model), nil
 }
 
 func (c *client) UpdateWidgetSettings(ctx context.Context, id string, settings models.WidgetOptions) (models.WidgetOptions, error) {
-	model := models.FromWidgetOptions(&settings)
+	model := settings.Model()
 
 	stmt := t.WidgetSettings.
 		UPDATE(
@@ -82,11 +81,10 @@ func (c *client) UpdateWidgetSettings(ctx context.Context, id string, settings m
 		WHERE(t.WidgetSettings.ID.EQ(s.String(id))).
 		RETURNING(t.WidgetSettings.AllColumns)
 
-	var record m.WidgetSettings
-	err := c.query(ctx, stmt, &record)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.WidgetOptions{}, err
 	}
 
-	return models.ToWidgetOptions(&record), nil
+	return models.ToWidgetOptions(&model), nil
 }

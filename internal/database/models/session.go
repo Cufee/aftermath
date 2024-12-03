@@ -54,7 +54,7 @@ func ToSession(record *model.Session) Session {
 	return session
 }
 
-func FromSession(record *Session) model.Session {
+func (record *Session) Model() model.Session {
 	session := model.Session{
 		ID:       utils.StringOr(record.ID, cuid.New()),
 		UserID:   record.UserID,

@@ -70,3 +70,22 @@ func ToUserRestriction(record *model.UserRestriction) UserRestriction {
 	json.Unmarshal([]byte(record.Events), &r.Events)
 	return r
 }
+
+func (record UserRestriction) Model() model.UserRestriction {
+	r := model.UserRestriction{
+		ID:     utils.StringOr(record.ID, cuid.New()),
+		Type:   string(record.Type),
+		UserID: record.UserID,
+
+		CreatedAt: record.CreatedAt,
+		UpdatedAt: record.UpdatedAt,
+		ExpiresAt: record.ExpiresAt,
+
+		ModeratorComment: record.ModeratorComment,
+		PublicReason:     record.PublicReason,
+		Restriction:      record.Restriction.Encode(),
+	}
+	data, _ := json.Marshal(record.Events)
+	r.Events = string(data)
+	return r
+}

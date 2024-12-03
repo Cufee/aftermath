@@ -59,7 +59,7 @@ func ToUserConnection(record *model.UserConnection) UserConnection {
 	return c
 }
 
-func FromUserConnection(record *UserConnection) model.UserConnection {
+func (record *UserConnection) Model() model.UserConnection {
 	perms := record.Permissions.Encode()
 	c := model.UserConnection{
 		ID:          utils.StringOr(record.ID, cuid.New()),

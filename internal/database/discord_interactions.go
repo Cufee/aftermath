@@ -13,18 +13,17 @@ import (
 )
 
 func (c client) CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) (models.DiscordInteraction, error) {
-	model := models.FromDiscordInteraction(&data)
+	model := data.Model()
 	stmt := t.DiscordInteraction.
 		INSERT(t.DiscordInteraction.AllColumns).
 		MODEL(model).
 		RETURNING(t.DiscordInteraction.AllColumns)
 
-	var result m.DiscordInteraction
-	err := c.query(ctx, stmt, &result)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.DiscordInteraction{}, err
 	}
-	return models.ToDiscordInteraction(&result), nil
+	return models.ToDiscordInteraction(&model), nil
 
 }
 
