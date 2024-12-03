@@ -57,7 +57,7 @@ func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Accoun
 	stmt := s.
 		SELECT(t.Account.AllColumns, t.Clan.ID, t.Clan.Tag).
 		FROM(t.Account.LEFT_JOIN(t.Clan, t.Clan.ID.EQ(t.Account.ClanID))).
-		WHERE(t.Account.ID.IN(toStringSlice(ids...)...))
+		WHERE(t.Account.ID.IN(stringsToExp(ids)...))
 
 	var result []accountWithClan
 	err := c.query(ctx, stmt, &result)

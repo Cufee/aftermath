@@ -56,7 +56,7 @@ func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[stri
 	err := c.query(ctx,
 		t.VehicleAverage.
 			SELECT(t.VehicleAverage.AllColumns).
-			WHERE(t.VehicleAverage.ID.IN(toStringSlice(ids...)...)),
+			WHERE(t.VehicleAverage.ID.IN(stringsToExp(ids)...)),
 		&records)
 	if err != nil {
 		return nil, err

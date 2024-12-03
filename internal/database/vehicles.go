@@ -54,7 +54,7 @@ func (c *client) GetVehicles(ctx context.Context, ids []string) (map[string]mode
 	}
 
 	var records []m.Vehicle
-	err := c.query(ctx, t.Vehicle.SELECT(t.Vehicle.AllColumns).WHERE(t.Vehicle.ID.IN(toStringSlice(ids...)...)), &records)
+	err := c.query(ctx, t.Vehicle.SELECT(t.Vehicle.AllColumns).WHERE(t.Vehicle.ID.IN(stringsToExp(ids)...)), &records)
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type CronTasks struct {
+type CronTask struct {
 	ID             string `sql:"primary_key"`
 	CreatedAt      time.Time
 	UpdatedAt      time.Time

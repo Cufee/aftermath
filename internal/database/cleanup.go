@@ -9,7 +9,7 @@ import (
 )
 
 func (c *client) DeleteExpiredTasks(ctx context.Context, expiration time.Time) error {
-	_, err := c.exec(ctx, t.CronTasks.DELETE().WHERE(t.CronTasks.CreatedAt.LT(s.DATETIME(expiration))))
+	_, err := c.exec(ctx, t.CronTask.DELETE().WHERE(t.CronTask.CreatedAt.LT(s.DATETIME(expiration))))
 	return err
 }
 

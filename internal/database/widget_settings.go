@@ -25,7 +25,7 @@ func (c *client) GetWidgetSettings(ctx context.Context, settingsID string) (mode
 func (c *client) GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error) {
 	where := []s.BoolExpression{t.WidgetSettings.UserID.EQ(s.String(userID))}
 	if referenceID != nil {
-		where = append(where, t.WidgetSettings.ReferenceID.IN(toStringSlice(referenceID...)...))
+		where = append(where, t.WidgetSettings.ReferenceID.IN(stringsToExp(referenceID)...))
 	}
 
 	stmt := t.WidgetSettings.

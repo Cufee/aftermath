@@ -162,7 +162,7 @@ func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) 
 		apply(&opts)
 	}
 
-	sqldb, err := sql.Open("sqlite3", fmt.Sprintf("file://%s?_fk=1&_auto_vacuum=2&_synchronous=1&_journal_mode=WAL", filePath)) // _mutex
+	sqldb, err := sql.Open("sqlite3", fmt.Sprintf("file://%s?_fk=1&_auto_vacuum=2&_synchronous=1&_journal_mode=WAL", filePath))
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +218,7 @@ func (t *transaction) exec(ctx context.Context, stmt sqlite.Statement) (sql.Resu
 
 func (c *client) withTx(ctx context.Context, fn func(tx *transaction) error) error {
 	var err error
-	tx, err := c.db.Begin()
+	tx, err := c.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -243,23 +243,10 @@ type clientOptions struct {
 	debug bool
 }
 
-func toStringSlice(s ...string) []sqlite.Expression {
+func stringsToExp(s []string) []sqlite.Expression {
 	var a []sqlite.Expression
 	for _, i := range s {
 		a = append(a, sqlite.String(i))
 	}
 	return a
-}
-
-func batch[T any](ops []T, size int) [][]T {
-	var batched [][]T
-	for i := 0; i < len(ops); i += size {
-		end := i + size
-		if end > len(ops) {
-			end = len(ops)
-		}
-		batched = append(batched, ops[i:end])
-	}
-
-	return batched
 }

@@ -16,7 +16,7 @@ func (c *client) GetCommandsByID(ctx context.Context, commandIDs ...string) ([]m
 
 	stmt := t.ApplicationCommand.
 		SELECT(t.ApplicationCommand.AllColumns).
-		WHERE(t.ApplicationCommand.ID.IN(toStringSlice(commandIDs...)...))
+		WHERE(t.ApplicationCommand.ID.IN(stringsToExp(commandIDs)...))
 
 	var result []m.ApplicationCommand
 	err := c.query(ctx, stmt, &result)
@@ -38,7 +38,7 @@ func (c *client) GetCommandsByHash(ctx context.Context, commandHashes ...string)
 
 	stmt := t.ApplicationCommand.
 		SELECT(t.ApplicationCommand.AllColumns).
-		WHERE(t.ApplicationCommand.OptionsHash.IN(toStringSlice(commandHashes...)...))
+		WHERE(t.ApplicationCommand.OptionsHash.IN(stringsToExp(commandHashes)...))
 
 	var result []m.ApplicationCommand
 	err := c.query(ctx, stmt, &result)

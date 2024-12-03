@@ -17,7 +17,7 @@ func UseSchema(schema string) {
 	AtlasSchemaRevisions = AtlasSchemaRevisions.FromSchema(schema)
 	AuthNonce = AuthNonce.FromSchema(schema)
 	Clan = Clan.FromSchema(schema)
-	CronTasks = CronTasks.FromSchema(schema)
+	CronTask = CronTask.FromSchema(schema)
 	DiscordInteraction = DiscordInteraction.FromSchema(schema)
 	GameMap = GameMap.FromSchema(schema)
 	GameMode = GameMode.FromSchema(schema)

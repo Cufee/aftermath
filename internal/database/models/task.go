@@ -1,7 +1,12 @@
 package models
 
 import (
+	"encoding/json"
 	"time"
+
+	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/utils"
+	"github.com/lucsky/cuid"
 )
 
 type TaskType string
@@ -98,4 +103,43 @@ func NewAttemptLog(task Task, comment string, err error) TaskLog {
 		Comment:   comment,
 		Error:     err.Error(),
 	}
+}
+
+func ToCronTask(record *model.CronTask) Task {
+	t := Task{
+		ID:             record.ID,
+		Type:           TaskType(record.Type),
+		CreatedAt:      record.CreatedAt,
+		UpdatedAt:      record.UpdatedAt,
+		ReferenceID:    record.ReferenceID,
+		Status:         TaskStatus(record.Status),
+		ScheduledAfter: record.ScheduledAfter,
+		TriesLeft:      int(record.TriesLeft),
+		LastRun:        record.LastRun,
+	}
+	json.Unmarshal([]byte(record.Targets), &t.Targets)
+	json.Unmarshal([]byte(record.Data), &t.Data)
+	json.Unmarshal([]byte(record.Logs), &t.Logs)
+	return t
+}
+
+func (record Task) Model() model.CronTask {
+	t := model.CronTask{
+		ID:             utils.StringOr(record.ID, cuid.New()),
+		Type:           string(record.Type),
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+		ReferenceID:    record.ReferenceID,
+		Status:         string(record.Status),
+		ScheduledAfter: record.ScheduledAfter,
+		TriesLeft:      int32(record.TriesLeft),
+		LastRun:        record.LastRun,
+	}
+	targets, _ := json.Marshal(record.Targets)
+	t.Targets = string(targets)
+	data, _ := json.Marshal(record.Data)
+	t.Data = string(data)
+	logs, _ := json.Marshal(record.Logs)
+	t.Logs = string(logs)
+	return t
 }

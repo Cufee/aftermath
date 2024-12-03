@@ -66,7 +66,7 @@ func (q *interactionQuery) build() s.SelectStatement {
 		if len(q.id) == 1 {
 			where = append(where, t.DiscordInteraction.ID.EQ(s.String(q.id[0])))
 		} else {
-			where = append(where, t.DiscordInteraction.ID.IN(toStringSlice(q.id...)...))
+			where = append(where, t.DiscordInteraction.ID.IN(stringsToExp(q.id)...))
 		}
 	}
 	// Snowflake
@@ -74,7 +74,7 @@ func (q *interactionQuery) build() s.SelectStatement {
 		if len(q.snowflake) == 1 {
 			where = append(where, t.DiscordInteraction.Snowflake.EQ(s.String(q.snowflake[0])))
 		} else {
-			where = append(where, t.DiscordInteraction.Snowflake.IN(toStringSlice(q.snowflake...)...))
+			where = append(where, t.DiscordInteraction.Snowflake.IN(stringsToExp(q.snowflake)...))
 		}
 	}
 	// UserID
@@ -82,7 +82,7 @@ func (q *interactionQuery) build() s.SelectStatement {
 		if len(q.userID) == 1 {
 			where = append(where, t.DiscordInteraction.UserID.EQ(s.String(q.userID[0])))
 		} else {
-			where = append(where, t.DiscordInteraction.UserID.IN(toStringSlice(q.userID...)...))
+			where = append(where, t.DiscordInteraction.UserID.IN(stringsToExp(q.userID)...))
 		}
 	}
 	// GuildID
@@ -90,7 +90,7 @@ func (q *interactionQuery) build() s.SelectStatement {
 		if len(q.guildID) == 1 {
 			where = append(where, t.DiscordInteraction.GuildID.EQ(s.String(q.guildID[0])))
 		} else {
-			where = append(where, t.DiscordInteraction.GuildID.IN(toStringSlice(q.guildID...)...))
+			where = append(where, t.DiscordInteraction.GuildID.IN(stringsToExp(q.guildID)...))
 		}
 	}
 	// ChannelID
@@ -98,7 +98,7 @@ func (q *interactionQuery) build() s.SelectStatement {
 		if len(q.channelID) == 1 {
 			where = append(where, t.DiscordInteraction.ChannelID.EQ(s.String(q.channelID[0])))
 		} else {
-			where = append(where, t.DiscordInteraction.ChannelID.IN(toStringSlice(q.channelID...)...))
+			where = append(where, t.DiscordInteraction.ChannelID.IN(stringsToExp(q.channelID)...))
 		}
 	}
 	// MessageID
@@ -106,7 +106,7 @@ func (q *interactionQuery) build() s.SelectStatement {
 		if len(q.messageID) == 1 {
 			where = append(where, t.DiscordInteraction.MessageID.EQ(s.String(q.messageID[0])))
 		} else {
-			where = append(where, t.DiscordInteraction.MessageID.IN(toStringSlice(q.messageID...)...))
+			where = append(where, t.DiscordInteraction.MessageID.IN(stringsToExp(q.messageID)...))
 		}
 	}
 	// EventID
@@ -114,7 +114,7 @@ func (q *interactionQuery) build() s.SelectStatement {
 		if len(q.eventID) == 1 {
 			where = append(where, t.DiscordInteraction.EventID.EQ(s.String(q.eventID[0])))
 		} else {
-			where = append(where, t.DiscordInteraction.EventID.IN(toStringSlice(q.eventID...)...))
+			where = append(where, t.DiscordInteraction.EventID.IN(stringsToExp(q.eventID)...))
 		}
 	}
 	// Type
@@ -122,7 +122,7 @@ func (q *interactionQuery) build() s.SelectStatement {
 		if len(q.kind) == 1 {
 			where = append(where, t.DiscordInteraction.Type.EQ(s.String(q.kind[0])))
 		} else {
-			where = append(where, t.DiscordInteraction.Type.IN(toStringSlice(q.kind...)...))
+			where = append(where, t.DiscordInteraction.Type.IN(stringsToExp(q.kind)...))
 		}
 	}
 	// Type

@@ -1,110 +1,129 @@
 package database
 
-// import (
-// 	"context"
-// 	"time"
+import (
+	"context"
+	"time"
 
-// 	m "github.com/cufee/aftermath/internal/database/gen/model"
-// 	t "github.com/cufee/aftermath/internal/database/gen/table"
-// 	"github.com/cufee/aftermath/internal/database/models"
-// 	s "github.com/go-jet/jet/v2/sqlite"
-// )
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/models"
+	s "github.com/go-jet/jet/v2/sqlite"
+)
 
-// func toCronTask(record *db.CronTask) models.Task {
-// 	return models.Task{
-// 		ID:             record.ID,
-// 		Type:           record.Type,
-// 		CreatedAt:      record.CreatedAt,
-// 		UpdatedAt:      record.UpdatedAt,
-// 		ReferenceID:    record.ReferenceID,
-// 		Targets:        record.Targets,
-// 		Logs:           record.Logs,
-// 		Status:         record.Status,
-// 		ScheduledAfter: record.ScheduledAfter,
-// 		LastRun:        record.LastRun,
-// 		Data:           record.Data,
-// 	}
-// }
+/*
+Returns up limit tasks that have TaskStatusInProgress and were last updates 1+ hours ago
+*/
+func (c *client) GetStaleTasks(ctx context.Context, limit int) ([]models.Task, error) {
+	var records []m.CronTask
+	stmt := t.CronTask.
+		SELECT(t.CronTask.AllColumns).
+		WHERE(s.AND(
+			t.CronTask.Status.EQ(s.String(string(models.TaskStatusInProgress))),
+			t.CronTask.LastRun.LT(s.DATETIME(time.Now().Add(time.Hour*-1))),
+		)).
+		LIMIT(int64(limit))
 
-// /*
-// Returns up limit tasks that have TaskStatusInProgress and were last updates 1+ hours ago
-// */
-// func (c *client) GetStaleTasks(ctx context.Context, limit int) ([]models.Task, error) {
-// 	records, err := c.db.CronTask.Query().
-// 		Where(
-// 			crontask.StatusEQ(models.TaskStatusInProgress),
-// 			crontask.LastRunLT(time.Now().Add(time.Hour*-1)),
-// 		).
-// 		Order(crontask.ByScheduledAfter(sql.OrderAsc())).
-// 		Limit(limit).
-// 		All(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	err := c.query(ctx, stmt, &records)
+	if err != nil {
+		return nil, err
+	}
 
-// 	var tasks []models.Task
-// 	for _, r := range records {
-// 		tasks = append(tasks, toCronTask(r))
-// 	}
+	var tasks []models.Task
+	for _, r := range records {
+		tasks = append(tasks, models.ToCronTask(&r))
+	}
 
-// 	return tasks, nil
-// }
+	return tasks, nil
+}
 
-// /*
-// Returns all tasks that were created after createdAfter, sorted by ScheduledAfter (DESC)
-// */
-// func (c *client) GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...models.TaskStatus) ([]models.Task, error) {
-// 	var where []predicate.CronTask
-// 	where = append(where, crontask.CreatedAtGT(createdAfter))
-// 	if len(status) > 0 {
-// 		where = append(where, crontask.StatusIn(status...))
-// 	}
+/*
+GetRecentTasks retrieves tasks sorted by DESC(task.last_run)
+  - createdAfter - tasks.created_at gt
+  - status (optional) - status of the tasks
+*/
+func (c *client) GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...models.TaskStatus) ([]models.Task, error) {
+	where := []s.BoolExpression{t.CronTask.CreatedAt.GT(s.DATETIME(createdAfter))}
+	if len(status) > 0 {
+		var s []string
+		for _, st := range status {
+			s = append(s, string(st))
+		}
+		where = append(where, t.CronTask.Status.IN(stringsToExp(s)...))
+	}
 
-// 	records, err := c.db.CronTask.Query().Where(where...).Order(crontask.ByLastRun(sql.OrderDesc())).All(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	var records []m.CronTask
+	stmt := t.CronTask.
+		SELECT(t.CronTask.AllColumns).
+		WHERE(s.AND(where...)).
+		ORDER_BY(t.CronTask.LastRun.DESC())
 
-// 	var tasks []models.Task
-// 	for _, r := range records {
-// 		tasks = append(tasks, toCronTask(r))
-// 	}
+	err := c.query(ctx, stmt, &records)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return tasks, nil
-// }
+	var tasks []models.Task
+	for _, r := range records {
+		tasks = append(tasks, models.ToCronTask(&r))
+	}
 
-// /*
-// GetAndStartTasks retrieves up to limit number of tasks matching the referenceId and updates their status to in progress
-// */
-// func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task, error) {
-// 	if limit < 1 {
-// 		return nil, nil
-// 	}
+	return tasks, nil
+}
 
-// 	var tasks []models.Task
-// 	return tasks, c.withTx(ctx, func(tx *db.Tx) error {
-// 		records, err := tx.CronTask.Query().Where(
-// 			crontask.TriesLeftGT(0),
-// 			crontask.ScheduledAfterLT(time.Now()),
-// 			crontask.StatusEQ(models.TaskStatusScheduled),
-// 		).Order(crontask.ByScheduledAfter(sql.OrderAsc())).Limit(limit).All(ctx)
-// 		if err != nil {
-// 			return err
-// 		}
+/*
+GetAndStartTasks retrieves up to limit number of tasks and updates their status to in progress
+*/
+func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task, error) {
+	if limit < 1 {
+		return nil, nil
+	}
 
-// 		var ids []string
-// 		for _, r := range records {
-// 			t := toCronTask(r)
-// 			t.OnUpdated()
+	var tasks []models.Task
+	return tasks, c.withTx(ctx, func(tx *transaction) error {
+		stmt := t.CronTask.
+			SELECT(t.CronTask.AllColumns).
+			WHERE(s.AND(
+				t.CronTask.TriesLeft.GT(s.Int32(0)),
+				t.CronTask.ScheduledAfter.LT(s.DATETIME(time.Now())),
+				t.CronTask.Status.EQ(s.String(string(models.TaskStatusScheduled))),
+			)).
+			ORDER_BY(t.CronTask.ScheduledAfter.ASC()).
+			LIMIT(int64(limit))
 
-// 			t.Status = models.TaskStatusInProgress
-// 			tasks = append(tasks, t)
-// 			ids = append(ids, r.ID)
-// 		}
+		var selected []m.CronTask
+		err := tx.query(ctx, stmt, &selected)
+		if err != nil {
+			return err
+		}
 
-// 		return tx.CronTask.Update().Where(crontask.IDIn(ids...)).SetStatus(models.TaskStatusInProgress).Exec(ctx)
-// 	})
-// }
+		for _, r := range selected {
+			task := models.ToCronTask(&r)
+			task.OnUpdated()
+			task.Status = models.TaskStatusInProgress
+
+			stmt := t.CronTask.
+				UPDATE(
+					t.CronTask.UpdatedAt,
+					t.CronTask.LastRun,
+					t.CronTask.Status,
+				).
+				SET(s.SET(
+					t.CronTask.Status.SET(s.String(string(task.Status))),
+					t.CronTask.UpdatedAt.SET(s.DATETIME(task.UpdatedAt)),
+					t.CronTask.LastRun.SET(s.DATETIME(task.LastRun)),
+				)).
+				WHERE(t.CronTask.ID.EQ(s.String(task.ID)))
+
+			_, err := tx.exec(ctx, stmt)
+			if err != nil {
+				return err
+			}
+
+			tasks = append(tasks, task)
+		}
+		return nil
+	})
+}
 
 // /*
 // AbandonTasks retrieves tasks by ids and marks them as scheduled, adding a log noting it was abandoned
@@ -115,7 +134,7 @@ package database
 // 	}
 
 // 	var tasks []models.Task
-// 	err := c.withTx(ctx, func(tx *db.Tx) error {
+// 	err := c.withTx(ctx, func(tx *transaction) error {
 // 		records, err := tx.CronTask.Query().Where(crontask.IDIn(ids...)).All(ctx)
 // 		if err != nil {
 // 			return err
@@ -142,50 +161,44 @@ package database
 // 	return c.UpdateTasks(ctx, tasks...)
 // }
 
-// func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
-// 	if len(tasks) < 1 {
-// 		return nil
-// 	}
-// 	return c.withTx(ctx, func(tx *db.Tx) error {
-// 		var inserts []*db.CronTaskCreate
-// 		for _, t := range tasks {
-// 			t.OnCreated()
-// 			t.OnUpdated()
+func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
+	if len(tasks) < 1 {
+		return nil
+	}
+	return c.withTx(ctx, func(tx *transaction) error {
+		var inserts []m.CronTask
+		for _, task := range tasks {
+			task.OnCreated()
+			task.OnUpdated()
+			inserts = append(inserts, task.Model())
+		}
 
-// 			inserts = append(inserts,
-// 				tx.CronTask.Create().
-// 					SetType(t.Type).
-// 					SetData(t.Data).
-// 					SetLogs(t.Logs).
-// 					SetStatus(t.Status).
-// 					SetTargets(t.Targets).
-// 					SetLastRun(t.LastRun).
-// 					SetTriesLeft(t.TriesLeft).
-// 					SetReferenceID(t.ReferenceID).
-// 					SetScheduledAfter(t.ScheduledAfter),
-// 			)
-// 		}
-// 		return tx.CronTask.CreateBulk(inserts...).Exec(ctx)
-// 	})
-// }
+		stmt := t.CronTask.INSERT().MODELS(inserts)
+		_, err := tx.exec(ctx, stmt)
+		return err
+	})
+}
 
-// func (c *client) GetTasks(ctx context.Context, ids ...string) ([]models.Task, error) {
-// 	if len(ids) < 1 {
-// 		return nil, nil
-// 	}
+func (c *client) GetTasks(ctx context.Context, ids ...string) ([]models.Task, error) {
+	if len(ids) < 1 {
+		return nil, nil
+	}
 
-// 	records, err := c.db.CronTask.Query().Where(crontask.IDIn(ids...)).All(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	var records []m.CronTask
+	stmt := t.CronTask.SELECT(t.CronTask.AllColumns).WHERE(t.CronTask.ID.IN(stringsToExp(ids)...))
 
-// 	var tasks []models.Task
-// 	for _, r := range records {
-// 		tasks = append(tasks, toCronTask(r))
-// 	}
+	err := c.query(ctx, stmt, &records)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return tasks, nil
-// }
+	var tasks []models.Task
+	for _, r := range records {
+		tasks = append(tasks, models.ToCronTask(&r))
+	}
+
+	return tasks, nil
+}
 
 // /*
 // UpdateTasks will update all tasks passed in
@@ -217,18 +230,15 @@ package database
 // 	})
 // }
 
-// /*
-// DeleteTasks will delete all tasks matching by ids
-//   - this func will block until all other calls to task update funcs are done
-// */
-// func (c *client) DeleteTasks(ctx context.Context, ids ...string) error {
-// 	if len(ids) < 1 {
-// 		return nil
-// 	}
-
-// 	return c.withTx(ctx, func(tx *db.Tx) error {
-// 		_, err := tx.CronTask.Delete().Where(crontask.IDIn(ids...)).Exec(ctx)
-// 		return err
-// 	})
-
-// }
+/*
+DeleteTasks will delete all tasks matching by ids
+*/
+func (c *client) DeleteTasks(ctx context.Context, ids ...string) error {
+	if len(ids) < 1 {
+		return nil
+	}
+	return c.withTx(ctx, func(tx *transaction) error {
+		_, err := tx.exec(ctx, t.CronTask.DELETE().WHERE(t.CronTask.ID.IN(stringsToExp(ids)...)))
+		return err
+	})
+}

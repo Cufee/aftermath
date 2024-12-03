@@ -36,7 +36,7 @@ table "app_configuration" {
   }
 }
 
-table "cron_tasks" {
+table "cron_task" {
   schema = schema.main
   column "id" {
     null = false

@@ -348,7 +348,7 @@ func (c *client) FindUserContentFromRefs(ctx context.Context, kind models.UserCo
 		SELECT(t.UserContent.AllColumns).
 		WHERE(s.AND(
 			t.UserContent.Type.EQ(s.String(string(kind))),
-			t.UserContent.ReferenceID.IN(toStringSlice(referenceIDs...)...),
+			t.UserContent.ReferenceID.IN(stringsToExp(referenceIDs)...),
 		))
 
 	var record []m.UserContent

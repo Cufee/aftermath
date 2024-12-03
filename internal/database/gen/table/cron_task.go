@@ -11,9 +11,9 @@ import (
 	"github.com/go-jet/jet/v2/sqlite"
 )
 
-var CronTasks = newCronTasksTable("", "cron_tasks", "")
+var CronTask = newCronTaskTable("", "cron_task", "")
 
-type cronTasksTable struct {
+type cronTaskTable struct {
 	sqlite.Table
 
 	// Columns
@@ -34,40 +34,40 @@ type cronTasksTable struct {
 	MutableColumns sqlite.ColumnList
 }
 
-type CronTasksTable struct {
-	cronTasksTable
+type CronTaskTable struct {
+	cronTaskTable
 
-	EXCLUDED cronTasksTable
+	EXCLUDED cronTaskTable
 }
 
-// AS creates new CronTasksTable with assigned alias
-func (a CronTasksTable) AS(alias string) *CronTasksTable {
-	return newCronTasksTable(a.SchemaName(), a.TableName(), alias)
+// AS creates new CronTaskTable with assigned alias
+func (a CronTaskTable) AS(alias string) *CronTaskTable {
+	return newCronTaskTable(a.SchemaName(), a.TableName(), alias)
 }
 
-// Schema creates new CronTasksTable with assigned schema name
-func (a CronTasksTable) FromSchema(schemaName string) *CronTasksTable {
-	return newCronTasksTable(schemaName, a.TableName(), a.Alias())
+// Schema creates new CronTaskTable with assigned schema name
+func (a CronTaskTable) FromSchema(schemaName string) *CronTaskTable {
+	return newCronTaskTable(schemaName, a.TableName(), a.Alias())
 }
 
-// WithPrefix creates new CronTasksTable with assigned table prefix
-func (a CronTasksTable) WithPrefix(prefix string) *CronTasksTable {
-	return newCronTasksTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
+// WithPrefix creates new CronTaskTable with assigned table prefix
+func (a CronTaskTable) WithPrefix(prefix string) *CronTaskTable {
+	return newCronTaskTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
 }
 
-// WithSuffix creates new CronTasksTable with assigned table suffix
-func (a CronTasksTable) WithSuffix(suffix string) *CronTasksTable {
-	return newCronTasksTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
+// WithSuffix creates new CronTaskTable with assigned table suffix
+func (a CronTaskTable) WithSuffix(suffix string) *CronTaskTable {
+	return newCronTaskTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
 }
 
-func newCronTasksTable(schemaName, tableName, alias string) *CronTasksTable {
-	return &CronTasksTable{
-		cronTasksTable: newCronTasksTableImpl(schemaName, tableName, alias),
-		EXCLUDED:       newCronTasksTableImpl("", "excluded", ""),
+func newCronTaskTable(schemaName, tableName, alias string) *CronTaskTable {
+	return &CronTaskTable{
+		cronTaskTable: newCronTaskTableImpl(schemaName, tableName, alias),
+		EXCLUDED:      newCronTaskTableImpl("", "excluded", ""),
 	}
 }
 
-func newCronTasksTableImpl(schemaName, tableName, alias string) cronTasksTable {
+func newCronTaskTableImpl(schemaName, tableName, alias string) cronTaskTable {
 	var (
 		IDColumn             = sqlite.StringColumn("id")
 		CreatedAtColumn      = sqlite.TimestampColumn("created_at")
@@ -85,7 +85,7 @@ func newCronTasksTableImpl(schemaName, tableName, alias string) cronTasksTable {
 		mutableColumns       = sqlite.ColumnList{CreatedAtColumn, UpdatedAtColumn, TypeColumn, ReferenceIDColumn, TargetsColumn, StatusColumn, ScheduledAfterColumn, LastRunColumn, TriesLeftColumn, LogsColumn, DataColumn}
 	)
 
-	return cronTasksTable{
+	return cronTaskTable{
 		Table: sqlite.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns

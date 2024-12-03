@@ -46,14 +46,14 @@ func (c *client) FindUserModerationRequests(ctx context.Context, userID string, 
 	}
 
 	if referenceIDs != nil {
-		where = append(where, t.ModerationRequest.ReferenceID.IN(toStringSlice(referenceIDs...)...))
+		where = append(where, t.ModerationRequest.ReferenceID.IN(stringsToExp(referenceIDs)...))
 	}
 	if status != nil {
 		var s []string
 		for _, st := range status {
 			s = append(s, string(st))
 		}
-		where = append(where, t.ModerationRequest.ActionStatus.IN(toStringSlice(s...)...))
+		where = append(where, t.ModerationRequest.ActionStatus.IN(stringsToExp(s)...))
 	}
 
 	var records []m.ModerationRequest
