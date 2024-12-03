@@ -134,7 +134,7 @@ type Client interface {
 	AccountsClient
 	// SnapshotsClient
 
-	// TasksClient
+	TasksClient
 
 	DiscordDataClient
 
