@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"go/types"
 	"runtime/debug"
 	"time"
+
+	"github.com/cufee/aftermath-assets/types"
 
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
@@ -136,7 +137,7 @@ type Client interface {
 
 	// TasksClient
 
-	// DiscordDataClient
+	DiscordDataClient
 
 	// ModerationClient
 	Disconnect() error
