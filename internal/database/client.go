@@ -77,54 +77,54 @@ type UsersClient interface {
 	DeleteUserContent(ctx context.Context, id string) error
 }
 
-// type SnapshotsClient interface {
-// 	GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AccountSnapshot, error)
-// 	GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) ([]models.VehicleSnapshot, error)
+type SnapshotsClient interface {
+	GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AccountSnapshot, error)
+	GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) ([]models.VehicleSnapshot, error)
 
-// 	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
-// 	GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
+	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
+	GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
 
-// 	CreateAccountSnapshots(ctx context.Context, snapshots ...*models.AccountSnapshot) error
-// 	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...*models.VehicleSnapshot) error
+	CreateAccountSnapshots(ctx context.Context, snapshots ...*models.AccountSnapshot) error
+	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...*models.VehicleSnapshot) error
 
-// 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
-// }
+	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
+}
 
-// type TasksClient interface {
-// 	CreateTasks(ctx context.Context, tasks ...models.Task) error
-// 	GetTasks(ctx context.Context, ids ...string) ([]models.Task, error)
-// 	UpdateTasks(ctx context.Context, tasks ...models.Task) error
-// 	DeleteTasks(ctx context.Context, ids ...string) error
-// 	AbandonTasks(ctx context.Context, ids ...string) error
+type TasksClient interface {
+	CreateTasks(ctx context.Context, tasks ...models.Task) error
+	GetTasks(ctx context.Context, ids ...string) ([]models.Task, error)
+	UpdateTasks(ctx context.Context, tasks ...models.Task) error
+	DeleteTasks(ctx context.Context, ids ...string) error
+	AbandonTasks(ctx context.Context, ids ...string) error
 
-// 	GetStaleTasks(ctx context.Context, limit int) ([]models.Task, error)
-// 	GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...models.TaskStatus) ([]models.Task, error)
-// 	GetAndStartTasks(ctx context.Context, limit int) ([]models.Task, error)
+	GetStaleTasks(ctx context.Context, limit int) ([]models.Task, error)
+	GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...models.TaskStatus) ([]models.Task, error)
+	GetAndStartTasks(ctx context.Context, limit int) ([]models.Task, error)
 
-// 	DeleteExpiredTasks(ctx context.Context, expiration time.Time) error
-// }
+	DeleteExpiredTasks(ctx context.Context, expiration time.Time) error
+}
 
-// type DiscordDataClient interface {
-// 	UpsertCommands(ctx context.Context, commands ...models.ApplicationCommand) error
-// 	GetCommandsByID(ctx context.Context, commandIDs ...string) ([]models.ApplicationCommand, error)
+type DiscordDataClient interface {
+	UpsertCommands(ctx context.Context, commands ...models.ApplicationCommand) error
+	GetCommandsByID(ctx context.Context, commandIDs ...string) ([]models.ApplicationCommand, error)
 
-// 	CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) (models.DiscordInteraction, error)
-// 	GetDiscordInteraction(ctx context.Context, id string) (models.DiscordInteraction, error)
-// 	FindDiscordInteractions(ctx context.Context, opts ...InteractionQuery) ([]models.DiscordInteraction, error)
-// 	DeleteExpiredInteractions(ctx context.Context, expiration time.Time) error
-// }
+	CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) (models.DiscordInteraction, error)
+	GetDiscordInteraction(ctx context.Context, id string) (models.DiscordInteraction, error)
+	FindDiscordInteractions(ctx context.Context, opts ...InteractionQuery) ([]models.DiscordInteraction, error)
+	DeleteExpiredInteractions(ctx context.Context, expiration time.Time) error
+}
 
-// type ModerationClient interface {
-// 	GetModerationRequest(ctx context.Context, id string) (models.ModerationRequest, error)
-// 	FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus, since time.Time) ([]models.ModerationRequest, error)
-// 	CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
-// 	UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
+type ModerationClient interface {
+	GetModerationRequest(ctx context.Context, id string) (models.ModerationRequest, error)
+	FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus, since time.Time) ([]models.ModerationRequest, error)
+	CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
+	UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error)
 
-// 	GetUserRestriction(ctx context.Context, id string) (models.UserRestriction, error)
-// 	GetUserRestrictions(ctx context.Context, userID string) ([]models.UserRestriction, error)
-// 	CreateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error)
-// 	UpdateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error)
-// }
+	GetUserRestriction(ctx context.Context, id string) (models.UserRestriction, error)
+	GetUserRestrictions(ctx context.Context, userID string) ([]models.UserRestriction, error)
+	CreateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error)
+	UpdateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error)
+}
 
 type Client interface {
 	AuthClient
