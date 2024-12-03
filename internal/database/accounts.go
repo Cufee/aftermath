@@ -79,24 +79,26 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts ...*models.Account
 	}
 
 	errors := make(map[string]error, len(accounts))
-	for _, a := range accounts {
-		stmt := t.Account.
-			INSERT(t.Account.AllColumns).
-			MODEL(models.ToAccount(a)).
-			ON_CONFLICT(t.Account.ID).
-			DO_UPDATE(
-				s.SET(
-					t.Account.UpdatedAt.SET(t.Account.EXCLUDED.UpdatedAt),
-					t.Account.ClanID.SET(t.Account.EXCLUDED.ClanID),
-					t.Account.Private.SET(t.Account.EXCLUDED.Private),
-					t.Account.Nickname.SET(t.Account.EXCLUDED.Nickname),
-					t.Account.LastBattleTime.SET(t.Account.EXCLUDED.LastBattleTime),
-				),
-			)
-		_, errors[a.ID] = c.exec(ctx, stmt)
-	}
+	return errors, c.withTx(ctx, func(tx *transaction) error {
+		for _, a := range accounts {
+			stmt := t.Account.
+				INSERT(t.Account.AllColumns).
+				MODEL(models.ToAccount(a)).
+				ON_CONFLICT(t.Account.ID).
+				DO_UPDATE(
+					s.SET(
+						t.Account.UpdatedAt.SET(t.Account.EXCLUDED.UpdatedAt),
+						t.Account.ClanID.SET(t.Account.EXCLUDED.ClanID),
+						t.Account.Private.SET(t.Account.EXCLUDED.Private),
+						t.Account.Nickname.SET(t.Account.EXCLUDED.Nickname),
+						t.Account.LastBattleTime.SET(t.Account.EXCLUDED.LastBattleTime),
+					),
+				)
+			_, errors[a.ID] = tx.exec(ctx, stmt)
+		}
+		return nil
+	})
 
-	return errors, nil
 }
 
 func (c *client) AccountSetPrivate(ctx context.Context, id string, value bool) error {

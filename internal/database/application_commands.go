@@ -58,25 +58,25 @@ func (c *client) UpsertCommands(ctx context.Context, commands ...models.Applicat
 		return nil
 	}
 
-	for _, command := range commands {
-		stmt := t.ApplicationCommand.
-			INSERT(t.ApplicationCommand.AllColumns).
-			MODEL(models.FromApplicationCommand(&command)).
-			ON_CONFLICT(t.ApplicationCommand.ID).
-			DO_UPDATE(
-				s.SET(
-					t.ApplicationCommand.OptionsHash.SET(t.ApplicationCommand.EXCLUDED.OptionsHash),
-					t.ApplicationCommand.UpdatedAt.SET(t.ApplicationCommand.EXCLUDED.UpdatedAt),
-					t.ApplicationCommand.Version.SET(t.ApplicationCommand.EXCLUDED.Version),
-					t.ApplicationCommand.Name.SET(t.ApplicationCommand.EXCLUDED.Name),
-				),
-			)
-		_, err := c.exec(ctx, stmt)
-		if err != nil {
-			return err
+	return c.withTx(ctx, func(tx *transaction) error {
+		for _, command := range commands {
+			stmt := t.ApplicationCommand.
+				INSERT(t.ApplicationCommand.AllColumns).
+				MODEL(models.FromApplicationCommand(&command)).
+				ON_CONFLICT(t.ApplicationCommand.ID).
+				DO_UPDATE(
+					s.SET(
+						t.ApplicationCommand.OptionsHash.SET(t.ApplicationCommand.EXCLUDED.OptionsHash),
+						t.ApplicationCommand.UpdatedAt.SET(t.ApplicationCommand.EXCLUDED.UpdatedAt),
+						t.ApplicationCommand.Version.SET(t.ApplicationCommand.EXCLUDED.Version),
+						t.ApplicationCommand.Name.SET(t.ApplicationCommand.EXCLUDED.Name),
+					),
+				)
+			_, err := tx.exec(ctx, stmt)
+			if err != nil {
+				return err
+			}
 		}
-	}
-
-	return nil
-
+		return nil
+	})
 }

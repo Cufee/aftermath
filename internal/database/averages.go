@@ -17,33 +17,34 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 	}
 
 	errors := make(map[string]error, len(averages))
-	for id, data := range averages {
-		encoded, err := json.Marshal(data)
-		if err != nil {
+	return errors, c.withTx(ctx, func(tx *transaction) error {
+		for id, data := range averages {
+			encoded, err := json.Marshal(data)
+			if err != nil {
+				errors[id] = err
+				continue
+			}
+
+			model := m.VehicleAverage{
+				ID:        id,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+				Data:      string(encoded),
+			}
+
+			stmt := t.VehicleAverage.
+				INSERT(t.VehicleAverage.AllColumns).
+				MODEL(model).
+				ON_CONFLICT(t.VehicleAverage.ID).
+				DO_UPDATE(s.SET(
+					t.VehicleAverage.Data.SET(t.VehicleAverage.EXCLUDED.Data),
+					t.VehicleAverage.UpdatedAt.SET(t.VehicleAverage.EXCLUDED.UpdatedAt),
+				))
+			_, err = tx.exec(ctx, stmt)
 			errors[id] = err
-			continue
 		}
-
-		model := m.VehicleAverage{
-			ID:        id,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			Data:      string(encoded),
-		}
-
-		stmt := t.VehicleAverage.
-			INSERT(t.VehicleAverage.AllColumns).
-			MODEL(model).
-			ON_CONFLICT(t.VehicleAverage.ID).
-			DO_UPDATE(s.SET(
-				t.VehicleAverage.Data.SET(t.VehicleAverage.EXCLUDED.Data),
-				t.VehicleAverage.UpdatedAt.SET(t.VehicleAverage.EXCLUDED.UpdatedAt),
-			))
-		_, err = c.exec(ctx, stmt)
-		errors[id] = err
-	}
-
-	return errors, nil
+		return nil
+	})
 }
 
 func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error) {

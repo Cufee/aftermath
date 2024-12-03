@@ -17,33 +17,34 @@ func (c *client) UpsertGameModes(ctx context.Context, modes map[string]map[langu
 	}
 
 	errors := make(map[string]error, len(modes))
-	for id, locales := range modes {
-		encoded, err := json.Marshal(locales)
-		if err != nil {
+	return errors, c.withTx(ctx, func(tx *transaction) error {
+		for id, locales := range modes {
+			encoded, err := json.Marshal(locales)
+			if err != nil {
+				errors[id] = err
+				continue
+			}
+
+			model := m.GameMode{
+				ID:             id,
+				CreatedAt:      time.Now(),
+				UpdatedAt:      time.Now(),
+				LocalizedNames: string(encoded),
+			}
+
+			stmt := t.GameMode.
+				INSERT(t.GameMode.AllColumns).
+				MODEL(model).
+				ON_CONFLICT(t.GameMode.ID).
+				DO_UPDATE(s.SET(
+					t.GameMode.UpdatedAt.SET(t.GameMode.EXCLUDED.UpdatedAt),
+					t.GameMode.LocalizedNames.SET(t.GameMode.EXCLUDED.LocalizedNames),
+				))
+			_, err = tx.exec(ctx, stmt)
 			errors[id] = err
-			continue
 		}
-
-		model := m.GameMode{
-			ID:             id,
-			CreatedAt:      time.Now(),
-			UpdatedAt:      time.Now(),
-			LocalizedNames: string(encoded),
-		}
-
-		stmt := t.GameMode.
-			INSERT(t.GameMode.AllColumns).
-			MODEL(model).
-			ON_CONFLICT(t.GameMode.ID).
-			DO_UPDATE(s.SET(
-				t.GameMode.UpdatedAt.SET(t.GameMode.EXCLUDED.UpdatedAt),
-				t.GameMode.LocalizedNames.SET(t.GameMode.EXCLUDED.LocalizedNames),
-			))
-		_, err = c.exec(ctx, stmt)
-		errors[id] = err
-	}
-
-	return errors, nil
+		return nil
+	})
 }
 
 func (c *client) GetGameModeNames(ctx context.Context, id string) (map[language.Tag]string, error) {

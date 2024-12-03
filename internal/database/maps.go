@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/cufee/aftermath-assets/types"
 	m "github.com/cufee/aftermath/internal/database/gen/model"
@@ -21,52 +22,50 @@ func toMap(record *m.GameMap) types.Map {
 	return data
 }
 
-// func (c *client) UpsertMaps(ctx context.Context, maps map[string]types.Map) error {
-// 	if len(maps) < 1 {
-// 		return nil
-// 	}
+func (c *client) UpsertMaps(ctx context.Context, maps map[string]types.Map) error {
+	if len(maps) < 1 {
+		return nil
+	}
 
-// 	var ids []string
-// 	for id := range maps {
-// 		ids = append(ids, id)
-// 	}
+	return c.withTx(ctx, func(tx *transaction) error {
+		for id, data := range maps {
+			model := m.GameMap{
+				ID:              id,
+				CreatedAt:       time.Now(),
+				UpdatedAt:       time.Now(),
+				SupremacyPoints: int32(data.SupremacyPoints),
+			}
+			modes, err := json.Marshal(data.GameModes)
+			if err != nil {
+				return err
+			}
+			model.GameModes = string(modes)
+			names, err := json.Marshal(data.LocalizedNames)
+			if err != nil {
+				return err
+			}
+			model.LocalizedNames = string(names)
 
-// 	records, err := c.db.GameMap.Query().Where(gamemap.IDIn(ids...)).All(ctx)
-// 	if err != nil && !IsNotFound(err) {
-// 		return err
-// 	}
+			stmt := t.GameMap.
+				INSERT(t.GameMap.AllColumns).
+				MODEL(model).
+				ON_CONFLICT(t.GameMap.ID).
+				DO_UPDATE(s.SET(
+					t.GameMap.UpdatedAt.SET(t.GameMap.EXCLUDED.UpdatedAt),
+					t.GameMap.GameModes.SET(t.GameMap.EXCLUDED.GameModes),
+					t.GameMap.LocalizedNames.SET(t.GameMap.EXCLUDED.LocalizedNames),
+					t.GameMap.SupremacyPoints.SET(t.GameMap.EXCLUDED.SupremacyPoints),
+				))
 
-// 	return c.withTx(ctx, func(tx *db.Tx) error {
-// 		for _, r := range records {
-// 			m, ok := maps[r.ID]
-// 			if !ok {
-// 				continue
-// 			}
+			_, err = tx.exec(ctx, stmt)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 
-// 			err := tx.GameMap.UpdateOneID(m.ID).
-// 				SetGameModes(m.GameModes).
-// 				SetLocalizedNames(m.LocalizedNames).
-// 				SetSupremacyPoints(m.SupremacyPoints).
-// 				Exec(ctx)
-
-// 			if err != nil {
-// 				return err
-// 			}
-// 			delete(maps, m.ID)
-// 		}
-
-// 		var writes []*db.GameMapCreate
-// 		for id, m := range maps {
-// 			writes = append(writes, tx.GameMap.Create().
-// 				SetID(id).
-// 				SetGameModes(m.GameModes).
-// 				SetLocalizedNames(m.LocalizedNames).
-// 				SetSupremacyPoints(m.SupremacyPoints),
-// 			)
-// 		}
-// 		return tx.GameMap.CreateBulk(writes...).Exec(ctx)
-// 	})
-// }
+}
 
 func (c *client) GetMap(ctx context.Context, id string) (types.Map, error) {
 	var record m.GameMap

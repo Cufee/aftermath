@@ -197,14 +197,33 @@ func (c *client) exec(ctx context.Context, stmt sqlite.Statement) (sql.Result, e
 	return stmt.ExecContext(ctx, c.db)
 }
 
-func (c *client) withTx(ctx context.Context, fn func(tx *sql.Tx) error) error {
+type transaction struct {
+	tx      *sql.Tx
+	options clientOptions
+}
+
+func (t *transaction) query(ctx context.Context, stmt sqlite.Statement, dst interface{}) error {
+	if t.options.debug {
+		println("SQL Query:", stmt.DebugSql())
+	}
+	return stmt.QueryContext(ctx, t.tx, dst)
+}
+
+func (t *transaction) exec(ctx context.Context, stmt sqlite.Statement) (sql.Result, error) {
+	if t.options.debug {
+		println("SQL Exec:", stmt.DebugSql())
+	}
+	return stmt.ExecContext(ctx, t.tx)
+}
+
+func (c *client) withTx(ctx context.Context, fn func(tx *transaction) error) error {
 	var err error
 	tx, err := c.db.Begin()
 	if err != nil {
 		return err
 	}
 
-	if err = fn(tx); err != nil {
+	if err = fn(&transaction{tx: tx, options: c.options}); err != nil {
 		if rerr := tx.Rollback(); rerr != nil {
 			err = fmt.Errorf("%w: rolling back transaction: %v", err, rerr)
 		}
