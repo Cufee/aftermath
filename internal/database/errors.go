@@ -1,5 +1,13 @@
 package database
 
-// func IsNotFound(err error) bool {
-// 	return db.IsNotFound(err)
-// }
+import (
+	"database/sql"
+	"errors"
+)
+
+func IsNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	return errors.Is(err, sql.ErrNoRows)
+}

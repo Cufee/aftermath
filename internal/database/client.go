@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"runtime/debug"
 	"time"
@@ -173,13 +172,6 @@ func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) 
 		options: opts,
 		db:      sqldb,
 	}, nil
-}
-
-func IsNotFound(err error) bool {
-	if err == nil {
-		return false
-	}
-	return errors.Is(err, sql.ErrNoRows)
 }
 
 type client struct {
