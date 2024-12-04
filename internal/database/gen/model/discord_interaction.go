@@ -12,17 +12,17 @@ import (
 )
 
 type DiscordInteraction struct {
-	ID        string `sql:"primary_key"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Result    string
-	EventID   string
-	GuildID   string
-	Snowflake string
-	ChannelID string
-	MessageID string
-	Type      string
-	Locale    string
-	Metadata  string
-	UserID    string
+	ID        string    `sql:"primary_key" db:"id"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	Result    string    `db:"result"`
+	EventID   string    `db:"event_id"`
+	GuildID   string    `db:"guild_id"`
+	Snowflake string    `db:"snowflake"`
+	ChannelID string    `db:"channel_id"`
+	MessageID string    `db:"message_id"`
+	Type      string    `db:"type"`
+	Locale    string    `db:"locale"`
+	Metadata  string    `db:"metadata"`
+	UserID    string    `db:"user_id"`
 }

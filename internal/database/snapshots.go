@@ -23,17 +23,24 @@ func (c *client) GetVehicleSnapshots(ctx context.Context, accountID string, vehi
 		apply(&query)
 	}
 
-	var records []m.VehicleSnapshot
-	stmt := vehiclesQuery(accountID, vehicleIDs, kind, t.VehicleSnapshot.VehicleID, query)
-	err := c.query(ctx, stmt, &records)
+	stmt := vehiclesQuery(accountID, vehicleIDs, kind, t.VehicleSnapshot.VehicleID.Name(), query)
+	rs, err := c.rows(ctx, stmt)
 	if err != nil {
 		return nil, err
 	}
 
 	var snapshots []models.VehicleSnapshot
-	for _, r := range records {
-		snapshots = append(snapshots, models.ToVehicleSnapshot(&r))
+	for rs.Next() {
+		var snapshot m.VehicleSnapshot
+		err := rs.Scan(&snapshot)
+		if err != nil {
+			return nil, err
+		}
+		println(snapshot.ID)
+
+		snapshots = append(snapshots, models.ToVehicleSnapshot(&snapshot))
 	}
+
 	return snapshots, nil
 }
 
@@ -77,16 +84,20 @@ func (c *client) GetAccountSnapshots(ctx context.Context, accountIDs []string, k
 		apply(&query)
 	}
 
-	var records []m.AccountSnapshot
-	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID, query)
-	err := c.query(ctx, stmt, &records)
+	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID.Name(), query)
+	rs, err := c.rows(ctx, stmt)
 	if err != nil {
 		return nil, err
 	}
 
 	var snapshots []models.AccountSnapshot
-	for _, r := range records {
-		snapshots = append(snapshots, models.ToAccountSnapshot(&r))
+	for rs.Next() {
+		var snapshot m.AccountSnapshot
+		err := rs.Scan(&snapshot)
+		if err != nil {
+			return nil, err
+		}
+		snapshots = append(snapshots, models.ToAccountSnapshot(&snapshot))
 	}
 	return snapshots, nil
 }
@@ -103,18 +114,26 @@ func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []str
 	for _, apply := range options {
 		apply(&query)
 	}
-	WithSelect(t.AccountSnapshot.AccountID, t.AccountSnapshot.LastBattleTime)(&query)
+	WithSelect(t.AccountSnapshot.AccountID.Name(), t.AccountSnapshot.LastBattleTime.Name())(&query)
 
-	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID, query)
-
-	var records []m.AccountSnapshot
-	err := c.query(ctx, stmt, &records)
+	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID.Name(), query)
+	rs, err := c.rows(ctx, stmt)
 	if err != nil {
 		return nil, err
 	}
 
+	var snapshots []m.AccountSnapshot
+	for rs.Next() {
+		var snapshot m.AccountSnapshot
+		err := rs.Scan(&snapshot)
+		if err != nil {
+			return nil, err
+		}
+		snapshots = append(snapshots, snapshot)
+	}
+
 	var lastBattles = make(map[string]time.Time)
-	for _, r := range records {
+	for _, r := range snapshots {
 		lastBattles[r.AccountID] = r.LastBattleTime
 	}
 	return lastBattles, nil

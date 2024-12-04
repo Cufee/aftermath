@@ -12,12 +12,12 @@ import (
 )
 
 type AuthNonce struct {
-	ID         string `sql:"primary_key"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	Active     bool
-	ExpiresAt  time.Time
-	Identifier string
-	PublicID   string
-	Metadata   string
+	ID         string    `sql:"primary_key" db:"id"`
+	CreatedAt  time.Time `db:"created_at"`
+	UpdatedAt  time.Time `db:"updated_at"`
+	Active     bool      `db:"active"`
+	ExpiresAt  time.Time `db:"expires_at"`
+	Identifier string    `db:"identifier"`
+	PublicID   string    `db:"public_id"`
+	Metadata   string    `db:"metadata"`
 }

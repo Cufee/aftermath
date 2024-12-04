@@ -12,9 +12,9 @@ import (
 )
 
 type Vehicle struct {
-	ID             string `sql:"primary_key"`
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	Tier           int32
-	LocalizedNames string
+	ID             string    `sql:"primary_key" db:"id"`
+	CreatedAt      time.Time `db:"created_at"`
+	UpdatedAt      time.Time `db:"updated_at"`
+	Tier           int32     `db:"tier"`
+	LocalizedNames string    `db:"localized_names"`
 }

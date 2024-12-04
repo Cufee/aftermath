@@ -12,16 +12,16 @@ import (
 )
 
 type CronTask struct {
-	ID             string `sql:"primary_key"`
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	Type           string
-	ReferenceID    string
-	Targets        string
-	Status         string
-	ScheduledAfter time.Time
-	LastRun        time.Time
-	TriesLeft      int32
-	Logs           string
-	Data           string
+	ID             string    `sql:"primary_key" db:"id"`
+	CreatedAt      time.Time `db:"created_at"`
+	UpdatedAt      time.Time `db:"updated_at"`
+	Type           string    `db:"type"`
+	ReferenceID    string    `db:"reference_id"`
+	Targets        string    `db:"targets"`
+	Status         string    `db:"status"`
+	ScheduledAfter time.Time `db:"scheduled_after"`
+	LastRun        time.Time `db:"last_run"`
+	TriesLeft      int32     `db:"tries_left"`
+	Logs           string    `db:"logs"`
+	Data           string    `db:"data"`
 }

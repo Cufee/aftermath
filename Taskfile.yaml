@@ -19,7 +19,7 @@ tasks:
 
   db-generate:
     desc: generate models from database schema
-    cmd: jet -dsn="file://${DATABASE_PATH}/${DATABASE_NAME}" -schema=dvds -path=./internal/database/gen
+    cmd: go generate ./internal/database
 
   db-migrate:
     desc: generate migrations

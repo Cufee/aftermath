@@ -12,10 +12,10 @@ import (
 )
 
 type ApplicationCommand struct {
-	ID          string `sql:"primary_key"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Name        string
-	Version     string
-	OptionsHash string
+	ID          string    `sql:"primary_key" db:"id"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
+	Name        string    `db:"name"`
+	Version     string    `db:"version"`
+	OptionsHash string    `db:"options_hash"`
 }

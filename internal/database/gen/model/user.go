@@ -12,10 +12,10 @@ import (
 )
 
 type User struct {
-	ID           string `sql:"primary_key"`
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	Username     string
-	Permissions  string
-	FeatureFlags *string
+	ID           string    `sql:"primary_key" db:"id"`
+	CreatedAt    time.Time `db:"created_at"`
+	UpdatedAt    time.Time `db:"updated_at"`
+	Username     string    `db:"username"`
+	Permissions  string    `db:"permissions"`
+	FeatureFlags *string   `db:"feature_flags"`
 }

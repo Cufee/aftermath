@@ -12,14 +12,14 @@ import (
 )
 
 type VehicleSnapshot struct {
-	ID             string `sql:"primary_key"`
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	Type           string
-	VehicleID      string
-	ReferenceID    string
-	Battles        int32
-	LastBattleTime time.Time
-	Frame          string
-	AccountID      string
+	ID             string    `sql:"primary_key" db:"id"`
+	CreatedAt      time.Time `db:"created_at"`
+	UpdatedAt      time.Time `db:"updated_at"`
+	Type           string    `db:"type"`
+	VehicleID      string    `db:"vehicle_id"`
+	ReferenceID    string    `db:"reference_id"`
+	Battles        int32     `db:"battles"`
+	LastBattleTime time.Time `db:"last_battle_time"`
+	Frame          string    `db:"frame"`
+	AccountID      string    `db:"account_id"`
 }

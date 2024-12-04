@@ -12,13 +12,13 @@ import (
 )
 
 type Account struct {
-	ID               string `sql:"primary_key"`
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
-	LastBattleTime   time.Time
-	AccountCreatedAt time.Time
-	Realm            string
-	Nickname         string
-	Private          bool
-	ClanID           *string
+	ID               string    `sql:"primary_key" db:"id"`
+	CreatedAt        time.Time `db:"created_at"`
+	UpdatedAt        time.Time `db:"updated_at"`
+	LastBattleTime   time.Time `db:"last_battle_time"`
+	AccountCreatedAt time.Time `db:"account_created_at"`
+	Realm            string    `db:"realm"`
+	Nickname         string    `db:"nickname"`
+	Private          bool      `db:"private"`
+	ClanID           *string   `db:"clan_id"`
 }

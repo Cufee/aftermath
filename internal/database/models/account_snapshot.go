@@ -38,7 +38,7 @@ func ToAccountSnapshot(record *model.AccountSnapshot) AccountSnapshot {
 func (record *AccountSnapshot) Model() model.AccountSnapshot {
 	s := model.AccountSnapshot{
 		ID:             utils.StringOr(record.ID, cuid.New()),
-		CreatedAt:      time.Now(),
+		CreatedAt:      record.CreatedAt,
 		UpdatedAt:      time.Now(),
 		Type:           string(record.Type),
 		LastBattleTime: record.LastBattleTime,

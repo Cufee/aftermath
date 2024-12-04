@@ -15,7 +15,7 @@ type baseQueryOptions struct {
 	createdAfter  *time.Time
 	createdBefore *time.Time
 
-	selectStmt s.SelectStatement
+	columns []string
 }
 
 type Query func(*baseQueryOptions)
@@ -75,9 +75,9 @@ func WithCreatedBefore(before time.Time) Query {
 /*
 Adds columns used for SELECT
 */
-func WithSelect(a s.Projection, b ...s.Projection) Query {
+func WithSelect(columns ...string) Query {
 	return func(q *baseQueryOptions) {
-		q.selectStmt = s.SELECT(a, b...)
+		q.columns = columns
 	}
 }
 
@@ -104,51 +104,53 @@ func (q *baseQueryOptions) refIDNotIn() []string {
 }
 
 // build a complete query for vehicle snapshots
-func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy s.GroupByClause, query baseQueryOptions) s.SelectStatement {
+func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy string, query baseQueryOptions) s.Statement {
 	// required where constraints
 	var innerWhere []s.BoolExpression
-	innerWhere = append(innerWhere, t.VehicleSnapshot.Type.EQ(s.String(string(kind))), t.VehicleSnapshot.AccountID.EQ(s.String(accountID)))
+	innerWhere = append(innerWhere, col(t.VehicleSnapshot.Type).EQ(s.String(string(kind))), col(t.VehicleSnapshot.AccountID).EQ(s.String(accountID)))
 
 	// optional where constraints
 	if vehicleIDs != nil {
-		innerWhere = append(innerWhere, t.VehicleSnapshot.VehicleID.IN(stringsToExp(vehicleIDs)...))
+		innerWhere = append(innerWhere, col(t.VehicleSnapshot.VehicleID).IN(stringsToExp(vehicleIDs)...))
 	}
 	if in := query.refIDIn(); in != nil {
-		innerWhere = append(innerWhere, t.VehicleSnapshot.ReferenceID.IN(stringsToExp(in)...))
+		innerWhere = append(innerWhere, col(t.VehicleSnapshot.ReferenceID).IN(stringsToExp(in)...))
 	}
 	if nin := query.refIDNotIn(); nin != nil {
-		innerWhere = append(innerWhere, t.VehicleSnapshot.ReferenceID.NOT_IN(stringsToExp(nin)...))
+		innerWhere = append(innerWhere, col(t.VehicleSnapshot.ReferenceID).NOT_IN(stringsToExp(nin)...))
 	}
 
 	// order and created_at constraints
-	innerOrder := t.VehicleSnapshot.CreatedAt.DESC()
+	innerOrder := col(t.VehicleSnapshot.CreatedAt).DESC()
 	if query.createdAfter != nil {
-		innerWhere = append(innerWhere, t.VehicleSnapshot.CreatedAt.GT(s.DATETIME(*query.createdAfter)))
-		innerOrder = t.VehicleSnapshot.CreatedAt.ASC()
+		innerWhere = append(innerWhere, s.TimestampColumn(t.VehicleSnapshot.CreatedAt.Name()).GT(s.DATETIME(*query.createdAfter)))
+		innerOrder = col(t.VehicleSnapshot.CreatedAt).ASC()
 	}
 	if query.createdBefore != nil {
-		innerWhere = append(innerWhere, t.VehicleSnapshot.CreatedAt.LT(s.DATETIME(*query.createdBefore)))
-		innerOrder = t.VehicleSnapshot.CreatedAt.DESC()
+		innerWhere = append(innerWhere, s.TimestampColumn(t.VehicleSnapshot.CreatedAt.Name()).LT(s.DATETIME(*query.createdBefore)))
+		innerOrder = col(t.VehicleSnapshot.CreatedAt).DESC()
 	}
 
-	var sel s.Projection = t.VehicleSnapshot.AllColumns
-	if query.selectStmt != nil {
-		sel = query.selectStmt
-	}
+	// var sel s.Projection = s.STAR
+	// if query.columns != nil {
+	// sel = s.SELECT()
+	// }
 
 	innerQuery := t.VehicleSnapshot.
-		SELECT(sel).
+		SELECT(s.STAR).
 		WHERE(s.AND(innerWhere...)).
-		ORDER_BY(innerOrder)
+		ORDER_BY(innerOrder).
+		AsTable("snapshots")
 
 	return s.
 		SELECT(s.STAR).
-		FROM(innerQuery.AsTable(t.VehicleSnapshot.TableName())).
-		GROUP_BY(groupBy)
+		FROM(innerQuery).
+		GROUP_BY(s.StringColumn(groupBy))
+
 }
 
 // build a complete query for account snapshot
-func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy s.GroupByClause, query baseQueryOptions) s.SelectStatement {
+func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy string, query baseQueryOptions) s.SelectStatement {
 	var innerWhere []s.BoolExpression
 	innerWhere = append(innerWhere, t.AccountSnapshot.Type.EQ(s.String(string(kind))), t.AccountSnapshot.AccountID.IN(stringsToExp(accountIDs)...))
 
@@ -162,29 +164,37 @@ func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy s.Grou
 	}
 
 	// order and created_at constraints
-	innerOrder := t.AccountSnapshot.CreatedAt.DESC()
+	innerOrder := s.String(t.AccountSnapshot.CreatedAt.Name()).DESC()
 	if query.createdAfter != nil {
-		innerWhere = append(innerWhere, t.AccountSnapshot.CreatedAt.GT(s.DATETIME(*query.createdAfter)))
-		innerOrder = t.AccountSnapshot.CreatedAt.ASC()
+		innerWhere = append(innerWhere, s.TimestampColumn(t.AccountSnapshot.CreatedAt.Name()).GT(s.DATETIME(*query.createdAfter)))
+		innerOrder = s.String(t.AccountSnapshot.CreatedAt.Name()).ASC()
 	}
 	if query.createdBefore != nil {
-		innerWhere = append(innerWhere, t.AccountSnapshot.CreatedAt.LT(s.DATETIME(*query.createdBefore)))
-		innerOrder = t.AccountSnapshot.CreatedAt.DESC()
+		innerWhere = append(innerWhere, s.TimestampColumn(t.AccountSnapshot.CreatedAt.Name()).LT(s.DATETIME(*query.createdBefore)))
+		innerOrder = s.String(t.AccountSnapshot.CreatedAt.Name()).DESC()
 	}
 
-	var sel s.Projection = t.AccountSnapshot.AllColumns
-	if query.selectStmt != nil {
-		sel = query.selectStmt
-	}
+	// var sel s.Projection = t.AccountSnapshot.AllColumns
+	// if query.columns != nil {
+	// 	sel = query.columns
+	// }
 
 	innerQuery := t.AccountSnapshot.
-		SELECT(sel).
+		SELECT(s.STAR).
 		WHERE(s.AND(innerWhere...)).
-		ORDER_BY(innerOrder)
+		ORDER_BY(innerOrder).
+		AsTable("snapshots")
 
 	return s.
 		SELECT(s.STAR).
-		FROM(innerQuery.AsTable(t.AccountSnapshot.TableName())).
-		GROUP_BY(groupBy)
+		FROM(innerQuery).
+		GROUP_BY(s.StringColumn(groupBy))
+}
 
+type named interface {
+	Name() string
+}
+
+func col(c named) s.ColumnString {
+	return s.StringColumn(c.Name())
 }

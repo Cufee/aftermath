@@ -12,11 +12,11 @@ import (
 )
 
 type Clan struct {
-	ID        string `sql:"primary_key"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Tag       string
-	Name      string
-	EmblemID  *string
-	Members   string
+	ID        string    `sql:"primary_key" db:"id"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	Tag       string    `db:"tag"`
+	Name      string    `db:"name"`
+	EmblemID  *string   `db:"emblem_id"`
+	Members   string    `db:"members"`
 }

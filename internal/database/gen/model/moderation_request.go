@@ -12,15 +12,15 @@ import (
 )
 
 type ModerationRequest struct {
-	ID               string `sql:"primary_key"`
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
-	ModeratorComment *string
-	Context          *string
-	ReferenceID      string
-	ActionReason     *string
-	ActionStatus     string
-	Data             string
-	RequestorID      string
-	ModeratorID      *string
+	ID               string    `sql:"primary_key" db:"id"`
+	CreatedAt        time.Time `db:"created_at"`
+	UpdatedAt        time.Time `db:"updated_at"`
+	ModeratorComment *string   `db:"moderator_comment"`
+	Context          *string   `db:"context"`
+	ReferenceID      string    `db:"reference_id"`
+	ActionReason     *string   `db:"action_reason"`
+	ActionStatus     string    `db:"action_status"`
+	Data             string    `db:"data"`
+	RequestorID      string    `db:"requestor_id"`
+	ModeratorID      *string   `db:"moderator_id"`
 }

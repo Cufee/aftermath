@@ -12,12 +12,12 @@ import (
 )
 
 type UserSubscription struct {
-	ID          string `sql:"primary_key"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Type        string
-	ExpiresAt   time.Time
-	Permissions string
-	ReferenceID string
-	UserID      string
+	ID          string    `sql:"primary_key" db:"id"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
+	Type        string    `db:"type"`
+	ExpiresAt   time.Time `db:"expires_at"`
+	Permissions string    `db:"permissions"`
+	ReferenceID string    `db:"reference_id"`
+	UserID      string    `db:"user_id"`
 }

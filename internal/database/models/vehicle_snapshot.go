@@ -61,7 +61,7 @@ func ToVehicleSnapshot(record *model.VehicleSnapshot) VehicleSnapshot {
 func (record *VehicleSnapshot) Model() model.VehicleSnapshot {
 	s := model.VehicleSnapshot{
 		ID:             utils.StringOr(record.ID, cuid.New()),
-		CreatedAt:      time.Now(),
+		CreatedAt:      record.CreatedAt,
 		UpdatedAt:      time.Now(),
 		Type:           string(record.Type),
 		VehicleID:      record.VehicleID,

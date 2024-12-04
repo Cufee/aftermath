@@ -12,10 +12,10 @@ import (
 )
 
 type GameMap struct {
-	ID              string `sql:"primary_key"`
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	GameModes       string
-	SupremacyPoints int32
-	LocalizedNames  string
+	ID              string    `sql:"primary_key" db:"id"`
+	CreatedAt       time.Time `db:"created_at"`
+	UpdatedAt       time.Time `db:"updated_at"`
+	GameModes       string    `db:"game_modes"`
+	SupremacyPoints int32     `db:"supremacy_points"`
+	LocalizedNames  string    `db:"localized_names"`
 }

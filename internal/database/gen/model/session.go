@@ -12,11 +12,11 @@ import (
 )
 
 type Session struct {
-	ID        string `sql:"primary_key"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	ExpiresAt time.Time
-	PublicID  string
-	Metadata  string
-	UserID    string
+	ID        string    `sql:"primary_key" db:"id"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	ExpiresAt time.Time `db:"expires_at"`
+	PublicID  string    `db:"public_id"`
+	Metadata  string    `db:"metadata"`
+	UserID    string    `db:"user_id"`
 }

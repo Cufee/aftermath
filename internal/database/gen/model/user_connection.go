@@ -12,14 +12,14 @@ import (
 )
 
 type UserConnection struct {
-	ID          string `sql:"primary_key"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Type        string
-	Verified    bool
-	Selected    bool
-	ReferenceID string
-	Permissions *string
-	Metadata    *string
-	UserID      string
+	ID          string    `sql:"primary_key" db:"id"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
+	Type        string    `db:"type"`
+	Verified    bool      `db:"verified"`
+	Selected    bool      `db:"selected"`
+	ReferenceID string    `db:"reference_id"`
+	Permissions *string   `db:"permissions"`
+	Metadata    *string   `db:"metadata"`
+	UserID      string    `db:"user_id"`
 }

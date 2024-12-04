@@ -12,14 +12,14 @@ import (
 )
 
 type WidgetSettings struct {
-	ID                 string `sql:"primary_key"`
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
-	ReferenceID        string
-	Title              *string
-	SessionFrom        *time.Time
-	Metadata           string
-	Styles             string
-	UserID             string
-	SessionReferenceID *string
+	ID                 string     `sql:"primary_key" db:"id"`
+	CreatedAt          time.Time  `db:"created_at"`
+	UpdatedAt          time.Time  `db:"updated_at"`
+	ReferenceID        string     `db:"reference_id"`
+	Title              *string    `db:"title"`
+	SessionFrom        *time.Time `db:"session_from"`
+	Metadata           string     `db:"metadata"`
+	Styles             string     `db:"styles"`
+	UserID             string     `db:"user_id"`
+	SessionReferenceID *string    `db:"session_reference_id"`
 }

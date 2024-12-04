@@ -12,16 +12,16 @@ import (
 )
 
 type AtlasSchemaRevisions struct {
-	Version         string `sql:"primary_key"`
-	Description     string
-	Type            int32
-	Applied         int32
-	Total           int32
-	ExecutedAt      time.Time
-	ExecutionTime   int32
-	Error           *string
-	ErrorStmt       *string
-	Hash            string
-	PartialHashes   *string
-	OperatorVersion string
+	Version         string    `sql:"primary_key" db:"version"`
+	Description     string    `db:"description"`
+	Type            int32     `db:"type"`
+	Applied         int32     `db:"applied"`
+	Total           int32     `db:"total"`
+	ExecutedAt      time.Time `db:"executed_at"`
+	ExecutionTime   int32     `db:"execution_time"`
+	Error           *string   `db:"error"`
+	ErrorStmt       *string   `db:"error_stmt"`
+	Hash            string    `db:"hash"`
+	PartialHashes   *string   `db:"partial_hashes"`
+	OperatorVersion string    `db:"operator_version"`
 }

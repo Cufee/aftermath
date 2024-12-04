@@ -12,15 +12,15 @@ import (
 )
 
 type AccountSnapshot struct {
-	ID             string `sql:"primary_key"`
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	Type           string
-	LastBattleTime time.Time
-	ReferenceID    string
-	RatingBattles  int32
-	RatingFrame    string
-	RegularBattles int32
-	RegularFrame   string
-	AccountID      string
+	ID             string    `sql:"primary_key" db:"id"`
+	CreatedAt      time.Time `db:"created_at"`
+	UpdatedAt      time.Time `db:"updated_at"`
+	Type           string    `db:"type"`
+	LastBattleTime time.Time `db:"last_battle_time"`
+	ReferenceID    string    `db:"reference_id"`
+	RatingBattles  int32     `db:"rating_battles"`
+	RatingFrame    string    `db:"rating_frame"`
+	RegularBattles int32     `db:"regular_battles"`
+	RegularFrame   string    `db:"regular_frame"`
+	AccountID      string    `db:"account_id"`
 }
