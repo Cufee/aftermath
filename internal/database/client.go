@@ -13,7 +13,6 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/go-jet/jet/v2/sqlite"
-	"github.com/lucsky/cuid"
 	"golang.org/x/text/language"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -78,14 +77,12 @@ type UsersClient interface {
 }
 
 type SnapshotsClient interface {
+	CreateVehicleSnapshots(ctx context.Context, snapshots ...*models.VehicleSnapshot) error
 	GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AccountSnapshot, error)
 	GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) ([]models.VehicleSnapshot, error)
 
-	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
-	GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
-
 	CreateAccountSnapshots(ctx context.Context, snapshots ...*models.AccountSnapshot) error
-	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...*models.VehicleSnapshot) error
+	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
 
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
 }
@@ -132,7 +129,7 @@ type Client interface {
 
 	GlossaryClient
 	AccountsClient
-	// SnapshotsClient
+	SnapshotsClient
 
 	TasksClient
 
@@ -177,10 +174,6 @@ func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) 
 type client struct {
 	options clientOptions
 	db      *sql.DB
-}
-
-func (c *client) newID() string {
-	return cuid.New()
 }
 
 func (c *client) query(ctx context.Context, stmt sqlite.Statement, dst interface{}) error {

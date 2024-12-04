@@ -1,6 +1,12 @@
 package database
 
-import "time"
+import (
+	"time"
+
+	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/models"
+	s "github.com/go-jet/jet/v2/sqlite"
+)
 
 type baseQueryOptions struct {
 	referenceIDIn    map[string]struct{}
@@ -9,7 +15,7 @@ type baseQueryOptions struct {
 	createdAfter  *time.Time
 	createdBefore *time.Time
 
-	fields []string
+	selectStmt s.SelectStatement
 }
 
 type Query func(*baseQueryOptions)
@@ -67,73 +73,118 @@ func WithCreatedBefore(before time.Time) Query {
 }
 
 /*
-Set fields that will be selected.
-  - Some fields like id, created_at, updated_at will always be selected
-  - Passing 0 length fields will result in select *
+Adds columns used for SELECT
 */
-func WithSelect(fields ...string) Query {
+func WithSelect(a s.Projection, b ...s.Projection) Query {
 	return func(q *baseQueryOptions) {
-		// make sure fields are unique
-		fieldsSet := make(map[string]struct{})
-		for _, field := range append(q.fields, fields...) {
-			fieldsSet[field] = struct{}{}
-		}
-
-		// passing 0 length fields will result in select *
-		q.fields = nil
-		for field := range fieldsSet {
-			q.fields = append(q.fields, field)
-		}
+		q.selectStmt = s.SELECT(a, b...)
 	}
 }
 
-/*
-Returns a slice of fields for a select statement with all duplicates removed and required fields added
-  - if query.fields is nil, returns a nil slice
-*/
-func (q *baseQueryOptions) selectFields(required ...string) []string {
-	if q.fields == nil {
-		return nil
-	}
-
-	// maker sure all required fields are part of the slice
-	var requiredFields = make(map[string]struct{})
-	for _, field := range required {
-		requiredFields[field] = struct{}{}
-	}
-
-	for _, field := range q.fields {
-		for required := range requiredFields {
-			if field == required {
-				delete(requiredFields, required)
-			}
-		}
-	}
-	for field := range requiredFields {
-		q.fields = append(q.fields, field)
-	}
-
-	return q.fields
-}
-
-func (q *baseQueryOptions) refIDIn() []any {
+func (q *baseQueryOptions) refIDIn() []string {
 	if len(q.referenceIDIn) == 0 {
 		return nil
 	}
-	var ids []any
+	var ids []string
 	for id := range q.referenceIDIn {
 		ids = append(ids, id)
 	}
 	return ids
 }
 
-func (q *baseQueryOptions) refIDNotIn() []any {
+func (q *baseQueryOptions) refIDNotIn() []string {
 	if len(q.referenceIDNotIn) == 0 {
 		return nil
 	}
-	var ids []any
+	var ids []string
 	for id := range q.referenceIDNotIn {
 		ids = append(ids, id)
 	}
 	return ids
+}
+
+// build a complete query for vehicle snapshots
+func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy s.GroupByClause, query baseQueryOptions) s.SelectStatement {
+	// required where constraints
+	var innerWhere []s.BoolExpression
+	innerWhere = append(innerWhere, t.VehicleSnapshot.Type.EQ(s.String(string(kind))), t.VehicleSnapshot.AccountID.EQ(s.String(accountID)))
+
+	// optional where constraints
+	if vehicleIDs != nil {
+		innerWhere = append(innerWhere, t.VehicleSnapshot.VehicleID.IN(stringsToExp(vehicleIDs)...))
+	}
+	if in := query.refIDIn(); in != nil {
+		innerWhere = append(innerWhere, t.VehicleSnapshot.ReferenceID.IN(stringsToExp(in)...))
+	}
+	if nin := query.refIDNotIn(); nin != nil {
+		innerWhere = append(innerWhere, t.VehicleSnapshot.ReferenceID.NOT_IN(stringsToExp(nin)...))
+	}
+
+	// order and created_at constraints
+	innerOrder := t.VehicleSnapshot.CreatedAt.DESC()
+	if query.createdAfter != nil {
+		innerWhere = append(innerWhere, t.VehicleSnapshot.CreatedAt.GT(s.DATETIME(*query.createdAfter)))
+		innerOrder = t.VehicleSnapshot.CreatedAt.ASC()
+	}
+	if query.createdBefore != nil {
+		innerWhere = append(innerWhere, t.VehicleSnapshot.CreatedAt.LT(s.DATETIME(*query.createdBefore)))
+		innerOrder = t.VehicleSnapshot.CreatedAt.DESC()
+	}
+
+	var sel s.Projection = t.VehicleSnapshot.AllColumns
+	if query.selectStmt != nil {
+		sel = query.selectStmt
+	}
+
+	innerQuery := t.VehicleSnapshot.
+		SELECT(sel).
+		WHERE(s.AND(innerWhere...)).
+		ORDER_BY(innerOrder)
+
+	return s.
+		SELECT(s.STAR).
+		FROM(innerQuery.AsTable(t.VehicleSnapshot.TableName())).
+		GROUP_BY(groupBy)
+}
+
+// build a complete query for account snapshot
+func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy s.GroupByClause, query baseQueryOptions) s.SelectStatement {
+	var innerWhere []s.BoolExpression
+	innerWhere = append(innerWhere, t.AccountSnapshot.Type.EQ(s.String(string(kind))), t.AccountSnapshot.AccountID.IN(stringsToExp(accountIDs)...))
+
+	// optional where constraints
+	if in := query.refIDIn(); in != nil {
+		innerWhere = append(innerWhere, t.AccountSnapshot.ReferenceID.IN(stringsToExp(in)...))
+
+	}
+	if nin := query.refIDNotIn(); nin != nil {
+		innerWhere = append(innerWhere, t.AccountSnapshot.ReferenceID.NOT_IN(stringsToExp(nin)...))
+	}
+
+	// order and created_at constraints
+	innerOrder := t.AccountSnapshot.CreatedAt.DESC()
+	if query.createdAfter != nil {
+		innerWhere = append(innerWhere, t.AccountSnapshot.CreatedAt.GT(s.DATETIME(*query.createdAfter)))
+		innerOrder = t.AccountSnapshot.CreatedAt.ASC()
+	}
+	if query.createdBefore != nil {
+		innerWhere = append(innerWhere, t.AccountSnapshot.CreatedAt.LT(s.DATETIME(*query.createdBefore)))
+		innerOrder = t.AccountSnapshot.CreatedAt.DESC()
+	}
+
+	var sel s.Projection = t.AccountSnapshot.AllColumns
+	if query.selectStmt != nil {
+		sel = query.selectStmt
+	}
+
+	innerQuery := t.AccountSnapshot.
+		SELECT(sel).
+		WHERE(s.AND(innerWhere...)).
+		ORDER_BY(innerOrder)
+
+	return s.
+		SELECT(s.STAR).
+		FROM(innerQuery.AsTable(t.AccountSnapshot.TableName())).
+		GROUP_BY(groupBy)
+
 }

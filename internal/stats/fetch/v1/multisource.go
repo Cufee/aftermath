@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
 
 	"github.com/cufee/aftermath/internal/external/blitzstars"
@@ -390,7 +389,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 			return
 		}
 		if len(s) < 1 {
-			accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Err: new(db.NotFoundError)}
+			accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Err: database.ErrNotFound}
 			return
 		}
 		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s[0]}

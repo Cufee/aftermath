@@ -9,13 +9,12 @@ import (
 
 	"github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"golang.org/x/text/language"
 )
 
-var ErrNotFound = &db.NotFoundError{}
+var ErrNotFound = database.ErrNotFound
 
 var _ database.Client = &staticTestingDatabase{}
 
@@ -107,10 +106,10 @@ func (c *staticTestingDatabase) GetOrCreateUserByID(ctx context.Context, id stri
 func (c *staticTestingDatabase) GetUserConnection(ctx context.Context, id string) (models.UserConnection, error) {
 	return models.UserConnection{}, errors.New("GetConnection not implemented")
 }
-func (c *staticTestingDatabase) UpdateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+func (c *staticTestingDatabase) UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error) {
 	return connection, nil
 }
-func (c *staticTestingDatabase) UpsertUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error) {
+func (c *staticTestingDatabase) UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	return connection, nil
 }
 func (c *staticTestingDatabase) DeleteUserConnection(ctx context.Context, userID, connectionID string) error {
@@ -129,11 +128,8 @@ func (c *staticTestingDatabase) GetAccountLastBattleTimes(ctx context.Context, a
 func (c *staticTestingDatabase) GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.Query) ([]models.VehicleSnapshot, error) {
 	return nil, errors.New("GetVehicleSnapshots not implemented")
 }
-func (c *staticTestingDatabase) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...*models.VehicleSnapshot) error {
-	return errors.New("CreateAccountVehicleSnapshots not implemented")
-}
-func (c *staticTestingDatabase) GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.Query) (map[string]time.Time, error) {
-	return nil, errors.New("GetVehicleLastBattleTimes not implemented")
+func (c *staticTestingDatabase) CreateVehicleSnapshots(ctx context.Context, snapshots ...*models.VehicleSnapshot) error {
+	return errors.New("CreateVehicleSnapshots not implemented")
 }
 func (c *staticTestingDatabase) DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error {
 	return errors.New("DeleteExpiredSnapshots not implemented")

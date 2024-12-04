@@ -45,7 +45,7 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 		}
 
 		conn.Selected = conn.ID == connID
-		u, err := ctx.Database().UpdateUserConnection(ctx.Context, conn)
+		u, err := ctx.Database().UpdateUserConnection(ctx.Context, conn.ID, conn)
 		if err != nil {
 			return nil, ctx.Err(err, "failed to update a connection")
 		}

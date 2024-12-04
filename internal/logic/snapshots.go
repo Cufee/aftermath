@@ -217,7 +217,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		vehicles := vehicleSnapshots[accountSnapshot.AccountID]
 		if len(vehicles) > 0 {
 			// save all vehicle snapshots)
-			err := dbClient.CreateAccountVehicleSnapshots(ctx, accountSnapshot.AccountID, vehicles...)
+			err := dbClient.CreateVehicleSnapshots(ctx, vehicles...)
 			if err != nil {
 				accountErrors[accountSnapshot.AccountID] = err
 				continue

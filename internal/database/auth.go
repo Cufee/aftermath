@@ -14,7 +14,7 @@ import (
 
 func (c *client) CreateAuthNonce(ctx context.Context, publicID, identifier string, expiresAt time.Time, meta map[string]string) (models.AuthNonce, error) {
 	insert := m.AuthNonce{
-		ID:         c.newID(),
+		ID:         cuid.New(),
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 		Active:     true,

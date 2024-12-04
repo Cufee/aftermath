@@ -39,7 +39,7 @@ func UpdateDefaultUserConnection(ctx context.Context, db database.Client, userID
 		}
 
 		conn.Selected = conn.ReferenceID == referenceID
-		_, err := db.UpdateUserConnection(ctx, conn)
+		_, err := db.UpdateUserConnection(ctx, conn.ID, conn)
 		if err != nil {
 			if database.IsNotFound(err) {
 				return models.UserConnection{}, ErrConnectionNotFound
