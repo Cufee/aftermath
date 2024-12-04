@@ -2,11 +2,12 @@ package database
 
 import (
 	"context"
-	"encoding/json"
+
 	"time"
 
 	m "github.com/cufee/aftermath/internal/database/gen/model"
 	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	s "github.com/go-jet/jet/v2/sqlite"
 )

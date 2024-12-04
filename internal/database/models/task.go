@@ -1,8 +1,9 @@
 package models
 
 import (
-	"encoding/json"
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/cufee/aftermath/internal/database/gen/model"
 	"github.com/cufee/aftermath/internal/utils"

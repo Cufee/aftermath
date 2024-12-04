@@ -2,8 +2,9 @@ package database
 
 import (
 	"context"
-	"encoding/json"
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
 
 	m "github.com/cufee/aftermath/internal/database/gen/model"
 	t "github.com/cufee/aftermath/internal/database/gen/table"
