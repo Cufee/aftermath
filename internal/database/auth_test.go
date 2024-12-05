@@ -66,13 +66,13 @@ func TestSession(t *testing.T) {
 	client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.Session.TableName()))
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.Session.TableName()))
 
-	user, err := client.GetOrCreateUserByID(context.Background(), "user-10")
+	user, err := client.GetOrCreateUserByID(context.Background(), "user-TestSession")
 	is.NoErr(err)
 
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = '%s';", table.User.TableName(), user.ID))
 
 	t.Run("all session fields are set correctly", func(t *testing.T) {
-		session, err := client.CreateSession(context.Background(), "pid-10", "user-10", time.Now().Add(time.Hour), nil)
+		session, err := client.CreateSession(context.Background(), "pid-10", user.ID, time.Now().Add(time.Hour), nil)
 		is.NoErr(err)
 		is.True(session.ID != "")
 		is.True(session.UserID == "user-10")
@@ -80,7 +80,7 @@ func TestSession(t *testing.T) {
 		is.True(session.ExpiresAt.After(time.Now().Add(time.Minute)))
 	})
 	t.Run("create and find a session", func(t *testing.T) {
-		session, err := client.CreateSession(context.Background(), "pid-11", "user-10", time.Now().Add(time.Hour), nil)
+		session, err := client.CreateSession(context.Background(), "pid-11", user.ID, time.Now().Add(time.Hour), nil)
 		is.NoErr(err)
 
 		found, err := client.FindSession(context.Background(), session.PublicID)
@@ -88,7 +88,7 @@ func TestSession(t *testing.T) {
 		is.True(found.ID == session.ID)
 	})
 	t.Run("set session expiration", func(t *testing.T) {
-		session, err := client.CreateSession(context.Background(), "pid-12", "user-10", time.Now().Add(time.Hour), nil)
+		session, err := client.CreateSession(context.Background(), "pid-12", user.ID, time.Now().Add(time.Hour), nil)
 		is.NoErr(err)
 
 		{

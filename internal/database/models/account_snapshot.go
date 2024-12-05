@@ -47,9 +47,8 @@ func (record *AccountSnapshot) Model() model.AccountSnapshot {
 		RegularBattles: int32(record.RegularBattles.Battles),
 		AccountID:      record.AccountID,
 	}
-	rating, _ := json.Marshal(record.RatingBattles)
-	s.RatingFrame = rating
-	regular, _ := json.Marshal(record.RegularBattles)
-	s.RegularFrame = regular
+	s.RatingFrame, _ = json.Marshal(record.RatingBattles)
+	s.RegularFrame, _ = json.Marshal(record.RegularBattles)
+
 	return s
 }

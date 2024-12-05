@@ -28,6 +28,6 @@ func ToVehicle(record *model.Vehicle) Vehicle {
 		Tier:           int(record.Tier),
 		LocalizedNames: make(map[language.Tag]string, 0),
 	}
-	json.Unmarshal([]byte(record.LocalizedNames), &v.LocalizedNames)
+	json.Unmarshal(record.LocalizedNames, &v.LocalizedNames)
 	return v
 }

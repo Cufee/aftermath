@@ -94,13 +94,12 @@ func (record *DiscordInteraction) Model() model.DiscordInteraction {
 		ChannelID: record.ChannelID,
 		MessageID: record.MessageID,
 
-		Locale:  record.Locale.String(),
-		Type:    string(record.Type),
-		EventID: record.EventID,
+		Locale:   record.Locale.String(),
+		Type:     string(record.Type),
+		EventID:  record.EventID,
+		Metadata: make([]byte, 0),
 	}
-	if record.Meta != nil {
-		data, _ := json.Marshal(record.Meta)
-		i.Metadata = data
-	}
+	i.Metadata, _ = json.Marshal(record.Meta)
+
 	return i
 }

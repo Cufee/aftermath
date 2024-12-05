@@ -66,9 +66,6 @@ func (record *Session) Model() model.Session {
 		UpdatedAt: time.Now(),
 		ExpiresAt: record.ExpiresAt,
 	}
-	if record.Meta != nil {
-		data, _ := json.Marshal(record.Meta)
-		session.Metadata = data
-	}
+	session.Metadata, _ = json.Marshal(record.Meta)
 	return session
 }
