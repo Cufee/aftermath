@@ -121,6 +121,7 @@ func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []str
 	if err != nil {
 		return nil, err
 	}
+	defer rs.Close()
 
 	var snapshots []m.AccountSnapshot
 	for rs.Next() {
@@ -151,10 +152,9 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...*model
 		}
 
 		err := c.withTx(ctx, func(tx *transaction) error {
-			_, err := tx.exec(ctx, t.VehicleSnapshot.INSERT(t.VehicleSnapshot.AllColumns).MODELS(models))
+			_, err := tx.exec(ctx, t.AccountSnapshot.INSERT(t.AccountSnapshot.AllColumns).MODELS(models))
 			return err
 		})
-
 		if err != nil {
 			return err
 		}

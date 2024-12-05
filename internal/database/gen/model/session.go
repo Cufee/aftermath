@@ -7,16 +7,12 @@
 
 package model
 
-import (
-	"time"
-)
-
 type Session struct {
-	ID        string    `sql:"primary_key" db:"id"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	ExpiresAt time.Time `db:"expires_at"`
-	PublicID  string    `db:"public_id"`
-	Metadata  []byte    `db:"metadata"`
-	UserID    string    `db:"user_id"`
+	ID        string `sql:"primary_key" db:"id"`
+	CreatedAt string `db:"created_at"`
+	UpdatedAt string `db:"updated_at"`
+	ExpiresAt string `db:"expires_at"`
+	PublicID  string `db:"public_id"`
+	Metadata  []byte `db:"metadata"`
+	UserID    string `db:"user_id"`
 }

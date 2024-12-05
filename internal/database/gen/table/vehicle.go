@@ -18,8 +18,8 @@ type vehicleTable struct {
 
 	// Columns
 	ID             sqlite.ColumnString
-	CreatedAt      sqlite.ColumnTimestamp
-	UpdatedAt      sqlite.ColumnTimestamp
+	CreatedAt      sqlite.ColumnString
+	UpdatedAt      sqlite.ColumnString
 	Tier           sqlite.ColumnInteger
 	LocalizedNames sqlite.ColumnString
 
@@ -63,8 +63,8 @@ func newVehicleTable(schemaName, tableName, alias string) *VehicleTable {
 func newVehicleTableImpl(schemaName, tableName, alias string) vehicleTable {
 	var (
 		IDColumn             = sqlite.StringColumn("id")
-		CreatedAtColumn      = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn      = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn      = sqlite.StringColumn("created_at")
+		UpdatedAtColumn      = sqlite.StringColumn("updated_at")
 		TierColumn           = sqlite.IntegerColumn("tier")
 		LocalizedNamesColumn = sqlite.StringColumn("localized_names")
 		allColumns           = sqlite.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, TierColumn, LocalizedNamesColumn}

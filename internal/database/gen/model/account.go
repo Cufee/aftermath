@@ -7,18 +7,14 @@
 
 package model
 
-import (
-	"time"
-)
-
 type Account struct {
-	ID               string    `sql:"primary_key" db:"id"`
-	CreatedAt        time.Time `db:"created_at"`
-	UpdatedAt        time.Time `db:"updated_at"`
-	LastBattleTime   time.Time `db:"last_battle_time"`
-	AccountCreatedAt time.Time `db:"account_created_at"`
-	Realm            string    `db:"realm"`
-	Nickname         string    `db:"nickname"`
-	Private          bool      `db:"private"`
-	ClanID           *string   `db:"clan_id"`
+	ID               string  `sql:"primary_key" db:"id"`
+	CreatedAt        string  `db:"created_at"`
+	UpdatedAt        string  `db:"updated_at"`
+	LastBattleTime   string  `db:"last_battle_time"`
+	AccountCreatedAt string  `db:"account_created_at"`
+	Realm            string  `db:"realm"`
+	Nickname         string  `db:"nickname"`
+	Private          bool    `db:"private"`
+	ClanID           *string `db:"clan_id"`
 }

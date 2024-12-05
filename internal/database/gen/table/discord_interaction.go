@@ -18,8 +18,8 @@ type discordInteractionTable struct {
 
 	// Columns
 	ID        sqlite.ColumnString
-	CreatedAt sqlite.ColumnTimestamp
-	UpdatedAt sqlite.ColumnTimestamp
+	CreatedAt sqlite.ColumnString
+	UpdatedAt sqlite.ColumnString
 	Result    sqlite.ColumnString
 	EventID   sqlite.ColumnString
 	GuildID   sqlite.ColumnString
@@ -71,8 +71,8 @@ func newDiscordInteractionTable(schemaName, tableName, alias string) *DiscordInt
 func newDiscordInteractionTableImpl(schemaName, tableName, alias string) discordInteractionTable {
 	var (
 		IDColumn        = sqlite.StringColumn("id")
-		CreatedAtColumn = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn = sqlite.StringColumn("created_at")
+		UpdatedAtColumn = sqlite.StringColumn("updated_at")
 		ResultColumn    = sqlite.StringColumn("result")
 		EventIDColumn   = sqlite.StringColumn("event_id")
 		GuildIDColumn   = sqlite.StringColumn("guild_id")

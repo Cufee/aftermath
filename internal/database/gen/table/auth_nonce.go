@@ -18,10 +18,10 @@ type authNonceTable struct {
 
 	// Columns
 	ID         sqlite.ColumnString
-	CreatedAt  sqlite.ColumnTimestamp
-	UpdatedAt  sqlite.ColumnTimestamp
+	CreatedAt  sqlite.ColumnString
+	UpdatedAt  sqlite.ColumnString
 	Active     sqlite.ColumnBool
-	ExpiresAt  sqlite.ColumnTimestamp
+	ExpiresAt  sqlite.ColumnString
 	Identifier sqlite.ColumnString
 	PublicID   sqlite.ColumnString
 	Metadata   sqlite.ColumnString
@@ -66,10 +66,10 @@ func newAuthNonceTable(schemaName, tableName, alias string) *AuthNonceTable {
 func newAuthNonceTableImpl(schemaName, tableName, alias string) authNonceTable {
 	var (
 		IDColumn         = sqlite.StringColumn("id")
-		CreatedAtColumn  = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn  = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn  = sqlite.StringColumn("created_at")
+		UpdatedAtColumn  = sqlite.StringColumn("updated_at")
 		ActiveColumn     = sqlite.BoolColumn("active")
-		ExpiresAtColumn  = sqlite.TimestampColumn("expires_at")
+		ExpiresAtColumn  = sqlite.StringColumn("expires_at")
 		IdentifierColumn = sqlite.StringColumn("identifier")
 		PublicIDColumn   = sqlite.StringColumn("public_id")
 		MetadataColumn   = sqlite.StringColumn("metadata")

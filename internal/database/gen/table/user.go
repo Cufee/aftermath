@@ -18,8 +18,8 @@ type userTable struct {
 
 	// Columns
 	ID           sqlite.ColumnString
-	CreatedAt    sqlite.ColumnTimestamp
-	UpdatedAt    sqlite.ColumnTimestamp
+	CreatedAt    sqlite.ColumnString
+	UpdatedAt    sqlite.ColumnString
 	Username     sqlite.ColumnString
 	Permissions  sqlite.ColumnString
 	FeatureFlags sqlite.ColumnString
@@ -64,8 +64,8 @@ func newUserTable(schemaName, tableName, alias string) *UserTable {
 func newUserTableImpl(schemaName, tableName, alias string) userTable {
 	var (
 		IDColumn           = sqlite.StringColumn("id")
-		CreatedAtColumn    = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn    = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn    = sqlite.StringColumn("created_at")
+		UpdatedAtColumn    = sqlite.StringColumn("updated_at")
 		UsernameColumn     = sqlite.StringColumn("username")
 		PermissionsColumn  = sqlite.StringColumn("permissions")
 		FeatureFlagsColumn = sqlite.StringColumn("feature_flags")

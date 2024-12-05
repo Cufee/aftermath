@@ -6,11 +6,11 @@ table "user" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "username" {
     null    = false
@@ -46,11 +46,11 @@ table "user_connection" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "type" {
     null = false
@@ -122,11 +122,11 @@ table "user_subscription" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "type" {
     null = false
@@ -134,7 +134,7 @@ table "user_subscription" {
   }
   column "expires_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "permissions" {
     null = false
@@ -182,11 +182,11 @@ table "user_content" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "type" {
     null = false
@@ -246,15 +246,15 @@ table "user_restriction" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "expires_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "type" {
     null = false
@@ -309,11 +309,11 @@ table "moderation_request" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "moderator_comment" {
     null = true
@@ -391,11 +391,11 @@ table "widget_settings" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "reference_id" {
     null = false
@@ -407,7 +407,7 @@ table "widget_settings" {
   }
   column "session_from" {
     null = true
-    type = datetime
+    type = text
   }
   column "metadata" {
     null = false

@@ -18,13 +18,13 @@ type vehicleSnapshotTable struct {
 
 	// Columns
 	ID             sqlite.ColumnString
-	CreatedAt      sqlite.ColumnTimestamp
-	UpdatedAt      sqlite.ColumnTimestamp
+	CreatedAt      sqlite.ColumnString
+	UpdatedAt      sqlite.ColumnString
 	Type           sqlite.ColumnString
 	VehicleID      sqlite.ColumnString
 	ReferenceID    sqlite.ColumnString
 	Battles        sqlite.ColumnInteger
-	LastBattleTime sqlite.ColumnTimestamp
+	LastBattleTime sqlite.ColumnString
 	Frame          sqlite.ColumnString
 	AccountID      sqlite.ColumnString
 
@@ -68,13 +68,13 @@ func newVehicleSnapshotTable(schemaName, tableName, alias string) *VehicleSnapsh
 func newVehicleSnapshotTableImpl(schemaName, tableName, alias string) vehicleSnapshotTable {
 	var (
 		IDColumn             = sqlite.StringColumn("id")
-		CreatedAtColumn      = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn      = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn      = sqlite.StringColumn("created_at")
+		UpdatedAtColumn      = sqlite.StringColumn("updated_at")
 		TypeColumn           = sqlite.StringColumn("type")
 		VehicleIDColumn      = sqlite.StringColumn("vehicle_id")
 		ReferenceIDColumn    = sqlite.StringColumn("reference_id")
 		BattlesColumn        = sqlite.IntegerColumn("battles")
-		LastBattleTimeColumn = sqlite.TimestampColumn("last_battle_time")
+		LastBattleTimeColumn = sqlite.StringColumn("last_battle_time")
 		FrameColumn          = sqlite.StringColumn("frame")
 		AccountIDColumn      = sqlite.StringColumn("account_id")
 		allColumns           = sqlite.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, TypeColumn, VehicleIDColumn, ReferenceIDColumn, BattlesColumn, LastBattleTimeColumn, FrameColumn, AccountIDColumn}

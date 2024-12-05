@@ -18,8 +18,8 @@ type gameModeTable struct {
 
 	// Columns
 	ID             sqlite.ColumnString
-	CreatedAt      sqlite.ColumnTimestamp
-	UpdatedAt      sqlite.ColumnTimestamp
+	CreatedAt      sqlite.ColumnString
+	UpdatedAt      sqlite.ColumnString
 	LocalizedNames sqlite.ColumnString
 
 	AllColumns     sqlite.ColumnList
@@ -62,8 +62,8 @@ func newGameModeTable(schemaName, tableName, alias string) *GameModeTable {
 func newGameModeTableImpl(schemaName, tableName, alias string) gameModeTable {
 	var (
 		IDColumn             = sqlite.StringColumn("id")
-		CreatedAtColumn      = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn      = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn      = sqlite.StringColumn("created_at")
+		UpdatedAtColumn      = sqlite.StringColumn("updated_at")
 		LocalizedNamesColumn = sqlite.StringColumn("localized_names")
 		allColumns           = sqlite.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LocalizedNamesColumn}
 		mutableColumns       = sqlite.ColumnList{CreatedAtColumn, UpdatedAtColumn, LocalizedNamesColumn}

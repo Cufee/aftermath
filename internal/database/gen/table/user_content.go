@@ -18,8 +18,8 @@ type userContentTable struct {
 
 	// Columns
 	ID          sqlite.ColumnString
-	CreatedAt   sqlite.ColumnTimestamp
-	UpdatedAt   sqlite.ColumnTimestamp
+	CreatedAt   sqlite.ColumnString
+	UpdatedAt   sqlite.ColumnString
 	Type        sqlite.ColumnString
 	ReferenceID sqlite.ColumnString
 	Value       sqlite.ColumnString
@@ -66,8 +66,8 @@ func newUserContentTable(schemaName, tableName, alias string) *UserContentTable 
 func newUserContentTableImpl(schemaName, tableName, alias string) userContentTable {
 	var (
 		IDColumn          = sqlite.StringColumn("id")
-		CreatedAtColumn   = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn   = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn   = sqlite.StringColumn("created_at")
+		UpdatedAtColumn   = sqlite.StringColumn("updated_at")
 		TypeColumn        = sqlite.StringColumn("type")
 		ReferenceIDColumn = sqlite.StringColumn("reference_id")
 		ValueColumn       = sqlite.StringColumn("value")

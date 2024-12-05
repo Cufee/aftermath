@@ -18,11 +18,11 @@ type widgetSettingsTable struct {
 
 	// Columns
 	ID                 sqlite.ColumnString
-	CreatedAt          sqlite.ColumnTimestamp
-	UpdatedAt          sqlite.ColumnTimestamp
+	CreatedAt          sqlite.ColumnString
+	UpdatedAt          sqlite.ColumnString
 	ReferenceID        sqlite.ColumnString
 	Title              sqlite.ColumnString
-	SessionFrom        sqlite.ColumnTimestamp
+	SessionFrom        sqlite.ColumnString
 	Metadata           sqlite.ColumnString
 	Styles             sqlite.ColumnString
 	UserID             sqlite.ColumnString
@@ -68,11 +68,11 @@ func newWidgetSettingsTable(schemaName, tableName, alias string) *WidgetSettings
 func newWidgetSettingsTableImpl(schemaName, tableName, alias string) widgetSettingsTable {
 	var (
 		IDColumn                 = sqlite.StringColumn("id")
-		CreatedAtColumn          = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn          = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn          = sqlite.StringColumn("created_at")
+		UpdatedAtColumn          = sqlite.StringColumn("updated_at")
 		ReferenceIDColumn        = sqlite.StringColumn("reference_id")
 		TitleColumn              = sqlite.StringColumn("title")
-		SessionFromColumn        = sqlite.TimestampColumn("session_from")
+		SessionFromColumn        = sqlite.StringColumn("session_from")
 		MetadataColumn           = sqlite.StringColumn("metadata")
 		StylesColumn             = sqlite.StringColumn("styles")
 		UserIDColumn             = sqlite.StringColumn("user_id")

@@ -18,8 +18,8 @@ type userConnectionTable struct {
 
 	// Columns
 	ID          sqlite.ColumnString
-	CreatedAt   sqlite.ColumnTimestamp
-	UpdatedAt   sqlite.ColumnTimestamp
+	CreatedAt   sqlite.ColumnString
+	UpdatedAt   sqlite.ColumnString
 	Type        sqlite.ColumnString
 	Verified    sqlite.ColumnBool
 	Selected    sqlite.ColumnBool
@@ -68,8 +68,8 @@ func newUserConnectionTable(schemaName, tableName, alias string) *UserConnection
 func newUserConnectionTableImpl(schemaName, tableName, alias string) userConnectionTable {
 	var (
 		IDColumn          = sqlite.StringColumn("id")
-		CreatedAtColumn   = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn   = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn   = sqlite.StringColumn("created_at")
+		UpdatedAtColumn   = sqlite.StringColumn("updated_at")
 		TypeColumn        = sqlite.StringColumn("type")
 		VerifiedColumn    = sqlite.BoolColumn("verified")
 		SelectedColumn    = sqlite.BoolColumn("selected")

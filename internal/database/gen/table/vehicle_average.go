@@ -18,8 +18,8 @@ type vehicleAverageTable struct {
 
 	// Columns
 	ID        sqlite.ColumnString
-	CreatedAt sqlite.ColumnTimestamp
-	UpdatedAt sqlite.ColumnTimestamp
+	CreatedAt sqlite.ColumnString
+	UpdatedAt sqlite.ColumnString
 	Data      sqlite.ColumnString
 
 	AllColumns     sqlite.ColumnList
@@ -62,8 +62,8 @@ func newVehicleAverageTable(schemaName, tableName, alias string) *VehicleAverage
 func newVehicleAverageTableImpl(schemaName, tableName, alias string) vehicleAverageTable {
 	var (
 		IDColumn        = sqlite.StringColumn("id")
-		CreatedAtColumn = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn = sqlite.StringColumn("created_at")
+		UpdatedAtColumn = sqlite.StringColumn("updated_at")
 		DataColumn      = sqlite.StringColumn("data")
 		allColumns      = sqlite.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, DataColumn}
 		mutableColumns  = sqlite.ColumnList{CreatedAtColumn, UpdatedAtColumn, DataColumn}

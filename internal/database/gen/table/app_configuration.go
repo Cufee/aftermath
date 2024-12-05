@@ -18,8 +18,8 @@ type appConfigurationTable struct {
 
 	// Columns
 	ID        sqlite.ColumnString
-	CreatedAt sqlite.ColumnTimestamp
-	UpdatedAt sqlite.ColumnTimestamp
+	CreatedAt sqlite.ColumnString
+	UpdatedAt sqlite.ColumnString
 	Key       sqlite.ColumnString
 	Value     sqlite.ColumnString
 	Metadata  sqlite.ColumnString
@@ -64,8 +64,8 @@ func newAppConfigurationTable(schemaName, tableName, alias string) *AppConfigura
 func newAppConfigurationTableImpl(schemaName, tableName, alias string) appConfigurationTable {
 	var (
 		IDColumn        = sqlite.StringColumn("id")
-		CreatedAtColumn = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn = sqlite.StringColumn("created_at")
+		UpdatedAtColumn = sqlite.StringColumn("updated_at")
 		KeyColumn       = sqlite.StringColumn("key")
 		ValueColumn     = sqlite.StringColumn("value")
 		MetadataColumn  = sqlite.StringColumn("metadata")

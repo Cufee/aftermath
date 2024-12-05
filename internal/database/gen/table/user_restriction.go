@@ -18,9 +18,9 @@ type userRestrictionTable struct {
 
 	// Columns
 	ID               sqlite.ColumnString
-	CreatedAt        sqlite.ColumnTimestamp
-	UpdatedAt        sqlite.ColumnTimestamp
-	ExpiresAt        sqlite.ColumnTimestamp
+	CreatedAt        sqlite.ColumnString
+	UpdatedAt        sqlite.ColumnString
+	ExpiresAt        sqlite.ColumnString
 	Type             sqlite.ColumnString
 	Restriction      sqlite.ColumnString
 	PublicReason     sqlite.ColumnString
@@ -68,9 +68,9 @@ func newUserRestrictionTable(schemaName, tableName, alias string) *UserRestricti
 func newUserRestrictionTableImpl(schemaName, tableName, alias string) userRestrictionTable {
 	var (
 		IDColumn               = sqlite.StringColumn("id")
-		CreatedAtColumn        = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn        = sqlite.TimestampColumn("updated_at")
-		ExpiresAtColumn        = sqlite.TimestampColumn("expires_at")
+		CreatedAtColumn        = sqlite.StringColumn("created_at")
+		UpdatedAtColumn        = sqlite.StringColumn("updated_at")
+		ExpiresAtColumn        = sqlite.StringColumn("expires_at")
 		TypeColumn             = sqlite.StringColumn("type")
 		RestrictionColumn      = sqlite.StringColumn("restriction")
 		PublicReasonColumn     = sqlite.StringColumn("public_reason")

@@ -7,20 +7,16 @@
 
 package model
 
-import (
-	"time"
-)
-
 type AccountSnapshot struct {
-	ID             string    `sql:"primary_key" db:"id"`
-	CreatedAt      time.Time `db:"created_at"`
-	UpdatedAt      time.Time `db:"updated_at"`
-	Type           string    `db:"type"`
-	LastBattleTime time.Time `db:"last_battle_time"`
-	ReferenceID    string    `db:"reference_id"`
-	RatingBattles  int32     `db:"rating_battles"`
-	RatingFrame    []byte    `db:"rating_frame"`
-	RegularBattles int32     `db:"regular_battles"`
-	RegularFrame   []byte    `db:"regular_frame"`
-	AccountID      string    `db:"account_id"`
+	ID             string `sql:"primary_key" db:"id"`
+	CreatedAt      string `db:"created_at"`
+	UpdatedAt      string `db:"updated_at"`
+	Type           string `db:"type"`
+	LastBattleTime string `db:"last_battle_time"`
+	ReferenceID    string `db:"reference_id"`
+	RatingBattles  int32  `db:"rating_battles"`
+	RatingFrame    []byte `db:"rating_frame"`
+	RegularBattles int32  `db:"regular_battles"`
+	RegularFrame   []byte `db:"regular_frame"`
+	AccountID      string `db:"account_id"`
 }

@@ -7,21 +7,17 @@
 
 package model
 
-import (
-	"time"
-)
-
 type CronTask struct {
-	ID             string    `sql:"primary_key" db:"id"`
-	CreatedAt      time.Time `db:"created_at"`
-	UpdatedAt      time.Time `db:"updated_at"`
-	Type           string    `db:"type"`
-	ReferenceID    string    `db:"reference_id"`
-	Targets        []byte    `db:"targets"`
-	Status         string    `db:"status"`
-	ScheduledAfter time.Time `db:"scheduled_after"`
-	LastRun        time.Time `db:"last_run"`
-	TriesLeft      int32     `db:"tries_left"`
-	Logs           []byte    `db:"logs"`
-	Data           []byte    `db:"data"`
+	ID             string `sql:"primary_key" db:"id"`
+	CreatedAt      string `db:"created_at"`
+	UpdatedAt      string `db:"updated_at"`
+	Type           string `db:"type"`
+	ReferenceID    string `db:"reference_id"`
+	Targets        []byte `db:"targets"`
+	Status         string `db:"status"`
+	ScheduledAfter string `db:"scheduled_after"`
+	LastRun        string `db:"last_run"`
+	TriesLeft      int32  `db:"tries_left"`
+	Logs           []byte `db:"logs"`
+	Data           []byte `db:"data"`
 }

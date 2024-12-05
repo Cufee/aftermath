@@ -7,13 +7,9 @@
 
 package model
 
-import (
-	"time"
-)
-
 type VehicleAverage struct {
-	ID        string    `sql:"primary_key" db:"id"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	Data      []byte    `db:"data"`
+	ID        string `sql:"primary_key" db:"id"`
+	CreatedAt string `db:"created_at"`
+	UpdatedAt string `db:"updated_at"`
+	Data      []byte `db:"data"`
 }

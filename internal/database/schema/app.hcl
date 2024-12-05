@@ -6,11 +6,11 @@ table "app_configuration" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "key" {
     null = false
@@ -46,11 +46,11 @@ table "cron_task" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "type" {
     null = false
@@ -71,11 +71,11 @@ table "cron_task" {
   }
   column "scheduled_after" {
     null = false
-    type = datetime
+    type = text
   }
   column "last_run" {
     null = false
-    type = datetime
+    type = text
   }
   column "tries_left" {
     null    = false

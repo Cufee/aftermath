@@ -7,15 +7,11 @@
 
 package model
 
-import (
-	"time"
-)
-
 type User struct {
-	ID           string    `sql:"primary_key" db:"id"`
-	CreatedAt    time.Time `db:"created_at"`
-	UpdatedAt    time.Time `db:"updated_at"`
-	Username     string    `db:"username"`
-	Permissions  string    `db:"permissions"`
-	FeatureFlags []byte    `db:"feature_flags"`
+	ID           string `sql:"primary_key" db:"id"`
+	CreatedAt    string `db:"created_at"`
+	UpdatedAt    string `db:"updated_at"`
+	Username     string `db:"username"`
+	Permissions  string `db:"permissions"`
+	FeatureFlags []byte `db:"feature_flags"`
 }

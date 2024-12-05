@@ -6,11 +6,11 @@ table "application_command" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "name" {
     null = false
@@ -43,11 +43,11 @@ table "discord_interaction" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "result" {
     null = false

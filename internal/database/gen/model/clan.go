@@ -7,16 +7,12 @@
 
 package model
 
-import (
-	"time"
-)
-
 type Clan struct {
-	ID        string    `sql:"primary_key" db:"id"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	Tag       string    `db:"tag"`
-	Name      string    `db:"name"`
-	EmblemID  *string   `db:"emblem_id"`
-	Members   []byte    `db:"members"`
+	ID        string  `sql:"primary_key" db:"id"`
+	CreatedAt string  `db:"created_at"`
+	UpdatedAt string  `db:"updated_at"`
+	Tag       string  `db:"tag"`
+	Name      string  `db:"name"`
+	EmblemID  *string `db:"emblem_id"`
+	Members   []byte  `db:"members"`
 }

@@ -18,10 +18,10 @@ type accountSnapshotTable struct {
 
 	// Columns
 	ID             sqlite.ColumnString
-	CreatedAt      sqlite.ColumnTimestamp
-	UpdatedAt      sqlite.ColumnTimestamp
+	CreatedAt      sqlite.ColumnString
+	UpdatedAt      sqlite.ColumnString
 	Type           sqlite.ColumnString
-	LastBattleTime sqlite.ColumnTimestamp
+	LastBattleTime sqlite.ColumnString
 	ReferenceID    sqlite.ColumnString
 	RatingBattles  sqlite.ColumnInteger
 	RatingFrame    sqlite.ColumnString
@@ -69,10 +69,10 @@ func newAccountSnapshotTable(schemaName, tableName, alias string) *AccountSnapsh
 func newAccountSnapshotTableImpl(schemaName, tableName, alias string) accountSnapshotTable {
 	var (
 		IDColumn             = sqlite.StringColumn("id")
-		CreatedAtColumn      = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn      = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn      = sqlite.StringColumn("created_at")
+		UpdatedAtColumn      = sqlite.StringColumn("updated_at")
 		TypeColumn           = sqlite.StringColumn("type")
-		LastBattleTimeColumn = sqlite.TimestampColumn("last_battle_time")
+		LastBattleTimeColumn = sqlite.StringColumn("last_battle_time")
 		ReferenceIDColumn    = sqlite.StringColumn("reference_id")
 		RatingBattlesColumn  = sqlite.IntegerColumn("rating_battles")
 		RatingFrameColumn    = sqlite.StringColumn("rating_frame")

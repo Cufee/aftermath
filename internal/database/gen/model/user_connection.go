@@ -7,19 +7,15 @@
 
 package model
 
-import (
-	"time"
-)
-
 type UserConnection struct {
-	ID          string    `sql:"primary_key" db:"id"`
-	CreatedAt   time.Time `db:"created_at"`
-	UpdatedAt   time.Time `db:"updated_at"`
-	Type        string    `db:"type"`
-	Verified    bool      `db:"verified"`
-	Selected    bool      `db:"selected"`
-	ReferenceID string    `db:"reference_id"`
-	Permissions *string   `db:"permissions"`
-	Metadata    []byte    `db:"metadata"`
-	UserID      string    `db:"user_id"`
+	ID          string  `sql:"primary_key" db:"id"`
+	CreatedAt   string  `db:"created_at"`
+	UpdatedAt   string  `db:"updated_at"`
+	Type        string  `db:"type"`
+	Verified    bool    `db:"verified"`
+	Selected    bool    `db:"selected"`
+	ReferenceID string  `db:"reference_id"`
+	Permissions *string `db:"permissions"`
+	Metadata    []byte  `db:"metadata"`
+	UserID      string  `db:"user_id"`
 }

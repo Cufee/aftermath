@@ -7,15 +7,11 @@
 
 package model
 
-import (
-	"time"
-)
-
 type GameMap struct {
-	ID              string    `sql:"primary_key" db:"id"`
-	CreatedAt       time.Time `db:"created_at"`
-	UpdatedAt       time.Time `db:"updated_at"`
-	GameModes       []byte    `db:"game_modes"`
-	SupremacyPoints int32     `db:"supremacy_points"`
-	LocalizedNames  []byte    `db:"localized_names"`
+	ID              string `sql:"primary_key" db:"id"`
+	CreatedAt       string `db:"created_at"`
+	UpdatedAt       string `db:"updated_at"`
+	GameModes       []byte `db:"game_modes"`
+	SupremacyPoints int32  `db:"supremacy_points"`
+	LocalizedNames  []byte `db:"localized_names"`
 }

@@ -18,8 +18,8 @@ type gameMapTable struct {
 
 	// Columns
 	ID              sqlite.ColumnString
-	CreatedAt       sqlite.ColumnTimestamp
-	UpdatedAt       sqlite.ColumnTimestamp
+	CreatedAt       sqlite.ColumnString
+	UpdatedAt       sqlite.ColumnString
 	GameModes       sqlite.ColumnString
 	SupremacyPoints sqlite.ColumnInteger
 	LocalizedNames  sqlite.ColumnString
@@ -64,8 +64,8 @@ func newGameMapTable(schemaName, tableName, alias string) *GameMapTable {
 func newGameMapTableImpl(schemaName, tableName, alias string) gameMapTable {
 	var (
 		IDColumn              = sqlite.StringColumn("id")
-		CreatedAtColumn       = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn       = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn       = sqlite.StringColumn("created_at")
+		UpdatedAtColumn       = sqlite.StringColumn("updated_at")
 		GameModesColumn       = sqlite.StringColumn("game_modes")
 		SupremacyPointsColumn = sqlite.IntegerColumn("supremacy_points")
 		LocalizedNamesColumn  = sqlite.StringColumn("localized_names")

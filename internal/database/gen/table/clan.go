@@ -18,8 +18,8 @@ type clanTable struct {
 
 	// Columns
 	ID        sqlite.ColumnString
-	CreatedAt sqlite.ColumnTimestamp
-	UpdatedAt sqlite.ColumnTimestamp
+	CreatedAt sqlite.ColumnString
+	UpdatedAt sqlite.ColumnString
 	Tag       sqlite.ColumnString
 	Name      sqlite.ColumnString
 	EmblemID  sqlite.ColumnString
@@ -65,8 +65,8 @@ func newClanTable(schemaName, tableName, alias string) *ClanTable {
 func newClanTableImpl(schemaName, tableName, alias string) clanTable {
 	var (
 		IDColumn        = sqlite.StringColumn("id")
-		CreatedAtColumn = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn = sqlite.StringColumn("created_at")
+		UpdatedAtColumn = sqlite.StringColumn("updated_at")
 		TagColumn       = sqlite.StringColumn("tag")
 		NameColumn      = sqlite.StringColumn("name")
 		EmblemIDColumn  = sqlite.StringColumn("emblem_id")

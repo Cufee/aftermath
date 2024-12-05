@@ -6,11 +6,11 @@ table "auth_nonce" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "active" {
     null = false
@@ -18,7 +18,7 @@ table "auth_nonce" {
   }
   column "expires_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "identifier" {
     null = false
@@ -53,15 +53,15 @@ table "session" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "expires_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "public_id" {
     null = false

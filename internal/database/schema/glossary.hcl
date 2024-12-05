@@ -6,11 +6,11 @@ table "vehicle" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "tier" {
     null = false
@@ -37,11 +37,11 @@ table "vehicle_average" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "data" {
     null = false
@@ -64,11 +64,11 @@ table "game_map" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "game_modes" {
     null = false
@@ -100,11 +100,11 @@ table "game_mode" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "localized_names" {
     null = false

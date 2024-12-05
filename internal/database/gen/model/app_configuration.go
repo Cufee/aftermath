@@ -7,15 +7,11 @@
 
 package model
 
-import (
-	"time"
-)
-
 type AppConfiguration struct {
-	ID        string    `sql:"primary_key" db:"id"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	Key       string    `db:"key"`
-	Value     []byte    `db:"value"`
-	Metadata  []byte    `db:"metadata"`
+	ID        string `sql:"primary_key" db:"id"`
+	CreatedAt string `db:"created_at"`
+	UpdatedAt string `db:"updated_at"`
+	Key       string `db:"key"`
+	Value     []byte `db:"value"`
+	Metadata  []byte `db:"metadata"`
 }

@@ -155,10 +155,6 @@ type connectionOpts struct {
 		verified *bool
 		selected *bool
 	}
-	// insert struct {
-	// 	verified *bool
-	// 	selected *bool
-	// }
 }
 
 type connectionQueryOptions []ConnectionQueryOption
@@ -172,18 +168,6 @@ func (o connectionQueryOptions) ToOptions() connectionOpts {
 	}
 	return opts
 }
-
-// func SetVerified(verified bool) ConnectionQueryOption {
-// 	return func(ugo *connectionOpts) {
-// 		ugo.insert.verified = utils.Pointer(verified)
-// 	}
-// }
-
-// func SetSelected(selected bool) ConnectionQueryOption {
-// 	return func(ugo *connectionOpts) {
-// 		ugo.insert.selected = utils.Pointer(selected)
-// 	}
-// }
 
 func ConnectionType(kind models.ConnectionType) ConnectionQueryOption {
 	return func(ugo *connectionOpts) {

@@ -18,14 +18,14 @@ type cronTaskTable struct {
 
 	// Columns
 	ID             sqlite.ColumnString
-	CreatedAt      sqlite.ColumnTimestamp
-	UpdatedAt      sqlite.ColumnTimestamp
+	CreatedAt      sqlite.ColumnString
+	UpdatedAt      sqlite.ColumnString
 	Type           sqlite.ColumnString
 	ReferenceID    sqlite.ColumnString
 	Targets        sqlite.ColumnString
 	Status         sqlite.ColumnString
-	ScheduledAfter sqlite.ColumnTimestamp
-	LastRun        sqlite.ColumnTimestamp
+	ScheduledAfter sqlite.ColumnString
+	LastRun        sqlite.ColumnString
 	TriesLeft      sqlite.ColumnInteger
 	Logs           sqlite.ColumnString
 	Data           sqlite.ColumnString
@@ -70,14 +70,14 @@ func newCronTaskTable(schemaName, tableName, alias string) *CronTaskTable {
 func newCronTaskTableImpl(schemaName, tableName, alias string) cronTaskTable {
 	var (
 		IDColumn             = sqlite.StringColumn("id")
-		CreatedAtColumn      = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn      = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn      = sqlite.StringColumn("created_at")
+		UpdatedAtColumn      = sqlite.StringColumn("updated_at")
 		TypeColumn           = sqlite.StringColumn("type")
 		ReferenceIDColumn    = sqlite.StringColumn("reference_id")
 		TargetsColumn        = sqlite.StringColumn("targets")
 		StatusColumn         = sqlite.StringColumn("status")
-		ScheduledAfterColumn = sqlite.TimestampColumn("scheduled_after")
-		LastRunColumn        = sqlite.TimestampColumn("last_run")
+		ScheduledAfterColumn = sqlite.StringColumn("scheduled_after")
+		LastRunColumn        = sqlite.StringColumn("last_run")
 		TriesLeftColumn      = sqlite.IntegerColumn("tries_left")
 		LogsColumn           = sqlite.StringColumn("logs")
 		DataColumn           = sqlite.StringColumn("data")

@@ -18,9 +18,9 @@ type sessionTable struct {
 
 	// Columns
 	ID        sqlite.ColumnString
-	CreatedAt sqlite.ColumnTimestamp
-	UpdatedAt sqlite.ColumnTimestamp
-	ExpiresAt sqlite.ColumnTimestamp
+	CreatedAt sqlite.ColumnString
+	UpdatedAt sqlite.ColumnString
+	ExpiresAt sqlite.ColumnString
 	PublicID  sqlite.ColumnString
 	Metadata  sqlite.ColumnString
 	UserID    sqlite.ColumnString
@@ -65,9 +65,9 @@ func newSessionTable(schemaName, tableName, alias string) *SessionTable {
 func newSessionTableImpl(schemaName, tableName, alias string) sessionTable {
 	var (
 		IDColumn        = sqlite.StringColumn("id")
-		CreatedAtColumn = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn = sqlite.TimestampColumn("updated_at")
-		ExpiresAtColumn = sqlite.TimestampColumn("expires_at")
+		CreatedAtColumn = sqlite.StringColumn("created_at")
+		UpdatedAtColumn = sqlite.StringColumn("updated_at")
+		ExpiresAtColumn = sqlite.StringColumn("expires_at")
 		PublicIDColumn  = sqlite.StringColumn("public_id")
 		MetadataColumn  = sqlite.StringColumn("metadata")
 		UserIDColumn    = sqlite.StringColumn("user_id")

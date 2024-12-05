@@ -6,19 +6,19 @@ table "account" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "last_battle_time" {
     null = false
-    type = datetime
+    type = text
   }
   column "account_created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "realm" {
     null = false
@@ -65,11 +65,11 @@ table "clan" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "tag" {
     null = false
@@ -111,11 +111,11 @@ table "account_snapshot" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "type" {
     null = false
@@ -123,7 +123,7 @@ table "account_snapshot" {
   }
   column "last_battle_time" {
     null = false
-    type = datetime
+    type = text
   }
   column "reference_id" {
     null = false
@@ -185,11 +185,11 @@ table "vehicle_snapshot" {
   }
   column "created_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "updated_at" {
     null = false
-    type = datetime
+    type = text
   }
   column "type" {
     null = false
@@ -209,7 +209,7 @@ table "vehicle_snapshot" {
   }
   column "last_battle_time" {
     null = false
-    type = datetime
+    type = text
   }
   column "frame" {
     null = false

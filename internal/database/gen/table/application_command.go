@@ -18,8 +18,8 @@ type applicationCommandTable struct {
 
 	// Columns
 	ID          sqlite.ColumnString
-	CreatedAt   sqlite.ColumnTimestamp
-	UpdatedAt   sqlite.ColumnTimestamp
+	CreatedAt   sqlite.ColumnString
+	UpdatedAt   sqlite.ColumnString
 	Name        sqlite.ColumnString
 	Version     sqlite.ColumnString
 	OptionsHash sqlite.ColumnString
@@ -64,8 +64,8 @@ func newApplicationCommandTable(schemaName, tableName, alias string) *Applicatio
 func newApplicationCommandTableImpl(schemaName, tableName, alias string) applicationCommandTable {
 	var (
 		IDColumn          = sqlite.StringColumn("id")
-		CreatedAtColumn   = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn   = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn   = sqlite.StringColumn("created_at")
+		UpdatedAtColumn   = sqlite.StringColumn("updated_at")
 		NameColumn        = sqlite.StringColumn("name")
 		VersionColumn     = sqlite.StringColumn("version")
 		OptionsHashColumn = sqlite.StringColumn("options_hash")

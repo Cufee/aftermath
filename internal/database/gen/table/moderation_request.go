@@ -18,8 +18,8 @@ type moderationRequestTable struct {
 
 	// Columns
 	ID               sqlite.ColumnString
-	CreatedAt        sqlite.ColumnTimestamp
-	UpdatedAt        sqlite.ColumnTimestamp
+	CreatedAt        sqlite.ColumnString
+	UpdatedAt        sqlite.ColumnString
 	ModeratorComment sqlite.ColumnString
 	Context          sqlite.ColumnString
 	ReferenceID      sqlite.ColumnString
@@ -69,8 +69,8 @@ func newModerationRequestTable(schemaName, tableName, alias string) *ModerationR
 func newModerationRequestTableImpl(schemaName, tableName, alias string) moderationRequestTable {
 	var (
 		IDColumn               = sqlite.StringColumn("id")
-		CreatedAtColumn        = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn        = sqlite.TimestampColumn("updated_at")
+		CreatedAtColumn        = sqlite.StringColumn("created_at")
+		UpdatedAtColumn        = sqlite.StringColumn("updated_at")
 		ModeratorCommentColumn = sqlite.StringColumn("moderator_comment")
 		ContextColumn          = sqlite.StringColumn("context")
 		ReferenceIDColumn      = sqlite.StringColumn("reference_id")
