@@ -160,12 +160,6 @@ table "account_snapshot" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "account_account_id_snapshot_account_id_fk" {
-    columns     = [column.account_id]
-    ref_columns = [table.account.column.id]
-    on_update   = NO_ACTION
-    on_delete   = CASCADE
-  }
   index "account_snapshot_id_idx" {
     columns = [column.id]
   }
