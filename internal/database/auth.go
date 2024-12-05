@@ -15,9 +15,9 @@ import (
 func (c *client) CreateAuthNonce(ctx context.Context, publicID, identifier string, expiresAt time.Time, meta map[string]string) (models.AuthNonce, error) {
 	insert := m.AuthNonce{
 		ID:         cuid.New(),
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-		ExpiresAt:  expiresAt,
+		CreatedAt:  models.TimeToString(time.Now()),
+		UpdatedAt:  models.TimeToString(time.Now()),
+		ExpiresAt:  models.TimeToString(expiresAt),
 		Active:     true,
 		Identifier: identifier,
 		PublicID:   publicID,
@@ -74,9 +74,9 @@ func (c *client) SetAuthNonceActive(ctx context.Context, nonceID string, active 
 func (c *client) CreateSession(ctx context.Context, publicID, userID string, expiresAt time.Time, meta map[string]string) (models.Session, error) {
 	model := m.Session{
 		ID:        cuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		ExpiresAt: expiresAt,
+		CreatedAt: models.TimeToString(time.Now()),
+		UpdatedAt: models.TimeToString(time.Now()),
+		ExpiresAt: models.TimeToString(expiresAt),
 		PublicID:  publicID,
 		UserID:    userID,
 		Metadata:  make([]byte, 0),
@@ -122,7 +122,7 @@ func (c *client) SetSessionExpiresAt(ctx context.Context, sessionID string, expi
 	stmt := t.Session.
 		UPDATE(t.Session.ExpiresAt).
 		WHERE(t.Session.ID.EQ(s.String(sessionID))).
-		SET(t.Session.ExpiresAt.SET(s.DATETIME(expiresAt)))
+		SET(t.Session.ExpiresAt.SET(timeToField(expiresAt)))
 
 	_, err := c.exec(ctx, stmt)
 	if err != nil {

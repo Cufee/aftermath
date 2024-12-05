@@ -23,14 +23,13 @@ type AccountSnapshot struct {
 
 func ToAccountSnapshot(record *model.AccountSnapshot) AccountSnapshot {
 	s := AccountSnapshot{
-		ID:          record.ID,
-		Type:        SnapshotType(record.Type),
-		AccountID:   record.AccountID,
-		ReferenceID: record.ReferenceID,
+		ID:             record.ID,
+		Type:           SnapshotType(record.Type),
+		AccountID:      record.AccountID,
+		ReferenceID:    record.ReferenceID,
+		CreatedAt:      StringToTime(record.CreatedAt),
+		LastBattleTime: StringToTime(record.LastBattleTime),
 	}
-	s.CreatedAt, _ = time.Parse(time.ANSIC, record.CreatedAt)
-	s.LastBattleTime, _ = time.Parse(time.ANSIC, record.CreatedAt)
-
 	json.Unmarshal(record.RatingFrame, &s.RatingBattles)
 	json.Unmarshal(record.RegularFrame, &s.RegularBattles)
 	return s
@@ -39,10 +38,10 @@ func ToAccountSnapshot(record *model.AccountSnapshot) AccountSnapshot {
 func (record *AccountSnapshot) Model() model.AccountSnapshot {
 	s := model.AccountSnapshot{
 		ID:             utils.StringOr(record.ID, cuid.New()),
-		CreatedAt:      record.CreatedAt.Format(),
-		UpdatedAt:      time.Now(),
+		CreatedAt:      TimeToString(record.CreatedAt),
+		UpdatedAt:      TimeToString(time.Now()),
 		Type:           string(record.Type),
-		LastBattleTime: record.LastBattleTime,
+		LastBattleTime: TimeToString(record.LastBattleTime),
 		ReferenceID:    record.ReferenceID,
 		RatingBattles:  int32(record.RatingBattles.Battles),
 		RegularBattles: int32(record.RegularBattles.Battles),

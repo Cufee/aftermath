@@ -63,8 +63,8 @@ func ToUserContent(record *model.UserContent) UserContent {
 
 		Value: record.Value,
 
-		CreatedAt: record.CreatedAt,
-		UpdatedAt: record.UpdatedAt,
+		CreatedAt: StringToTime(record.CreatedAt),
+		UpdatedAt: StringToTime(record.UpdatedAt),
 	}
 	json.Unmarshal(record.Metadata, &c.Meta)
 
@@ -77,8 +77,8 @@ func ToUserContent(record *model.UserContent) UserContent {
 func (record *UserContent) Model() model.UserContent {
 	c := model.UserContent{
 		ID:        utils.StringOr(record.ID, cuid.New()),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: TimeToString(time.Now()),
+		UpdatedAt: TimeToString(time.Now()),
 
 		Type:        string(record.Type),
 		UserID:      record.UserID,

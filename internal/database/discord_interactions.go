@@ -127,7 +127,7 @@ func (q *interactionQuery) build() s.SelectStatement {
 	}
 	// Type
 	if q.createdAfter != nil {
-		where = append(where, t.DiscordInteraction.CreatedAt.GT(s.DATETIME(q.createdAfter)))
+		where = append(where, t.DiscordInteraction.CreatedAt.GT(timeToField(*q.createdAfter)))
 	}
 
 	return stmt.WHERE(s.AND(where...))

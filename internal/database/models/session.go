@@ -44,9 +44,9 @@ func ToSession(record *model.Session) Session {
 		UserID:   record.UserID,
 		PublicID: record.PublicID,
 
-		CreatedAt: record.CreatedAt,
-		UpdatedAt: record.UpdatedAt,
-		ExpiresAt: record.ExpiresAt,
+		CreatedAt: StringToTime(record.CreatedAt),
+		UpdatedAt: StringToTime(record.UpdatedAt),
+		ExpiresAt: StringToTime(record.ExpiresAt),
 	}
 	json.Unmarshal(record.Metadata, &session.Meta)
 
@@ -62,9 +62,9 @@ func (record *Session) Model() model.Session {
 		UserID:   record.UserID,
 		PublicID: record.PublicID,
 
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		ExpiresAt: record.ExpiresAt,
+		CreatedAt: TimeToString(time.Now()),
+		UpdatedAt: TimeToString(time.Now()),
+		ExpiresAt: TimeToString(record.ExpiresAt),
 	}
 	session.Metadata, _ = json.Marshal(record.Meta)
 	return session

@@ -7,6 +7,7 @@ import (
 
 	m "github.com/cufee/aftermath/internal/database/gen/model"
 	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	s "github.com/go-jet/jet/v2/sqlite"
@@ -28,8 +29,8 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 
 			model := m.VehicleAverage{
 				ID:        id,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				CreatedAt: models.TimeToString(time.Now()),
+				UpdatedAt: models.TimeToString(time.Now()),
 				Data:      encoded,
 			}
 

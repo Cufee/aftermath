@@ -27,10 +27,10 @@ func TestVehicleSnapshots(t *testing.T) {
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = '%s';", table.Account.TableName(), accountID))
 
 	createdAtVehicle1 := time.Date(2023, 6, 1, 0, 0, 0, 0, time.UTC)
-	createdAtVehicle2 := time.Date(2023, 8, 1, 0, 0, 0, 0, time.UTC)
+	createdAtVehicle2 := time.Date(2023, 8, 1, 0, 0, 0, 100, time.UTC)
 	createdAtVehicle3 := time.Date(2023, 10, 1, 0, 0, 0, 0, time.UTC)
 
-	createdAtVehicle4 := time.Date(2023, 9, 1, 0, 0, 0, 0, time.UTC)
+	createdAtVehicle4 := time.Date(2023, 9, 1, 0, 0, 0, 100, time.UTC)
 	createdAtVehicle5 := time.Date(2023, 9, 2, 0, 0, 0, 0, time.UTC)
 
 	vehicle1 := models.VehicleSnapshot{
@@ -94,7 +94,7 @@ func TestVehicleSnapshots(t *testing.T) {
 		assert.NoError(t, err, "create vehicle snapshot should not error")
 	}
 	t.Run("vehicles need to be ordered by createdAt ASC when queried with created after", func(t *testing.T) {
-		vehicles, err := client.GetVehicleSnapshots(ctx, accountID, nil, models.SnapshotTypeDaily, WithCreatedAfter(createdAtVehicle1.Add(time.Minute)), WithReferenceIDIn("r1"))
+		vehicles, err := client.GetVehicleSnapshots(ctx, accountID, nil, models.SnapshotTypeDaily, WithCreatedAfter(createdAtVehicle1), WithReferenceIDIn("r1"))
 		assert.NoError(t, err, "get vehicle snapshot error")
 		assert.Len(t, vehicles, 1, "should return exactly 1 snapshot")
 		assert.True(t, vehicles[0].CreatedAt.Equal(createdAtVehicle2), "wrong vehicle snapshot returned\nvehicles:%#v\nexpected:%#v", vehicles, createdAtVehicle2)
@@ -189,7 +189,7 @@ func TestAccountSnapshots(t *testing.T) {
 	})
 
 	t.Run("test get with created before/after", func(t *testing.T) {
-		snapshots, err := client.GetAccountSnapshots(context.Background(), []string{accountID}, snapshot1.Type, WithCreatedAfter(createdAt1.Add(time.Minute)))
+		snapshots, err := client.GetAccountSnapshots(context.Background(), []string{accountID}, snapshot1.Type, WithCreatedAfter(createdAt1))
 		is.NoErr(err)
 		is.True(len(snapshots) == 1)
 		is.True(snapshots[0].CreatedAt.Unix() == createdAt2.Unix())

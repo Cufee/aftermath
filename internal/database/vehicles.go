@@ -22,8 +22,8 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.
 		for id, data := range vehicles {
 			model := m.Vehicle{
 				ID:        id,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				CreatedAt: models.TimeToString(time.Now()),
+				UpdatedAt: models.TimeToString(time.Now()),
 				Tier:      int32(data.Tier),
 			}
 			names, err := json.Marshal(data.LocalizedNames)

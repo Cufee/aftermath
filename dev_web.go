@@ -13,8 +13,7 @@ import (
 var static embed.FS
 
 func main() {
-
-	t, err := time.Parse(time.RFC3339Nano, "2024-07-28 19:04:52.920131689+02:00")
+	t, err := time.Parse("2006-01-02 15:04:05.999999999Z07:00", "2024-07-28 19:04:52.920131689+02:00")
 	if err != nil {
 		panic(err)
 	}

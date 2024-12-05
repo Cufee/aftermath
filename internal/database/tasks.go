@@ -19,7 +19,7 @@ func (c *client) GetStaleTasks(ctx context.Context, limit int) ([]models.Task, e
 		SELECT(t.CronTask.AllColumns).
 		WHERE(s.AND(
 			t.CronTask.Status.EQ(s.String(string(models.TaskStatusInProgress))),
-			t.CronTask.LastRun.LT(s.DATETIME(time.Now().Add(time.Hour*-1))),
+			t.CronTask.LastRun.LT(timeToField(time.Now().Add(time.Hour*-1))),
 		)).
 		LIMIT(int64(limit))
 
@@ -42,7 +42,7 @@ GetRecentTasks retrieves tasks sorted by DESC(task.last_run)
   - status (optional) - status of the tasks
 */
 func (c *client) GetRecentTasks(ctx context.Context, createdAfter time.Time, status ...models.TaskStatus) ([]models.Task, error) {
-	where := []s.BoolExpression{t.CronTask.CreatedAt.GT(s.DATETIME(createdAfter))}
+	where := []s.BoolExpression{t.CronTask.CreatedAt.GT(timeToField(createdAfter))}
 	if len(status) > 0 {
 		var s []string
 		for _, st := range status {
@@ -84,7 +84,7 @@ func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task
 			SELECT(t.CronTask.AllColumns).
 			WHERE(s.AND(
 				t.CronTask.TriesLeft.GT(s.Int32(0)),
-				t.CronTask.ScheduledAfter.LT(s.DATETIME(time.Now())),
+				t.CronTask.ScheduledAfter.LT(timeToField(time.Now())),
 				t.CronTask.Status.EQ(s.String(string(models.TaskStatusScheduled))),
 			)).
 			ORDER_BY(t.CronTask.ScheduledAfter.ASC()).
@@ -109,8 +109,8 @@ func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task
 				).
 				SET(s.SET(
 					t.CronTask.Status.SET(s.String(string(task.Status))),
-					t.CronTask.UpdatedAt.SET(s.DATETIME(task.UpdatedAt)),
-					t.CronTask.LastRun.SET(s.DATETIME(task.LastRun)),
+					t.CronTask.UpdatedAt.SET(timeToField(task.UpdatedAt)),
+					t.CronTask.LastRun.SET(timeToField(task.LastRun)),
 				)).
 				WHERE(t.CronTask.ID.EQ(s.String(task.ID)))
 

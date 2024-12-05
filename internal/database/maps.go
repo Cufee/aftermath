@@ -7,6 +7,7 @@ import (
 	"github.com/cufee/aftermath-assets/types"
 	m "github.com/cufee/aftermath/internal/database/gen/model"
 	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/json"
 	s "github.com/go-jet/jet/v2/sqlite"
 )
@@ -31,8 +32,8 @@ func (c *client) UpsertMaps(ctx context.Context, maps map[string]types.Map) erro
 		for id, data := range maps {
 			model := m.GameMap{
 				ID:              id,
-				CreatedAt:       time.Now(),
-				UpdatedAt:       time.Now(),
+				CreatedAt:       models.TimeToString(time.Now()),
+				UpdatedAt:       models.TimeToString(time.Now()),
 				SupremacyPoints: int32(data.SupremacyPoints),
 			}
 			modes, err := json.Marshal(data.GameModes)

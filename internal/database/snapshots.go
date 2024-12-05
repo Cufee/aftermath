@@ -135,7 +135,7 @@ func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []str
 
 	var lastBattles = make(map[string]time.Time)
 	for _, r := range snapshots {
-		lastBattles[r.AccountID] = r.LastBattleTime
+		lastBattles[r.AccountID] = models.StringToTime(r.LastBattleTime)
 	}
 	return lastBattles, nil
 }

@@ -47,8 +47,8 @@ type ModerationRequest struct {
 func ToModerationRequest(r *model.ModerationRequest) ModerationRequest {
 	req := ModerationRequest{
 		ID:        r.ID,
-		UpdateAt:  r.UpdatedAt,
-		CreatedAt: r.CreatedAt,
+		UpdateAt:  StringToTime(r.UpdatedAt),
+		CreatedAt: StringToTime(r.CreatedAt),
 
 		ReferenceID: r.ReferenceID,
 		RequestorID: r.RequestorID,
@@ -73,8 +73,8 @@ func ToModerationRequest(r *model.ModerationRequest) ModerationRequest {
 func (r ModerationRequest) Model() model.ModerationRequest {
 	req := model.ModerationRequest{
 		ID:        utils.StringOr(r.ID, cuid.New()),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: TimeToString(time.Now()),
+		UpdatedAt: TimeToString(time.Now()),
 
 		ReferenceID: r.ReferenceID,
 		RequestorID: r.RequestorID,

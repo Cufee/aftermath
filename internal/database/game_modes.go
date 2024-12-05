@@ -6,6 +6,7 @@ import (
 
 	m "github.com/cufee/aftermath/internal/database/gen/model"
 	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/json"
 	s "github.com/go-jet/jet/v2/sqlite"
 	"golang.org/x/text/language"
@@ -27,8 +28,8 @@ func (c *client) UpsertGameModes(ctx context.Context, modes map[string]map[langu
 
 			model := m.GameMode{
 				ID:             id,
-				CreatedAt:      time.Now(),
-				UpdatedAt:      time.Now(),
+				CreatedAt:      models.TimeToString(time.Now()),
+				UpdatedAt:      models.TimeToString(time.Now()),
 				LocalizedNames: encoded,
 			}
 

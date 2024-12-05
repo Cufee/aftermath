@@ -48,8 +48,8 @@ func ToVehicleSnapshot(record *model.VehicleSnapshot) VehicleSnapshot {
 	s := VehicleSnapshot{
 		ID:             record.ID,
 		Type:           SnapshotType(record.Type),
-		CreatedAt:      record.CreatedAt,
-		LastBattleTime: record.LastBattleTime,
+		CreatedAt:      StringToTime(record.CreatedAt),
+		LastBattleTime: StringToTime(record.LastBattleTime),
 		ReferenceID:    record.ReferenceID,
 		AccountID:      record.AccountID,
 		VehicleID:      record.VehicleID,
@@ -61,13 +61,13 @@ func ToVehicleSnapshot(record *model.VehicleSnapshot) VehicleSnapshot {
 func (record *VehicleSnapshot) Model() model.VehicleSnapshot {
 	s := model.VehicleSnapshot{
 		ID:             utils.StringOr(record.ID, cuid.New()),
-		CreatedAt:      record.CreatedAt,
-		UpdatedAt:      time.Now(),
+		CreatedAt:      TimeToString(record.CreatedAt),
+		UpdatedAt:      TimeToString(time.Now()),
 		Type:           string(record.Type),
 		VehicleID:      record.VehicleID,
 		ReferenceID:    record.ReferenceID,
 		Battles:        int32(record.Stats.Battles),
-		LastBattleTime: record.LastBattleTime,
+		LastBattleTime: TimeToString(record.LastBattleTime),
 		AccountID:      record.AccountID,
 	}
 	s.Frame, _ = json.Marshal(record.Stats)

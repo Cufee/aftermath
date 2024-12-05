@@ -252,3 +252,7 @@ func stringsToExp(s []string) []sqlite.Expression {
 	}
 	return a
 }
+
+func timeToField(t time.Time) sqlite.StringExpression {
+	return sqlite.String(models.TimeToString(t))
+}

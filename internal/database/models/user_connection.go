@@ -66,8 +66,8 @@ func (record *UserConnection) Model() model.UserConnection {
 	perms := record.Permissions.Encode()
 	c := model.UserConnection{
 		ID:          utils.StringOr(record.ID, cuid.New()),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+		CreatedAt:   TimeToString(time.Now()),
+		UpdatedAt:   TimeToString(time.Now()),
 		Type:        string(record.Type),
 		Verified:    record.Verified,
 		Selected:    record.Selected,

@@ -60,7 +60,7 @@ func ToDiscordInteraction(record *model.DiscordInteraction) DiscordInteraction {
 	}
 	i := DiscordInteraction{
 		ID:        record.ID,
-		CreatedAt: record.CreatedAt,
+		CreatedAt: StringToTime(record.CreatedAt),
 
 		Result:    record.Result,
 		UserID:    record.UserID,
@@ -84,8 +84,8 @@ func ToDiscordInteraction(record *model.DiscordInteraction) DiscordInteraction {
 func (record *DiscordInteraction) Model() model.DiscordInteraction {
 	i := model.DiscordInteraction{
 		ID:        utils.StringOr(record.ID, cuid.New()),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: TimeToString(time.Now()),
+		UpdatedAt: TimeToString(time.Now()),
 
 		Result:    record.Result,
 		UserID:    record.UserID,

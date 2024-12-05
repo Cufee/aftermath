@@ -42,9 +42,9 @@ func ToAuthNonce(record *model.AuthNonce) AuthNonce {
 		PublicID:   record.PublicID,
 		Identifier: record.Identifier,
 
-		CreatedAt: record.CreatedAt,
-		UpdatedAt: record.UpdatedAt,
-		ExpiresAt: record.ExpiresAt,
+		CreatedAt: StringToTime(record.CreatedAt),
+		UpdatedAt: StringToTime(record.UpdatedAt),
+		ExpiresAt: StringToTime(record.ExpiresAt),
 	}
 	json.Unmarshal(record.Metadata, &nonce.Meta)
 

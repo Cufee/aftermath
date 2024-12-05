@@ -79,8 +79,8 @@ type WidgetVehicleCardStyle struct {
 func ToWidgetOptions(record *model.WidgetSettings) WidgetOptions {
 	o := WidgetOptions{
 		ID:        record.ID,
-		CreatedAt: record.CreatedAt,
-		UpdatedAt: record.UpdatedAt,
+		CreatedAt: StringToTime(record.CreatedAt),
+		UpdatedAt: StringToTime(record.UpdatedAt),
 
 		UserID:    record.UserID,
 		AccountID: record.ReferenceID,
@@ -89,7 +89,7 @@ func ToWidgetOptions(record *model.WidgetSettings) WidgetOptions {
 		o.Title = *record.Title
 	}
 	if record.SessionFrom != nil {
-		o.SessionFrom = *record.SessionFrom
+		o.SessionFrom = StringToTime(*record.SessionFrom)
 	}
 	if record.SessionReferenceID != nil {
 		o.SessionRefID = *record.SessionReferenceID
@@ -106,8 +106,8 @@ func ToWidgetOptions(record *model.WidgetSettings) WidgetOptions {
 func (record *WidgetOptions) Model() model.WidgetSettings {
 	s := model.WidgetSettings{
 		ID:          utils.StringOr(record.ID, cuid.New()),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+		CreatedAt:   TimeToString(time.Now()),
+		UpdatedAt:   TimeToString(time.Now()),
 		ReferenceID: record.AccountID,
 		UserID:      record.UserID,
 	}
@@ -115,7 +115,8 @@ func (record *WidgetOptions) Model() model.WidgetSettings {
 		s.Title = &record.Title
 	}
 	if !record.SessionFrom.IsZero() {
-		s.SessionFrom = &record.SessionFrom
+		f := TimeToString(record.SessionFrom)
+		s.SessionFrom = &f
 	}
 	if record.SessionRefID != "" {
 		s.SessionReferenceID = &record.SessionRefID

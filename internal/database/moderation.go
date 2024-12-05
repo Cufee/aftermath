@@ -42,7 +42,7 @@ func (c *client) GetModerationRequest(ctx context.Context, id string) (models.Mo
 func (c *client) FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus, since time.Time) ([]models.ModerationRequest, error) {
 	where := []s.BoolExpression{
 		t.ModerationRequest.RequestorID.EQ(s.String(userID)),
-		t.ModerationRequest.UpdatedAt.GT(s.DATETIME(since)),
+		t.ModerationRequest.UpdatedAt.GT(timeToField(since)),
 	}
 
 	if referenceIDs != nil {

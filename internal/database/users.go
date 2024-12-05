@@ -80,8 +80,8 @@ func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...Use
 	options := UserQueryOptions(opts).ToOptions()
 	user := m.User{
 		ID:           id,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
+		CreatedAt:    models.TimeToString(time.Now()),
+		UpdatedAt:    models.TimeToString(time.Now()),
 		Permissions:  permissions.User.String(),
 		FeatureFlags: make([]byte, 0),
 	}

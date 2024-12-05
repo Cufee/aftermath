@@ -57,9 +57,9 @@ func ToUserRestriction(record *model.UserRestriction) UserRestriction {
 		Type:   UserRestrictionType(record.Type),
 		UserID: record.UserID,
 
-		CreatedAt: record.CreatedAt,
-		UpdatedAt: record.UpdatedAt,
-		ExpiresAt: record.ExpiresAt,
+		CreatedAt: StringToTime(record.CreatedAt),
+		UpdatedAt: StringToTime(record.UpdatedAt),
+		ExpiresAt: StringToTime(record.ExpiresAt),
 
 		ModeratorComment: record.ModeratorComment,
 		PublicReason:     record.PublicReason,
@@ -77,9 +77,9 @@ func (record UserRestriction) Model() model.UserRestriction {
 		Type:   string(record.Type),
 		UserID: record.UserID,
 
-		CreatedAt: record.CreatedAt,
-		UpdatedAt: record.UpdatedAt,
-		ExpiresAt: record.ExpiresAt,
+		CreatedAt: TimeToString(record.CreatedAt),
+		UpdatedAt: TimeToString(record.UpdatedAt),
+		ExpiresAt: TimeToString(record.ExpiresAt),
 
 		ModeratorComment: record.ModeratorComment,
 		PublicReason:     record.PublicReason,
