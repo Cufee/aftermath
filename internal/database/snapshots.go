@@ -9,6 +9,7 @@ import (
 	t "github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/utils"
+	s "github.com/go-jet/jet/v2/sqlite"
 	"github.com/pkg/errors"
 )
 
@@ -24,31 +25,19 @@ func (c *client) GetVehicleSnapshots(ctx context.Context, accountID string, vehi
 		apply(&query)
 	}
 
-	stmt := vehiclesQuery(accountID, vehicleIDs, kind, t.VehicleSnapshot.VehicleID.Name(), query)
+	stmt := vehiclesQuery(accountID, vehicleIDs, kind, t.VehicleSnapshot.VehicleID, query)
 	rs, err := c.rows(ctx, stmt)
 	if err != nil {
 		return nil, err
 	}
 	defer rs.Close()
 
-	cols, err := rs.Rows.Columns()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get row columns")
-	}
-
 	var snapshots []models.VehicleSnapshot
-	for rs.Rows.Next() {
+	for rs.Next() {
 		var record m.VehicleSnapshot
-
-		fieldPtrs, err := mapColumnsToFields(&record, cols)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := rs.Rows.Scan(fieldPtrs...); err != nil {
+		if err := rs.Scan(&record); err != nil {
 			return nil, errors.New("failed to scan row: " + err.Error())
 		}
-
 		snapshots = append(snapshots, models.ToVehicleSnapshot(&record))
 	}
 
@@ -95,11 +84,12 @@ func (c *client) GetAccountSnapshots(ctx context.Context, accountIDs []string, k
 		apply(&query)
 	}
 
-	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID.Name(), query)
+	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID, query)
 	rs, err := c.rows(ctx, stmt)
 	if err != nil {
 		return nil, err
 	}
+	defer rs.Close()
 
 	var snapshots []models.AccountSnapshot
 	for rs.Next() {
@@ -125,9 +115,9 @@ func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []str
 	for _, apply := range options {
 		apply(&query)
 	}
-	WithSelect(t.AccountSnapshot.AccountID.Name(), t.AccountSnapshot.LastBattleTime.Name())(&query)
+	WithSelect(s.ColumnList{t.AccountSnapshot.AccountID, t.AccountSnapshot.LastBattleTime})(&query)
 
-	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID.Name(), query)
+	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID, query)
 	rs, err := c.rows(ctx, stmt)
 	if err != nil {
 		return nil, err

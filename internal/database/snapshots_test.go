@@ -90,7 +90,7 @@ func TestGetVehicleSnapshots(t *testing.T) {
 		assert.NoError(t, err, "create vehicle snapshot should not error")
 	}
 	t.Run("vehicles need to be ordered by createdAt ASC when queried with created after", func(t *testing.T) {
-		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", nil, models.SnapshotTypeDaily, WithCreatedAfter(createdAtVehicle1), WithReferenceIDIn("r1"))
+		vehicles, err := client.GetVehicleSnapshots(ctx, "a1", nil, models.SnapshotTypeDaily, WithCreatedAfter(createdAtVehicle1.Add(time.Minute)), WithReferenceIDIn("r1"))
 		assert.NoError(t, err, "get vehicle snapshot error")
 		assert.Len(t, vehicles, 1, "should return exactly 1 snapshot")
 		assert.True(t, vehicles[0].CreatedAt.Equal(createdAtVehicle2), "wrong vehicle snapshot returned\nvehicles:%#v\nexpected:%#v", vehicles, createdAtVehicle2)
