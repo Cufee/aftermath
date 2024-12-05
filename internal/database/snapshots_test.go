@@ -170,7 +170,7 @@ func TestAccountSnapshots(t *testing.T) {
 	}
 	snapshot4 := models.AccountSnapshot{
 		AccountID:   accountID2,
-		ReferenceID: "r3",
+		ReferenceID: "r1",
 
 		Type:           models.SnapshotTypeDaily,
 		CreatedAt:      createdAt3,
@@ -195,7 +195,17 @@ func TestAccountSnapshots(t *testing.T) {
 		is.True(snapshots[0].CreatedAt.Unix() == createdAt2.Unix())
 	})
 
-	// t.Run("test get with reference id", func(t *testing.T) {
-
-	// })
+	t.Run("test get with reference id", func(t *testing.T) {
+		{
+			snapshots, err := client.GetAccountSnapshots(context.Background(), []string{accountID}, snapshot4.Type, WithReferenceIDIn("r2"))
+			is.NoErr(err)
+			is.True(len(snapshots) == 1)
+			is.True(snapshots[0].CreatedAt.Unix() == createdAt3.Unix())
+		}
+		{
+			snapshots, err := client.GetAccountSnapshots(context.Background(), []string{accountID}, snapshot1.Type, WithReferenceIDNotIn("r1", "r2"))
+			is.NoErr(err)
+			is.True(len(snapshots) == 0)
+		}
+	})
 }
