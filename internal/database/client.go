@@ -182,43 +182,6 @@ func (c *client) query(ctx context.Context, stmt sqlite.Statement, dst interface
 	if c.options.debug {
 		println("SQL Query:", stmt.DebugSql())
 	}
-
-	// rs, err := stmt.Rows(ctx, c.db)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// var records []R
-
-	// recordType := reflect.TypeOf((*R)(nil)).Elem()
-	// if recordType.Kind() != reflect.Ptr {
-	// 	return nil, errors.New("type parameter must be a pointer to a struct")
-	// }
-
-	// for rs.Next() {
-	// 	recordPtr := reflect.New(recordType.Elem())
-	// 	record := recordPtr.Interface().(R)
-
-	// 	values, err := record.ScanValues(columns)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	if err := rs.Scan(values...); err != nil {
-	// 		return nil, err
-	// 	}
-
-	// 	err = record.AssignValues(columns, values)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	records = append(records, record)
-	// }
-
-	// return records, nil
-
-	// fmt.Printf("%#v", rows)
-	// return nil
-
 	return stmt.QueryContext(ctx, c.db, dst)
 }
 

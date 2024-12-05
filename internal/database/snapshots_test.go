@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetVehicleSnapshots(t *testing.T) {
+func TestVehicleSnapshots(t *testing.T) {
 	client := MustTestClient(t)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
