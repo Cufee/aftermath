@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	m "github.com/cufee/aftermath/internal/database/gen/model"
@@ -76,7 +75,7 @@ GetAccountSnapshots returns complete snapshots for accounts by ID, grouped by ac
 */
 func (c *client) GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AccountSnapshot, error) {
 	if len(accountIDs) < 1 {
-		return nil, sql.ErrNoRows
+		return nil, ErrNotFound
 	}
 
 	var query baseQueryOptions
@@ -108,7 +107,7 @@ Get last battle times for accounts by ID, grouped by account ID
 */
 func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error) {
 	if len(accountIDs) < 1 {
-		return nil, sql.ErrNoRows
+		return nil, ErrNotFound
 	}
 
 	var query baseQueryOptions

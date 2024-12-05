@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"time"
 
@@ -74,16 +73,17 @@ func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...Use
 	if err == nil {
 		return usr, nil
 	}
-	if !errors.Is(err, sql.ErrNoRows) {
+	if !IsNotFound(err) {
 		return models.User{}, err
 	}
 
 	options := UserQueryOptions(opts).ToOptions()
 	user := m.User{
-		ID:          id,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-		Permissions: permissions.User.String(),
+		ID:           id,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+		Permissions:  permissions.User.String(),
+		FeatureFlags: make([]byte, 0),
 	}
 	if options.insert.permissions != nil {
 		user.Permissions = permissions.User.Add(*options.insert.permissions).String()
@@ -295,7 +295,7 @@ func (c *client) UpsertUserConnection(ctx context.Context, connection models.Use
 	}
 
 	connection, err := c.UpdateUserConnection(ctx, connection.ID, connection)
-	if errors.Is(err, sql.ErrNoRows) {
+	if IsNotFound(err) {
 		return c.CreateUserConnection(ctx, connection)
 	}
 	return connection, err
