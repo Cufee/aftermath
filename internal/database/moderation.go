@@ -77,17 +77,12 @@ func (c *client) FindUserModerationRequests(ctx context.Context, userID string, 
 func (c *client) UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {
 	model := request.Model()
 	stmt := t.ModerationRequest.
-		UPDATE(
-			t.ModerationRequest.UpdatedAt,
-			t.ModerationRequest.ReferenceID,
+		UPDATE(t.ModerationRequest.AllColumns.Except(
+			t.ModerationRequest.ID,
+			t.ModerationRequest.CreatedAt,
 			t.ModerationRequest.RequestorID,
-			t.ModerationRequest.Context,
-			t.ModerationRequest.ActionReason,
-			t.ModerationRequest.ActionStatus,
-			t.ModerationRequest.ModeratorComment,
-			t.ModerationRequest.ModeratorID,
-			t.ModerationRequest.Data,
-		).
+			t.ModerationRequest.ReferenceID,
+		)).
 		MODEL(model).
 		WHERE(t.ModerationRequest.ID.EQ(s.String(request.ID))).
 		RETURNING(t.ModerationRequest.AllColumns)

@@ -46,7 +46,7 @@ func TestDiscordInteraction(t *testing.T) {
 		is.Equal(found.ID, inserted.ID)
 	})
 
-	t.Run("create and find discord interaction", func(t *testing.T) {
+	t.Run("create and find discord interactions", func(t *testing.T) {
 		data1 := models.DiscordInteraction{
 			Snowflake: "flake-2",
 			Result:    "result-2",
