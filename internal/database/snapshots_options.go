@@ -131,13 +131,9 @@ func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotTy
 		innerOrder = column(t.VehicleSnapshot.CreatedAt).DESC()
 	}
 
-	// var outerSelect []s.Projection
-	// if query.columns == nil {
-	// 	query.columns = t.VehicleSnapshot.AllColumns
-	// }
-	// for _, col := range query.columns {
-	// 	outerSelect = append(outerSelect, s.SELECT(s.String(col.Name()).AS(col.TableName()+"."+col.Name())))
-	// }
+	if query.columns == nil {
+		query.columns = t.VehicleSnapshot.AllColumns
+	}
 
 	innerQuery := t.VehicleSnapshot.
 		SELECT(s.STAR).
@@ -146,7 +142,7 @@ func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotTy
 		AsTable("vehicle_snapshot")
 
 	return s.
-		SELECT(t.VehicleSnapshot.AllColumns).
+		SELECT(query.columns).
 		FROM(innerQuery).
 		GROUP_BY(groupBy)
 }
@@ -176,22 +172,18 @@ func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy s.Grou
 		innerOrder = s.String(t.AccountSnapshot.CreatedAt.Name()).DESC()
 	}
 
-	// var outerSelect []s.Projection
-	// if query.columns == nil {
-	// 	query.columns = t.AccountSnapshot.AllColumns
-	// }
-	// for _, col := range query.columns {
-	// 	outerSelect = append(outerSelect, s.String(col.Name()).AS(col.TableName()+"."+col.Name()))
-	// }
+	if query.columns == nil {
+		query.columns = t.AccountSnapshot.AllColumns
+	}
 
 	innerQuery := t.AccountSnapshot.
 		SELECT(s.STAR).
 		WHERE(s.AND(innerWhere...)).
 		ORDER_BY(innerOrder).
-		AsTable("account_snapshots")
+		AsTable("account_snapshot")
 
 	return s.
-		SELECT(s.STAR).
+		SELECT(query.columns).
 		FROM(innerQuery).
 		GROUP_BY(groupBy)
 }
