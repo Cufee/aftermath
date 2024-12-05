@@ -27,7 +27,7 @@ func (c *staticTestingFetch) Account(ctx context.Context, id string) (models.Acc
 	}
 	return models.Account{}, errors.New("account not found")
 }
-func (c *staticTestingFetch) Search(ctx context.Context, nickname, realm string, limit int) (types.Account, error) {
+func (c *staticTestingFetch) Search(ctx context.Context, nickname string, realm types.Realm, limit int) (types.Account, error) {
 	return types.Account{}, nil
 }
 func (c *staticTestingFetch) BroadSearch(ctx context.Context, nickname string, limit int) ([]fetch.AccountWithRealm, error) {

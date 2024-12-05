@@ -4,12 +4,13 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
 type Account struct {
-	ID       string `json:"id"`
-	Realm    string `json:"realm"`
-	Nickname string `json:"nickname"`
+	ID       string      `json:"id"`
+	Realm    types.Realm `json:"realm"`
+	Nickname string      `json:"nickname"`
 
 	Private        bool      `json:"private"`
 	CreatedAt      time.Time `json:"createdAt"`
@@ -26,7 +27,7 @@ func (a *Account) Model() model.Account {
 		UpdatedAt:        time.Now(),
 		LastBattleTime:   a.LastBattleTime,
 		AccountCreatedAt: a.CreatedAt,
-		Realm:            a.Realm,
+		Realm:            a.Realm.String(),
 		Nickname:         a.Nickname,
 		Private:          a.Private,
 	}
@@ -39,7 +40,7 @@ func (a *Account) Model() model.Account {
 func ToAccount(r *model.Account, clan *model.Clan) Account {
 	account := Account{
 		ID:             r.ID,
-		Realm:          r.Realm,
+		Realm:          types.Realm(r.Realm),
 		Nickname:       r.Nickname,
 		Private:        r.Private,
 		CreatedAt:      r.AccountCreatedAt,

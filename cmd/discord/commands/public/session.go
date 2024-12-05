@@ -73,7 +73,7 @@ func init() {
 
 					realms := make(map[string]struct{})
 					for _, a := range accounts {
-						realms[a.Realm] = struct{}{}
+						realms[a.Realm.String()] = struct{}{}
 					}
 					if len(realms) > 1 {
 						reply, err := realmSelectButtons(ctx, ctx.ID(), accounts)

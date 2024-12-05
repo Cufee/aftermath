@@ -85,14 +85,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		if opts.VehicleID != "" {
 			footer = append(footer, cards.Overview.Title)
 		} else {
-			switch strings.ToLower(stats.Realm) {
-			case "na":
-				footer = append(footer, "North America")
-			case "eu":
-				footer = append(footer, "Europe")
-			case "as":
-				footer = append(footer, "Asia")
-			}
+			footer = append(footer, common.RealmLabel(stats.Realm))
 		}
 
 		sessionTo := stats.PeriodEnd.Format("Jan 2, 2006")

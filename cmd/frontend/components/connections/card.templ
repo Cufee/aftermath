@@ -15,7 +15,7 @@ templ ConnectionCard(connection ConnectionWithAccount, defaultConnID string) {
 		<div class="rounded-md bg-base-300 flex flex-row grow">
 			<div class="p-1 bg-base-200 flex justify-center items-center h-full aspect-square rounded-l-md">
 				<span class="font-bold">
-					{ connection.Account.Realm }
+					{ connection.Account.Realm.String() }
 				</span>
 			</div>
 			<div class="p-3 pr-0 flex flex-row gap-2 items-center justify-between grow">
@@ -33,7 +33,7 @@ templ ConnectionCard(connection ConnectionWithAccount, defaultConnID string) {
 					}
 				</div>
 				if !connection.Verified {
-					<form action={ templ.URL("/api/p/auth/wargaming/login/" + connection.Account.Realm) }>
+					<form action={ templ.URL("/api/p/auth/wargaming/login/" + connection.Account.Realm.String()) }>
 						<button type="submit" class="verify-button btn btn-sm btn-info flex flex-row flex-nowrap items-center justify-between gap-1 font-normal">
 							<span>Verify</span>
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">

@@ -213,7 +213,7 @@ func init() {
 						_, _ = ctx.Core().Fetch().Account(c, id) // Make sure the account is cached
 					}(fmt.Sprint(account.ID))
 
-					return ctx.Reply().Format("command_links_linked_successfully_fmt", account.Nickname, strings.ToUpper(options.Realm)).Send()
+					return ctx.Reply().Format("command_links_linked_successfully_fmt", account.Nickname, options.Realm.String()).Send()
 				}
 			}),
 	)

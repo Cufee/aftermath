@@ -60,7 +60,7 @@ func UpdateDefaultUserConnection(ctx context.Context, db database.Client, userID
 		}
 
 		content.ReferenceID = userID
-		if c.Verified == true {
+		if c.Verified {
 			content.ReferenceID = r
 
 			// check if there is an existing record for the same account and update it to not reference the account anymore
