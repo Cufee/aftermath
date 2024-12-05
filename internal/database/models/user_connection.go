@@ -46,13 +46,15 @@ func ToUserConnection(record *model.UserConnection) UserConnection {
 		ID:          record.ID,
 		Type:        ConnectionType(record.Type),
 		Verified:    record.Verified,
+		Selected:    record.Selected,
 		UserID:      record.UserID,
 		ReferenceID: record.ReferenceID,
+		Permissions: permissions.Blank,
 	}
 	json.Unmarshal(record.Metadata, &c.Metadata)
 
 	if record.Permissions != nil {
-		c.Permissions = permissions.Parse(*record.Permissions, permissions.Blank)
+		c.Permissions = permissions.Parse(*record.Permissions, c.Permissions)
 	}
 	if c.Metadata == nil {
 		c.Metadata = make(map[string]any)
@@ -68,6 +70,7 @@ func (record *UserConnection) Model() model.UserConnection {
 		UpdatedAt:   time.Now(),
 		Type:        string(record.Type),
 		Verified:    record.Verified,
+		Selected:    record.Selected,
 		ReferenceID: record.ReferenceID,
 		Permissions: &perms,
 		UserID:      record.UserID,

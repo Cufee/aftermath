@@ -7,11 +7,15 @@
 
 package model
 
+import (
+	"time"
+)
+
 type ApplicationCommand struct {
-	ID          string `sql:"primary_key" db:"id"`
-	CreatedAt   int64  `db:"created_at"`
-	UpdatedAt   int64  `db:"updated_at"`
-	Name        string `db:"name"`
-	Version     string `db:"version"`
-	OptionsHash string `db:"options_hash"`
+	ID          string    `sql:"primary_key" db:"id"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
+	Name        string    `db:"name"`
+	Version     string    `db:"version"`
+	OptionsHash string    `db:"options_hash"`
 }

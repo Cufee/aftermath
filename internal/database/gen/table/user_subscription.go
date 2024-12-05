@@ -18,10 +18,10 @@ type userSubscriptionTable struct {
 
 	// Columns
 	ID          sqlite.ColumnString
-	CreatedAt   sqlite.ColumnInteger
-	UpdatedAt   sqlite.ColumnInteger
+	CreatedAt   sqlite.ColumnTimestamp
+	UpdatedAt   sqlite.ColumnTimestamp
 	Type        sqlite.ColumnString
-	ExpiresAt   sqlite.ColumnInteger
+	ExpiresAt   sqlite.ColumnTimestamp
 	Permissions sqlite.ColumnString
 	ReferenceID sqlite.ColumnString
 	UserID      sqlite.ColumnString
@@ -66,10 +66,10 @@ func newUserSubscriptionTable(schemaName, tableName, alias string) *UserSubscrip
 func newUserSubscriptionTableImpl(schemaName, tableName, alias string) userSubscriptionTable {
 	var (
 		IDColumn          = sqlite.StringColumn("id")
-		CreatedAtColumn   = sqlite.IntegerColumn("created_at")
-		UpdatedAtColumn   = sqlite.IntegerColumn("updated_at")
+		CreatedAtColumn   = sqlite.TimestampColumn("created_at")
+		UpdatedAtColumn   = sqlite.TimestampColumn("updated_at")
 		TypeColumn        = sqlite.StringColumn("type")
-		ExpiresAtColumn   = sqlite.IntegerColumn("expires_at")
+		ExpiresAtColumn   = sqlite.TimestampColumn("expires_at")
 		PermissionsColumn = sqlite.StringColumn("permissions")
 		ReferenceIDColumn = sqlite.StringColumn("reference_id")
 		UserIDColumn      = sqlite.StringColumn("user_id")
