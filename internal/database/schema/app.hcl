@@ -18,11 +18,13 @@ table "app_configuration" {
   }
   column "value" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "metadata" {
-    null = true
-    type = json
+    null = false
+    type = blob
+    default = ""
   }
   primary_key {
     columns = [column.id]
@@ -60,7 +62,8 @@ table "cron_task" {
   }
   column "targets" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "status" {
     null = false
@@ -81,11 +84,13 @@ table "cron_task" {
   }
   column "logs" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "data" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   primary_key {
     columns = [column.id]

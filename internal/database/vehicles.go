@@ -31,7 +31,7 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.
 				errors[id] = err
 				continue
 			}
-			model.LocalizedNames = string(names)
+			model.LocalizedNames = names
 
 			stmt := t.Vehicle.
 				INSERT(t.Vehicle.AllColumns).

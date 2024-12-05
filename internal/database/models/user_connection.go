@@ -48,8 +48,9 @@ func ToUserConnection(record *model.UserConnection) UserConnection {
 		Verified:    record.Verified,
 		UserID:      record.UserID,
 		ReferenceID: record.ReferenceID,
-		Metadata:    make(map[string]any, 0),
 	}
+	json.Unmarshal(record.Metadata, &c.Metadata)
+
 	if record.Permissions != nil {
 		c.Permissions = permissions.Parse(*record.Permissions, permissions.Blank)
 	}
@@ -71,9 +72,6 @@ func (record *UserConnection) Model() model.UserConnection {
 		Permissions: &perms,
 		UserID:      record.UserID,
 	}
-	if data, err := json.Marshal(record.Metadata); err == nil {
-		s := string(data)
-		c.Metadata = &s
-	}
+	c.Metadata, _ = json.Marshal(record.Metadata)
 	return c
 }

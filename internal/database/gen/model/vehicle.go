@@ -16,5 +16,5 @@ type Vehicle struct {
 	CreatedAt      time.Time `db:"created_at"`
 	UpdatedAt      time.Time `db:"updated_at"`
 	Tier           int32     `db:"tier"`
-	LocalizedNames string    `db:"localized_names"`
+	LocalizedNames []byte    `db:"localized_names"`
 }

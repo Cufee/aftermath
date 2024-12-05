@@ -18,8 +18,8 @@ type WidgetSettings struct {
 	ReferenceID        string     `db:"reference_id"`
 	Title              *string    `db:"title"`
 	SessionFrom        *time.Time `db:"session_from"`
-	Metadata           string     `db:"metadata"`
-	Styles             string     `db:"styles"`
+	Metadata           []byte     `db:"metadata"`
+	Styles             []byte     `db:"styles"`
 	UserID             string     `db:"user_id"`
 	SessionReferenceID *string    `db:"session_reference_id"`
 }

@@ -92,7 +92,8 @@ table "clan" {
   }
   column "members" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   primary_key {
     columns = [column.id]
@@ -140,7 +141,8 @@ table "account_snapshot" {
   }
   column "rating_frame" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "regular_battles" {
     null = false
@@ -148,7 +150,8 @@ table "account_snapshot" {
   }
   column "regular_frame" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "account_id" {
     null = false
@@ -216,7 +219,8 @@ table "vehicle_snapshot" {
   }
   column "frame" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "account_id" {
     null = false

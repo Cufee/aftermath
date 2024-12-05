@@ -15,7 +15,7 @@ type GameMap struct {
 	ID              string    `sql:"primary_key" db:"id"`
 	CreatedAt       time.Time `db:"created_at"`
 	UpdatedAt       time.Time `db:"updated_at"`
-	GameModes       string    `db:"game_modes"`
+	GameModes       []byte    `db:"game_modes"`
 	SupremacyPoints int32     `db:"supremacy_points"`
-	LocalizedNames  string    `db:"localized_names"`
+	LocalizedNames  []byte    `db:"localized_names"`
 }

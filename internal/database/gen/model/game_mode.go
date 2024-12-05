@@ -15,5 +15,5 @@ type GameMode struct {
 	ID             string    `sql:"primary_key" db:"id"`
 	CreatedAt      time.Time `db:"created_at"`
 	UpdatedAt      time.Time `db:"updated_at"`
-	LocalizedNames string    `db:"localized_names"`
+	LocalizedNames []byte    `db:"localized_names"`
 }

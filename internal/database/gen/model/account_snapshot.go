@@ -19,8 +19,8 @@ type AccountSnapshot struct {
 	LastBattleTime time.Time `db:"last_battle_time"`
 	ReferenceID    string    `db:"reference_id"`
 	RatingBattles  int32     `db:"rating_battles"`
-	RatingFrame    string    `db:"rating_frame"`
+	RatingFrame    []byte    `db:"rating_frame"`
 	RegularBattles int32     `db:"regular_battles"`
-	RegularFrame   string    `db:"regular_frame"`
+	RegularFrame   []byte    `db:"regular_frame"`
 	AccountID      string    `db:"account_id"`
 }

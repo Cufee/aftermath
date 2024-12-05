@@ -18,5 +18,5 @@ type Clan struct {
 	Tag       string    `db:"tag"`
 	Name      string    `db:"name"`
 	EmblemID  *string   `db:"emblem_id"`
-	Members   string    `db:"members"`
+	Members   []byte    `db:"members"`
 }

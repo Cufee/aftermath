@@ -16,6 +16,6 @@ type AppConfiguration struct {
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 	Key       string    `db:"key"`
-	Value     string    `db:"value"`
-	Metadata  *string   `db:"metadata"`
+	Value     []byte    `db:"value"`
+	Metadata  []byte    `db:"metadata"`
 }

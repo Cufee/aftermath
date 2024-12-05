@@ -54,7 +54,7 @@ func ToVehicleSnapshot(record *model.VehicleSnapshot) VehicleSnapshot {
 		AccountID:      record.AccountID,
 		VehicleID:      record.VehicleID,
 	}
-	json.Unmarshal([]byte(record.Frame), &s.Stats)
+	json.Unmarshal(record.Frame, &s.Stats)
 	return s
 }
 
@@ -70,7 +70,6 @@ func (record *VehicleSnapshot) Model() model.VehicleSnapshot {
 		LastBattleTime: record.LastBattleTime,
 		AccountID:      record.AccountID,
 	}
-	frame, _ := json.Marshal(record.Stats)
-	s.Frame = string(frame)
+	s.Frame, _ = json.Marshal(record.Stats)
 	return s
 }

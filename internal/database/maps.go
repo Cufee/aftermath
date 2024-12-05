@@ -39,12 +39,12 @@ func (c *client) UpsertMaps(ctx context.Context, maps map[string]types.Map) erro
 			if err != nil {
 				return err
 			}
-			model.GameModes = string(modes)
+			model.GameModes = modes
 			names, err := json.Marshal(data.LocalizedNames)
 			if err != nil {
 				return err
 			}
-			model.LocalizedNames = string(names)
+			model.LocalizedNames = names
 
 			stmt := t.GameMap.
 				INSERT(t.GameMap.AllColumns).

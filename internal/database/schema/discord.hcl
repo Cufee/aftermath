@@ -84,7 +84,8 @@ table "discord_interaction" {
   }
   column "metadata" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "user_id" {
     null = false

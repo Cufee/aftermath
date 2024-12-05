@@ -9,6 +9,7 @@ import (
 	t "github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/utils"
+	"github.com/pkg/errors"
 )
 
 // --- vehicle snapshots ---
@@ -28,17 +29,27 @@ func (c *client) GetVehicleSnapshots(ctx context.Context, accountID string, vehi
 	if err != nil {
 		return nil, err
 	}
+	defer rs.Close()
+
+	cols, err := rs.Rows.Columns()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get row columns")
+	}
 
 	var snapshots []models.VehicleSnapshot
-	for rs.Next() {
-		var snapshot m.VehicleSnapshot
-		err := rs.Scan(&snapshot)
+	for rs.Rows.Next() {
+		var record m.VehicleSnapshot
+
+		fieldPtrs, err := mapColumnsToFields(&record, cols)
 		if err != nil {
 			return nil, err
 		}
-		println(snapshot.ID)
 
-		snapshots = append(snapshots, models.ToVehicleSnapshot(&snapshot))
+		if err := rs.Rows.Scan(fieldPtrs...); err != nil {
+			return nil, errors.New("failed to scan row: " + err.Error())
+		}
+
+		snapshots = append(snapshots, models.ToVehicleSnapshot(&record))
 	}
 
 	return snapshots, nil

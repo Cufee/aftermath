@@ -55,7 +55,6 @@ func ToModerationRequest(r *model.ModerationRequest) ModerationRequest {
 
 		ActionStatus: ModerationStatus(r.ActionStatus),
 		ModeratorID:  r.ModeratorID,
-		Data:         make(map[string]any, 0),
 	}
 	if r.Context != nil {
 		req.RequestContext = *r.Context
@@ -66,10 +65,7 @@ func ToModerationRequest(r *model.ModerationRequest) ModerationRequest {
 	if r.ModeratorComment != nil {
 		req.ModeratorComment = *r.ModeratorComment
 	}
-
-	if r.Data != "" {
-		json.Unmarshal([]byte(r.Data), &req.Data)
-	}
+	json.Unmarshal(r.Data, &req.Data)
 
 	return req
 }
@@ -95,11 +91,7 @@ func (r ModerationRequest) Model() model.ModerationRequest {
 	if r.ModeratorComment != "" {
 		req.ModeratorComment = &r.ModeratorComment
 	}
-
-	if r.Data != nil {
-		data, _ := json.Marshal(r.Data)
-		req.Data = string(data)
-	}
+	req.Data, _ = json.Marshal(r.Data)
 
 	return req
 }

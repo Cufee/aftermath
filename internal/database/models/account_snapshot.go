@@ -30,8 +30,8 @@ func ToAccountSnapshot(record *model.AccountSnapshot) AccountSnapshot {
 		CreatedAt:      record.CreatedAt,
 		LastBattleTime: record.LastBattleTime,
 	}
-	json.Unmarshal([]byte(record.RatingFrame), &s.RatingBattles)
-	json.Unmarshal([]byte(record.RegularFrame), &s.RegularBattles)
+	json.Unmarshal(record.RatingFrame, &s.RatingBattles)
+	json.Unmarshal(record.RegularFrame, &s.RegularBattles)
 	return s
 }
 
@@ -48,8 +48,8 @@ func (record *AccountSnapshot) Model() model.AccountSnapshot {
 		AccountID:      record.AccountID,
 	}
 	rating, _ := json.Marshal(record.RatingBattles)
-	s.RatingFrame = string(rating)
+	s.RatingFrame = rating
 	regular, _ := json.Marshal(record.RegularBattles)
-	s.RegularFrame = string(regular)
+	s.RegularFrame = regular
 	return s
 }

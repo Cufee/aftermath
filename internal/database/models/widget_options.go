@@ -94,8 +94,12 @@ func ToWidgetOptions(record *model.WidgetSettings) WidgetOptions {
 	if record.SessionReferenceID != nil {
 		o.SessionRefID = *record.SessionReferenceID
 	}
-	json.Unmarshal([]byte(record.Styles), &o.Style)
-	json.Unmarshal([]byte(record.Metadata), &o.Meta)
+	json.Unmarshal(record.Styles, &o.Style)
+	json.Unmarshal(record.Metadata, &o.Meta)
+
+	if o.Meta == nil {
+		o.Meta = make(map[string]any, 0)
+	}
 	return o
 }
 
@@ -116,11 +120,7 @@ func (record *WidgetOptions) Model() model.WidgetSettings {
 	if record.SessionRefID != "" {
 		s.SessionReferenceID = &record.SessionRefID
 	}
-	if record.Meta != nil {
-		data, _ := json.Marshal(record.Meta)
-		s.Metadata = string(data)
-	}
-	data, _ := json.Marshal(record.Style)
-	s.Styles = string(data)
+	s.Metadata, _ = json.Marshal(record.Meta)
+	s.Styles, _ = json.Marshal(record.Style)
 	return s
 }

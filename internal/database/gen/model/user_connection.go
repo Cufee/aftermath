@@ -20,6 +20,6 @@ type UserConnection struct {
 	Selected    bool      `db:"selected"`
 	ReferenceID string    `db:"reference_id"`
 	Permissions *string   `db:"permissions"`
-	Metadata    *string   `db:"metadata"`
+	Metadata    []byte    `db:"metadata"`
 	UserID      string    `db:"user_id"`
 }

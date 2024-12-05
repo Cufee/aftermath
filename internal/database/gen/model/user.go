@@ -17,5 +17,5 @@ type User struct {
 	UpdatedAt    time.Time `db:"updated_at"`
 	Username     string    `db:"username"`
 	Permissions  string    `db:"permissions"`
-	FeatureFlags *string   `db:"feature_flags"`
+	FeatureFlags []byte    `db:"feature_flags"`
 }

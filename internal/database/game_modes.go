@@ -29,7 +29,7 @@ func (c *client) UpsertGameModes(ctx context.Context, modes map[string]map[langu
 				ID:             id,
 				CreatedAt:      time.Now(),
 				UpdatedAt:      time.Now(),
-				LocalizedNames: string(encoded),
+				LocalizedNames: encoded,
 			}
 
 			stmt := t.GameMode.

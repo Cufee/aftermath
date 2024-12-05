@@ -25,7 +25,13 @@ tasks:
     desc: generate migrations
     cmds: 
       - echo "Generating migrations for $DATABASE_PATH/$DATABASE_NAME"
+      - task: db-migrate-hash
       - atlas migrate hash --env local && atlas migrate diff --env local
+
+  db-migrate-hash:
+    desc: generate migrations
+    cmds: 
+      - atlas migrate hash --env local
 
   db-migrate-apply:
     desc: apply migrations using atlas

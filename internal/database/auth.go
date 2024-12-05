@@ -27,7 +27,7 @@ func (c *client) CreateAuthNonce(ctx context.Context, publicID, identifier strin
 		if err != nil {
 			return models.AuthNonce{}, err
 		}
-		insert.Metadata = string(metaEncoded)
+		insert.Metadata = metaEncoded
 	}
 
 	var result m.AuthNonce
@@ -84,7 +84,7 @@ func (c *client) CreateSession(ctx context.Context, publicID, userID string, exp
 		if err != nil {
 			return models.Session{}, err
 		}
-		model.Metadata = string(data)
+		model.Metadata = data
 	}
 
 	stmt := t.Session.

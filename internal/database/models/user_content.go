@@ -62,12 +62,15 @@ func ToUserContent(record *model.UserContent) UserContent {
 		ReferenceID: record.ReferenceID,
 
 		Value: record.Value,
-		Meta:  make(map[string]any, 0),
 
 		CreatedAt: record.CreatedAt,
 		UpdatedAt: record.UpdatedAt,
 	}
-	json.Unmarshal([]byte(record.Metadata), &c.Meta)
+	json.Unmarshal(record.Metadata, &c.Meta)
+
+	if c.Meta == nil {
+		c.Meta = make(map[string]any, 0)
+	}
 	return c
 }
 
@@ -83,9 +86,6 @@ func (record *UserContent) Model() model.UserContent {
 
 		Value: record.Value,
 	}
-	if record.Meta != nil {
-		data, _ := json.Marshal(record.Meta)
-		c.Metadata = string(data)
-	}
+	c.Metadata, _ = json.Marshal(record.Meta)
 	return c
 }

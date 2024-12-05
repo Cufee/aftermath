@@ -30,7 +30,7 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 				ID:        id,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
-				Data:      string(encoded),
+				Data:      encoded,
 			}
 
 			stmt := t.VehicleAverage.

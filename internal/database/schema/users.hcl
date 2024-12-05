@@ -23,8 +23,9 @@ table "user" {
     default = ""
   }
   column "feature_flags" {
-    null = true
-    type = json
+    null = false
+    type = blob
+    default = ""
   }
   primary_key {
     columns = [column.id]
@@ -75,8 +76,9 @@ table "user_connection" {
     default = ""
   }
   column "metadata" {
-    null = true
-    type = json
+    null = false
+    type = blob
+    default = ""
   }
   column "user_id" {
     null = false
@@ -200,7 +202,8 @@ table "user_content" {
   }
   column "metadata" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "user_id" {
     null = false
@@ -271,7 +274,8 @@ table "user_restriction" {
   }
   column "events" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "user_id" {
     null = false
@@ -333,7 +337,8 @@ table "moderation_request" {
   }
   column "data" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "requestor_id" {
     null = false
@@ -406,11 +411,13 @@ table "widget_settings" {
   }
   column "metadata" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "styles" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "user_id" {
     null = false

@@ -67,7 +67,7 @@ func ToUserRestriction(record *model.UserRestriction) UserRestriction {
 
 		Events: make([]RestrictionUpdate, 0),
 	}
-	json.Unmarshal([]byte(record.Events), &r.Events)
+	json.Unmarshal(record.Events, &r.Events)
 	return r
 }
 
@@ -85,7 +85,6 @@ func (record UserRestriction) Model() model.UserRestriction {
 		PublicReason:     record.PublicReason,
 		Restriction:      record.Restriction.Encode(),
 	}
-	data, _ := json.Marshal(record.Events)
-	r.Events = string(data)
+	r.Events, _ = json.Marshal(record.Events)
 	return r
 }

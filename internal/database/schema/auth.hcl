@@ -30,7 +30,8 @@ table "auth_nonce" {
   }
   column "metadata" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   primary_key {
     columns = [column.id]
@@ -68,7 +69,8 @@ table "session" {
   }
   column "metadata" {
     null = false
-    type = json
+    type = blob
+    default = ""
   }
   column "user_id" {
     null = false

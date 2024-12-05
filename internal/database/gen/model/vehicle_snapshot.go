@@ -20,6 +20,6 @@ type VehicleSnapshot struct {
 	ReferenceID    string    `db:"reference_id"`
 	Battles        int32     `db:"battles"`
 	LastBattleTime time.Time `db:"last_battle_time"`
-	Frame          string    `db:"frame"`
+	Frame          []byte    `db:"frame"`
 	AccountID      string    `db:"account_id"`
 }

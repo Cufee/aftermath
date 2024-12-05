@@ -20,7 +20,6 @@ const (
 	TaskTypeDatabaseCleanup TaskType = "CLEANUP_DATABASE"
 )
 
-// Values provides list valid values for Enum.
 func (TaskType) Values() []string {
 	var kinds []string
 	for _, s := range []TaskType{
@@ -118,9 +117,9 @@ func ToCronTask(record *model.CronTask) Task {
 		TriesLeft:      int(record.TriesLeft),
 		LastRun:        record.LastRun,
 	}
-	json.Unmarshal([]byte(record.Targets), &t.Targets)
-	json.Unmarshal([]byte(record.Data), &t.Data)
-	json.Unmarshal([]byte(record.Logs), &t.Logs)
+	json.Unmarshal(record.Targets, &t.Targets)
+	json.Unmarshal(record.Data, &t.Data)
+	json.Unmarshal(record.Logs, &t.Logs)
 	return t
 }
 
@@ -136,11 +135,8 @@ func (record Task) Model() model.CronTask {
 		TriesLeft:      int32(record.TriesLeft),
 		LastRun:        record.LastRun,
 	}
-	targets, _ := json.Marshal(record.Targets)
-	t.Targets = string(targets)
-	data, _ := json.Marshal(record.Data)
-	t.Data = string(data)
-	logs, _ := json.Marshal(record.Logs)
-	t.Logs = string(logs)
+	t.Targets, _ = json.Marshal(record.Targets)
+	t.Data, _ = json.Marshal(record.Data)
+	t.Logs, _ = json.Marshal(record.Logs)
 	return t
 }

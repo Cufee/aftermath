@@ -19,5 +19,5 @@ type AuthNonce struct {
 	ExpiresAt  time.Time `db:"expires_at"`
 	Identifier string    `db:"identifier"`
 	PublicID   string    `db:"public_id"`
-	Metadata   string    `db:"metadata"`
+	Metadata   []byte    `db:"metadata"`
 }

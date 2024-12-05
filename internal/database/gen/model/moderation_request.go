@@ -20,7 +20,7 @@ type ModerationRequest struct {
 	ReferenceID      string    `db:"reference_id"`
 	ActionReason     *string   `db:"action_reason"`
 	ActionStatus     string    `db:"action_status"`
-	Data             string    `db:"data"`
+	Data             []byte    `db:"data"`
 	RequestorID      string    `db:"requestor_id"`
 	ModeratorID      *string   `db:"moderator_id"`
 }

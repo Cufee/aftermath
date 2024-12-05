@@ -84,7 +84,7 @@ func ToUserSubscription(record *model.UserSubscription) UserSubscription {
 		Type:        SubscriptionType(record.Type),
 		UserID:      record.UserID,
 		ReferenceID: record.ReferenceID,
-		ExpiresAt:   record.ExpiresAt,
+		ExpiresAt:   time.Unix(record.ExpiresAt, 0),
 		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
 	}
 }

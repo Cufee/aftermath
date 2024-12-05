@@ -20,6 +20,6 @@ type UserRestriction struct {
 	Restriction      string    `db:"restriction"`
 	PublicReason     string    `db:"public_reason"`
 	ModeratorComment string    `db:"moderator_comment"`
-	Events           string    `db:"events"`
+	Events           []byte    `db:"events"`
 	UserID           string    `db:"user_id"`
 }

@@ -72,9 +72,12 @@ func ToDiscordInteraction(record *model.DiscordInteraction) DiscordInteraction {
 		Locale:  locale,
 		Type:    DiscordInteractionType(record.Type),
 		EventID: record.EventID,
-		Meta:    make(map[string]any, 0),
 	}
-	json.Unmarshal([]byte(record.Metadata), &i.Meta)
+	json.Unmarshal(record.Metadata, &i.Meta)
+
+	if i.Meta == nil {
+		i.Meta = make(map[string]any, 0)
+	}
 	return i
 }
 
@@ -97,7 +100,7 @@ func (record *DiscordInteraction) Model() model.DiscordInteraction {
 	}
 	if record.Meta != nil {
 		data, _ := json.Marshal(record.Meta)
-		i.Metadata = string(data)
+		i.Metadata = data
 	}
 	return i
 }

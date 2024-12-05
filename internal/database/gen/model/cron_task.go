@@ -17,11 +17,11 @@ type CronTask struct {
 	UpdatedAt      time.Time `db:"updated_at"`
 	Type           string    `db:"type"`
 	ReferenceID    string    `db:"reference_id"`
-	Targets        string    `db:"targets"`
+	Targets        []byte    `db:"targets"`
 	Status         string    `db:"status"`
 	ScheduledAfter time.Time `db:"scheduled_after"`
 	LastRun        time.Time `db:"last_run"`
 	TriesLeft      int32     `db:"tries_left"`
-	Logs           string    `db:"logs"`
-	Data           string    `db:"data"`
+	Logs           []byte    `db:"logs"`
+	Data           []byte    `db:"data"`
 }

@@ -45,9 +45,11 @@ func ToAuthNonce(record *model.AuthNonce) AuthNonce {
 		CreatedAt: record.CreatedAt,
 		UpdatedAt: record.UpdatedAt,
 		ExpiresAt: record.ExpiresAt,
-
-		Meta: make(map[string]string, 0),
 	}
-	json.Unmarshal([]byte(record.Metadata), &nonce.Meta)
+	json.Unmarshal(record.Metadata, &nonce.Meta)
+
+	if nonce.Meta == nil {
+		nonce.Meta = make(map[string]string, 0)
+	}
 	return nonce
 }

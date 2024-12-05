@@ -2,9 +2,11 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,8 +19,8 @@ func TestGetVehicleSnapshots(t *testing.T) {
 	_, err := client.UpsertAccounts(ctx, &models.Account{ID: "a1", Realm: "test", Nickname: "test_account"})
 	assert.NoError(t, err, "failed to upsert an account")
 
-	// client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.VehicleSnapshot.TableName()))
-	// defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.VehicleSnapshot.TableName()))
+	client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.VehicleSnapshot.TableName()))
+	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.VehicleSnapshot.TableName()))
 
 	createdAtVehicle1 := time.Date(2023, 6, 1, 0, 0, 0, 0, time.UTC)
 	createdAtVehicle2 := time.Date(2023, 8, 1, 0, 0, 0, 0, time.UTC)

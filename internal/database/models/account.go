@@ -22,10 +22,10 @@ type Account struct {
 func (a *Account) Model() model.Account {
 	model := model.Account{
 		ID:               a.ID,
-		CreatedAt:        time.Now(),
-		UpdatedAt:        time.Now(),
-		LastBattleTime:   a.LastBattleTime,
-		AccountCreatedAt: a.CreatedAt,
+		CreatedAt:        time.Now().Unix(),
+		UpdatedAt:        time.Now().Unix(),
+		LastBattleTime:   a.LastBattleTime.Unix(),
+		AccountCreatedAt: a.CreatedAt.Unix(),
 		Realm:            a.Realm,
 		Nickname:         a.Nickname,
 		Private:          a.Private,
@@ -42,8 +42,8 @@ func ToAccount(r *model.Account, clan *model.Clan) Account {
 		Realm:          r.Realm,
 		Nickname:       r.Nickname,
 		Private:        r.Private,
-		CreatedAt:      r.AccountCreatedAt,
-		LastBattleTime: r.LastBattleTime,
+		CreatedAt:      time.Unix(r.AccountCreatedAt, 0),
+		LastBattleTime: time.Unix(r.LastBattleTime, 0),
 	}
 	if clan != nil {
 		account.ClanID = clan.ID

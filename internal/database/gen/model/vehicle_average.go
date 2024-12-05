@@ -15,5 +15,5 @@ type VehicleAverage struct {
 	ID        string    `sql:"primary_key" db:"id"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
-	Data      string    `db:"data"`
+	Data      []byte    `db:"data"`
 }

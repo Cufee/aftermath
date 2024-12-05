@@ -18,6 +18,6 @@ type UserContent struct {
 	Type        string    `db:"type"`
 	ReferenceID string    `db:"reference_id"`
 	Value       string    `db:"value"`
-	Metadata    string    `db:"metadata"`
+	Metadata    []byte    `db:"metadata"`
 	UserID      string    `db:"user_id"`
 }

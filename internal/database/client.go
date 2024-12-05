@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"reflect"
 	"runtime/debug"
+	"strings"
 	"time"
 
 	"github.com/cufee/aftermath-assets/types"
@@ -288,4 +290,34 @@ func stringsToExp(s []string) []sqlite.Expression {
 		a = append(a, sqlite.String(i))
 	}
 	return a
+}
+
+func mapColumnsToFields(record interface{}, cols []string) ([]interface{}, error) {
+	val := reflect.ValueOf(record).Elem()
+	typ := val.Type()
+
+	fieldPtrs := make([]interface{}, len(cols))
+
+	for i, col := range cols {
+		fieldPtr := findFieldByTag(val, typ, col)
+		if fieldPtr == nil {
+			var dummy interface{} // Placeholder for unused columns
+			fieldPtrs[i] = &dummy
+		} else {
+			fieldPtrs[i] = fieldPtr
+		}
+	}
+
+	return fieldPtrs, nil
+}
+
+func findFieldByTag(val reflect.Value, typ reflect.Type, col string) interface{} {
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		tag := field.Tag.Get("db")
+		if strings.EqualFold(tag, col) { // Match column name to `db` tag
+			return val.Field(i).Addr().Interface()
+		}
+	}
+	return nil
 }

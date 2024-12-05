@@ -47,10 +47,12 @@ func ToSession(record *model.Session) Session {
 		CreatedAt: record.CreatedAt,
 		UpdatedAt: record.UpdatedAt,
 		ExpiresAt: record.ExpiresAt,
-
-		Meta: make(map[string]string, 0),
 	}
-	json.Unmarshal([]byte(record.Metadata), &session.Meta)
+	json.Unmarshal(record.Metadata, &session.Meta)
+
+	if session.Meta == nil {
+		session.Meta = make(map[string]string, 0)
+	}
 	return session
 }
 
@@ -66,7 +68,7 @@ func (record *Session) Model() model.Session {
 	}
 	if record.Meta != nil {
 		data, _ := json.Marshal(record.Meta)
-		session.Metadata = string(data)
+		session.Metadata = data
 	}
 	return session
 }

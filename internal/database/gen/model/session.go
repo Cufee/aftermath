@@ -17,6 +17,6 @@ type Session struct {
 	UpdatedAt time.Time `db:"updated_at"`
 	ExpiresAt time.Time `db:"expires_at"`
 	PublicID  string    `db:"public_id"`
-	Metadata  string    `db:"metadata"`
+	Metadata  []byte    `db:"metadata"`
 	UserID    string    `db:"user_id"`
 }

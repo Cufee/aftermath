@@ -23,6 +23,6 @@ type DiscordInteraction struct {
 	MessageID string    `db:"message_id"`
 	Type      string    `db:"type"`
 	Locale    string    `db:"locale"`
-	Metadata  string    `db:"metadata"`
+	Metadata  []byte    `db:"metadata"`
 	UserID    string    `db:"user_id"`
 }

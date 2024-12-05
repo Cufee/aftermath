@@ -18,10 +18,10 @@ type accountTable struct {
 
 	// Columns
 	ID               sqlite.ColumnString
-	CreatedAt        sqlite.ColumnTimestamp
-	UpdatedAt        sqlite.ColumnTimestamp
-	LastBattleTime   sqlite.ColumnTimestamp
-	AccountCreatedAt sqlite.ColumnTimestamp
+	CreatedAt        sqlite.ColumnInteger
+	UpdatedAt        sqlite.ColumnInteger
+	LastBattleTime   sqlite.ColumnInteger
+	AccountCreatedAt sqlite.ColumnInteger
 	Realm            sqlite.ColumnString
 	Nickname         sqlite.ColumnString
 	Private          sqlite.ColumnBool
@@ -67,10 +67,10 @@ func newAccountTable(schemaName, tableName, alias string) *AccountTable {
 func newAccountTableImpl(schemaName, tableName, alias string) accountTable {
 	var (
 		IDColumn               = sqlite.StringColumn("id")
-		CreatedAtColumn        = sqlite.TimestampColumn("created_at")
-		UpdatedAtColumn        = sqlite.TimestampColumn("updated_at")
-		LastBattleTimeColumn   = sqlite.TimestampColumn("last_battle_time")
-		AccountCreatedAtColumn = sqlite.TimestampColumn("account_created_at")
+		CreatedAtColumn        = sqlite.IntegerColumn("created_at")
+		UpdatedAtColumn        = sqlite.IntegerColumn("updated_at")
+		LastBattleTimeColumn   = sqlite.IntegerColumn("last_battle_time")
+		AccountCreatedAtColumn = sqlite.IntegerColumn("account_created_at")
 		RealmColumn            = sqlite.StringColumn("realm")
 		NicknameColumn         = sqlite.StringColumn("nickname")
 		PrivateColumn          = sqlite.BoolColumn("private")
