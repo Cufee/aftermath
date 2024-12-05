@@ -17,10 +17,11 @@ func (c *client) CreateAuthNonce(ctx context.Context, publicID, identifier strin
 		ID:         cuid.New(),
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
-		Active:     true,
 		ExpiresAt:  expiresAt,
+		Active:     true,
 		Identifier: identifier,
 		PublicID:   publicID,
+		Metadata:   make([]byte, 0),
 	}
 	if meta != nil {
 		metaEncoded, err := json.Marshal(meta)
@@ -78,6 +79,7 @@ func (c *client) CreateSession(ctx context.Context, publicID, userID string, exp
 		ExpiresAt: expiresAt,
 		PublicID:  publicID,
 		UserID:    userID,
+		Metadata:  make([]byte, 0),
 	}
 	if meta != nil {
 		data, err := json.Marshal(meta)
@@ -88,9 +90,9 @@ func (c *client) CreateSession(ctx context.Context, publicID, userID string, exp
 	}
 
 	stmt := t.Session.
-		INSERT().
+		INSERT(t.Session.AllColumns).
 		MODEL(model).
-		RETURNING()
+		RETURNING(t.Session.AllColumns)
 
 	var record m.Session
 	err := c.query(ctx, stmt, &record)

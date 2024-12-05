@@ -15,7 +15,7 @@ func (c *client) CreateModerationRequest(ctx context.Context, request models.Mod
 	stmt := t.ModerationRequest.
 		INSERT(t.ModerationRequest.AllColumns).
 		MODEL(model).
-		RETURNING()
+		RETURNING(t.ModerationRequest.AllColumns)
 
 	err := c.query(ctx, stmt, &model)
 	if err != nil {

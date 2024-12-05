@@ -370,7 +370,7 @@ func (c *client) CreateUserContent(ctx context.Context, content models.UserConte
 	stmt := t.UserContent.
 		INSERT(t.UserContent.AllColumns).
 		MODEL(model).
-		RETURNING()
+		RETURNING(t.UserContent.AllColumns)
 
 	err := c.query(ctx, stmt, &model)
 	if err != nil {
@@ -393,7 +393,7 @@ func (c *client) UpdateUserContent(ctx context.Context, content models.UserConte
 			t.UserContent.Metadata,
 		).
 		MODEL(model).
-		RETURNING()
+		RETURNING(t.UserContent.AllColumns)
 
 	err := c.query(ctx, stmt, &model)
 	if err != nil {
