@@ -2,7 +2,7 @@ module github.com/cufee/aftermath
 
 go 1.23
 
-toolchain go1.23.0
+toolchain go1.23.4
 
 require github.com/go-jet/jet/v2 v2.12.0
 
@@ -49,6 +49,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/jackc/pgio v1.0.0 // indirect
+	github.com/jackc/pgtype v1.14.4 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
