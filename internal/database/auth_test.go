@@ -66,8 +66,10 @@ func TestSession(t *testing.T) {
 	client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.Session.TableName()))
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.Session.TableName()))
 
-	_, err := client.GetOrCreateUserByID(context.Background(), "user-10")
+	user, err := client.GetOrCreateUserByID(context.Background(), "user-10")
 	is.NoErr(err)
+
+	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = '%s';", table.User.TableName(), user.ID))
 
 	t.Run("all session fields are set correctly", func(t *testing.T) {
 		session, err := client.CreateSession(context.Background(), "pid-10", "user-10", time.Now().Add(time.Hour), nil)
