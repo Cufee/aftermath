@@ -93,7 +93,43 @@ func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotTy
 		SELECT(s.STAR).
 		WHERE(s.AND(innerWhere...)).
 		ORDER_BY(innerOrder).
-		AsTable("vehicle_snapshot")
+		AsTable(t.VehicleSnapshot.TableName())
+
+	return s.
+		SELECT(query.columns).
+		FROM(innerQuery).
+		GROUP_BY(groupBy)
+}
+
+// build a complete query for vehicle achievements snapshots
+func vehiclesAchievementsQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy s.GroupByClause, query baseQueryOptions) s.Statement {
+	// required where constraints
+	var innerWhere []s.BoolExpression
+	innerWhere = append(innerWhere, column(t.VehicleAchievementsSnapshot.Type).EQ(s.String(string(kind))), column(t.VehicleAchievementsSnapshot.AccountID).EQ(s.String(accountID)))
+
+	// optional where constraints
+	if vehicleIDs != nil {
+		innerWhere = append(innerWhere, column(t.VehicleAchievementsSnapshot.VehicleID).IN(stringsToExp(vehicleIDs)...))
+	}
+	if in := query.refIDIn(); in != nil {
+		innerWhere = append(innerWhere, column(t.VehicleAchievementsSnapshot.ReferenceID).IN(stringsToExp(in)...))
+	}
+
+	// order and created_at constraints
+	innerOrder := column(t.VehicleAchievementsSnapshot.CreatedAt).DESC()
+	if query.createdBefore != nil {
+		innerWhere = append(innerWhere, column(t.VehicleAchievementsSnapshot.CreatedAt).LT(timeToField(*query.createdBefore)))
+	}
+
+	if query.columns == nil {
+		query.columns = t.VehicleAchievementsSnapshot.AllColumns
+	}
+
+	innerQuery := t.VehicleAchievementsSnapshot.
+		SELECT(s.STAR).
+		WHERE(s.AND(innerWhere...)).
+		ORDER_BY(innerOrder).
+		AsTable(t.VehicleAchievementsSnapshot.TableName())
 
 	return s.
 		SELECT(query.columns).
@@ -126,7 +162,40 @@ func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy s.Grou
 		SELECT(s.STAR).
 		WHERE(s.AND(innerWhere...)).
 		ORDER_BY(innerOrder).
-		AsTable("account_snapshot")
+		AsTable(t.AccountSnapshot.TableName())
+
+	return s.
+		SELECT(query.columns).
+		FROM(innerQuery).
+		GROUP_BY(groupBy)
+}
+
+// build a complete query for account achievements snapshot
+func accountsAchievementsQuery(accountIDs []string, kind models.SnapshotType, groupBy s.GroupByClause, query baseQueryOptions) s.SelectStatement {
+	var innerWhere []s.BoolExpression
+	innerWhere = append(innerWhere, column(t.AccountAchievementsSnapshot.Type).EQ(s.String(string(kind))), column(t.AccountAchievementsSnapshot.AccountID).IN(stringsToExp(accountIDs)...))
+
+	// optional where constraints
+	if in := query.refIDIn(); in != nil {
+		innerWhere = append(innerWhere, column(t.AccountAchievementsSnapshot.ReferenceID).IN(stringsToExp(in)...))
+
+	}
+
+	// order and created_at constraints
+	innerOrder := column(t.AccountAchievementsSnapshot.CreatedAt).DESC()
+	if query.createdBefore != nil {
+		innerWhere = append(innerWhere, column(t.AccountAchievementsSnapshot.CreatedAt).LT(timeToField(*query.createdBefore)))
+	}
+
+	if query.columns == nil {
+		query.columns = t.AccountAchievementsSnapshot.AllColumns
+	}
+
+	innerQuery := t.AccountAchievementsSnapshot.
+		SELECT(s.STAR).
+		WHERE(s.AND(innerWhere...)).
+		ORDER_BY(innerOrder).
+		AsTable(t.AccountAchievementsSnapshot.TableName())
 
 	return s.
 		SELECT(query.columns).

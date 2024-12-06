@@ -31,6 +31,15 @@ func (c *client) DeleteExpiredSnapshots(ctx context.Context, expiration time.Tim
 		log.Debug().Int64("deleted", affected).Msg("account snapshot cleanup complete")
 	}
 	{
+		sql, args := snapshotCleanup(t.AccountAchievementsSnapshot.TableName(), t.AccountAchievementsSnapshot.AccountID.Name(), expiration)
+		result, err := c.db.ExecContext(ctx, sql, args...)
+		if err != nil {
+			return err
+		}
+		affected, _ := result.RowsAffected()
+		log.Debug().Int64("deleted", affected).Msg("account achievements snapshot cleanup complete")
+	}
+	{
 		sql, args := snapshotCleanup(t.VehicleSnapshot.TableName(), t.VehicleSnapshot.VehicleID.Name(), expiration)
 		result, err := c.db.ExecContext(ctx, sql, args...)
 		if err != nil {
@@ -38,6 +47,15 @@ func (c *client) DeleteExpiredSnapshots(ctx context.Context, expiration time.Tim
 		}
 		affected, _ := result.RowsAffected()
 		log.Debug().Int64("deleted", affected).Msg("vehicle snapshot cleanup complete")
+	}
+	{
+		sql, args := snapshotCleanup(t.VehicleAchievementsSnapshot.TableName(), t.VehicleAchievementsSnapshot.VehicleID.Name(), expiration)
+		result, err := c.db.ExecContext(ctx, sql, args...)
+		if err != nil {
+			return err
+		}
+		affected, _ := result.RowsAffected()
+		log.Debug().Int64("deleted", affected).Msg("vehicle achievements snapshot cleanup complete")
 	}
 	return nil
 }

@@ -67,6 +67,40 @@ func (c *client) CreateVehicleSnapshots(ctx context.Context, snapshots ...*model
 	return nil
 }
 
+/*
+Get vehicle last battle times for accounts by ID, grouped by vehicle ID
+*/
+func (c *client) GetVehiclesLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error) {
+	var query baseQueryOptions
+	for _, apply := range options {
+		apply(&query)
+	}
+	withSelect(s.ColumnList{t.VehicleSnapshot.VehicleID, t.VehicleSnapshot.LastBattleTime})(&query)
+
+	stmt := vehiclesQuery(accountID, vehicleIDs, kind, t.VehicleSnapshot.VehicleID, query)
+	rs, err := c.rows(ctx, stmt)
+	if err != nil {
+		return nil, err
+	}
+	defer rs.Close()
+
+	var snapshots []m.VehicleSnapshot
+	for rs.Next() {
+		var snapshot m.VehicleSnapshot
+		err := rs.Scan(&snapshot)
+		if err != nil {
+			return nil, err
+		}
+		snapshots = append(snapshots, snapshot)
+	}
+
+	var lastBattles = make(map[string]time.Time)
+	for _, r := range snapshots {
+		lastBattles[r.VehicleID] = models.StringToTime(r.LastBattleTime)
+	}
+	return lastBattles, nil
+}
+
 // --- account snapshots ---
 
 /*
