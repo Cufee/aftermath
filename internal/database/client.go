@@ -140,6 +140,8 @@ type Client interface {
 
 	ModerationClient
 	Disconnect() error
+
+	Unsafe() *sql.DB
 }
 
 type ClientOption func(*clientOptions)
@@ -177,6 +179,10 @@ func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) 
 type client struct {
 	options clientOptions
 	db      *sql.DB
+}
+
+func (c *client) Unsafe() *sql.DB {
+	return c.db
 }
 
 func (c *client) query(ctx context.Context, stmt sqlite.Statement, dst interface{}) error {

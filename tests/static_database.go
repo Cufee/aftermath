@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -25,6 +26,11 @@ func StaticTestingDatabase() *staticTestingDatabase {
 }
 
 func (c *staticTestingDatabase) Disconnect() error {
+	return nil
+}
+
+func (c *staticTestingDatabase) Unsafe() *sql.DB {
+	panic("cannot call staticTestingDatabase#Unsafe")
 	return nil
 }
 

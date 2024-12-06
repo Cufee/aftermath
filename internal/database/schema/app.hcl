@@ -112,3 +112,41 @@ table "cron_task" {
   }
 }
 
+table "manual_migration" {
+  schema = schema.main
+  column "id" {
+    null = false
+    type = text
+  }
+  column "created_at" {
+    null = false
+    type = text
+  }
+  column "updated_at" {
+    null = false
+    type = text
+  }
+  column "key" {
+    null = false
+    type = text
+  }
+  column "finished" {
+    null = false
+    type = bool
+  }
+  column "metadata" {
+    null = false
+    type = blob
+    default = ""
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  index "manual_migration_id_idx" {
+    columns = [column.id]
+  }
+  index "manual_migration_key_idx" {
+    unique  = true
+    columns = [column.key]
+  }
+}

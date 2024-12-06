@@ -22,6 +22,7 @@ func UseSchema(schema string) {
 	DiscordInteraction = DiscordInteraction.FromSchema(schema)
 	GameMap = GameMap.FromSchema(schema)
 	GameMode = GameMode.FromSchema(schema)
+	ManualMigration = ManualMigration.FromSchema(schema)
 	ModerationRequest = ModerationRequest.FromSchema(schema)
 	Session = Session.FromSchema(schema)
 	User = User.FromSchema(schema)
