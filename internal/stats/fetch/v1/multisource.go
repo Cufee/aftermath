@@ -44,7 +44,7 @@ func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Clie
 }
 
 func (c *multiSourceClient) Search(ctx context.Context, nickname string, realm types.Realm, limit int) (types.Account, error) {
-	accounts, err := c.wargaming.SearchAccounts(ctx, realm, nickname, limit)
+	accounts, err := c.wargaming.SearchAccounts(ctx, realm, nickname, types.WithLimit(limit))
 	if err != nil {
 		return types.Account{}, err
 	}
@@ -62,7 +62,7 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmNorthAmerica, nickname, limitPerRealm)
+		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmNorthAmerica, nickname, types.WithLimit(limitPerRealm))
 		if err != nil {
 			errors <- err
 			return
@@ -74,7 +74,7 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmEurope, nickname, limitPerRealm)
+		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmEurope, nickname, types.WithLimit(limitPerRealm))
 		if err != nil {
 			errors <- err
 			return
@@ -86,7 +86,7 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmAsia, nickname, limitPerRealm)
+		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmAsia, nickname, types.WithLimit(limitPerRealm))
 		if err != nil {
 			errors <- err
 			return
