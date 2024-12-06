@@ -38,7 +38,7 @@ func init() {
 						continue
 					}
 					linkedAccounts = append(linkedAccounts, conn.ReferenceID)
-					if def, _ := conn.Metadata["default"].(bool); def {
+					if conn.Selected {
 						currentDefault = conn.ReferenceID
 					}
 
@@ -156,7 +156,7 @@ func init() {
 				}
 
 				slices.SortFunc(accounts, func(a, b fetch.AccountWithRealm) int {
-					return strings.Compare(b.Realm+b.Nickname, a.Realm+a.Nickname)
+					return strings.Compare(b.Realm.String()+b.Nickname, a.Realm.String()+a.Nickname)
 				})
 
 				var opts []*discordgo.ApplicationCommandOptionChoice
@@ -170,7 +170,7 @@ func init() {
 
 func accountToRow(account models.Account, padding int, isDefault bool) string {
 	var row string
-	row += "[" + account.Realm + "] "
+	row += "[" + account.Realm.String() + "] "
 	row += account.Nickname + strings.Repeat(" ", padding-utf8.RuneCountInString(account.Nickname))
 	if isDefault {
 		row += " ⭐"

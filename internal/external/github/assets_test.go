@@ -5,10 +5,13 @@ import (
 	"io"
 	"testing"
 
+	"github.com/cufee/aftermath/tests/env"
 	"github.com/matryer/is"
 )
 
 func TestGetLatestGameAssets(t *testing.T) {
+	env.LoadTestEnv(t)
+
 	is := is.New(t)
 
 	rc, size, err := GetLatestGameAssets(context.Background())

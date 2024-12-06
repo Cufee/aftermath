@@ -4,168 +4,148 @@ import (
 	"context"
 	"time"
 
-	"entgo.io/ent/dialect/sql"
-	"github.com/cufee/aftermath/internal/database/ent/db"
-	"github.com/cufee/aftermath/internal/database/ent/db/moderationrequest"
-	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
-	"github.com/cufee/aftermath/internal/database/ent/db/userrestriction"
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
+	s "github.com/go-jet/jet/v2/sqlite"
 )
 
-func toModerationRequest(r *db.ModerationRequest) models.ModerationRequest {
-	return models.ModerationRequest{
-		ID:        r.ID,
-		UpdateAt:  r.UpdatedAt,
-		CreatedAt: r.CreatedAt,
-
-		ReferenceID:    r.ReferenceID,
-		RequestorID:    r.RequestorID,
-		RequestContext: r.Context,
-
-		ActionStatus:     r.ActionStatus,
-		ActionReason:     r.ActionReason,
-		ModeratorComment: r.ModeratorComment,
-		ModeratorID:      r.ModeratorID,
-		Data:             r.Data,
-	}
-}
-
 func (c *client) CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {
-	create := c.db.ModerationRequest.Create().
-		SetData(request.Data).
-		SetContext(request.RequestContext).
-		SetReferenceID(request.ReferenceID).
-		SetActionStatus(request.ActionStatus).
-		SetActionReason(request.ActionReason).
-		SetModeratorComment(request.ModeratorComment).
-		SetRequestor(c.db.User.GetX(ctx, request.RequestorID))
-	if request.ModeratorID != nil {
-		mod, err := c.db.User.Get(ctx, *request.ModeratorID)
-		if err != nil {
-			return models.ModerationRequest{}, err
-		}
-		create = create.SetModerator(mod)
-	}
+	model := request.Model()
+	stmt := t.ModerationRequest.
+		INSERT(t.ModerationRequest.AllColumns).
+		MODEL(model).
+		RETURNING(t.ModerationRequest.AllColumns)
 
-	record, err := create.Save(ctx)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.ModerationRequest{}, err
 	}
 
-	return toModerationRequest(record), nil
+	return models.ToModerationRequest(&model), nil
 }
 
 func (c *client) GetModerationRequest(ctx context.Context, id string) (models.ModerationRequest, error) {
-	record, err := c.db.ModerationRequest.Get(ctx, id)
+	stmt := t.ModerationRequest.
+		SELECT(t.ModerationRequest.AllColumns).
+		WHERE(t.ModerationRequest.ID.EQ(s.String(id)))
+
+	var result m.ModerationRequest
+	err := c.query(ctx, stmt, &result)
 	if err != nil {
 		return models.ModerationRequest{}, err
 	}
-	return toModerationRequest(record), nil
+
+	return models.ToModerationRequest(&result), nil
 }
 
 func (c *client) FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus, since time.Time) ([]models.ModerationRequest, error) {
-	var where []predicate.ModerationRequest
-	where = append(where, moderationrequest.RequestorID(userID), moderationrequest.UpdatedAtGT(since))
-	if referenceIDs != nil {
-		where = append(where, moderationrequest.ReferenceIDIn(referenceIDs...))
-	}
-	if status != nil {
-		where = append(where, moderationrequest.ActionStatusIn(status...))
+	where := []s.BoolExpression{
+		t.ModerationRequest.RequestorID.EQ(s.String(userID)),
+		t.ModerationRequest.UpdatedAt.GT(timeToField(since)),
 	}
 
-	records, err := c.db.ModerationRequest.Query().Where(where...).Order(moderationrequest.ByCreatedAt(sql.OrderDesc())).All(ctx)
+	if referenceIDs != nil {
+		where = append(where, t.ModerationRequest.ReferenceID.IN(stringsToExp(referenceIDs)...))
+	}
+	if status != nil {
+		var s []string
+		for _, st := range status {
+			s = append(s, string(st))
+		}
+		where = append(where, t.ModerationRequest.ActionStatus.IN(stringsToExp(s)...))
+	}
+
+	var records []m.ModerationRequest
+	stmt := t.ModerationRequest.
+		SELECT(t.ModerationRequest.AllColumns).
+		WHERE(s.AND(where...)).
+		ORDER_BY(t.ModerationRequest.CreatedAt.DESC())
+
+	err := c.query(ctx, stmt, &records)
 	if err != nil {
 		return nil, err
 	}
 
 	var requests []models.ModerationRequest
 	for _, r := range records {
-		requests = append(requests, toModerationRequest(r))
+		requests = append(requests, models.ToModerationRequest(&r))
 	}
-
 	return requests, nil
 }
 
 func (c *client) UpdateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {
-	update := c.db.ModerationRequest.UpdateOneID(request.ID).
-		SetData(request.Data).
-		SetContext(request.RequestContext).
-		SetReferenceID(request.ReferenceID).
-		SetActionStatus(request.ActionStatus).
-		SetActionReason(request.ActionReason).
-		SetModeratorComment(request.ModeratorComment)
-	if request.ModeratorID != nil {
-		mod, err := c.db.User.Get(ctx, *request.ModeratorID)
-		if err != nil {
-			return models.ModerationRequest{}, err
-		}
-		update = update.SetModerator(mod)
-	}
+	model := request.Model()
+	stmt := t.ModerationRequest.
+		UPDATE(t.ModerationRequest.AllColumns.Except(
+			t.ModerationRequest.ID,
+			t.ModerationRequest.CreatedAt,
+			t.ModerationRequest.RequestorID,
+			t.ModerationRequest.ReferenceID,
+		)).
+		MODEL(model).
+		WHERE(t.ModerationRequest.ID.EQ(s.String(request.ID))).
+		RETURNING(t.ModerationRequest.AllColumns)
 
-	record, err := update.Save(ctx)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.ModerationRequest{}, err
 	}
 
-	return toModerationRequest(record), nil
+	return models.ToModerationRequest(&model), nil
 }
 
 func (c *client) GetUserRestriction(ctx context.Context, id string) (models.UserRestriction, error) {
-	record, err := c.db.UserRestriction.Get(ctx, id)
+	var record m.UserRestriction
+	err := c.query(ctx, t.UserRestriction.SELECT(t.UserRestriction.AllColumns).WHERE(t.UserRestriction.ID.EQ(s.String(id))), &record)
 	if err != nil {
 		return models.UserRestriction{}, err
 	}
 
-	return toUserRestriction(record), nil
+	return models.ToUserRestriction(&record), nil
 }
 
 func (c *client) GetUserRestrictions(ctx context.Context, userID string) ([]models.UserRestriction, error) {
-	records, err := c.db.UserRestriction.Query().Where(userrestriction.UserID(userID)).All(ctx)
+	var record []m.UserRestriction
+	err := c.query(ctx, t.UserRestriction.SELECT(t.UserRestriction.AllColumns).WHERE(t.UserRestriction.UserID.EQ(s.String(userID))), &record)
 	if err != nil {
 		return nil, err
 	}
 
 	var restrictions []models.UserRestriction
-	for _, r := range records {
-		restrictions = append(restrictions, toUserRestriction(r))
+	for _, r := range record {
+		restrictions = append(restrictions, models.ToUserRestriction(&r))
 	}
 
 	return restrictions, nil
 }
 
 func (c *client) CreateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error) {
-	user, err := c.db.User.Get(ctx, data.UserID)
+	model := data.Model()
+	stmt := t.UserRestriction.INSERT(t.UserRestriction.AllColumns).MODEL(model).RETURNING(t.UserRestriction.AllColumns)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.UserRestriction{}, err
 	}
-
-	record, err := c.db.UserRestriction.Create().
-		SetModeratorComment(data.ModeratorComment).
-		SetRestriction(data.Restriction.String()).
-		SetPublicReason(data.PublicReason).
-		SetExpiresAt(data.ExpiresAt).
-		SetEvents(data.Events).
-		SetType(data.Type).
-		SetUser(user).
-		Save(ctx)
-	if err != nil {
-		return models.UserRestriction{}, err
-	}
-
-	return toUserRestriction(record), nil
+	return models.ToUserRestriction(&model), nil
 }
 
 func (c *client) UpdateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error) {
-	record, err := c.db.UserRestriction.UpdateOneID(data.ID).
-		SetModeratorComment(data.ModeratorComment).
-		SetRestriction(data.Restriction.String()).
-		SetPublicReason(data.PublicReason).
-		SetExpiresAt(data.ExpiresAt).
-		SetEvents(data.Events).
-		SetType(data.Type).
-		Save(ctx)
+	model := data.Model()
+	stmt := t.UserRestriction.
+		UPDATE(
+			t.UserRestriction.UpdatedAt,
+			t.UserRestriction.PublicReason,
+			t.UserRestriction.ModeratorComment,
+			t.UserRestriction.ExpiresAt,
+			t.UserRestriction.Events,
+		).
+		WHERE(t.UserRestriction.ID.EQ(s.String(data.ID))).
+		MODEL(model).
+		RETURNING(t.UserRestriction.AllColumns)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.UserRestriction{}, err
 	}
-	return toUserRestriction(record), nil
+	return models.ToUserRestriction(&model), nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/utils"
 	"net/http"
 	"slices"
 )
@@ -34,8 +35,11 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 
 	var connections []components.ConnectionWithAccount
 	var accountToConnection = make(map[string]models.UserConnection)
-	accountConnection, _ := user.FilterConnections(models.ConnectionTypeWargaming, nil)
-	for _, conn := range accountConnection {
+	for _, conn := range user.Connections {
+		if conn.Type != models.ConnectionTypeWargaming {
+			continue
+		}
+
 		accountToConnection[conn.ReferenceID] = conn
 		if !slices.Contains(ids, conn.ReferenceID) {
 			ids = append(ids, conn.ReferenceID)
@@ -60,7 +64,7 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 			}
 		}
 	}
-	defaultConn, _ := user.Connection(models.ConnectionTypeWargaming, map[string]any{"default": true})
+	defaultConn, _ := user.Connection(models.ConnectionTypeWargaming, nil, utils.Pointer(true))
 
 	return layouts.Main, index(connections, defaultConn.ID, 3, widgets, constants.WidgetAccountLimit), nil
 }

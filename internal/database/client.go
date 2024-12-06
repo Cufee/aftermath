@@ -7,17 +7,18 @@ import (
 	"runtime/debug"
 	"time"
 
-	entsql "entgo.io/ent/dialect/sql"
 	"github.com/cufee/aftermath-assets/types"
-	"github.com/cufee/aftermath/internal/database/ent/db"
+
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
-	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
+	"github.com/go-jet/jet/v2/sqlite"
 	"golang.org/x/text/language"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+//go:generate go run ./generate.go
 
 var _ Client = &client{}
 
@@ -55,12 +56,11 @@ type GlossaryClient interface {
 }
 
 type UsersClient interface {
-	GetUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error)
-	GetOrCreateUserByID(ctx context.Context, id string, opts ...UserGetOption) (models.User, error)
-	UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error)
+	GetUserByID(ctx context.Context, id string, opts ...UserQueryOption) (models.User, error)
+	GetOrCreateUserByID(ctx context.Context, id string, opts ...UserQueryOption) (models.User, error)
 
 	GetUserConnection(ctx context.Context, connection string) (models.UserConnection, error)
-	UpdateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
+	UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error)
 	UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
 	DeleteUserConnection(ctx context.Context, userID, connectionID string) error
 
@@ -79,14 +79,12 @@ type UsersClient interface {
 }
 
 type SnapshotsClient interface {
+	CreateVehicleSnapshots(ctx context.Context, snapshots ...*models.VehicleSnapshot) error
 	GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AccountSnapshot, error)
 	GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) ([]models.VehicleSnapshot, error)
 
-	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
-	GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
-
 	CreateAccountSnapshots(ctx context.Context, snapshots ...*models.AccountSnapshot) error
-	CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...*models.VehicleSnapshot) error
+	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
 
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
 }
@@ -143,37 +141,6 @@ type Client interface {
 	Disconnect() error
 }
 
-type client struct {
-	db *db.Client
-}
-
-func (c *client) withTx(ctx context.Context, fn func(tx *db.Tx) error) error {
-	var err error
-	tx, err := c.db.Tx(ctx)
-	if err != nil {
-		return err
-	}
-
-	if err = fn(tx); err != nil {
-		if rerr := tx.Rollback(); rerr != nil {
-			err = fmt.Errorf("%w: rolling back transaction: %v", err, rerr)
-		}
-		return err
-	}
-	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("committing transaction: %w", err)
-	}
-	return err
-}
-
-func (c *client) Disconnect() error {
-	return c.db.Close()
-}
-
-type clientOptions struct {
-	debug bool
-}
-
 type ClientOption func(*clientOptions)
 
 func WithDebug() func(*clientOptions) {
@@ -194,45 +161,98 @@ func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) 
 		apply(&opts)
 	}
 
-	var dbOptions []db.Option
-	if opts.debug {
-		dbOptions = append(dbOptions, db.Debug())
-	}
-
-	sqldb, err := sql.Open("sqlite3", fmt.Sprintf("file://%s?_fk=1&_auto_vacuum=2&_synchronous=1&_journal_mode=WAL", filePath)) // _mutex
+	sqldb, err := sql.Open("sqlite3", fmt.Sprintf("file://%s?_fk=1&_auto_vacuum=2&_synchronous=1&_journal_mode=WAL", filePath))
 	if err != nil {
 		return nil, err
 	}
 	sqldb.SetMaxOpenConns(1)
-	dbOptions = append(dbOptions, db.Driver(entsql.OpenDB("sqlite3", sqldb)))
 
 	return &client{
-		db: db.NewClient(dbOptions...),
+		options: opts,
+		db:      sqldb,
 	}, nil
 }
 
-func toAnySlice[T any](s ...T) []any {
-	var a []any
+type client struct {
+	options clientOptions
+	db      *sql.DB
+}
+
+func (c *client) query(ctx context.Context, stmt sqlite.Statement, dst interface{}) error {
+	if c.options.debug {
+		println("SQL Query:", stmt.DebugSql())
+	}
+	return stmt.QueryContext(ctx, c.db, dst)
+}
+
+func (c *client) rows(ctx context.Context, stmt sqlite.Statement) (*sqlite.Rows, error) {
+	if c.options.debug {
+		println("SQL Rows:", stmt.DebugSql())
+	}
+	return stmt.Rows(ctx, c.db)
+}
+
+func (c *client) exec(ctx context.Context, stmt sqlite.Statement) (sql.Result, error) {
+	if c.options.debug {
+		println("SQL Exec:", stmt.DebugSql())
+	}
+	return stmt.ExecContext(ctx, c.db)
+}
+
+type transaction struct {
+	tx      *sql.Tx
+	options clientOptions
+}
+
+func (t *transaction) query(ctx context.Context, stmt sqlite.Statement, dst interface{}) error {
+	if t.options.debug {
+		println("SQL Query:", stmt.DebugSql())
+	}
+	return stmt.QueryContext(ctx, t.tx, dst)
+}
+
+func (t *transaction) exec(ctx context.Context, stmt sqlite.Statement) (sql.Result, error) {
+	if t.options.debug {
+		println("SQL Exec:", stmt.DebugSql())
+	}
+	return stmt.ExecContext(ctx, t.tx)
+}
+
+func (c *client) withTx(ctx context.Context, fn func(tx *transaction) error) error {
+	var err error
+	tx, err := c.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	if err = fn(&transaction{tx: tx, options: c.options}); err != nil {
+		if rerr := tx.Rollback(); rerr != nil {
+			err = fmt.Errorf("%w: rolling back transaction: %v", err, rerr)
+		}
+		return err
+	}
+	if err = tx.Commit(); err != nil {
+		return fmt.Errorf("committing transaction: %w", err)
+	}
+	return err
+}
+
+func (c *client) Disconnect() error {
+	return c.db.Close()
+}
+
+type clientOptions struct {
+	debug bool
+}
+
+func stringsToExp(s []string) []sqlite.Expression {
+	var a []sqlite.Expression
 	for _, i := range s {
-		a = append(a, i)
+		a = append(a, sqlite.String(i))
 	}
 	return a
 }
 
-func wrap(query string) *entsql.Builder {
-	wrapper := &entsql.Builder{}
-	return wrapper.Wrap(func(b *entsql.Builder) { b.WriteString(query) })
-}
-
-func batch[T any](ops []T, size int) [][]T {
-	var batched [][]T
-	for i := 0; i < len(ops); i += size {
-		end := i + size
-		if end > len(ops) {
-			end = len(ops)
-		}
-		batched = append(batched, ops[i:end])
-	}
-
-	return batched
+func timeToField(t time.Time) sqlite.StringExpression {
+	return sqlite.String(models.TimeToString(t))
 }

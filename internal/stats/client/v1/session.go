@@ -66,7 +66,13 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 			defer cancel()
 
-			_, err := logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, c.wargaming.RealmFromAccountID(id), false, logic.WithReference(id, opts.referenceID))
+			realm, err := c.wargaming.RealmFromID(id)
+			if err != nil {
+				log.Err(err).Str("accountId", id).Msg("invalid account realm")
+				return
+			}
+
+			_, err = logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, *realm, false, logic.WithReference(id, opts.referenceID))
 			if err != nil {
 				log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
 			}
@@ -95,7 +101,13 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 				defer cancel()
 
-				_, err := logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, c.wargaming.RealmFromAccountID(id), false, logic.WithReference(id, opts.referenceID))
+				realm, err := c.wargaming.RealmFromID(id)
+				if err != nil {
+					log.Err(err).Str("accountId", id).Msg("invalid account realm")
+					return
+				}
+
+				_, err = logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, *realm, false, logic.WithReference(id, opts.referenceID))
 				if err != nil {
 					log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
 				}

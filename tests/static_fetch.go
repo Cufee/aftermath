@@ -21,13 +21,17 @@ func StaticTestingFetch() *staticTestingFetch {
 	return &staticTestingFetch{}
 }
 
+func (c *staticTestingFetch) VerifyAccountToken(ctx context.Context, id string, token string) (bool, error) {
+	return true, nil
+}
+
 func (c *staticTestingFetch) Account(ctx context.Context, id string) (models.Account, error) {
 	if account, ok := staticAccounts[id]; ok {
 		return account, nil
 	}
 	return models.Account{}, errors.New("account not found")
 }
-func (c *staticTestingFetch) Search(ctx context.Context, nickname, realm string, limit int) (types.Account, error) {
+func (c *staticTestingFetch) Search(ctx context.Context, nickname string, realm types.Realm, limit int) (types.Account, error) {
 	return types.Account{}, nil
 }
 func (c *staticTestingFetch) BroadSearch(ctx context.Context, nickname string, limit int) ([]fetch.AccountWithRealm, error) {

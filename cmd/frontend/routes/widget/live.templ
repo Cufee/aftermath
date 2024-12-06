@@ -58,7 +58,14 @@ func customWidgetFromID(ctx context.Context, core core.Client, widgetID string) 
 			go func(widget, account string) {
 				c, cancel := context.WithTimeout(context.Background(), time.Second*15)
 				defer cancel()
-				_, err = backend.RecordAccountSnapshots(c, core.Wargaming(), core.Database(), core.Wargaming().RealmFromAccountID(account), false, backend.WithReference(account, widget))
+
+				realm, err := core.Wargaming().RealmFromID(account)
+				if err != nil {
+					log.Err(err).Str("widgetId", widget).Str("account", account).Msg("invalid realm")
+					return
+				}
+
+				_, err = backend.RecordAccountSnapshots(c, core.Wargaming(), core.Database(), *realm, false, backend.WithReference(account, widget))
 				if err != nil {
 					log.Err(err).Str("widgetId", widget).Str("account", account).Msg("failed to record a new session for an existing widget")
 					return

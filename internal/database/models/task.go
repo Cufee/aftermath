@@ -2,6 +2,12 @@ package models
 
 import (
 	"time"
+
+	"github.com/cufee/aftermath/internal/json"
+
+	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/utils"
+	"github.com/lucsky/cuid"
 )
 
 type TaskType string
@@ -14,7 +20,6 @@ const (
 	TaskTypeDatabaseCleanup TaskType = "CLEANUP_DATABASE"
 )
 
-// Values provides list valid values for Enum.
 func (TaskType) Values() []string {
 	var kinds []string
 	for _, s := range []TaskType{
@@ -98,4 +103,40 @@ func NewAttemptLog(task Task, comment string, err error) TaskLog {
 		Comment:   comment,
 		Error:     err.Error(),
 	}
+}
+
+func ToCronTask(record *model.CronTask) Task {
+	t := Task{
+		ID:             record.ID,
+		Type:           TaskType(record.Type),
+		CreatedAt:      StringToTime(record.CreatedAt),
+		UpdatedAt:      StringToTime(record.UpdatedAt),
+		ReferenceID:    record.ReferenceID,
+		Status:         TaskStatus(record.Status),
+		ScheduledAfter: StringToTime(record.ScheduledAfter),
+		TriesLeft:      int(record.TriesLeft),
+		LastRun:        StringToTime(record.LastRun),
+	}
+	json.Unmarshal(record.Targets, &t.Targets)
+	json.Unmarshal(record.Data, &t.Data)
+	json.Unmarshal(record.Logs, &t.Logs)
+	return t
+}
+
+func (record Task) Model() model.CronTask {
+	t := model.CronTask{
+		ID:             utils.StringOr(record.ID, cuid.New()),
+		Type:           string(record.Type),
+		CreatedAt:      TimeToString(time.Now()),
+		UpdatedAt:      TimeToString(time.Now()),
+		ReferenceID:    record.ReferenceID,
+		Status:         string(record.Status),
+		ScheduledAfter: TimeToString(record.ScheduledAfter),
+		TriesLeft:      int32(record.TriesLeft),
+		LastRun:        TimeToString(record.LastRun),
+	}
+	t.Targets, _ = json.Marshal(record.Targets)
+	t.Data, _ = json.Marshal(record.Data)
+	t.Logs, _ = json.Marshal(record.Logs)
+	return t
 }

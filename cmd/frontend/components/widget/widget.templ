@@ -46,7 +46,7 @@ func WithStyle(style *models.WidgetStyling) WidgetOption {
 
 func Widget(account models.Account, cards prepare.Cards, options ...WidgetOption) templ.Component {
 	widget := widget{
-		head:       widgetHead(account.Nickname, account.Realm),
+		head:       widgetHead(account.Nickname, account.Realm.String()),
 		style:      models.DefaultWidgetStyle,
 		account:    account,
 		cards:      cards,
@@ -82,7 +82,7 @@ templ (w widget) Render() {
 				@w.defaultWidget()
 		}
 		if w.autoReload {
-			@logic.EmbedMinifiedScript(widgetRefresh(w.account.Realm, w.account.ID, w.account.LastBattleTime.Unix()), w.account.Realm, w.account.ID, w.account.LastBattleTime.Unix())
+			@logic.EmbedMinifiedScript(widgetRefresh(w.account.Realm.String(), w.account.ID, w.account.LastBattleTime.Unix()), w.account.Realm.String(), w.account.ID, w.account.LastBattleTime.Unix())
 		}
 	</div>
 }

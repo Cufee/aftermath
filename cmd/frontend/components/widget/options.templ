@@ -59,8 +59,8 @@ templ customOptionsForm(search components.PlayerSearch, options WidgetWithAccoun
 			<div class="indicator flex flex-col bg-base-200 rounded-lg p-4 w-full">
 				<div id="account_id_indicator" class="indicator-item indicator-start change-indicator h-2 w-2 bg-info rounded-full m-1 hidden"></div>
 				<div class="flex flex-row flex-wrap gap-2">
-					<select id="account_realm" name="realm" class="select select-bordered grow" value={ options.Account.Realm } onchange={ search.OnRealmSelect() }>
-						@search.RealmOptions(options.Account.Realm)
+					<select id="account_realm" name="realm" class="select select-bordered grow" value={ options.Account.Realm.String() } onchange={ search.OnRealmSelect() }>
+						@search.RealmOptions(options.Account.Realm.String())
 					</select>
 					<div class="dropdown dropdown-top grow">
 						<input id="account_id" type="text" name="account_id" class="hidden" data-current={ options.Account.ID } value={ options.Account.ID }/>

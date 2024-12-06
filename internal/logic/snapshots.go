@@ -93,7 +93,7 @@ func filterActiveAccounts(ctx context.Context, dbClient database.Client, input A
 	return needAnUpdate, nil
 }
 
-func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm string, force bool, input AccountsWithReference) (map[string]error, error) {
+func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm types.Realm, force bool, input AccountsWithReference) (map[string]error, error) {
 	if len(input) < 1 {
 		return nil, nil
 	}
@@ -217,7 +217,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		vehicles := vehicleSnapshots[accountSnapshot.AccountID]
 		if len(vehicles) > 0 {
 			// save all vehicle snapshots)
-			err := dbClient.CreateAccountVehicleSnapshots(ctx, accountSnapshot.AccountID, vehicles...)
+			err := dbClient.CreateVehicleSnapshots(ctx, vehicles...)
 			if err != nil {
 				accountErrors[accountSnapshot.AccountID] = err
 				continue

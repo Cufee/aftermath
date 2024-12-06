@@ -3,9 +3,14 @@ package database
 import (
 	"context"
 
-	"github.com/cufee/aftermath/internal/database/ent/db"
-	"github.com/cufee/aftermath/internal/database/ent/db/vehicleaverage"
+	"time"
+
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/stats/frame"
+	s "github.com/go-jet/jet/v2/sqlite"
 )
 
 func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error) {
@@ -13,41 +18,34 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 		return nil, nil
 	}
 
-	var ids []string
-	for id := range averages {
-		ids = append(ids, id)
-	}
-
-	existing, err := c.db.VehicleAverage.Query().Where(vehicleaverage.IDIn(ids...)).All(ctx)
-	if err != nil && !IsNotFound(err) {
-		return nil, err
-	}
-
-	errors := make(map[string]error)
-	return errors, c.withTx(ctx, func(tx *db.Tx) error {
-		for _, r := range existing {
-			update, ok := averages[r.ID]
-			if !ok {
-				continue // should never happen tho
-			}
-
-			err := tx.VehicleAverage.UpdateOneID(r.ID).SetData(update).Exec(ctx)
+	errors := make(map[string]error, len(averages))
+	return errors, c.withTx(ctx, func(tx *transaction) error {
+		for id, data := range averages {
+			encoded, err := json.Marshal(data)
 			if err != nil {
-				errors[r.ID] = err
+				errors[id] = err
+				continue
 			}
 
-			delete(averages, r.ID)
-		}
+			model := m.VehicleAverage{
+				ID:        id,
+				CreatedAt: models.TimeToString(time.Now()),
+				UpdatedAt: models.TimeToString(time.Now()),
+				Data:      encoded,
+			}
 
-		var writes []*db.VehicleAverageCreate
-		for id, frame := range averages {
-			writes = append(writes, tx.VehicleAverage.Create().
-				SetID(id).
-				SetData(frame),
-			)
+			stmt := t.VehicleAverage.
+				INSERT(t.VehicleAverage.AllColumns).
+				MODEL(model).
+				ON_CONFLICT(t.VehicleAverage.ID).
+				DO_UPDATE(s.SET(
+					t.VehicleAverage.Data.SET(t.VehicleAverage.EXCLUDED.Data),
+					t.VehicleAverage.UpdatedAt.SET(t.VehicleAverage.EXCLUDED.UpdatedAt),
+				))
+			_, err = tx.exec(ctx, stmt)
+			errors[id] = err
 		}
-
-		return tx.VehicleAverage.CreateBulk(writes...).Exec(ctx)
+		return nil
 	})
 }
 
@@ -56,14 +54,24 @@ func (c *client) GetVehicleAverages(ctx context.Context, ids []string) (map[stri
 		return nil, nil
 	}
 
-	records, err := c.db.VehicleAverage.Query().Where(vehicleaverage.IDIn(ids...)).All(ctx)
+	var records []m.VehicleAverage
+	err := c.query(ctx,
+		t.VehicleAverage.
+			SELECT(t.VehicleAverage.AllColumns).
+			WHERE(t.VehicleAverage.ID.IN(stringsToExp(ids)...)),
+		&records)
 	if err != nil {
 		return nil, err
 	}
 
 	averages := make(map[string]frame.StatsFrame)
 	for _, a := range records {
-		averages[a.ID] = a.Data
+		var frame frame.StatsFrame
+		err := json.Unmarshal([]byte(a.Data), &frame)
+		if err != nil {
+			continue
+		}
+		averages[a.ID] = frame
 	}
 	return averages, nil
 }

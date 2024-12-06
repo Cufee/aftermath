@@ -19,6 +19,7 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/realtime"
+	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"github.com/pkg/errors"
 )
 
@@ -122,7 +123,7 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 	if settings.AccountID == "" {
 		var account models.Account
 		if data.Realm != nil {
-			account.Realm = *data.Realm
+			account.Realm = types.Realm(*data.Realm)
 		}
 		if data.Nickname != nil {
 			account.Nickname = *data.Nickname
@@ -148,7 +149,13 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 
 	c, cancel := context.WithTimeout(ctx.Context, time.Second*5)
 	defer cancel()
-	_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(created.AccountID), false, logic.WithReference(created.AccountID, created.ID))
+
+	realm, err := ctx.Wargaming().RealmFromID(created.AccountID)
+	if err != nil {
+		return nil, ctx.Err(err, "failed to create widget settings")
+	}
+
+	_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), *realm, false, logic.WithReference(created.AccountID, created.ID))
 	if err != nil {
 		return nil, ctx.Err(err, "failed to create a new widget session")
 	}
@@ -190,7 +197,7 @@ var UpdateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 	if settings.AccountID == "" {
 		var account models.Account
 		if data.Realm != nil {
-			account.Realm = *data.Realm
+			account.Realm = types.Realm(*data.Realm)
 		}
 		if data.Nickname != nil {
 			account.Nickname = *data.Nickname
@@ -318,7 +325,14 @@ var ResetSession handler.Partial = func(ctx *handler.Context) (templ.Component, 
 	go func(widgetID, accountID string) {
 		c, cancel := context.WithTimeout(context.Background(), time.Second*15)
 		defer cancel()
-		_, err := logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), ctx.Wargaming().RealmFromAccountID(accountID), false, logic.WithReference(accountID, widgetID))
+
+		realm, err := ctx.Wargaming().RealmFromID(accountID)
+		if err != nil {
+			log.Err(err).Str("widgetId", widgetID).Str("accountId", accountID).Msg("failed to parse realm")
+			return
+		}
+
+		_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), *realm, false, logic.WithReference(accountID, widgetID))
 		if err != nil {
 			log.Err(err).Str("widgetId", widgetID).Str("accountId", accountID).Msg("failed to refresh a session for widget")
 		}

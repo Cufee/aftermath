@@ -4,41 +4,13 @@ import (
 	"context"
 	"time"
 
-	"entgo.io/ent/dialect/sql"
-	"github.com/cufee/aftermath/internal/database/ent/db"
-	"github.com/cufee/aftermath/internal/database/ent/db/account"
-	"github.com/cufee/aftermath/internal/database/ent/db/accountsnapshot"
-	"github.com/cufee/aftermath/internal/database/ent/db/vehiclesnapshot"
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/utils"
+	s "github.com/go-jet/jet/v2/sqlite"
+	"github.com/pkg/errors"
 )
-
-// --- record to model ---
-
-func toVehicleSnapshot(record *db.VehicleSnapshot) models.VehicleSnapshot {
-	return models.VehicleSnapshot{
-		ID:             record.ID,
-		Type:           record.Type,
-		CreatedAt:      record.CreatedAt,
-		LastBattleTime: record.LastBattleTime,
-		ReferenceID:    record.ReferenceID,
-		AccountID:      record.AccountID,
-		VehicleID:      record.VehicleID,
-		Stats:          record.Frame,
-	}
-}
-
-func toAccountSnapshot(record *db.AccountSnapshot) models.AccountSnapshot {
-	return models.AccountSnapshot{
-		ID:             record.ID,
-		Type:           record.Type,
-		AccountID:      record.AccountID,
-		ReferenceID:    record.ReferenceID,
-		RatingBattles:  record.RatingFrame,
-		RegularBattles: record.RegularFrame,
-		CreatedAt:      record.CreatedAt,
-		LastBattleTime: record.LastBattleTime,
-	}
-}
 
 // --- vehicle snapshots ---
 
@@ -52,86 +24,42 @@ func (c *client) GetVehicleSnapshots(ctx context.Context, accountID string, vehi
 		apply(&query)
 	}
 
-	queryString, columns, queryArgs := vehiclesQuery(accountID, vehicleIDs, kind, vehiclesnapshot.FieldVehicleID, query)
-	rows, err := c.db.VehicleSnapshot.QueryContext(ctx, queryString, queryArgs...)
+	stmt := vehiclesQuery(accountID, vehicleIDs, kind, t.VehicleSnapshot.VehicleID, query)
+	rs, err := c.rows(ctx, stmt)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	records, err := rowsToRecords[*db.VehicleSnapshot](rows, columns)
-	if err != nil {
-		return nil, err
-	}
+	defer rs.Close()
 
 	var snapshots []models.VehicleSnapshot
-	for _, r := range records {
-		snapshots = append(snapshots, toVehicleSnapshot(r))
+	for rs.Next() {
+		var record m.VehicleSnapshot
+		if err := rs.Scan(&record); err != nil {
+			return nil, errors.New("failed to scan row: " + err.Error())
+		}
+		snapshots = append(snapshots, models.ToVehicleSnapshot(&record))
 	}
+
 	return snapshots, nil
 }
 
-/*
-get last battle times for each vehicle in vehicle IDs for a specific account
-  - passing nil vehicleIDs will return all vehicles available
-*/
-func (c *client) GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error) {
-	var query baseQueryOptions
-	for _, apply := range options {
-		apply(&query)
-	}
-	WithSelect(vehiclesnapshot.FieldVehicleID, vehiclesnapshot.FieldLastBattleTime)(&query)
-
-	queryString, columns, queryArgs := vehiclesQuery(accountID, vehicleIDs, kind, vehiclesnapshot.FieldVehicleID, query)
-	rows, err := c.db.VehicleSnapshot.QueryContext(ctx, queryString, queryArgs...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	records, err := rowsToRecords[*db.VehicleSnapshot](rows, columns)
-	if err != nil {
-		return nil, err
-	}
-
-	var lastBattleTimes = make(map[string]time.Time)
-	for _, r := range records {
-		lastBattleTimes[r.VehicleID] = r.LastBattleTime
-	}
-
-	return lastBattleTimes, nil
-}
-
-// create vehicle snapshots for a specific account
-func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...*models.VehicleSnapshot) error {
+// CreateVehicleSnapshots inserts many vehicle snapshots
+func (c *client) CreateVehicleSnapshots(ctx context.Context, snapshots ...*models.VehicleSnapshot) error {
 	if len(snapshots) < 1 {
 		return nil
 	}
 
-	account, err := c.db.Account.Get(ctx, accountID)
-	if err != nil {
-		return err
-	}
+	for _, batch := range utils.Batch(snapshots, 100) {
+		var models []m.VehicleSnapshot
+		for _, item := range batch {
+			models = append(models, item.Model())
+		}
 
-	var inserts []*db.VehicleSnapshotCreate
-	for _, data := range snapshots {
-		inserts = append(inserts,
-			c.db.VehicleSnapshot.Create().
-				SetType(data.Type).
-				SetFrame(data.Stats).
-				SetVehicleID(data.VehicleID).
-				SetReferenceID(data.ReferenceID).
-				SetCreatedAt(data.CreatedAt).
-				SetBattles(int(data.Stats.Battles.Float())).
-				SetLastBattleTime(data.LastBattleTime).
-				SetAccount(account),
-		)
-	}
-
-	for _, ops := range batch(inserts, 100) {
-		err := c.withTx(ctx, func(tx *db.Tx) error {
-			return tx.VehicleSnapshot.CreateBulk(ops...).Exec(ctx)
+		err := c.withTx(ctx, func(tx *transaction) error {
+			_, err := tx.exec(ctx, t.VehicleSnapshot.INSERT(t.VehicleSnapshot.AllColumns).MODELS(models))
+			return err
 		})
+
 		if err != nil {
 			return err
 		}
@@ -139,58 +67,15 @@ func (c *client) CreateAccountVehicleSnapshots(ctx context.Context, accountID st
 	return nil
 }
 
-// build a complete query for vehicle snapshots
-func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy string, query baseQueryOptions) (string, []string, []any) {
-	// required where constraints
-	var innerWhere []*sql.Predicate
-	innerWhere = append(innerWhere, sql.EQ(vehiclesnapshot.FieldType, kind), sql.EQ(vehiclesnapshot.FieldAccountID, accountID))
-
-	// optional where constraints
-	if vehicleIDs != nil {
-		innerWhere = append(innerWhere, sql.In(vehiclesnapshot.FieldVehicleID, toAnySlice(vehicleIDs...)...))
-	}
-	if in := query.refIDIn(); in != nil {
-		innerWhere = append(innerWhere, sql.In(vehiclesnapshot.FieldReferenceID, in...))
-	}
-	if nin := query.refIDNotIn(); nin != nil {
-		innerWhere = append(innerWhere, sql.NotIn(vehiclesnapshot.FieldReferenceID, nin...))
-	}
-
-	// order and created_at constraints
-	innerOrder := sql.Desc(vehiclesnapshot.FieldCreatedAt)
-	if query.createdAfter != nil {
-		innerWhere = append(innerWhere, sql.GT(vehiclesnapshot.FieldCreatedAt, *query.createdAfter))
-		innerOrder = sql.Asc(vehiclesnapshot.FieldCreatedAt)
-	}
-	if query.createdBefore != nil {
-		innerWhere = append(innerWhere, sql.LT(vehiclesnapshot.FieldCreatedAt, *query.createdBefore))
-		innerOrder = sql.Desc(vehiclesnapshot.FieldCreatedAt)
-	}
-
-	selectFields := vehiclesnapshot.Columns
-	if fields := query.selectFields(groupBy); fields != nil {
-		selectFields = fields
-	}
-
-	innerQuery := sql.Select(selectFields...).From(sql.Table(vehiclesnapshot.Table))
-	innerQuery = innerQuery.Where(sql.And(innerWhere...))
-	innerQuery = innerQuery.OrderBy(innerOrder)
-
-	innerQueryString, innerQueryArgs := innerQuery.Query()
-
-	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(groupBy).Query()
-	return queryString, selectFields, innerQueryArgs
-}
-
 // --- account snapshots ---
 
 /*
-Get complete snapshots for accounts by ID, grouped by account ID
+GetAccountSnapshots returns complete snapshots for accounts by ID, grouped by account ID
   - there are no use cases where all accounts should be returned for now, so nil slice of ids will return an error
 */
 func (c *client) GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) ([]models.AccountSnapshot, error) {
 	if len(accountIDs) < 1 {
-		return nil, new(db.NotFoundError)
+		return nil, ErrNotFound
 	}
 
 	var query baseQueryOptions
@@ -198,21 +83,21 @@ func (c *client) GetAccountSnapshots(ctx context.Context, accountIDs []string, k
 		apply(&query)
 	}
 
-	queryString, columns, queryArgs := accountsQuery(accountIDs, kind, accountsnapshot.FieldAccountID, query)
-	rows, err := c.db.AccountSnapshot.QueryContext(ctx, queryString, queryArgs...)
+	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID, query)
+	rs, err := c.rows(ctx, stmt)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	records, err := rowsToRecords[*db.AccountSnapshot](rows, columns)
-	if err != nil {
-		return nil, err
-	}
+	defer rs.Close()
 
 	var snapshots []models.AccountSnapshot
-	for _, r := range records {
-		snapshots = append(snapshots, toAccountSnapshot(r))
+	for rs.Next() {
+		var snapshot m.AccountSnapshot
+		err := rs.Scan(&snapshot)
+		if err != nil {
+			return nil, err
+		}
+		snapshots = append(snapshots, models.ToAccountSnapshot(&snapshot))
 	}
 	return snapshots, nil
 }
@@ -222,29 +107,35 @@ Get last battle times for accounts by ID, grouped by account ID
 */
 func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error) {
 	if len(accountIDs) < 1 {
-		return nil, new(db.NotFoundError)
+		return nil, ErrNotFound
 	}
 
 	var query baseQueryOptions
 	for _, apply := range options {
 		apply(&query)
 	}
-	WithSelect(accountsnapshot.FieldAccountID, accountsnapshot.FieldLastBattleTime)(&query)
+	withSelect(s.ColumnList{t.AccountSnapshot.AccountID, t.AccountSnapshot.LastBattleTime})(&query)
 
-	queryStr, columns, queryArgs := accountsQuery(accountIDs, kind, accountsnapshot.FieldAccountID, query)
-	rows, err := c.db.AccountSnapshot.QueryContext(ctx, queryStr, queryArgs...)
+	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID, query)
+	rs, err := c.rows(ctx, stmt)
 	if err != nil {
 		return nil, err
 	}
+	defer rs.Close()
 
-	records, err := rowsToRecords[*db.AccountSnapshot](rows, columns)
-	if err != nil {
-		return nil, err
+	var snapshots []m.AccountSnapshot
+	for rs.Next() {
+		var snapshot m.AccountSnapshot
+		err := rs.Scan(&snapshot)
+		if err != nil {
+			return nil, err
+		}
+		snapshots = append(snapshots, snapshot)
 	}
 
 	var lastBattles = make(map[string]time.Time)
-	for _, r := range records {
-		lastBattles[r.AccountID] = r.LastBattleTime
+	for _, r := range snapshots {
+		lastBattles[r.AccountID] = models.StringToTime(r.LastBattleTime)
 	}
 	return lastBattles, nil
 }
@@ -254,83 +145,19 @@ func (c *client) CreateAccountSnapshots(ctx context.Context, snapshots ...*model
 		return nil
 	}
 
-	var ids []string
-	for _, s := range snapshots {
-		ids = append(ids, s.AccountID)
-	}
+	for _, batch := range utils.Batch(snapshots, 100) {
+		var models []m.AccountSnapshot
+		for _, item := range batch {
+			models = append(models, item.Model())
+		}
 
-	accounts, err := c.db.Account.Query().Where(account.IDIn(ids...)).All(ctx)
-	if err != nil {
-		return err
-	}
-	accountsMap := make(map[string]*db.Account)
-	for _, a := range accounts {
-		accountsMap[a.ID] = a
-	}
-
-	var inserts []*db.AccountSnapshotCreate
-	for _, s := range snapshots {
-		inserts = append(inserts,
-			c.db.AccountSnapshot.Create().
-				SetAccount(accountsMap[s.AccountID]). // assume its valid, transaction will fail if it's not
-				SetCreatedAt(s.CreatedAt).
-				SetLastBattleTime(s.LastBattleTime).
-				SetRatingBattles(int(s.RatingBattles.Battles.Float())).
-				SetRatingFrame(s.RatingBattles).
-				SetReferenceID(s.ReferenceID).
-				SetRegularBattles(int(s.RegularBattles.Battles)).
-				SetRegularFrame(s.RegularBattles).
-				SetType(s.Type),
-		)
-	}
-
-	for _, ops := range batch(inserts, 100) {
-		err := c.withTx(ctx, func(tx *db.Tx) error {
-			return tx.AccountSnapshot.CreateBulk(ops...).Exec(ctx)
+		err := c.withTx(ctx, func(tx *transaction) error {
+			_, err := tx.exec(ctx, t.AccountSnapshot.INSERT(t.AccountSnapshot.AllColumns).MODELS(models))
+			return err
 		})
 		if err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-// build a complete query for account snapshot
-func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy string, query baseQueryOptions) (string, []string, []any) {
-	// required where constraints
-	var innerWhere []*sql.Predicate
-	innerWhere = append(innerWhere, sql.EQ(accountsnapshot.FieldType, kind), sql.In(accountsnapshot.FieldAccountID, toAnySlice(accountIDs...)...))
-
-	// optional where constraints
-	if in := query.refIDIn(); in != nil {
-		innerWhere = append(innerWhere, sql.In(accountsnapshot.FieldReferenceID, in...))
-	}
-	if nin := query.refIDNotIn(); nin != nil {
-		innerWhere = append(innerWhere, sql.NotIn(accountsnapshot.FieldReferenceID, nin...))
-	}
-
-	// order and created_at constraints
-	innerOrder := sql.Desc(accountsnapshot.FieldCreatedAt)
-	if query.createdAfter != nil {
-		innerWhere = append(innerWhere, sql.GT(accountsnapshot.FieldCreatedAt, *query.createdAfter))
-		innerOrder = sql.Asc(accountsnapshot.FieldCreatedAt)
-	}
-	if query.createdBefore != nil {
-		innerWhere = append(innerWhere, sql.LT(accountsnapshot.FieldCreatedAt, *query.createdBefore))
-		innerOrder = sql.Desc(accountsnapshot.FieldCreatedAt)
-	}
-
-	selectFields := accountsnapshot.Columns
-	if fields := query.selectFields(groupBy); fields != nil {
-		selectFields = fields
-	}
-
-	innerQuery := sql.Select(selectFields...).From(sql.Table(accountsnapshot.Table))
-	innerQuery = innerQuery.Where(sql.And(innerWhere...))
-	innerQuery = innerQuery.OrderBy(innerOrder)
-
-	innerQueryString, innerQueryArgs := innerQuery.Query()
-	queryString, _ := sql.Select(selectFields...).FromExpr(wrap(innerQueryString)).GroupBy(groupBy).Query()
-
-	return queryString, selectFields, innerQueryArgs
 }

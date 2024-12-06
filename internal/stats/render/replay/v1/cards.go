@@ -55,15 +55,7 @@ func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) str
 	// We first render a footer in order to calculate the minimum required width
 	{
 		var footer []string
-
-		switch strings.ToLower(replay.Realm) {
-		case "na":
-			footer = append(footer, "North America")
-		case "eu":
-			footer = append(footer, "Europe")
-		case "as":
-			footer = append(footer, "Asia")
-		}
+		footer = append(footer, common.RealmLabel(replay.Realm))
 		footer = append(footer, replay.BattleTime.Format("Jan 2, 2006"))
 		if footerHintTag != "" {
 			footer = append(footer, footerHintTag)

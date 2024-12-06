@@ -2,9 +2,13 @@ package database
 
 import (
 	"context"
+	"time"
 
-	"github.com/cufee/aftermath/internal/database/ent/db"
-	"github.com/cufee/aftermath/internal/database/ent/db/gamemode"
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/json"
+	s "github.com/go-jet/jet/v2/sqlite"
 	"golang.org/x/text/language"
 )
 
@@ -13,50 +17,49 @@ func (c *client) UpsertGameModes(ctx context.Context, modes map[string]map[langu
 		return nil, nil
 	}
 
-	var ids []string
-	for id := range modes {
-		ids = append(ids, id)
-	}
-
-	records, err := c.db.GameMode.Query().Where(gamemode.IDIn(ids...)).All(ctx)
-	if err != nil && !IsNotFound(err) {
-		return nil, err
-	}
-
-	errors := make(map[string]error)
-	return errors, c.withTx(ctx, func(tx *db.Tx) error {
-		for _, r := range records {
-			m, ok := modes[r.ID]
-			if !ok {
+	errors := make(map[string]error, len(modes))
+	return errors, c.withTx(ctx, func(tx *transaction) error {
+		for id, locales := range modes {
+			encoded, err := json.Marshal(locales)
+			if err != nil {
+				errors[id] = err
 				continue
 			}
 
-			err := tx.GameMode.UpdateOneID(r.ID).
-				SetLocalizedNames(m).
-				Exec(ctx)
-			if err != nil {
-				errors[r.ID] = err
+			model := m.GameMode{
+				ID:             id,
+				CreatedAt:      models.TimeToString(time.Now()),
+				UpdatedAt:      models.TimeToString(time.Now()),
+				LocalizedNames: encoded,
 			}
 
-			delete(modes, r.ID)
+			stmt := t.GameMode.
+				INSERT(t.GameMode.AllColumns).
+				MODEL(model).
+				ON_CONFLICT(t.GameMode.ID).
+				DO_UPDATE(s.SET(
+					t.GameMode.UpdatedAt.SET(t.GameMode.EXCLUDED.UpdatedAt),
+					t.GameMode.LocalizedNames.SET(t.GameMode.EXCLUDED.LocalizedNames),
+				))
+			_, err = tx.exec(ctx, stmt)
+			errors[id] = err
 		}
-
-		var writes []*db.GameModeCreate
-		for id, v := range modes {
-			writes = append(writes, tx.GameMode.Create().
-				SetID(id).
-				SetLocalizedNames(v),
-			)
-		}
-
-		return tx.GameMode.CreateBulk(writes...).Exec(ctx)
+		return nil
 	})
 }
 
 func (c *client) GetGameModeNames(ctx context.Context, id string) (map[language.Tag]string, error) {
-	record, err := c.db.GameMode.Get(ctx, id)
+	var record m.GameMode
+	err := c.query(ctx, t.GameMode.SELECT(t.GameMode.AllColumns).WHERE(t.GameMode.ID.EQ(s.String(id))), &record)
 	if err != nil {
 		return nil, err
 	}
-	return record.LocalizedNames, nil
+
+	var names map[language.Tag]string
+	err = json.Unmarshal([]byte(record.LocalizedNames), &names)
+	if err != nil {
+		return nil, err
+	}
+
+	return names, nil
 }
