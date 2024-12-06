@@ -113,10 +113,6 @@ table "account_snapshot" {
     null = false
     type = text
   }
-  column "updated_at" {
-    null = false
-    type = text
-  }
   column "type" {
     null = false
     type = text
@@ -163,17 +159,20 @@ table "account_snapshot" {
   index "account_snapshot_id_idx" {
     columns = [column.id]
   }
+  index "account_snapshot_type_idx" {
+    columns = [column.type]
+  }
   index "account_snapshot_created_at_idx" {
     columns = [column.created_at]
   }
   index "account_snapshot_type_account_id_created_at_idx" {
     columns = [column.type, column.account_id, column.created_at]
   }
-  index "account_snapshot_type_account_id_reference_id_idx" {
-    columns = [column.type, column.account_id, column.reference_id]
-  }
   index "account_snapshot_type_account_id_reference_id_created_at_idx" {
     columns = [column.type, column.account_id, column.reference_id, column.created_at]
+  }
+  index "account_snapshot_account_id_reference_id_created_at_idx" {
+    columns = [column.account_id, column.reference_id, column.created_at]
   }
 }
 
@@ -184,10 +183,6 @@ table "vehicle_snapshot" {
     type = text
   }
   column "created_at" {
-    null = false
-    type = text
-  }
-  column "updated_at" {
     null = false
     type = text
   }
@@ -232,16 +227,22 @@ table "vehicle_snapshot" {
   index "vehicle_snapshot_id_idx" {
     columns = [column.id]
   }
+  index "vehicle_snapshot_type_idx" {
+    columns = [column.type]
+  }
   index "vehicle_snapshot_created_at_idx" {
     columns = [column.created_at]
   }
-  index "vehicle_snapshot_vehicle_id_created_at_idx" {
-    columns = [column.vehicle_id, column.created_at]
+  index "vehicle_snapshot_type_account_id_created_at_idx" {
+    columns = [column.type, column.account_id, column.created_at]
   }
-  index "vehicle)snapshot_account_id_created_at_idx" {
-    columns = [column.account_id, column.created_at]
+  index "vehicle_snapshot_type_account_id_vehicle_id_created_at_idx" {
+    columns = [column.type, column.account_id, column.vehicle_id, column.created_at]
   }
-  index "vehicle_snapshot_account_id_type_created_at_idx" {
-    columns = [column.account_id, column.type, column.created_at]
+  index "vehicle_snapshot_type_account_id_vehicle_id_reference_id_created_at_idx" {
+    columns = [column.type, column.account_id, column.vehicle_id, column.reference_id, column.created_at]
+  }
+  index "vehicle_snapshot_vehicle_id_reference_id_created_at_idx" {
+    columns = [column.vehicle_id, column.reference_id, column.created_at]
   }
 }

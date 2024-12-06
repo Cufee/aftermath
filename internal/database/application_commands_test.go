@@ -13,6 +13,8 @@ func TestApplicationCommands(t *testing.T) {
 	is := is.New(t)
 
 	t.Run("get command by hash", func(t *testing.T) {
+		is := is.New(t)
+
 		err := client.UpsertCommands(context.Background(), models.ApplicationCommand{
 			ID:      "command-1",
 			Hash:    "hash-1",
@@ -27,6 +29,8 @@ func TestApplicationCommands(t *testing.T) {
 		is.True(cmd[0].ID == "command-1")
 	})
 	t.Run("get command by id", func(t *testing.T) {
+		is := is.New(t)
+
 		err := client.UpsertCommands(context.Background(), models.ApplicationCommand{
 			ID:      "command-2",
 			Hash:    "hash-2",
@@ -41,6 +45,8 @@ func TestApplicationCommands(t *testing.T) {
 		is.True(cmd[0].ID == "command-2")
 	})
 	t.Run("update command hash", func(t *testing.T) {
+		is := is.New(t)
+
 		err := client.UpsertCommands(context.Background(), models.ApplicationCommand{
 			ID:      "command-3",
 			Hash:    "hash-3",

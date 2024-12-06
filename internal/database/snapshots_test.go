@@ -93,12 +93,6 @@ func TestVehicleSnapshots(t *testing.T) {
 		err := client.CreateVehicleSnapshots(ctx, snapshots...)
 		assert.NoError(t, err, "create vehicle snapshot should not error")
 	}
-	t.Run("vehicles need to be ordered by createdAt ASC when queried with created after", func(t *testing.T) {
-		vehicles, err := client.GetVehicleSnapshots(ctx, accountID, nil, models.SnapshotTypeDaily, WithCreatedAfter(createdAtVehicle1), WithReferenceIDIn("r1"))
-		assert.NoError(t, err, "get vehicle snapshot error")
-		assert.Len(t, vehicles, 1, "should return exactly 1 snapshot")
-		assert.True(t, vehicles[0].CreatedAt.Equal(createdAtVehicle2), "wrong vehicle snapshot returned\nvehicles:%#v\nexpected:%#v", vehicles, createdAtVehicle2)
-	})
 	t.Run("vehicles need to be ordered by createdAt DESC when queried with created before", func(t *testing.T) {
 		vehicles, err := client.GetVehicleSnapshots(ctx, accountID, nil, models.SnapshotTypeDaily, WithCreatedBefore(createdAtVehicle3), WithReferenceIDIn("r1"))
 		assert.NoError(t, err, "get vehicle snapshot error")
@@ -182,6 +176,8 @@ func TestAccountSnapshots(t *testing.T) {
 		is.NoErr(err)
 	}
 	t.Run("test get last battles", func(t *testing.T) {
+		is := is.New(t)
+
 		times, err := client.GetAccountLastBattleTimes(context.Background(), []string{accountID}, snapshot1.Type)
 		is.NoErr(err)
 		is.True(len(times) == 1)
@@ -189,23 +185,20 @@ func TestAccountSnapshots(t *testing.T) {
 	})
 
 	t.Run("test get with created before/after", func(t *testing.T) {
-		snapshots, err := client.GetAccountSnapshots(context.Background(), []string{accountID}, snapshot1.Type, WithCreatedAfter(createdAt1))
+		is := is.New(t)
+
+		snapshots, err := client.GetAccountSnapshots(context.Background(), []string{accountID}, snapshot1.Type, WithCreatedBefore(createdAt2))
 		is.NoErr(err)
 		is.True(len(snapshots) == 1)
-		is.True(snapshots[0].CreatedAt.Unix() == createdAt2.Unix())
+		is.True(snapshots[0].CreatedAt.Unix() == createdAt1.Unix())
 	})
 
 	t.Run("test get with reference id", func(t *testing.T) {
-		{
-			snapshots, err := client.GetAccountSnapshots(context.Background(), []string{accountID}, snapshot4.Type, WithReferenceIDIn("r2"))
-			is.NoErr(err)
-			is.True(len(snapshots) == 1)
-			is.True(snapshots[0].CreatedAt.Unix() == createdAt3.Unix())
-		}
-		{
-			snapshots, err := client.GetAccountSnapshots(context.Background(), []string{accountID}, snapshot1.Type, WithReferenceIDNotIn("r1", "r2"))
-			is.NoErr(err)
-			is.True(len(snapshots) == 0)
-		}
+		is := is.New(t)
+
+		snapshots, err := client.GetAccountSnapshots(context.Background(), []string{accountID}, snapshot4.Type, WithReferenceIDIn("r2"))
+		is.NoErr(err)
+		is.True(len(snapshots) == 1)
+		is.True(snapshots[0].CreatedAt.Unix() == createdAt3.Unix())
 	})
 }

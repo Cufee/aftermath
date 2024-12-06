@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	"github.com/matryer/is"
 )
 
 func TestUsers(t *testing.T) {
@@ -14,4 +16,10 @@ func TestUsers(t *testing.T) {
 	//
 	_ = ctx
 	_ = client
+
+	t.Run("", func(t *testing.T) {
+		is := is.New(t)
+		_ = is
+
+	})
 }

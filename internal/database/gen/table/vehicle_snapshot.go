@@ -19,7 +19,6 @@ type vehicleSnapshotTable struct {
 	// Columns
 	ID             sqlite.ColumnString
 	CreatedAt      sqlite.ColumnString
-	UpdatedAt      sqlite.ColumnString
 	Type           sqlite.ColumnString
 	VehicleID      sqlite.ColumnString
 	ReferenceID    sqlite.ColumnString
@@ -69,7 +68,6 @@ func newVehicleSnapshotTableImpl(schemaName, tableName, alias string) vehicleSna
 	var (
 		IDColumn             = sqlite.StringColumn("id")
 		CreatedAtColumn      = sqlite.StringColumn("created_at")
-		UpdatedAtColumn      = sqlite.StringColumn("updated_at")
 		TypeColumn           = sqlite.StringColumn("type")
 		VehicleIDColumn      = sqlite.StringColumn("vehicle_id")
 		ReferenceIDColumn    = sqlite.StringColumn("reference_id")
@@ -77,8 +75,8 @@ func newVehicleSnapshotTableImpl(schemaName, tableName, alias string) vehicleSna
 		LastBattleTimeColumn = sqlite.StringColumn("last_battle_time")
 		FrameColumn          = sqlite.StringColumn("frame")
 		AccountIDColumn      = sqlite.StringColumn("account_id")
-		allColumns           = sqlite.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, TypeColumn, VehicleIDColumn, ReferenceIDColumn, BattlesColumn, LastBattleTimeColumn, FrameColumn, AccountIDColumn}
-		mutableColumns       = sqlite.ColumnList{CreatedAtColumn, UpdatedAtColumn, TypeColumn, VehicleIDColumn, ReferenceIDColumn, BattlesColumn, LastBattleTimeColumn, FrameColumn, AccountIDColumn}
+		allColumns           = sqlite.ColumnList{IDColumn, CreatedAtColumn, TypeColumn, VehicleIDColumn, ReferenceIDColumn, BattlesColumn, LastBattleTimeColumn, FrameColumn, AccountIDColumn}
+		mutableColumns       = sqlite.ColumnList{CreatedAtColumn, TypeColumn, VehicleIDColumn, ReferenceIDColumn, BattlesColumn, LastBattleTimeColumn, FrameColumn, AccountIDColumn}
 	)
 
 	return vehicleSnapshotTable{
@@ -87,7 +85,6 @@ func newVehicleSnapshotTableImpl(schemaName, tableName, alias string) vehicleSna
 		//Columns
 		ID:             IDColumn,
 		CreatedAt:      CreatedAtColumn,
-		UpdatedAt:      UpdatedAtColumn,
 		Type:           TypeColumn,
 		VehicleID:      VehicleIDColumn,
 		ReferenceID:    ReferenceIDColumn,

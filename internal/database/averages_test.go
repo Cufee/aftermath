@@ -17,6 +17,8 @@ func TestAverages(t *testing.T) {
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.VehicleAverage.TableName()))
 
 	t.Run("create and get vehicle averages", func(t *testing.T) {
+		is := is.New(t)
+
 		averages := map[string]frame.StatsFrame{
 			"id-1": {Battles: 420},
 			"id-2": {Battles: 228},

@@ -114,7 +114,7 @@ func (c *client) GetAccountLastBattleTimes(ctx context.Context, accountIDs []str
 	for _, apply := range options {
 		apply(&query)
 	}
-	WithSelect(s.ColumnList{t.AccountSnapshot.AccountID, t.AccountSnapshot.LastBattleTime})(&query)
+	withSelect(s.ColumnList{t.AccountSnapshot.AccountID, t.AccountSnapshot.LastBattleTime})(&query)
 
 	stmt := accountsQuery(accountIDs, kind, t.AccountSnapshot.AccountID, query)
 	rs, err := c.rows(ctx, stmt)

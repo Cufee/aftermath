@@ -39,7 +39,6 @@ func (record *AccountSnapshot) Model() model.AccountSnapshot {
 	s := model.AccountSnapshot{
 		ID:             utils.StringOr(record.ID, cuid.New()),
 		CreatedAt:      TimeToString(record.CreatedAt),
-		UpdatedAt:      TimeToString(time.Now()),
 		Type:           string(record.Type),
 		LastBattleTime: TimeToString(record.LastBattleTime),
 		ReferenceID:    record.ReferenceID,

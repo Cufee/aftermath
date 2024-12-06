@@ -10,7 +10,6 @@ package model
 type AccountSnapshot struct {
 	ID             string `sql:"primary_key" db:"id"`
 	CreatedAt      string `db:"created_at"`
-	UpdatedAt      string `db:"updated_at"`
 	Type           string `db:"type"`
 	LastBattleTime string `db:"last_battle_time"`
 	ReferenceID    string `db:"reference_id"`

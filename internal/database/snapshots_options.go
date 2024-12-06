@@ -9,10 +9,8 @@ import (
 )
 
 type baseQueryOptions struct {
-	referenceIDIn    map[string]struct{}
-	referenceIDNotIn map[string]struct{}
+	referenceIDIn map[string]struct{}
 
-	createdAfter  *time.Time
 	createdBefore *time.Time
 
 	columns s.ColumnList
@@ -38,31 +36,6 @@ func WithReferenceIDIn(ids ...string) Query {
 }
 
 /*
-Constrain referenceID field for the query
-  - if the final list of reference IDs is > 0, reference_id not in (ids) will be added to the query
-*/
-func WithReferenceIDNotIn(ids ...string) Query {
-	return func(q *baseQueryOptions) {
-		if q.referenceIDNotIn == nil {
-			q.referenceIDNotIn = make(map[string]struct{})
-		}
-		for _, id := range ids {
-			q.referenceIDNotIn[id] = struct{}{}
-		}
-	}
-}
-
-/*
-Adds a created_at lt constraint
-  - if this constraint is set, records will be sorted by created_at ASC
-*/
-func WithCreatedAfter(after time.Time) Query {
-	return func(q *baseQueryOptions) {
-		q.createdAfter = &after
-	}
-}
-
-/*
 Adds a created_at gt constraint
   - if this constraint is set, records will be sorted by created_at DESC
 */
@@ -75,7 +48,7 @@ func WithCreatedBefore(before time.Time) Query {
 /*
 Adds columns used for SELECT
 */
-func WithSelect(columns s.ColumnList) Query {
+func withSelect(columns s.ColumnList) Query {
 	return func(q *baseQueryOptions) {
 		q.columns = columns
 	}
@@ -87,17 +60,6 @@ func (q *baseQueryOptions) refIDIn() []string {
 	}
 	var ids []string
 	for id := range q.referenceIDIn {
-		ids = append(ids, id)
-	}
-	return ids
-}
-
-func (q *baseQueryOptions) refIDNotIn() []string {
-	if len(q.referenceIDNotIn) == 0 {
-		return nil
-	}
-	var ids []string
-	for id := range q.referenceIDNotIn {
 		ids = append(ids, id)
 	}
 	return ids
@@ -116,19 +78,11 @@ func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotTy
 	if in := query.refIDIn(); in != nil {
 		innerWhere = append(innerWhere, column(t.VehicleSnapshot.ReferenceID).IN(stringsToExp(in)...))
 	}
-	if nin := query.refIDNotIn(); nin != nil {
-		innerWhere = append(innerWhere, column(t.VehicleSnapshot.ReferenceID).NOT_IN(stringsToExp(nin)...))
-	}
 
 	// order and created_at constraints
 	innerOrder := column(t.VehicleSnapshot.CreatedAt).DESC()
-	if query.createdAfter != nil {
-		innerWhere = append(innerWhere, column(t.VehicleSnapshot.CreatedAt).GT(timeToField(*query.createdAfter)))
-		innerOrder = column(t.VehicleSnapshot.CreatedAt).ASC()
-	}
 	if query.createdBefore != nil {
 		innerWhere = append(innerWhere, column(t.VehicleSnapshot.CreatedAt).LT(timeToField(*query.createdBefore)))
-		innerOrder = column(t.VehicleSnapshot.CreatedAt).DESC()
 	}
 
 	if query.columns == nil {
@@ -157,19 +111,11 @@ func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy s.Grou
 		innerWhere = append(innerWhere, column(t.AccountSnapshot.ReferenceID).IN(stringsToExp(in)...))
 
 	}
-	if nin := query.refIDNotIn(); nin != nil {
-		innerWhere = append(innerWhere, column(t.AccountSnapshot.ReferenceID).NOT_IN(stringsToExp(nin)...))
-	}
 
 	// order and created_at constraints
 	innerOrder := column(t.AccountSnapshot.CreatedAt).DESC()
-	if query.createdAfter != nil {
-		innerWhere = append(innerWhere, column(t.AccountSnapshot.CreatedAt).GT(timeToField(*query.createdAfter)))
-		innerOrder = column(t.AccountSnapshot.CreatedAt).ASC()
-	}
 	if query.createdBefore != nil {
 		innerWhere = append(innerWhere, column(t.AccountSnapshot.CreatedAt).LT(timeToField(*query.createdBefore)))
-		innerOrder = column(t.AccountSnapshot.CreatedAt).DESC()
 	}
 
 	if query.columns == nil {

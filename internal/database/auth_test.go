@@ -20,6 +20,8 @@ func TestAuthNonce(t *testing.T) {
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.AuthNonce.TableName()))
 
 	t.Run("all auth fields are set correctly", func(t *testing.T) {
+		is := is.New(t)
+
 		nonce, err := client.CreateAuthNonce(context.Background(), "pid-1", "id-1", time.Now().Add(time.Hour), nil)
 		is.NoErr(err)
 		is.True(nonce.ID != "")
@@ -29,6 +31,8 @@ func TestAuthNonce(t *testing.T) {
 		is.True(nonce.ExpiresAt.After(time.Now().Add(time.Minute)))
 	})
 	t.Run("find auth by public id", func(t *testing.T) {
+		is := is.New(t)
+
 		nonce, err := client.CreateAuthNonce(context.Background(), "pid-2", "id-2", time.Now().Add(time.Hour), nil)
 		is.NoErr(err)
 
@@ -40,6 +44,8 @@ func TestAuthNonce(t *testing.T) {
 		is.True(IsNotFound(err))
 	})
 	t.Run("set nonce as not active", func(t *testing.T) {
+		is := is.New(t)
+
 		nonce, err := client.CreateAuthNonce(context.Background(), "pid-3", "id-3", time.Now().Add(time.Hour), nil)
 		is.NoErr(err)
 
@@ -72,6 +78,8 @@ func TestSession(t *testing.T) {
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = '%s';", table.User.TableName(), user.ID))
 
 	t.Run("all session fields are set correctly", func(t *testing.T) {
+		is := is.New(t)
+
 		session, err := client.CreateSession(context.Background(), "pid-10", user.ID, time.Now().Add(time.Hour), nil)
 		is.NoErr(err)
 		is.True(session.ID != "")
@@ -80,6 +88,8 @@ func TestSession(t *testing.T) {
 		is.True(session.ExpiresAt.After(time.Now().Add(time.Minute)))
 	})
 	t.Run("create and find a session", func(t *testing.T) {
+		is := is.New(t)
+
 		session, err := client.CreateSession(context.Background(), "pid-11", user.ID, time.Now().Add(time.Hour), nil)
 		is.NoErr(err)
 
@@ -88,6 +98,8 @@ func TestSession(t *testing.T) {
 		is.True(found.ID == session.ID)
 	})
 	t.Run("set session expiration", func(t *testing.T) {
+		is := is.New(t)
+
 		session, err := client.CreateSession(context.Background(), "pid-12", user.ID, time.Now().Add(time.Hour), nil)
 		is.NoErr(err)
 

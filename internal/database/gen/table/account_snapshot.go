@@ -19,7 +19,6 @@ type accountSnapshotTable struct {
 	// Columns
 	ID             sqlite.ColumnString
 	CreatedAt      sqlite.ColumnString
-	UpdatedAt      sqlite.ColumnString
 	Type           sqlite.ColumnString
 	LastBattleTime sqlite.ColumnString
 	ReferenceID    sqlite.ColumnString
@@ -70,7 +69,6 @@ func newAccountSnapshotTableImpl(schemaName, tableName, alias string) accountSna
 	var (
 		IDColumn             = sqlite.StringColumn("id")
 		CreatedAtColumn      = sqlite.StringColumn("created_at")
-		UpdatedAtColumn      = sqlite.StringColumn("updated_at")
 		TypeColumn           = sqlite.StringColumn("type")
 		LastBattleTimeColumn = sqlite.StringColumn("last_battle_time")
 		ReferenceIDColumn    = sqlite.StringColumn("reference_id")
@@ -79,8 +77,8 @@ func newAccountSnapshotTableImpl(schemaName, tableName, alias string) accountSna
 		RegularBattlesColumn = sqlite.IntegerColumn("regular_battles")
 		RegularFrameColumn   = sqlite.StringColumn("regular_frame")
 		AccountIDColumn      = sqlite.StringColumn("account_id")
-		allColumns           = sqlite.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, TypeColumn, LastBattleTimeColumn, ReferenceIDColumn, RatingBattlesColumn, RatingFrameColumn, RegularBattlesColumn, RegularFrameColumn, AccountIDColumn}
-		mutableColumns       = sqlite.ColumnList{CreatedAtColumn, UpdatedAtColumn, TypeColumn, LastBattleTimeColumn, ReferenceIDColumn, RatingBattlesColumn, RatingFrameColumn, RegularBattlesColumn, RegularFrameColumn, AccountIDColumn}
+		allColumns           = sqlite.ColumnList{IDColumn, CreatedAtColumn, TypeColumn, LastBattleTimeColumn, ReferenceIDColumn, RatingBattlesColumn, RatingFrameColumn, RegularBattlesColumn, RegularFrameColumn, AccountIDColumn}
+		mutableColumns       = sqlite.ColumnList{CreatedAtColumn, TypeColumn, LastBattleTimeColumn, ReferenceIDColumn, RatingBattlesColumn, RatingFrameColumn, RegularBattlesColumn, RegularFrameColumn, AccountIDColumn}
 	)
 
 	return accountSnapshotTable{
@@ -89,7 +87,6 @@ func newAccountSnapshotTableImpl(schemaName, tableName, alias string) accountSna
 		//Columns
 		ID:             IDColumn,
 		CreatedAt:      CreatedAtColumn,
-		UpdatedAt:      UpdatedAtColumn,
 		Type:           TypeColumn,
 		LastBattleTime: LastBattleTimeColumn,
 		ReferenceID:    ReferenceIDColumn,

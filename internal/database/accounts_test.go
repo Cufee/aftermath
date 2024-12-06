@@ -14,6 +14,8 @@ func TestAccounts(t *testing.T) {
 	is := is.New(t)
 
 	t.Run("upsert and check a new account", func(t *testing.T) {
+		is := is.New(t)
+
 		errors, err := client.UpsertAccounts(context.Background(), &models.Account{
 			ID:       "id-1",
 			Realm:    "realm",
@@ -52,6 +54,8 @@ func TestAccounts(t *testing.T) {
 	})
 
 	t.Run("get multiple accounts", func(t *testing.T) {
+		is := is.New(t)
+
 		errors, err := client.UpsertAccounts(context.Background(),
 			&models.Account{
 				ID:       "id-21",
@@ -85,6 +89,8 @@ func TestAccounts(t *testing.T) {
 	})
 
 	t.Run("set account to private", func(t *testing.T) {
+		is := is.New(t)
+
 		errors, err := client.UpsertAccounts(context.Background(), &models.Account{
 			ID:       "id-10",
 			Realm:    "realm",
