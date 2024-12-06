@@ -75,8 +75,8 @@ func TestVehicleSnapshots(t *testing.T) {
 		ReferenceID: "r2",
 
 		Type:           models.SnapshotTypeDaily,
-		CreatedAt:      createdAtVehicle5,
-		LastBattleTime: createdAtVehicle5,
+		CreatedAt:      createdAtVehicle4,
+		LastBattleTime: createdAtVehicle4,
 	}
 	vehicle6 := models.VehicleSnapshot{
 		VehicleID:   "v5",
@@ -115,6 +115,14 @@ func TestVehicleSnapshots(t *testing.T) {
 		vehicles, err := client.GetVehicleSnapshots(ctx, accountID, nil, models.SnapshotTypeDaily, WithCreatedBefore(createdAtVehicle1), WithReferenceIDIn("r1"))
 		assert.NoError(t, err, "no results from a raw query does not trigger an error")
 		assert.Len(t, vehicles, 0, "return should have no results\nvehicles:%#v", vehicles)
+	})
+	t.Run("get vehicle last battle time", func(t *testing.T) {
+		vehicles, err := client.GetVehiclesLastBattleTimes(ctx, accountID, nil, models.SnapshotTypeDaily, WithReferenceIDIn("r2"))
+		assert.NoError(t, err, "no results from a raw query does not trigger an error")
+		assert.Len(t, vehicles, 2, "return should have exactly 2 results\nvehicles:%#v", vehicles)
+		assert.Equal(t, vehicles[vehicle4.VehicleID], vehicle4.LastBattleTime, "vehicle4 last battle time check")
+		assert.Equal(t, vehicles[vehicle6.VehicleID], vehicle6.LastBattleTime, "vehicle6 last battle time check")
+
 	})
 }
 

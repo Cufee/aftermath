@@ -69,12 +69,12 @@ WHERE id IN (
 	FROM %[1]s AS snapshots_1
 	WHERE created_at < ?
 	AND (
-		type != '%[3]s'
-		OR EXISTS (
+		EXISTS (
 			SELECT 1
 			FROM %[1]s AS snapshots_2
 			WHERE snapshots_1.%[2]s = snapshots_2.%[2]s
 			AND snapshots_1.reference_id = snapshots_2.reference_id
+			AND snapshots_1.type = snapshots_2.type
 			AND snapshots_2.created_at >= ?
 		)
 	)

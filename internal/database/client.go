@@ -85,6 +85,7 @@ type SnapshotsClient interface {
 
 	CreateAccountSnapshots(ctx context.Context, snapshots ...*models.AccountSnapshot) error
 	GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
+	GetVehiclesLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...Query) (map[string]time.Time, error)
 
 	DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error
 }

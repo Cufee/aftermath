@@ -72,7 +72,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 				return
 			}
 
-			_, err = logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, *realm, false, logic.WithReference(id, opts.referenceID))
+			_, err = logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, *realm, logic.WithReference(id, opts.referenceID))
 			if err != nil {
 				log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
 			}
@@ -107,7 +107,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 					return
 				}
 
-				_, err = logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, *realm, false, logic.WithReference(id, opts.referenceID))
+				_, err = logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, *realm, logic.WithReference(id, opts.referenceID))
 				if err != nil {
 					log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
 				}

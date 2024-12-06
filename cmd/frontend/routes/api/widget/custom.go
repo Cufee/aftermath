@@ -155,7 +155,7 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 		return nil, ctx.Err(err, "failed to create widget settings")
 	}
 
-	_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), *realm, false, logic.WithReference(created.AccountID, created.ID))
+	_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), *realm, logic.WithReference(created.AccountID, created.ID), logic.WithType(models.SnapshotTypeWidget))
 	if err != nil {
 		return nil, ctx.Err(err, "failed to create a new widget session")
 	}
@@ -332,7 +332,7 @@ var ResetSession handler.Partial = func(ctx *handler.Context) (templ.Component, 
 			return
 		}
 
-		_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), *realm, false, logic.WithReference(accountID, widgetID))
+		_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), *realm, logic.WithReference(accountID, widgetID), logic.WithType(models.SnapshotTypeWidget))
 		if err != nil {
 			log.Err(err).Str("widgetId", widgetID).Str("accountId", accountID).Msg("failed to refresh a session for widget")
 		}

@@ -125,6 +125,9 @@ func (c *staticTestingDatabase) CreateAccountSnapshots(ctx context.Context, snap
 func (c *staticTestingDatabase) GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.Query) (map[string]time.Time, error) {
 	return nil, errors.New("GetAccountLastBattleTimes not implemented")
 }
+func (c *staticTestingDatabase) GetVehiclesLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.Query) (map[string]time.Time, error) {
+	return nil, errors.New("GetVehiclesLastBattleTimes not implemented")
+}
 func (c *staticTestingDatabase) GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.Query) ([]models.VehicleSnapshot, error) {
 	return nil, errors.New("GetVehicleSnapshots not implemented")
 }

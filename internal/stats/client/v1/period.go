@@ -44,7 +44,7 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 			return
 		}
 
-		_, err = logic.RecordAccountSnapshots(ctx, r.wargaming, r.database, *realm, false, logic.WithReference(id, opts.referenceID))
+		_, err = logic.RecordAccountSnapshots(ctx, r.wargaming, r.database, *realm, logic.WithReference(id, opts.referenceID))
 		if err != nil {
 			log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
 		}

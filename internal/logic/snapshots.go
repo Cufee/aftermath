@@ -22,6 +22,25 @@ var (
 	accountSnapshotsPool = newPool[models.AccountSnapshot]()
 )
 
+type snapshotRecordOptions struct {
+	force bool
+	kind  models.SnapshotType
+}
+
+type SnapshotRecordOption func(*snapshotRecordOptions)
+
+func WithForceUpdate() SnapshotRecordOption {
+	return func(sro *snapshotRecordOptions) {
+		sro.force = true
+	}
+}
+
+func WithType(t models.SnapshotType) SnapshotRecordOption {
+	return func(sro *snapshotRecordOptions) {
+		sro.kind = t
+	}
+}
+
 type AccountsWithReference map[string]string
 
 func WithReference(accountID string, referenceID string) AccountsWithReference {
@@ -54,26 +73,21 @@ func WithDefaultReference(ids []string) AccountsWithReference {
 	return d
 }
 
-type vehicleBattleData struct {
-	LastBattle time.Time
-	Battles    int
-}
-
 /*
 Filter passed in accounts and return active account ids
   - an account is considered active if it has played a battle since the last snapshot, or has no snapshots
 */
-func filterActiveAccounts(ctx context.Context, dbClient database.Client, input AccountsWithReference, accounts map[string]types.ExtendedAccount, force bool) ([]string, error) {
+func filterActiveAccounts(ctx context.Context, dbClient database.Client, input AccountsWithReference, accounts map[string]types.ExtendedAccount, options snapshotRecordOptions) ([]string, error) {
 	var ids []string
 	for id := range accounts {
 		ids = append(ids, id)
 	}
 
 	// existing snapshots for accounts
-	var opts []database.Query
-	opts = append(opts, database.WithReferenceIDIn(input.ReferenceIDs()...))
+	var dbOpts []database.Query
+	dbOpts = append(dbOpts, database.WithReferenceIDIn(input.ReferenceIDs()...))
 
-	existingLastBattleTimes, err := dbClient.GetAccountLastBattleTimes(ctx, ids, models.SnapshotTypeDaily, opts...)
+	existingLastBattleTimes, err := dbClient.GetAccountLastBattleTimes(ctx, ids, options.kind, dbOpts...)
 	if err != nil && !database.IsNotFound(err) {
 		return nil, errors.Wrap(err, "failed to get existing snapshots")
 	}
@@ -84,7 +98,7 @@ func filterActiveAccounts(ctx context.Context, dbClient database.Client, input A
 		if data.LastBattleTime < 1 {
 			continue
 		}
-		if s, ok := existingLastBattleTimes[id]; !force && (ok && !s.IsZero() && data.LastBattleTime == int(s.Unix())) {
+		if s, ok := existingLastBattleTimes[id]; !options.force && (ok && !s.IsZero() && data.LastBattleTime == int(s.Unix())) {
 			// last snapshot is the same, we can skip it
 			continue
 		}
@@ -93,10 +107,16 @@ func filterActiveAccounts(ctx context.Context, dbClient database.Client, input A
 	return needAnUpdate, nil
 }
 
-func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm types.Realm, force bool, input AccountsWithReference) (map[string]error, error) {
+func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbClient database.Client, realm types.Realm, input AccountsWithReference, opts ...SnapshotRecordOption) (map[string]error, error) {
 	if len(input) < 1 {
 		return nil, nil
 	}
+
+	options := snapshotRecordOptions{kind: models.SnapshotTypeDaily, force: false}
+	for _, apply := range opts {
+		apply(&options)
+	}
+
 	createdAt := time.Now()
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -107,7 +127,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		return nil, errors.Wrap(err, "failed to fetch accounts")
 	}
 
-	accountsNeedAnUpdate, err := filterActiveAccounts(ctx, dbClient, input, accounts, force)
+	accountsNeedAnUpdate, err := filterActiveAccounts(ctx, dbClient, input, accounts, options)
 	if err != nil {
 		return nil, err
 	}
@@ -120,6 +140,9 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 
 	var accountVehiclesMx sync.Mutex
 	accountVehicles := make(map[string]retry.DataWithErr[[]types.VehicleStatsFrame], len(accountsNeedAnUpdate))
+
+	var accountVehiclesBTMx sync.Mutex
+	accountVehiclesBT := make(map[string]retry.DataWithErr[map[string]time.Time], len(accountsNeedAnUpdate))
 
 	for _, id := range accountsNeedAnUpdate {
 		group.Add(1)
@@ -146,6 +169,18 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		clans = data
 	}()
 
+	// get account vehicle last battle times
+	for _, accountID := range accountsNeedAnUpdate {
+		group.Add(1)
+		go func(id string) {
+			defer group.Done()
+			lastBattles, err := dbClient.GetVehiclesLastBattleTimes(ctx, id, nil, options.kind)
+			accountVehiclesBTMx.Lock()
+			accountVehiclesBT[id] = retry.DataWithErr[map[string]time.Time]{Data: lastBattles, Err: err}
+			defer accountVehiclesBTMx.Unlock()
+		}(accountID)
+	}
+
 	group.Wait()
 
 	var accountErrors = make(map[string]error)
@@ -161,6 +196,12 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			continue
 		}
 
+		existingLastBattleTimes := accountVehiclesBT[accountID]
+		if existingLastBattleTimes.Err != nil {
+			accountErrors[accountID] = existingLastBattleTimes.Err
+			continue
+		}
+
 		accountRefID := input[accountID]
 		if accountRefID == "" {
 			accountRefID = accountID
@@ -172,7 +213,7 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 			defer accountSnapshotsPool.Put(sht)
 
 			*sht = models.AccountSnapshot{
-				Type:           models.SnapshotTypeDaily,
+				Type:           options.kind,
 				CreatedAt:      createdAt,
 				ReferenceID:    accountRefID,
 				AccountID:      snapshotStats.Account.ID,
@@ -190,17 +231,19 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 
 		// vehicle snapshots
-		var vehicleLastBattleTimes = make(map[string]vehicleBattleData)
 		vehicleStats := fetch.WargamingVehiclesToFrame(vehicles.Data)
 		if len(vehicles.Data) > 0 {
 			for id, vehicle := range vehicleStats {
-				vehicleLastBattleTimes[id] = vehicleBattleData{vehicle.LastBattleTime, int(vehicle.Battles.Float())}
+				if !options.force && existingLastBattleTimes.Data[id].Unix() >= vehicle.LastBattleTime.Unix() {
+					// skip vehicles that were not played
+					continue
+				}
 
 				sht := vehicleSnapshotsPool.Get()
 				defer vehicleSnapshotsPool.Put(sht)
 
 				*sht = models.VehicleSnapshot{
-					Type:           models.SnapshotTypeDaily,
+					Type:           options.kind,
 					LastBattleTime: vehicle.LastBattleTime,
 					Stats:          *vehicle.StatsFrame,
 					VehicleID:      vehicle.VehicleID,

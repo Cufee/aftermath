@@ -104,33 +104,4 @@ func TestSnapshotCleanup(t *testing.T) {
 		is.True(len(survived) == 1)
 		is.True(survived[0].ID == expired.ID)
 	})
-
-	t.Run("delete non daily snapshot even if no recent exists", func(t *testing.T) {
-		is := is.New(t)
-
-		id1 := "s-5"
-		defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id IN ('%s');", table.VehicleSnapshot.TableName(), id1))
-
-		expiredTime := time.Now().Add(time.Hour * -1)
-		expiredUnrelated := models.VehicleSnapshot{
-			ID:          id1,
-			VehicleID:   "v3",
-			AccountID:   accountID,
-			ReferenceID: "r3",
-
-			Type:           models.SnapshotTypeWidget,
-			CreatedAt:      expiredTime,
-			LastBattleTime: expiredTime,
-		}
-
-		err := client.CreateVehicleSnapshots(context.Background(), &expiredUnrelated)
-		is.NoErr(err)
-		err = client.DeleteExpiredSnapshots(context.Background(), time.Now())
-		is.NoErr(err)
-
-		survived, err := client.GetVehicleSnapshots(context.Background(), accountID, nil, models.SnapshotTypeWidget)
-		is.NoErr(err)
-		fmt.Printf("%#v", survived)
-		is.True(len(survived) == 0)
-	})
 }
