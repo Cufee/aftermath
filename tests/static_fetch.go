@@ -21,6 +21,10 @@ func StaticTestingFetch() *staticTestingFetch {
 	return &staticTestingFetch{}
 }
 
+func (c *staticTestingFetch) VerifyAccountToken(ctx context.Context, id string, token string) (bool, error) {
+	return true, nil
+}
+
 func (c *staticTestingFetch) Account(ctx context.Context, id string) (models.Account, error) {
 	if account, ok := staticAccounts[id]; ok {
 		return account, nil

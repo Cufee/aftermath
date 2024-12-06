@@ -17,12 +17,17 @@ import (
 )
 
 var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
+	if ctx.Query("status") == "error" {
+		return ctx.Redirect("/error?message="+ctx.Query("message"), http.StatusTemporaryRedirect)
+	}
+
 	accountID := ctx.Query("account_id")
 	if accountID == "" {
 		return ctx.Redirect("/error?message=invalid response received from wargaming", http.StatusTemporaryRedirect)
 	}
-	if ctx.Query("status") == "error" {
-		return ctx.Redirect("/error?message="+ctx.Query("message"), http.StatusTemporaryRedirect)
+	accessToken := ctx.Query("access_token")
+	if accessToken == "" {
+		return ctx.Redirect("/error?message=invalid response received from wargaming", http.StatusTemporaryRedirect)
 	}
 
 	token := ctx.Path("token")
@@ -37,6 +42,18 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 	if session.Meta["flow"] != "wargaming-redirect" {
+		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
+	}
+
+	tokenValid, err := ctx.Fetch().VerifyAccountToken(ctx.Context, accountID, accessToken)
+	if !tokenValid {
+		if err != nil {
+			log.Debug().Err(err).Msg("failed to verify access token")
+		}
+		err := ctx.Database().SetSessionExpiresAt(ctx.Context, session.ID, time.Time{})
+		if err != nil {
+			log.Err(err).Msg("failed to set session expiration")
+		}
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
@@ -60,7 +77,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 
 		conn.Selected = conn.ReferenceID == accountID
 		if conn.ReferenceID == accountID {
-			conn.Verified = true
+			conn.Verified = tokenValid
 			found = true
 		}
 
@@ -74,7 +91,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 			Type:        models.ConnectionTypeWargaming,
 			UserID:      user.ID,
 			ReferenceID: accountID,
-			Verified:    true,
+			Verified:    tokenValid,
 			Selected:    true,
 		}
 		_, err := ctx.Database().UpsertUserConnection(ctx.Context, conn)
