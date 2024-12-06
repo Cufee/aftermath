@@ -115,23 +115,6 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 }
 
 /*
-Verify an account_token, ensuring the token belongs to the account stated
-*/
-func (c *multiSourceClient) VerifyAccountToken(ctx context.Context, id string, token string) (bool, error) {
-	realm, err := c.wargaming.RealmFromID(id)
-	if err != nil {
-		return false, err
-	}
-
-	account, err := c.wargaming.AccountByID(ctx, *realm, id, types.WithToken(token), types.WithFields("account_id"))
-	if err != nil {
-		return false, err
-	}
-
-	return fmt.Sprint(account.ID) == id, nil
-}
-
-/*
 Gets account info from wg and updates cache
 */
 func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Account, error) {

@@ -53,8 +53,6 @@ type StatsWithVehicles struct {
 }
 
 type Client interface {
-	VerifyAccountToken(ctx context.Context, id string, token string) (bool, error)
-
 	Account(ctx context.Context, id string) (models.Account, error)
 	Search(ctx context.Context, nickname string, realm types.Realm, limit int) (types.Account, error)
 	BroadSearch(ctx context.Context, nickname string, limit int) ([]AccountWithRealm, error)
