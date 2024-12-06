@@ -80,11 +80,24 @@ type UserSubscription struct {
 
 func ToUserSubscription(record *model.UserSubscription) UserSubscription {
 	return UserSubscription{
-		ID:          utils.StringOr(record.ID, cuid.New()),
+		ID:          record.ID,
 		Type:        SubscriptionType(record.Type),
 		UserID:      record.UserID,
 		ReferenceID: record.ReferenceID,
 		ExpiresAt:   StringToTime(record.ExpiresAt),
 		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
+	}
+}
+
+func (record *UserSubscription) Model() model.UserSubscription {
+	return model.UserSubscription{
+		ID:          utils.StringOr(record.ID, cuid.New()),
+		CreatedAt:   TimeToString(time.Now()),
+		UpdatedAt:   TimeToString(time.Now()),
+		Type:        string(record.Type),
+		UserID:      record.UserID,
+		ReferenceID: record.ReferenceID,
+		ExpiresAt:   TimeToString(record.ExpiresAt),
+		Permissions: record.Permissions.Encode(),
 	}
 }

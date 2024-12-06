@@ -31,6 +31,7 @@ func TestSnapshotCleanup(t *testing.T) {
 
 	t.Run("delete expired snapshot when a new one is present", func(t *testing.T) {
 		is := is.New(t)
+
 		id1, id2 := "s-1", "s-2"
 		defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id IN ('%s', '%s');", table.VehicleSnapshot.TableName(), id1, id2))
 
@@ -77,6 +78,7 @@ func TestSnapshotCleanup(t *testing.T) {
 
 	t.Run("do not delete expired snapshot when a new one is not present", func(t *testing.T) {
 		is := is.New(t)
+
 		id1, id2 := "s-3", "s-4"
 		defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id IN ('%s', '%s');", table.VehicleSnapshot.TableName(), id1, id2))
 
@@ -105,6 +107,7 @@ func TestSnapshotCleanup(t *testing.T) {
 
 	t.Run("delete non daily snapshot even if no recent exists", func(t *testing.T) {
 		is := is.New(t)
+
 		id1 := "s-5"
 		defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id IN ('%s');", table.VehicleSnapshot.TableName(), id1))
 

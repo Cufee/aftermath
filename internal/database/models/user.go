@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/cufee/aftermath/internal/database/gen/model"
 	"github.com/cufee/aftermath/internal/permissions"
 )
@@ -62,9 +64,10 @@ func (u User) Subscription(kind SubscriptionType) (UserSubscription, bool) {
 }
 
 func (u User) FilterSubscriptions(kind SubscriptionType) ([]UserSubscription, bool) {
+	now := time.Now()
 	var valid []UserSubscription
 	for _, subscription := range u.Subscriptions {
-		if subscription.Type == kind {
+		if subscription.Type == kind && subscription.ExpiresAt.After(now) {
 			valid = append(valid, subscription)
 		}
 	}

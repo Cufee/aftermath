@@ -53,7 +53,7 @@ type RestrictionUpdate struct {
 
 func ToUserRestriction(record *model.UserRestriction) UserRestriction {
 	r := UserRestriction{
-		ID:     utils.StringOr(record.ID, cuid.New()),
+		ID:     record.ID,
 		Type:   UserRestrictionType(record.Type),
 		UserID: record.UserID,
 

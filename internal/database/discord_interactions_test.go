@@ -23,6 +23,8 @@ func TestDiscordInteraction(t *testing.T) {
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = '%s';", table.User.TableName(), user.ID))
 
 	t.Run("create and get discord interaction", func(t *testing.T) {
+		is := is.New(t)
+
 		data := models.DiscordInteraction{
 			Snowflake: "flake-1",
 			Result:    "result-1",
@@ -47,6 +49,8 @@ func TestDiscordInteraction(t *testing.T) {
 	})
 
 	t.Run("create and find discord interactions", func(t *testing.T) {
+		is := is.New(t)
+
 		data1 := models.DiscordInteraction{
 			Snowflake: "flake-2",
 			Result:    "result-2",

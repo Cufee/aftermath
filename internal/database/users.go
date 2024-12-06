@@ -362,7 +362,6 @@ func (c *client) CreateUserContent(ctx context.Context, content models.UserConte
 	}
 
 	return models.ToUserContent(&model), nil
-
 }
 
 func (c *client) UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
@@ -397,4 +396,40 @@ func (c *client) UpsertUserContent(ctx context.Context, content models.UserConte
 func (c *client) DeleteUserContent(ctx context.Context, id string) error {
 	_, err := c.exec(ctx, t.UserContent.DELETE().WHERE(t.UserContent.ID.EQ(s.String(id))))
 	return err
+}
+
+func (c *client) CreateUserSubscription(ctx context.Context, subscription models.UserSubscription) (models.UserSubscription, error) {
+	model := subscription.Model()
+	stmt := t.UserSubscription.
+		INSERT(t.UserSubscription.AllColumns).
+		MODEL(model).
+		RETURNING(t.UserSubscription.AllColumns)
+
+	err := c.query(ctx, stmt, &model)
+	if err != nil {
+		return models.UserSubscription{}, err
+	}
+
+	return models.ToUserSubscription(&model), nil
+}
+
+func (c *client) UpdateUserSubscription(ctx context.Context, id string, subscription models.UserSubscription) (models.UserSubscription, error) {
+	model := subscription.Model()
+	stmt := t.UserSubscription.
+		UPDATE(t.UserSubscription.AllColumns.Except(
+			t.UserSubscription.ID,
+			t.UserSubscription.Type,
+			t.UserSubscription.UserID,
+			t.UserSubscription.CreatedAt,
+		)).
+		MODEL(model).
+		WHERE(t.UserSubscription.ID.EQ(s.String(id))).
+		RETURNING(t.UserSubscription.AllColumns)
+
+	err := c.query(ctx, stmt, &model)
+	if err != nil {
+		return models.UserSubscription{}, err
+	}
+
+	return models.ToUserSubscription(&model), nil
 }

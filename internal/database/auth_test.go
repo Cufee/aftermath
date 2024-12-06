@@ -83,7 +83,7 @@ func TestSession(t *testing.T) {
 		session, err := client.CreateSession(context.Background(), "pid-10", user.ID, time.Now().Add(time.Hour), nil)
 		is.NoErr(err)
 		is.True(session.ID != "")
-		is.True(session.UserID == "user-10")
+		is.True(session.UserID == user.ID)
 		is.True(session.PublicID == "pid-10")
 		is.True(session.ExpiresAt.After(time.Now().Add(time.Minute)))
 	})
