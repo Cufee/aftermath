@@ -176,6 +176,70 @@ table "account_snapshot" {
   }
 }
 
+table "account_achievements_snapshot" {
+  schema = schema.main
+  column "id" {
+    null = false
+    type = text
+  }
+  column "created_at" {
+    null = false
+    type = text
+  }
+  column "type" {
+    null = false
+    type = text
+  }
+  column "battles" {
+    null = false
+    type = integer
+  }
+  column "last_battle_time" {
+    null = false
+    type = text
+  }
+  column "reference_id" {
+    null = false
+    type = text
+  }
+  column "frame" {
+    null = false
+    type = blob
+    default = ""
+  }
+  column "account_id" {
+    null = false
+    type = text
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "account_id_account_achievements_snapshot_account_id_fk" {
+    columns     = [column.account_id]
+    ref_columns = [table.account.column.id]
+    on_update   = NO_ACTION
+    on_delete   = CASCADE
+  }
+  index "account_achievements_snapshot_id_idx" {
+    columns = [column.id]
+  }
+  index "account_achievements_snapshot_type_idx" {
+    columns = [column.type]
+  }
+  index "account_achievements_created_at_idx" {
+    columns = [column.created_at]
+  }
+  index "account_achievements_snapshot_type_account_id_created_at_idx" {
+    columns = [column.type, column.account_id, column.created_at]
+  }
+  index "account_achievements_snapshot_type_account_id_reference_id_created_at_idx" {
+    columns = [column.type, column.account_id, column.reference_id, column.created_at]
+  }
+  index "account_achievements_snapshot_account_id_reference_id_created_at_idx" {
+    columns = [column.account_id, column.reference_id, column.created_at]
+  }
+}
+
 table "vehicle_snapshot" {
   schema = schema.main
   column "id" {
@@ -243,6 +307,78 @@ table "vehicle_snapshot" {
     columns = [column.type, column.account_id, column.vehicle_id, column.reference_id, column.created_at]
   }
   index "vehicle_snapshot_vehicle_id_reference_id_created_at_idx" {
+    columns = [column.vehicle_id, column.reference_id, column.created_at]
+  }
+}
+
+
+table "vehicle_achievements_snapshot" {
+  schema = schema.main
+  column "id" {
+    null = false
+    type = text
+  }
+  column "created_at" {
+    null = false
+    type = text
+  }
+  column "type" {
+    null = false
+    type = text
+  }
+  column "vehicle_id" {
+    null = false
+    type = text
+  }
+  column "reference_id" {
+    null = false
+    type = text
+  }
+  column "battles" {
+    null = false
+    type = integer
+  }
+  column "last_battle_time" {
+    null = false
+    type = text
+  }
+  column "frame" {
+    null = false
+    type = blob
+    default = ""
+  }
+  column "account_id" {
+    null = false
+    type = text
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "vehicle_achievements_snapshot_account_id_account_id_fk" {
+    columns     = [column.account_id]
+    ref_columns = [table.account.column.id]
+    on_update   = NO_ACTION
+    on_delete   = CASCADE
+  }
+  index "vehicle_achievements_snapshot_id_idx" {
+    columns = [column.id]
+  }
+  index "vehicle_achievements_snapshot_type_idx" {
+    columns = [column.type]
+  }
+  index "vehicle_achievements_snapshot_created_at_idx" {
+    columns = [column.created_at]
+  }
+  index "vehicle_achievements_snapshot_type_account_id_created_at_idx" {
+    columns = [column.type, column.account_id, column.created_at]
+  }
+  index "vehicle_achievements_snapshot_type_account_id_vehicle_id_created_at_idx" {
+    columns = [column.type, column.account_id, column.vehicle_id, column.created_at]
+  }
+  index "vehicle_achievements_snapshot_type_account_id_vehicle_id_reference_id_created_at_idx" {
+    columns = [column.type, column.account_id, column.vehicle_id, column.reference_id, column.created_at]
+  }
+  index "vehicle_achievements_snapshot_vehicle_id_reference_id_created_at_idx" {
     columns = [column.vehicle_id, column.reference_id, column.created_at]
   }
 }

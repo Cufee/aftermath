@@ -11,6 +11,7 @@ package table
 // this method only once at the beginning of the program.
 func UseSchema(schema string) {
 	Account = Account.FromSchema(schema)
+	AccountAchievementsSnapshot = AccountAchievementsSnapshot.FromSchema(schema)
 	AccountSnapshot = AccountSnapshot.FromSchema(schema)
 	AppConfiguration = AppConfiguration.FromSchema(schema)
 	ApplicationCommand = ApplicationCommand.FromSchema(schema)
@@ -29,6 +30,7 @@ func UseSchema(schema string) {
 	UserRestriction = UserRestriction.FromSchema(schema)
 	UserSubscription = UserSubscription.FromSchema(schema)
 	Vehicle = Vehicle.FromSchema(schema)
+	VehicleAchievementsSnapshot = VehicleAchievementsSnapshot.FromSchema(schema)
 	VehicleAverage = VehicleAverage.FromSchema(schema)
 	VehicleSnapshot = VehicleSnapshot.FromSchema(schema)
 	WidgetSettings = WidgetSettings.FromSchema(schema)

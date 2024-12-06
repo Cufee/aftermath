@@ -14,8 +14,8 @@ func TestCronTasks(t *testing.T) {
 	is := is.New(t)
 
 	client := MustTestClient(t)
+	client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.CronTask.TableName()))
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.CronTask.TableName()))
-	//
 
 	task := models.Task{
 		Type:        models.TaskTypeDatabaseCleanup,
