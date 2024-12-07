@@ -20,7 +20,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
 	"net/http"
-	"slices"
 	"strconv"
 	"time"
 )
@@ -51,7 +50,7 @@ func customWidgetFromID(ctx context.Context, core core.Client, widgetID string) 
 		return widgetEndpointResponse{}, errors.New("private accounts cannot be tracked")
 	}
 
-	var opts = []client.RequestOption{client.WithWN8(), client.WithReferenceID(settings.ID)}
+	var opts = []client.RequestOption{client.WithWN8(), client.WithReferenceID(settings.ID), client.WithType(models.SnapshotTypeWidget)}
 	cards, _, err := core.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
 	if err != nil {
 		if errors.Is(err, fetch.ErrSessionNotFound) {
@@ -167,13 +166,6 @@ var LiveWidget handler.Page = func(ctx *handler.Context) (handler.Layout, templ.
 	}
 
 	var opts = []client.RequestOption{client.WithWN8()}
-	if ref := ctx.Query("ref"); ref != "" {
-		opts = append(opts, client.WithReferenceID(ref))
-	}
-	if t := ctx.Query("type"); t != "" && slices.Contains(models.SnapshotType("").Values(), t) {
-		opts = append(opts, client.WithType(models.SnapshotType(t)))
-	}
-
 	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
 	if err != nil {
 		return nil, nil, err
@@ -205,13 +197,6 @@ var LiveWidgetJSON handler.Endpoint = func(ctx *handler.Context) error {
 	}
 
 	var opts = []client.RequestOption{client.WithWN8()}
-	if ref := ctx.Query("ref"); ref != "" {
-		opts = append(opts, client.WithReferenceID(ref))
-	}
-	if t := ctx.Query("type"); t != "" && slices.Contains(models.SnapshotType("").Values(), t) {
-		opts = append(opts, client.WithType(models.SnapshotType(t)))
-	}
-
 	cards, _, err := ctx.Client.Stats(language.English).SessionCards(context.Background(), account.ID, time.Now(), opts...)
 	if err != nil {
 		return ctx.JSON(map[string]string{"error": err.Error()})
