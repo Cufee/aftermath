@@ -10,6 +10,16 @@ import (
 	s "github.com/go-jet/jet/v2/sqlite"
 )
 
+func (c *client) GetTaskByID(ctx context.Context, id string) (models.Task, error) {
+	var records m.CronTask
+	stmt := t.CronTask.SELECT(t.CronTask.AllColumns).WHERE(t.CronTask.ID.EQ(s.String(id)))
+	err := c.query(ctx, stmt, &records)
+	if err != nil {
+		return models.Task{}, err
+	}
+	return models.ToCronTask(&records), nil
+}
+
 /*
 Returns up limit tasks that have TaskStatusInProgress and were last updates 1+ hours ago
 */
@@ -107,11 +117,11 @@ func (c *client) GetAndStartTasks(ctx context.Context, limit int) ([]models.Task
 					t.CronTask.LastRun,
 					t.CronTask.Status,
 				).
-				SET(s.SET(
-					t.CronTask.Status.SET(s.String(string(task.Status))),
+				SET(
 					t.CronTask.UpdatedAt.SET(timeToField(task.UpdatedAt)),
 					t.CronTask.LastRun.SET(timeToField(task.LastRun)),
-				)).
+					t.CronTask.Status.SET(s.String(string(task.Status))),
+				).
 				WHERE(t.CronTask.ID.EQ(s.String(task.ID)))
 
 			_, err := tx.exec(ctx, stmt)

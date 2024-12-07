@@ -124,16 +124,17 @@ func ToCronTask(record *model.CronTask) Task {
 }
 
 func (record Task) Model() model.CronTask {
+	now := TimeToString(time.Now())
 	t := model.CronTask{
 		ID:             utils.StringOr(record.ID, cuid.New()),
 		Type:           string(record.Type),
-		CreatedAt:      TimeToString(time.Now()),
-		UpdatedAt:      TimeToString(time.Now()),
+		CreatedAt:      now,
+		UpdatedAt:      now,
 		ReferenceID:    record.ReferenceID,
-		Status:         string(record.Status),
+		Status:         utils.StringOr(string(record.Status), string(TaskStatusScheduled)),
 		ScheduledAfter: TimeToString(record.ScheduledAfter),
 		TriesLeft:      int32(record.TriesLeft),
-		LastRun:        TimeToString(record.LastRun),
+		LastRun:        now,
 	}
 	t.Targets, _ = json.Marshal(record.Targets)
 	t.Data, _ = json.Marshal(record.Data)
