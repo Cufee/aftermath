@@ -97,14 +97,6 @@ type TaskLog struct {
 	Error     string    `json:"error" bson:"error"`
 }
 
-func NewAttemptLog(task Task, comment string, err error) TaskLog {
-	return TaskLog{
-		Timestamp: time.Now(),
-		Comment:   comment,
-		Error:     err.Error(),
-	}
-}
-
 func ToCronTask(record *model.CronTask) Task {
 	t := Task{
 		ID:             record.ID,
