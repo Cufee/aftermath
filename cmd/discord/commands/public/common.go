@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/cufee/aftermath/internal/json"
+	"github.com/cufee/am-wg-proxy-next/v2/types"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands"
@@ -64,17 +65,17 @@ func (o statsOptions) refreshButton(ctx common.Context, id string) (discordgo.Me
 }
 
 var validNicknameSeparatorChars = []string{"!", "@", "#", "$", "%", "^", "&", "*", "-", "=", "+"}
-var validFuzzyServers = map[string]string{
-	"na":            "NA",
-	"north america": "NA",
-	"north-america": "NA",
-	"northamerica":  "NA",
-	"america":       "NA",
-	"com":           "NA",
-	"eu":            "EU",
-	"europe":        "EU",
-	"as":            "AS",
-	"asia":          "AS",
+var validFuzzyServers = map[string]types.Realm{
+	"na":            types.RealmNorthAmerica,
+	"north america": types.RealmNorthAmerica,
+	"north-america": types.RealmNorthAmerica,
+	"northamerica":  types.RealmNorthAmerica,
+	"america":       types.RealmNorthAmerica,
+	"com":           types.RealmNorthAmerica,
+	"eu":            types.RealmEurope,
+	"europe":        types.RealmEurope,
+	"as":            types.RealmAsia,
+	"asia":          types.RealmAsia,
 }
 
 func accountsFromBadInput(ctx context.Context, client fetch.Client, input string) ([]fetch.AccountWithRealm, error) {
@@ -123,8 +124,8 @@ func accountsFromBadInput(ctx context.Context, client fetch.Client, input string
 func realmSelectButtons(ctx common.Context, id string, accounts []fetch.AccountWithRealm) (common.Reply, error) {
 	realmAccounts := make(map[string]fetch.AccountWithRealm)
 	for _, a := range accounts {
-		if _, ok := realmAccounts[a.Realm]; !ok {
-			realmAccounts[a.Realm] = a
+		if _, ok := realmAccounts[a.Realm.String()]; !ok {
+			realmAccounts[a.Realm.String()] = a
 		}
 	}
 
@@ -159,7 +160,7 @@ func realmSelectButtons(ctx common.Context, id string, accounts []fetch.AccountW
 		}
 
 		row.Components = append(row.Components, discordgo.Button{
-			Label:    a.Realm,
+			Label:    a.Realm.String(),
 			Style:    discordgo.SecondaryButton,
 			CustomID: fmt.Sprintf("refresh_stats_from_button#%s", interaction.ID),
 		})

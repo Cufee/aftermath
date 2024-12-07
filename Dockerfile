@@ -11,7 +11,7 @@ COPY ./cmd/frontend/widget/ ./
 RUN bun run build
 
 # Build app
-FROM golang:1.22.5-bookworm as builder-go
+FROM golang:1.23-bookworm as builder-go
 
 ARG BRAND_FLAVOR=red
 ENV BRAND_FLAVOR $BRAND_FLAVOR

@@ -1,6 +1,9 @@
 package models
 
 import (
+	"time"
+
+	"github.com/cufee/aftermath/internal/database/gen/model"
 	"github.com/cufee/aftermath/internal/permissions"
 )
 
@@ -34,30 +37,22 @@ func (u User) HasPermission(values ...permissions.Permissions) bool {
 	return perms.Has(values...)
 }
 
-func (u User) Connection(kind ConnectionType, conditions map[string]any) (UserConnection, bool) {
-	valid, ok := u.FilterConnections(kind, conditions)
-	if !ok {
+func (u User) Connection(kind ConnectionType, verified, selected *bool) (UserConnection, bool) {
+	if len(u.Connections) < 1 {
 		return UserConnection{}, false
 	}
-	return valid[0], true
-}
 
-func (u User) FilterConnections(kind ConnectionType, conditions map[string]any) ([]UserConnection, bool) {
-	var valid []UserConnection
-
-outerLoop:
-	for _, connection := range u.Connections {
-		if connection.Type == kind {
-			for key, value := range conditions {
-				if connection.Metadata[key] != value {
-					continue outerLoop
-				}
-			}
-			valid = append(valid, connection)
+	for _, conn := range u.Connections {
+		if ok := verified != nil; ok && (conn.Verified != *verified) {
+			continue
 		}
+		if ok := selected != nil; ok && (conn.Selected != *selected) {
+			continue
+		}
+		return conn, true
 	}
 
-	return valid, len(valid) > 0
+	return UserConnection{}, false
 }
 
 func (u User) Subscription(kind SubscriptionType) (UserSubscription, bool) {
@@ -69,9 +64,10 @@ func (u User) Subscription(kind SubscriptionType) (UserSubscription, bool) {
 }
 
 func (u User) FilterSubscriptions(kind SubscriptionType) ([]UserSubscription, bool) {
+	now := time.Now()
 	var valid []UserSubscription
 	for _, subscription := range u.Subscriptions {
-		if subscription.Type == kind {
+		if subscription.Type == kind && subscription.ExpiresAt.After(now) {
 			valid = append(valid, subscription)
 		}
 	}
@@ -85,4 +81,24 @@ func (u User) Content(kind UserContentType) (UserContent, bool) {
 		}
 	}
 	return UserContent{}, false
+}
+
+func ToUser(record *model.User, connections []model.UserConnection, subscriptions []model.UserSubscription, content []model.UserContent, restrictions []model.UserRestriction) User {
+	user := User{
+		ID:          record.ID,
+		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
+	}
+	for _, c := range connections {
+		user.Connections = append(user.Connections, ToUserConnection(&c))
+	}
+	for _, s := range subscriptions {
+		user.Subscriptions = append(user.Subscriptions, ToUserSubscription(&s))
+	}
+	for _, c := range content {
+		user.Uploads = append(user.Uploads, ToUserContent(&c))
+	}
+	for _, r := range restrictions {
+		user.Restrictions = append(user.Restrictions, ToUserRestriction(&r))
+	}
+	return user
 }

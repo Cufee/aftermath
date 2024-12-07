@@ -94,7 +94,7 @@ func init() {
 					}
 
 					var content = []string{fmt.Sprintf(ctx.Localize("command_links_set_default_successfully_fmt"), nickname, realm)}
-					if updated.Metadata["verified"] != true {
+					if updated.Verified != true {
 						content = append(content, ctx.Localize("command_links_verify_cta"))
 					}
 					return ctx.Reply().Text(content...).Send()
@@ -129,7 +129,7 @@ func init() {
 							continue
 						}
 						linkedAccounts = append(linkedAccounts, conn.ReferenceID)
-						if def, _ := conn.Metadata["default"].(bool); def {
+						if conn.Selected {
 							currentDefault = conn.ReferenceID
 						}
 					}
@@ -184,10 +184,10 @@ func init() {
 					var found bool
 					for _, conn := range wgConnections {
 						if conn.ReferenceID == account.ID {
-							conn.Metadata["verified"] = false
+							conn.Verified = false
 							found = true
 						}
-						conn.Metadata["default"] = conn.ReferenceID == account.ID
+						conn.Selected = conn.ReferenceID == account.ID
 
 						_, err := ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), conn)
 						if err != nil {
@@ -195,14 +195,12 @@ func init() {
 						}
 					}
 					if !found {
-						meta := make(map[string]any)
-						meta["verified"] = false
-						meta["default"] = true
 						_, err := ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), models.UserConnection{
 							Type:        models.ConnectionTypeWargaming,
+							Verified:    false,
+							Selected:    true,
 							ReferenceID: fmt.Sprint(account.ID),
 							UserID:      ctx.User().ID,
-							Metadata:    meta,
 						})
 						if err != nil {
 							return ctx.Err(err)
@@ -215,7 +213,7 @@ func init() {
 						_, _ = ctx.Core().Fetch().Account(c, id) // Make sure the account is cached
 					}(fmt.Sprint(account.ID))
 
-					return ctx.Reply().Format("command_links_linked_successfully_fmt", account.Nickname, strings.ToUpper(options.Realm)).Send()
+					return ctx.Reply().Format("command_links_linked_successfully_fmt", account.Nickname, options.Realm.String()).Send()
 				}
 			}),
 	)

@@ -36,7 +36,7 @@ type Context struct {
 	Context context.Context
 
 	user        *models.User
-	userOptions database.UserGetOptions
+	userOptions database.UserQueryOptions
 	session     *models.Session
 
 	formParsed bool
@@ -149,8 +149,8 @@ func (ctx *Context) Session() (*models.Session, error) {
 	return &session, nil
 }
 
-func (ctx *Context) SessionUser(o ...database.UserGetOption) (*models.User, error) {
-	var opts database.UserGetOptions = o
+func (ctx *Context) SessionUser(o ...database.UserQueryOption) (*models.User, error) {
+	var opts database.UserQueryOptions = o
 
 	// if dev mode is on, we just grab a pre-defined user from the database, expecting it to exist
 	if devMode {

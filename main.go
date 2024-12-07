@@ -34,6 +34,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core/server/handlers/private"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/database/migrations/manual"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
@@ -67,6 +68,13 @@ func main() {
 	db, err := newDatabaseClientFromEnv()
 	if err != nil {
 		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	err = manual.Migrate(ctx, db)
+	cancel()
+	if err != nil {
+		log.Fatal().Err(err).Msg("manual.Migrate failed")
 	}
 
 	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db)
@@ -148,10 +156,6 @@ func main() {
 			{
 				Path: "POST /v1/accounts/import",
 				Func: private.LoadAccountsHandler(cacheCoreClient),
-			},
-			{
-				Path: "POST /v1/connections/import",
-				Func: private.ImportConnections(cacheCoreClient),
 			},
 			{
 				Path: "POST /v1/snapshots/{realm}",

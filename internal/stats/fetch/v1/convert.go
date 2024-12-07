@@ -17,7 +17,7 @@ func timestampToTime(timestamp int) time.Time {
 	return time.Unix(int64(timestamp), 0)
 }
 
-func WargamingToAccount(realm string, account types.ExtendedAccount, clan types.ClanMember, private bool) models.Account {
+func WargamingToAccount(realm types.Realm, account types.ExtendedAccount, clan types.ClanMember, private bool) models.Account {
 	a := models.Account{
 		ID:       strconv.Itoa(account.ID),
 		Realm:    realm,
@@ -34,7 +34,7 @@ func WargamingToAccount(realm string, account types.ExtendedAccount, clan types.
 	return a
 }
 
-func WargamingToStats(realm string, accountData types.ExtendedAccount, clanMember types.ClanMember, vehicleData []types.VehicleStatsFrame) AccountStatsOverPeriod {
+func WargamingToStats(realm types.Realm, accountData types.ExtendedAccount, clanMember types.ClanMember, vehicleData []types.VehicleStatsFrame) AccountStatsOverPeriod {
 	stats := AccountStatsOverPeriod{
 		Realm: realm,
 		// we got the stats, so the account is obv not private at this point
@@ -138,5 +138,5 @@ func blitzstarsToStats(vehicles map[string]frame.VehicleStatsFrame, histories ma
 type Replay struct {
 	Map assets.Map
 	replay.Replay
-	Realm string
+	Realm types.Realm
 }

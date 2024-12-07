@@ -5,10 +5,13 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"github.com/cufee/aftermath/tests/env"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetAllFiles(t *testing.T) {
+	env.LoadTestEnv(t)
+
 	mockFs := fstest.MapFS{
 		"file.txt": {
 			Data: []byte("file.txt value"),

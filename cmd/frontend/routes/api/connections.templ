@@ -40,12 +40,12 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 
 	var previous, updated models.UserConnection
 	for _, conn := range user.Connections {
-		if conn.Metadata["default"] == true {
+		if conn.Selected {
 			previous = conn
 		}
 
-		conn.Metadata["default"] = conn.ID == connID
-		u, err := ctx.Database().UpdateUserConnection(ctx.Context, conn)
+		conn.Selected = conn.ID == connID
+		u, err := ctx.Database().UpdateUserConnection(ctx.Context, conn.ID, conn)
 		if err != nil {
 			return nil, ctx.Err(err, "failed to update a connection")
 		}

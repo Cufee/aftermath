@@ -26,6 +26,9 @@
 - key: label_overview_unrated
   value: Regular Battles
 
+- key: label_map_name_unknown
+  value: Unknown
+
 - key: label_game_mode_unknown
   value: Unknown
 - key: label_battle_type_regular

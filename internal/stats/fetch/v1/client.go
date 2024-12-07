@@ -12,11 +12,11 @@ import (
 
 type AccountWithRealm struct {
 	types.Account
-	Realm string
+	Realm types.Realm
 }
 
 type AccountStatsOverPeriod struct {
-	Realm string `json:"realm"`
+	Realm types.Realm `json:"realm"`
 
 	Account models.Account `json:"account"`
 
@@ -54,7 +54,7 @@ type StatsWithVehicles struct {
 
 type Client interface {
 	Account(ctx context.Context, id string) (models.Account, error)
-	Search(ctx context.Context, nickname, realm string, limit int) (types.Account, error)
+	Search(ctx context.Context, nickname string, realm types.Realm, limit int) (types.Account, error)
 	BroadSearch(ctx context.Context, nickname string, limit int) ([]AccountWithRealm, error)
 	CurrentStats(ctx context.Context, id string, opts ...StatsOption) (AccountStatsOverPeriod, error)
 

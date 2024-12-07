@@ -3,7 +3,11 @@ package models
 import (
 	"time"
 
+	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/permissions"
+	"github.com/cufee/aftermath/internal/utils"
+	"github.com/lucsky/cuid"
 )
 
 type UserRestrictionType string
@@ -45,4 +49,42 @@ type RestrictionUpdate struct {
 	ModeratorID string
 	Summary     string
 	Context     string
+}
+
+func ToUserRestriction(record *model.UserRestriction) UserRestriction {
+	r := UserRestriction{
+		ID:     record.ID,
+		Type:   UserRestrictionType(record.Type),
+		UserID: record.UserID,
+
+		CreatedAt: StringToTime(record.CreatedAt),
+		UpdatedAt: StringToTime(record.UpdatedAt),
+		ExpiresAt: StringToTime(record.ExpiresAt),
+
+		ModeratorComment: record.ModeratorComment,
+		PublicReason:     record.PublicReason,
+		Restriction:      permissions.Parse(record.Restriction, permissions.Blank),
+
+		Events: make([]RestrictionUpdate, 0),
+	}
+	json.Unmarshal(record.Events, &r.Events)
+	return r
+}
+
+func (record UserRestriction) Model() model.UserRestriction {
+	r := model.UserRestriction{
+		ID:     utils.StringOr(record.ID, cuid.New()),
+		Type:   string(record.Type),
+		UserID: record.UserID,
+
+		CreatedAt: TimeToString(record.CreatedAt),
+		UpdatedAt: TimeToString(record.UpdatedAt),
+		ExpiresAt: TimeToString(record.ExpiresAt),
+
+		ModeratorComment: record.ModeratorComment,
+		PublicReason:     record.PublicReason,
+		Restriction:      record.Restriction.Encode(),
+	}
+	r.Events, _ = json.Marshal(record.Events)
+	return r
 }

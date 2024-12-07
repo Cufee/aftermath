@@ -11,12 +11,12 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
+	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
 func init() {
 	defaultHandlers[models.TaskTypeRecordSnapshots] = TaskHandler{
 		Process: func(ctx context.Context, client core.Client, task *models.Task) error {
-			forceUpdate := task.Data["force"] == "true"
 			realm, ok := task.Data["realm"]
 			if !ok {
 				return errors.New("invalid realm")
@@ -30,7 +30,11 @@ func init() {
 
 			log.Debug().Str("taskId", task.ID).Any("targets", task.Targets).Msg("started working on a session refresh task")
 
-			accountErrors, err := logic.RecordAccountSnapshots(ctx, client.Wargaming(), client.Database(), realm, forceUpdate, logic.WithDefaultReference(task.Targets))
+			var opts []logic.SnapshotRecordOption
+			if task.Data["force"] == "true" {
+				opts = append(opts, logic.WithForceUpdate())
+			}
+			accountErrors, err := logic.RecordAccountSnapshots(ctx, client.Wargaming(), client.Database(), types.Realm(realm), logic.WithDefaultReference(task.Targets), opts...)
 			if err != nil {
 				return err
 			}
