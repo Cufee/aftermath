@@ -8,6 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
 var validNameRegex = regexp.MustCompile(`[^\w\_]`)
@@ -56,7 +57,7 @@ type StatsOptions struct {
 	Days           int
 	NicknameSearch string
 	AccountID      string
-	Realm          string
+	Realm          types.Realm
 	UserID         string
 	TankSearch     string
 	TankID         string
@@ -85,7 +86,7 @@ func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataO
 	if strings.HasPrefix(options.NicknameSearch, "valid#account#") {
 		data := strings.Split(strings.TrimPrefix(options.NicknameSearch, "valid#account#"), "#")
 		if len(data) == 2 {
-			options.Realm = data[1]
+			options.Realm = types.Realm(data[1])
 			options.AccountID = data[0]
 		}
 	}

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -11,18 +12,29 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
+	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"github.com/pkg/errors"
 )
 
 var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
+	if ctx.Query("status") == "error" {
+		return ctx.Redirect("/error?message="+ctx.Query("message"), http.StatusTemporaryRedirect)
+	}
+
 	accountID := ctx.Query("account_id")
 	if accountID == "" {
 		return ctx.Redirect("/error?message=invalid response received from wargaming", http.StatusTemporaryRedirect)
 	}
-	if ctx.Query("status") == "error" {
-		return ctx.Redirect("/error?message="+ctx.Query("message"), http.StatusTemporaryRedirect)
+	accessToken := ctx.Query("access_token")
+	if accessToken == "" {
+		return ctx.Redirect("/error?message=invalid response received from wargaming", http.StatusTemporaryRedirect)
+	}
+	realm, err := ctx.Wargaming().RealmFromID(accountID)
+	if err != nil {
+		return ctx.Redirect("/error?message=invalid response received from wargaming", http.StatusTemporaryRedirect)
 	}
 
 	token := ctx.Path("token")
@@ -40,6 +52,17 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
+	err = verifyAccountToken(ctx.Context, constants.WargamingPublicAppID, realm.String(), accountID, accessToken)
+	if err != nil {
+		log.Debug().Err(err).Msg("failed to verify access token")
+
+		err := ctx.Database().SetSessionExpiresAt(ctx.Context, session.ID, time.Time{})
+		if err != nil {
+			log.Err(err).Msg("failed to set session expiration")
+		}
+		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
+	}
+
 	user, err := ctx.Database().GetUserByID(ctx.Context, session.UserID, database.WithConnections())
 	if err != nil {
 		log.Debug().Err(err).Msg("failed to find user")
@@ -52,16 +75,19 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
-	connections, _ := user.FilterConnections(models.ConnectionTypeWargaming, nil)
 	var found bool
-	for _, conn := range connections {
-		conn.Metadata["default"] = conn.ReferenceID == accountID
+	for _, conn := range user.Connections {
+		if conn.Type != models.ConnectionTypeWargaming {
+			continue
+		}
+
+		conn.Selected = conn.ReferenceID == accountID
 		if conn.ReferenceID == accountID {
-			conn.Metadata["verified"] = true
+			conn.Verified = true
 			found = true
 		}
 
-		_, err := ctx.Database().UpdateUserConnection(ctx.Context, conn)
+		_, err := ctx.Database().UpdateUserConnection(ctx.Context, conn.ID, conn)
 		if err != nil {
 			return ctx.Err(err, "failed to update user connection")
 		}
@@ -71,7 +97,8 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 			Type:        models.ConnectionTypeWargaming,
 			UserID:      user.ID,
 			ReferenceID: accountID,
-			Metadata:    map[string]any{"verified": true, "default": true},
+			Verified:    true,
+			Selected:    true,
 		}
 		_, err := ctx.Database().UpsertUserConnection(ctx.Context, conn)
 		if err != nil {
@@ -88,7 +115,7 @@ var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/login", http.StatusTemporaryRedirect)
 	}
 
-	baseWgURL, err := authURLFromRealm(ctx.Path("realm"))
+	baseWgURL, err := baseUriFromRealm(ctx.Path("realm"))
 	if err != nil {
 		return ctx.Redirect("/app", http.StatusTemporaryRedirect)
 	}
@@ -104,19 +131,54 @@ var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=failed to start a new session", http.StatusTemporaryRedirect)
 	}
 
-	redirectURL := fmt.Sprintf("%s?application_id=%s&redirect_uri=%s", baseWgURL, constants.WargamingPublicAppID, auth.NewWargamingAuthRedirectURL(verifySession.PublicID))
+	tokenExpiration := "300" // seconds
+	redirectURL := fmt.Sprintf("%s/auth/login/?application_id=%s&expires_at=%s&redirect_uri=%s", baseWgURL, constants.WargamingPublicAppID, tokenExpiration, auth.NewWargamingAuthRedirectURL(verifySession.PublicID))
 	return ctx.Redirect(redirectURL, http.StatusTemporaryRedirect)
 }
 
-func authURLFromRealm(realm string) (string, error) {
+func verifyAccountToken(ctx context.Context, appID string, realm string, accountID string, token string) error {
+	baseWgURL, err := baseUriFromRealm(realm)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("%s/account/info/?application_id=%s&account_id=%s&access_token=%s", baseWgURL, appID, accountID, token)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+	req = req.WithContext(ctx)
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	var response types.WgResponse[map[string]types.Account]
+	err = json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		return err
+	}
+	if response.Error.Code != 0 {
+		return errors.New(response.Error.Message)
+	}
+	if fmt.Sprint(response.Data[accountID].ID) != accountID {
+		return errors.New("invalid token for account")
+	}
+	return nil
+}
+
+func baseUriFromRealm(realm string) (string, error) {
 	switch strings.ToUpper(realm) {
-	case "EU":
-		return "https://api.worldoftanks.eu/wot/auth/login/", nil
-	case "NA":
-		return "https://api.worldoftanks.com/wot/auth/login/", nil
-	case "AS":
-		return "https://api.worldoftanks.asia/wot/auth/login/", nil
 	default:
-		return "", errors.New("unknown realm")
+		return "", errors.New("unsupported realm")
+
+	case types.RealmEurope.String():
+		return "https://api.worldoftanks.eu/wot", nil
+	case types.RealmNorthAmerica.String():
+		return "https://api.worldoftanks.com/wot", nil
+	case types.RealmAsia.String():
+		return "https://api.worldoftanks.asia/wot", nil
 	}
 }

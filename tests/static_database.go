@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -9,14 +10,12 @@ import (
 
 	"github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"golang.org/x/text/language"
 )
 
-var ErrNotFound = &db.NotFoundError{}
+var ErrNotFound = database.ErrNotFound
 
 var _ database.Client = &staticTestingDatabase{}
 
@@ -27,6 +26,11 @@ func StaticTestingDatabase() *staticTestingDatabase {
 }
 
 func (c *staticTestingDatabase) Disconnect() error {
+	return nil
+}
+
+func (c *staticTestingDatabase) Unsafe() *sql.DB {
+	panic("cannot call staticTestingDatabase#Unsafe")
 	return nil
 }
 
@@ -99,24 +103,16 @@ func (c *staticTestingDatabase) UpsertVehicleAverages(ctx context.Context, avera
 	return nil, errors.New("UpsertVehicleAverages not implemented")
 }
 
-func (c *staticTestingDatabase) GetUserByID(ctx context.Context, id string, opts ...database.UserGetOption) (models.User, error) {
+func (c *staticTestingDatabase) GetUserByID(ctx context.Context, id string, opts ...database.UserQueryOption) (models.User, error) {
 	return DefaultUserWithEdges, nil
 }
-func (c *staticTestingDatabase) GetOrCreateUserByID(ctx context.Context, id string, opts ...database.UserGetOption) (models.User, error) {
+func (c *staticTestingDatabase) GetOrCreateUserByID(ctx context.Context, id string, opts ...database.UserQueryOption) (models.User, error) {
 	return c.GetUserByID(ctx, id)
-}
-func (c *staticTestingDatabase) UpsertUserWithPermissions(ctx context.Context, userID string, perms permissions.Permissions) (models.User, error) {
-	u, err := c.GetUserByID(ctx, userID)
-	if err != nil {
-		return u, err
-	}
-	u.Permissions = perms
-	return u, nil
 }
 func (c *staticTestingDatabase) GetUserConnection(ctx context.Context, id string) (models.UserConnection, error) {
 	return models.UserConnection{}, errors.New("GetConnection not implemented")
 }
-func (c *staticTestingDatabase) UpdateUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
+func (c *staticTestingDatabase) UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error) {
 	return connection, nil
 }
 func (c *staticTestingDatabase) UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
@@ -135,14 +131,14 @@ func (c *staticTestingDatabase) CreateAccountSnapshots(ctx context.Context, snap
 func (c *staticTestingDatabase) GetAccountLastBattleTimes(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.Query) (map[string]time.Time, error) {
 	return nil, errors.New("GetAccountLastBattleTimes not implemented")
 }
+func (c *staticTestingDatabase) GetVehiclesLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.Query) (map[string]time.Time, error) {
+	return nil, errors.New("GetVehiclesLastBattleTimes not implemented")
+}
 func (c *staticTestingDatabase) GetVehicleSnapshots(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.Query) ([]models.VehicleSnapshot, error) {
 	return nil, errors.New("GetVehicleSnapshots not implemented")
 }
-func (c *staticTestingDatabase) CreateAccountVehicleSnapshots(ctx context.Context, accountID string, snapshots ...*models.VehicleSnapshot) error {
-	return errors.New("CreateAccountVehicleSnapshots not implemented")
-}
-func (c *staticTestingDatabase) GetVehicleLastBattleTimes(ctx context.Context, accountID string, vehicleIDs []string, kind models.SnapshotType, options ...database.Query) (map[string]time.Time, error) {
-	return nil, errors.New("GetVehicleLastBattleTimes not implemented")
+func (c *staticTestingDatabase) CreateVehicleSnapshots(ctx context.Context, snapshots ...*models.VehicleSnapshot) error {
+	return errors.New("CreateVehicleSnapshots not implemented")
 }
 func (c *staticTestingDatabase) DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error {
 	return errors.New("DeleteExpiredSnapshots not implemented")
@@ -216,7 +212,7 @@ func (c *staticTestingDatabase) SetSessionExpiresAt(ctx context.Context, session
 func (c *staticTestingDatabase) FindSession(ctx context.Context, publicID string) (models.Session, error) {
 	return models.Session{ID: "session1", UserID: "user1", PublicID: "cookie1", ExpiresAt: time.Date(9999, 0, 0, 0, 0, 0, 0, time.UTC)}, nil
 }
-func (c *staticTestingDatabase) UserFromSession(ctx context.Context, publicID string, opts ...database.UserGetOption) (models.User, error) {
+func (c *staticTestingDatabase) UserFromSession(ctx context.Context, publicID string, opts ...database.UserQueryOption) (models.User, error) {
 	return DefaultUserWithEdges, nil
 }
 
@@ -231,7 +227,7 @@ func (c *staticTestingDatabase) UpsertMaps(ctx context.Context, maps map[string]
 }
 
 func (c *staticTestingDatabase) GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error) {
-	conn, _ := DefaultUserWithEdges.Connection(models.ConnectionTypeWargaming, nil)
+	conn, _ := DefaultUserWithEdges.Connection(models.ConnectionTypeWargaming, nil, nil)
 	return models.WidgetOptions{
 		ID:        "w1",
 		CreatedAt: time.Now(),

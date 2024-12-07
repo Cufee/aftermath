@@ -4,98 +4,129 @@ import (
 	"context"
 	"time"
 
-	"github.com/cufee/aftermath/internal/database/ent/db"
-	"github.com/cufee/aftermath/internal/database/ent/db/authnonce"
-	"github.com/cufee/aftermath/internal/database/ent/db/session"
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/json"
+	s "github.com/go-jet/jet/v2/sqlite"
+	"github.com/lucsky/cuid"
 )
 
-func toAuthNonce(record *db.AuthNonce) models.AuthNonce {
-	return models.AuthNonce{
-		ID:         record.ID,
-		Active:     record.Active,
-		PublicID:   record.PublicID,
-		Identifier: record.Identifier,
-		Meta:       record.Metadata,
-
-		CreatedAt: record.CreatedAt,
-		UpdatedAt: record.UpdatedAt,
-		ExpiresAt: record.ExpiresAt,
-	}
-}
-
 func (c *client) CreateAuthNonce(ctx context.Context, publicID, identifier string, expiresAt time.Time, meta map[string]string) (models.AuthNonce, error) {
-	record, err := c.db.AuthNonce.Create().SetActive(true).SetExpiresAt(expiresAt).SetIdentifier(identifier).SetPublicID(publicID).SetMetadata(meta).Save(ctx)
+	insert := m.AuthNonce{
+		ID:         cuid.New(),
+		CreatedAt:  models.TimeToString(time.Now()),
+		UpdatedAt:  models.TimeToString(time.Now()),
+		ExpiresAt:  models.TimeToString(expiresAt),
+		Active:     true,
+		Identifier: identifier,
+		PublicID:   publicID,
+		Metadata:   make([]byte, 0),
+	}
+	if meta != nil {
+		metaEncoded, err := json.Marshal(meta)
+		if err != nil {
+			return models.AuthNonce{}, err
+		}
+		insert.Metadata = metaEncoded
+	}
+
+	var result m.AuthNonce
+	stmt := t.AuthNonce.
+		INSERT(t.AuthNonce.AllColumns).
+		MODEL(insert).
+		RETURNING(t.AuthNonce.AllColumns)
+	err := c.query(ctx, stmt, &result)
 	if err != nil {
 		return models.AuthNonce{}, err
 	}
 
-	nonce := toAuthNonce(record)
+	nonce := models.ToAuthNonce(&result)
 	return nonce, nonce.Valid()
 }
 
 func (c *client) FindAuthNonce(ctx context.Context, publicID string) (models.AuthNonce, error) {
-	record, err := c.db.AuthNonce.Query().Where(authnonce.PublicID(publicID), authnonce.Active(true), authnonce.ExpiresAtGT(time.Now())).First(ctx)
+	var record m.AuthNonce
+	stmt := t.AuthNonce.
+		SELECT(t.AuthNonce.AllColumns).
+		WHERE(t.AuthNonce.PublicID.EQ(s.String(publicID)))
+	err := c.query(ctx, stmt, &record)
 	if err != nil {
 		return models.AuthNonce{}, err
 	}
 
-	nonce := toAuthNonce(record)
+	nonce := models.ToAuthNonce(&record)
 	return nonce, nonce.Valid()
 }
 
 func (c *client) SetAuthNonceActive(ctx context.Context, nonceID string, active bool) error {
-	err := c.db.AuthNonce.UpdateOneID(nonceID).SetActive(active).Exec(ctx)
+	stmt := t.AuthNonce.
+		UPDATE().
+		SET(t.AuthNonce.Active.SET(s.Bool(active))).
+		WHERE(t.AuthNonce.ID.EQ(s.String(nonceID)))
+	_, err := c.exec(ctx, stmt)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func toSession(record *db.Session) models.Session {
-	return models.Session{
-		ID:       record.ID,
-		UserID:   record.UserID,
-		PublicID: record.PublicID,
-		Meta:     record.Metadata,
-
-		CreatedAt: record.CreatedAt,
-		UpdatedAt: record.UpdatedAt,
-		ExpiresAt: record.ExpiresAt,
-	}
-}
-
 func (c *client) CreateSession(ctx context.Context, publicID, userID string, expiresAt time.Time, meta map[string]string) (models.Session, error) {
-	user, err := c.GetOrCreateUserByID(ctx, userID)
+	model := m.Session{
+		ID:        cuid.New(),
+		CreatedAt: models.TimeToString(time.Now()),
+		UpdatedAt: models.TimeToString(time.Now()),
+		ExpiresAt: models.TimeToString(expiresAt),
+		PublicID:  publicID,
+		UserID:    userID,
+		Metadata:  make([]byte, 0),
+	}
+	if meta != nil {
+		data, err := json.Marshal(meta)
+		if err != nil {
+			return models.Session{}, err
+		}
+		model.Metadata = data
+	}
+
+	stmt := t.Session.
+		INSERT(t.Session.AllColumns).
+		MODEL(model).
+		RETURNING(t.Session.AllColumns)
+
+	var record m.Session
+	err := c.query(ctx, stmt, &record)
 	if err != nil {
 		return models.Session{}, err
 	}
 
-	record, err := c.db.Session.Create().SetPublicID(publicID).SetUser(c.db.User.GetX(ctx, user.ID)).SetExpiresAt(expiresAt).SetMetadata(meta).Save(ctx)
-	if err != nil {
-		return models.Session{}, err
-	}
-
-	nonce := toSession(record)
-	return nonce, nonce.Valid()
+	return models.ToSession(&record), nil
 }
 
 func (c *client) FindSession(ctx context.Context, publicID string) (models.Session, error) {
-	record, err := c.db.Session.Query().Where(session.PublicID(publicID), session.ExpiresAtGT(time.Now())).First(ctx)
+	stmt := t.Session.
+		SELECT(t.Session.AllColumns).
+		WHERE(t.Session.PublicID.EQ(s.String(publicID)))
+
+	var record m.Session
+	err := c.query(ctx, stmt, &record)
 	if err != nil {
 		return models.Session{}, err
 	}
 
-	session := toSession(record)
+	session := models.ToSession(&record)
 	return session, session.Valid()
 }
 
 func (c *client) SetSessionExpiresAt(ctx context.Context, sessionID string, expiresAt time.Time) error {
-	err := c.db.Session.UpdateOneID(sessionID).SetExpiresAt(expiresAt).Exec(ctx)
+	stmt := t.Session.
+		UPDATE(t.Session.ExpiresAt).
+		WHERE(t.Session.ID.EQ(s.String(sessionID))).
+		SET(t.Session.ExpiresAt.SET(timeToField(expiresAt)))
+
+	_, err := c.exec(ctx, stmt)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }

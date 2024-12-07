@@ -18,6 +18,7 @@ import (
 	render "github.com/cufee/aftermath/internal/stats/render/replay/v1"
 	session "github.com/cufee/aftermath/internal/stats/render/session/v1"
 	"github.com/cufee/aftermath/tests"
+	"github.com/cufee/aftermath/tests/env"
 	"github.com/matryer/is"
 	"github.com/nao1215/imaging"
 	"github.com/rs/zerolog"
@@ -30,14 +31,16 @@ import (
 var bgImage = "static://bg-default"
 var bgIsCustom = false
 
-func TestRenderSession(t *testing.T) {
-	// Logger
+func init() {
+	loadStaticAssets(static)
 	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
 	zerolog.SetGlobalLevel(level)
+}
 
-	loadStaticAssets(static)
-
+func TestRenderSession(t *testing.T) {
+	env.LoadTestEnv(t)
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
+
 	t.Run("generate content mask before generating image", func(t *testing.T) {
 		cards, meta, err := stats.SessionCards(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithWN8())
 		assert.NoError(t, err, "failed to generate session cards")
@@ -105,12 +108,7 @@ func TestRenderSession(t *testing.T) {
 }
 
 func TestRenderPeriod(t *testing.T) {
-	// Logger
-	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
-	zerolog.SetGlobalLevel(level)
-
-	loadStaticAssets(static)
-
+	env.LoadTestEnv(t)
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 
 	t.Run("render period image for small nickname", func(t *testing.T) {
@@ -169,12 +167,7 @@ func TestRenderPeriod(t *testing.T) {
 func TestRenderReplay(t *testing.T) {
 	is := is.New(t)
 
-	// Logger
-	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
-	zerolog.SetGlobalLevel(level)
-
-	loadStaticAssets(static)
-
+	env.LoadTestEnv(t)
 	db := tests.StaticTestingDatabase()
 	wg, _ := wargamingClientsFromEnv()
 
@@ -187,6 +180,8 @@ func TestRenderReplay(t *testing.T) {
 	replayFiles := []string{"replay_defeat.wotbreplay", "replay_victory.wotbreplay", "replay_draw.wotbreplay"}
 	for _, name := range replayFiles {
 		t.Run("render replay image from "+name, func(t *testing.T) {
+			is := is.New(t)
+
 			file, err := os.ReadFile("tests/" + name)
 			is.NoErr(err)
 

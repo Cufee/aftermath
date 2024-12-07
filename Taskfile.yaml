@@ -3,10 +3,6 @@ version: "3"
 dotenv:
   - ".env"
 
-vars:
-  DATABASE_PATH: $DATABASE_PATH
-  DATABASE_NAME: $DATABASE_NAME
-
 tasks:
   test:
     dotenv:
@@ -21,32 +17,36 @@ tasks:
           go test -timeout 30s --count=1 -v -run {{ .CLI_ARGS }}
         fi
 
-  ent-generate:
-    desc: generate go code for the ent schema directory
-    cmd: go generate internal/database/ent
+  db-generate:
+    desc: generate models from database schema
+    cmd: go generate ./internal/database
 
   db-migrate:
     desc: generate migrations
-    cmd: atlas migrate hash --dir "file://internal/database/ent/migrations" && atlas migrate diff {{.CLI_ARGS}} --dir "file://internal/database/ent/migrations" --to "ent://internal/database/ent/schema" --dev-url "sqlite://file?mode=memory&_fk=1"
+    cmds: 
+      - echo "Generating migrations for $DATABASE_PATH/$DATABASE_NAME"
+      - task: db-migrate-hash
+      - atlas migrate hash --env local && atlas migrate diff --env local
+
+  db-migrate-hash:
+    desc: generate migrations
+    cmds: 
+      - atlas migrate hash --env local
+
   db-migrate-apply:
     desc: apply migrations using atlas
     cmds:
       # variables will be pulled from global vars declaration unless overwritten in the task call
-      - echo "Applying migrations to {{.DATABASE_PATH}}/{{.DATABASE_NAME}}"
-      - atlas migrate apply --allow-dirty --dir "file://internal/database/ent/migrations" --tx-mode all --url "sqlite://{{.DATABASE_PATH}}/{{.DATABASE_NAME}}?_fk=1"
-  db-migrate-down:
-    desc: rollback migrations using atlas
+      - echo "Applying migrations to $DATABASE_PATH/$DATABASE_NAME"
+      - atlas migrate apply --env local
+      - task: db-generate
+
+  db-migrate-tests:
+    desc: apply migrations using atlas
+    dotenv:
+      - ".env.test"
     cmds:
-      # variables will be pulled from global vars declaration unless overwritten in the task call
-      - echo "Applying down migrations to {{.DATABASE_PATH}}/{{.DATABASE_NAME}}"
-      - atlas migrate down --dir "file://internal/database/ent/migrations" --url "sqlite://{{.DATABASE_PATH}}/{{.DATABASE_NAME}}?_fk=1" --dev-url "sqlite://file?mode=memory&_fk=1" {{ .CLI_ARGS }}
-  db-migrate-apply-test:
-    desc: apply migrations to the tests database using atlas
-    cmds:
-      - task: db-migrate-apply
-        vars:
-          DATABASE_PATH: $DATABASE_PATH
-          DATABASE_NAME: tests.db
+      - atlas migrate apply --env local
 
   build-widget:
     desc: Build amth-widget js assets

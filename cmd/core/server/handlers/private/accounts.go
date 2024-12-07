@@ -45,14 +45,18 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 				existingMap[a.ID] = struct{}{}
 			}
 
-			accountsByRealm := make(map[string][]string, len(accounts))
+			accountsByRealm := make(map[types.Realm][]string, len(accounts))
 			for _, a := range accounts {
 				if _, ok := existingMap[a]; ok {
 					continue
 				}
 
-				id := client.Wargaming().RealmFromAccountID(a)
-				accountsByRealm[id] = append(accountsByRealm[id], a)
+				realm, err := client.Wargaming().RealmFromID(a)
+				if err != nil {
+					continue
+				}
+
+				accountsByRealm[*realm] = append(accountsByRealm[*realm], a)
 			}
 
 			batchSize := 50
@@ -69,7 +73,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 					}
 
 					wg.Add(1)
-					go func(accounts []string, realm string) {
+					go func(accounts []string, realm types.Realm) {
 						defer wg.Done()
 
 						ctx, cancel := context.WithCancel(context.Background())

@@ -2,44 +2,51 @@ package database
 
 import (
 	"context"
-	"strings"
 
-	"github.com/cufee/aftermath/internal/database/ent/db"
-	"github.com/cufee/aftermath/internal/database/ent/db/account"
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
+	s "github.com/go-jet/jet/v2/sqlite"
 )
 
-func toAccount(model *db.Account) models.Account {
-	account := models.Account{
-		ID:             model.ID,
-		Realm:          model.Realm,
-		Nickname:       model.Nickname,
-		Private:        model.Private,
-		CreatedAt:      model.AccountCreatedAt,
-		LastBattleTime: model.LastBattleTime,
-	}
-	if model.Edges.Clan != nil {
-		account.ClanID = model.Edges.Clan.ID
-		account.ClanTag = model.Edges.Clan.Tag
-	}
-	return account
+type accountWithClan struct {
+	m.Account
+	Clan *m.Clan
 }
 
 func (c *client) GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error) {
-	result, err := c.db.Account.Query().Where(account.Realm(strings.ToUpper(realm))).IDs(ctx)
+	stmt := t.Account.
+		SELECT(t.Account.ID).
+		WHERE(t.Account.Realm.EQ(s.UPPER(s.String(realm))))
+
+	var result []m.Account
+	err := c.query(ctx, stmt, &result)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	var ids []string
+	for _, a := range result {
+		ids = append(ids, a.ID)
+	}
+
+	return ids, nil
 }
 
 func (c *client) GetAccountByID(ctx context.Context, id string) (models.Account, error) {
-	result, err := c.db.Account.Query().Where(account.ID(id)).WithClan().First(ctx)
+	stmt := s.
+		SELECT(t.Account.AllColumns, t.Clan.ID, t.Clan.Tag).
+		FROM(t.Account.LEFT_JOIN(t.Clan, t.Clan.ID.EQ(t.Account.ClanID))).
+		WHERE(t.Account.ID.EQ(s.String(id))).
+		LIMIT(1)
+
+	var result accountWithClan
+	err := c.query(ctx, stmt, &result)
 	if err != nil {
 		return models.Account{}, err
 	}
-	return toAccount(result), nil
+
+	return models.ToAccount(&result.Account, result.Clan), nil
 }
 
 func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Account, error) {
@@ -47,14 +54,20 @@ func (c *client) GetAccounts(ctx context.Context, ids []string) ([]models.Accoun
 		return nil, nil
 	}
 
-	result, err := c.db.Account.Query().Where(account.IDIn(ids...)).WithClan().All(ctx)
+	stmt := s.
+		SELECT(t.Account.AllColumns, t.Clan.ID, t.Clan.Tag).
+		FROM(t.Account.LEFT_JOIN(t.Clan, t.Clan.ID.EQ(t.Account.ClanID))).
+		WHERE(t.Account.ID.IN(stringsToExp(ids)...))
+
+	var result []accountWithClan
+	err := c.query(ctx, stmt, &result)
 	if err != nil {
 		return nil, err
 	}
 
 	var accounts []models.Account
 	for _, a := range result {
-		accounts = append(accounts, toAccount(a))
+		accounts = append(accounts, models.ToAccount(&a.Account, a.Clan))
 	}
 
 	return accounts, nil
@@ -65,57 +78,37 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts ...*models.Account
 		return nil, nil
 	}
 
-	var ids []string
-	accountsMap := make(map[string]*models.Account)
-	for _, a := range accounts {
-		ids = append(ids, a.ID)
-		accountsMap[a.ID] = a
-	}
-
-	records, err := c.db.Account.Query().Where(account.IDIn(ids...)).All(ctx)
-	if err != nil && !IsNotFound(err) {
-		return nil, err
-	}
-
-	errors := make(map[string]error)
-	return errors, c.withTx(ctx, func(tx *db.Tx) error {
-		for _, r := range records {
-			update, ok := accountsMap[r.ID]
-			if !ok {
-				continue // this should never happen tho
-			}
-
-			err = tx.Account.UpdateOneID(r.ID).
-				SetRealm(strings.ToUpper(update.Realm)).
-				SetNickname(update.Nickname).
-				SetPrivate(update.Private).
-				SetLastBattleTime(update.LastBattleTime).
-				Exec(ctx)
-			if err != nil {
-				errors[r.ID] = err
-			}
-
-			delete(accountsMap, r.ID)
+	errors := make(map[string]error, len(accounts))
+	return errors, c.withTx(ctx, func(tx *transaction) error {
+		for _, a := range accounts {
+			stmt := t.Account.
+				INSERT(t.Account.AllColumns).
+				MODEL(a.Model()).
+				ON_CONFLICT(t.Account.ID).
+				DO_UPDATE(
+					s.SET(
+						t.Account.UpdatedAt.SET(t.Account.EXCLUDED.UpdatedAt),
+						t.Account.ClanID.SET(t.Account.EXCLUDED.ClanID),
+						t.Account.Private.SET(t.Account.EXCLUDED.Private),
+						t.Account.Nickname.SET(t.Account.EXCLUDED.Nickname),
+						t.Account.LastBattleTime.SET(t.Account.EXCLUDED.LastBattleTime),
+					),
+				)
+			_, errors[a.ID] = tx.exec(ctx, stmt)
 		}
-
-		var writes []*db.AccountCreate
-		for _, a := range accountsMap {
-			writes = append(writes, tx.Account.Create().
-				SetID(a.ID).
-				SetRealm(strings.ToUpper(a.Realm)).
-				SetNickname(a.Nickname).
-				SetPrivate(a.Private).
-				SetAccountCreatedAt(a.CreatedAt).
-				SetLastBattleTime(a.LastBattleTime),
-			)
-		}
-
-		return tx.Account.CreateBulk(writes...).Exec(ctx)
+		return nil
 	})
+
 }
 
 func (c *client) AccountSetPrivate(ctx context.Context, id string, value bool) error {
-	err := c.db.Account.UpdateOneID(id).SetPrivate(value).Exec(ctx)
+	stmt := t.Account.
+		UPDATE(t.Account.Private).
+		SET(
+			t.Account.Private.SET(s.Bool(value)),
+		).
+		WHERE(t.Account.ID.EQ(s.String(id)))
+	_, err := c.exec(ctx, stmt)
 	if err != nil {
 		return err
 	}

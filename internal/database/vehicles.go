@@ -2,64 +2,50 @@ package database
 
 import (
 	"context"
+	"time"
 
-	"github.com/cufee/aftermath/internal/database/ent/db"
-	"github.com/cufee/aftermath/internal/database/ent/db/vehicle"
+	"github.com/cufee/aftermath/internal/json"
+
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
+	s "github.com/go-jet/jet/v2/sqlite"
 )
-
-func toVehicle(record *db.Vehicle) models.Vehicle {
-	return models.Vehicle{
-		ID:             record.ID,
-		Tier:           record.Tier,
-		LocalizedNames: record.LocalizedNames,
-	}
-}
 
 func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) (map[string]error, error) {
 	if len(vehicles) < 1 {
 		return nil, nil
 	}
 
-	var ids []string
-	for id := range vehicles {
-		ids = append(ids, id)
-	}
-
-	records, err := c.db.Vehicle.Query().Where(vehicle.IDIn(ids...)).All(ctx)
-	if err != nil && !IsNotFound(err) {
-		return nil, err
-	}
-
-	errors := make(map[string]error)
-	return errors, c.withTx(ctx, func(tx *db.Tx) error {
-		for _, r := range records {
-			v, ok := vehicles[r.ID]
-			if !ok {
+	errors := make(map[string]error, len(vehicles))
+	return errors, c.withTx(ctx, func(tx *transaction) error {
+		for id, data := range vehicles {
+			model := m.Vehicle{
+				ID:        id,
+				CreatedAt: models.TimeToString(time.Now()),
+				UpdatedAt: models.TimeToString(time.Now()),
+				Tier:      int32(data.Tier),
+			}
+			names, err := json.Marshal(data.LocalizedNames)
+			if err != nil {
+				errors[id] = err
 				continue
 			}
+			model.LocalizedNames = names
 
-			err := tx.Vehicle.UpdateOneID(v.ID).
-				SetTier(v.Tier).
-				SetLocalizedNames(v.LocalizedNames).
-				Exec(ctx)
-			if err != nil {
-				errors[v.ID] = err
-			}
+			stmt := t.Vehicle.
+				INSERT(t.Vehicle.AllColumns).
+				MODEL(model).
+				ON_CONFLICT(t.Vehicle.ID).
+				DO_UPDATE(s.SET(
+					t.Vehicle.LocalizedNames.SET(t.Vehicle.EXCLUDED.LocalizedNames),
+					t.Vehicle.UpdatedAt.SET(t.Vehicle.EXCLUDED.UpdatedAt),
+					t.Vehicle.Tier.SET(t.Vehicle.EXCLUDED.Tier),
+				))
 
-			delete(vehicles, v.ID)
+			_, errors[id] = tx.exec(ctx, stmt)
 		}
-
-		var writes []*db.VehicleCreate
-		for id, v := range vehicles {
-			writes = append(writes, tx.Vehicle.Create().
-				SetID(id).
-				SetTier(v.Tier).
-				SetLocalizedNames(v.LocalizedNames),
-			)
-		}
-
-		return tx.Vehicle.CreateBulk(writes...).Exec(ctx)
+		return nil
 	})
 }
 
@@ -68,28 +54,30 @@ func (c *client) GetVehicles(ctx context.Context, ids []string) (map[string]mode
 		return nil, nil
 	}
 
-	records, err := c.db.Vehicle.Query().Where(vehicle.IDIn(ids...)).All(ctx)
+	var records []m.Vehicle
+	err := c.query(ctx, t.Vehicle.SELECT(t.Vehicle.AllColumns).WHERE(t.Vehicle.ID.IN(stringsToExp(ids)...)), &records)
 	if err != nil {
 		return nil, err
 	}
 
 	vehicles := make(map[string]models.Vehicle)
 	for _, r := range records {
-		vehicles[r.ID] = toVehicle(r)
+		vehicles[r.ID] = models.ToVehicle(&r)
 	}
 
 	return vehicles, nil
 }
 
 func (c *client) GetAllVehicles(ctx context.Context) (map[string]models.Vehicle, error) {
-	records, err := c.db.Vehicle.Query().All(ctx)
+	var records []m.Vehicle
+	err := c.query(ctx, t.Vehicle.SELECT(t.Vehicle.AllColumns), &records)
 	if err != nil {
 		return nil, err
 	}
 
 	vehicles := make(map[string]models.Vehicle)
 	for _, r := range records {
-		vehicles[r.ID] = toVehicle(r)
+		vehicles[r.ID] = models.ToVehicle(&r)
 	}
 
 	return vehicles, nil

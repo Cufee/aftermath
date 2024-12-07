@@ -140,14 +140,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		if opts.VehicleID != "" {
 			footer = append(footer, cards.Unrated.Overview.Title)
 		} else {
-			switch strings.ToLower(session.Realm) {
-			case "na":
-				footer = append(footer, "North America")
-			case "eu":
-				footer = append(footer, "Europe")
-			case "as":
-				footer = append(footer, "Asia")
-			}
+			footer = append(footer, common.RealmLabel(session.Realm))
 		}
 		if session.LastBattleTime.Unix() > 1 {
 			sessionTo := session.PeriodEnd.Format("Jan 2")

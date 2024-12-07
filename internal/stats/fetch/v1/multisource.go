@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/ent/db"
 	"github.com/cufee/aftermath/internal/database/models"
 
 	"github.com/cufee/aftermath/internal/external/blitzstars"
@@ -44,8 +43,8 @@ func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Clie
 	}, nil
 }
 
-func (c *multiSourceClient) Search(ctx context.Context, nickname, realm string, limit int) (types.Account, error) {
-	accounts, err := c.wargaming.SearchAccounts(ctx, realm, nickname, limit)
+func (c *multiSourceClient) Search(ctx context.Context, nickname string, realm types.Realm, limit int) (types.Account, error) {
+	accounts, err := c.wargaming.SearchAccounts(ctx, realm, nickname, types.WithLimit(limit))
 	if err != nil {
 		return types.Account{}, err
 	}
@@ -63,37 +62,37 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		accounts, err := c.wargaming.SearchAccounts(ctx, "NA", nickname, limitPerRealm)
+		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmNorthAmerica, nickname, types.WithLimit(limitPerRealm))
 		if err != nil {
 			errors <- err
 			return
 		}
 		for _, a := range accounts {
-			data <- AccountWithRealm{a, "NA"}
+			data <- AccountWithRealm{a, types.RealmNorthAmerica}
 		}
 	}()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		accounts, err := c.wargaming.SearchAccounts(ctx, "EU", nickname, limitPerRealm)
+		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmEurope, nickname, types.WithLimit(limitPerRealm))
 		if err != nil {
 			errors <- err
 			return
 		}
 		for _, a := range accounts {
-			data <- AccountWithRealm{a, "EU"}
+			data <- AccountWithRealm{a, types.RealmEurope}
 		}
 	}()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		accounts, err := c.wargaming.SearchAccounts(ctx, "AS", nickname, limitPerRealm)
+		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmAsia, nickname, types.WithLimit(limitPerRealm))
 		if err != nil {
 			errors <- err
 			return
 		}
 		for _, a := range accounts {
-			data <- AccountWithRealm{a, "AS"}
+			data <- AccountWithRealm{a, types.RealmAsia}
 		}
 	}()
 	wg.Wait()
@@ -119,7 +118,10 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 Gets account info from wg and updates cache
 */
 func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Account, error) {
-	realm := c.wargaming.RealmFromAccountID(id)
+	realm, err := c.wargaming.RealmFromID(id)
+	if err != nil {
+		return models.Account{}, err
+	}
 
 	var group sync.WaitGroup
 	group.Add(2)
@@ -131,13 +133,13 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Acco
 		defer group.Done()
 
 		wgAccount = retry.Retry(func() (types.ExtendedAccount, error) {
-			return c.wargaming.AccountByID(ctx, realm, id)
+			return c.wargaming.AccountByID(ctx, *realm, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 	}()
 	go func() {
 		defer group.Done()
 		// we should not retry this request since it is not critical and will fail on accounts without a clan
-		clan, _ = c.wargaming.AccountClan(ctx, realm, id)
+		clan, _ = c.wargaming.AccountClan(ctx, *realm, id)
 	}()
 
 	group.Wait()
@@ -146,7 +148,7 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Acco
 		return models.Account{}, wgAccount.Err
 	}
 
-	account := WargamingToAccount(realm, wgAccount.Data, clan, false)
+	account := WargamingToAccount(*realm, wgAccount.Data, clan, false)
 	go func(account models.Account) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
@@ -174,7 +176,10 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		apply(&options)
 	}
 
-	realm := c.wargaming.RealmFromAccountID(id)
+	realm, err := c.wargaming.RealmFromID(id)
+	if err != nil {
+		return AccountStatsOverPeriod{}, err
+	}
 
 	var group sync.WaitGroup
 	group.Add(3)
@@ -188,13 +193,13 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		defer group.Done()
 
 		account = retry.Retry(func() (types.ExtendedAccount, error) {
-			return c.wargaming.AccountByID(ctx, realm, id)
+			return c.wargaming.AccountByID(ctx, *realm, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 	}()
 	go func() {
 		defer group.Done()
 		// we should not retry this request since it is not critical and will fail on accounts without a clan
-		clan, _ = c.wargaming.AccountClan(ctx, realm, id)
+		clan, _ = c.wargaming.AccountClan(ctx, *realm, id)
 	}()
 	go func() {
 		defer group.Done()
@@ -205,7 +210,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		}
 
 		vehicles = retry.Retry(func() ([]types.VehicleStatsFrame, error) {
-			return c.wargaming.AccountVehicles(ctx, realm, id, vehicleIDs)
+			return c.wargaming.AccountVehicles(ctx, *realm, id, vehicleIDs)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 
 		if vehicles.Err != nil || len(vehicles.Data) < 1 || !options.withWN8 {
@@ -234,7 +239,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		log.Err(averages.Err).Msg("failed to get tank averages")
 	}
 
-	stats := WargamingToStats(realm, account.Data, clan, vehicles.Data)
+	stats := WargamingToStats(*realm, account.Data, clan, vehicles.Data)
 	if options.withWN8 {
 		stats.AddWN8(averages.Data)
 	}
@@ -390,7 +395,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 			return
 		}
 		if len(s) < 1 {
-			accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Err: new(db.NotFoundError)}
+			accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Err: database.ErrNotFound}
 			return
 		}
 		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s[0]}
@@ -500,6 +505,11 @@ func (c *multiSourceClient) Replay(ctx context.Context, file io.ReaderAt, size i
 func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.UnpackedReplay) (Replay, error) {
 	replay := replay.Prettify(unpacked.BattleResult, unpacked.Meta)
 
+	realm, err := c.wargaming.RealmFromID(replay.Protagonist.ID)
+	if err != nil {
+		return Replay{}, err
+	}
+
 	var vehicles []string
 	for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
 		vehicles = append(vehicles, player.VehicleID)
@@ -527,5 +537,5 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 		return Replay{}, errors.Wrap(err, "failed to get map glossary")
 	}
 
-	return Replay{mapData, replay, c.wargaming.RealmFromAccountID(replay.Protagonist.ID)}, nil
+	return Replay{mapData, replay, *realm}, nil
 }

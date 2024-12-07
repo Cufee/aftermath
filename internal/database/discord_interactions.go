@@ -2,75 +2,42 @@ package database
 
 import (
 	"context"
+
 	"time"
 
-	"entgo.io/ent/dialect/sql"
-	"github.com/cufee/aftermath/internal/database/ent/db"
-	"github.com/cufee/aftermath/internal/database/ent/db/discordinteraction"
-	"github.com/cufee/aftermath/internal/database/ent/db/predicate"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/pkg/errors"
-	"golang.org/x/text/language"
+
+	m "github.com/cufee/aftermath/internal/database/gen/model"
+	t "github.com/cufee/aftermath/internal/database/gen/table"
+	s "github.com/go-jet/jet/v2/sqlite"
 )
 
 func (c client) CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) (models.DiscordInteraction, error) {
-	user, err := c.db.User.Get(ctx, data.UserID)
-	if err != nil {
-		return models.DiscordInteraction{}, errors.Wrap(err, "failed to get user")
-	}
+	model := data.Model()
+	stmt := t.DiscordInteraction.
+		INSERT(t.DiscordInteraction.AllColumns).
+		MODEL(model).
+		RETURNING(t.DiscordInteraction.AllColumns)
 
-	record, err := c.db.DiscordInteraction.Create().
-		SetLocale(data.Locale.String()).
-		SetSnowflake(data.Snowflake).
-		SetChannelID(data.ChannelID).
-		SetMessageID(data.MessageID).
-		SetEventID(data.EventID).
-		SetGuildID(data.GuildID).
-		SetMetadata(data.Meta).
-		SetResult(data.Result).
-		SetType(data.Type).
-		SetUser(user).
-		Save(ctx)
+	err := c.query(ctx, stmt, &model)
 	if err != nil {
 		return models.DiscordInteraction{}, err
 	}
+	return models.ToDiscordInteraction(&model), nil
 
-	return toDiscordInteraction(record), nil
 }
 
 func (c client) GetDiscordInteraction(ctx context.Context, id string) (models.DiscordInteraction, error) {
-	record, err := c.db.DiscordInteraction.Get(ctx, id)
+	stmt := t.DiscordInteraction.
+		SELECT(t.DiscordInteraction.AllColumns).
+		WHERE(t.DiscordInteraction.ID.EQ(s.String(id)))
+
+	var result m.DiscordInteraction
+	err := c.query(ctx, stmt, &result)
 	if err != nil {
 		return models.DiscordInteraction{}, err
 	}
-	return toDiscordInteraction(record), nil
-}
-
-func toDiscordInteraction(record *db.DiscordInteraction) models.DiscordInteraction {
-	locale, err := language.Parse(record.Locale)
-	if err != nil {
-		locale = language.English
-	}
-	i := models.DiscordInteraction{
-		ID:        record.ID,
-		CreatedAt: record.CreatedAt,
-
-		Result:    record.Result,
-		UserID:    record.UserID,
-		GuildID:   record.GuildID,
-		Snowflake: record.Snowflake,
-		ChannelID: record.ChannelID,
-		MessageID: record.MessageID,
-
-		Locale:  locale,
-		Type:    record.Type,
-		EventID: record.EventID,
-		Meta:    record.Metadata,
-	}
-	if i.Meta == nil {
-		i.Meta = make(map[string]any)
-	}
-	return i
+	return models.ToDiscordInteraction(&result), nil
 }
 
 type interactionQuery struct {
@@ -81,86 +48,89 @@ type interactionQuery struct {
 	channelID    []string
 	messageID    []string
 	eventID      []string
-	kind         []models.DiscordInteractionType
+	kind         []string
 	createdAfter *time.Time
 	limit        int
 }
 
-func (q *interactionQuery) build() []predicate.DiscordInteraction {
+func (q *interactionQuery) build() s.SelectStatement {
+	stmt := t.DiscordInteraction.SELECT(t.DiscordInteraction.AllColumns)
+
 	if q.limit == 0 {
 		q.limit = 10
 	}
 
-	var where []predicate.DiscordInteraction
+	var where []s.BoolExpression
 	// ID
 	if q.id != nil {
 		if len(q.id) == 1 {
-			where = append(where, discordinteraction.ID(q.id[0]))
+			where = append(where, t.DiscordInteraction.ID.EQ(s.String(q.id[0])))
 		} else {
-			where = append(where, discordinteraction.IDIn(q.id...))
+			where = append(where, t.DiscordInteraction.ID.IN(stringsToExp(q.id)...))
 		}
 	}
 	// Snowflake
 	if q.snowflake != nil {
 		if len(q.snowflake) == 1 {
-			where = append(where, discordinteraction.Snowflake(q.snowflake[0]))
+			where = append(where, t.DiscordInteraction.Snowflake.EQ(s.String(q.snowflake[0])))
 		} else {
-			where = append(where, discordinteraction.SnowflakeIn(q.snowflake...))
+			where = append(where, t.DiscordInteraction.Snowflake.IN(stringsToExp(q.snowflake)...))
 		}
 	}
 	// UserID
 	if q.userID != nil {
 		if len(q.userID) == 1 {
-			where = append(where, discordinteraction.UserID(q.userID[0]))
+			where = append(where, t.DiscordInteraction.UserID.EQ(s.String(q.userID[0])))
 		} else {
-			where = append(where, discordinteraction.UserIDIn(q.userID...))
+			where = append(where, t.DiscordInteraction.UserID.IN(stringsToExp(q.userID)...))
 		}
 	}
 	// GuildID
 	if q.guildID != nil {
 		if len(q.guildID) == 1 {
-			where = append(where, discordinteraction.GuildID(q.guildID[0]))
+			where = append(where, t.DiscordInteraction.GuildID.EQ(s.String(q.guildID[0])))
 		} else {
-			where = append(where, discordinteraction.GuildIDIn(q.guildID...))
+			where = append(where, t.DiscordInteraction.GuildID.IN(stringsToExp(q.guildID)...))
 		}
 	}
 	// ChannelID
 	if q.channelID != nil {
 		if len(q.channelID) == 1 {
-			where = append(where, discordinteraction.ChannelID(q.channelID[0]))
+			where = append(where, t.DiscordInteraction.ChannelID.EQ(s.String(q.channelID[0])))
 		} else {
-			where = append(where, discordinteraction.ChannelIDIn(q.channelID...))
+			where = append(where, t.DiscordInteraction.ChannelID.IN(stringsToExp(q.channelID)...))
 		}
 	}
 	// MessageID
 	if q.messageID != nil {
 		if len(q.messageID) == 1 {
-			where = append(where, discordinteraction.MessageID(q.messageID[0]))
+			where = append(where, t.DiscordInteraction.MessageID.EQ(s.String(q.messageID[0])))
 		} else {
-			where = append(where, discordinteraction.MessageIDIn(q.messageID...))
+			where = append(where, t.DiscordInteraction.MessageID.IN(stringsToExp(q.messageID)...))
 		}
 	}
 	// EventID
 	if q.eventID != nil {
 		if len(q.eventID) == 1 {
-			where = append(where, discordinteraction.EventID(q.eventID[0]))
+			where = append(where, t.DiscordInteraction.EventID.EQ(s.String(q.eventID[0])))
 		} else {
-			where = append(where, discordinteraction.EventIDIn(q.eventID...))
+			where = append(where, t.DiscordInteraction.EventID.IN(stringsToExp(q.eventID)...))
 		}
 	}
 	// Type
 	if q.kind != nil {
 		if len(q.kind) == 1 {
-			where = append(where, discordinteraction.TypeEQ(q.kind[0]))
+			where = append(where, t.DiscordInteraction.Type.EQ(s.String(q.kind[0])))
 		} else {
-			where = append(where, discordinteraction.TypeIn(q.kind...))
+			where = append(where, t.DiscordInteraction.Type.IN(stringsToExp(q.kind)...))
 		}
 	}
 	// Type
 	if q.createdAfter != nil {
-		where = append(where, discordinteraction.CreatedAtGT(*q.createdAfter))
+		where = append(where, t.DiscordInteraction.CreatedAt.GT(timeToField(*q.createdAfter)))
 	}
-	return where
+
+	return stmt.WHERE(s.AND(where...))
 }
 
 type InteractionQuery func(*interactionQuery)
@@ -202,7 +172,10 @@ func WithEventID(id ...string) InteractionQuery {
 }
 func WithType(types ...models.DiscordInteractionType) InteractionQuery {
 	return func(iq *interactionQuery) {
-		iq.kind = append(iq.kind, types...)
+		for _, t := range types {
+			iq.kind = append(iq.kind, string(t))
+		}
+
 	}
 }
 func WithSentAfter(after time.Time) InteractionQuery {
@@ -222,14 +195,12 @@ func (c client) FindDiscordInteractions(ctx context.Context, opts ...Interaction
 		apply(&query)
 	}
 
-	records, err := c.db.DiscordInteraction.Query().Where(query.build()...).Limit(query.limit).Order(discordinteraction.ByCreatedAt(sql.OrderDesc())).All(ctx)
-	if err != nil {
-		return nil, err
-	}
+	var record []m.DiscordInteraction
+	c.query(ctx, query.build(), &record)
 
 	var interactions []models.DiscordInteraction
-	for _, r := range records {
-		interactions = append(interactions, toDiscordInteraction(r))
+	for _, r := range record {
+		interactions = append(interactions, models.ToDiscordInteraction(&r))
 	}
 	return interactions, nil
 }
