@@ -130,13 +130,10 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 			}
 			wg.Wait()
 
-			if len(errors) > 0 {
-				event := log.Error()
-				for id, err := range errors {
-					event.Str(id, err.Error())
-				}
-				event.Msg("some account imports failed")
+			for id, err := range errors {
+				log.Err(err).Str("id", id).Msg("some account imports failed")
 			}
+
 			log.Info().Int("count", len(accounts)-len(existing)).Msg("finished importing accounts")
 		}(accounts, existing)
 	}
