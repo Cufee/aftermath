@@ -322,23 +322,6 @@ func (c *client) GetUserContentFromRef(ctx context.Context, referenceID string, 
 	return models.ToUserContent(&record), nil
 }
 
-func (c *client) FindUserContentFromReference(ctx context.Context, userID string, referenceID string) (models.UserContent, error) {
-	stmt := t.UserContent.
-		SELECT(t.UserContent.AllColumns).
-		WHERE(s.AND(
-			t.UserContent.UserID.EQ(s.String(string(userID))),
-			t.UserContent.ReferenceID.IN(s.String(referenceID)),
-		))
-
-	var record m.UserContent
-	err := c.query(ctx, stmt, &record)
-	if err != nil {
-		return models.UserContent{}, err
-	}
-
-	return models.ToUserContent(&record), nil
-}
-
 func (c *client) CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
 	model := content.Model()
 	stmt := t.UserContent.
@@ -376,19 +359,6 @@ func (c *client) UpdateUserContent(ctx context.Context, content models.UserConte
 }
 
 func (c *client) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
-	stmt := t.UserContent.
-		SELECT(t.UserContent.AllColumns).
-		WHERE(s.AND(
-			t.UserContent.Type.EQ(s.String(string(content.Type))),
-			t.UserContent.UserID.EQ(s.String(content.UserID)),
-			t.UserContent.ReferenceID.EQ(s.String(content.ReferenceID)),
-		))
-	var record m.UserContent
-	err := c.query(ctx, stmt, &record)
-	if err != nil {
-		return models.UserContent{}, err
-	}
-
 	if content.ID != "" {
 		return c.UpdateUserContent(ctx, content)
 	}

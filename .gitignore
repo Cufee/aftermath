@@ -3,6 +3,7 @@ tmp
 .task
 .vscode
 **/.DS_Store
+.censitive
 
 **/.env*
 

@@ -2,30 +2,20 @@ package common
 
 import (
 	"context"
-	"os"
-	"slices"
-	"strconv"
 
 	"image"
-	"io"
-	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/encoding"
-	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/external/images"
 	"github.com/nao1215/imaging"
-	"github.com/pkg/errors"
 )
 
-var ErrInvalidImage = errors.New("invalid image")
-var ErrUnsupportedImageFormat = errors.New("unsupported image format")
-
 func CreateImageModerationRequest(ctx context.Context, db database.ModerationClient, userID string, imageURL *url.URL) (image.Image, string, error) {
-	img, err := SafeLoadRemoteImage(imageURL)
+	img, err := images.SafeLoadFromURL(imageURL, constants.ImageUploadMaxSize)
 	if err != nil {
 		return nil, "", err
 	}
@@ -50,48 +40,4 @@ func CreateImageModerationRequest(ctx context.Context, db database.ModerationCli
 	}
 
 	return img, request.ID, nil
-}
-
-// https://stackoverflow.com/questions/63464736/image-maximum-file-size-based-on-image-dimension
-
-var remoteImageClient = http.Client{
-	Timeout: time.Second * 1,
-}
-
-func SafeLoadRemoteImage(url *url.URL) (image.Image, error) {
-	res, err := remoteImageClient.Get(url.String())
-	if err != nil {
-		if os.IsTimeout(err) {
-			return nil, ErrInvalidImage
-		}
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	contentLengthStr := res.Header.Get("Content-Length")
-	if contentLengthStr == "" {
-		log.Warn().Msg("Content-Length header is missing on remote replay file")
-		return nil, ErrInvalidImage
-	}
-	contentLength, err := strconv.ParseInt(contentLengthStr, 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	if contentLength > constants.ImageUploadMaxSize {
-		return nil, ErrInvalidImage
-	}
-
-	img, format, err := image.Decode(io.LimitReader(res.Body, constants.ImageUploadMaxSize))
-	if err != nil {
-		if errors.Is(err, image.ErrFormat) {
-			return nil, ErrUnsupportedImageFormat
-		}
-		return nil, err
-	}
-
-	if !slices.Contains([]string{"jpeg", "png"}, format) {
-		return nil, ErrUnsupportedImageFormat
-	}
-
-	return img, nil
 }
