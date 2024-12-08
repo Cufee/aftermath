@@ -359,10 +359,25 @@ func (c *client) UpdateUserContent(ctx context.Context, content models.UserConte
 }
 
 func (c *client) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
-	if content.ID != "" {
-		return c.UpdateUserContent(ctx, content)
+	model := content.Model()
+	stmt := t.UserContent.
+		INSERT(t.UserContent.AllColumns).
+		MODEL(model).
+		ON_CONFLICT(t.UserContent.ID).
+		DO_UPDATE(s.SET(
+			t.UserContent.Value.SET(t.UserContent.Value),
+			t.UserContent.Metadata.SET(t.UserContent.Metadata),
+			t.UserContent.Type.SET(t.UserContent.EXCLUDED.Type),
+			t.UserContent.UpdatedAt.SET(t.UserContent.EXCLUDED.UpdatedAt),
+		)).
+		RETURNING(t.UserContent.AllColumns)
+
+	err := c.query(ctx, stmt, &model)
+	if err != nil {
+		return models.UserContent{}, err
 	}
-	return c.CreateUserContent(ctx, content)
+
+	return models.ToUserContent(&model), nil
 }
 
 func (c *client) DeleteUserContent(ctx context.Context, id string) error {
