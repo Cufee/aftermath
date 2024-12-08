@@ -31,7 +31,6 @@ func (c *staticTestingDatabase) Disconnect() error {
 
 func (c *staticTestingDatabase) Unsafe() *sql.DB {
 	panic("cannot call staticTestingDatabase#Unsafe")
-	return nil
 }
 
 func (c *staticTestingDatabase) GetAccounts(ctx context.Context, ids []string) ([]models.Account, error) {
