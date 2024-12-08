@@ -94,7 +94,7 @@ func init() {
 					}
 
 					var content = []string{fmt.Sprintf(ctx.Localize("command_links_set_default_successfully_fmt"), nickname, realm)}
-					if updated.Verified != true {
+					if !updated.Verified {
 						content = append(content, ctx.Localize("command_links_verify_cta"))
 					}
 					return ctx.Reply().Text(content...).Send()
