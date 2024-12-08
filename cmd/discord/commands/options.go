@@ -32,8 +32,8 @@ var VehicleOption = builder.NewOption("tank", discordgo.ApplicationCommandOption
 
 var NicknameOption = builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
 	Autocomplete().
-	Min(5).
-	Max(30).
+	Min(3).
+	Max(25).
 	Params(
 		builder.SetNameKey("common_option_stats_nickname_name"),
 		builder.SetDescKey("common_option_stats_nickname_description"),
