@@ -139,6 +139,12 @@ func TestUsers(t *testing.T) {
 		is.NoErr(err)
 		is.True(inserted.Value == data.Value)
 		is.True(inserted.ReferenceID == data.ReferenceID)
+
+		data.Meta = map[string]any{"test": "test"}
+		updated, err := client.UpdateUserContent(context.Background(), data)
+		is.NoErr(err)
+		is.True(updated.Meta["test"] == "test")
+
 	})
 
 }

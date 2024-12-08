@@ -376,6 +376,7 @@ func (c *client) UpdateUserContent(ctx context.Context, content models.UserConte
 			t.UserContent.Metadata,
 		).
 		MODEL(model).
+		WHERE(t.UserContent.ID.EQ(s.String(content.ID))).
 		RETURNING(t.UserContent.AllColumns)
 
 	err := c.query(ctx, stmt, &model)
