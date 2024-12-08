@@ -109,12 +109,22 @@ func init() {
 				if err != nil {
 					return ctx.Err(err)
 				}
-				content, err := ctx.Core().Database().UpsertUserContent(ctx.Ctx(), models.UserContent{
-					Type:        models.UserContentTypeInModeration,
-					Value:       string(encoded),
-					UserID:      ctx.User().ID,
-					ReferenceID: ctx.User().ID,
-				})
+
+				currentContent, err := ctx.Core().Database().FindUserContentFromReference(ctx.Ctx(), ctx.User().ID, ctx.User().ID)
+				if database.IsNotFound(err) {
+					err = nil
+					currentContent = models.UserContent{
+						UserID:      ctx.User().ID,
+						ReferenceID: ctx.User().ID,
+					}
+				}
+				if err != nil {
+					return ctx.Err(err)
+				}
+
+				currentContent.Value = string(encoded)
+				currentContent.Type = models.UserContentTypeInModeration
+				content, err := ctx.Core().Database().UpsertUserContent(ctx.Ctx(), currentContent)
 				if err != nil {
 					return ctx.Err(err)
 				}

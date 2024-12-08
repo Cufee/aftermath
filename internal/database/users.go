@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	m "github.com/cufee/aftermath/internal/database/gen/model"
@@ -323,30 +322,21 @@ func (c *client) GetUserContentFromRef(ctx context.Context, referenceID string, 
 	return models.ToUserContent(&record), nil
 }
 
-func (c *client) FindUserContentFromRefs(ctx context.Context, kind models.UserContentType, referenceIDs ...string) ([]models.UserContent, error) {
-	if len(referenceIDs) < 1 {
-		return nil, errors.New("at least one reference id is required")
-	}
-
+func (c *client) FindUserContentFromReference(ctx context.Context, userID string, referenceID string) (models.UserContent, error) {
 	stmt := t.UserContent.
 		SELECT(t.UserContent.AllColumns).
 		WHERE(s.AND(
-			t.UserContent.Type.EQ(s.String(string(kind))),
-			t.UserContent.ReferenceID.IN(stringsToExp(referenceIDs)...),
+			t.UserContent.UserID.EQ(s.String(string(userID))),
+			t.UserContent.ReferenceID.IN(s.String(referenceID)),
 		))
 
-	var record []m.UserContent
+	var record m.UserContent
 	err := c.query(ctx, stmt, &record)
 	if err != nil {
-		return nil, err
+		return models.UserContent{}, err
 	}
 
-	var content []models.UserContent
-	for _, c := range record {
-		content = append(content, models.ToUserContent(&c))
-	}
-
-	return content, nil
+	return models.ToUserContent(&record), nil
 }
 
 func (c *client) CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
@@ -370,12 +360,11 @@ func (c *client) UpdateUserContent(ctx context.Context, content models.UserConte
 		UPDATE(
 			t.UserContent.UpdatedAt,
 			t.UserContent.Type,
-			t.UserContent.UserID,
-			t.UserContent.ReferenceID,
 			t.UserContent.Value,
 			t.UserContent.Metadata,
 		).
 		MODEL(model).
+		WHERE(t.UserContent.ID.EQ(s.String(content.ID))).
 		RETURNING(t.UserContent.AllColumns)
 
 	err := c.query(ctx, stmt, &model)
@@ -387,6 +376,19 @@ func (c *client) UpdateUserContent(ctx context.Context, content models.UserConte
 }
 
 func (c *client) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
+	stmt := t.UserContent.
+		SELECT(t.UserContent.AllColumns).
+		WHERE(s.AND(
+			t.UserContent.Type.EQ(s.String(string(content.Type))),
+			t.UserContent.UserID.EQ(s.String(content.UserID)),
+			t.UserContent.ReferenceID.EQ(s.String(content.ReferenceID)),
+		))
+	var record m.UserContent
+	err := c.query(ctx, stmt, &record)
+	if err != nil {
+		return models.UserContent{}, err
+	}
+
 	if content.ID != "" {
 		return c.UpdateUserContent(ctx, content)
 	}
