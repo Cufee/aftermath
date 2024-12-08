@@ -49,10 +49,8 @@ func TestRenderSession(t *testing.T) {
 		assert.NoError(t, err, "failed to render a session segments")
 		assert.NotNil(t, segments, "segments is nil")
 
-		start := time.Now()
 		mask, err := segments.ContentMask()
 		assert.NoError(t, err, "failed to generate content mask")
-		println("mask", time.Since(start).Milliseconds())
 
 		f, err := os.Create("tmp/render_test_session_full_small_mask.png")
 		assert.NoError(t, err, "failed to create a file")
@@ -61,9 +59,7 @@ func TestRenderSession(t *testing.T) {
 		err = png.Encode(f, mask)
 		assert.NoError(t, err, "failed to encode a png image")
 
-		start = time.Now()
 		_, err = segments.Render()
-		println("image after mask", time.Since(start).Milliseconds())
 		assert.NoError(t, err, "failed to render segments")
 	})
 
