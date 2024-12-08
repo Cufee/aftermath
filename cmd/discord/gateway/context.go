@@ -72,7 +72,6 @@ func (c *eventContext) saveInteractionEvent(msg discordgo.Message, msgErr error,
 
 	data := models.DiscordInteraction{
 		Snowflake: c.InteractionID(),
-		ID:        c.interaction.ID,
 		EventID:   c.ID(),
 		MessageID: msg.ID,
 		Locale:    c.locale,
