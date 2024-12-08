@@ -156,7 +156,9 @@ func (value *ValueSpecialRating) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to parse special rating")
 	}
-	*value = ValueSpecialRating(v)
+
+	// since we save the json value as value string, we need to reverse the calculation
+	*value = ValueSpecialRating((v - 3000) / 10)
 	return nil
 }
 
