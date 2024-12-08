@@ -45,7 +45,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 
 	session, err := ctx.Database().FindSession(ctx.Context, token)
 	if err != nil {
-		log.Debug().Err(err).Msg("failed to find session")
+		log.Warn().Err(err).Msg("failed to find session")
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 	if session.Meta["flow"] != "wargaming-redirect" {
@@ -54,7 +54,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 
 	err = verifyAccountToken(ctx.Context, constants.WargamingPublicAppID, realm.String(), accountID, accessToken)
 	if err != nil {
-		log.Debug().Err(err).Msg("failed to verify access token")
+		log.Warn().Err(err).Msg("failed to verify access token")
 
 		err := ctx.Database().SetSessionExpiresAt(ctx.Context, session.ID, time.Time{})
 		if err != nil {
@@ -65,7 +65,7 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 
 	user, err := ctx.Database().GetUserByID(ctx.Context, session.UserID, database.WithConnections())
 	if err != nil {
-		log.Debug().Err(err).Msg("failed to find user")
+		log.Err(err).Msg("failed to find user")
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
@@ -115,7 +115,7 @@ var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/login", http.StatusTemporaryRedirect)
 	}
 
-	baseWgURL, err := baseUriFromRealm(ctx.Path("realm"))
+	baseWgURL, err := loginUriFromRealm(ctx.Path("realm"))
 	if err != nil {
 		return ctx.Redirect("/app", http.StatusTemporaryRedirect)
 	}
@@ -137,7 +137,7 @@ var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
 }
 
 func verifyAccountToken(ctx context.Context, appID string, realm string, accountID string, token string) error {
-	baseWgURL, err := baseUriFromRealm(realm)
+	baseWgURL, err := verifyBaseUriFromRealm(realm)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func verifyAccountToken(ctx context.Context, appID string, realm string, account
 	return nil
 }
 
-func baseUriFromRealm(realm string) (string, error) {
+func loginUriFromRealm(realm string) (string, error) {
 	switch strings.ToUpper(realm) {
 	default:
 		return "", errors.New("unsupported realm")
@@ -180,5 +180,19 @@ func baseUriFromRealm(realm string) (string, error) {
 		return "https://api.worldoftanks.com/wot", nil
 	case types.RealmAsia.String():
 		return "https://api.worldoftanks.asia/wot", nil
+	}
+}
+
+func verifyBaseUriFromRealm(realm string) (string, error) {
+	switch strings.ToUpper(realm) {
+	default:
+		return "", errors.New("unsupported realm")
+
+	case types.RealmEurope.String():
+		return "https://api.wotblitz.eu/wotb", nil
+	case types.RealmNorthAmerica.String():
+		return "https://api.wotblitz.com/wotb", nil
+	case types.RealmAsia.String():
+		return "https://api.wotblitz.asia/wotb", nil
 	}
 }
