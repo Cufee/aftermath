@@ -95,6 +95,26 @@ func TestUsers(t *testing.T) {
 			is.True(found.ID == regular.ID)
 			is.True(!found.Selected && !found.Verified)
 		}
+		{
+			err := client.SetReferenceConnectionsUnverified(context.Background(), verified.ReferenceID)
+			is.NoErr(err)
+
+			updated, err := client.GetUserConnection(context.Background(), verified.ID)
+			is.NoErr(err)
+			is.True(updated.Verified == false)
+		}
+		{
+			err := client.SetReferenceConnectionsUnverified(context.Background(), regular.ReferenceID)
+			is.NoErr(err)
+
+			updated, err := client.GetUserConnection(context.Background(), regular.ID)
+			is.NoErr(err)
+			is.True(updated.Verified == false)
+		}
+		{
+			err := client.SetReferenceConnectionsUnverified(context.Background(), "invalid-ref")
+			is.NoErr(err)
+		}
 	})
 
 	t.Run("create and get user subscription", func(t *testing.T) {
@@ -144,7 +164,5 @@ func TestUsers(t *testing.T) {
 		updated, err := client.UpdateUserContent(context.Background(), data)
 		is.NoErr(err)
 		is.True(updated.Meta["test"] == "test")
-
 	})
-
 }

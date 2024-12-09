@@ -69,6 +69,12 @@ var DiscordRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/login?message=failed to create a session", http.StatusTemporaryRedirect)
 	}
 
+	_, err = ctx.Database().GetOrCreateUserByID(ctx.Context, user.ID)
+	if err != nil {
+		log.Err(err).Msg("failed to ensure a database user exists")
+		return ctx.Redirect("/login?message=failed to create a session", http.StatusTemporaryRedirect)
+	}
+
 	sessionID, err := logic.RandomString(32)
 	if err != nil {
 		log.Err(err).Msg("failed to generate a session id")

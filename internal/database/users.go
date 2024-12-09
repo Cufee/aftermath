@@ -200,6 +200,19 @@ func (c *client) GetUserConnection(ctx context.Context, id string) (models.UserC
 	return models.ToUserConnection(&record), nil
 }
 
+func (c *client) SetReferenceConnectionsUnverified(ctx context.Context, referenceID string) error {
+	stmt := t.UserConnection.
+		UPDATE(t.UserConnection.Verified).
+		WHERE(t.UserConnection.ReferenceID.EQ(s.String(referenceID))).
+		SET(t.UserConnection.Verified.SET(s.Bool(false)))
+
+	_, err := c.exec(ctx, stmt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *client) FindUserConnections(ctx context.Context, userID string, opts ...ConnectionQueryOption) ([]models.UserConnection, error) {
 	options := connectionQueryOptions(opts).ToOptions()
 

@@ -75,6 +75,13 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=this verification link has expired", http.StatusTemporaryRedirect)
 	}
 
+	// Mark all other connection to this account as not verified
+	err = ctx.Database().SetReferenceConnectionsUnverified(ctx.Context, accountID)
+	if err != nil && !database.IsNotFound(err) {
+		log.Err(err).Msg("failed to claim connection verification status")
+		return ctx.Err(err, "failed to update user connection")
+	}
+
 	var found bool
 	for _, conn := range user.Connections {
 		if conn.Type != models.ConnectionTypeWargaming {

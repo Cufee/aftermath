@@ -114,6 +114,9 @@ func (c *staticTestingDatabase) GetUserConnection(ctx context.Context, id string
 func (c *staticTestingDatabase) UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error) {
 	return connection, nil
 }
+func (c *staticTestingDatabase) SetReferenceConnectionsUnverified(ctx context.Context, referenceID string) error {
+	return nil
+}
 func (c *staticTestingDatabase) UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	return connection, nil
 }

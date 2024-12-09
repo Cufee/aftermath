@@ -63,6 +63,7 @@ type UsersClient interface {
 	UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error)
 	UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
 	DeleteUserConnection(ctx context.Context, userID, connectionID string) error
+	SetReferenceConnectionsUnverified(ctx context.Context, referenceID string) error
 
 	GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error)
 	GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error)
