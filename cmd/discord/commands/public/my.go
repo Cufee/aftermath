@@ -59,10 +59,15 @@ func init() {
 
 				ioptions := statsOptions{StatsOptions: options}
 
-				background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
-				if img, err := logic.UserContentToImage(background); err == nil {
+				if img, content, err := logic.GetAccountBackgroundImage(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
 					opts = append(opts, stats.WithBackground(img, true))
-					ioptions.BackgroundID = background.ID
+					ioptions.BackgroundID = content.ID
+				} else {
+					background, _ := ctx.User().Content(models.UserContentTypePersonalBackground)
+					if img, err := logic.UserContentToImage(background); err == nil {
+						opts = append(opts, stats.WithBackground(img, true))
+						ioptions.BackgroundID = background.ID
+					}
 				}
 
 				value, _ := subOptions.Value("account").(string)
