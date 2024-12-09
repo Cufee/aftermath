@@ -59,10 +59,12 @@ type UsersClient interface {
 	GetUserByID(ctx context.Context, id string, opts ...UserQueryOption) (models.User, error)
 	GetOrCreateUserByID(ctx context.Context, id string, opts ...UserQueryOption) (models.User, error)
 
+	FindUserConnections(ctx context.Context, opts ...ConnectionQueryOption) ([]models.UserConnection, error)
 	GetUserConnection(ctx context.Context, connection string) (models.UserConnection, error)
 	UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error)
 	UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
 	DeleteUserConnection(ctx context.Context, userID, connectionID string) error
+	SetReferenceConnectionsUnverified(ctx context.Context, referenceID string) error
 
 	GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error)
 	GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error)

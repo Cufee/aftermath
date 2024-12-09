@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	m "github.com/cufee/aftermath/internal/database/gen/model"
@@ -150,9 +151,10 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...UserQueryOp
 
 type connectionOpts struct {
 	get struct {
-		kind     *models.ConnectionType
-		verified *bool
-		selected *bool
+		kind      *models.ConnectionType
+		reference string
+		verified  *bool
+		selected  *bool
 	}
 }
 
@@ -186,6 +188,12 @@ func ConnectionSelected(selected bool) ConnectionQueryOption {
 	}
 }
 
+func ConnectionReferenceID(reference string) ConnectionQueryOption {
+	return func(ugo *connectionOpts) {
+		ugo.get.reference = reference
+	}
+}
+
 func (c *client) GetUserConnection(ctx context.Context, id string) (models.UserConnection, error) {
 	stmt := t.UserConnection.
 		SELECT(t.UserConnection.AllColumns).
@@ -200,10 +208,26 @@ func (c *client) GetUserConnection(ctx context.Context, id string) (models.UserC
 	return models.ToUserConnection(&record), nil
 }
 
-func (c *client) FindUserConnections(ctx context.Context, userID string, opts ...ConnectionQueryOption) ([]models.UserConnection, error) {
+func (c *client) SetReferenceConnectionsUnverified(ctx context.Context, referenceID string) error {
+	stmt := t.UserConnection.
+		UPDATE(t.UserConnection.Verified).
+		WHERE(t.UserConnection.ReferenceID.EQ(s.String(referenceID))).
+		SET(t.UserConnection.Verified.SET(s.Bool(false)))
+
+	_, err := c.exec(ctx, stmt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *client) FindUserConnections(ctx context.Context, opts ...ConnectionQueryOption) ([]models.UserConnection, error) {
+	if len(opts) < 1 {
+		return nil, errors.New("options are required")
+	}
 	options := connectionQueryOptions(opts).ToOptions()
 
-	where := []s.BoolExpression{t.UserConnection.UserID.EQ(s.String(userID))}
+	var where []s.BoolExpression
 	if options.get.kind != nil {
 		where = append(where, t.UserConnection.Type.EQ(s.String(string(*options.get.kind))))
 	}
@@ -212,6 +236,9 @@ func (c *client) FindUserConnections(ctx context.Context, userID string, opts ..
 	}
 	if options.get.selected != nil {
 		where = append(where, t.UserConnection.Selected.EQ(s.Bool(*options.get.selected)))
+	}
+	if options.get.reference != "" {
+		where = append(where, t.UserConnection.ReferenceID.EQ(s.String(options.get.reference)))
 	}
 
 	stmt := t.UserConnection.
@@ -359,10 +386,25 @@ func (c *client) UpdateUserContent(ctx context.Context, content models.UserConte
 }
 
 func (c *client) UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error) {
-	if content.ID != "" {
-		return c.UpdateUserContent(ctx, content)
+	model := content.Model()
+	stmt := t.UserContent.
+		INSERT(t.UserContent.AllColumns).
+		MODEL(model).
+		ON_CONFLICT(t.UserContent.ID).
+		DO_UPDATE(s.SET(
+			t.UserContent.Value.SET(t.UserContent.Value),
+			t.UserContent.Metadata.SET(t.UserContent.Metadata),
+			t.UserContent.Type.SET(t.UserContent.EXCLUDED.Type),
+			t.UserContent.UpdatedAt.SET(t.UserContent.EXCLUDED.UpdatedAt),
+		)).
+		RETURNING(t.UserContent.AllColumns)
+
+	err := c.query(ctx, stmt, &model)
+	if err != nil {
+		return models.UserContent{}, err
 	}
-	return c.CreateUserContent(ctx, content)
+
+	return models.ToUserContent(&model), nil
 }
 
 func (c *client) DeleteUserContent(ctx context.Context, id string) error {

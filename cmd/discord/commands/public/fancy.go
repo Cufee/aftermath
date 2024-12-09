@@ -111,7 +111,7 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				currentContent, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypePersonalBackground)
+				currentContent, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypeInModeration)
 				if err != nil && !database.IsNotFound(err) {
 					return ctx.Err(err)
 				}

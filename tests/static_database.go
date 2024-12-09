@@ -108,11 +108,17 @@ func (c *staticTestingDatabase) GetUserByID(ctx context.Context, id string, opts
 func (c *staticTestingDatabase) GetOrCreateUserByID(ctx context.Context, id string, opts ...database.UserQueryOption) (models.User, error) {
 	return c.GetUserByID(ctx, id)
 }
+func (c *staticTestingDatabase) FindUserConnections(ctx context.Context, opts ...database.ConnectionQueryOption) ([]models.UserConnection, error) {
+	return nil, errors.New("FindUserConnections not implemented")
+}
 func (c *staticTestingDatabase) GetUserConnection(ctx context.Context, id string) (models.UserConnection, error) {
 	return models.UserConnection{}, errors.New("GetConnection not implemented")
 }
 func (c *staticTestingDatabase) UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error) {
 	return connection, nil
+}
+func (c *staticTestingDatabase) SetReferenceConnectionsUnverified(ctx context.Context, referenceID string) error {
+	return nil
 }
 func (c *staticTestingDatabase) UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error) {
 	return connection, nil
