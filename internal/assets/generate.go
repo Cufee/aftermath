@@ -214,4 +214,23 @@ func generateDiscordLogo() {
 		}
 		f.Close()
 	}
+	{
+		filename := "images/discord/logo_centered_alpha.png"
+
+		opts := common.LargeLogoOptions()
+		padding := 80
+		img := imaging.Fit(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Linear)
+		nctx := gg.NewContext(256+padding, 256+padding)
+		nctx.DrawImageAnchored(img, nctx.Width()/2, nctx.Height()/2, 0.5, 0.5)
+
+		f, err := os.Create(filepath.Join(outDirPath, filename))
+		if err != nil {
+			panic(err)
+		}
+		err = png.Encode(f, nctx.Image())
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+	}
 }

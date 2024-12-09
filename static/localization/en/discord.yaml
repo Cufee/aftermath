@@ -77,6 +77,11 @@
 - key: command_links_verify_cta
   value: "You can also verify your account with `/links verify`"
   context: A new default account was set, but it is not verified
+- key: command_links_view_content_fmt
+  value: "## Here is a list of your linked Blitz accounts!\n%s\n \nYou can manage and verify them on our website!"
+  context: The message body for showing a list of linked accounts
+- key: command_links_buttons_manage
+  value: Manage Accounts
 # /widget
 - key: "commands_widget_name"
   value: "widget"

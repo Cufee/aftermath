@@ -17,9 +17,13 @@ tasks:
           go test -timeout 30s --count=1 -v -run {{ .CLI_ARGS }}
         fi
 
-  db-generate:
+  generate-db:
     desc: generate models from database schema
     cmd: go generate ./internal/database
+
+  generate-assets:
+    desc: generate static assets
+    cmd: go generate ./internal/assets
 
   db-migrate:
     desc: generate migrations
@@ -39,7 +43,6 @@ tasks:
       # variables will be pulled from global vars declaration unless overwritten in the task call
       - echo "Applying migrations to $DATABASE_PATH/$DATABASE_NAME"
       - atlas migrate apply --env local
-      - task: db-generate
 
   db-migrate-tests:
     desc: apply migrations using atlas
