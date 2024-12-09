@@ -56,7 +56,7 @@ import (
 
 //go:generate templ generate
 //go:generate go generate ./internal/assets
-//go:generate go generate ./internal/database/ent
+//go:generate go generate ./internal/database
 //go:generate go generate ./cmd/frontend/assets/generate
 //go:generate task build-widget
 

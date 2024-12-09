@@ -7,7 +7,6 @@ import (
 	"slices"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands"
@@ -52,16 +51,9 @@ func init() {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"}).Send()
 				}
 
-				var longestName int
-				for _, a := range accounts {
-					if l := utf8.RuneCountInString(a.Nickname); l > longestName {
-						longestName = l
-					}
-				}
-
 				var opts []*discordgo.ApplicationCommandOptionChoice
 				for _, a := range accounts {
-					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: accountToRow(a, longestName, currentDefault == a.ID), Value: fmt.Sprintf("valid#%s#%s#%s", a.ID, a.Nickname, a.Realm)})
+					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: accountToRow(a, currentDefault == a.ID), Value: fmt.Sprintf("valid#%s#%s#%s", a.ID, a.Nickname, a.Realm)})
 				}
 				return ctx.Reply().Choices(opts...).Send()
 			}),
@@ -168,12 +160,14 @@ func init() {
 	)
 }
 
-func accountToRow(account models.Account, padding int, isDefault bool) string {
+func accountToRow(account models.Account, isDefault bool) string {
 	var row string
-	row += "[" + account.Realm.String() + "] "
-	row += account.Nickname + strings.Repeat(" ", padding-utf8.RuneCountInString(account.Nickname))
 	if isDefault {
-		row += " ⭐"
+		row += "⏺ "
+	} else {
+		row += "○ "
 	}
+	row += "[" + account.Realm.String() + "] "
+	row += account.Nickname
 	return row
 }

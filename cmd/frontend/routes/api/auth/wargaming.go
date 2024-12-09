@@ -15,6 +15,7 @@ import (
 	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"github.com/pkg/errors"
 )
@@ -112,6 +113,16 @@ var WargamingRedirect handler.Endpoint = func(ctx *handler.Context) error {
 			return ctx.Err(err, "failed to update user connection")
 		}
 	}
+
+	go func(fetch fetch.Client, id string) {
+		// make sure this account exists in the database
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		_, err := fetch.Account(ctx, id)
+		if err != nil {
+			log.Err(err).Msg("failed to cache an account after login")
+		}
+	}(ctx.Fetch(), accountID)
 
 	return ctx.Redirect("/linked?nickname="+ctx.Query("nickname"), http.StatusTemporaryRedirect)
 }
