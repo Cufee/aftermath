@@ -59,6 +59,7 @@ type UsersClient interface {
 	GetUserByID(ctx context.Context, id string, opts ...UserQueryOption) (models.User, error)
 	GetOrCreateUserByID(ctx context.Context, id string, opts ...UserQueryOption) (models.User, error)
 
+	FindUserConnections(ctx context.Context, opts ...ConnectionQueryOption) ([]models.UserConnection, error)
 	GetUserConnection(ctx context.Context, connection string) (models.UserConnection, error)
 	UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error)
 	UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)

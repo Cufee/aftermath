@@ -47,7 +47,7 @@ func init() {
 					}
 					accountID = defaultAccount.ReferenceID
 
-					if img, content, err := logic.GetBackgroundImageFromRef(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
+					if img, content, err := logic.GetAccountBackgroundImage(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
 						opts = append(opts, stats.WithBackground(img, true))
 						ioptions.BackgroundID = content.ID
 					}
@@ -56,7 +56,7 @@ func init() {
 					// account selected from autocomplete
 					accountID = options.AccountID
 
-					if img, content, err := logic.GetBackgroundImageFromRef(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
+					if img, content, err := logic.GetAccountBackgroundImage(ctx.Ctx(), ctx.Core().Database(), accountID); err == nil {
 						opts = append(opts, stats.WithBackground(img, true))
 						ioptions.BackgroundID = content.ID
 					}

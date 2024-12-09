@@ -75,7 +75,7 @@ func (r *client) ReplayImage(ctx context.Context, replayURL string, o ...Request
 		return nil, meta, err
 	}
 
-	if img, _, err := logic.GetBackgroundImageFromRef(ctx, r.database, meta.Replay.Protagonist.ID); err == nil {
+	if img, _, err := logic.GetAccountBackgroundImage(ctx, r.database, meta.Replay.Protagonist.ID); err == nil {
 		opts.backgroundImage = img
 	}
 
