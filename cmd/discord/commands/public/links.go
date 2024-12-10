@@ -233,9 +233,9 @@ func linkedAccountsString(accounts []models.Account, connections map[string]mode
 func accountToLinksRow(account models.Account, connection models.UserConnection, maxNameWidth int) string {
 	var row string
 	if connection.Selected {
-		row += "⏺ "
+		row += "⬢ "
 	} else {
-		row += "○ "
+		row += "⬡ "
 	}
 	row += "[" + account.Realm.String() + "] "
 	row += account.Nickname
