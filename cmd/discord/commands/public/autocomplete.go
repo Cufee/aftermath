@@ -163,9 +163,9 @@ func init() {
 func accountToRow(account models.Account, isDefault bool) string {
 	var row string
 	if isDefault {
-		row += "⏺ "
+		row += "⬢ "
 	} else {
-		row += "○ "
+		row += "⬡ "
 	}
 	row += "[" + account.Realm.String() + "] "
 	row += account.Nickname
