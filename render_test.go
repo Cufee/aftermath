@@ -232,8 +232,11 @@ func TestSeasonalVehicleCards(t *testing.T) {
 		Vehicle: models.Vehicle{
 			ID: "1",
 			LocalizedNames: map[language.Tag]string{
-				language.English: "Vehicle Name",
+				language.English: "Kampfpanzer 70",
 			},
+			Premium:     true,
+			Collectible: true,
+			Tier:        9,
 		},
 		Price: wargaming.AuctionPrice{
 			Current:  wargaming.Price{10000, "gold"},

@@ -208,7 +208,6 @@ func (cache AuctionMemoryCache) currentAuction(ctx context.Context, realm types.
 		if !item.Available || item.Type != "vehicle" {
 			continue
 		}
-
 		group.Go(func() error {
 			vehicle := AuctionVehicle{
 				ID:            fmt.Sprint(item.Entity.ID),

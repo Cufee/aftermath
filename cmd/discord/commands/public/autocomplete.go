@@ -14,9 +14,9 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/search"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
 func init() {
@@ -75,7 +75,7 @@ func init() {
 					if !ok {
 						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"}).Send()
 					}
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)}).Send()
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)}).Send()
 				}
 
 				if len(options.TankSearch) < 3 {
@@ -89,7 +89,7 @@ func init() {
 
 				var opts []*discordgo.ApplicationCommandOptionChoice
 				for _, v := range vehicles {
-					content := fmt.Sprintf("%s %s", prepare.IntToRoman(v.Tier), v.Name(ctx.Locale()))
+					content := fmt.Sprintf("%s %s", logic.IntToRoman(v.Tier), v.Name(ctx.Locale()))
 					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: content, Value: fmt.Sprintf("valid#vehicle#%s", v.ID)})
 				}
 				return ctx.Reply().Choices(opts...).Send()

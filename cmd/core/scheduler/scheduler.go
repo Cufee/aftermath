@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/cmd/core"
+	"github.com/cufee/aftermath/internal/seasonal/auction"
+	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"github.com/go-co-op/gocron"
 )
 
@@ -47,6 +49,8 @@ func RegisterDefaultTasks(s *scheduler, coreClient core.Client) {
 	s.Add("0 9 * * *", CreateSnapshotTasksWorker(coreClient, "NA"))  // NA
 	s.Add("0 1 * * *", CreateSnapshotTasksWorker(coreClient, "EU"))  // EU
 	s.Add("0 18 * * *", CreateSnapshotTasksWorker(coreClient, "AS")) // Asia
+
+	s.Add("*/5 * * * *", func() { auction.UpdateAuctionCache(types.RealmNorthAmerica, types.RealmEurope, types.RealmAsia) })
 
 	// // Achievement leaderboards. ideally, this should not delay snapshots
 	// // hourly

@@ -1,10 +1,13 @@
 package auction
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"image"
+	"image/png"
 	"slices"
+	"sync"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
@@ -13,11 +16,15 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"golang.org/x/sync/errgroup"
+	"golang.org/x/text/language"
 )
 
 type cacheType struct {
 	auction *wargaming.AuctionMemoryCache
 	db      database.GlossaryClient
+
+	mx       *sync.Mutex
+	rendered map[types.Realm][][]byte
 }
 
 type Vehicle struct {
@@ -39,7 +46,8 @@ func InitAuctionCache(db database.GlossaryClient) error {
 	if err != nil {
 		return err
 	}
-	cache = &cacheType{auction, db}
+	cache = &cacheType{auction, db, &sync.Mutex{}, make(map[types.Realm][][]byte)}
+
 	return nil
 }
 
@@ -58,6 +66,11 @@ func UpdateAuctionCache(realms ...types.Realm) {
 			err := cache.auction.Update(ctx, realm)
 			if err != nil {
 				log.Err(err).Str("realm", realm.String()).Msg("failed to update auction cache")
+			}
+
+			err = cache.updateAuctionImagesCache(ctx, realm)
+			if err != nil {
+				log.Err(err).Str("realm", realm.String()).Msg("failed to update auction image cache")
 			}
 			return nil
 		})
@@ -93,7 +106,7 @@ func CurrentAuction(ctx context.Context, realm types.Realm) (AuctionVehicles, er
 	}
 
 	var nextPriceDrop time.Time
-	data := make([]Vehicle, len(current.Vehicles))
+	data := make([]Vehicle, 0, len(current.Vehicles))
 	for _, vehicle := range current.Vehicles {
 		v := Vehicle{
 			Image:         vehicle.Image,
@@ -122,4 +135,56 @@ func CurrentAuction(ctx context.Context, realm types.Realm) (AuctionVehicles, er
 		LastUpdate:    current.LastUpdate,
 		NextPriceDrop: nextPriceDrop,
 	}, nil
+}
+
+func CurrentAuctionImages(ctx context.Context, realm types.Realm) ([][]byte, AuctionVehicles, error) {
+	data, err := CurrentAuction(ctx, realm)
+	if err != nil {
+		return nil, AuctionVehicles{}, err
+	}
+	if images, ok := cache.rendered[realm]; ok && len(images) > 0 {
+		return images, data, nil
+	}
+	return nil, AuctionVehicles{}, ErrRealmNotCached
+}
+
+func (c *cacheType) updateAuctionImagesCache(ctx context.Context, realm types.Realm) error {
+	data, err := CurrentAuction(ctx, realm)
+	if err != nil {
+		return err
+	}
+
+	cards, err := AuctionCards(data, language.English)
+	if err != nil {
+		return err
+	}
+
+	var imagesMx sync.Mutex
+	images := make([][]byte, len(cards))
+
+	var group errgroup.Group
+	for i, img := range cards {
+		group.Go(func() error {
+			var buf bytes.Buffer
+			err = png.Encode(&buf, img)
+			if err != nil {
+				return err
+			}
+			imagesMx.Lock()
+			defer imagesMx.Unlock()
+
+			images[i] = buf.Bytes()
+			return nil
+		})
+	}
+	err = group.Wait()
+	if err != nil {
+		return err
+	}
+
+	cache.mx.Lock()
+	defer cache.mx.Unlock()
+
+	cache.rendered[realm] = images
+	return nil
 }

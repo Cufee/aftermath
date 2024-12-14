@@ -1,6 +1,7 @@
 package public
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/seasonal/auction"
+	"github.com/cufee/aftermath/internal/utils"
 )
 
 var auctionCommandExpiration = time.Date(2025, 1, 11, 0, 0, 0, 0, time.UTC)
@@ -36,17 +38,33 @@ func init() {
 				server, _ := ctx.Options().Value("server").(string)
 				realm, _ := ctx.Core().Wargaming().ParseRealm(server)
 
-				data, err := auction.CurrentAuction(ctx.Ctx(), realm)
+				cards, data, err := auction.CurrentAuctionImages(ctx.Ctx(), realm)
 				if err != nil {
+					if errors.Is(err, auction.ErrRealmNotCached) {
+						return ctx.Reply().Send("error_command_auction_still_refreshing")
+					}
 					return ctx.Err(err)
 				}
 
-				var message string
-				for _, vehicle := range data.Vehicles {
-					message += fmt.Sprintf("%s %d <:wg_gold:1317571455097110629>\n", vehicle.Name(ctx.Locale()), vehicle.Price.Current.Value)
+				batches := utils.Batch(cards, 10)
+				for i, group := range batches {
+					reply := ctx.Reply()
+					for i, img := range group {
+						reply = reply.File(img, fmt.Sprintf("%02d_auction_by_amth.one.png", i))
+					}
+
+					var err error
+					if i == 0 {
+						err = reply.Format("command_auction_result_fmt", data.LastUpdate.Unix()).Send()
+					} else {
+						_, err = reply.Followup()
+					}
+					if err != nil {
+						return ctx.Err(err)
+					}
 				}
 
-				return ctx.Reply().Send(message)
+				return nil
 			}),
 	)
 }

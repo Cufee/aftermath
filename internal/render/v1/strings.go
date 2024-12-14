@@ -6,19 +6,19 @@ import (
 	"github.com/fogleman/gg"
 )
 
-type stringSize struct {
+type StringSize struct {
 	TotalWidth  float64
 	TotalHeight float64
 	LineOffset  float64
 	LineHeight  float64
 }
 
-func MeasureString(text string, font Font) stringSize {
+func MeasureString(text string, font Font) StringSize {
 	if !font.Valid() {
-		return stringSize{}
+		return StringSize{}
 	}
 	if text == "" {
-		return stringSize{}
+		return StringSize{}
 	}
 
 	face, close := font.Face()
@@ -27,7 +27,7 @@ func MeasureString(text string, font Font) stringSize {
 	measureCtx := gg.NewContext(1, 1)
 	measureCtx.SetFontFace(face)
 
-	var result stringSize
+	var result StringSize
 	// Account for font descender height
 	result.LineOffset = float64(face.Metrics().Descent>>6) * 2
 

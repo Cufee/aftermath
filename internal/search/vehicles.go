@@ -9,7 +9,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/lithammer/fuzzysearch/fuzzy"
 	"golang.org/x/text/language"
 )
@@ -52,7 +52,7 @@ func RefreshVehicleCache(ctx context.Context, db database.GlossaryClient) error 
 				localeNameToID = make(map[string]string)
 			}
 
-			nameWithTier := strings.ToLower(fmt.Sprintf("%s %s", common.IntToRoman(vehicle.Tier), value))
+			nameWithTier := strings.ToLower(fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), value))
 			localeNameToID[nameWithTier] = id
 			newVehicleNameToID[tag] = localeNameToID
 			newVehicleNames[tag] = append(newVehicleNames[tag], nameWithTier)

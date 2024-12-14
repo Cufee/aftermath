@@ -42,6 +42,9 @@ type Style struct {
 	Width  float64
 	Height float64
 
+	GrowX bool
+	GrowY bool
+
 	BorderRadius    float64
 	BackgroundColor color.Color
 	Blur            float64

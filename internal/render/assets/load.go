@@ -71,8 +71,9 @@ func loadImages(files map[string][]byte) (map[string]image.Image, error) {
 		if err != nil {
 			return nil, err
 		}
-		imagesMap[strings.Split(filepath.Base(path), ".")[0]] = image
-		log.Debug().Str("path", path).Msg("loaded image")
+		key := strings.Split(filepath.Base(path), ".")[0]
+		imagesMap[key] = image
+		log.Debug().Str("path", path).Str("key", key).Msg("loaded image")
 	}
 
 	return imagesMap, nil
