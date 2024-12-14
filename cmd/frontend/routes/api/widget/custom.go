@@ -150,12 +150,12 @@ var CreateCustomWidget handler.Partial = func(ctx *handler.Context) (templ.Compo
 	c, cancel := context.WithTimeout(ctx.Context, time.Second*5)
 	defer cancel()
 
-	realm, err := ctx.Wargaming().RealmFromID(created.AccountID)
-	if err != nil {
-		return nil, ctx.Err(err, "failed to create widget settings")
+	realm, ok := ctx.Wargaming().RealmFromID(created.AccountID)
+	if !ok {
+		return nil, ctx.Error("failed to create widget settings")
 	}
 
-	_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), *realm, logic.WithReference(created.AccountID, created.ID), logic.WithType(models.SnapshotTypeWidget))
+	_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), realm, logic.WithReference(created.AccountID, created.ID), logic.WithType(models.SnapshotTypeWidget))
 	if err != nil {
 		return nil, ctx.Err(err, "failed to create a new widget session")
 	}
@@ -326,13 +326,13 @@ var ResetSession handler.Partial = func(ctx *handler.Context) (templ.Component, 
 		c, cancel := context.WithTimeout(context.Background(), time.Second*15)
 		defer cancel()
 
-		realm, err := ctx.Wargaming().RealmFromID(accountID)
-		if err != nil {
-			log.Err(err).Str("widgetId", widgetID).Str("accountId", accountID).Msg("failed to parse realm")
+		realm, ok := ctx.Wargaming().RealmFromID(accountID)
+		if !ok {
+			log.Error().Str("widgetId", widgetID).Str("accountId", accountID).Msg("failed to parse realm")
 			return
 		}
 
-		_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), *realm, logic.WithReference(accountID, widgetID), logic.WithType(models.SnapshotTypeWidget))
+		_, err = logic.RecordAccountSnapshots(c, ctx.Wargaming(), ctx.Database(), realm, logic.WithReference(accountID, widgetID), logic.WithType(models.SnapshotTypeWidget))
 		if err != nil {
 			log.Err(err).Str("widgetId", widgetID).Str("accountId", accountID).Msg("failed to refresh a session for widget")
 		}
