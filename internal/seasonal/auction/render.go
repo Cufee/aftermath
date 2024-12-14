@@ -70,7 +70,7 @@ func vehicleCard(style render.Style, locale language.Tag, vehicle Vehicle) (imag
 
 	name := styledText{
 		value: fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(locale)),
-		style: render.Style{Font: render.FontLarge(), FontColor: nameColor},
+		style: render.Style{Font: render.FontXL(), FontColor: nameColor},
 	}
 
 	remaining := time.Until(vehicle.NextPriceDrop).Round(time.Second)
