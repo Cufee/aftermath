@@ -33,7 +33,6 @@ var (
 		Direction:       render.DirectionVertical,
 		JustifyContent:  render.JustifyContentCenter,
 		Gap:             2,
-		// Debug:           true,
 	}
 )
 
