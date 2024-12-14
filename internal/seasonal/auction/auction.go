@@ -84,6 +84,7 @@ var (
 
 type AuctionVehicles struct {
 	Vehicles      []Vehicle
+	TotalLots     int
 	LastUpdate    time.Time
 	NextUpdate    time.Time
 	NextPriceDrop time.Time
@@ -134,6 +135,7 @@ func CurrentAuction(ctx context.Context, realm types.Realm) (AuctionVehicles, er
 		Vehicles:      data,
 		LastUpdate:    current.LastUpdate,
 		NextPriceDrop: nextPriceDrop,
+		TotalLots:     current.TotalLots,
 	}, nil
 }
 

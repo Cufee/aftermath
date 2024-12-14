@@ -20,8 +20,9 @@ import (
 )
 
 type AuctionMemoryCache struct {
-	mx     *sync.Mutex
-	data   map[types.Realm]RealmCache
+	mx   *sync.Mutex
+	data map[types.Realm]RealmCache
+
 	images map[string]image.Image
 
 	onUpdateCallback func(current, previous RealmCache)
@@ -32,6 +33,7 @@ type RealmCache struct {
 	LastUpdate    time.Time
 	NextPriceDrop time.Time
 	Vehicles      []AuctionVehicle
+	TotalLots     int
 }
 
 func (cache *AuctionMemoryCache) Current(realm types.Realm) (RealmCache, bool) {
@@ -46,7 +48,7 @@ func (cache *AuctionMemoryCache) Update(ctx context.Context, realm types.Realm) 
 	cache.mx.Lock()
 	defer cache.mx.Unlock()
 
-	vehicles, err := cache.currentAuction(ctx, realm)
+	vehicles, lots, err := cache.currentAuction(ctx, realm)
 	if err != nil {
 		return errors.Wrap(err, "update failed on "+realm.String())
 	}
@@ -56,6 +58,7 @@ func (cache *AuctionMemoryCache) Update(ctx context.Context, realm types.Realm) 
 		Realm:      realm,
 		Vehicles:   vehicles,
 		LastUpdate: time.Now(),
+		TotalLots:  lots,
 	}
 	cache.data[realm] = current
 	go cache.onUpdateCallback(current, last)
@@ -178,30 +181,31 @@ type item struct {
 	NextPriceTimestamp int    `json:"next_price_timestamp"`
 }
 
-func (cache AuctionMemoryCache) currentAuction(ctx context.Context, realm types.Realm) ([]AuctionVehicle, error) {
+func (cache AuctionMemoryCache) currentAuction(ctx context.Context, realm types.Realm) ([]AuctionVehicle, int, error) {
 	domain, ok := realm.DomainBlitz()
 	if !ok {
-		return nil, ErrRealmNotSupported
+		return nil, 0, ErrRealmNotSupported
 	}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("https://%s/en/api/events/items/auction/?page_size=100&type[]=vehicle&saleable=true", domain), nil)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	req = req.WithContext(ctx)
 
 	res, err := auctionHttpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer res.Body.Close()
 
 	var data auctionResponse
 	err = json.NewDecoder(res.Body).Decode(&data)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
+	var imagesMx sync.Mutex
 	resultCh := make(chan AuctionVehicle, len(data.Results))
 	var group errgroup.Group
 	for _, item := range data.Results {
@@ -243,6 +247,8 @@ func (cache AuctionMemoryCache) currentAuction(ctx context.Context, realm types.
 					return nil
 				}
 
+				imagesMx.Lock()
+				defer imagesMx.Unlock()
 				cache.images[item.Entity.PreviewImageURL] = loaded
 				vehicle.Image = loaded
 			}
@@ -253,12 +259,12 @@ func (cache AuctionMemoryCache) currentAuction(ctx context.Context, realm types.
 	err = group.Wait()
 	close(resultCh)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	var result []AuctionVehicle
 	for v := range resultCh {
 		result = append(result, v)
 	}
-	return result, nil
+	return result, len(data.Results), nil
 }

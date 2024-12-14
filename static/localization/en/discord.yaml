@@ -144,7 +144,7 @@
 - key: command_auction_description
   value: View the current Blitz Auction
 - key: command_auction_result_fmt
-  value: Updated <t:%d:R>
+  value: "### Showing (%d/%d) vehicles\nUpdated <t:%d:R>"
 - key: error_command_auction_still_refreshing
   value: Aftermath is still working on refreshing the current auction offers, please try again in a couple minutes.
 

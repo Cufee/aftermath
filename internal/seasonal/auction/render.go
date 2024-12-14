@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	timeIconSize = 14.0
+	timeIconSize = 16.0
 
 	goldIconSmallSize = 20.0
 	goldIconLargeSize = 32.0
@@ -25,10 +25,10 @@ var (
 	tankImageSize = 300.0
 
 	cardStyle = render.Style{
-		Width:           tankImageSize + 100,
+		Width:           tankImageSize + 120,
 		BackgroundColor: render.DefaultCardColor,
 		BorderRadius:    render.BorderRadiusLG,
-		PaddingX:        50,
+		PaddingX:        60,
 		PaddingY:        50,
 		Direction:       render.DirectionVertical,
 		JustifyContent:  render.JustifyContentCenter,
@@ -59,6 +59,11 @@ func centerText(target float64, text ...*styledText) float64 {
 	return widthMax
 }
 
+func headerCard() (image.Image, error) {
+	bg, _ := assets.GetLoadedImage("auction-splash")
+	return imaging.Fill(bg, 1000, 50, imaging.Top, imaging.Linear), nil
+}
+
 func vehicleCard(style render.Style, locale language.Tag, vehicle Vehicle) (image.Image, error) {
 	nameColor := render.TextPrimary
 	if vehicle.Premium {
@@ -81,7 +86,7 @@ func vehicleCard(style render.Style, locale language.Tag, vehicle Vehicle) (imag
 
 	availableWithTime := styledText{
 		value: fmt.Sprintf("Available: %d %s", vehicle.Available, nextDropString),
-		style: render.Style{Font: render.FontMedium(), FontColor: render.TextSecondary, PaddingX: (timeIconSize / 2) + 4},
+		style: render.Style{Font: render.FontLarge(), FontColor: render.TextSecondary, PaddingX: (timeIconSize / 2) + 4},
 	}
 
 	widthMax := centerText(style.Width-(style.PaddingX*2), &name, &availableWithTime)
@@ -91,10 +96,10 @@ func vehicleCard(style render.Style, locale language.Tag, vehicle Vehicle) (imag
 	var blocks []render.Block
 	blocks = append(blocks, render.NewTextContent(name.style, name.value))
 	blocks = append(blocks, render.NewBlocksContent(render.Style{Direction: render.DirectionHorizontal, AlignItems: render.AlignItemsCenter, JustifyContent: render.JustifyContentSpaceBetween, Width: contentWidth},
-		render.NewTextContent(render.Style{Font: render.FontMedium(), FontColor: render.TextSecondary}, fmt.Sprintf("Available: %d", vehicle.Available)),
+		render.NewTextContent(render.Style{Font: render.FontLarge(), FontColor: render.TextSecondary}, fmt.Sprintf("Available: %d", vehicle.Available)),
 		render.NewBlocksContent(render.Style{Direction: render.DirectionHorizontal, AlignItems: render.AlignItemsCenter, Gap: 4},
 			render.NewImageContent(render.Style{BackgroundColor: render.TextSecondary}, timerIcon),
-			render.NewTextContent(render.Style{Font: render.FontMedium(), FontColor: render.TextSecondary}, nextDropString),
+			render.NewTextContent(render.Style{Font: render.FontLarge(), FontColor: render.TextSecondary}, nextDropString),
 		),
 	))
 
@@ -133,9 +138,15 @@ func AuctionCards(data AuctionVehicles, locale language.Tag) ([]image.Image, err
 	}
 
 	var cardsMx sync.Mutex
-	cards := make([]image.Image, len(data.Vehicles))
+	cards := make([]image.Image, len(data.Vehicles)+1)
 
 	var group errgroup.Group
+	group.Go(func() error {
+		header, err := headerCard()
+		cards[0] = header
+		return err
+	})
+
 	for i, vehicle := range data.Vehicles {
 		group.Go(func() error {
 			card, err := vehicleCard(cardStyle, locale, vehicle)
@@ -144,7 +155,7 @@ func AuctionCards(data AuctionVehicles, locale language.Tag) ([]image.Image, err
 			}
 			cardsMx.Lock()
 			defer cardsMx.Unlock()
-			cards[i] = card
+			cards[i+1] = card
 			return nil
 		})
 	}
