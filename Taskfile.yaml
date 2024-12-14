@@ -9,7 +9,7 @@ tasks:
       - ".env.test"
     desc: runs tests
     cmds:
-      - task: db-migrate-apply-test
+      # - task: db-migrate-apply-test
       - |
         if [ -z "{{ .CLI_ARGS }}" ]; then
           go test -timeout 30s --count=1 -v ./...

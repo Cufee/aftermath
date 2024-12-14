@@ -1,4 +1,4 @@
-package common
+package render
 
 import (
 	"fmt"
@@ -25,7 +25,6 @@ func (t blockContentType) String() string {
 const (
 	BlockContentTypeText blockContentType = iota
 	BlockContentTypeImage
-	// BlockContentTypeIcon
 	BlockContentTypeBlocks
 	BlockContentTypeEmpty
 )
@@ -45,6 +44,13 @@ func (block *Block) Render() (image.Image, error) {
 	return block.content.Render(block.Style)
 }
 
+type content struct {
+	width     float64
+	height    float64
+	positionY float64
+	positionX float64
+}
+
 func NewBlock(content BlockContent, style Style) Block {
 	return Block{
 		ContentType: content.Type(),
@@ -54,6 +60,7 @@ func NewBlock(content BlockContent, style Style) Block {
 }
 
 type contentText struct {
+	content
 	value string
 }
 
@@ -98,6 +105,7 @@ func (content contentText) Type() blockContentType {
 }
 
 type contentBlocks struct {
+	content
 	blocks []Block
 }
 
@@ -162,6 +170,7 @@ func (content contentBlocks) Type() blockContentType {
 }
 
 type contentImage struct {
+	content
 	image image.Image
 }
 
@@ -206,7 +215,7 @@ func (content contentImage) Type() blockContentType {
 	return BlockContentTypeBlocks
 }
 
-type contentEmpty struct{}
+type contentEmpty content
 
 func (content contentEmpty) Type() blockContentType {
 	return BlockContentTypeEmpty

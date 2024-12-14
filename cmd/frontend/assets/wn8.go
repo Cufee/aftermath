@@ -4,11 +4,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/cufee/aftermath/internal/stats/render/common/v1"
+	"github.com/cufee/aftermath/internal/render/v1"
 )
 
 func wn8IconFilename(rating float32) string {
-	name := strings.ReplaceAll(strings.ToLower(common.GetWN8TierName(rating)), " ", "_")
+	name := strings.ReplaceAll(strings.ToLower(render.GetWN8TierName(rating)), " ", "_")
 	if rating < 1 {
 		name = "invalid"
 	}

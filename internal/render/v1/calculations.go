@@ -1,4 +1,4 @@
-package common
+package render
 
 import "golang.org/x/exp/constraints"
 

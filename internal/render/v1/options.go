@@ -1,10 +1,10 @@
-package common
+package render
 
 import (
 	"image"
 	"strings"
 
-	"github.com/cufee/aftermath/internal/stats/render/assets"
+	"github.com/cufee/aftermath/internal/render/assets"
 )
 
 type Options struct {

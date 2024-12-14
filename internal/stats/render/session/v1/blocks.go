@@ -3,11 +3,11 @@ package session
 import (
 	"image/color"
 
+	"github.com/cufee/aftermath/internal/render/assets"
+	common "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
-	"github.com/cufee/aftermath/internal/stats/render/assets"
-	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
 )

@@ -1,4 +1,4 @@
-package common
+package render
 
 import (
 	"github.com/golang/freetype/truetype"

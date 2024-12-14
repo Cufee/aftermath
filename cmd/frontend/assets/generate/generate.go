@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
 	"github.com/rs/zerolog/log"
