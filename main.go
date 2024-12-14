@@ -27,6 +27,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/gateway"
 	"github.com/cufee/aftermath/cmd/discord/router"
 	"github.com/cufee/aftermath/cmd/frontend"
+	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"github.com/nao1215/imaging"
 	"github.com/pkg/errors"
 
@@ -41,11 +42,12 @@ import (
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/metrics"
 	"github.com/cufee/aftermath/internal/realtime"
+	"github.com/cufee/aftermath/internal/seasonal/auction"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 
 	"github.com/cufee/aftermath/internal/log"
-	"github.com/cufee/aftermath/internal/stats/render/assets"
-	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
+	"github.com/cufee/aftermath/internal/render/assets"
+	render "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/rs/zerolog"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -76,6 +78,13 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("manual.Migrate failed")
 	}
+
+	// Seasonal features
+	err = auction.InitAuctionCache(db)
+	if err != nil {
+		log.Fatal().Err(err).Msg("auction.InitAuctionCache failed")
+	}
+	go auction.UpdateAuctionCache(types.RealmNorthAmerica, types.RealmEurope, types.RealmAsia)
 
 	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db)
 

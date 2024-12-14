@@ -1,4 +1,4 @@
-package common
+package render
 
 import (
 	"image/color"
@@ -41,6 +41,9 @@ type Style struct {
 
 	Width  float64
 	Height float64
+
+	GrowX bool
+	GrowY bool
 
 	BorderRadius    float64
 	BackgroundColor color.Color

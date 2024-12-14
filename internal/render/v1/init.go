@@ -1,4 +1,4 @@
-package common
+package render
 
 import (
 	"image/color"
@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/stats/render/assets"
+	"github.com/cufee/aftermath/internal/render/assets"
 )
 
 var DiscordBackgroundColor = color.NRGBA{49, 51, 56, 255}

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	common "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	rp "github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
-	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
 func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) string) (common.Segments, error) {

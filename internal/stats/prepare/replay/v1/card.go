@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1/replay"
 	"golang.org/x/text/language"
@@ -47,7 +48,7 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes
 	for _, player := range replay.Teams.Allies {
 		vehicle := glossary[player.VehicleID]
 		vehicle.ID = player.VehicleID
-		name := fmt.Sprintf("%s %s", common.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
+		name := fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
 		card, err := playerToCard(player, name, playerBlocks, options.Printer())
 		if err != nil {
 			return cards, err
@@ -58,7 +59,7 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes
 	for _, player := range replay.Teams.Enemies {
 		vehicle := glossary[player.VehicleID]
 		vehicle.ID = player.VehicleID
-		name := fmt.Sprintf("%s %s", common.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
+		name := fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
 		card, err := playerToCard(player, name, playerBlocks, options.Printer())
 		if err != nil {
 			return cards, err

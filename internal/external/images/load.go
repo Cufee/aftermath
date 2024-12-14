@@ -1,7 +1,8 @@
 package images
 
 import (
-	"errors"
+	"context"
+
 	"image"
 	"io"
 	"net/http"
@@ -9,23 +10,27 @@ import (
 	"os"
 	"slices"
 	"strconv"
-	"time"
 
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/pkg/errors"
 )
 
 var ErrInvalidImage = errors.New("invalid image")
 var ErrUnsupportedImageFormat = errors.New("unsupported image format")
 
-var remoteImageClient = http.Client{
-	Timeout: time.Second * 1,
-}
+var remoteImageClient = http.DefaultClient
 
-func SafeLoadFromURL(url *url.URL, maxSize int64) (image.Image, error) {
-	res, err := remoteImageClient.Get(url.String())
+func SafeLoadFromURL(ctx context.Context, url *url.URL, maxSize int64) (image.Image, error) {
+	req, err := http.NewRequest("GET", url.String(), nil)
+	if err != nil {
+		return nil, ErrInvalidImage
+	}
+	req = req.WithContext(ctx)
+
+	res, err := remoteImageClient.Do(req)
 	if err != nil {
 		if os.IsTimeout(err) {
-			return nil, ErrInvalidImage
+			return nil, errors.Wrap(ErrInvalidImage, "request failed")
 		}
 		return nil, err
 	}
@@ -34,14 +39,14 @@ func SafeLoadFromURL(url *url.URL, maxSize int64) (image.Image, error) {
 	contentLengthStr := res.Header.Get("Content-Length")
 	if contentLengthStr == "" {
 		log.Warn().Msg("Content-Length header is missing on remote file")
-		return nil, ErrInvalidImage
+		return nil, errors.Wrap(ErrInvalidImage, "missing headers")
 	}
 	contentLength, err := strconv.ParseInt(contentLengthStr, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	if contentLength > maxSize {
-		return nil, ErrInvalidImage
+		return nil, errors.Wrap(ErrInvalidImage, "image too large")
 	}
 
 	img, format, err := image.Decode(io.LimitReader(res.Body, maxSize))

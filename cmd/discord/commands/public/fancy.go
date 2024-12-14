@@ -22,7 +22,7 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
-	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
+	render "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
 )
@@ -89,7 +89,10 @@ func init() {
 				}
 
 				// download and resize the image
-				img, err := images.SafeLoadFromURL(parsed, constants.ImageUploadMaxSize)
+				ictx, cancel := context.WithTimeout(ctx.Ctx(), time.Second*1)
+				defer cancel()
+
+				img, err := images.SafeLoadFromURL(ictx, parsed, constants.ImageUploadMaxSize)
 				if err != nil {
 					if errors.Is(err, images.ErrUnsupportedImageFormat) {
 						return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_format")

@@ -1,8 +1,8 @@
-package common
+package render
 
 import (
+	"github.com/cufee/aftermath/internal/render/assets"
 	"github.com/cufee/aftermath/internal/stats/frame"
-	"github.com/cufee/aftermath/internal/stats/render/assets"
 )
 
 var iconsCache = make(map[string]Block, 6)

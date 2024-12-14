@@ -1,4 +1,4 @@
-package common
+package render
 
 import (
 	"fmt"
@@ -25,7 +25,6 @@ func (t blockContentType) String() string {
 const (
 	BlockContentTypeText blockContentType = iota
 	BlockContentTypeImage
-	// BlockContentTypeIcon
 	BlockContentTypeBlocks
 	BlockContentTypeEmpty
 )

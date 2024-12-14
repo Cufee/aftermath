@@ -51,12 +51,12 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 					continue
 				}
 
-				realm, err := client.Wargaming().RealmFromID(a)
-				if err != nil {
+				realm, ok := client.Wargaming().RealmFromID(a)
+				if !ok {
 					continue
 				}
 
-				accountsByRealm[*realm] = append(accountsByRealm[*realm], a)
+				accountsByRealm[realm] = append(accountsByRealm[realm], a)
 			}
 
 			batchSize := 50

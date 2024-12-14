@@ -5,12 +5,12 @@ import (
 	"image"
 	"math"
 
+	"github.com/cufee/aftermath/internal/render/assets"
+	common "github.com/cufee/aftermath/internal/render/v1"
 	fetch "github.com/cufee/aftermath/internal/stats/fetch/v1/replay"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
-	"github.com/cufee/aftermath/internal/stats/render/assets"
-	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"github.com/nao1215/imaging"
 )
 

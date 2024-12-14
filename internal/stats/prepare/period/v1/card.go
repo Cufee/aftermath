@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
@@ -44,7 +45,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 		if options.VehicleID != "" {
 			glossary := glossary[options.VehicleID]
 			glossary.ID = options.VehicleID
-			cards.Overview.Title = fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
+			cards.Overview.Title = fmt.Sprintf("%s %s", logic.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
 		}
 		cards.Overview.Type = common.CardTypeOverview
 		cards.Overview.Blocks = append(cards.Overview.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
@@ -93,7 +94,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 		glossary.ID = data.Vehicle.VehicleID
 
 		cards.Highlights = append(cards.Highlights, VehicleCard{
-			Title:  fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.Locale())),
+			Title:  fmt.Sprintf("%s %s", logic.IntToRoman(glossary.Tier), glossary.Name(options.Locale())),
 			Meta:   options.Printer()(data.Highlight.Label),
 			Type:   common.CardTypeVehicle,
 			Blocks: vehicleBlocks,

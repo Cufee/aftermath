@@ -1,9 +1,9 @@
 package replay
 
 import (
+	common "github.com/cufee/aftermath/internal/render/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
-	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 )
 
 func statsBlockToBlock(stats prepare.StatsBlock[replay.BlockData, string], width float64) common.Block {

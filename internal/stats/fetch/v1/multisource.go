@@ -118,9 +118,9 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 Gets account info from wg and updates cache
 */
 func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Account, error) {
-	realm, err := c.wargaming.RealmFromID(id)
-	if err != nil {
-		return models.Account{}, err
+	realm, ok := c.wargaming.RealmFromID(id)
+	if !ok {
+		return models.Account{}, wargaming.ErrRealmNotSupported
 	}
 
 	var group sync.WaitGroup
@@ -133,13 +133,13 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Acco
 		defer group.Done()
 
 		wgAccount = retry.Retry(func() (types.ExtendedAccount, error) {
-			return c.wargaming.AccountByID(ctx, *realm, id)
+			return c.wargaming.AccountByID(ctx, realm, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 	}()
 	go func() {
 		defer group.Done()
 		// we should not retry this request since it is not critical and will fail on accounts without a clan
-		clan, _ = c.wargaming.AccountClan(ctx, *realm, id)
+		clan, _ = c.wargaming.AccountClan(ctx, realm, id)
 	}()
 
 	group.Wait()
@@ -148,7 +148,7 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Acco
 		return models.Account{}, wgAccount.Err
 	}
 
-	account := WargamingToAccount(*realm, wgAccount.Data, clan, false)
+	account := WargamingToAccount(realm, wgAccount.Data, clan, false)
 	go func(account models.Account) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
@@ -176,9 +176,9 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		apply(&options)
 	}
 
-	realm, err := c.wargaming.RealmFromID(id)
-	if err != nil {
-		return AccountStatsOverPeriod{}, err
+	realm, ok := c.wargaming.RealmFromID(id)
+	if !ok {
+		return AccountStatsOverPeriod{}, wargaming.ErrRealmNotSupported
 	}
 
 	var group sync.WaitGroup
@@ -193,13 +193,13 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		defer group.Done()
 
 		account = retry.Retry(func() (types.ExtendedAccount, error) {
-			return c.wargaming.AccountByID(ctx, *realm, id)
+			return c.wargaming.AccountByID(ctx, realm, id)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 	}()
 	go func() {
 		defer group.Done()
 		// we should not retry this request since it is not critical and will fail on accounts without a clan
-		clan, _ = c.wargaming.AccountClan(ctx, *realm, id)
+		clan, _ = c.wargaming.AccountClan(ctx, realm, id)
 	}()
 	go func() {
 		defer group.Done()
@@ -210,7 +210,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		}
 
 		vehicles = retry.Retry(func() ([]types.VehicleStatsFrame, error) {
-			return c.wargaming.AccountVehicles(ctx, *realm, id, vehicleIDs)
+			return c.wargaming.AccountVehicles(ctx, realm, id, vehicleIDs)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 
 		if vehicles.Err != nil || len(vehicles.Data) < 1 || !options.withWN8 {
@@ -239,7 +239,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		log.Err(averages.Err).Msg("failed to get tank averages")
 	}
 
-	stats := WargamingToStats(*realm, account.Data, clan, vehicles.Data)
+	stats := WargamingToStats(realm, account.Data, clan, vehicles.Data)
 	if options.withWN8 {
 		stats.AddWN8(averages.Data)
 	}
@@ -505,9 +505,9 @@ func (c *multiSourceClient) Replay(ctx context.Context, file io.ReaderAt, size i
 func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.UnpackedReplay) (Replay, error) {
 	replay := replay.Prettify(unpacked.BattleResult, unpacked.Meta)
 
-	realm, err := c.wargaming.RealmFromID(replay.Protagonist.ID)
-	if err != nil {
-		return Replay{}, err
+	realm, ok := c.wargaming.RealmFromID(replay.Protagonist.ID)
+	if !ok {
+		return Replay{}, wargaming.ErrRealmNotSupported
 	}
 
 	var vehicles []string
@@ -537,5 +537,5 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 		return Replay{}, errors.Wrap(err, "failed to get map glossary")
 	}
 
-	return Replay{mapData, replay, *realm}, nil
+	return Replay{mapData, replay, realm}, nil
 }

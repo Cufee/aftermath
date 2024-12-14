@@ -1,4 +1,4 @@
-package common
+package render
 
 import (
 	"slices"
@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/stats/render/assets"
+	"github.com/cufee/aftermath/internal/render/assets"
 )
 
 type subscriptionPillStyle struct {

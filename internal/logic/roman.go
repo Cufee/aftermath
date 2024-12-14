@@ -1,4 +1,4 @@
-package common
+package logic
 
 func IntToRoman(i int) string {
 	roman := ""
