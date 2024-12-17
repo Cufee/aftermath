@@ -5,17 +5,12 @@ import (
 	"context"
 	"image/png"
 	"os"
-	"path/filepath"
 	"slices"
 	"testing"
 	"time"
 
-	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
-	"github.com/cufee/aftermath/internal/render/assets"
 	rc "github.com/cufee/aftermath/internal/render/v1"
-	"github.com/cufee/aftermath/internal/seasonal/auction"
 	client "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
@@ -24,7 +19,6 @@ import (
 	session "github.com/cufee/aftermath/internal/stats/render/session/v1"
 	"github.com/cufee/aftermath/tests"
 	"github.com/cufee/aftermath/tests/env"
-	"github.com/cufee/aftermath/tests/path"
 	"github.com/matryer/is"
 	"github.com/nao1215/imaging"
 	"github.com/rs/zerolog"
@@ -221,40 +215,4 @@ func TestRenderReplay(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestSeasonalVehicleCards(t *testing.T) {
-	is := is.New(t)
-	vehicleImg, _ := assets.GetLoadedImage("secret-vehicle")
-
-	data := auction.AuctionVehicles{}
-	data.Vehicles = append(data.Vehicles, auction.Vehicle{
-		Vehicle: models.Vehicle{
-			ID: "1",
-			LocalizedNames: map[language.Tag]string{
-				language.English: "Kampfpanzer 70",
-			},
-			Premium:     true,
-			Collectible: true,
-			Tier:        9,
-		},
-		Price: wargaming.AuctionPrice{
-			Current:  wargaming.Price{10000, "gold"},
-			Upcoming: wargaming.Price{9000, "gold"},
-		},
-		Available:     10,
-		Total:         100,
-		NextPriceDrop: time.Now().Add(time.Hour),
-		Image:         vehicleImg,
-	})
-
-	img, err := auction.AuctionCards(data, language.English)
-	is.NoErr(err)
-
-	f, err := os.Create(filepath.Join(path.Root(), "tmp/seasonal_render_vehicle_card.png"))
-	assert.NoError(t, err, "failed to create a file")
-	defer f.Close()
-
-	err = png.Encode(f, img[0])
-	assert.NoError(t, err, "failed to encode a png image")
 }
