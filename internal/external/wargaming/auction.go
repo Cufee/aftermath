@@ -5,84 +5,52 @@ import (
 	"fmt"
 	"image"
 	"net/http"
-	"net/url"
 	"sync"
 	"time"
 
-	"github.com/cufee/aftermath/internal/constants"
-	"github.com/cufee/aftermath/internal/external/images"
 	"github.com/cufee/aftermath/internal/json"
-	"github.com/cufee/aftermath/internal/log"
-	"github.com/cufee/aftermath/internal/render/assets"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
 )
 
 type AuctionMemoryCache struct {
 	mx   *sync.Mutex
-	data map[types.Realm]RealmCache
-
-	images map[string]image.Image
-
-	onUpdateCallback func(current, previous RealmCache)
+	data *Cache
 }
 
-type RealmCache struct {
-	Realm         types.Realm
-	LastUpdate    time.Time
-	NextPriceDrop time.Time
-	Vehicles      []AuctionVehicle
-	TotalLots     int
+type Cache struct {
+	LastUpdate time.Time
+	Vehicles   []AuctionVehicle
 }
 
-func (cache *AuctionMemoryCache) Current(realm types.Realm) (RealmCache, bool) {
-	data, ok := cache.data[realm]
-	if !ok {
-		return RealmCache{}, false
+func (cache *AuctionMemoryCache) Current() (*Cache, bool) {
+	if cache.data == nil {
+		return nil, false
 	}
-	return data, true
+	return cache.data, true
 }
 
-func (cache *AuctionMemoryCache) Update(ctx context.Context, realm types.Realm) error {
+func (cache *AuctionMemoryCache) Update(ctx context.Context) error {
 	cache.mx.Lock()
 	defer cache.mx.Unlock()
 
-	vehicles, lots, err := cache.currentAuction(ctx, realm)
+	vehicles, err := cache.currentAuction(ctx)
 	if err != nil {
-		return errors.Wrap(err, "update failed on "+realm.String())
+		return errors.Wrap(err, "update failed")
 	}
 
-	last := cache.data[realm]
-	current := RealmCache{
-		Realm:      realm,
+	cache.data = &Cache{
 		Vehicles:   vehicles,
 		LastUpdate: time.Now(),
-		TotalLots:  lots,
 	}
-	cache.data[realm] = current
-	go cache.onUpdateCallback(current, last)
 
 	return nil
 }
 
-func NewAuctionCache(updateCallback func(current, previous RealmCache)) (*AuctionMemoryCache, error) {
-	fallbackImage, ok := assets.GetLoadedImage("secret-vehicle")
-	if !ok {
-		return nil, errors.New("failed to load fallback vehicle image")
-	}
-
-	if updateCallback == nil {
-		updateCallback = func(current, previous RealmCache) {}
-	}
+func NewAuctionCache() (*AuctionMemoryCache, error) {
 	cache := &AuctionMemoryCache{
-		mx:               &sync.Mutex{},
-		data:             make(map[types.Realm]RealmCache),
-		images:           make(map[string]image.Image, 25),
-		onUpdateCallback: updateCallback,
+		mx: &sync.Mutex{},
 	}
-
-	cache.images["fallback"] = fallbackImage
 	return cache, nil
 }
 
@@ -181,90 +149,50 @@ type item struct {
 	NextPriceTimestamp int    `json:"next_price_timestamp"`
 }
 
-func (cache AuctionMemoryCache) currentAuction(ctx context.Context, realm types.Realm) ([]AuctionVehicle, int, error) {
-	domain, ok := realm.DomainBlitz()
+func (cache AuctionMemoryCache) currentAuction(ctx context.Context) ([]AuctionVehicle, error) {
+
+	domain, ok := types.RealmNorthAmerica.DomainBlitz()
 	if !ok {
-		return nil, 0, ErrRealmNotSupported
+		return nil, ErrRealmNotSupported
 	}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("https://%s/en/api/events/items/auction/?page_size=100&type[]=vehicle&saleable=true", domain), nil)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	req = req.WithContext(ctx)
 
 	res, err := auctionHttpClient.Do(req)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	defer res.Body.Close()
 
 	var data auctionResponse
 	err = json.NewDecoder(res.Body).Decode(&data)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	var imagesMx sync.Mutex
-	resultCh := make(chan AuctionVehicle, len(data.Results))
-	var group errgroup.Group
+	var vehicles = map[int]AuctionVehicle{}
 	for _, item := range data.Results {
-		if !item.Available || item.Type != "vehicle" {
+		if !item.Available || item.Type != "vehicle" || item.CurrentCount == 0 {
 			continue
 		}
-		group.Go(func() error {
-			vehicle := AuctionVehicle{
-				ID:            fmt.Sprint(item.Entity.ID),
-				Image:         cache.images[item.Entity.PreviewImageURL],
-				Total:         item.InitialCount,
-				Available:     item.CurrentCount,
-				IsPremium:     item.Entity.IsPremium,
-				IsCollectible: item.Entity.IsCollectible,
-				NextPriceDrop: time.Unix(int64(item.NextPriceTimestamp), 0),
-				Price:         AuctionPrice{item.Price.toPrice(), item.NextPrice.toPrice()},
-			}
-
-			defer func() {
-				if vehicle.Image == nil {
-					vehicle.Image = cache.images["fallback"]
-				}
-				resultCh <- vehicle
-			}()
-
-			if vehicle.Image == nil && item.Entity.PreviewImageURL != "" {
-				link, err := url.Parse(item.Entity.PreviewImageURL)
-				if err != nil {
-					log.Warn().Err(err).Str("url", link.String()).Msg("failed to parse auction vehicle preview url")
-					return nil
-				}
-
-				ictx, cancel := context.WithTimeout(ctx, time.Second*5)
-				defer cancel()
-
-				loaded, err := images.SafeLoadFromURL(ictx, link, constants.ImageUploadMaxSize)
-				if err != nil {
-					log.Warn().Err(err).Str("url", link.String()).Msg("failed to load auction vehicle preview url")
-					return nil
-				}
-
-				imagesMx.Lock()
-				defer imagesMx.Unlock()
-				cache.images[item.Entity.PreviewImageURL] = loaded
-				vehicle.Image = loaded
-			}
-
-			return nil
-		})
-	}
-	err = group.Wait()
-	close(resultCh)
-	if err != nil {
-		return nil, 0, err
+		vehicles[item.Entity.ID] = AuctionVehicle{
+			ID:            fmt.Sprint(item.Entity.ID),
+			Total:         item.InitialCount,
+			Available:     item.CurrentCount,
+			IsPremium:     item.Entity.IsPremium,
+			IsCollectible: item.Entity.IsCollectible,
+			NextPriceDrop: time.Unix(int64(item.NextPriceTimestamp), 0),
+			Price:         AuctionPrice{item.Price.toPrice(), item.NextPrice.toPrice()},
+		}
 	}
 
 	var result []AuctionVehicle
-	for v := range resultCh {
+	for _, v := range vehicles {
 		result = append(result, v)
 	}
-	return result, len(data.Results), nil
+	return result, nil
 }

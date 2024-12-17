@@ -231,13 +231,6 @@ func getDetailedSize(images []image.Image, style Style) imageSize {
 	}
 }
 
-func max(a, b float64) float64 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 func clipRoundedRect(ctx *gg.Context, borderRadius float64) {
 	if borderRadius <= 0 {
 		return
