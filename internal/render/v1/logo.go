@@ -36,7 +36,7 @@ func (opts LogoSizingOptions) LineOffsetAt(i int) float64 {
 func (opts LogoSizingOptions) Height() int {
 	var maxHeight int
 	for line := range opts.Lines {
-		maxHeight = Max(maxHeight, int(math.RoundToEven(opts.LineHeightAt(line)+opts.LineOffsetAt(line))))
+		maxHeight = max(maxHeight, int(math.RoundToEven(opts.LineHeightAt(line)+opts.LineOffsetAt(line))))
 	}
 	return maxHeight
 }
