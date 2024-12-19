@@ -35,7 +35,6 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/tdewolff/minify/v2 v2.21.2
 	go.dedis.ch/protobuf v1.0.11
-	golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d
 	golang.org/x/image v0.23.0
 	golang.org/x/sync v0.10.0
 	golang.org/x/text v0.21.0

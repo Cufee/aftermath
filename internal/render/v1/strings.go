@@ -13,7 +13,7 @@ type StringSize struct {
 	LineHeight  float64
 }
 
-func MeasureString(text string, font Font) StringSize {
+func MeasureString(text string, font *Font) StringSize {
 	if !font.Valid() {
 		return StringSize{}
 	}

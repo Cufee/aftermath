@@ -12,13 +12,6 @@ import (
 var DiscordBackgroundColor = color.NRGBA{49, 51, 56, 255}
 
 var (
-	FontCustom func(float64) Font
-	FontXL     func() Font
-	Font2XL    func() Font
-	FontLarge  func() Font
-	FontMedium func() Font
-	FontSmall  func() Font
-
 	TextPrimary   = color.NRGBA{255, 255, 255, 255}
 	TextSecondary = color.NRGBA{204, 204, 204, 255}
 	TextAlt       = color.NRGBA{150, 150, 150, 255}
@@ -62,19 +55,45 @@ var (
 	userSubscriptionSupporter, userSubscriptionPlus, userSubscriptionPro, clanSubscriptionVerified, clanSubscriptionPro, subscriptionDeveloper, subscriptionServerModerator, subscriptionContentModerator, subscriptionServerBooster, subscriptionTranslator *subscriptionHeader
 )
 
+var defaultFont []byte
+var fonts = make(map[float64]*Font)
+
+func Font2XL() *Font {
+	return getFont(36)
+}
+func FontXL() *Font {
+	return getFont(32)
+}
+func FontLarge() *Font {
+	return getFont(24)
+}
+func FontMedium() *Font {
+	return getFont(18)
+}
+func FontSmall() *Font {
+	return getFont(14)
+}
+
+func getFont(size float64) *Font {
+	if fonts[size] == nil {
+		fonts[size] = NewFont(defaultFont, size)
+	}
+	return fonts[size]
+}
+
 func InitLoadedAssets() error {
 	fontData, ok := assets.GetLoadedFontFace("default")
 	if !ok {
 		return errors.New("default font not found")
 	}
+	defaultFont = fontData
 
-	FontXL = func() Font { return Font{size: 32, data: fontData} }
-	Font2XL = func() Font { return Font{size: 36, data: fontData} }
-	FontCustom = func(size float64) Font { return Font{size: size, data: fontData} }
-
-	FontLarge = func() Font { return Font{size: 24, data: fontData} }
-	FontMedium = func() Font { return Font{size: 18, data: fontData} }
-	FontSmall = func() Font { return Font{size: 14, data: fontData} }
+	// cache all fonts
+	Font2XL()
+	FontXL()
+	FontLarge()
+	FontMedium()
+	FontSmall()
 
 	// Personal
 	userSubscriptionSupporter = &subscriptionHeader{
