@@ -59,10 +59,12 @@ type UsersClient interface {
 	GetUserByID(ctx context.Context, id string, opts ...UserQueryOption) (models.User, error)
 	GetOrCreateUserByID(ctx context.Context, id string, opts ...UserQueryOption) (models.User, error)
 
+	FindUserConnections(ctx context.Context, opts ...ConnectionQueryOption) ([]models.UserConnection, error)
 	GetUserConnection(ctx context.Context, connection string) (models.UserConnection, error)
 	UpdateUserConnection(ctx context.Context, id string, connection models.UserConnection) (models.UserConnection, error)
 	UpsertUserConnection(ctx context.Context, connection models.UserConnection) (models.UserConnection, error)
 	DeleteUserConnection(ctx context.Context, userID, connectionID string) error
+	SetReferenceConnectionsUnverified(ctx context.Context, referenceID string) error
 
 	GetWidgetSettings(ctx context.Context, settingsID string) (models.WidgetOptions, error)
 	GetUserWidgetSettings(ctx context.Context, userID string, referenceID []string) ([]models.WidgetOptions, error)
@@ -71,7 +73,6 @@ type UsersClient interface {
 
 	GetUserContent(ctx context.Context, id string) (models.UserContent, error)
 	GetUserContentFromRef(ctx context.Context, referenceID string, kind models.UserContentType) (models.UserContent, error)
-	FindUserContentFromReference(ctx context.Context, userID string, referenceID string) (models.UserContent, error)
 	CreateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
 	UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
 	UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)

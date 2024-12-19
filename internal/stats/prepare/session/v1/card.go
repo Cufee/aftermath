@@ -6,6 +6,7 @@ import (
 
 	"github.com/cufee/aftermath/cmd/frontend/assets"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
@@ -92,7 +93,7 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 			}
 			glossary := glossary[options.VehicleID]
 			glossary.ID = options.VehicleID
-			overviewLabel = fmt.Sprintf("%s %s", common.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
+			overviewLabel = fmt.Sprintf("%s %s", logic.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
 		}
 
 		card, err := builder.makeOverviewCard(
@@ -229,7 +230,7 @@ func (b *cardBuilder) makeVehicleCard(vehicleID string, presets []common.Tag, ca
 	}
 
 	return VehicleCard{
-		Meta:   common.IntToRoman(b.vehicle(vehicleID).Tier),
+		Meta:   logic.IntToRoman(b.vehicle(vehicleID).Tier),
 		Title:  b.vehicle(vehicleID).Name(locale),
 		Type:   cardType,
 		Blocks: blocks,
@@ -257,7 +258,7 @@ func (b *cardBuilder) makeHighlightCard(vehicleID string, highlight common.Highl
 
 	return VehicleCard{
 		Meta:   printer(highlight.Label),
-		Title:  common.IntToRoman(b.vehicle(vehicleID).Tier) + " " + b.vehicle(vehicleID).Name(locale),
+		Title:  logic.IntToRoman(b.vehicle(vehicleID).Tier) + " " + b.vehicle(vehicleID).Name(locale),
 		Type:   common.CardTypeHighlight,
 		Blocks: blocks,
 	}, nil

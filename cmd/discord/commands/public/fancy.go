@@ -18,10 +18,11 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/external/images"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
-	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
+	render "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
 )
@@ -88,12 +89,15 @@ func init() {
 				}
 
 				// download and resize the image
-				img, err := common.SafeLoadRemoteImage(parsed)
+				ictx, cancel := context.WithTimeout(ctx.Ctx(), time.Second*1)
+				defer cancel()
+
+				img, err := images.SafeLoadFromURL(ictx, parsed, constants.ImageUploadMaxSize)
 				if err != nil {
-					if errors.Is(err, common.ErrUnsupportedImageFormat) {
+					if errors.Is(err, images.ErrUnsupportedImageFormat) {
 						return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_format")
 					}
-					if errors.Is(err, common.ErrInvalidImage) {
+					if errors.Is(err, images.ErrInvalidImage) {
 						return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_image")
 					}
 					return ctx.Err(err)
@@ -110,16 +114,15 @@ func init() {
 					return ctx.Err(err)
 				}
 
-				currentContent, err := ctx.Core().Database().FindUserContentFromReference(ctx.Ctx(), ctx.User().ID, ctx.User().ID)
+				currentContent, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypeInModeration)
+				if err != nil && !database.IsNotFound(err) {
+					return ctx.Err(err)
+				}
 				if database.IsNotFound(err) {
-					err = nil
 					currentContent = models.UserContent{
 						UserID:      ctx.User().ID,
 						ReferenceID: ctx.User().ID,
 					}
-				}
-				if err != nil {
-					return ctx.Err(err)
 				}
 
 				currentContent.Value = string(encoded)

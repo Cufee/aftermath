@@ -77,6 +77,11 @@
 - key: command_links_verify_cta
   value: "You can also verify your account with `/links verify`"
   context: A new default account was set, but it is not verified
+- key: command_links_view_content_fmt
+  value: "## Here is a list of your linked Blitz accounts!\n%s\n \nYou can manage and verify them on our website!"
+  context: The message body for showing a list of linked accounts
+- key: command_links_buttons_manage
+  value: Manage Accounts
 # /widget
 - key: "commands_widget_name"
   value: "widget"
@@ -131,6 +136,17 @@
   value: "**Your recent image moderation request was declined**\nIt looks like the image you have uploaded did not pass out safety standards. You background will not be updated."
 - key: fancy_moderation_request_declined_and_banned_fmt
   value: "**Your recent image moderation request was declined**\nIt looks like you have tried to upload an image that is against Aftermath Terms Of Service. As a result, your account will be restricted from uploading custom content until <t:%d:D>. This decision is final and cannot be appealed."
+
+# Seasonal Commands
+# auction
+- key: command_auction_name
+  value: auction
+- key: command_auction_description
+  value: View the current Blitz Auction
+- key: command_auction_result_fmt
+  value: "### Updated <t:%d:R>"
+- key: error_command_auction_still_refreshing
+  value: Aftermath is still working on refreshing the current auction offers, please try again in a couple minutes.
 
 # Common command options
 # days
@@ -213,6 +229,9 @@
 - key: common_error_command_missing_permissions
   value: "You don't have permission to use this command."
 
+- key: common_error_command_expired_fmt
+  value: "This is a seasonal command that was disabled on <t:%d:D> and will be removed soon."
+
 - key: common_error_payment_required
   value: "This feature of Aftermath is only available for users with an active subscription.\nYou can subscribe by using the `/subscribe` command."
 
@@ -222,7 +241,7 @@
 
 - key: common_error_missing_permissions_dm
   value: "Aftermath is not able to send you a direct message."
-  context: User has DMs restricted to friends only\
+  context: User has DMs restricted to friends only
 
 - key: common_error_missing_permissions_dm_mention_fmt
   value: "Hey %s, Aftermath is not able to send you a direct message."

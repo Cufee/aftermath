@@ -12,6 +12,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/cmd/discord/emoji"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
@@ -122,16 +123,14 @@ func init() {
 					return ctx.Reply().Send("links_error_connection_not_found_selected")
 
 				case "view":
-					var currentDefault string
+					connections := make(map[string]models.UserConnection)
 					var linkedAccounts []string
 					for _, conn := range ctx.User().Connections {
 						if conn.Type != models.ConnectionTypeWargaming {
 							continue
 						}
 						linkedAccounts = append(linkedAccounts, conn.ReferenceID)
-						if conn.Selected {
-							currentDefault = conn.ReferenceID
-						}
+						connections[conn.ReferenceID] = conn
 					}
 
 					accounts, err := ctx.Core().Database().GetAccounts(ctx.Ctx(), linkedAccounts)
@@ -142,18 +141,14 @@ func init() {
 						return ctx.Reply().Send("stats_error_connection_not_found_personal")
 					}
 
-					var longestName int
-					for _, a := range accounts {
-						if l := utf8.RuneCountInString(a.Nickname); l > longestName {
-							longestName = l
-						}
+					manageButton := discordgo.Button{
+						Style: discordgo.LinkButton,
+						Label: ctx.Localize("command_links_buttons_manage"),
+						Emoji: emoji.AftermathLogoColored("red"),
+						URL:   "https://amth.one/app",
 					}
 
-					var nicknames []string
-					for _, a := range accounts {
-						nicknames = append(nicknames, accountToRow(a, longestName, currentDefault == a.ID))
-					}
-					return ctx.Reply().Send(strings.Join(nicknames, "\n"))
+					return ctx.Reply().Format("command_links_view_content_fmt", linkedAccountsString(accounts, connections)).Component(discordgo.ActionsRow{Components: []discordgo.MessageComponent{manageButton}}).Send()
 
 				case "add":
 					var wgConnections []models.UserConnection
@@ -217,4 +212,35 @@ func init() {
 				}
 			}),
 	)
+}
+
+func linkedAccountsString(accounts []models.Account, connections map[string]models.UserConnection) string {
+	var longestName int
+	for _, a := range accounts {
+		if l := utf8.RuneCountInString(a.Nickname); l > longestName {
+			longestName = l
+		}
+	}
+
+	var nicknames []string
+	for _, a := range accounts {
+		nicknames = append(nicknames, accountToLinksRow(a, connections[a.ID], longestName))
+	}
+
+	return strings.Join(nicknames, "\n")
+}
+
+func accountToLinksRow(account models.Account, connection models.UserConnection, maxNameWidth int) string {
+	var row string
+	if connection.Selected {
+		row += "⬢ "
+	} else {
+		row += "⬡ "
+	}
+	row += "[" + account.Realm.String() + "] "
+	row += account.Nickname
+	if connection.Verified {
+		row += strings.Repeat(" ", maxNameWidth-utf8.RuneCountInString(account.Nickname)) + " <:verified:1315490261127925881>"
+	}
+	return row
 }

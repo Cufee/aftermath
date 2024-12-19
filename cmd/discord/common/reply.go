@@ -142,6 +142,11 @@ func (r Reply) Message(content ...string) (discordgo.Message, error) {
 	return r.ctx.InteractionResponse(r)
 }
 
+func (r Reply) Followup(content ...string) (discordgo.Message, error) {
+	r.internal.Text = append(r.internal.Text, content...)
+	return r.ctx.InteractionFollowUp(r)
+}
+
 func (r replyInternal) Build(localize func(string) string) (ResponseData, []rest.File) {
 	var content []string
 	for _, t := range r.Text {

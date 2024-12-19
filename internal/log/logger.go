@@ -43,7 +43,7 @@ func NewMiddleware(logger zerolog.Logger, ignorePath ...string) func(http.Handle
 			Int("status", status).
 			Str("method", r.Method).
 			Str("duration", duration.String()).
-			Stringer("url", r.URL).
+			Str("url", r.URL.Path).
 			Msg("")
 	}))
 

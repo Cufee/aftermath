@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/localization"
+	rc "github.com/cufee/aftermath/internal/render/v1"
 	client "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
-	rc "github.com/cufee/aftermath/internal/stats/render/common/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/replay/v1"
 	session "github.com/cufee/aftermath/internal/stats/render/session/v1"
 	"github.com/cufee/aftermath/tests"
@@ -23,6 +23,7 @@ import (
 	"github.com/nao1215/imaging"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/text/language"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -35,6 +36,21 @@ func init() {
 	loadStaticAssets(static)
 	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
 	zerolog.SetGlobalLevel(level)
+}
+
+func TestStressRenderSession(t *testing.T) {
+	env.LoadTestEnv(t)
+	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
+
+	var group errgroup.Group
+	for range 100 {
+		group.Go(func() error {
+			_, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithWN8())
+			return err
+		})
+	}
+	err := group.Wait()
+	assert.NoError(t, err, "failed to render a session image")
 }
 
 func TestRenderSession(t *testing.T) {

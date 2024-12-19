@@ -7,7 +7,6 @@ import (
 	"slices"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands"
@@ -15,9 +14,9 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/search"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
 func init() {
@@ -52,16 +51,9 @@ func init() {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"}).Send()
 				}
 
-				var longestName int
-				for _, a := range accounts {
-					if l := utf8.RuneCountInString(a.Nickname); l > longestName {
-						longestName = l
-					}
-				}
-
 				var opts []*discordgo.ApplicationCommandOptionChoice
 				for _, a := range accounts {
-					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: accountToRow(a, longestName, currentDefault == a.ID), Value: fmt.Sprintf("valid#%s#%s#%s", a.ID, a.Nickname, a.Realm)})
+					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: accountToRow(a, currentDefault == a.ID), Value: fmt.Sprintf("valid#%s#%s#%s", a.ID, a.Nickname, a.Realm)})
 				}
 				return ctx.Reply().Choices(opts...).Send()
 			}),
@@ -83,7 +75,7 @@ func init() {
 					if !ok {
 						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"}).Send()
 					}
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", prepare.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)}).Send()
+					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)}).Send()
 				}
 
 				if len(options.TankSearch) < 3 {
@@ -97,7 +89,7 @@ func init() {
 
 				var opts []*discordgo.ApplicationCommandOptionChoice
 				for _, v := range vehicles {
-					content := fmt.Sprintf("%s %s", prepare.IntToRoman(v.Tier), v.Name(ctx.Locale()))
+					content := fmt.Sprintf("%s %s", logic.IntToRoman(v.Tier), v.Name(ctx.Locale()))
 					opts = append(opts, &discordgo.ApplicationCommandOptionChoice{Name: content, Value: fmt.Sprintf("valid#vehicle#%s", v.ID)})
 				}
 				return ctx.Reply().Choices(opts...).Send()
@@ -168,12 +160,14 @@ func init() {
 	)
 }
 
-func accountToRow(account models.Account, padding int, isDefault bool) string {
+func accountToRow(account models.Account, isDefault bool) string {
 	var row string
-	row += "[" + account.Realm.String() + "] "
-	row += account.Nickname + strings.Repeat(" ", padding-utf8.RuneCountInString(account.Nickname))
 	if isDefault {
-		row += " ⭐"
+		row += "⬢ "
+	} else {
+		row += "⬡ "
 	}
+	row += "[" + account.Realm.String() + "] "
+	row += account.Nickname
 	return row
 }

@@ -4,9 +4,9 @@ import (
 	"image"
 
 	"github.com/cufee/aftermath/internal/database/models"
+	common "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
-	"github.com/cufee/aftermath/internal/stats/render/common/v1"
 	"golang.org/x/text/language"
 )
 

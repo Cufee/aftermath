@@ -44,8 +44,8 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 
 	"github.com/cufee/aftermath/internal/log"
-	"github.com/cufee/aftermath/internal/stats/render/assets"
-	render "github.com/cufee/aftermath/internal/stats/render/common/v1"
+	"github.com/cufee/aftermath/internal/render/assets"
+	render "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/rs/zerolog"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -56,7 +56,7 @@ import (
 
 //go:generate templ generate
 //go:generate go generate ./internal/assets
-//go:generate go generate ./internal/database/ent
+//go:generate go generate ./internal/database
 //go:generate go generate ./cmd/frontend/assets/generate
 //go:generate task build-widget
 

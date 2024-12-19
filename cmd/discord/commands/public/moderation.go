@@ -9,7 +9,6 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
-	"github.com/cufee/aftermath/cmd/frontend/logic"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -113,7 +112,6 @@ func init() {
 					}
 
 					// update the content
-					content.ReferenceID = logic.StringIfElse(currentContent.ReferenceID, request.RequestorID, currentContent.ReferenceID != "")
 					content.Type = models.UserContentTypePersonalBackground
 					content.Meta["moderation_request_approved_time"] = time.Now()
 					content.Meta["moderation_request_approved"] = true

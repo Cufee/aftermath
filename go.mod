@@ -12,7 +12,7 @@ require (
 	github.com/a-h/templ v0.2.793
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/cufee/aftermath-assets v0.1.0
-	github.com/cufee/am-wg-proxy-next/v2 v2.2.3
+	github.com/cufee/am-wg-proxy-next/v2 v2.2.5
 	github.com/fogleman/gg v1.3.0
 	github.com/go-co-op/gocron v1.37.0
 	github.com/goccy/go-json v0.10.3
@@ -35,7 +35,6 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/tdewolff/minify/v2 v2.21.2
 	go.dedis.ch/protobuf v1.0.11
-	golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d
 	golang.org/x/image v0.23.0
 	golang.org/x/sync v0.10.0
 	golang.org/x/text v0.21.0

@@ -3,7 +3,7 @@ package replay
 import (
 	"image/color"
 
-	"github.com/cufee/aftermath/internal/stats/render/common/v1"
+	common "github.com/cufee/aftermath/internal/render/v1"
 )
 
 var (
