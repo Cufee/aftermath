@@ -1,13 +1,16 @@
 package render
 
 import (
+	"sync"
+
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 )
 
 type Font struct {
 	size float64
-	data []byte
+	face font.Face
+	mx   *sync.Mutex
 }
 
 func (f *Font) Size() float64 {
@@ -15,13 +18,18 @@ func (f *Font) Size() float64 {
 }
 
 func (f *Font) Valid() bool {
-	return f.data != nil && f.size > 0
+	return f.face != nil
 }
 
 func (f *Font) Face() (font.Face, func() error) {
-	ttf, _ := truetype.Parse(f.data)
+	f.mx.Lock()
+	return f.face, func() error { f.mx.Unlock(); return nil }
+}
+
+func NewFont(data []byte, size float64) *Font {
+	ttf, _ := truetype.Parse(data)
 	face := truetype.NewFace(ttf, &truetype.Options{
-		Size: f.size,
+		Size: size,
 	})
-	return face, face.Close
+	return &Font{size, face, &sync.Mutex{}}
 }

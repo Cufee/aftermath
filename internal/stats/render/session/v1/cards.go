@@ -50,12 +50,12 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		titleStyle := common.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(0))
 		clanSize := common.MeasureString(session.Account.ClanTag, titleStyle.ClanTag.Font)
 		nameSize := common.MeasureString(session.Account.Nickname, titleStyle.Nickname.Font)
-		primaryCardWidth = common.Max(primaryCardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
+		primaryCardWidth = max(primaryCardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
 	}
 	{
 		for _, text := range opts.PromoText {
 			size := common.MeasureString(text, promoTextStyle().Font)
-			totalFrameWidth = common.Max(size.TotalWidth, totalFrameWidth)
+			totalFrameWidth = max(size.TotalWidth, totalFrameWidth)
 		}
 	}
 
@@ -65,9 +65,9 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 			styleWithIconOffset.session.PaddingX += vehicleComparisonIconSize
 
 			presetBlockWidth, contentWidth := overviewColumnBlocksWidth(column.Blocks, styleWithIconOffset.session, styleWithIconOffset.career, styleWithIconOffset.label, overviewColumnStyle(0))
-			overviewColumnSizes[string(column.Flavor)] = common.Max(overviewColumnSizes[string(column.Flavor)], contentWidth)
+			overviewColumnSizes[string(column.Flavor)] = max(overviewColumnSizes[string(column.Flavor)], contentWidth)
 			for key, width := range presetBlockWidth {
-				primaryCardBlockSizes[key] = common.Max(primaryCardBlockSizes[key], width)
+				primaryCardBlockSizes[key] = max(primaryCardBlockSizes[key], width)
 			}
 		}
 	}
@@ -77,9 +77,9 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 			styleWithIconOffset.session.PaddingX += vehicleComparisonIconSize
 
 			presetBlockWidth, contentWidth := overviewColumnBlocksWidth(column.Blocks, styleWithIconOffset.session, styleWithIconOffset.career, styleWithIconOffset.label, overviewColumnStyle(0))
-			overviewColumnSizes[string(column.Flavor)] = common.Max(overviewColumnSizes[string(column.Flavor)], contentWidth)
+			overviewColumnSizes[string(column.Flavor)] = max(overviewColumnSizes[string(column.Flavor)], contentWidth)
 			for key, width := range presetBlockWidth {
-				primaryCardBlockSizes[key] = common.Max(primaryCardBlockSizes[key], width)
+				primaryCardBlockSizes[key] = max(primaryCardBlockSizes[key], width)
 			}
 		}
 	}
@@ -89,14 +89,14 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		for _, column := range cards.Unrated.Overview.Blocks {
 			totalContentWidth += overviewColumnSizes[string(column.Flavor)]
 		}
-		primaryCardWidth = common.Max(primaryCardWidth, totalContentWidth)
+		primaryCardWidth = max(primaryCardWidth, totalContentWidth)
 	}
 	if shouldRenderRatingOverview {
 		var totalContentWidth float64 = overviewCardStyle(0).Gap*float64(len(cards.Rating.Overview.Blocks)-1) + overviewCardStyle(0).PaddingX*2
 		for _, column := range cards.Rating.Overview.Blocks {
 			totalContentWidth += overviewColumnSizes[string(column.Flavor)]
 		}
-		primaryCardWidth = common.Max(primaryCardWidth, totalContentWidth)
+		primaryCardWidth = max(primaryCardWidth, totalContentWidth)
 	}
 
 	// highlighted vehicles go on the primary block
@@ -108,11 +108,11 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 			style := vehicleBlockStyle()
 			presetBlockWidth, contentWidth := highlightedVehicleBlocksWidth(card.Blocks, style.session, style.career, style.label, highlightedVehicleBlockRowStyle(0))
 			// add the gap and card padding, the gap here accounts for title/label being inline with content
-			contentWidth += highlightedVehicleBlockRowStyle(0).Gap*float64(len(card.Blocks)-1) + highlightedVehicleCardStyle(0).Gap + highlightedVehicleCardStyle(0).PaddingX*2 + common.Max(titleSize.TotalWidth, labelSize.TotalWidth)
-			primaryCardWidth = common.Max(primaryCardWidth, contentWidth)
+			contentWidth += highlightedVehicleBlockRowStyle(0).Gap*float64(len(card.Blocks)-1) + highlightedVehicleCardStyle(0).Gap + highlightedVehicleCardStyle(0).PaddingX*2 + max(titleSize.TotalWidth, labelSize.TotalWidth)
+			primaryCardWidth = max(primaryCardWidth, contentWidth)
 
 			for key, width := range presetBlockWidth {
-				highlightCardBlockSizes[key] = common.Max(highlightCardBlockSizes[key], width)
+				highlightCardBlockSizes[key] = max(highlightCardBlockSizes[key], width)
 			}
 		}
 	}
@@ -127,10 +127,10 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 			contentWidth += vehicleBlocksRowStyle(0).Gap*float64(len(card.Blocks)-1) + vehicleCardStyle(0).PaddingX*2
 
 			titleSize := common.MeasureString(card.Title, vehicleCardTitleTextStyle().Font)
-			secondaryCardWidth = common.Max(secondaryCardWidth, contentWidth, titleSize.TotalWidth+vehicleCardStyle(0).PaddingX*2)
+			secondaryCardWidth = max(secondaryCardWidth, contentWidth, titleSize.TotalWidth+vehicleCardStyle(0).PaddingX*2)
 
 			for key, width := range presetBlockWidth {
-				secondaryCardBlockSizes[key] = common.Max(secondaryCardBlockSizes[key], width)
+				secondaryCardBlockSizes[key] = max(secondaryCardBlockSizes[key], width)
 			}
 		}
 	}
@@ -161,7 +161,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	if secondaryCardWidth > 0 && primaryCardWidth > 0 {
 		frameWidth += frameStyle().Gap
 	}
-	totalFrameWidth = common.Max(totalFrameWidth, frameWidth)
+	totalFrameWidth = max(totalFrameWidth, frameWidth)
 
 	// header card
 	if headerCard, headerCardExists := common.NewHeaderCard(totalFrameWidth, subs, opts.PromoText); headerCardExists {
@@ -217,18 +217,18 @@ func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], 
 		var width float64
 		{
 			size := common.MeasureString(block.Data.Session().String(), sessionStyle.Font)
-			width = common.Max(width, size.TotalWidth+sessionStyle.PaddingX*2)
+			width = max(width, size.TotalWidth+sessionStyle.PaddingX*2)
 		}
 		{
 			size := common.MeasureString(block.Data.Career().String(), careerStyle.Font)
-			width = common.Max(width, size.TotalWidth+careerStyle.PaddingX*2)
+			width = max(width, size.TotalWidth+careerStyle.PaddingX*2)
 		}
 		{
 			size := common.MeasureString(block.Label, labelStyle.Font)
-			width = common.Max(width, size.TotalWidth+labelStyle.PaddingX*2+vehicleLegendLabelContainer.PaddingX*2)
+			width = max(width, size.TotalWidth+labelStyle.PaddingX*2+vehicleLegendLabelContainer.PaddingX*2)
 		}
-		maxBlockWidth = common.Max(maxBlockWidth, width)
-		presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], width)
+		maxBlockWidth = max(maxBlockWidth, width)
+		presetBlockWidth[block.Tag.String()] = max(presetBlockWidth[block.Tag.String()], width)
 	}
 
 	if containerStyle.Direction == common.DirectionHorizontal {
@@ -250,14 +250,14 @@ func highlightedVehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData
 		var width float64
 		{
 			size := common.MeasureString(block.Data.Session().String(), sessionStyle.Font)
-			width = common.Max(width, size.TotalWidth+sessionStyle.PaddingX*2)
+			width = max(width, size.TotalWidth+sessionStyle.PaddingX*2)
 		}
 		{
 			size := common.MeasureString(block.Label, labelStyle.Font)
-			width = common.Max(width, size.TotalWidth+labelStyle.PaddingX*2)
+			width = max(width, size.TotalWidth+labelStyle.PaddingX*2)
 		}
-		maxBlockWidth = common.Max(maxBlockWidth, width)
-		presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], width)
+		maxBlockWidth = max(maxBlockWidth, width)
+		presetBlockWidth[block.Tag.String()] = max(presetBlockWidth[block.Tag.String()], width)
 	}
 
 	if containerStyle.Direction == common.DirectionHorizontal {
@@ -278,13 +278,13 @@ func overviewColumnBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, st
 		if block.Tag == prepare.TagWN8 {
 			tierNameSize := common.MeasureString(common.GetWN8TierName(block.Value().Float()), overviewSpecialRatingLabelStyle(nil).Font)
 			tierNameWithPadding := tierNameSize.TotalWidth + overviewSpecialRatingPillStyle(nil).PaddingX*2
-			presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], specialRatingIconSize, tierNameWithPadding)
-			contentWidth = common.Max(contentWidth, tierNameWithPadding)
+			presetBlockWidth[block.Tag.String()] = max(presetBlockWidth[block.Tag.String()], specialRatingIconSize, tierNameWithPadding)
+			contentWidth = max(contentWidth, tierNameWithPadding)
 		}
 		if block.Tag == prepare.TagRankedRating {
 			valueSize := common.MeasureString(block.Value().String(), overviewSpecialRatingLabelStyle(nil).Font)
-			presetBlockWidth[block.Tag.String()] = common.Max(presetBlockWidth[block.Tag.String()], specialRatingIconSize, valueSize.TotalWidth)
-			contentWidth = common.Max(contentWidth, valueSize.TotalWidth)
+			presetBlockWidth[block.Tag.String()] = max(presetBlockWidth[block.Tag.String()], specialRatingIconSize, valueSize.TotalWidth)
+			contentWidth = max(contentWidth, valueSize.TotalWidth)
 		}
 	}
 	return presetBlockWidth, contentWidth

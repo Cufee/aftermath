@@ -30,7 +30,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 			titleStyle := common.DefaultPlayerTitleStyle(stats.Account.Nickname, titleCardStyle(cardWidth))
 			clanSize := common.MeasureString(stats.Account.ClanTag, titleStyle.ClanTag.Font)
 			nameSize := common.MeasureString(stats.Account.Nickname, titleStyle.Nickname.Font)
-			cardWidth = common.Max(cardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
+			cardWidth = max(cardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
 		}
 		{
 			rowStyle := getOverviewStyle(cardWidth)
@@ -45,7 +45,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 					labelSize := common.MeasureString(label, labelStyle.Font)
 					valueSize := common.MeasureString(block.Value().String(), valueStyle.Font)
 
-					overviewColumnWidth = common.Max(overviewColumnWidth, common.Max(labelSize.TotalWidth+overviewSpecialRatingPillStyle(nil).PaddingX*2, valueSize.TotalWidth))
+					overviewColumnWidth = max(overviewColumnWidth, max(labelSize.TotalWidth+overviewSpecialRatingPillStyle(nil).PaddingX*2, valueSize.TotalWidth))
 				}
 			}
 
@@ -53,7 +53,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 			paddingAndGaps := (cardStyle.PaddingX+rowStyle.container.PaddingX+rowStyle.blockContainer.PaddingX)*2 + float64(len(cards.Overview.Blocks)-1)*(cardStyle.Gap+rowStyle.container.Gap+rowStyle.blockContainer.Gap)
 
 			overviewCardContentWidth := overviewColumnWidth * float64(len(cards.Overview.Blocks))
-			cardWidth = common.Max(cardWidth, overviewCardContentWidth+paddingAndGaps)
+			cardWidth = max(cardWidth, overviewCardContentWidth+paddingAndGaps)
 		}
 
 		{
@@ -63,19 +63,19 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 				// Title and tank name
 				metaSize := common.MeasureString(highlight.Meta, highlightStyle.cardTitle.Font)
 				titleSize := common.MeasureString(highlight.Title, highlightStyle.tankName.Font)
-				highlightTitleMaxWidth = common.Max(highlightTitleMaxWidth, metaSize.TotalWidth, titleSize.TotalWidth)
+				highlightTitleMaxWidth = max(highlightTitleMaxWidth, metaSize.TotalWidth, titleSize.TotalWidth)
 
 				// Blocks
-				highlightBlocksMaxCount = common.Max(highlightBlocksMaxCount, float64(len(highlight.Blocks)))
+				highlightBlocksMaxCount = max(highlightBlocksMaxCount, float64(len(highlight.Blocks)))
 				for _, block := range highlight.Blocks {
 					labelSize := common.MeasureString(block.Label, highlightStyle.blockLabel.Font)
 					valueSize := common.MeasureString(block.Value().String(), highlightStyle.blockValue.Font)
-					highlightBlockMaxSize = common.Max(highlightBlockMaxSize, valueSize.TotalWidth, labelSize.TotalWidth)
+					highlightBlockMaxSize = max(highlightBlockMaxSize, valueSize.TotalWidth, labelSize.TotalWidth)
 				}
 			}
 
 			highlightCardWidthMax := (highlightStyle.container.PaddingX * 2) + (highlightStyle.container.Gap * highlightBlocksMaxCount) + (highlightBlockMaxSize * highlightBlocksMaxCount) + highlightTitleMaxWidth
-			cardWidth = common.Max(cardWidth, highlightCardWidthMax)
+			cardWidth = max(cardWidth, highlightCardWidthMax)
 		}
 	}
 

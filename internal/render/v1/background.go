@@ -37,8 +37,8 @@ func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed
 
 func NewBrandedBackground(width, height, logoSize, padding int, colors []color.Color, hashSeed int) image.Image {
 	// 1/3 of the image should be left for logos
-	rows := Max((height-padding*2)/3/logoSize, 2)
-	cols := Max((width-padding*2)/3/logoSize, 2)
+	rows := max((height-padding*2)/3/logoSize, 2)
+	cols := max((width-padding*2)/3/logoSize, 2)
 	// the rest is gaps
 	xGapsTotal := width - padding*2 - (cols)*logoSize
 	yGapsTotal := height - padding*2 - (rows)*logoSize
@@ -71,6 +71,7 @@ func NewBrandedBackground(width, height, logoSize, padding int, colors []color.C
 	for c := range cols {
 		for r := range rows {
 			wg.Add(1)
+
 			makeFn = append(makeFn, func() {
 				defer wg.Done()
 

@@ -27,7 +27,7 @@ const (
 )
 
 type Style struct {
-	Font      Font
+	Font      *Font
 	FontColor color.Color
 
 	JustifyContent justifyContentValue

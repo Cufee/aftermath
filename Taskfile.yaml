@@ -17,6 +17,19 @@ tasks:
           go test -timeout 30s --count=1 -v -run {{ .CLI_ARGS }}
         fi
 
+  bench:
+    dotenv:
+      - ".env.test"
+    desc: runs tests
+    cmds:
+      # - task: db-migrate-apply-test
+      - |
+        if [ -z "{{ .CLI_ARGS }}" ]; then
+          go test -timeout 30s --count=1 -v -bench=. -benchmem -memprofile tmp/pprof/memory-test.out -cpuprofile tmp/pprof/cpu-test.out ./...
+        else
+          go test -timeout 30s --count=1 -v  -bench=. -benchmem -memprofile tmp/pprof/memory-test.out -cpuprofile tmp/pprof/cpu-test.out -run {{ .CLI_ARGS }}
+        fi
+
   generate-db:
     desc: generate models from database schema
     cmd: go generate ./internal/database
