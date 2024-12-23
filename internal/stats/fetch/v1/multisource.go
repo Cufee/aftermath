@@ -100,9 +100,11 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 	close(errors)
 
 	// return first error
-	if len(errors) == 3 || (len(data) == 0 && len(errors) > 0) {
+	if len(data) == 0 && len(errors) > 0 {
 		for err := range errors {
-			return nil, err
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
