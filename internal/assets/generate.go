@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/log"
 	common "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
-	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
 
 	"github.com/joho/godotenv"

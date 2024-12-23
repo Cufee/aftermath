@@ -44,7 +44,7 @@ func GetAccountBackgroundImage(ctx context.Context, db database.Client, accountI
 		return nil, models.UserContent{}, errors.New("account id does not have a verified connection")
 	}
 	if len(connections) > 1 {
-		log.Warn().Msg("found multiple verified connections for the same wargaming account")
+		log.Warn().Str("account", accountID).Int("connections", len(connections)).Msg("found multiple verified connections for the same wargaming account")
 	}
 
 	content, err := db.GetUserContentFromRef(ctx, connections[0].UserID, models.UserContentTypePersonalBackground)

@@ -11,16 +11,17 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/log"
 	backend "github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/realtime"
 	"github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 	"golang.org/x/text/language"
-	"net/http"
 	"strconv"
+
+	"net/http"
 	"time"
 )
 
