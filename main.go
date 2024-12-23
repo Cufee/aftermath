@@ -29,6 +29,7 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend"
 	"github.com/nao1215/imaging"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 
 	"github.com/cufee/aftermath/cmd/core/server"
 	"github.com/cufee/aftermath/cmd/core/server/handlers/private"
@@ -46,7 +47,6 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/render/assets"
 	render "github.com/cufee/aftermath/internal/render/v1"
-	"github.com/rs/zerolog"
 
 	_ "github.com/joho/godotenv/autoload"
 

@@ -11,7 +11,13 @@ import (
 	"github.com/rs/zerolog/hlog"
 )
 
-var globalLogger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+type DokployTypeHook struct{}
+
+func (h DokployTypeHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
+	e.Str("type", "["+level.String()+"]")
+}
+
+var globalLogger = zerolog.New(os.Stdout).Hook(DokployTypeHook{}).With().Timestamp().Logger()
 
 func SetupGlobalLogger(setup func(zerolog.Logger) zerolog.Logger) {
 	globalLogger = setup(globalLogger)
