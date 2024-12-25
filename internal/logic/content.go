@@ -35,6 +35,10 @@ func ImageToUserContentValue(img image.Image) ([]byte, error) {
 }
 
 func GetAccountBackgroundImage(ctx context.Context, db database.Client, accountID string) (image.Image, models.UserContent, error) {
+	if accountID == "" {
+		return nil, models.UserContent{}, errors.New("invalid account id")
+	}
+
 	// find who owns the account verification
 	connections, err := db.FindUserConnections(ctx, database.ConnectionType(models.ConnectionTypeWargaming), database.ConnectionReferenceID(accountID), database.ConnectionVerified(true))
 	if err != nil {
