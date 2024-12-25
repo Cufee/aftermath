@@ -138,7 +138,7 @@ var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
 		return ctx.Redirect("/error?message=invalid realm", http.StatusTemporaryRedirect)
 	}
 
-	domain, ok := realm.DomainWorldOfTanks()
+	domain, ok := realm.DomainWorldOfTanksAPI()
 	if !ok {
 		return ctx.Redirect("/error?message=invalid realm", http.StatusTemporaryRedirect)
 	}
@@ -160,7 +160,7 @@ var WargamingBegin handler.Endpoint = func(ctx *handler.Context) error {
 }
 
 func verifyAccountToken(ctx context.Context, appID string, realm types.Realm, accountID string, token string) error {
-	domain, ok := realm.DomainBlitz()
+	domain, ok := realm.DomainBlitzAPI()
 	if !ok {
 		return wargaming.ErrRealmNotSupported
 	}
@@ -177,6 +177,10 @@ func verifyAccountToken(ctx context.Context, appID string, realm types.Realm, ac
 		return err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New("bad status code")
+	}
 
 	var response types.WgResponse[map[string]types.Account]
 	err = json.NewDecoder(res.Body).Decode(&response)
