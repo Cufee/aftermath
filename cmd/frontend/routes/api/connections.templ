@@ -42,6 +42,7 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 	for _, conn := range user.Connections {
 		if conn.Selected {
 			previous = conn
+			previous.Selected = previous.ID == connID
 		}
 
 		conn.Selected = conn.ID == connID
@@ -90,7 +91,9 @@ var SetDefaultConnection handler.Partial = func(ctx *handler.Context) (templ.Com
 }
 
 templ updatedConnections(conns []connections.ConnectionWithAccount, defaultID string) {
-	for _, c := range conns {
-		@connections.ConnectionCard(c, defaultID)
-	}
+	<div>
+		for _, c := range conns {
+			@connections.ConnectionCard(c, defaultID)
+		}
+	</div>
 }
