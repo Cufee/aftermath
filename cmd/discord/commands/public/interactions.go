@@ -58,7 +58,10 @@ func MentionHandler(errorImage []byte) common.EventHandler[discordgo.MessageCrea
 					if err != nil {
 						log.Warn().Str("userId", ctx.User().ID).Err(err).Msg("failed to create a DM channel for a user")
 						data := discordgo.MessageSend{Content: fmt.Sprintf(printer("errors_help_missing_dm_permissions_fmt"), "<@"+ctx.User().ID+">"), Flags: discordgo.MessageFlagsEphemeral}
-						_, _ = ctx.Rest().CreateMessage(ctx.Ctx(), channel.ID, data, []rest.File{{Data: errorImage, Name: "how_to_use_aftermath.png"}})
+						_, err = ctx.Rest().CreateMessage(ctx.Ctx(), event.ChannelID, data, []rest.File{{Data: errorImage, Name: "how_to_use_aftermath.png"}})
+						if err != nil {
+							log.Err(err).Msg("failed to send a channel message")
+						}
 						return nil
 					}
 
@@ -77,7 +80,10 @@ func MentionHandler(errorImage []byte) common.EventHandler[discordgo.MessageCrea
 					if err != nil {
 						log.Warn().Str("userId", ctx.User().ID).Err(err).Msg("failed to DM a user")
 						data := discordgo.MessageSend{Content: fmt.Sprintf(printer("errors_help_missing_dm_permissions_fmt"), "<@"+ctx.User().ID+">"), Flags: discordgo.MessageFlagsEphemeral}
-						_, _ = ctx.Rest().CreateMessage(ctx.Ctx(), channel.ID, data, []rest.File{{Data: errorImage, Name: "how_to_use_aftermath.png"}})
+						_, err = ctx.Rest().CreateMessage(ctx.Ctx(), event.ChannelID, data, []rest.File{{Data: errorImage, Name: "how_to_use_aftermath.png"}})
+						if err != nil {
+							log.Err(err).Msg("failed to send a channel message")
+						}
 					}
 					return nil
 				}
