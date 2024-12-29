@@ -177,7 +177,7 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 				c, cancel := context.WithTimeout(context.Background(), time.Second*15)
 				defer cancel()
 
-				image, _, err := ctx.Core().Stats(ctx.Locale()).ReplayImage(c, url)
+				image, _, err := ctx.Core().Stats(ctx.Locale()).ReplayImage(c, url, stats.WithWN8())
 				if err != nil {
 					return err
 				}
