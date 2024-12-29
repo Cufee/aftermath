@@ -195,7 +195,7 @@ func main() {
 
 func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway.Client, error) {
 	// discord gateway
-	gw, err := gateway.NewClient(core, constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages)
+	gw, err := gateway.NewClient(core, constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages|discordgo.IntentGuildMessageReactions|discordgo.IntentDirectMessageReactions)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a gateway client")
 	}
@@ -211,6 +211,8 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway
 		return nil, errors.Wrap(err, "failed to encode help image")
 	}
 	gw.Handler(public.MentionHandler(buf.Bytes()))
+	gw.Handler(gateway.ToGatewayHandler(gw, public.ReplayFileHandler))
+	gw.Handler(gateway.ToGatewayHandler(gw, public.ReplayInteractionHandler))
 
 	err = gw.Connect()
 	if err != nil {

@@ -1,6 +1,6 @@
 package constants
 
 var (
-	DatabasePath = mustGetEnv("DATABASE_PATH")
-	DatabaseName = mustGetEnv("DATABASE_NAME")
+	DatabasePath = MustGetEnv("DATABASE_PATH")
+	DatabaseName = MustGetEnv("DATABASE_NAME")
 )

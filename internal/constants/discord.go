@@ -6,28 +6,28 @@ import (
 )
 
 var (
-	DiscordBotInviteURL          = mustGetEnv("BOT_INVITE_LINK")
-	DiscordPrimaryGuildInviteURL = mustGetEnv("PRIMARY_GUILD_INVITE_LINK")
+	DiscordBotInviteURL          = MustGetEnv("BOT_INVITE_LINK")
+	DiscordPrimaryGuildInviteURL = MustGetEnv("PRIMARY_GUILD_INVITE_LINK")
 )
 
 var (
-	DiscordPrimaryToken     = mustGetEnv("DISCORD_TOKEN")
-	DiscordPrimaryPublicKey = mustGetEnv("DISCORD_PUBLIC_KEY")
+	DiscordPrimaryToken     = MustGetEnv("DISCORD_TOKEN")
+	DiscordPrimaryPublicKey = MustGetEnv("DISCORD_PUBLIC_KEY")
 
 	DiscordPrivateBotEnabled = os.Getenv("INTERNAL_DISCORD_TOKEN") != ""
-	DiscordPrivateToken      = mustGetEnv("INTERNAL_DISCORD_TOKEN", func() bool { return !DiscordPrivateBotEnabled })
-	DiscordPrivatePublicKey  = mustGetEnv("INTERNAL_DISCORD_PUBLIC_KEY", func() bool { return !DiscordPrivateBotEnabled })
+	DiscordPrivateToken      = MustGetEnv("INTERNAL_DISCORD_TOKEN", func() bool { return !DiscordPrivateBotEnabled })
+	DiscordPrivatePublicKey  = MustGetEnv("INTERNAL_DISCORD_PUBLIC_KEY", func() bool { return !DiscordPrivateBotEnabled })
 )
 
 var (
-	DiscordAuthClientID      = mustGetEnv("DISCORD_AUTH_CLIENT_ID")
-	DiscordAuthClientSecret  = mustGetEnv("DISCORD_AUTH_CLIENT_SECRET")
-	DiscordAuthRedirectURL   = mustGetEnv("DISCORD_AUTH_REDIRECT_URL")
-	DiscordAuthDefaultScopes = mustGetEnv("DISCORD_AUTH_DEFAULT_SCOPES")
+	DiscordAuthClientID      = MustGetEnv("DISCORD_AUTH_CLIENT_ID")
+	DiscordAuthClientSecret  = MustGetEnv("DISCORD_AUTH_CLIENT_SECRET")
+	DiscordAuthRedirectURL   = MustGetEnv("DISCORD_AUTH_REDIRECT_URL")
+	DiscordAuthDefaultScopes = MustGetEnv("DISCORD_AUTH_DEFAULT_SCOPES")
 )
 
 var (
-	DiscordContentModerationChannelID = mustGetEnv("DISCORD_CONTENT_MODERATION_CHANNEL_ID")
+	DiscordContentModerationChannelID = MustGetEnv("DISCORD_CONTENT_MODERATION_CHANNEL_ID")
 )
 
 var (
@@ -37,4 +37,10 @@ var (
 
 var (
 	DefaultFeatureBanDuration time.Duration = time.Hour * 24 * 180 // 180 days
+)
+
+var (
+	DiscordEmojiYellowID = MustGetEnv("EMOJI_AFTERMATH_YELLOW_ID")
+	DiscordEmojiBlueID   = MustGetEnv("EMOJI_AFTERMATH_BLUE_ID")
+	DiscordEmojiRedID    = MustGetEnv("EMOJI_AFTERMATH_RED_ID")
 )

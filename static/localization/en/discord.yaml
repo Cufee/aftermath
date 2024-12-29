@@ -350,6 +350,17 @@
   value: "When using this command, you only need to provide either a link or a replay file. The replay file will override the link if both are provided."
   context: User provided a link AND a file, this will not cause an error
 
+  # replay interaction errors
+- key: replay_errors_all_attachments_invalid
+  value: "None of the files you have attached are valid WoT Blitz replays."
+  context: All attached files are invalid
+- key: replay_errors_some_attachments_invalid
+  value: "Some of the files you have attached are valid WoT Blitz replays and were skipped."
+  context: Some attached files are invalid
+- key: replay_errors_too_many_files
+  value: "Aftermath can process up to 5 replays at once. Please use the `/replay` command to upload any additional files."
+  context: 5+ replays uploaded
+
   # /links errors
 - key: links_error_too_many_connections
   value: "It looks like you have reached the limit for the number of Blitz accounts linked.\nTry removing an existing account with `/links remove` before adding a new one."

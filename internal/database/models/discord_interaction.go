@@ -20,20 +20,8 @@ const (
 	InteractionTypeComponent        = "component"
 	InteractionTypeAutocomplete     = "autocomplete"
 	InteractionTypeAutomatedMessage = "automated_message"
+	InteractionTypeGatewayEvent     = "gateway_event"
 )
-
-// Values provides list valid values for Enum.
-func (DiscordInteractionType) Values() []string {
-	return []string{
-		InteractionTypeUnknown,
-		InteractionTypeModal,
-		InteractionTypeCommand,
-		InteractionTypeFollowUp,
-		InteractionTypeComponent,
-		InteractionTypeAutocomplete,
-		InteractionTypeAutomatedMessage,
-	}
-}
 
 type DiscordInteraction struct {
 	ID        string

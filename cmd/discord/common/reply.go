@@ -25,7 +25,9 @@ type replyInternal struct {
 	Components []discordgo.MessageComponent
 	Choices    []*discordgo.ApplicationCommandOptionChoice
 
-	IncludeAds    bool
+	Reference  *discordgo.MessageReference
+	IncludeAds bool
+
 	eventMetadata map[string]any
 }
 
@@ -79,6 +81,15 @@ func (r Reply) WithMeta(data map[string]any) Reply {
 	meta := r.Metadata()
 	for key, value := range data {
 		meta[key] = value
+	}
+	return r
+}
+
+func (r Reply) Reference(messageID, channelID, guildID string) Reply {
+	r.internal.Reference = &discordgo.MessageReference{
+		MessageID: messageID,
+		ChannelID: channelID,
+		GuildID:   guildID,
 	}
 	return r
 }

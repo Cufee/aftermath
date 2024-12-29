@@ -23,8 +23,9 @@ var (
 	DefaultCardColorNoAlpha = color.NRGBA{10, 10, 10, 255}
 	ClanTagBackgroundColor  = color.NRGBA{10, 10, 10, 120}
 
-	ColorAftermathRed  = color.NRGBA{255, 0, 120, 255}
-	ColorAftermathBlue = color.NRGBA{72, 167, 250, 255}
+	ColorAftermathRed    = color.NRGBA{255, 0, 120, 255}
+	ColorAftermathBlue   = color.NRGBA{72, 167, 250, 255}
+	ColorAftermathYellow = color.NRGBA{255, 223, 0, 255}
 
 	BorderRadiusXL = 30.0
 	BorderRadiusLG = 25.0
