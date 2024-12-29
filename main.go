@@ -210,7 +210,7 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encode help image")
 	}
-	gw.Handler(public.MentionHandler(buf.Bytes()))
+	gw.Handler(gateway.ToGatewayHandler(gw, public.MentionHandler(buf.Bytes())))
 	gw.Handler(gateway.ToGatewayHandler(gw, public.ReplayFileHandler))
 	gw.Handler(gateway.ToGatewayHandler(gw, public.ReplayInteractionHandler))
 

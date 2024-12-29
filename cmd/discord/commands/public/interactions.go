@@ -15,6 +15,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/emoji"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/cmd/discord/rest"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
@@ -33,44 +34,56 @@ import (
 	"github.com/pkg/errors"
 )
 
-func MentionHandler(errorImage []byte) func(s *discordgo.Session, e *discordgo.MessageCreate) {
-	return func(s *discordgo.Session, e *discordgo.MessageCreate) {
-		for _, mention := range e.Mentions {
-			if mention.ID == s.State.User.ID {
-				// Use the user locale selection by default with fallback to English
-				locale := language.English
-				if mention.Locale != "" {
-					locale = common.LocaleToLanguageTag(discordgo.Locale(mention.Locale))
-				}
+func MentionHandler(errorImage []byte) common.EventHandler[discordgo.MessageCreate] {
+	return common.EventHandler[discordgo.MessageCreate]{
+		Match: func(c database.Client, s *discordgo.Session, event *discordgo.MessageCreate) bool {
+			return len(event.Mentions) > 0 && event.Author.ID != constants.DiscordBotUserID
+		},
+		Handle: func(ctx common.Context, event *discordgo.MessageCreate) error {
+			for _, mention := range event.Mentions {
+				if mention.ID == constants.DiscordBotUserID {
+					// Use the user locale selection by default with fallback to English
+					locale := language.English
+					if mention.Locale != "" {
+						locale = common.LocaleToLanguageTag(discordgo.Locale(mention.Locale))
+					}
 
-				printer, err := localization.NewPrinterWithFallback("discord", locale)
-				if err != nil {
-					log.Err(err).Msg("failed to get a localization printer for context")
-					printer = func(s string) string { return s }
-				}
+					printer, err := localization.NewPrinterWithFallback("discord", locale)
+					if err != nil {
+						log.Err(err).Msg("failed to get a localization printer for context")
+						printer = func(s string) string { return s }
+					}
 
-				channel, err := s.UserChannelCreate(e.Author.ID)
-				if err != nil {
-					log.Warn().Str("userId", e.Author.ID).Err(err).Msg("failed to create a DM channel for a user")
-					data := discordgo.MessageSend{Files: []*discordgo.File{{Name: "how-to-use-commands.png", Reader: bytes.NewReader(errorImage)}}, Content: fmt.Sprintf(printer("errors_help_missing_dm_permissions_fmt"), e.Author.Mention())}
-					_, _ = s.ChannelMessageSendComplex(e.ChannelID, &data)
-					return
-				}
+					channel, err := ctx.Rest().CreateDMChannel(ctx.Ctx(), ctx.User().ID)
+					if err != nil {
+						log.Warn().Str("userId", ctx.User().ID).Err(err).Msg("failed to create a DM channel for a user")
+						data := discordgo.MessageSend{Content: fmt.Sprintf(printer("errors_help_missing_dm_permissions_fmt"), "<@"+ctx.User().ID+">"), Flags: discordgo.MessageFlagsEphemeral}
+						_, _ = ctx.Rest().CreateMessage(ctx.Ctx(), channel.ID, data, []rest.File{rest.File{Data: errorImage, Name: "how_to_use_aftermath.png"}})
+						return nil
+					}
 
-				_, err = s.ChannelMessageSendComplex(channel.ID, &discordgo.MessageSend{Content: fmt.Sprintf(printer("commands_help_message_fmt"), sessionResetTimes(printer)), Components: []discordgo.MessageComponent{
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							common.ButtonInviteAftermath(printer("buttons_add_aftermath_to_your_server")),
-							common.ButtonJoinPrimaryGuild(printer("buttons_join_primary_guild")),
-						}}}})
-				if err != nil {
-					log.Warn().Str("userId", e.Author.ID).Err(err).Msg("failed to DM a user")
-					data := discordgo.MessageSend{Files: []*discordgo.File{{Name: "how-to-use-commands.png", Reader: bytes.NewReader(errorImage)}}, Content: fmt.Sprintf(printer("errors_help_missing_dm_permissions_fmt"), e.Author.Mention())}
-					_, _ = s.ChannelMessageSendComplex(e.ChannelID, &data)
+					_, err = ctx.Rest().CreateMessage(
+						ctx.Ctx(),
+						channel.ID,
+						discordgo.MessageSend{Content: fmt.Sprintf(printer("commands_help_message_fmt"), sessionResetTimes(printer)), Components: []discordgo.MessageComponent{
+							discordgo.ActionsRow{
+								Components: []discordgo.MessageComponent{
+									common.ButtonInviteAftermath(printer("buttons_add_aftermath_to_your_server")),
+									common.ButtonJoinPrimaryGuild(printer("buttons_join_primary_guild")),
+								},
+							}}},
+						nil)
+
+					if err != nil {
+						log.Warn().Str("userId", ctx.User().ID).Err(err).Msg("failed to DM a user")
+						data := discordgo.MessageSend{Content: fmt.Sprintf(printer("errors_help_missing_dm_permissions_fmt"), "<@"+ctx.User().ID+">"), Flags: discordgo.MessageFlagsEphemeral}
+						_, _ = ctx.Rest().CreateMessage(ctx.Ctx(), channel.ID, data, []rest.File{rest.File{Data: errorImage, Name: "how_to_use_aftermath.png"}})
+					}
+					return nil
 				}
-				return
 			}
-		}
+			return nil
+		},
 	}
 }
 
@@ -113,7 +126,7 @@ type imageWithIndex struct {
 
 var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]{
 	Match: func(db database.Client, s *discordgo.Session, event *discordgo.MessageReactionAdd) bool {
-		if event.Emoji.ID != replayReactionEmoji.ID {
+		if event.Emoji.ID != replayReactionEmoji.ID || event.UserID == constants.DiscordBotUserID {
 			return false
 		}
 

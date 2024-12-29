@@ -512,9 +512,21 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 		return Replay{}, wargaming.ErrRealmNotSupported
 	}
 
+	playersMap := make(map[string]struct{})
 	var vehicles []string
 	for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
 		vehicles = append(vehicles, player.VehicleID)
+		playersMap[player.ID] = struct{}{}
+	}
+
+	var players []string
+	for id := range playersMap {
+		players = append(players, id)
+	}
+
+	playerData, err := c.wargaming.BatchAccountByID(ctx, realm, players)
+	if err != nil {
+		err = nil // this error is not critical and will result in some missing data
 	}
 
 	averages, err := c.database.GetVehicleAverages(ctx, vehicles)
@@ -525,6 +537,11 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 	// calculate and cache WN8
 	_ = replay.Protagonist.Performance.WN8(averages[replay.Protagonist.VehicleID])
 	for i, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
+		// set player career stats
+		frame := WargamingToFrame(playerData[player.ID].Statistics.All)
+		player.Performance.BattlesWon = frame.BattlesWon
+		player.Performance.Battles = frame.Battles
+
 		avg := averages[player.VehicleID]
 		_ = player.Performance.WN8(avg)
 		if i < len(replay.Teams.Allies) {
