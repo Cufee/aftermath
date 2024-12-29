@@ -13,5 +13,5 @@ var (
 )
 
 func init() {
-	SchedulerConcurrentWorkers, _ = strconv.Atoi(mustGetEnv("SCHEDULER_CONCURRENT_WORKERS", func() bool { return !SchedulerEnabled }))
+	SchedulerConcurrentWorkers, _ = strconv.Atoi(MustGetEnv("SCHEDULER_CONCURRENT_WORKERS", func() bool { return !SchedulerEnabled }))
 }

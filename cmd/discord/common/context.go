@@ -6,6 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/cufee/aftermath/cmd/core"
+	"github.com/cufee/aftermath/cmd/discord/rest"
 
 	"github.com/cufee/aftermath/internal/database/models"
 
@@ -17,6 +18,7 @@ type Options []*discordgo.ApplicationCommandInteractionDataOption
 type Context interface {
 	Ctx() context.Context
 	Core() core.Client
+	Rest() *rest.Client
 
 	ID() string
 	User() models.User

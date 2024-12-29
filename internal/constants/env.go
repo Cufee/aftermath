@@ -6,7 +6,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-func mustGetEnv(key string, ignoreIf ...func() bool) string {
+func MustGetEnv(key string, ignoreIf ...func() bool) string {
 	if v := os.Getenv(key); v != "" {
 		return v
 	}

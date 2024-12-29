@@ -36,14 +36,17 @@ func main() {
 	case "blue":
 		brandColor = common.ColorAftermathBlue
 	case "gold":
-		brandColor = common.TextSubscriptionPremium
+		brandColor = common.ColorAftermathYellow
 	}
 
 	localization.LoadAssets(os.DirFS("../../static/localization"), ".")
 	printer, _ := localization.NewPrinterWithFallback("discord", language.English)
 
 	generateDiscordHelpImage(printer)
-	generateDiscordLogo()
+
+	generateDiscordLogo("red", common.ColorAftermathRed)
+	generateDiscordLogo("blue", common.ColorAftermathBlue)
+	generateDiscordLogo("yellow", common.ColorAftermathYellow)
 }
 
 func generateDiscordHelpImage(printer func(string) string) {
@@ -170,14 +173,14 @@ type point struct {
 	y int
 }
 
-func generateDiscordLogo() {
+func generateDiscordLogo(suffix string, logoColor color.Color) {
 	log.Debug().Msg("generating discord logo image")
 	{
-		filename := "images/discord/logo.png"
+		filename := "images/discord/logo_" + suffix + ".png"
 
 		opts := common.LargeLogoOptions()
 		padding := 80
-		img := imaging.Fit(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Linear)
+		img := imaging.Fit(common.AftermathLogo(logoColor, opts), 256, 256, imaging.Linear)
 		nctx := gg.NewContext(256+padding, 256+padding)
 		nctx.SetColor(color.NRGBA{30, 31, 34, 255})
 		nctx.Clear()
@@ -194,11 +197,11 @@ func generateDiscordLogo() {
 		f.Close()
 	}
 	{
-		filename := "images/discord/logo_centered.png"
+		filename := "images/discord/logo_" + suffix + "_centered.png"
 
 		opts := common.LargeLogoOptions()
 		padding := 80
-		img := imaging.Fit(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Linear)
+		img := imaging.Fit(common.AftermathLogo(logoColor, opts), 256, 256, imaging.Linear)
 		nctx := gg.NewContext(256+padding, 256+padding)
 		nctx.SetColor(color.NRGBA{30, 31, 34, 255})
 		nctx.Clear()
@@ -215,11 +218,11 @@ func generateDiscordLogo() {
 		f.Close()
 	}
 	{
-		filename := "images/discord/logo_centered_alpha.png"
+		filename := "images/discord/logo_" + suffix + "_centered_alpha.png"
 
 		opts := common.LargeLogoOptions()
 		padding := 80
-		img := imaging.Fit(common.AftermathLogo(brandColor, opts), 256, 256, imaging.Linear)
+		img := imaging.Fit(common.AftermathLogo(logoColor, opts), 256, 256, imaging.Linear)
 		nctx := gg.NewContext(256+padding, 256+padding)
 		nctx.DrawImageAnchored(img, nctx.Width()/2, nctx.Height()/2, 0.5, 0.5)
 
