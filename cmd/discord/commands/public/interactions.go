@@ -129,8 +129,6 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 		return true
 	},
 	Handle: func(ctx common.Context, event *discordgo.MessageReactionAdd) error {
-		println("initial check")
-
 		message, err := ctx.Rest().GetMessage(ctx.Ctx(), event.ChannelID, event.MessageID)
 		if err != nil {
 			log.Err(err).Msg("failed to get channel message")
@@ -154,10 +152,19 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 		}
 
 		var attachments []string
+		attachmentHashes := make(map[string]struct{})
 		for _, attachment := range message.Attachments {
-			if !strings.Contains(attachment.Filename, ".wotbreplay") {
+			name := strings.ToLower(attachment.Filename)
+			if !strings.Contains(name, ".wotbreplay") {
 				continue
 			}
+
+			hash := fmt.Sprintf("%s-%d", name, attachment.Size)
+			if _, ok := attachmentHashes[hash]; ok {
+				continue
+			}
+			attachmentHashes[hash] = struct{}{}
+
 			attachments = append(attachments, attachment.URL)
 		}
 
