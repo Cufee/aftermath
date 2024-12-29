@@ -225,6 +225,9 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 		}
 
 		for _, file := range files {
+			if file.Data == nil {
+				continue
+			}
 			reply = reply.File(file.Data, file.Name)
 		}
 		return reply.Reference(event.MessageID, event.ChannelID, event.GuildID).Format("-# <@%s> used a replay reaction", ctx.User().ID).Send()
