@@ -48,6 +48,7 @@ func newContext(ctx context.Context, gw *gatewayClient, event any) (common.Conte
 		locale := language.English
 		if cast.Member != nil && cast.Member.User != nil {
 			locale = common.LocaleToLanguageTag(discordgo.Locale(cast.Member.User.Locale))
+
 			if cast.Member.User.Bot || cast.UserID == constants.DiscordBotUserID {
 				return nil, ErrBotUserInitiated
 			}
