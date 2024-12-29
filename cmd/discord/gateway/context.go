@@ -10,6 +10,7 @@ import (
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/rest"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
@@ -44,19 +45,20 @@ func newContext(ctx context.Context, gw *gatewayClient, event any) (common.Conte
 	var c *eventContext
 	switch cast := event.(type) {
 	case *discordgo.MessageReactionAdd:
-		if cast.Member == nil || cast.Member.User == nil {
-			return nil, ErrInvalidEvent
+		locale := language.English
+		if cast.Member != nil && cast.Member.User != nil {
+			locale = common.LocaleToLanguageTag(discordgo.Locale(cast.Member.User.Locale))
+			if cast.Member.User.Bot || cast.UserID == constants.DiscordBotUserID {
+				return nil, ErrBotUserInitiated
+			}
 		}
-		if cast.Member.User.Bot {
-			return nil, ErrBotUserInitiated
-		}
-		c = &eventContext{id: cuid.New(), Context: ctx, gw: gw, userID: cast.UserID, guildID: cast.GuildID, channelID: cast.ChannelID, messageID: cast.MessageID, locale: common.LocaleToLanguageTag(discordgo.Locale(cast.Member.User.Locale))}
+		c = &eventContext{id: cuid.New(), Context: ctx, gw: gw, userID: cast.UserID, guildID: cast.GuildID, channelID: cast.ChannelID, messageID: cast.MessageID, locale: locale}
 
 	case *discordgo.MessageCreate:
 		if cast.Author == nil {
 			return nil, ErrInvalidEvent
 		}
-		if cast.Author.Bot {
+		if cast.Author.Bot || cast.Author.ID == constants.DiscordBotUserID {
 			return nil, ErrBotUserInitiated
 		}
 		c = &eventContext{id: cuid.New(), Context: ctx, gw: gw, userID: cast.Author.ID, guildID: cast.GuildID, channelID: cast.ChannelID, messageID: cast.ID, locale: common.LocaleToLanguageTag(discordgo.Locale(cast.Author.Locale))}

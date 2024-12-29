@@ -113,7 +113,7 @@ type imageWithIndex struct {
 
 var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]{
 	Match: func(db database.Client, s *discordgo.Session, event *discordgo.MessageReactionAdd) bool {
-		if !(event.Emoji.ID == replayReactionEmoji.ID && event.Member != nil && event.Member.User != nil && !event.Member.User.Bot) {
+		if event.Emoji.ID != replayReactionEmoji.ID {
 			return false
 		}
 
