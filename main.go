@@ -266,12 +266,16 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 
 	router.LoadCommands(public.Help().Build())
 	router.LoadCommands(commands.LoadedPublic.Compose()...)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-	err = router.UpdateLoadedCommands(ctx)
-	if err != nil {
-		log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
-	}
+
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+		defer cancel()
+		err = router.UpdateLoadedCommands(ctx)
+		if err != nil {
+			log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
+		}
+	}()
+
 	fn, err := router.HTTPHandler()
 	if err != nil {
 		log.Fatal().Msgf("router#HTTPHandler failed %s", err)
