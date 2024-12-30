@@ -536,11 +536,9 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 		avg := averages[player.VehicleID]
 		_ = player.Performance.WN8(avg)
 
-		// set player career battles and cache winrate
+		// set winrate cache
 		frame := WargamingToFrame(playerData[player.ID].Statistics.All)
-		player.Performance.BattlesWon = frame.BattlesWon
-		player.Performance.Battles = frame.Battles
-		_ = player.Performance.WinRate()
+		player.Performance.SetWinRate(float32(frame.BattlesWon) / float32(frame.Battles) * 100)
 
 		if i < len(replay.Teams.Allies) {
 			replay.Teams.Allies[i] = player

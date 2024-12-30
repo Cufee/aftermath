@@ -117,6 +117,10 @@ func (r *StatsFrame) WinRate(_ ...any) Value {
 	return r.winRate
 }
 
+func (r *StatsFrame) SetWinRate(wr float32) {
+	r.winRate = ValueFloatPercent(wr)
+}
+
 /*
 Calculate and return accuracy
 */
