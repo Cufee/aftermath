@@ -208,7 +208,7 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 		close(images)
 
 		if errors.Is(err, replay.ErrInvalidReplayFile) || len(images) == 0 {
-			return ctx.Error("replay_errors_all_attachments_invalid")
+			return ctx.Reply().Send("replay_errors_all_attachments_invalid")
 		}
 
 		reply := ctx.Reply()
@@ -240,7 +240,7 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 		}
 		err = group.Wait()
 		if err != nil {
-			return ctx.Error("replay_errors_all_attachments_invalid")
+			return ctx.Reply().Send("replay_errors_all_attachments_invalid")
 		}
 
 		for _, file := range files {
