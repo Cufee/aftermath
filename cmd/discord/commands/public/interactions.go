@@ -118,7 +118,7 @@ var ReplayFileHandler = common.EventHandler[discordgo.MessageCreate]{
 	},
 	Handle: func(ctx common.Context, event *discordgo.MessageCreate) error {
 		err := ctx.Rest().CreateMessageReaction(ctx.Ctx(), event.ChannelID, event.ID, replayReactionEmojiString)
-		if err != nil && !errors.Is(err, rest.ErrMissingPermissions) {
+		if err != nil && !errors.Is(err, rest.ErrMissingPermissions) && !errors.Is(err, rest.ErrMissingUserUnreachable) {
 			return err
 		}
 		return nil
@@ -150,6 +150,9 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 	Handle: func(ctx common.Context, event *discordgo.MessageReactionAdd) error {
 		message, err := ctx.Rest().GetMessage(ctx.Ctx(), event.ChannelID, event.MessageID)
 		if err != nil {
+			if errors.Is(err, rest.ErrMissingPermissions) {
+				return ctx.Reply().Send("replay_errors_missing_permissions_vague")
+			}
 			log.Err(err).Msg("failed to get channel message")
 			return nil // this is a silent error for the user
 		}
@@ -164,6 +167,7 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 		if !hasReaction {
 			return nil
 		}
+
 		err = ctx.Rest().DeleteOwnMessageReaction(ctx.Ctx(), event.ChannelID, event.MessageID, replayReactionEmojiString)
 		if err != nil && !errors.Is(err, rest.ErrMissingPermissions) {
 			log.Err(err).Msg("failed to delete a message reaction")

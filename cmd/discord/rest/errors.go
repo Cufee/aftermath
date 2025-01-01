@@ -10,6 +10,7 @@ var (
 	ErrUnknownInteraction      = errors.New("discord api: unknown interaction")
 	ErrInteractionAlreadyAcked = errors.New("discord api: interaction already acked")
 	ErrMissingPermissions      = errors.New("discord api: missing permissions")
+	ErrMissingUserUnreachable  = errors.New("discord api: user unreachable or blocked")
 )
 
 func knownError(code int) error {
@@ -24,5 +25,9 @@ func knownError(code int) error {
 		return ErrInteractionAlreadyAcked
 	case discordgo.ErrCodeMissingPermissions:
 		return ErrMissingPermissions
+	case discordgo.ErrCodeMissingAccess:
+		return ErrMissingPermissions
+	case discordgo.ErrCodeReactionBlocked:
+		return ErrMissingUserUnreachable
 	}
 }

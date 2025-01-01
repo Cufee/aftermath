@@ -360,6 +360,9 @@
 - key: replay_errors_too_many_files
   value: "Aftermath can process up to 5 replays at once. Please use the `/replay` command to upload any additional files."
   context: 5+ replays uploaded
+- key: replay_errors_missing_permissions_vague
+  value: "Aftermath is missing some required permissions in this channel. Try using the `/replay` command instead."
+  context: Missing some (unknown) perms
 
   # /links errors
 - key: links_error_too_many_connections
