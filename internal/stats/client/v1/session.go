@@ -107,6 +107,12 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 					return
 				}
 
+				// make sure account is cached
+				_, err = c.fetchClient.Account(ctx, id)
+				if err != nil {
+					log.Err(err).Str("accountId", id).Msg("failed to get account")
+				}
+
 				_, err = logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, realm, logic.WithReference(id, opts.referenceID))
 				if err != nil {
 					log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
