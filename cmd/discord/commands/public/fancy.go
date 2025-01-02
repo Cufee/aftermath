@@ -33,11 +33,17 @@ func init() {
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.CreatePersonalContent, permissions.RemovePersonalContent, permissions.UpdatePersonalContent)).
 			Ephemeral().
 			Options(
-				builder.NewOption("file", discordgo.ApplicationCommandOptionAttachment).
-					Params(builder.SetNameKey("command_option_fancy_file_name"), builder.SetDescKey("command_option_fancy_file_description")),
+				builder.NewOption("upload", discordgo.ApplicationCommandOptionSubCommand).
+					Params(builder.SetNameKey("command_option_fancy_upload_name"), builder.SetDescKey("command_option_fancy_upload_desc")).
+					Options(
+						builder.NewOption("file", discordgo.ApplicationCommandOptionAttachment).
+							Params(builder.SetNameKey("command_option_fancy_file_name"), builder.SetDescKey("command_option_fancy_file_description")),
 
-				builder.NewOption("link", discordgo.ApplicationCommandOptionString).
-					Params(builder.SetNameKey("command_option_fancy_link_name"), builder.SetDescKey("command_option_fancy_link_description")),
+						builder.NewOption("link", discordgo.ApplicationCommandOptionString).
+							Params(builder.SetNameKey("command_option_fancy_link_name"), builder.SetDescKey("command_option_fancy_link_description")),
+					),
+				builder.NewOption("remove", discordgo.ApplicationCommandOptionSubCommand).
+					Params(builder.SetNameKey("command_option_fancy_remove_name"), builder.SetDescKey("command_option_fancy_remove_desc")),
 			).
 			Handler(func(ctx common.Context) error {
 				helpButton := discordgo.ActionsRow{
@@ -45,127 +51,148 @@ func init() {
 						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
 					}}
 
-				// check if a user has a pending/recent request
-				pending, err := ctx.Core().Database().FindUserModerationRequests(ctx.Ctx(), ctx.User().ID, []string{"background-upload"}, []models.ModerationStatus{models.ModerationStatusSubmitted, models.ModerationStatusApproved, models.ModerationStatusDeclined}, time.Now().Add(-time.Hour*72))
-				if err != nil && !database.IsNotFound(err) {
-					return ctx.Err(err)
-				}
-				slices.SortFunc(pending, func(a, b models.ModerationRequest) int {
-					return b.CreatedAt.Compare(a.CreatedAt)
-				})
-				for _, req := range pending {
-					if req.ActionStatus == models.ModerationStatusSubmitted {
-						return ctx.Reply().Component(helpButton).Send("fancy_errors_pending_request_exists")
-					}
-					if time.Since(req.CreatedAt) < time.Hour*24 {
-						return ctx.Reply().Component(helpButton).Format("fancy_errors_upload_timeout_fmt", req.CreatedAt.Add(time.Hour*24).Unix()).Send()
-					}
-				}
-
-				if len(ctx.Options()) == 0 {
+				subcommand, subOptions, _ := ctx.Options().Subcommand()
+				switch subcommand {
+				default:
 					return ctx.Reply().Send("command_fancy_help_message")
-				}
 
-				link, linkOK := ctx.Options().Value("link").(string)
-				file, fileOK := ctx.Options().Value("file").(string)
-				if (!linkOK && !fileOK) || (link == "" && file == "") {
-					return ctx.Reply().Send("fancy_errors_missing_attachment")
-				}
-				var hintMessage string = "fancy_hint_image_transformation"
-				if linkOK && fileOK {
-					hintMessage = "fancy_error_too_many_options_non_blocking"
-				}
-
-				imageURL := link
-				if data, ok := ctx.CommandData(); ok && data.Resolved != nil {
-					if attachment, ok := data.Resolved.Attachments[file]; ok {
-						imageURL = attachment.URL
+				case "upload":
+					// check if a user has a pending/recent request
+					pending, err := ctx.Core().Database().FindUserModerationRequests(ctx.Ctx(), ctx.User().ID, []string{"background-upload"}, []models.ModerationStatus{models.ModerationStatusSubmitted, models.ModerationStatusApproved, models.ModerationStatusDeclined}, time.Now().Add(-time.Hour*72))
+					if err != nil && !database.IsNotFound(err) {
+						return ctx.Err(err)
 					}
-				}
-
-				parsed, err := url.Parse(imageURL)
-				if err != nil {
-					return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_link")
-				}
-
-				// download and resize the image
-				ictx, cancel := context.WithTimeout(ctx.Ctx(), time.Second*1)
-				defer cancel()
-
-				img, err := images.SafeLoadFromURL(ictx, parsed, constants.ImageUploadMaxSize)
-				if err != nil {
-					if errors.Is(err, images.ErrUnsupportedImageFormat) {
-						return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_format")
+					slices.SortFunc(pending, func(a, b models.ModerationRequest) int {
+						return b.CreatedAt.Compare(a.CreatedAt)
+					})
+					for _, req := range pending {
+						if req.ActionStatus == models.ModerationStatusSubmitted {
+							return ctx.Reply().Component(helpButton).Send("fancy_errors_pending_request_exists")
+						}
+						if time.Since(req.CreatedAt) < time.Hour*24 {
+							return ctx.Reply().Component(helpButton).Format("fancy_errors_upload_timeout_fmt", req.CreatedAt.Add(time.Hour*24).Unix()).Send()
+						}
 					}
-					if errors.Is(err, images.ErrInvalidImage) {
-						return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_image")
+
+					if len(subOptions) == 0 {
+						return ctx.Reply().Send("command_fancy_help_message")
 					}
-					return ctx.Err(err)
-				}
-				img = imaging.Fill(img, 300, 300, imaging.Center, imaging.Linear)
-				withBg := gg.NewContext(300, 300)
-				withBg.SetColor(render.DiscordBackgroundColor)
-				withBg.Clear()
-				withBg.DrawImage(img, 0, 0)
 
-				// save the image
-				encoded, err := logic.ImageToUserContentValue(img)
-				if err != nil {
-					return ctx.Err(err)
-				}
-
-				currentContent, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypeInModeration)
-				if err != nil && !database.IsNotFound(err) {
-					return ctx.Err(err)
-				}
-				if database.IsNotFound(err) {
-					currentContent = models.UserContent{
-						UserID:      ctx.User().ID,
-						ReferenceID: ctx.User().ID,
+					link, linkOK := subOptions.Value("link").(string)
+					file, fileOK := subOptions.Value("file").(string)
+					if (!linkOK && !fileOK) || (link == "" && file == "") {
+						return ctx.Reply().Send("fancy_errors_missing_attachment")
 					}
-				}
+					var hintMessage string = "fancy_hint_image_transformation"
+					if linkOK && fileOK {
+						hintMessage = "fancy_error_too_many_options_non_blocking"
+					}
 
-				currentContent.Value = string(encoded)
-				currentContent.Type = models.UserContentTypeInModeration
-				content, err := ctx.Core().Database().UpsertUserContent(ctx.Ctx(), currentContent)
-				if err != nil {
-					return ctx.Err(err)
-				}
+					imageURL := link
+					if data, ok := ctx.CommandData(); ok && data.Resolved != nil {
+						if attachment, ok := data.Resolved.Attachments[file]; ok {
+							imageURL = attachment.URL
+						}
+					}
 
-				buttons := discordgo.ActionsRow{
-					Components: []discordgo.MessageComponent{
-						discordgo.Button{
-							Style: discordgo.SecondaryButton,
-							Label: ctx.Localize("buttons_submit"),
-							Emoji: &discordgo.ComponentEmoji{
-								ID:       "1264733320713867365",
-								Name:     "check",
-								Animated: true,
-							},
-							CustomID: fmt.Sprintf("fancy_image_submit#%s", content.ID),
-						},
-						common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
-					}}
-
-				// send a preview
-				var buf bytes.Buffer
-				imaging.Encode(&buf, imaging.Blur(withBg.Image(), render.DefaultBackgroundBlur), imaging.JPEG, imaging.JPEGQuality(80))
-				err = ctx.Reply().File(buf.Bytes(), "preview.jpeg").Component(buttons).Hint(hintMessage).Send("fancy_preview_msg")
-				if err != nil {
-					return ctx.Err(err)
-				}
-
-				go func(ctx common.Context) {
-					time.Sleep(time.Minute * 1)
-					c, cancel := context.WithTimeout(context.Background(), time.Second*5)
-					defer cancel()
-					err := ctx.DeleteResponse(c)
+					parsed, err := url.Parse(imageURL)
 					if err != nil {
-						log.Err(err).Msg("failed to delete an interaction response")
+						return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_link")
 					}
-				}(ctx)
 
-				return nil
+					// download and resize the image
+					ictx, cancel := context.WithTimeout(ctx.Ctx(), time.Second*1)
+					defer cancel()
+
+					img, err := images.SafeLoadFromURL(ictx, parsed, constants.ImageUploadMaxSize)
+					if err != nil {
+						if errors.Is(err, images.ErrUnsupportedImageFormat) {
+							return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_format")
+						}
+						if errors.Is(err, images.ErrInvalidImage) {
+							return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_image")
+						}
+						return ctx.Err(err)
+					}
+					img = imaging.Fill(img, 300, 300, imaging.Center, imaging.Linear)
+					withBg := gg.NewContext(300, 300)
+					withBg.SetColor(render.DiscordBackgroundColor)
+					withBg.Clear()
+					withBg.DrawImage(img, 0, 0)
+
+					// save the image
+					encoded, err := logic.ImageToUserContentValue(img)
+					if err != nil {
+						return ctx.Err(err)
+					}
+
+					currentContent, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypeInModeration)
+					if err != nil && !database.IsNotFound(err) {
+						return ctx.Err(err)
+					}
+					if database.IsNotFound(err) {
+						currentContent = models.UserContent{
+							UserID:      ctx.User().ID,
+							ReferenceID: ctx.User().ID,
+						}
+					}
+
+					currentContent.Value = string(encoded)
+					currentContent.Type = models.UserContentTypeInModeration
+					content, err := ctx.Core().Database().UpsertUserContent(ctx.Ctx(), currentContent)
+					if err != nil {
+						return ctx.Err(err)
+					}
+
+					buttons := discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							discordgo.Button{
+								Style: discordgo.SecondaryButton,
+								Label: ctx.Localize("buttons_submit"),
+								Emoji: &discordgo.ComponentEmoji{
+									ID:       "1264733320713867365",
+									Name:     "check",
+									Animated: true,
+								},
+								CustomID: fmt.Sprintf("fancy_image_submit#%s", content.ID),
+							},
+							common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question")),
+						}}
+
+					// send a preview
+					var buf bytes.Buffer
+					imaging.Encode(&buf, imaging.Blur(withBg.Image(), render.DefaultBackgroundBlur), imaging.JPEG, imaging.JPEGQuality(80))
+					err = ctx.Reply().File(buf.Bytes(), "preview.jpeg").Component(buttons).Hint(hintMessage).Send("fancy_preview_msg")
+					if err != nil {
+						return ctx.Err(err)
+					}
+
+					go func(ctx common.Context) {
+						time.Sleep(time.Minute * 1)
+						c, cancel := context.WithTimeout(context.Background(), time.Second*5)
+						defer cancel()
+						err := ctx.DeleteResponse(c)
+						if err != nil {
+							log.Err(err).Msg("failed to delete an interaction response")
+						}
+					}(ctx)
+
+					return nil
+				case "remove":
+					currentContent, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypePersonalBackground)
+					if err != nil && !database.IsNotFound(err) {
+						return ctx.Err(err)
+					}
+					if database.IsNotFound(err) {
+						return ctx.Reply().Send("fancy_remove_not_found")
+					}
+
+					err = ctx.Core().Database().DeleteUserContent(ctx.Ctx(), currentContent.ID)
+					if err != nil {
+						return ctx.Err(err)
+					}
+					return ctx.Reply().Send("fancy_remove_completed")
+				}
 			}),
 	)
 

@@ -112,9 +112,21 @@
 - key: command_fancy_name
   value: "fancy"
 - key: command_fancy_description
-  value: "Set a custom background for your stats!"
+  value: "Manage your custom background images"
 - key: command_fancy_help_message
   value: "## Upload a Custom Background!\nTo get started, attach an image or provide a link to an image when sending the command!"
+- key: command_option_fancy_upload_name
+  value: "upload"
+- key: command_option_fancy_upload_desc
+  value: "Upload a new custom background for your stats"
+- key: command_option_fancy_remove_name
+  value: "remove"
+- key: command_option_fancy_remove_desc
+  value: "Remove a custom background you have previously uploaded"
+- key: fancy_remove_not_found
+  value: "## You don't have a custom background image uploaded\nTo get started, use `/fancy upload`."
+- key: fancy_remove_completed
+  value: "Your custom background image was removed."
 - key: command_option_fancy_link_name
   value: "link"
 - key: command_option_fancy_link_description
