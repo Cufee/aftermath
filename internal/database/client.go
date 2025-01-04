@@ -77,6 +77,9 @@ type UsersClient interface {
 	UpdateUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
 	UpsertUserContent(ctx context.Context, content models.UserContent) (models.UserContent, error)
 	DeleteUserContent(ctx context.Context, id string) error
+
+	CreateUserSubscription(ctx context.Context, subscription models.UserSubscription) (models.UserSubscription, error)
+	UpdateUserSubscription(ctx context.Context, id string, subscription models.UserSubscription) (models.UserSubscription, error)
 }
 
 type SnapshotsClient interface {

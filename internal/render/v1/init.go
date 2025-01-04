@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/pkg/errors"
@@ -186,6 +187,16 @@ func InitLoadedAssets() error {
 			Text:      Style{Font: FontSmall(), FontColor: TextSecondary},
 		},
 	}
-
 	return nil
+}
+
+func subscriptionThumbsUp(count float64) *subscriptionHeader {
+	return &subscriptionHeader{
+		Name: fmt.Sprintf("%0.0f", count),
+		Icon: "images/icons/thumbs-up",
+		Style: subscriptionPillStyle{
+			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 10, PaddingY: 5, Gap: 5, Height: 32},
+			Icon:      Style{Width: 20, Height: 20, BackgroundColor: TextPrimary},
+			Text:      Style{Font: FontSmall(), FontColor: TextSecondary},
+		}}
 }

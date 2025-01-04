@@ -127,6 +127,13 @@ func (c *staticTestingDatabase) DeleteUserConnection(ctx context.Context, userID
 	return nil
 }
 
+func (c *staticTestingDatabase) CreateUserSubscription(ctx context.Context, subscription models.UserSubscription) (models.UserSubscription, error) {
+	return models.UserSubscription{}, database.ErrNotFound
+}
+func (c *staticTestingDatabase) UpdateUserSubscription(ctx context.Context, id string, subscription models.UserSubscription) (models.UserSubscription, error) {
+	return models.UserSubscription{}, database.ErrNotFound
+}
+
 func (c *staticTestingDatabase) GetAccountSnapshots(ctx context.Context, accountIDs []string, kind models.SnapshotType, options ...database.Query) ([]models.AccountSnapshot, error) {
 	return nil, errors.New("GetAccountSnapshots not implemented")
 }

@@ -146,7 +146,7 @@ func (c *client) SessionImage(ctx context.Context, accountId string, from time.T
 	}
 
 	stop := meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(meta.Stats["session"], meta.Stats["career"], cards, nil, opts.RenderOpts(printer)...)
+	image, err := render.CardsToImage(meta.Stats["session"], meta.Stats["career"], cards, opts.subscriptions, opts.RenderOpts(printer)...)
 	stop()
 	if err != nil {
 		return nil, meta, err

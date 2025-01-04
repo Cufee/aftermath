@@ -87,7 +87,7 @@ func (r *client) PeriodImage(ctx context.Context, accountId string, from time.Ti
 	}
 
 	stop := meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(meta.Stats["period"], cards, nil, opts.RenderOpts(printer)...)
+	image, err := render.CardsToImage(meta.Stats["period"], cards, opts.subscriptions, opts.RenderOpts(printer)...)
 	stop()
 	if err != nil {
 		return nil, meta, err
