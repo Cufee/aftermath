@@ -62,7 +62,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 			batchSize := 50
 			var wg sync.WaitGroup
 			sem := semaphore.NewWeighted(5)
-			errors := make(map[string]error, len(accountsByRealm))
+			errors := make(map[string]error)
 			var errorsMx sync.Mutex
 
 			for realm, accounts := range accountsByRealm {

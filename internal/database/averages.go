@@ -18,7 +18,7 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 		return nil, nil
 	}
 
-	errors := make(map[string]error, len(averages))
+	errors := make(map[string]error)
 	return errors, c.withTx(ctx, func(tx *transaction) error {
 		for id, data := range averages {
 			encoded, err := json.Marshal(data)
@@ -43,7 +43,9 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 					t.VehicleAverage.UpdatedAt.SET(t.VehicleAverage.EXCLUDED.UpdatedAt),
 				))
 			_, err = tx.exec(ctx, stmt)
-			errors[id] = err
+			if err != nil {
+				errors[id] = err
+			}
 		}
 		return nil
 	})
