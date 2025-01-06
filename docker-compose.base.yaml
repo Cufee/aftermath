@@ -32,3 +32,18 @@ services:
           memory: 256m
         limits:
           memory: 256m
+
+  aftermath-collector-base:
+    image: ghcr.io/cufee/aftermath-collector:${ENVIRONMENT}
+    build:
+      context: .
+      dockerfile: Dockerfile.collector
+    env_file:
+      - .env
+    deploy:
+      # go runtime will try to keep memory usage right under the container limit
+      resources:
+        reservations:
+          memory: 256m
+        limits:
+          memory: 256m

@@ -16,4 +16,5 @@ type UserSubscription struct {
 	Permissions string `db:"permissions"`
 	ReferenceID string `db:"reference_id"`
 	UserID      string `db:"user_id"`
+	Metadata    []byte `db:"metadata"`
 }

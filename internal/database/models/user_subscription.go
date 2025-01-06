@@ -1,10 +1,10 @@
 package models
 
 import (
-	"slices"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/utils"
 	"github.com/lucsky/cuid"
@@ -21,7 +21,7 @@ func (s SubscriptionType) GetPermissions() permissions.Permissions {
 	case SubscriptionTypeProClan:
 		return permissions.SubscriptionAftermathPro
 	default:
-		return permissions.User
+		return permissions.Blank
 	}
 }
 
@@ -43,31 +43,8 @@ const SubscriptionTypeDeveloper = SubscriptionType("developer")
 const SubscriptionTypeServerBooster = SubscriptionType("server-booster")
 const SubscriptionTypeContentTranslator = SubscriptionType("content-translator")
 
-var AllSubscriptionTypes = []SubscriptionType{
-	SubscriptionTypePro,
-	SubscriptionTypeProClan,
-	SubscriptionTypePlus,
-	SubscriptionTypeSupporter,
-	SubscriptionTypeVerifiedClan,
-	SubscriptionTypeServerModerator,
-	SubscriptionTypeContentModerator,
-	SubscriptionTypeDeveloper,
-	SubscriptionTypeServerBooster,
-	SubscriptionTypeContentTranslator,
-}
-
-// Values provides list valid values for Enum.
-func (SubscriptionType) Values() []string {
-	var kinds []string
-	for _, s := range AllSubscriptionTypes {
-		kinds = append(kinds, string(s))
-	}
-	return kinds
-}
-
-func (s SubscriptionType) Valid() bool {
-	return slices.Contains(AllSubscriptionTypes, s)
-}
+// Manually assigned
+const SubscriptionTypeThumbsCounter = SubscriptionType("thumbs-up-counter")
 
 type UserSubscription struct {
 	ID          string
@@ -76,10 +53,11 @@ type UserSubscription struct {
 	ExpiresAt   time.Time
 	ReferenceID string
 	Permissions permissions.Permissions
+	Meta        map[string]any
 }
 
 func ToUserSubscription(record *model.UserSubscription) UserSubscription {
-	return UserSubscription{
+	sub := UserSubscription{
 		ID:          record.ID,
 		Type:        SubscriptionType(record.Type),
 		UserID:      record.UserID,
@@ -87,10 +65,17 @@ func ToUserSubscription(record *model.UserSubscription) UserSubscription {
 		ExpiresAt:   StringToTime(record.ExpiresAt),
 		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
 	}
+
+	json.Unmarshal(record.Metadata, &sub.Meta)
+	if sub.Meta == nil {
+		sub.Meta = make(map[string]any, 0)
+	}
+
+	return sub
 }
 
 func (record *UserSubscription) Model() model.UserSubscription {
-	return model.UserSubscription{
+	sub := model.UserSubscription{
 		ID:          utils.StringOr(record.ID, cuid.New()),
 		CreatedAt:   TimeToString(time.Now()),
 		UpdatedAt:   TimeToString(time.Now()),
@@ -100,4 +85,6 @@ func (record *UserSubscription) Model() model.UserSubscription {
 		ExpiresAt:   TimeToString(record.ExpiresAt),
 		Permissions: record.Permissions.Encode(),
 	}
+	sub.Metadata, _ = json.Marshal(record.Meta)
+	return sub
 }

@@ -25,6 +25,7 @@ type userSubscriptionTable struct {
 	Permissions sqlite.ColumnString
 	ReferenceID sqlite.ColumnString
 	UserID      sqlite.ColumnString
+	Metadata    sqlite.ColumnString
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
@@ -73,8 +74,9 @@ func newUserSubscriptionTableImpl(schemaName, tableName, alias string) userSubsc
 		PermissionsColumn = sqlite.StringColumn("permissions")
 		ReferenceIDColumn = sqlite.StringColumn("reference_id")
 		UserIDColumn      = sqlite.StringColumn("user_id")
-		allColumns        = sqlite.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, TypeColumn, ExpiresAtColumn, PermissionsColumn, ReferenceIDColumn, UserIDColumn}
-		mutableColumns    = sqlite.ColumnList{CreatedAtColumn, UpdatedAtColumn, TypeColumn, ExpiresAtColumn, PermissionsColumn, ReferenceIDColumn, UserIDColumn}
+		MetadataColumn    = sqlite.StringColumn("metadata")
+		allColumns        = sqlite.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, TypeColumn, ExpiresAtColumn, PermissionsColumn, ReferenceIDColumn, UserIDColumn, MetadataColumn}
+		mutableColumns    = sqlite.ColumnList{CreatedAtColumn, UpdatedAtColumn, TypeColumn, ExpiresAtColumn, PermissionsColumn, ReferenceIDColumn, UserIDColumn, MetadataColumn}
 	)
 
 	return userSubscriptionTable{
@@ -89,6 +91,7 @@ func newUserSubscriptionTableImpl(schemaName, tableName, alias string) userSubsc
 		Permissions: PermissionsColumn,
 		ReferenceID: ReferenceIDColumn,
 		UserID:      UserIDColumn,
+		Metadata:    MetadataColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

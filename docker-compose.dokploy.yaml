@@ -1,4 +1,12 @@
 services:
+  aftermath-collector:
+    extends:
+      file: docker-compose.base.yaml
+      service: aftermath-collector-base
+    command: --backend=aftermath-service:${PRIVATE_SERVER_PORT}
+    networks:
+      - dokploy-network
+
   aftermath-migrate:
     extends:
       file: docker-compose.base.yaml

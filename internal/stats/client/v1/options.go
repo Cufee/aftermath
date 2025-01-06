@@ -19,6 +19,7 @@ type requestOptions struct {
 	promoText          []string
 	vehicleID          string
 	withWN8            bool
+	subscriptions      []models.UserSubscription
 
 	vehicleTags    []prepare.Tag
 	ratingColumns  []prepare.TagColumn[string]
@@ -27,6 +28,9 @@ type requestOptions struct {
 
 type RequestOption func(o *requestOptions)
 
+func WithSubscriptions(subs []models.UserSubscription) RequestOption {
+	return func(o *requestOptions) { o.subscriptions = subs }
+}
 func WithWN8() RequestOption {
 	return func(o *requestOptions) { o.withWN8 = true }
 }
