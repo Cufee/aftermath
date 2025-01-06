@@ -37,9 +37,9 @@ func main() {
 
 	scheduler := gocron.NewScheduler(time.UTC)
 
-	scheduler.Cron("0 0 * * 5").Do(collectRealmIDs, *backendApi, types.RealmAsia)
-	scheduler.Cron("0 0 * * 5").Do(collectRealmIDs, *backendApi, types.RealmEurope)
-	scheduler.Cron("0 0 * * 5").Do(collectRealmIDs, *backendApi, types.RealmNorthAmerica)
+	scheduler.Cron("0 3 * * 2").Do(collectRealmIDs, *backendApi, types.RealmAsia)
+	scheduler.Cron("0 7 * * 2").Do(collectRealmIDs, *backendApi, types.RealmEurope)
+	scheduler.Cron("0 11 * * 2").Do(collectRealmIDs, *backendApi, types.RealmNorthAmerica)
 
 	log.Info().Msg("started a cron scheduler")
 	scheduler.StartBlocking()
