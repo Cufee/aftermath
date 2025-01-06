@@ -62,7 +62,7 @@ func collectRealmIDs(backendApi string, realm types.Realm) {
 	}
 
 	if len(season.Leagues) < 1 {
-		log.Err(err).Msg("season contains no leagues")
+		log.Error().Msg("season contains no leagues")
 		return
 	}
 
