@@ -29,9 +29,11 @@ func main() {
 		return l.Level(level)
 	})
 
-	// Realm input
 	backendApi := flag.String("backend", "", "Aftermath api domain")
 	flag.Parse()
+	if *backendApi == "" {
+		log.Fatal().Msg("backend is a required argument")
+	}
 
 	scheduler := gocron.NewScheduler(time.UTC)
 
@@ -46,7 +48,8 @@ func main() {
 func collectRealmIDs(backendApi string, realm types.Realm) {
 	client, err := wargaming.NewRatingLeaderboardClient()
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create a leaderboard client")
+		log.Err(err).Msg("failed to create a leaderboard client")
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -54,16 +57,19 @@ func collectRealmIDs(backendApi string, realm types.Realm) {
 
 	season, err := client.CurrentSeason(ctx, realm)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to get current season")
+		log.Err(err).Msg("failed to get current season")
+		return
 	}
 
 	if len(season.Leagues) < 1 {
-		log.Fatal().Err(err).Msg("season contains no leagues")
+		log.Err(err).Msg("season contains no leagues")
+		return
 	}
 
 	players, err := client.LeagueTop(ctx, realm, season.Leagues[0].ID)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to get league top players")
+		log.Err(err).Msg("failed to get league top players")
+		return
 	}
 
 	var initialIDs []int
@@ -84,7 +90,8 @@ func collectRealmIDs(backendApi string, realm types.Realm) {
 
 	err = client.CollectPlayerIDs(context.Background(), types.RealmNorthAmerica, collector, players[len(players)-1].AccountID)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to complete player id collection")
+		log.Err(err).Msg("failed to complete player id collection")
+		return
 	}
 
 	log.Info().Int("total", total).Msg("finished collecting player ids")
