@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
+	"time"
 
 	"github.com/cufee/aftermath/internal/json"
+	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
@@ -22,6 +25,9 @@ func (c *RatingLeaderboardClient) CurrentSeason(ctx context.Context, realm types
 	if err != nil {
 		return RatingSeason{}, err
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
 	req = req.WithContext(ctx)
 
 	res, err := c.http.Do(req)
@@ -44,6 +50,9 @@ func (c *RatingLeaderboardClient) LeagueTop(ctx context.Context, realm types.Rea
 	if err != nil {
 		return nil, err
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
 	req = req.WithContext(ctx)
 
 	res, err := c.http.Do(req)
@@ -83,6 +92,61 @@ func (c *RatingLeaderboardClient) PlayerPosition(ctx context.Context, realm type
 	}
 
 	return data, nil
+}
+
+type leaderboardPositionSlim struct {
+	AccountID int                       `json:"spa_id"`
+	Position  int                       `json:"number"`
+	Neighbors []leaderboardPositionSlim `json:"neighbors"`
+}
+
+func (c *RatingLeaderboardClient) CollectPlayerIDs(parentCtx context.Context, realm types.Realm, collector chan<- []int, startingFromID int) error {
+	batchSize := 100
+
+	req, err := http.NewRequest("GET", neighborsURL(realm, startingFromID, batchSize), nil)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(parentCtx, time.Second*15) // this api generally is really slow
+	defer cancel()
+	req = req.WithContext(ctx)
+
+	res, err := c.http.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Debug().Int("id", startingFromID).Str("realm", realm.String()).Str("status", res.Status).Msg("retrying collecting player ids")
+		time.Sleep(time.Second * 30)
+		return c.CollectPlayerIDs(parentCtx, realm, collector, startingFromID)
+	}
+
+	var data leaderboardPositionSlim
+	err = json.NewDecoder(res.Body).Decode(&data)
+	if err != nil {
+		return err
+	}
+
+	startingIndex := slices.IndexFunc(data.Neighbors, func(player leaderboardPositionSlim) bool { return player.AccountID == startingFromID }) + 1
+	if startingIndex >= len(data.Neighbors) {
+		return nil
+	}
+
+	var ids []int
+	var lastPosition int
+	for _, player := range data.Neighbors[startingIndex:] {
+		ids = append(ids, player.AccountID)
+		lastPosition = max(lastPosition, player.Position)
+	}
+	collector <- ids
+
+	if len(ids) < batchSize {
+		return nil
+	}
+	return c.CollectPlayerIDs(parentCtx, realm, collector, ids[len(ids)-1])
 }
 
 // Season

@@ -7,6 +7,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/utils"
 
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/log"
@@ -17,9 +18,9 @@ import (
 )
 
 var (
-	accountsPool         = newPool[models.Account]()
-	vehicleSnapshotsPool = newPool[models.VehicleSnapshot]()
-	accountSnapshotsPool = newPool[models.AccountSnapshot]()
+	accountsPool         = utils.NewPool[models.Account]()
+	vehicleSnapshotsPool = utils.NewPool[models.VehicleSnapshot]()
+	accountSnapshotsPool = utils.NewPool[models.AccountSnapshot]()
 )
 
 type snapshotRecordOptions struct {
