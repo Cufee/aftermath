@@ -96,7 +96,9 @@ func UpdateAveragesWorker(client core.Client) func() {
 		}
 
 		for id, err := range aErr {
-			log.Err(err).Str("", id).Msg("failed to update some average cache")
+			if err != nil {
+				log.Err(err).Str("", id).Msg("failed to update some average cache")
+			}
 		}
 
 		log.Info().Msg("averages cache updated")

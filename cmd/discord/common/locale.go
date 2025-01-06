@@ -24,6 +24,9 @@ func LocaleToLanguageTag(locale discordgo.Locale) language.Tag {
 	case discordgo.PortugueseBR:
 		return language.Portuguese
 
+	case "":
+		return language.English
+
 	default:
 		tag, err := language.Parse(locale.String())
 		if err != nil {

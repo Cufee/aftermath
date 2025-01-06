@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cufee/aftermath/internal/log"
 	common "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
-	"github.com/rs/zerolog/log"
 
 	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/joho/godotenv"

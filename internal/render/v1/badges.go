@@ -38,6 +38,7 @@ func SubscriptionsBadges(subscriptions []models.UserSubscription) ([]Block, erro
 	})
 
 	var badges []Block
+	// Moderator role group
 	for _, subscription := range subscriptions {
 		var header *subscriptionHeader
 		switch subscription.Type {
@@ -58,11 +59,16 @@ func SubscriptionsBadges(subscriptions []models.UserSubscription) ([]Block, erro
 			break
 		}
 	}
+	// Community role group
 	for _, subscription := range subscriptions {
 		var header *subscriptionHeader
 		switch subscription.Type {
 		case models.SubscriptionTypeContentTranslator:
 			header = subscriptionTranslator
+		case models.SubscriptionTypeThumbsCounter:
+			if count, _ := subscription.Meta["count"].(float64); count > 0 {
+				header = subscriptionThumbsUp(count)
+			}
 		}
 
 		if header != nil {
@@ -74,6 +80,7 @@ func SubscriptionsBadges(subscriptions []models.UserSubscription) ([]Block, erro
 			break
 		}
 	}
+	// Paid member group
 	for _, subscription := range subscriptions {
 		var header *subscriptionHeader
 		switch subscription.Type {

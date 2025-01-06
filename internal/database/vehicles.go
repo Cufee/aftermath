@@ -17,7 +17,7 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.
 		return nil, nil
 	}
 
-	errors := make(map[string]error, len(vehicles))
+	errors := make(map[string]error)
 	return errors, c.withTx(ctx, func(tx *transaction) error {
 		for id, data := range vehicles {
 			model := m.Vehicle{
@@ -43,7 +43,10 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.
 					t.Vehicle.Tier.SET(t.Vehicle.EXCLUDED.Tier),
 				))
 
-			_, errors[id] = tx.exec(ctx, stmt)
+			_, err = tx.exec(ctx, stmt)
+			if err != nil {
+				errors[id] = err
+			}
 		}
 		return nil
 	})

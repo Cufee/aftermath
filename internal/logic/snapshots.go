@@ -7,6 +7,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/utils"
 
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/log"
@@ -17,9 +18,9 @@ import (
 )
 
 var (
-	accountsPool         = newPool[models.Account]()
-	vehicleSnapshotsPool = newPool[models.VehicleSnapshot]()
-	accountSnapshotsPool = newPool[models.AccountSnapshot]()
+	accountsPool         = utils.NewPool[models.Account]()
+	vehicleSnapshotsPool = utils.NewPool[models.VehicleSnapshot]()
+	accountSnapshotsPool = utils.NewPool[models.AccountSnapshot]()
 )
 
 type snapshotRecordOptions struct {
@@ -256,28 +257,31 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 	}
 
+outer:
 	for _, accountSnapshot := range accountSnapshots {
-		vehicles := vehicleSnapshots[accountSnapshot.AccountID]
-		if len(vehicles) > 0 {
-			// save all vehicle snapshots)
-			err := dbClient.CreateVehicleSnapshots(ctx, vehicles...)
-			if err != nil {
-				accountErrors[accountSnapshot.AccountID] = err
-				continue
-			}
+		// update account cache
+		aErr, err := dbClient.UpsertAccounts(ctx, accountUpdates[accountSnapshot.AccountID])
+		if err != nil {
+			log.Err(err).Str("accountId", accountSnapshot.AccountID).Msg("failed to upsert account")
+		}
+		for _, err := range aErr {
+			log.Err(err).Str("accountId", accountSnapshot.AccountID).Msg("failed to upsert account")
+			accountErrors[accountSnapshot.AccountID] = err
+			continue outer
 		}
 
 		// save account snapshot
-		err := dbClient.CreateAccountSnapshots(ctx, accountSnapshot)
+		err = dbClient.CreateAccountSnapshots(ctx, accountSnapshot)
 		if err != nil {
 			accountErrors[accountSnapshot.AccountID] = errors.Wrap(err, "failed to save account snapshots to database")
 			continue
 		}
 
-		// update account cache, non critical and should not fail the flow
-		_, err = dbClient.UpsertAccounts(ctx, accountUpdates[accountSnapshot.AccountID])
+		// save all vehicle snapshots)
+		err = dbClient.CreateVehicleSnapshots(ctx, vehicleSnapshots[accountSnapshot.AccountID]...)
 		if err != nil {
-			log.Err(err).Str("accountId", accountSnapshot.AccountID).Msg("failed to upsert account")
+			accountErrors[accountSnapshot.AccountID] = err
+			continue
 		}
 	}
 

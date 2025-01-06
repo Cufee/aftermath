@@ -1,6 +1,7 @@
 package render
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/pkg/errors"
@@ -23,8 +24,9 @@ var (
 	DefaultCardColorNoAlpha = color.NRGBA{10, 10, 10, 255}
 	ClanTagBackgroundColor  = color.NRGBA{10, 10, 10, 120}
 
-	ColorAftermathRed  = color.NRGBA{255, 0, 120, 255}
-	ColorAftermathBlue = color.NRGBA{72, 167, 250, 255}
+	ColorAftermathRed    = color.NRGBA{255, 0, 120, 255}
+	ColorAftermathBlue   = color.NRGBA{72, 167, 250, 255}
+	ColorAftermathYellow = color.NRGBA{255, 223, 0, 255}
 
 	BorderRadiusXL = 30.0
 	BorderRadiusLG = 25.0
@@ -185,6 +187,16 @@ func InitLoadedAssets() error {
 			Text:      Style{Font: FontSmall(), FontColor: TextSecondary},
 		},
 	}
-
 	return nil
+}
+
+func subscriptionThumbsUp(count float64) *subscriptionHeader {
+	return &subscriptionHeader{
+		Name: fmt.Sprintf("%0.0f", count),
+		Icon: "images/icons/thumbs-up",
+		Style: subscriptionPillStyle{
+			Container: Style{Direction: DirectionHorizontal, AlignItems: AlignItemsCenter, BackgroundColor: DefaultCardColorNoAlpha, BorderRadius: 15, PaddingX: 10, PaddingY: 5, Gap: 5, Height: 32},
+			Icon:      Style{Width: 20, Height: 20, BackgroundColor: TextPrimary},
+			Text:      Style{Font: FontSmall(), FontColor: TextSecondary},
+		}}
 }

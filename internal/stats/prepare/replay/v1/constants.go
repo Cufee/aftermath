@@ -5,8 +5,8 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 )
 
-var defaultBlocks = []common.Tag{common.TagDamageDealt, TagDamageAssistedCombined, common.TagFrags, common.TagWN8}
-var blocksNoWN8 = []common.Tag{common.TagDamageDealt, TagDamageAssisted, TagDamageBlocked, common.TagFrags}
+var defaultBlocks = []common.Tag{common.TagDamageDealt, TagDamageAssistedCombined, common.TagFrags, common.TagWinrate, common.TagWN8}
+var blocksNoWN8 = []common.Tag{common.TagDamageDealt, TagDamageAssisted, TagDamageBlocked, common.TagFrags, common.TagWinrate}
 
 const (
 	TagDamageBlocked          common.Tag = "blocked"

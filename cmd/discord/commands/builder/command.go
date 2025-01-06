@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
+	"github.com/cufee/aftermath/internal/discord"
 )
 
 type commandType byte
@@ -19,7 +20,7 @@ const (
 type CommandHandler func(common.Context) error
 
 type Command struct {
-	discordgo.ApplicationCommand
+	discord.ApplicationCommand
 
 	Type       commandType
 	Match      func(string) bool
@@ -27,6 +28,11 @@ type Command struct {
 	Middleware []middleware.MiddlewareFunc
 	Ephemeral  bool
 }
+
+const (
+	IntegrationTypeGuild = 0
+	IntegrationTypeUser  = 1
+)
 
 type Builder struct {
 	name   string
@@ -39,12 +45,15 @@ type Builder struct {
 	handler    CommandHandler
 	middleware []middleware.MiddlewareFunc
 
+	integrationTypes    []discord.InteractionType
+	interactionContexts []discord.InteractionContextType
+
 	ephemeral bool
 	options   []Option
 }
 
 func NewCommand(name string) Builder {
-	return Builder{name: name, match: func(s string) bool { return s == name }, kind: CommandTypeChat}
+	return Builder{name: name, match: func(s string) bool { return s == name }, kind: CommandTypeChat, integrationTypes: discord.InteractionTypeAll, interactionContexts: discord.InteractionContextAll}
 }
 
 func (c Builder) Build() Command {
@@ -72,7 +81,7 @@ func (c Builder) Build() Command {
 	}
 
 	return Command{
-		discordgo.ApplicationCommand{
+		discord.ApplicationCommand{
 			Name:                     strings.ToLower(stringOr(nameLocalized[discordgo.EnglishUS], c.name)),
 			Description:              stringOr(descLocalized[discordgo.EnglishUS], c.name),
 			NameLocalizations:        &nameLocalized,
@@ -80,6 +89,8 @@ func (c Builder) Build() Command {
 			Options:                  options,
 			DMPermission:             common.Pointer(!c.guildOnly),
 			Type:                     discordgo.ChatApplicationCommand,
+			IntegrationTypes:         c.integrationTypes,
+			Contexts:                 c.interactionContexts,
 		},
 		c.kind,
 		c.match,

@@ -8,8 +8,6 @@ import (
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
-	"github.com/cufee/aftermath/internal/log"
-	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
@@ -62,21 +60,8 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	stop()
 	if database.IsNotFound(err) {
 		// record a session in the background
-		go func(id string) {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-			defer cancel()
+		go recordAccountSnapshots(c.wargaming, c.database, accountId, opts.referenceID)
 
-			realm, ok := c.wargaming.RealmFromID(id)
-			if !ok {
-				log.Error().Str("accountId", id).Msg("invalid account realm")
-				return
-			}
-
-			_, err = logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, realm, logic.WithReference(id, opts.referenceID))
-			if err != nil {
-				log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
-			}
-		}(accountId)
 		return prepare.Cards{}, meta, ErrAccountNotTracked
 	}
 	if err != nil {
@@ -96,22 +81,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	stop()
 	if err != nil {
 		if errors.Is(err, fetch.ErrSessionNotFound) {
-			go func(id string) {
-				// record a session in the background
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-				defer cancel()
-
-				realm, ok := c.wargaming.RealmFromID(id)
-				if !ok {
-					log.Error().Str("accountId", id).Msg("invalid account realm")
-					return
-				}
-
-				_, err = logic.RecordAccountSnapshots(ctx, c.wargaming, c.database, realm, logic.WithReference(id, opts.referenceID))
-				if err != nil {
-					log.Err(err).Str("accountId", id).Msg("failed to record account snapshot")
-				}
-			}(accountId)
+			go recordAccountSnapshots(c.wargaming, c.database, accountId, opts.referenceID)
 		}
 		return prepare.Cards{}, meta, err
 	}
@@ -176,7 +146,7 @@ func (c *client) SessionImage(ctx context.Context, accountId string, from time.T
 	}
 
 	stop := meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(meta.Stats["session"], meta.Stats["career"], cards, nil, opts.RenderOpts(printer)...)
+	image, err := render.CardsToImage(meta.Stats["session"], meta.Stats["career"], cards, opts.subscriptions, opts.RenderOpts(printer)...)
 	stop()
 	if err != nil {
 		return nil, meta, err

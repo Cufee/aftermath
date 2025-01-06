@@ -29,6 +29,7 @@ import (
 	"github.com/cufee/aftermath/cmd/frontend"
 	"github.com/nao1215/imaging"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 
 	"github.com/cufee/aftermath/cmd/core/server"
 	"github.com/cufee/aftermath/cmd/core/server/handlers/private"
@@ -46,7 +47,6 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/render/assets"
 	render "github.com/cufee/aftermath/internal/render/v1"
-	"github.com/rs/zerolog"
 
 	_ "github.com/joho/godotenv/autoload"
 
@@ -195,7 +195,7 @@ func main() {
 
 func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway.Client, error) {
 	// discord gateway
-	gw, err := gateway.NewClient(core, constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages)
+	gw, err := gateway.NewClient(core, constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages|discordgo.IntentGuildMessageReactions|discordgo.IntentDirectMessageReactions)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a gateway client")
 	}
@@ -210,7 +210,9 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encode help image")
 	}
-	gw.Handler(public.MentionHandler(buf.Bytes()))
+	gw.Handler(gateway.ToGatewayHandler(gw, public.MentionHandler(buf.Bytes())))
+	gw.Handler(gateway.ToGatewayHandler(gw, public.ReplayFileHandler))
+	gw.Handler(gateway.ToGatewayHandler(gw, public.ReplayInteractionHandler))
 
 	err = gw.Connect()
 	if err != nil {
@@ -266,12 +268,16 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 
 	router.LoadCommands(public.Help().Build())
 	router.LoadCommands(commands.LoadedPublic.Compose()...)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-	err = router.UpdateLoadedCommands(ctx)
-	if err != nil {
-		log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
-	}
+
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+		defer cancel()
+		err = router.UpdateLoadedCommands(ctx)
+		if err != nil {
+			log.Fatal().Msgf("router#UpdateLoadedCommands failed %s", err)
+		}
+	}()
+
 	fn, err := router.HTTPHandler()
 	if err != nil {
 		log.Fatal().Msgf("router#HTTPHandler failed %s", err)

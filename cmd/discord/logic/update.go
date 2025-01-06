@@ -4,18 +4,18 @@ import (
 	"context"
 	"os"
 
-	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/discord"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 )
 
 type command struct {
 	requested *builder.Command
-	current   *discordgo.ApplicationCommand
+	current   *discord.ApplicationCommand
 	cached    *models.ApplicationCommand
 }
 

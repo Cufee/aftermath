@@ -78,7 +78,7 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts ...*models.Account
 		return nil, nil
 	}
 
-	errors := make(map[string]error, len(accounts))
+	errors := make(map[string]error)
 	return errors, c.withTx(ctx, func(tx *transaction) error {
 		for _, a := range accounts {
 			stmt := t.Account.
@@ -94,7 +94,10 @@ func (c *client) UpsertAccounts(ctx context.Context, accounts ...*models.Account
 						t.Account.LastBattleTime.SET(t.Account.EXCLUDED.LastBattleTime),
 					),
 				)
-			_, errors[a.ID] = tx.exec(ctx, stmt)
+			_, err := tx.exec(ctx, stmt)
+			if err != nil {
+				errors[a.ID] = err
+			}
 		}
 		return nil
 	})

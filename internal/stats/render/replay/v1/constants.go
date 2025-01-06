@@ -47,7 +47,7 @@ func statsRowStyle() common.Style {
 		PaddingX:   common.BorderRadiusLG - playerCardPadding,
 		Direction:  common.DirectionHorizontal,
 		AlignItems: common.AlignItemsCenter,
-		Gap:        10,
+		Gap:        20,
 		// Debug:     true,
 	}
 }

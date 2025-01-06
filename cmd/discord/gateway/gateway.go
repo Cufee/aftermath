@@ -68,6 +68,10 @@ func (c *gatewayClient) Disconnect() error {
 	return c.manager.Shutdown()
 }
 
+func (c *gatewayClient) Rest() *rest.Client {
+	return c.rest
+}
+
 func (c *gatewayClient) Handler(fn interface{}) {
 	c.manager.AddHandler(fn)
 }

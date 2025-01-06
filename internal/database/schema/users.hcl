@@ -148,6 +148,12 @@ table "user_subscription" {
     null = false
     type = text
   }
+  column "metadata" {
+    null = false
+    type = blob
+    default = ""
+  }
+
   primary_key {
     columns = [column.id]
   }

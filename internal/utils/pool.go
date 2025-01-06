@@ -1,4 +1,4 @@
-package logic
+package utils
 
 import "sync"
 
@@ -22,7 +22,7 @@ func (p *pool[T]) Put(s *T) {
 	p.pool.Put(s)
 }
 
-func newPool[T any]() *pool[T] {
+func NewPool[T any]() *pool[T] {
 	return &pool[T]{
 		pool: &sync.Pool{
 			New: func() any {

@@ -17,7 +17,7 @@ func (c *client) UpsertGameModes(ctx context.Context, modes map[string]map[langu
 		return nil, nil
 	}
 
-	errors := make(map[string]error, len(modes))
+	errors := make(map[string]error)
 	return errors, c.withTx(ctx, func(tx *transaction) error {
 		for id, locales := range modes {
 			encoded, err := json.Marshal(locales)
@@ -42,7 +42,9 @@ func (c *client) UpsertGameModes(ctx context.Context, modes map[string]map[langu
 					t.GameMode.LocalizedNames.SET(t.GameMode.EXCLUDED.LocalizedNames),
 				))
 			_, err = tx.exec(ctx, stmt)
-			errors[id] = err
+			if err != nil {
+				errors[id] = err
+			}
 		}
 		return nil
 	})

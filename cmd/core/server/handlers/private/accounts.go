@@ -62,7 +62,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 			batchSize := 50
 			var wg sync.WaitGroup
 			sem := semaphore.NewWeighted(5)
-			errors := make(map[string]error, len(accountsByRealm))
+			errors := make(map[string]error)
 			var errorsMx sync.Mutex
 
 			for realm, accounts := range accountsByRealm {
@@ -131,7 +131,9 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 			wg.Wait()
 
 			for id, err := range errors {
-				log.Err(err).Str("id", id).Msg("some account imports failed")
+				if err != nil {
+					log.Err(err).Str("id", id).Msg("some account imports failed")
+				}
 			}
 
 			log.Info().Int("count", len(accounts)-len(existing)).Msg("finished importing accounts")

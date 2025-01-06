@@ -3,56 +3,81 @@ package gateway
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/core"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/rest"
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/lucsky/cuid"
 	"golang.org/x/text/language"
 )
 
 type eventContext struct {
+	id string
+
 	context.Context
 
-	user   models.User
-	member discordgo.User
+	user models.User
 
 	locale   language.Tag
 	localize localization.Printer
 	gw       *gatewayClient
 
-	interaction discordgo.Interaction
+	userID    string
+	guildID   string
+	messageID string
+	channelID string
+	eventType string
 }
 
-func newContext(ctx context.Context, gw *gatewayClient, interaction discordgo.Interaction) (common.Context, error) {
-	c := &eventContext{Context: ctx, locale: language.English, interaction: interaction, gw: gw}
+var ErrUnsupportedEvent = errors.New("event type not supported")
+var ErrInvalidEvent = errors.New("event type missing required fields")
+var ErrBotUserInitiated = errors.New("event initiated by a bot user")
 
-	if interaction.User != nil {
-		c.member = *interaction.User
-	}
-	if interaction.Member != nil {
-		c.member = *interaction.Member.User
+func newContext(ctx context.Context, gw *gatewayClient, event any) (common.Context, error) {
+	var c *eventContext
+	switch cast := event.(type) {
+	case *discordgo.MessageReactionAdd:
+		locale := language.English
+		if cast.Member != nil && cast.Member.User != nil {
+			locale = common.LocaleToLanguageTag(discordgo.Locale(cast.Member.User.Locale))
+
+			if cast.Member.User.Bot || cast.UserID == constants.DiscordBotUserID {
+				return nil, ErrBotUserInitiated
+			}
+		}
+		c = &eventContext{id: cuid.New(), Context: ctx, gw: gw, userID: cast.UserID, guildID: cast.GuildID, channelID: cast.ChannelID, messageID: cast.MessageID, locale: locale}
+
+	case *discordgo.MessageCreate:
+		if cast.Author == nil {
+			return nil, ErrInvalidEvent
+		}
+		if cast.Author.Bot || cast.Author.ID == constants.DiscordBotUserID {
+			return nil, ErrBotUserInitiated
+		}
+		c = &eventContext{id: cuid.New(), Context: ctx, gw: gw, userID: cast.Author.ID, guildID: cast.GuildID, channelID: cast.ChannelID, messageID: cast.ID, locale: common.LocaleToLanguageTag(discordgo.Locale(cast.Author.Locale))}
+
+	default:
+		return nil, ErrUnsupportedEvent
 	}
 
-	if c.member.ID == "" {
-		return nil, errors.New("failed to get a valid discord user id")
+	if c.userID == "" {
+		return nil, ErrInvalidEvent
 	}
+	c.eventType = fmt.Sprintf("%T", event)
 
-	user, err := gw.core.Database().GetOrCreateUserByID(ctx, c.member.ID, database.WithConnections(), database.WithSubscriptions(), database.WithContent())
+	user, err := gw.core.Database().GetOrCreateUserByID(ctx, c.userID, database.WithConnections(), database.WithSubscriptions(), database.WithContent())
 	if err != nil {
 		return nil, err
 	}
 	c.user = user
-
-	// Use the user locale selection by default with fallback to guild settings
-	if c.interaction.Locale != "" {
-		c.locale = common.LocaleToLanguageTag(c.interaction.Locale)
-	}
 
 	printer, err := localization.NewPrinterWithFallback("discord", c.locale)
 	if err != nil {
@@ -66,29 +91,19 @@ func newContext(ctx context.Context, gw *gatewayClient, interaction discordgo.In
 
 func (c *eventContext) saveInteractionEvent(msg discordgo.Message, msgErr error, reply common.Reply) {
 	meta := reply.Metadata()
-	i := c.interaction
-	i.Token = "..."
-	meta["interaction"] = i
+	meta["eventType"] = c.eventType
+	meta["eventMessageId"] = c.messageID
 
 	data := models.DiscordInteraction{
 		Snowflake: c.InteractionID(),
-		EventID:   c.ID(),
+		EventID:   c.eventType,
 		MessageID: msg.ID,
 		Locale:    c.locale,
 		UserID:    c.user.ID,
-		GuildID:   c.interaction.GuildID,
-		ChannelID: c.interaction.ChannelID,
-		Type:      models.InteractionTypeUnknown,
+		GuildID:   c.guildID,
+		ChannelID: c.channelID,
+		Type:      models.InteractionTypeGatewayEvent,
 		Meta:      meta,
-	}
-	if c.isCommand() {
-		data.Type = models.InteractionTypeCommand
-	}
-	if c.isComponentInteraction() {
-		data.Type = models.InteractionTypeComponent
-	}
-	if c.isAutocompleteInteraction() {
-		data.Type = models.InteractionTypeAutocomplete
 	}
 	if msgErr != nil {
 		data.Result = "error"
@@ -106,49 +121,11 @@ func (c *eventContext) saveInteractionEvent(msg discordgo.Message, msgErr error,
 	}
 }
 func (c *eventContext) InteractionResponse(reply common.Reply) (discordgo.Message, error) {
-	data, files := reply.Peek().Build(c.localize)
-	select {
-	case <-c.Context.Done():
-		go c.saveInteractionEvent(discordgo.Message{}, c.Context.Err(), reply)
-		return discordgo.Message{}, c.Context.Err()
-	default:
-		msg, err := common.WithRetry(func() (discordgo.Message, error) {
-			// since we already finished handling the interaction, there is no need to use the handler context
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
-			defer cancel()
-
-			if c.interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
-				err := c.gw.rest.SendAutocompleteResponse(ctx, c.interaction.ID, c.interaction.Token, data.Choices)
-				if errors.Is(err, rest.ErrInteractionAlreadyAcked) {
-					err = nil
-				}
-				return discordgo.Message{}, err
-			}
-			return c.gw.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data.Interaction(), files)
-		})
-
-		go c.saveInteractionEvent(msg, err, reply)
-		return msg, err
-	}
+	return c.CreateMessage(c.Context, c.channelID, reply)
 }
 
 func (c *eventContext) InteractionFollowUp(reply common.Reply) (discordgo.Message, error) {
-	data, files := reply.Peek().Build(c.localize)
-	select {
-	case <-c.Context.Done():
-		go c.saveInteractionEvent(discordgo.Message{}, c.Context.Err(), reply)
-		return discordgo.Message{}, c.Context.Err()
-	default:
-		return common.WithRetry(func() (discordgo.Message, error) {
-			// since we already finished handling the interaction, there is no need to use the handler context
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			msg, err := c.gw.rest.SendInteractionFollowup(ctx, c.interaction.AppID, c.interaction.Token, data.Interaction(), files)
-
-			go c.saveInteractionEvent(msg, err, reply)
-			return msg, err
-		})
-	}
+	return c.CreateMessage(c.Context, c.channelID, reply)
 }
 
 func (c *eventContext) Ctx() context.Context {
@@ -160,7 +137,7 @@ func (c *eventContext) User() models.User {
 }
 
 func (c *eventContext) Member() discordgo.User {
-	return c.member
+	return discordgo.User{ID: c.userID}
 }
 
 func (c *eventContext) Locale() language.Tag {
@@ -180,11 +157,11 @@ func (c *eventContext) Rest() *rest.Client {
 }
 
 func (c *eventContext) RawInteraction() discordgo.Interaction {
-	return c.interaction
+	return discordgo.Interaction{}
 }
 
 func (c *eventContext) InteractionID() string {
-	return c.interaction.ID
+	return c.id
 }
 
 func (c *eventContext) Reply() common.Reply {
@@ -192,12 +169,12 @@ func (c *eventContext) Reply() common.Reply {
 }
 
 func (c *eventContext) Err(err error) error {
-	log.Err(err).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
+	log.Err(err).Str("interactionId", c.id).Msg("error while handling an interaction")
 	button := discordgo.ActionsRow{
 		Components: []discordgo.MessageComponent{
 			common.ButtonJoinPrimaryGuild(c.localize("buttons_have_a_question_question")),
 		}}
-	return c.Reply().Hint(c.interaction.ID).Component(button).Send("common_error_unhandled_reported")
+	return c.Reply().Hint(c.id).Component(button).Send("common_error_unhandled_reported")
 }
 
 func (c *eventContext) Error(message string) error {
@@ -205,71 +182,39 @@ func (c *eventContext) Error(message string) error {
 }
 
 func (c *eventContext) isCommand() bool {
-	return c.interaction.Type == discordgo.InteractionApplicationCommand
+	return false
 }
 
 func (c *eventContext) isComponentInteraction() bool {
-	return c.interaction.Type == discordgo.InteractionMessageComponent
+	return false
 }
 
 func (c *eventContext) isAutocompleteInteraction() bool {
-	return c.interaction.Type == discordgo.InteractionApplicationCommandAutocomplete
+	return false
 }
 
 func (c *eventContext) ID() string {
-	var id string
-	if c.isCommand() {
-		d, _ := c.CommandData()
-		id = d.Name
-	}
-	if c.isComponentInteraction() {
-		d, _ := c.ComponentData()
-		id = d.CustomID
-	}
-	if c.isAutocompleteInteraction() {
-		d, _ := c.AutocompleteData()
-		id = d.Name
-	}
-	if id != "" {
-		return id
-	}
-	return "unknown"
+	return c.id
 }
 
 func (c *eventContext) Options() common.Options {
-	if data, ok := c.interaction.Data.(discordgo.ApplicationCommandInteractionData); ok {
-		var o common.Options = data.Options
-		return o.Deep()
-	}
 	return common.Options{}
 }
 
 func (c *eventContext) CommandData() (discordgo.ApplicationCommandInteractionData, bool) {
-	if !c.isCommand() {
-		return discordgo.ApplicationCommandInteractionData{}, false
-	}
-	data, ok := c.interaction.Data.(discordgo.ApplicationCommandInteractionData)
-	return data, ok
+	return discordgo.ApplicationCommandInteractionData{}, false
 }
 
 func (c *eventContext) ComponentData() (discordgo.MessageComponentInteractionData, bool) {
-	if !c.isComponentInteraction() {
-		return discordgo.MessageComponentInteractionData{}, false
-	}
-	data, ok := c.interaction.Data.(discordgo.MessageComponentInteractionData)
-	return data, ok
+	return discordgo.MessageComponentInteractionData{}, false
 }
 
 func (c *eventContext) AutocompleteData() (discordgo.ApplicationCommandInteractionData, bool) {
-	if !c.isAutocompleteInteraction() {
-		return discordgo.ApplicationCommandInteractionData{}, false
-	}
-	data, ok := c.interaction.Data.(discordgo.ApplicationCommandInteractionData)
-	return data, ok
+	return discordgo.ApplicationCommandInteractionData{}, false
 }
 
 func (c *eventContext) DeleteResponse(ctx context.Context) error {
-	return c.gw.rest.DeleteInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token)
+	return nil
 }
 func (c *eventContext) CreateMessage(ctx context.Context, channelID string, reply common.Reply) (discordgo.Message, error) {
 	data, files := reply.Peek().Build(c.localize)
@@ -277,6 +222,7 @@ func (c *eventContext) CreateMessage(ctx context.Context, channelID string, repl
 		Content:    data.Content,
 		Components: data.Components,
 		Embeds:     data.Embeds,
+		Reference:  reply.Peek().Reference,
 	}, files)
 
 	go c.saveInteractionEvent(msg, err, reply)

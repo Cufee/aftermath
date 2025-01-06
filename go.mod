@@ -12,7 +12,7 @@ require (
 	github.com/a-h/templ v0.2.793
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/cufee/aftermath-assets v0.1.0
-	github.com/cufee/am-wg-proxy-next/v2 v2.2.5
+	github.com/cufee/am-wg-proxy-next/v2 v2.2.6
 	github.com/fogleman/gg v1.3.0
 	github.com/go-co-op/gocron v1.37.0
 	github.com/goccy/go-json v0.10.3

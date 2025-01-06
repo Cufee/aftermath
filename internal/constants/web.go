@@ -6,9 +6,9 @@ import (
 )
 
 var (
-	FrontendURL     = mustGetEnv("FRONTEND_URL")
+	FrontendURL     = MustGetEnv("FRONTEND_URL")
 	FrontendHost    string
-	FrontendAppName = mustGetEnv("WEBAPP_NAME")
+	FrontendAppName = MustGetEnv("WEBAPP_NAME")
 )
 
 var (

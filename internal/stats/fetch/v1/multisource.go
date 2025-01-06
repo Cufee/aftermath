@@ -100,9 +100,11 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 	close(errors)
 
 	// return first error
-	if len(errors) == 3 || (len(data) == 0 && len(errors) > 0) {
+	if len(data) == 0 && len(errors) > 0 {
 		for err := range errors {
-			return nil, err
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -510,9 +512,16 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 		return Replay{}, wargaming.ErrRealmNotSupported
 	}
 
+	var players []string
 	var vehicles []string
 	for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
 		vehicles = append(vehicles, player.VehicleID)
+		players = append(players, player.ID)
+	}
+
+	playerData, err := c.wargaming.BatchAccountByID(ctx, realm, players)
+	if err != nil {
+		err = nil // this error is not critical and will result in some missing data
 	}
 
 	averages, err := c.database.GetVehicleAverages(ctx, vehicles)
@@ -523,8 +532,16 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 	// calculate and cache WN8
 	_ = replay.Protagonist.Performance.WN8(averages[replay.Protagonist.VehicleID])
 	for i, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
+		// calculate and cache WN8
 		avg := averages[player.VehicleID]
 		_ = player.Performance.WN8(avg)
+
+		// set winrate cache
+		if stats, ok := playerData[player.ID]; ok {
+			frame := WargamingToFrame(stats.Statistics.All)
+			player.Performance.SetWinRate(float32(frame.BattlesWon) / float32(frame.Battles) * 100)
+		}
+
 		if i < len(replay.Teams.Allies) {
 			replay.Teams.Allies[i] = player
 		} else {
