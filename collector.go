@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -33,13 +35,18 @@ func main() {
 		log.Fatal().Msg("backend is a required argument")
 	}
 
-	if os.Getenv("COLLECTOR_RUN_ON_START") == "true" {
-		go func() {
-			collectRealmIDs(backendApi, types.RealmAsia)
-			collectRealmIDs(backendApi, types.RealmEurope)
+	go func() {
+		realms := strings.Split(os.Getenv("COLLECTOR_RUN_ON_START"), ",")
+		if slices.Contains(realms, types.RealmNorthAmerica.String()) {
 			collectRealmIDs(backendApi, types.RealmNorthAmerica)
-		}()
-	}
+		}
+		if slices.Contains(realms, types.RealmEurope.String()) {
+			collectRealmIDs(backendApi, types.RealmEurope)
+		}
+		if slices.Contains(realms, types.RealmAsia.String()) {
+			collectRealmIDs(backendApi, types.RealmAsia)
+		}
+	}()
 
 	scheduler := gocron.NewScheduler(time.UTC)
 
