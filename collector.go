@@ -29,11 +29,20 @@ func main() {
 		return l.Level(level)
 	})
 
+	runNow := flag.Bool("now", false, "Run collection tasks for all realms at start")
 	backendApi := flag.String("backend", "", "Aftermath api domain")
 	flag.Parse()
 	if *backendApi == "" {
 		log.Fatal().Msg("backend is a required argument")
 	}
+
+	go func() {
+		if *runNow {
+			collectRealmIDs(*backendApi, types.RealmAsia)
+			collectRealmIDs(*backendApi, types.RealmEurope)
+			collectRealmIDs(*backendApi, types.RealmNorthAmerica)
+		}
+	}()
 
 	scheduler := gocron.NewScheduler(time.UTC)
 
@@ -46,9 +55,11 @@ func main() {
 }
 
 func collectRealmIDs(backendApi string, realm types.Realm) {
+	log.Info().Str("realm", realm.String()).Msg("started collecting player ids")
+
 	client, err := wargaming.NewRatingLeaderboardClient()
 	if err != nil {
-		log.Err(err).Msg("failed to create a leaderboard client")
+		log.Err(err).Str("realm", realm.String()).Msg("failed to create a leaderboard client")
 		return
 	}
 
@@ -57,18 +68,18 @@ func collectRealmIDs(backendApi string, realm types.Realm) {
 
 	season, err := client.CurrentSeason(ctx, realm)
 	if err != nil {
-		log.Err(err).Msg("failed to get current season")
+		log.Err(err).Str("realm", realm.String()).Msg("failed to get current season")
 		return
 	}
 
 	if len(season.Leagues) < 1 {
-		log.Err(err).Msg("season contains no leagues")
+		log.Error().Str("realm", realm.String()).Msg("season contains no leagues")
 		return
 	}
 
 	players, err := client.LeagueTop(ctx, realm, season.Leagues[0].ID)
 	if err != nil {
-		log.Err(err).Msg("failed to get league top players")
+		log.Err(err).Str("realm", realm.String()).Msg("failed to get league top players")
 		return
 	}
 
@@ -84,17 +95,17 @@ func collectRealmIDs(backendApi string, realm types.Realm) {
 		for ids := range collector {
 			total += len(ids)
 			go savePlayerIDs(backendApi, ids)
-			log.Debug().Int("count", len(ids)).Int("total", total).Str("realm", realm.String()).Msg("collected player ids")
+			log.Debug().Str("realm", realm.String()).Int("count", len(ids)).Int("total", total).Str("realm", realm.String()).Msg("collected player ids")
 		}
 	}()
 
-	err = client.CollectPlayerIDs(context.Background(), types.RealmNorthAmerica, collector, players[len(players)-1].AccountID)
+	err = client.CollectPlayerIDs(context.Background(), realm, collector, players[len(initialIDs)-1].AccountID)
 	if err != nil {
-		log.Err(err).Msg("failed to complete player id collection")
+		log.Err(err).Str("realm", realm.String()).Msg("failed to complete player id collection")
 		return
 	}
 
-	log.Info().Int("total", total).Msg("finished collecting player ids")
+	log.Info().Str("realm", realm.String()).Int("total", total).Msg("finished collecting player ids")
 }
 
 var client = http.Client{
@@ -102,7 +113,7 @@ var client = http.Client{
 }
 
 func savePlayerIDs(apiDomain string, data []int) {
-	log.Info().Int("count", len(data)).Msg("saving player ids")
+	log.Debug().Int("count", len(data)).Msg("saving player ids")
 
 	var accounts []string
 	for _, a := range data {
