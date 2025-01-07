@@ -102,6 +102,9 @@ func collectRealmIDs(backendApi string, realm types.Realm) {
 			log.Debug().Str("realm", realm.String()).Int("count", len(ids)).Int("total", total).Str("realm", realm.String()).Msg("collected player ids")
 		}
 	}()
+	defer func() {
+		close(collector)
+	}()
 
 	err = client.CollectPlayerIDs(context.Background(), realm, collector, players[len(initialIDs)-1].AccountID)
 	if err != nil {
