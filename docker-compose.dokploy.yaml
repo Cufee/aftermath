@@ -3,9 +3,8 @@ services:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-collector-base
-    command: --backend=aftermath-service:${PRIVATE_SERVER_PORT}
     environment:
-      - LOG_LEVEL=debug
+      - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
     networks:
       - dokploy-network
 
