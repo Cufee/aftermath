@@ -40,7 +40,7 @@ RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux go build 
 # Make a scratch container with required files and binary
 FROM debian:stable-slim
 
-ENV TZ=Europe/Berlin
+ENV TZ=Etc/UTC
 ENV ZONEINFO=/zoneinfo.zip
 COPY --from=builder-go /bin/aftermath /usr/bin/aftermath
 COPY --from=builder-go /usr/local/go/lib/time/zoneinfo.zip /
