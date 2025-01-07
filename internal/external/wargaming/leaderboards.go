@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"slices"
 	"time"
 
@@ -113,13 +114,18 @@ func (c *RatingLeaderboardClient) CollectPlayerIDs(parentCtx context.Context, re
 	req = req.WithContext(ctx)
 
 	res, err := c.http.Do(req)
+	if os.IsTimeout(err) {
+		log.Warn().Err(err).Int("id", startingFromID).Str("realm", realm.String()).Msg("retrying collecting player ids")
+		time.Sleep(time.Second * 30)
+		return c.CollectPlayerIDs(parentCtx, realm, collector, startingFromID)
+	}
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		log.Debug().Int("id", startingFromID).Str("realm", realm.String()).Str("status", res.Status).Msg("retrying collecting player ids")
+		log.Warn().Int("id", startingFromID).Str("realm", realm.String()).Str("status", res.Status).Msg("retrying collecting player ids")
 		time.Sleep(time.Second * 30)
 		return c.CollectPlayerIDs(parentCtx, realm, collector, startingFromID)
 	}
