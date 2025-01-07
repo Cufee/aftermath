@@ -5,7 +5,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -24,31 +23,29 @@ import (
 
 func main() {
 	// Logger
-	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
+	level, _ := zerolog.ParseLevel(os.Getenv("COLLECTOR_LOG_LEVEL"))
 	log.SetupGlobalLogger(func(l zerolog.Logger) zerolog.Logger {
 		return l.Level(level)
 	})
 
-	runNow := flag.Bool("now", false, "Run collection tasks for all realms at start")
-	backendApi := flag.String("backend", "", "Aftermath api domain")
-	flag.Parse()
-	if *backendApi == "" {
+	backendApi := os.Getenv("COLLECTOR_BACKEND_URL")
+	if backendApi == "" {
 		log.Fatal().Msg("backend is a required argument")
 	}
 
-	go func() {
-		if *runNow {
-			collectRealmIDs(*backendApi, types.RealmAsia)
-			collectRealmIDs(*backendApi, types.RealmEurope)
-			collectRealmIDs(*backendApi, types.RealmNorthAmerica)
-		}
-	}()
+	if os.Getenv("COLLECTOR_RUN_ON_START") == "true" {
+		go func() {
+			collectRealmIDs(backendApi, types.RealmAsia)
+			collectRealmIDs(backendApi, types.RealmEurope)
+			collectRealmIDs(backendApi, types.RealmNorthAmerica)
+		}()
+	}
 
 	scheduler := gocron.NewScheduler(time.UTC)
 
-	scheduler.Cron("0 3 * * 2").Do(collectRealmIDs, *backendApi, types.RealmAsia)
-	scheduler.Cron("0 7 * * 2").Do(collectRealmIDs, *backendApi, types.RealmEurope)
-	scheduler.Cron("0 11 * * 2").Do(collectRealmIDs, *backendApi, types.RealmNorthAmerica)
+	scheduler.Cron("0 3 * * 2").Do(collectRealmIDs, backendApi, types.RealmAsia)
+	scheduler.Cron("0 7 * * 2").Do(collectRealmIDs, backendApi, types.RealmEurope)
+	scheduler.Cron("0 11 * * 2").Do(collectRealmIDs, backendApi, types.RealmNorthAmerica)
 
 	log.Info().Msg("started a cron scheduler")
 	scheduler.StartBlocking()
