@@ -301,7 +301,7 @@ func specialIconPath(preset common.Tag, frame frame.StatsFrame, small bool) stri
 		return assets.WN8IconPath(frame.WN8().Float())
 	}
 	if preset == common.TagRankedRating {
-		return assets.RatingIconPath(frame.Rating.Float())
+		return assets.RatingIconPath(frame.Rating().Float())
 	}
 	return ""
 }

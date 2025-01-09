@@ -29,7 +29,7 @@ type StatsFrame struct {
 	CapturePoints        ValueInt `json:"capturePoints" protobuf:"35"`
 	DroppedCapturePoints ValueInt `json:"droppedCapturePoints" protobuf:"36"`
 
-	Rating ValueSpecialRating `json:"mmRating" protobuf:"40"`
+	RawRating ValueSpecialRating `json:"mmRating" protobuf:"40"`
 
 	wn8             ValueInt          `json:"-" bson:"-"`
 	winRate         ValueFloatPercent `json:"-" bson:"-"`
@@ -132,6 +132,16 @@ func (r *StatsFrame) Accuracy(_ ...any) Value {
 		r.accuracy = ValueFloatPercent(r.ShotsHit.Float() / r.ShotsFired.Float() * 100)
 	}
 	return r.accuracy
+}
+
+/*
+Calculate and return mm rating
+*/
+func (r *StatsFrame) Rating(_ ...any) Value {
+	if r.Battles == 0 {
+		return InvalidValue
+	}
+	return r.RawRating
 }
 
 /*

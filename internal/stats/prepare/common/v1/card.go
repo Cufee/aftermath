@@ -73,7 +73,7 @@ func PresetValue(preset Tag, stats frame.StatsFrame, args ...any) (frame.Value, 
 	case TagAccuracy:
 		return stats.Accuracy(args...), nil
 	case TagRankedRating:
-		return stats.Rating, nil
+		return stats.Rating(args...), nil
 	case TagAvgDamage:
 		return stats.AvgDamage(args...), nil
 	case TagDamageRatio:
