@@ -127,7 +127,7 @@ type ValueSpecialRating float32
 var _ Value = ValueSpecialRating(0)
 
 func (value ValueSpecialRating) int() int {
-	if value > 0 {
+	if value != 0 {
 		return int((value * 10) + 3000)
 	}
 	return int(InvalidValue.Float())
