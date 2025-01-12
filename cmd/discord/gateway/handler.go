@@ -33,7 +33,13 @@ func ToGatewayHandler[T any](client *gatewayClient, handler common.EventHandler[
 			return
 		}
 
-		err = handler.Handle(cCtx, e)
+		chain := func(ctx common.Context) error {
+			return handler.Handle(ctx, e)
+		}
+		for i := len(client.middleware) - 1; i >= 0; i-- {
+			chain = client.middleware[i](cCtx, chain)
+		}
+		err = chain(cCtx)
 		if err != nil {
 			log.Err(err).Msg("gateway event handler returned an error")
 			return
