@@ -24,7 +24,6 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands"
 	_ "github.com/cufee/aftermath/cmd/discord/commands/private"
 	"github.com/cufee/aftermath/cmd/discord/commands/public"
-	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/gateway"
 	"github.com/cufee/aftermath/cmd/discord/router"
 	"github.com/cufee/aftermath/cmd/frontend"
@@ -203,12 +202,7 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client, instrume
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a gateway client")
 	}
-
 	gw.LoadMiddleware(collector.Middleware())
-	gw.LoadMiddleware(func(ctx common.Context, next func(common.Context) error) func(common.Context) error {
-		println("middleware")
-		return next
-	})
 
 	helpImage, ok := assets.GetLoadedImage("discord-help")
 	if !ok {
