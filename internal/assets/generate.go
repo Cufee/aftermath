@@ -249,7 +249,7 @@ type ratingIcon struct {
 }
 
 var ratingIcons = []ratingIcon{
-	{name: "calibration", fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}},
+	{name: "calibration", color: common.TextAlt, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 0, 1, 1, 0}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 1, 1, 0, 1, 1, 0}, {0, 0, 1, 0, 0}}},
 	{name: "bronze", color: render.GetRatingColors(1).Background, fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 0}}},
 	{name: "silver", color: render.GetRatingColors(2001).Background, fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 0, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 0}}},
 	{name: "gold", color: render.GetRatingColors(3001).Background, fill: [][]int{{0, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 1, 1, 0, 1, 0, 1, 1, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 0, 0, 0}}},
