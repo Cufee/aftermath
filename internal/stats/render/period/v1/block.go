@@ -49,7 +49,7 @@ func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockDa
 		ratingColors.Background = common.TextAlt
 	}
 
-	iconTop := common.AftermathLogo(ratingColors.Background, common.DefaultLogoOptions())
+	iconTop := common.AftermathLogo(ratingColors.Background, common.SmallLogoOptions())
 	iconBlockTop := common.NewImageContent(common.Style{Width: float64(iconTop.Bounds().Dx()), Height: float64(iconTop.Bounds().Dy())}, iconTop)
 
 	style.blockContainer.Gap = 5
