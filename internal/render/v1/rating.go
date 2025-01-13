@@ -48,7 +48,7 @@ func GetRatingTierName(rating float32) string {
 func GetRatingColors(rating float32) ratingColors {
 	switch {
 	case rating > 5000:
-		return ratingColors{color.NRGBA{142, 65, 177, 255}, color.White}
+		return ratingColors{color.NRGBA{181, 106, 181, 255}, color.White}
 	case rating > 4000:
 		return ratingColors{color.NRGBA{154, 197, 219, 255}, color.Black}
 	case rating > 3000:
@@ -56,7 +56,7 @@ func GetRatingColors(rating float32) ratingColors {
 	case rating > 2000:
 		return ratingColors{color.NRGBA{192, 192, 192, 255}, color.Black}
 	case rating > 0:
-		return ratingColors{color.NRGBA{192, 105, 105, 255}, color.Black}
+		return ratingColors{color.NRGBA{192, 105, 105, 255}, color.White}
 	default:
 		return ratingColors{color.Transparent, color.Transparent}
 	}
@@ -106,7 +106,7 @@ var RatingIconSettings = map[string]ratingIcon{
 	"gold": {Name: "gold", Color: GetRatingColors(3001).Background, Fill: [][]int{
 		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
 		{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
-		{1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
 		{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
 		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
 	}},

@@ -23,7 +23,7 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData, string]
 		}
 
 		var column []common.Block
-		iconTop := common.AftermathLogo(ratingColors.Background, common.SmallLogoOptions())
+		iconTop := common.AftermathLogo(ratingColors.Background, common.DefaultLogoOptions())
 		column = append(column, common.NewImageContent(common.Style{Width: specialWN8IconSize, Height: specialWN8IconSize}, iconTop))
 
 		pillColor := ratingColors.Background
