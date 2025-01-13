@@ -243,9 +243,19 @@ func wn8IconFilename(rating float32) string {
 
 func generateRatingIcons() {
 	log.Debug().Msg("generating rating image assets")
-	{
-		img := common.AftermathLogo(common.TextAlt, common.DefaultLogoOptions())
-		f, err := os.Create(filepath.Join(outDirPath, "rating", "calibration.png"))
+
+	for name, icon := range common.RatingIconSettings {
+		block, ok := common.RenderRatingIcon(icon)
+		if !ok {
+			panic("failed to render rating icon " + name)
+		}
+
+		img, err := block.Render()
+		if err != nil {
+			panic(err)
+		}
+
+		f, err := os.Create(filepath.Join(outDirPath, "rating", name+".png"))
 		if err != nil {
 			panic(err)
 		}
@@ -254,5 +264,6 @@ func generateRatingIcons() {
 			panic(err)
 		}
 		f.Close()
+
 	}
 }
