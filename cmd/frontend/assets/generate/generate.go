@@ -54,7 +54,7 @@ func generateWN8Icons() {
 		}
 		{
 			filename := wn8IconFilename(float32(tier))
-			img := common.AftermathLogo(color, common.SmallLogoOptions())
+			img := common.AftermathLogo(color, common.LargeLogoOptions())
 			f, err := os.Create(filepath.Join(outDirPath, "wn8", filename))
 			if err != nil {
 				panic(err)
