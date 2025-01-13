@@ -106,7 +106,7 @@ var RatingIconSettings = map[string]ratingIcon{
 	"gold": {Name: "gold", Color: GetRatingColors(3001).Background, Fill: [][]int{
 		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
 		{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
-		{1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1},
 		{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
 		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
 	}},
