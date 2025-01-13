@@ -251,18 +251,16 @@ var ratingIcons = []ratingIcon{
 	{name: "calibration", fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}},
 	{name: "bronze", color: color.NRGBA{192, 105, 105, 255}, fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 0}}},
 	{name: "silver", color: color.NRGBA{192, 192, 192, 255}, fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 0, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 0}}},
-	{name: "gold", color: color.NRGBA{255, 215, 0, 255}, fill: [][]int{{0, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 1, 1, 1, 0, 1, 1, 1, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 0, 0, 0}}},
-	{name: "platinum", color: color.NRGBA{154, 197, 219, 255}, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 1, 1, 1, 0, 1, 1, 1, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 1, 0, 0}}},
-	{name: "diamond", color: color.NRGBA{181, 106, 181, 255}, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 0, 1, 1, 0}, {0, 1, 1, 1, 0, 1, 1, 1, 0}, {0, 1, 1, 0, 1, 1, 0}, {0, 0, 1, 0, 0}}},
+	{name: "gold", color: color.NRGBA{255, 215, 0, 255}, fill: [][]int{{0, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 1, 1, 0, 1, 0, 1, 1, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 0, 0, 0}}},
+	{name: "platinum", color: color.NRGBA{154, 197, 219, 255}, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 1, 0, 0}}},
+	{name: "diamond", color: color.NRGBA{181, 106, 181, 255}, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 0, 1, 1, 0}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 1, 1, 0, 1, 1, 0}, {0, 0, 1, 0, 0}}},
 }
-
-var ratingIconLineWidth = 76
-
-// var ratingIconBackgroundColor = common.TextAlt
-var ratingIconBackgroundColor = common.DefaultCardColor
 
 func generateRatingIcons() {
 	log.Debug().Msg("generating rating icons")
+
+	var ratingIconLineWidth = 8
+	var ratingIconBackgroundColor = color.Transparent
 
 	for _, icon := range ratingIcons {
 		filename := "images/game/rating-" + icon.name + ".png"

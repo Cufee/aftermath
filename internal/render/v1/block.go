@@ -359,7 +359,7 @@ func (content *contentImage) Render(style Style) (image.Image, error) {
 		newHeight = 0
 	}
 
-	var image image.Image = imaging.Resize(content.image, newWidth, newHeight, imaging.Linear)
+	var image image.Image = imaging.Resize(content.image, newWidth, newHeight, imaging.CatmullRom)
 	if style.BackgroundColor != nil {
 		mask := gg.NewContextForImage(image)
 		ctx := gg.NewContext(image.Bounds().Dx(), image.Bounds().Dy())
