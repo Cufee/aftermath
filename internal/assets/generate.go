@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"image/color"
 	"image/png"
+	"math"
 	"os"
 	"path/filepath"
 
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/render/v1"
 	common "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
@@ -47,6 +49,8 @@ func main() {
 	generateDiscordLogo("red", common.ColorAftermathRed)
 	generateDiscordLogo("blue", common.ColorAftermathBlue)
 	generateDiscordLogo("yellow", common.ColorAftermathYellow)
+
+	generateRatingIcons()
 }
 
 func generateDiscordHelpImage(printer func(string) string) {
@@ -235,5 +239,104 @@ func generateDiscordLogo(suffix string, logoColor color.Color) {
 			panic(err)
 		}
 		f.Close()
+	}
+}
+
+type ratingIcon struct {
+	name  string
+	color color.Color
+	fill  [][]int
+}
+
+var ratingIcons = []ratingIcon{
+	{name: "calibration", fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}},
+	{name: "bronze", color: render.GetRatingColors(1).Background, fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 0}}},
+	{name: "silver", color: render.GetRatingColors(2001).Background, fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 0, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 0}}},
+	{name: "gold", color: render.GetRatingColors(3001).Background, fill: [][]int{{0, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 1, 1, 0, 1, 0, 1, 1, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 0, 0, 0}}},
+	{name: "platinum", color: render.GetRatingColors(4001).Background, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 1, 0, 0}}},
+	{name: "diamond", color: render.GetRatingColors(5001).Background, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 0, 1, 1, 0}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 1, 1, 0, 1, 1, 0}, {0, 0, 1, 0, 0}}},
+}
+
+func generateRatingIcons() {
+	log.Debug().Msg("generating rating icons")
+
+	var ratingIconLineWidth = 8
+	var ratingIconBackgroundColor = color.Transparent
+
+	for _, icon := range ratingIcons {
+		filename := "images/game/rating-" + icon.name + ".png"
+
+		centerIndex := len(icon.fill) / 2
+		iconWidth := (centerIndex * 2) * (ratingIconLineWidth * 2)
+		iconHeight := 0
+		for _, items := range icon.fill {
+			iconHeight = max(iconHeight, len(items)*(ratingIconLineWidth))
+		}
+
+		ctx := gg.NewContext(iconWidth, iconHeight)
+		offsetX := ratingIconLineWidth / 2
+		for _, items := range icon.fill {
+			colHeight := len(items) * (ratingIconLineWidth)
+			offsetY := (iconHeight - colHeight) / 2
+			ctx.DrawRoundedRectangle(float64(offsetX), float64(offsetY), float64(ratingIconLineWidth), float64(colHeight), (float64(ratingIconLineWidth)/2)-1)
+			ctx.SetColor(ratingIconBackgroundColor)
+			ctx.Fill()
+
+			ctx.SetColor(icon.color)
+			for i, section := range items {
+				sectionOffsetY := float64(offsetY + (i * ratingIconLineWidth))
+				if section == 0 {
+					continue
+				}
+
+				var topRounded bool = true
+				var bottomRounded bool = true
+				if i-1 >= 0 {
+					topRounded = items[i-1] == 0
+				}
+				if i+1 < len(items) {
+					bottomRounded = items[i+1] == 0
+				}
+
+				positionY := sectionOffsetY
+
+				if !topRounded && !bottomRounded {
+					ctx.DrawRectangle(float64(offsetX), positionY, float64(ratingIconLineWidth), float64(ratingIconLineWidth))
+					ctx.Fill()
+				}
+
+				// draw top part
+				if topRounded {
+					ctx.DrawArc(float64(offsetX)+float64(ratingIconLineWidth/2), positionY+float64(ratingIconLineWidth)/2, float64(ratingIconLineWidth)/2, -math.Pi, 0)
+					ctx.Fill()
+				} else {
+					ctx.DrawRectangle(float64(offsetX), positionY, float64(ratingIconLineWidth), float64(ratingIconLineWidth)/2)
+					ctx.Fill()
+				}
+
+				// draw bottom part
+				if bottomRounded {
+
+					ctx.DrawArc(float64(offsetX)+float64(ratingIconLineWidth/2), positionY+float64(ratingIconLineWidth/2), float64(ratingIconLineWidth)/2, math.Pi, 0)
+					ctx.Fill()
+				} else {
+					ctx.DrawRectangle(float64(offsetX), positionY+float64(ratingIconLineWidth/2), float64(ratingIconLineWidth), float64(ratingIconLineWidth)/2)
+					ctx.Fill()
+				}
+			}
+
+			offsetX += ratingIconLineWidth * 3 / 2
+		}
+
+		f, err := os.Create(filepath.Join(outDirPath, filename))
+		if err != nil {
+			panic(err)
+		}
+		err = png.Encode(f, ctx.Image())
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+
 	}
 }
