@@ -24,14 +24,14 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData, string]
 
 		var column []common.Block
 		iconTop := common.AftermathLogo(ratingColors.Background, common.DefaultLogoOptions())
-		column = append(column, common.NewImageContent(common.Style{Width: specialRatingIconSize, Height: specialRatingIconSize}, iconTop))
+		column = append(column, common.NewImageContent(common.Style{Width: specialWN8IconSize, Height: specialWN8IconSize}, iconTop))
 
 		pillColor := ratingColors.Background
 		if block.Value().Float() < 0 {
 			pillColor = color.Transparent
 		}
 		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
-			common.NewTextContent(blockStyle.session, block.Data.Session().String()),
+			blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()),
 			common.NewBlocksContent(
 				overviewSpecialRatingPillStyle(pillColor),
 				common.NewTextContent(overviewSpecialRatingLabelStyle(ratingColors.Content), common.GetWN8TierName(block.Value().Float())),
@@ -45,9 +45,16 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData, string]
 		if ok {
 			column = append(column, icon)
 		}
+
+		ratingColors := common.GetRatingColors(block.Value().Float())
 		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
 			blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()),
+			common.NewBlocksContent(
+				overviewSpecialRatingPillStyle(ratingColors.Background),
+				common.NewTextContent(overviewSpecialRatingLabelStyle(ratingColors.Content), common.GetRatingTierName(block.Value().Float())),
+			),
 		))
+
 		return common.NewBlocksContent(specialRatingColumnStyle(), column...)
 
 	default:

@@ -73,7 +73,7 @@ func WargamingToFrame(wg types.StatsFrame) frame.StatsFrame {
 		EnemiesSpotted:       frame.ValueInt(wg.Spotted),
 		CapturePoints:        frame.ValueInt(wg.CapturePoints),
 		DroppedCapturePoints: frame.ValueInt(wg.DroppedCapturePoints),
-		Rating:               frame.ValueSpecialRating(wg.Rating),
+		RawRating:            frame.ValueSpecialRating(wg.Rating),
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -181,20 +182,8 @@ func (c *eventContext) Error(message string) error {
 	return c.Err(errors.New(message))
 }
 
-func (c *eventContext) isCommand() bool {
-	return false
-}
-
-func (c *eventContext) isComponentInteraction() bool {
-	return false
-}
-
-func (c *eventContext) isAutocompleteInteraction() bool {
-	return false
-}
-
 func (c *eventContext) ID() string {
-	return c.id
+	return strings.TrimPrefix(c.eventType, "*discordgo.")
 }
 
 func (c *eventContext) Options() common.Options {

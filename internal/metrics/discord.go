@@ -9,21 +9,21 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-type discordCollector struct {
+type discordInteractionCollector struct {
 	totalInteractions        *prometheus.CounterVec
 	totalInteractionsErrored *prometheus.CounterVec
 }
 
-func (c discordCollector) Describe(ch chan<- *prometheus.Desc) {
+func (c discordInteractionCollector) Describe(ch chan<- *prometheus.Desc) {
 	c.totalInteractions.Describe(ch)
 	c.totalInteractionsErrored.Describe(ch)
 }
-func (c discordCollector) Collect(ch chan<- prometheus.Metric) {
+func (c discordInteractionCollector) Collect(ch chan<- prometheus.Metric) {
 	c.totalInteractions.Collect(ch)
 	c.totalInteractionsErrored.Collect(ch)
 }
 
-func (c discordCollector) Middleware() middleware.MiddlewareFunc {
+func (c discordInteractionCollector) Middleware() middleware.MiddlewareFunc {
 	return func(ctx common.Context, next func(common.Context) error) func(common.Context) error {
 		return func(ctx common.Context) error {
 			name := "unknown_interaction"
@@ -46,8 +46,8 @@ func (c discordCollector) Middleware() middleware.MiddlewareFunc {
 	}
 }
 
-func NewDiscordCollector(prefix string) discordCollector {
-	return discordCollector{
+func NewDiscordInteractionCollector(prefix string) discordInteractionCollector {
+	return discordInteractionCollector{
 		totalInteractionsErrored: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: fmt.Sprintf("discord_%s_interactions_errored_total", prefix),
@@ -59,6 +59,53 @@ func NewDiscordCollector(prefix string) discordCollector {
 			prometheus.CounterOpts{
 				Name: fmt.Sprintf("discord_%s_interactions_handled_total", prefix),
 				Help: "Number of handled Discord interactions.",
+			},
+			[]string{"name"},
+		),
+	}
+}
+
+type discordGatewayCollector struct {
+	totalEvents        *prometheus.CounterVec
+	totalEventsErrored *prometheus.CounterVec
+}
+
+func (c discordGatewayCollector) Describe(ch chan<- *prometheus.Desc) {
+	c.totalEvents.Describe(ch)
+	c.totalEventsErrored.Describe(ch)
+}
+func (c discordGatewayCollector) Collect(ch chan<- prometheus.Metric) {
+	c.totalEvents.Collect(ch)
+	c.totalEventsErrored.Collect(ch)
+}
+
+func (c discordGatewayCollector) Middleware() middleware.MiddlewareFunc {
+	return func(ctx common.Context, next func(common.Context) error) func(common.Context) error {
+		return func(ctx common.Context) error {
+			name := "gateway_event_" + ctx.ID()
+			c.totalEvents.WithLabelValues(name).Inc()
+			err := next(ctx)
+			if err != nil {
+				c.totalEventsErrored.WithLabelValues(name).Inc()
+			}
+			return err
+		}
+	}
+}
+
+func NewDiscordGatewayCollector(prefix string) discordGatewayCollector {
+	return discordGatewayCollector{
+		totalEventsErrored: prometheus.NewCounterVec(
+			prometheus.CounterOpts{
+				Name: fmt.Sprintf("discord_%s_events_errored_total", prefix),
+				Help: "Number of errored Discord gateway events.",
+			},
+			[]string{"name"},
+		),
+		totalEvents: prometheus.NewCounterVec(
+			prometheus.CounterOpts{
+				Name: fmt.Sprintf("discord_%s_events_handled_total", prefix),
+				Help: "Number of handled Discord gateway events.",
 			},
 			[]string{"name"},
 		),

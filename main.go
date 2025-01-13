@@ -108,7 +108,7 @@ func main() {
 	defer cancel()
 
 	// Discord Gateway - commands public commands are handled through the gateway
-	gw, err := discordGatewayFromEnv(globalCtx, liveCoreClient)
+	gw, err := discordGatewayFromEnv(globalCtx, liveCoreClient, instrument)
 	if err != nil {
 		log.Fatal().Err(err).Msg("discordGatewayFromEnv failed")
 	}
@@ -193,12 +193,16 @@ func main() {
 	log.Info().Msg("finished cleanup tasks")
 }
 
-func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway.Client, error) {
+func discordGatewayFromEnv(globalCtx context.Context, core core.Client, instrument metrics.Instrument) (gateway.Client, error) {
+	collector := metrics.NewDiscordGatewayCollector("public")
+	instrument.Register(collector)
+
 	// discord gateway
 	gw, err := gateway.NewClient(core, constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages|discordgo.IntentGuildMessageReactions|discordgo.IntentDirectMessageReactions)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a gateway client")
 	}
+	gw.LoadMiddleware(collector.Middleware())
 
 	helpImage, ok := assets.GetLoadedImage("discord-help")
 	if !ok {
@@ -247,7 +251,7 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client) (gateway
 }
 
 func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Instrument) []server.Handler {
-	collector := metrics.NewDiscordCollector("public")
+	collector := metrics.NewDiscordInteractionCollector("public")
 	instrument.Register(collector)
 
 	var handlers []server.Handler
