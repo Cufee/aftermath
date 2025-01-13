@@ -49,7 +49,7 @@ var (
 		EnemiesSpotted:       240 / 2,
 		CapturePoints:        0,
 		DroppedCapturePoints: 0,
-		RawRating:            102.528,
+		RawRating:            200.528,
 	}
 	DefaultStatsFrameSmall1 = frame.StatsFrame{
 		Battles:              20,

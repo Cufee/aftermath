@@ -12,6 +12,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/render/v1"
 	common "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
@@ -249,11 +250,11 @@ type ratingIcon struct {
 
 var ratingIcons = []ratingIcon{
 	{name: "calibration", fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}},
-	{name: "bronze", color: color.NRGBA{192, 105, 105, 255}, fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 0}}},
-	{name: "silver", color: color.NRGBA{192, 192, 192, 255}, fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 0, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 0}}},
-	{name: "gold", color: color.NRGBA{255, 215, 0, 255}, fill: [][]int{{0, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 1, 1, 0, 1, 0, 1, 1, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 0, 0, 0}}},
-	{name: "platinum", color: color.NRGBA{154, 197, 219, 255}, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 1, 0, 0}}},
-	{name: "diamond", color: color.NRGBA{181, 106, 181, 255}, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 0, 1, 1, 0}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 1, 1, 0, 1, 1, 0}, {0, 0, 1, 0, 0}}},
+	{name: "bronze", color: render.GetRatingColors(1).Background, fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 0}}},
+	{name: "silver", color: render.GetRatingColors(2001).Background, fill: [][]int{{0, 0, 0, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 1, 1, 0, 1, 1, 0, 0}, {0, 0, 1, 1, 1, 0, 0}, {0, 0, 0, 0, 0}}},
+	{name: "gold", color: render.GetRatingColors(3001).Background, fill: [][]int{{0, 0, 0, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 1, 1, 0, 1, 0, 1, 1, 0}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 0, 0, 0}}},
+	{name: "platinum", color: render.GetRatingColors(4001).Background, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 1, 1, 1, 0}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 1, 1, 1, 1, 1, 0}, {0, 0, 1, 0, 0}}},
+	{name: "diamond", color: render.GetRatingColors(5001).Background, fill: [][]int{{0, 0, 1, 0, 0}, {0, 1, 1, 0, 1, 1, 0}, {1, 1, 1, 1, 0, 1, 1, 1, 1}, {0, 1, 1, 0, 1, 1, 0}, {0, 0, 1, 0, 0}}},
 }
 
 func generateRatingIcons() {
