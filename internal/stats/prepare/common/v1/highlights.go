@@ -5,15 +5,17 @@ import (
 )
 
 type Highlight struct {
-	CompareWith Tag
-	Blocks      []Tag
-	Label       string
+	CompareWith      Tag
+	Blocks           []Tag
+	Label            string
+	ignoreMinBattles bool
 }
 
 var (
-	HighlightAvgDamage = Highlight{TagAvgDamage, []Tag{TagBattles, TagAvgDamage, TagWN8}, "label_highlight_avg_damage"}
-	HighlightBattles   = Highlight{TagBattles, []Tag{TagBattles, TagAvgDamage, TagWN8}, "label_highlight_battles"}
-	HighlightWN8       = Highlight{TagWN8, []Tag{TagBattles, TagAvgDamage, TagWN8}, "label_highlight_wn8"}
+	HighlightRecentBattle = Highlight{TagLastBattleTime, []Tag{TagBattles, TagAvgDamage, TagWN8}, "label_highlight_recent_battle", true}
+	HighlightAvgDamage    = Highlight{TagAvgDamage, []Tag{TagBattles, TagAvgDamage, TagWN8}, "label_highlight_avg_damage", false}
+	HighlightBattles      = Highlight{TagBattles, []Tag{TagBattles, TagAvgDamage, TagWN8}, "label_highlight_battles", false}
+	HighlightWN8          = Highlight{TagWN8, []Tag{TagBattles, TagAvgDamage, TagWN8}, "label_highlight_wn8", false}
 )
 
 type highlightedVehicle struct {
@@ -25,13 +27,14 @@ type highlightedVehicle struct {
 func GetHighlightedVehicles(highlights []Highlight, vehicles map[string]frame.VehicleStatsFrame, minBattles int) ([]highlightedVehicle, error) {
 	leadersMap := make(map[string]highlightedVehicle)
 	for _, vehicle := range vehicles {
-		if int(vehicle.Battles.Float()) < minBattles {
-			continue
-		}
-
 		for _, highlight := range highlights {
+			if int(vehicle.Battles.Float()) < minBattles && !highlight.ignoreMinBattles {
+				continue
+			}
+
 			currentLeader, leaderExists := leadersMap[highlight.Label]
-			value, err := PresetValue(highlight.CompareWith, *vehicle.StatsFrame)
+
+			value, err := PresetValue(highlight.CompareWith, *vehicle.StatsFrame, vehicle)
 			if err != nil {
 				return nil, err
 			}

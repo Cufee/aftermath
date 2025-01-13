@@ -86,6 +86,15 @@ func PresetValue(preset Tag, stats frame.StatsFrame, args ...any) (frame.Value, 
 		return stats.DamageDealt, nil
 	case TagDamageTaken:
 		return stats.DamageReceived, nil
+	case TagLastBattleTime:
+		if len(args) != 2 {
+			return frame.InvalidValue, errors.New("invalid args length for last_battle_time")
+		}
+		vehicle, ok := args[1].(frame.VehicleStatsFrame)
+		if !ok {
+			return frame.InvalidValue, errors.New("invalid args for last_battle_time, second arg should be vehicle")
+		}
+		return frame.ValueInt(vehicle.LastBattleTime.Unix()), nil
 	case TagAvgTier:
 		if len(args) != 2 {
 			return frame.InvalidValue, errors.New("invalid args length for avg_tier")
