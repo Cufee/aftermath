@@ -11,7 +11,7 @@ type ratingColors struct {
 
 func GetWN8Colors(r float32) ratingColors {
 	if r > 0 && r < 301 {
-		return ratingColors{color.NRGBA{255, 0, 0, 255}, color.Black}
+		return ratingColors{color.NRGBA{255, 0, 0, 255}, color.White}
 	}
 	if r > 300 && r < 451 {
 		return ratingColors{color.NRGBA{251, 83, 83, 255}, color.White}
@@ -38,7 +38,7 @@ func GetWN8Colors(r float32) ratingColors {
 		return ratingColors{color.NRGBA{208, 108, 255, 255}, color.White}
 	}
 	if r > 2900 {
-		return ratingColors{color.NRGBA{142, 65, 177, 255}, color.White}
+		return ratingColors{color.NRGBA{142, 65, 177, 255}, color.Black}
 	}
 	return ratingColors{color.Transparent, color.Transparent}
 }
