@@ -23,7 +23,6 @@ import (
 
 var (
 	careerCommandMiddleware = []middleware.MiddlewareFunc{middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)}
-	careerCommandParams     = []builder.Param{builder.SetNameKey("command_stats_name"), builder.SetDescKey("command_stats_desc")}
 	careerCommandOptions    = commands.CareerStatsOptions
 )
 
@@ -92,7 +91,7 @@ func careerCommandHandler(ctx common.Context) error {
 	default:
 		defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, nil, utils.Pointer(true))
 		if !hasDefaultAccount {
-			return ctx.Reply().Send("command_stats_help_message")
+			return ctx.Reply().Send("command_career_help_message")
 		}
 		// command used without options, but user has a default connection
 		accountID = defaultAccount.ReferenceID
@@ -149,11 +148,11 @@ func init() {
 	commands.LoadedPublic.Add(builder.NewCommand("stats").
 		Middleware(careerCommandMiddleware...).
 		Options(careerCommandOptions...).
-		Params(careerCommandParams...).
+		Params(builder.SetDescKey("command_career_desc")).
 		Handler(careerCommandHandler))
 	commands.LoadedPublic.Add(builder.NewCommand("career").
 		Middleware(careerCommandMiddleware...).
 		Options(careerCommandOptions...).
-		Params(careerCommandParams...).
+		Params(builder.SetNameKey("command_career_name"), builder.SetDescKey("command_career_desc")).
 		Handler(careerCommandHandler))
 }
