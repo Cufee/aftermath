@@ -139,8 +139,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		var footer []string
 		if opts.VehicleID != "" {
 			footer = append(footer, cards.Unrated.Overview.Title)
-		} else {
-			footer = append(footer, common.RealmLabel(session.Realm))
 		}
 		if session.LastBattleTime.Unix() > 1 {
 			sessionTo := session.PeriodEnd.Format("Jan 2")
