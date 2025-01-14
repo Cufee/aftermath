@@ -103,7 +103,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		}
 
 		cardWidth = max(cardWidth, float64(footerImage.Bounds().Dx()))
-		segments.AddFooter(common.NewImageContent(common.Style{Width: cardWidth, Height: float64(footerImage.Bounds().Dy())}, footerImage))
+		segments.AddFooter(common.NewImageContent(common.Style{}, footerImage))
 	}
 
 	// Header card

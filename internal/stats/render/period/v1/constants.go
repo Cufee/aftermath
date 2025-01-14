@@ -102,13 +102,8 @@ func overviewCardBlocksStyle(width float64) common.Style {
 	return style
 }
 
-func overviewSpecialRatingPillStyle(color color.Color) common.Style {
-	return common.Style{
-		PaddingY:        2,
-		PaddingX:        7.5,
-		BorderRadius:    common.BorderRadiusXS,
-		BackgroundColor: color,
-	}
+func overviewSpecialRatingPillStyle(_ color.Color) common.Style {
+	return common.Style{}
 }
 
 func highlightCardStyle(containerStyle common.Style) highlightStyle {
