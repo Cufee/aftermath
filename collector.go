@@ -24,6 +24,10 @@ import (
 )
 
 func main() {
+	if os.Getenv("COLLECTOR_ENABLED") == "false" {
+		os.Exit(0)
+	}
+
 	// Logger
 	level, _ := zerolog.ParseLevel(os.Getenv("COLLECTOR_LOG_LEVEL"))
 	log.SetupGlobalLogger(func(l zerolog.Logger) zerolog.Logger {

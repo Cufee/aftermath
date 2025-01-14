@@ -26,7 +26,7 @@ var (
 	outcomeIconColorYellow  = color.NRGBA{255, 223, 0, 120}
 
 	playerWN8IconSize          = 28.0
-	playerRatingIconSize       = 38.0
+	playerRatingIconSize       = 34.0
 	playerWinrateIndicatorSize = 7.5
 	playerCardPadding          = (80 - hpBarHeight) / 2
 )
