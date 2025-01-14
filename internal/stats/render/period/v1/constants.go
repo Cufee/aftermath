@@ -1,8 +1,6 @@
 package period
 
 import (
-	"image/color"
-
 	common "github.com/cufee/aftermath/internal/render/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
@@ -102,7 +100,7 @@ func overviewCardBlocksStyle(width float64) common.Style {
 	return style
 }
 
-func overviewSpecialRatingPillStyle(_ color.Color) common.Style {
+func overviewSpecialRatingPillStyle() common.Style {
 	return common.Style{}
 }
 
