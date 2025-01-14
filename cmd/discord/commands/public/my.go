@@ -27,8 +27,8 @@ func init() {
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
 			Params(builder.SetNameKey("command_my_name"), builder.SetDescKey("command_my_description")).
 			Options(
-				builder.NewOption("stats", discordgo.ApplicationCommandOptionSubCommand).
-					Params(builder.SetNameKey("command_my_stats_name"), builder.SetDescKey("command_my_stats_description")).
+				builder.NewOption("career", discordgo.ApplicationCommandOptionSubCommand).
+					Params(builder.SetNameKey("command_my_career_name"), builder.SetDescKey("command_my_career_description")).
 					Options(
 						commands.DaysOption,
 						commands.VehicleOption,
@@ -120,7 +120,7 @@ func init() {
 				if err != nil {
 					return ctx.Err(err)
 				}
-				return ctx.Reply().File(buf.Bytes(), "session_command_by_aftermath.png").Component(button).Send()
+				return ctx.Reply().WithAds().File(buf.Bytes(), "session_command_by_aftermath.png").Component(button).Send()
 			}),
 	)
 }
