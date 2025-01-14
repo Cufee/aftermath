@@ -141,7 +141,7 @@ func (r *StatsFrame) Accuracy(_ ...any) Value {
 Calculate and return mm rating
 */
 func (r *StatsFrame) Rating(_ ...any) Value {
-	if r.Battles == 0 {
+	if r.Battles == 0 || r.RawRating == 0.0000 {
 		return InvalidValue
 	}
 	return r.RawRating

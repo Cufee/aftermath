@@ -8,6 +8,11 @@ import (
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 )
 
+const (
+	wn8IconSize    = 60.0
+	ratingIconSize = 60.0
+)
+
 type overviewStyle struct {
 	container      common.Style
 	blockContainer common.Style
