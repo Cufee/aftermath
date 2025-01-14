@@ -25,7 +25,12 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData, string]
 		iconTop := common.AftermathLogo(ratingColors.Background, common.DefaultLogoOptions())
 		column = append(column, common.NewImageContent(common.Style{Width: specialWN8IconSize, Height: specialWN8IconSize}, iconTop))
 
-		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
+		column = append(column, common.NewBlocksContent(common.Style{
+			Width:          width,
+			AlignItems:     common.AlignItemsCenter,
+			Direction:      common.DirectionVertical,
+			JustifyContent: common.JustifyContentCenter,
+		},
 			blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()),
 			common.NewBlocksContent(
 				overviewSpecialRatingPillStyle(),
@@ -41,7 +46,12 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData, string]
 			column = append(column, icon)
 		}
 
-		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
+		column = append(column, common.NewBlocksContent(common.Style{
+			Width:          width,
+			AlignItems:     common.AlignItemsCenter,
+			Direction:      common.DirectionVertical,
+			JustifyContent: common.JustifyContentCenter,
+		},
 			blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()),
 			common.NewBlocksContent(
 				overviewSpecialRatingPillStyle(),

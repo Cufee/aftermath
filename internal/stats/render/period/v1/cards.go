@@ -48,7 +48,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 					labelSize := common.MeasureString(label, labelStyle.Font)
 					valueSize := common.MeasureString(block.Value().String(), valueStyle.Font)
 
-					overviewColumnWidth = max(overviewColumnWidth, max(labelSize.TotalWidth+overviewSpecialRatingPillStyle(nil).PaddingX*2, valueSize.TotalWidth))
+					overviewColumnWidth = max(overviewColumnWidth, max(labelSize.TotalWidth+overviewSpecialRatingPillStyle().PaddingX*2, valueSize.TotalWidth))
 				}
 			}
 
