@@ -37,6 +37,9 @@ func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) str
 			if block.Tag == prepare.TagWN8 {
 				statsSizes["wn8_icon"] = playerWN8IconSize + statsStyle.Gap/2
 			}
+			if block.Tag == prepare.TagRankedRating {
+				statsSizes["rating_icon"] = playerRatingIconSize + statsStyle.Gap/2
+			}
 			statsSizes[block.Tag] = max(statsSizes[block.Tag], w)
 
 			if block.Tag == rp.TagDamageAssistedCombined {

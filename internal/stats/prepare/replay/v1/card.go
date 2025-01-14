@@ -26,6 +26,9 @@ func NewCards(replay fetch.Replay, glossary map[string]models.Vehicle, gameModes
 	if replay.GameMode.Special {
 		playerBlocks = blocksNoWN8
 	}
+	if slices.Contains(replay.GameMode.Tags, "rating") {
+		playerBlocks = blocksRating
+	}
 
 	var cards Cards
 	cards.Header.Outcome = replay.Outcome

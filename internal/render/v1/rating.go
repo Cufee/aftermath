@@ -55,7 +55,7 @@ func GetRatingColors(rating float32) ratingColors {
 	case rating > 3000:
 		return ratingColors{color.NRGBA{255, 215, 0, 255}, color.Black}
 	case rating > 2000:
-		return ratingColors{color.NRGBA{192, 192, 192, 255}, color.Black}
+		return ratingColors{color.NRGBA{234, 237, 240, 255}, color.Black}
 	case rating > 0:
 		return ratingColors{color.NRGBA{192, 105, 105, 255}, color.White}
 	default:
@@ -187,8 +187,6 @@ func RenderRatingIcon(settings ratingIcon) (Block, bool) {
 	iconWidth := (len(rows[0]) * ratingIconLineWidth) + ((len(rows[0]) - 1) * (ratingIconLineWidth / 2))
 
 	ctx := gg.NewContext(iconWidth, iconHeight)
-	// ctx.SetColor(color.Black)
-	// ctx.Clear()
 	ctx.SetColor(settings.Color)
 
 	for rowI, row := range rows {

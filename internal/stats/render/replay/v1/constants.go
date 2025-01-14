@@ -25,8 +25,9 @@ var (
 	outcomeIconBgColorGreen = color.NRGBA{R: 80, G: 120, B: 80, A: 120}
 	outcomeIconColorYellow  = color.NRGBA{255, 223, 0, 120}
 
-	playerWN8IconSize = 25.0
-	playerCardPadding = (80 - hpBarHeight) / 2
+	playerWN8IconSize    = 28.0
+	playerRatingIconSize = 38.0
+	playerCardPadding    = (80 - hpBarHeight) / 2
 )
 
 func defaultCardStyle(width, height float64) common.Style {

@@ -56,7 +56,7 @@ var gameModes = map[int]gameMode{
 	1:  {1, "game_mode_regular", false, nil},
 	4:  {4, "game_mode_regular", true, []string{"tournament"}},
 	5:  {5, "game_mode_regular", true, []string{"quick_tournament"}},
-	7:  {7, "game_mode_rating", false, nil},
+	7:  {7, "game_mode_rating", false, []string{"rating"}},
 	8:  {8, "game_mode_arcade", true, nil},
 	29: {29, "game_mode_arcade", true, []string{"tournament"}},
 	36: {36, "game_mode_arcade", true, []string{"quick_tournament"}},
@@ -212,6 +212,7 @@ func playerFromData(battle battleResults, info playerInfo, result playerResultsI
 		stats.BattlesSurvived = 1
 	}
 
+	stats.RawRating = frame.ValueSpecialRating(result.MMRating)
 	stats.DamageDealt = frame.ValueInt(result.DamageDealt)
 	stats.DamageReceived = frame.ValueInt(result.DamageReceived)
 	stats.ShotsHit = frame.ValueInt(result.ShotsHit)

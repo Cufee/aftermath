@@ -69,6 +69,9 @@ func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card repla
 		if block.Tag == prepare.TagWN8 {
 			rightBlocks = append(rightBlocks, playerWN8Icon(block.Value()))
 		}
+		if block.Tag == prepare.TagRankedRating {
+			rightBlocks = append(rightBlocks, playerRatingIcon(block.Value()))
+		}
 	}
 	rightBlock := common.NewBlocksContent(statsRowStyle(), rightBlocks...)
 
@@ -139,5 +142,14 @@ func playerWN8Icon(value frame.Value) common.Block {
 	}
 	icon := common.AftermathLogo(colors.Background, common.SmallLogoOptions())
 	return common.NewImageContent(common.Style{Width: playerWN8IconSize, Height: playerWN8IconSize}, icon)
+
+}
+
+func playerRatingIcon(value frame.Value) common.Block {
+	icon, ok := common.GetRatingIcon(value, playerRatingIconSize)
+	if !ok {
+		return common.NewEmptyContent(1, 1)
+	}
+	return icon
 
 }
