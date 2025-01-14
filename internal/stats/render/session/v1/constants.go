@@ -1,8 +1,6 @@
 package session
 
 import (
-	"image/color"
-
 	common "github.com/cufee/aftermath/internal/render/v1"
 )
 
@@ -41,17 +39,12 @@ func overviewStatsBlockStyle() blockStyle {
 	}
 }
 
-func overviewSpecialRatingLabelStyle(color color.Color) common.Style {
-	return common.Style{FontColor: color, Font: common.FontSmall()}
+func overviewSpecialRatingLabelStyle() common.Style {
+	return common.Style{FontColor: common.TextAlt, Font: common.FontSmall()}
 }
 
-func overviewSpecialRatingPillStyle(color color.Color) common.Style {
-	return common.Style{
-		PaddingY:        2,
-		PaddingX:        7.5,
-		BorderRadius:    common.BorderRadiusXS,
-		BackgroundColor: color,
-	}
+func overviewSpecialRatingPillStyle() common.Style {
+	return common.Style{}
 }
 
 func overviewColumnStyle(width float64) common.Style {
