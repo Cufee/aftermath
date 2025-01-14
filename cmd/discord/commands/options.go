@@ -45,8 +45,14 @@ var UserOption = builder.NewOption("user", discordgo.ApplicationCommandOptionUse
 		builder.SetDescKey("common_option_stats_user_description"),
 	)
 
-var DefaultStatsOptions = []builder.Option{
+var SessionStatsOptions = []builder.Option{
 	DaysOption,
+	NicknameOption,
+	VehicleOption,
+	UserOption,
+}
+
+var CareerStatsOptions = []builder.Option{
 	NicknameOption,
 	VehicleOption,
 	UserOption,

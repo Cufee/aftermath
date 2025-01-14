@@ -24,7 +24,7 @@ func init() {
 	commands.LoadedPublic.Add(
 		builder.NewCommand("session").
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
-			Options(commands.DefaultStatsOptions...).
+			Options(commands.SessionStatsOptions...).
 			Handler(func(ctx common.Context) error {
 				options := commands.GetDefaultStatsOptions(ctx.Options())
 				message, valid := options.Validate(ctx)

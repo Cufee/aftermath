@@ -58,7 +58,6 @@ type Client interface {
 	BroadSearch(ctx context.Context, nickname string, limit int) ([]AccountWithRealm, error)
 	CurrentStats(ctx context.Context, id string, opts ...StatsOption) (AccountStatsOverPeriod, error)
 
-	PeriodStats(ctx context.Context, id string, from time.Time, opts ...StatsOption) (AccountStatsOverPeriod, error)
 	SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error)
 
 	ReplayRemote(ctx context.Context, fileURL string) (Replay, error)
