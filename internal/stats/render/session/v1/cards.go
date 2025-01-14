@@ -274,14 +274,14 @@ func overviewColumnBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, st
 	for _, block := range blocks {
 		// adjust width if this column includes a special icon
 		if block.Tag == prepare.TagWN8 {
-			tierNameSize := common.MeasureString(common.GetWN8TierName(block.Value().Float()), overviewSpecialRatingLabelStyle(nil).Font)
-			tierNameWithPadding := tierNameSize.TotalWidth + overviewSpecialRatingPillStyle(nil).PaddingX*2
+			tierNameSize := common.MeasureString(common.GetWN8TierName(block.Value().Float()), overviewSpecialRatingLabelStyle().Font)
+			tierNameWithPadding := tierNameSize.TotalWidth + overviewSpecialRatingPillStyle().PaddingX*2
 			presetBlockWidth[block.Tag.String()] = max(presetBlockWidth[block.Tag.String()], specialWN8IconSize, tierNameWithPadding)
 			contentWidth = max(contentWidth, tierNameWithPadding)
 		}
 		if block.Tag == prepare.TagRankedRating {
-			valueSize := common.MeasureString(common.GetRatingTierName(block.Value().Float()), overviewSpecialRatingLabelStyle(nil).Font)
-			tierNameWithPadding := valueSize.TotalWidth + overviewSpecialRatingPillStyle(nil).PaddingX*2
+			valueSize := common.MeasureString(common.GetRatingTierName(block.Value().Float()), overviewSpecialRatingLabelStyle().Font)
+			tierNameWithPadding := valueSize.TotalWidth + overviewSpecialRatingPillStyle().PaddingX*2
 			presetBlockWidth[block.Tag.String()] = max(presetBlockWidth[block.Tag.String()], specialRatingIconSize, tierNameWithPadding)
 			contentWidth = max(contentWidth, tierNameWithPadding)
 		}
