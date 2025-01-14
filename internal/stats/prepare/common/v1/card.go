@@ -13,7 +13,7 @@ const (
 	CardTypeVehicle        CardType = "vehicle"
 	CardTypeRatingVehicle  CardType = "ratingVehicle"
 	CardTypeOverview       CardType = "overview"
-	CardTypeHighlight      CardType = "overview"
+	CardTypeHighlight      CardType = "highlight"
 	CardTypeTierPercentage CardType = "tierPercentage"
 )
 

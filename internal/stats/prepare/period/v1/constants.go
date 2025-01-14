@@ -11,11 +11,19 @@ var overviewBlocks = []common.TagColumn[string]{
 	{Tags: []common.Tag{common.TagWN8}, Meta: string(BlockFlavorSpecial)},
 	{Tags: []common.Tag{TagAvgTier, common.TagAvgDamage, common.TagDamageRatio}, Meta: string(BlockFlavorDefault)},
 }
+
+var overviewBlocksRating = []common.TagColumn[string]{
+	{Tags: []common.Tag{common.TagWinrate, common.TagBattles}, Meta: string(BlockFlavorDefault)},
+	{Tags: []common.Tag{common.TagRankedRating}, Meta: string(BlockFlavorSpecial)},
+	{Tags: []common.Tag{common.TagAvgDamage, common.TagDamageRatio}, Meta: string(BlockFlavorDefault)},
+}
+
 var highlights = []common.Highlight{common.HighlightRecentBattle, common.HighlightBattles, common.HighlightWN8, common.HighlightAvgDamage}
 
 type Cards struct {
-	Overview   OverviewCard  `json:"overview"`
-	Highlights []VehicleCard `json:"highlights"`
+	Rating     RatingOverviewCard `json:"rating"`
+	Overview   OverviewCard       `json:"overview"`
+	Highlights []VehicleCard      `json:"highlights"`
 }
 
 type OverviewColumn struct {
@@ -24,6 +32,7 @@ type OverviewColumn struct {
 }
 
 type OverviewCard common.StatsCard[OverviewColumn, string]
+type RatingOverviewCard common.StatsCard[OverviewColumn, bool]
 type VehicleCard common.StatsCard[common.StatsBlock[BlockData, string], string]
 
 type BlockData struct {

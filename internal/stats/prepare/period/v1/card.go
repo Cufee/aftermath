@@ -21,6 +21,26 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 	}
 
 	var cards Cards
+	if stats.RatingBattles.Battles > 0 && options.VehicleID == "" {
+		cards.Rating.Meta = stats.RatingBattles.Rating() != frame.InvalidValue
+		for _, column := range overviewBlocksRating {
+			var columnBlocks []common.StatsBlock[BlockData, string]
+			for _, preset := range column.Tags {
+				var block common.StatsBlock[BlockData, string]
+				b, err := presetToBlock(preset, stats.RatingBattles.StatsFrame, stats.RatingBattles.Vehicles, glossary)
+				if err != nil {
+					return Cards{}, err
+				}
+				block = b
+
+				block.Localize(options.Printer())
+				columnBlocks = append(columnBlocks, block)
+			}
+			cards.Rating.Type = common.CardTypeOverview
+			cards.Rating.Blocks = append(cards.Rating.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
+		}
+	}
+
 	overviewUnrated := stats.RegularBattles.StatsFrame
 	if options.VehicleID != "" {
 		overviewUnrated = frame.StatsFrame{}
