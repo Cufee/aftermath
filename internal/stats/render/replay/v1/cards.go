@@ -33,6 +33,10 @@ func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) str
 		for _, block := range card.Blocks {
 			valueSize := common.MeasureString(block.Value().String(), common.FontLarge())
 			labelSize := common.MeasureString(block.Label, common.FontSmall())
+			if block.Tag == prepare.TagWinrate {
+				labelSize.TotalWidth += float64(playerWinrateIndicatorSize * 2)
+			}
+
 			w := max(valueSize.TotalWidth, labelSize.TotalWidth)
 			if block.Tag == prepare.TagWN8 {
 				statsSizes["wn8_icon"] = playerWN8IconSize + statsStyle.Gap/2

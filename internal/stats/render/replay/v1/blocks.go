@@ -11,6 +11,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
+	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
 )
 
@@ -151,5 +152,19 @@ func playerRatingIcon(value frame.Value) common.Block {
 		return common.NewEmptyContent(1, 1)
 	}
 	return icon
+
+}
+
+func playerWinrateIndicator(value frame.Value) common.Block {
+	color := common.GetWinrateColor(value)
+	if value.Float() == frame.InvalidValue.Float() {
+		color = common.TextAlt
+	}
+	ctx := gg.NewContext(int(playerWinrateIndicatorSize), int(playerWinrateIndicatorSize))
+	r := playerWinrateIndicatorSize / 2
+	ctx.DrawCircle(r, r, r)
+	ctx.SetColor(color)
+	ctx.Fill()
+	return common.NewImageContent(common.Style{}, ctx.Image())
 
 }
