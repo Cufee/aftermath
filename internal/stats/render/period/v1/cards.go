@@ -34,13 +34,16 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		}
 		{
 			rowStyle := getOverviewStyle(cardWidth)
-			for _, column := range cards.Overview.Blocks {
+			for _, column := range append(cards.Overview.Blocks, cards.Rating.Blocks...) {
 				for _, block := range column.Blocks {
 					valueStyle, labelStyle := rowStyle.block(block)
 
 					label := block.Label
 					if block.Tag == prepare.TagWN8 {
 						label = common.GetWN8TierName(block.Value().Float())
+					}
+					if block.Tag == prepare.TagRankedRating {
+						label = common.GetRatingTierName(block.Value().Float())
 					}
 					labelSize := common.MeasureString(label, labelStyle.Font)
 					valueSize := common.MeasureString(block.Value().String(), valueStyle.Font)
@@ -114,7 +117,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	segments.AddContent(common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(stats.Account.Nickname, titleCardStyle(cardWidth)), stats.Account.Nickname, stats.Account.ClanTag, subs))
 
 	// Overview Card
-	{
+	if len(cards.Overview.Blocks) > 0 {
 		var overviewStatsBlocks []common.Block
 		for _, column := range cards.Overview.Blocks {
 			columnBlock, err := statsBlocksToColumnBlock(getOverviewStyle(overviewColumnWidth), column.Blocks)
@@ -128,8 +131,26 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		segments.AddContent(common.NewBlocksContent(overviewCardStyle(), overviewCardBlocks...))
 	}
 
+	// Rating Card -- only when player has current season rating
+	if cards.Rating.Meta {
+		var ratingStatsBlocks []common.Block
+		for _, column := range cards.Rating.Blocks {
+			columnBlock, err := statsBlocksToColumnBlock(getOverviewStyle(overviewColumnWidth), column.Blocks)
+			if err != nil {
+				return segments, err
+			}
+			ratingStatsBlocks = append(ratingStatsBlocks, columnBlock)
+		}
+		var ratingCardBlocks []common.Block
+		ratingCardBlocks = append(ratingCardBlocks, common.NewBlocksContent(overviewCardBlocksStyle(cardWidth), ratingStatsBlocks...))
+		segments.AddContent(common.NewBlocksContent(overviewCardStyle(), ratingCardBlocks...))
+	}
+
 	// Highlights
-	for _, card := range cards.Highlights {
+	for i, card := range cards.Highlights {
+		if i > 0 && cards.Rating.Meta {
+			break // only show 1 highlight when rating battles card is visible
+		}
 		segments.AddContent(newHighlightCard(highlightCardStyle(defaultCardStyle(cardWidth)), card))
 	}
 
