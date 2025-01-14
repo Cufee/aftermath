@@ -9,7 +9,7 @@
 - key: commands_help_refresh_times_fmt
   value: "North America: <t:%d:t> (<t:%d:R>)\nEurope: <t:%d:t> (<t:%d:R>)\nAsia: <t:%d:t> (<t:%d:R>)"
 - key: commands_help_message_fmt
-  value: "## :chart_with_upwards_trend: Track your progress\n### ○ /session\nGet an image with your current session stats. You can also mention another user to view their session.\n### Aftermath sessions will be reset at the following times:\n%s\n### ○ /stats\nGet an image with your career stats. You can also mention another user to view their stats.\n## :film_frames: Dive deeper into every battle\n### ○ /replay\nUpload your replay and get an overview of the battle you have played.\n## :link: Tell Aftermath your Blitz nickname\n### ○ /links\nYou can set a default account by using the _/links favorite_ command to use _/session_ and _/stats_ without providing a nickname and server.\n### ○ /links verify\nVerify your Wargaming account to unlock additional features.\n## :frame_photo: Add a splash of style\n### ○ /fancy\nUpload a custom background image for your session stats. Your unique style will be visible to everyone who views your stats.\n## :desktop: Show off on your stream\n### ○ /widget\nGet a link to a streaming widget for your stream overlay.\nThis widget will automatically update with your latest session stats.\n\n_Found a translation error? Let us know on Aftermath Official_\n## :heart: Share the love!"
+  value: "## :chart_with_upwards_trend: Track your progress\n### ○ /session\nGet an image with your current session stats. You can also mention another user to view their session.\n### Aftermath sessions will be reset at the following times:\n%s\n### ○ /career\nGet an image with your career stats. You can also mention another user to view their stats.\n## :film_frames: Dive deeper into every battle\n### ○ /replay\nUpload your replay and get an overview of the battle you have played.\n## :link: Tell Aftermath your Blitz nickname\n### ○ /links\nYou can set a default account by using the _/links favorite_ command to use _/session_ and _/career_ without providing a nickname and server.\n### ○ /links verify\nVerify your Wargaming account to unlock additional features.\n## :frame_photo: Add a splash of style\n### ○ /fancy\nUpload a custom background image for your session stats. Your unique style will be visible to everyone who views your stats.\n## :desktop: Show off on your stream\n### ○ /widget\nGet a link to a streaming widget for your stream overlay.\nThis widget will automatically update with your latest session stats.\n\n_Found a translation error? Let us know on Aftermath Official_\n## :heart: Share the love!"
 # /career
 - key: command_career_name
   value: career
@@ -295,7 +295,7 @@
   context: We were not tracking this account, but successfully started tracking it just now
 
 - key: session_error_no_session_for_period
-  value: "Aftermath does not yet have a session for this period. Try changing the number of days or using `/stats` instead."
+  value: "Aftermath does not yet have a session for this period. Try changing the number of days or using `/career` instead."
   context: This account is being tracked, but there is no session available
 
 - key: stats_refresh_interaction_error_expired
