@@ -1,13 +1,11 @@
 package fetch
 
 import (
-	"slices"
 	"strconv"
 	"time"
 
 	assets "github.com/cufee/aftermath-assets/types"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1/replay"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
@@ -88,47 +86,6 @@ func WargamingVehiclesToFrame(wg []types.VehicleStatsFrame) map[string]frame.Veh
 			StatsFrame:     &inner,
 			MarkOfMastery:  record.MarkOfMastery,
 			LastBattleTime: timestampToTime(record.LastBattleTime),
-		}
-	}
-
-	return stats
-}
-
-func blitzstarsToStats(vehicles map[string]frame.VehicleStatsFrame, histories map[int][]blitzstars.TankHistoryEntry, from time.Time) StatsWithVehicles {
-	stats := StatsWithVehicles{
-		Vehicles: make(map[string]frame.VehicleStatsFrame),
-	}
-
-	for _, vehicle := range vehicles {
-		if vehicle.LastBattleTime.Before(from) {
-			continue
-		}
-
-		id, err := strconv.Atoi(vehicle.VehicleID)
-		if err != nil || id == 0 {
-			continue
-		}
-
-		entries := histories[id]
-		// Sort entries by number of battles in descending order
-		slices.SortFunc(entries, func(i, j blitzstars.TankHistoryEntry) int {
-			return j.Stats.Battles - i.Stats.Battles
-		})
-
-		var selectedEntry blitzstars.TankHistoryEntry
-		for _, entry := range entries {
-			if entry.LastBattleTime < int(from.Unix()) {
-				selectedEntry = entry
-				break
-			}
-		}
-
-		if selectedEntry.Stats.Battles < int(vehicle.Battles) {
-			selectedFrame := WargamingToFrame(selectedEntry.Stats)
-			vehicle.StatsFrame.Subtract(selectedFrame)
-
-			stats.Vehicles[vehicle.VehicleID] = vehicle
-			stats.Add(*vehicle.StatsFrame)
 		}
 	}
 

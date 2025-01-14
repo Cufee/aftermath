@@ -120,7 +120,7 @@ func init() {
 				if err != nil {
 					return ctx.Err(err)
 				}
-				return ctx.Reply().File(buf.Bytes(), "session_command_by_aftermath.png").Component(button).Send()
+				return ctx.Reply().WithAds().File(buf.Bytes(), "session_command_by_aftermath.png").Component(button).Send()
 			}),
 	)
 }

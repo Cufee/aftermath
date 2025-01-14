@@ -36,7 +36,7 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 	}(accountId, opts.referenceID)
 
 	stop := meta.Timer("fetchClient#PeriodStats")
-	stats, err := r.fetchClient.PeriodStats(ctx, accountId, from, opts.FetchOpts()...)
+	stats, err := r.fetchClient.CurrentStats(ctx, accountId, opts.FetchOpts()...)
 	stop()
 	if err != nil {
 		return prepare.Cards{}, meta, err
