@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
@@ -507,22 +508,37 @@ func (c *multiSourceClient) Replay(ctx context.Context, file io.ReaderAt, size i
 func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.UnpackedReplay) (Replay, error) {
 	replay := replay.Prettify(unpacked.BattleResult, unpacked.Meta)
 
-	realm, ok := c.wargaming.RealmFromID(replay.Protagonist.ID)
-	if !ok {
-		return Replay{}, wargaming.ErrRealmNotSupported
-	}
-
-	var players []string
 	var vehicles []string
+	var players = make(map[types.Realm][]string)
 	for _, player := range append(replay.Teams.Allies, replay.Teams.Enemies...) {
 		vehicles = append(vehicles, player.VehicleID)
-		players = append(players, player.ID)
+
+		realm, ok := c.wargaming.RealmFromID(replay.Protagonist.ID)
+		if !ok {
+			continue
+		}
+		players[realm] = append(players[realm], player.ID)
 	}
 
-	playerData, err := c.wargaming.BatchAccountByID(ctx, realm, players)
-	if err != nil {
-		err = nil // this error is not critical and will result in some missing data
+	var group errgroup.Group
+	var playerDataMx sync.Mutex
+	var playerData = make(map[string]types.ExtendedAccount)
+	for realm, ids := range players {
+		group.Go(func() error {
+			data, err := c.wargaming.BatchAccountByID(ctx, realm, ids)
+			if err != nil {
+				return err
+			}
+
+			playerDataMx.Lock()
+			defer playerDataMx.Unlock()
+			for id, player := range data {
+				playerData[id] = player
+			}
+			return nil
+		})
 	}
+	_ = group.Wait() // this error is not critical and will result in some missing data
 
 	averages, err := c.database.GetVehicleAverages(ctx, vehicles)
 	if err != nil {
@@ -554,5 +570,5 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 		return Replay{}, errors.Wrap(err, "failed to get map glossary")
 	}
 
-	return Replay{mapData, replay, realm}, nil
+	return Replay{mapData, replay}, nil
 }
