@@ -15,7 +15,7 @@ type blockStyle struct {
 var (
 	vehicleWN8IconSize        = 20.0
 	specialWN8IconSize        = 50.0
-	specialRatingIconSize     = 40.0
+	specialRatingIconSize     = 50.0
 	vehicleComparisonIconSize = 10.0
 	minPrimaryCardWidth       = 300.0 // making the primary card too small looks bad if there are no battles in a session
 

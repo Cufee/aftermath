@@ -3,6 +3,7 @@ package render
 import (
 	"image/color"
 	"math"
+	"strings"
 
 	"github.com/cufee/aftermath/internal/render/assets"
 	"github.com/cufee/aftermath/internal/stats/frame"
@@ -85,52 +86,87 @@ func GetRatingIcon(rating frame.Value, size float64) (Block, bool) {
 type ratingIcon struct {
 	Name  string
 	Color color.Color
-	Fill  [][]int
+	Fill  string
 }
 
 var RatingIconSettings = map[string]ratingIcon{
-	"bronze": {Name: "bronze", Color: GetRatingColors(1).Background, Fill: [][]int{
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-		{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	}},
-	"silver": {Name: "silver", Color: GetRatingColors(2001).Background, Fill: [][]int{
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-		{0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0},
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	}},
-	"gold": {Name: "gold", Color: GetRatingColors(3001).Background, Fill: [][]int{
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-		{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
-		{1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1},
-		{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-	}},
-	"platinum": {Name: "platinum", Color: GetRatingColors(4001).Background, Fill: [][]int{
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-		{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
-		{1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1},
-		{0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0},
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-	}},
-	"diamond": {Name: "diamond", Color: GetRatingColors(5001).Background, Fill: [][]int{
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-		{0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0},
-		{1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1},
-		{0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0},
-		{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
-	}},
+	"bronze": {Name: "bronze", Color: GetRatingColors(1).Background, Fill: `
+_______
+_______
+___x___
+___x___
+__xxx__
+__xxx__
+__xxx__
+__xxx__
+___x___
+___x___
+_______
+_______
+`},
+	"silver": {Name: "silver", Color: GetRatingColors(2001).Background, Fill: `
+_______
+_______
+___x___
+___x___
+_x_x_x_
+_x___x_
+_xx_xx_
+__xxx__
+__xxx__
+___x___
+___x___
+_______
+`},
+	"gold": {Name: "gold", Color: GetRatingColors(3001).Background, Fill: `
+_______
+___x___
+__xxx__
+_xxxxx_
+_x_x_x_
+_x___x_
+_xx_xx_
+__xxx__
+__xxx__
+___x___
+___x___
+_______
+`},
+	"platinum": {Name: "platinum", Color: GetRatingColors(4001).Background, Fill: `
+_______
+___x___
+x_xxx_x
+xxxxxxx
+xx_x_xx
+_x___x_
+_xx_xx_
+__xxx__
+__xxx__
+___x___
+___x___
+_______
+`},
+	"diamond": {Name: "diamond", Color: GetRatingColors(5001).Background, Fill: `
+___x___
+x__x__x
+x_xxx_x
+xxxxxxx
+xx_x_xx
+_x___x_
+_xx_xx_
+__xxx__
+__xxx__
+___x___
+___x___
+_______
+`},
 }
 
 func init() {
 	RatingIconSettings["calibration"] = ratingIcon{
 		Color: TextAlt,
 		Name:  "calibration",
-		Fill:  RatingIconSettings["diamond"].Fill,
+		Fill:  RatingIconSettings["bronze"].Fill,
 	}
 }
 
@@ -144,68 +180,59 @@ func NewRatingIcon(rating frame.Value) (Block, bool) {
 
 func RenderRatingIcon(settings ratingIcon) (Block, bool) {
 	var ratingIconLineWidth = 8
-	var ratingIconBackgroundColor = color.Transparent
 
-	centerIndex := len(settings.Fill) / 2
-	iconHeight := 0
-	for _, items := range settings.Fill {
-		iconHeight = max(iconHeight, len(items)*(ratingIconLineWidth))
-	}
-	iconWidth := (centerIndex*2)*(ratingIconLineWidth*2) - (len(settings.Fill)%2)*ratingIconLineWidth
+	rows := strings.Split(strings.TrimSpace(settings.Fill), "\n")
+
+	iconHeight := len(rows) * (ratingIconLineWidth)
+	iconWidth := (len(rows[0]) * ratingIconLineWidth) + ((len(rows[0]) - 1) * (ratingIconLineWidth / 2))
 
 	ctx := gg.NewContext(iconWidth, iconHeight)
-	offsetX := 0
-	for _, items := range settings.Fill {
-		colHeight := len(items) * (ratingIconLineWidth)
-		offsetY := (iconHeight - colHeight) / 2
-		ctx.DrawRoundedRectangle(float64(offsetX), float64(offsetY), float64(ratingIconLineWidth), float64(colHeight), (float64(ratingIconLineWidth)/2)-1)
-		ctx.SetColor(ratingIconBackgroundColor)
-		ctx.Fill()
+	// ctx.SetColor(color.Black)
+	// ctx.Clear()
+	ctx.SetColor(settings.Color)
 
-		ctx.SetColor(settings.Color)
-		for i, section := range items {
-			sectionOffsetY := float64(offsetY + (i * ratingIconLineWidth))
-			if section == 0 {
+	for rowI, row := range rows {
+		positionY := float64(rowI * ratingIconLineWidth)
+		for itemI, item := range strings.Split(row, "") {
+			if strings.ToLower(item) != "x" {
 				continue
 			}
 
+			positionX := itemI*ratingIconLineWidth + max(0, (itemI)*(ratingIconLineWidth/2))
+
 			var topRounded bool = true
 			var bottomRounded bool = true
-			if i-1 >= 0 {
-				topRounded = items[i-1] == 0
+			if rowI-1 >= 0 {
+				topRounded = strings.ToLower(strings.Split(rows[rowI-1], "")[itemI]) != "x"
 			}
-			if i+1 < len(items) {
-				bottomRounded = items[i+1] == 0
+			if rowI+1 < len(rows) {
+				bottomRounded = strings.ToLower(strings.Split(rows[rowI+1], "")[itemI]) != "x"
 			}
-
-			positionY := sectionOffsetY
 
 			if !topRounded && !bottomRounded {
-				ctx.DrawRectangle(float64(offsetX), positionY, float64(ratingIconLineWidth), float64(ratingIconLineWidth))
+				ctx.DrawRectangle(float64(positionX), positionY, float64(ratingIconLineWidth), float64(ratingIconLineWidth))
 				ctx.Fill()
 			}
 
 			// draw top part
 			if topRounded {
-				ctx.DrawArc(float64(offsetX)+float64(ratingIconLineWidth/2), positionY+float64(ratingIconLineWidth)/2, float64(ratingIconLineWidth)/2, -math.Pi, 0)
+				ctx.DrawArc(float64(positionX)+float64(ratingIconLineWidth/2), positionY+float64(ratingIconLineWidth)/2, float64(ratingIconLineWidth)/2, -math.Pi, 0)
 				ctx.Fill()
 			} else {
-				ctx.DrawRectangle(float64(offsetX), positionY, float64(ratingIconLineWidth), float64(ratingIconLineWidth)/2)
+				ctx.DrawRectangle(float64(positionX), positionY, float64(ratingIconLineWidth), float64(ratingIconLineWidth)/2)
 				ctx.Fill()
 			}
 
 			// draw bottom part
 			if bottomRounded {
 
-				ctx.DrawArc(float64(offsetX)+float64(ratingIconLineWidth/2), positionY+float64(ratingIconLineWidth/2), float64(ratingIconLineWidth)/2, math.Pi, 0)
+				ctx.DrawArc(float64(positionX)+float64(ratingIconLineWidth/2), positionY+float64(ratingIconLineWidth/2), float64(ratingIconLineWidth)/2, math.Pi, 0)
 				ctx.Fill()
 			} else {
-				ctx.DrawRectangle(float64(offsetX), positionY+float64(ratingIconLineWidth/2), float64(ratingIconLineWidth), float64(ratingIconLineWidth)/2)
+				ctx.DrawRectangle(float64(positionX), positionY+float64(ratingIconLineWidth/2), float64(ratingIconLineWidth), float64(ratingIconLineWidth)/2)
 				ctx.Fill()
 			}
 		}
-
-		offsetX += ratingIconLineWidth * 3 / 2
 	}
 
 	return NewImageContent(Style{}, ctx.Image()), true
