@@ -48,7 +48,6 @@ func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockDa
 
 	ratingColors := common.GetWN8Colors(stats.Value().Float())
 	if stats.Value().Float() <= 0 {
-		ratingColors.Content = common.TextAlt
 		ratingColors.Background = common.TextAlt
 	}
 
@@ -59,7 +58,6 @@ func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockDa
 	blocks = append(blocks, common.NewBlocksContent(style.blockContainer, iconBlockTop, valueBlock))
 
 	if stats.Value().Float() >= 0 {
-		labelStyle.FontColor = ratingColors.Content
 		blocks = append(blocks, common.NewBlocksContent(overviewSpecialRatingPillStyle(ratingColors.Background), common.NewTextContent(labelStyle, common.GetWN8TierName(stats.Value().Float()))))
 	}
 
@@ -71,7 +69,6 @@ func uniqueBlockRating(style overviewStyle, stats prepare.StatsBlock[period.Bloc
 
 	ratingColors := common.GetRatingColors(stats.Value().Float())
 	if stats.Value().Float() <= 0 {
-		ratingColors.Content = common.TextAlt
 		ratingColors.Background = common.TextAlt
 	}
 
@@ -86,7 +83,6 @@ func uniqueBlockRating(style overviewStyle, stats prepare.StatsBlock[period.Bloc
 
 	blocks = append(blocks, common.NewBlocksContent(style.blockContainer, valueBlocks...))
 	if stats.Value().Float() != frame.InvalidValue.Float() {
-		labelStyle.FontColor = ratingColors.Content
 		blocks = append(blocks, common.NewBlocksContent(overviewSpecialRatingPillStyle(ratingColors.Background), common.NewTextContent(labelStyle, common.GetRatingTierName(stats.Value().Float()))))
 	}
 
