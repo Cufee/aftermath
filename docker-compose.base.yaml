@@ -23,13 +23,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        BRAND_FLAVOR: ${BRAND_FLAVOR}
     restart: always
     volumes:
       - ${DATABASE_PATH}:/data
     env_file:
       - .env
     depends_on:
-      aftermath-migrate:
+      aftermath-migrate-base:
         condition: service_completed_successfully
     deploy:
       # go runtime will try to keep memory usage right under the container limit
