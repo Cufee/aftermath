@@ -46,6 +46,8 @@
   value: Regular Battle
 - key: label_highlight_avg_damage
   value: Best Performance
+- key: label_highlight_recent_battle
+  value: Last Battle
 
 - key: label_game_mode_rating
   value: Rating Battle

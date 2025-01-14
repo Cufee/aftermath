@@ -29,6 +29,7 @@ const (
 	TagSurvivalPercent Tag = "survival_percent"
 	TagDamageDealt     Tag = "damage_dealt"
 	TagDamageTaken     Tag = "damage_taken"
+	TagLastBattleTime  Tag = "last_battle_time"
 
 	// Module Specific
 	TagAvgTier Tag = "avg_tier"

@@ -7,6 +7,7 @@ import (
 	m "github.com/cufee/aftermath/internal/database/gen/model"
 	t "github.com/cufee/aftermath/internal/database/gen/table"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/utils"
 	s "github.com/go-jet/jet/v2/sqlite"
 )
 
@@ -187,16 +188,21 @@ func (c *client) CreateTasks(ctx context.Context, tasks ...models.Task) error {
 		return nil
 	}
 	return c.withTx(ctx, func(tx *transaction) error {
-		var inserts []m.CronTask
-		for _, task := range tasks {
-			task.OnCreated()
-			task.OnUpdated()
-			inserts = append(inserts, task.Model())
-		}
+		for _, batch := range utils.Batch(tasks, 100) {
+			var inserts []m.CronTask
+			for _, task := range batch {
+				task.OnCreated()
+				task.OnUpdated()
+				inserts = append(inserts, task.Model())
+			}
 
-		stmt := t.CronTask.INSERT().MODELS(inserts)
-		_, err := tx.exec(ctx, stmt)
-		return err
+			stmt := t.CronTask.INSERT().MODELS(inserts)
+			_, err := tx.exec(ctx, stmt)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 }
 
@@ -230,25 +236,27 @@ func (c *client) UpdateTasks(ctx context.Context, tasks ...models.Task) error {
 	}
 
 	return c.withTx(ctx, func(tx *transaction) error {
-		for _, task := range tasks {
-			task.OnUpdated()
-			stmt := t.CronTask.
-				UPDATE(
-					t.CronTask.UpdatedAt,
-					t.CronTask.Targets,
-					t.CronTask.Logs,
-					t.CronTask.Status,
-					t.CronTask.ScheduledAfter,
-					t.CronTask.TriesLeft,
-					t.CronTask.LastRun,
-					t.CronTask.Data,
-				).
-				MODEL(task.Model()).
-				WHERE(t.CronTask.ID.EQ(s.String(task.ID)))
+		for _, batch := range utils.Batch(tasks, 100) {
+			for _, task := range batch {
+				task.OnUpdated()
+				stmt := t.CronTask.
+					UPDATE(
+						t.CronTask.UpdatedAt,
+						t.CronTask.Targets,
+						t.CronTask.Logs,
+						t.CronTask.Status,
+						t.CronTask.ScheduledAfter,
+						t.CronTask.TriesLeft,
+						t.CronTask.LastRun,
+						t.CronTask.Data,
+					).
+					MODEL(task.Model()).
+					WHERE(t.CronTask.ID.EQ(s.String(task.ID)))
 
-			_, err := tx.exec(ctx, stmt)
-			if err != nil {
-				return err
+				_, err := tx.exec(ctx, stmt)
+				if err != nil {
+					return err
+				}
 			}
 		}
 		return nil

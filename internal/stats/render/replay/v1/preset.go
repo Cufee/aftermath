@@ -1,21 +1,28 @@
 package replay
 
 import (
+	"image/color"
+
 	common "github.com/cufee/aftermath/internal/render/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 )
 
 func statsBlockToBlock(stats prepare.StatsBlock[replay.BlockData, string], width float64) common.Block {
-	value := common.NewTextContent(common.Style{
-		Font:      common.FontLarge(),
-		FontColor: common.TextPrimary,
-	}, stats.Value().String())
+	var fontColor color.Color = common.TextPrimary
 
-	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Width: width},
-		value,
+	label := []common.Block{
 		common.NewTextContent(common.Style{
 			Font:      common.FontSmall(),
 			FontColor: common.TextAlt,
-		}, stats.Label))
+		}, stats.Label),
+	}
+	if stats.Tag == prepare.TagWinrate {
+		label = append(label, playerWinrateIndicator(stats.V))
+	}
+
+	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Width: width},
+		common.NewTextContent(common.Style{Font: common.FontLarge(), FontColor: fontColor}, stats.Value().String()),
+		common.NewBlocksContent(common.Style{AlignItems: common.AlignItemsCenter, JustifyContent: common.JustifyContentCenter, Gap: playerWinrateIndicatorSize}, label...),
+	)
 }

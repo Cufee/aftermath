@@ -33,9 +33,16 @@ func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) str
 		for _, block := range card.Blocks {
 			valueSize := common.MeasureString(block.Value().String(), common.FontLarge())
 			labelSize := common.MeasureString(block.Label, common.FontSmall())
+			if block.Tag == prepare.TagWinrate {
+				labelSize.TotalWidth += float64(playerWinrateIndicatorSize * 2)
+			}
+
 			w := max(valueSize.TotalWidth, labelSize.TotalWidth)
 			if block.Tag == prepare.TagWN8 {
 				statsSizes["wn8_icon"] = playerWN8IconSize + statsStyle.Gap/2
+			}
+			if block.Tag == prepare.TagRankedRating {
+				statsSizes["rating_icon"] = playerRatingIconSize + statsStyle.Gap/2
 			}
 			statsSizes[block.Tag] = max(statsSizes[block.Tag], w)
 
@@ -55,7 +62,6 @@ func generateCards(replay fetch.Replay, cards rp.Cards, printer func(string) str
 	// We first render a footer in order to calculate the minimum required width
 	{
 		var footer []string
-		footer = append(footer, common.RealmLabel(replay.Realm))
 		footer = append(footer, replay.BattleTime.Format("Jan 2, 2006"))
 		if footerHintTag != "" {
 			footer = append(footer, footerHintTag)

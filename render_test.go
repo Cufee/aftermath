@@ -189,7 +189,7 @@ func TestRenderReplay(t *testing.T) {
 	fetch, err := fetch.NewMultiSourceClient(wg, nil, db)
 	is.NoErr(err)
 
-	replayFiles := []string{"replay_defeat.wotbreplay", "replay_victory.wotbreplay", "replay_draw.wotbreplay"}
+	replayFiles := []string{"replay_defeat.wotbreplay", "replay_victory.wotbreplay", "replay_draw.wotbreplay", "replay_rating.wotbreplay"}
 	for _, name := range replayFiles {
 		t.Run("render replay image from "+name, func(t *testing.T) {
 			is := is.New(t)

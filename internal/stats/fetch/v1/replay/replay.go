@@ -56,7 +56,7 @@ var gameModes = map[int]gameMode{
 	1:  {1, "game_mode_regular", false, nil},
 	4:  {4, "game_mode_regular", true, []string{"tournament"}},
 	5:  {5, "game_mode_regular", true, []string{"quick_tournament"}},
-	7:  {7, "game_mode_rating", false, nil},
+	7:  {7, "game_mode_rating", false, []string{"rating"}},
 	8:  {8, "game_mode_arcade", true, nil},
 	29: {29, "game_mode_arcade", true, []string{"tournament"}},
 	36: {36, "game_mode_arcade", true, []string{"quick_tournament"}},
@@ -128,14 +128,13 @@ func Prettify(battle battleResults, meta replayMeta) Replay {
 		// MasteryBadge: data.MasteryBadge,
 	}
 
-	var allyTeam, enemyTeam uint32
+	var allyTeam, enemyTeam int = int(battle.Author.Team), -1
 	players := make(map[int]playerInfo)
+
 	for _, p := range battle.Players {
 		players[int(p.AccountID)] = p.Info
-		if p.AccountID == battle.Author.AccountID {
-			allyTeam = p.Info.Team
-		} else {
-			enemyTeam = p.Info.Team
+		if team := int(p.Info.Team); team != allyTeam {
+			enemyTeam = team
 		}
 	}
 	for _, result := range battle.PlayerResults {
@@ -147,7 +146,7 @@ func Prettify(battle battleResults, meta replayMeta) Replay {
 		if player.ID == fmt.Sprint(battle.Author.AccountID) {
 			replay.Protagonist = player
 		}
-		if info.Team == allyTeam {
+		if int(info.Team) == allyTeam {
 			replay.Teams.Allies = append(replay.Teams.Allies, player)
 		} else {
 			replay.Teams.Enemies = append(replay.Teams.Enemies, player)
@@ -155,10 +154,10 @@ func Prettify(battle battleResults, meta replayMeta) Replay {
 	}
 
 	replay.Outcome = OutcomeDraw
-	if battle.WinnerTeam == allyTeam {
+	if int(battle.WinnerTeam) == allyTeam {
 		replay.Outcome = OutcomeVictory
 	}
-	if battle.WinnerTeam == enemyTeam {
+	if int(battle.WinnerTeam) == enemyTeam {
 		replay.Outcome = OutcomeDefeat
 	}
 
@@ -213,6 +212,7 @@ func playerFromData(battle battleResults, info playerInfo, result playerResultsI
 		stats.BattlesSurvived = 1
 	}
 
+	stats.RawRating = frame.ValueSpecialRating(result.MMRating)
 	stats.DamageDealt = frame.ValueInt(result.DamageDealt)
 	stats.DamageReceived = frame.ValueInt(result.DamageReceived)
 	stats.ShotsHit = frame.ValueInt(result.ShotsHit)

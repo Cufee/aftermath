@@ -138,5 +138,4 @@ func blitzstarsToStats(vehicles map[string]frame.VehicleStatsFrame, histories ma
 type Replay struct {
 	Map assets.Map
 	replay.Replay
-	Realm types.Realm
 }

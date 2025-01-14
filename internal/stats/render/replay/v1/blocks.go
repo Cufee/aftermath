@@ -11,6 +11,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
+	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
 )
 
@@ -68,6 +69,9 @@ func newPlayerCard(style common.Style, sizes map[prepare.Tag]float64, card repla
 		rightBlocks = append(rightBlocks, statsBlockToBlock(block, sizes[block.Tag]))
 		if block.Tag == prepare.TagWN8 {
 			rightBlocks = append(rightBlocks, playerWN8Icon(block.Value()))
+		}
+		if block.Tag == prepare.TagRankedRating {
+			rightBlocks = append(rightBlocks, playerRatingIcon(block.Value()))
 		}
 	}
 	rightBlock := common.NewBlocksContent(statsRowStyle(), rightBlocks...)
@@ -139,5 +143,28 @@ func playerWN8Icon(value frame.Value) common.Block {
 	}
 	icon := common.AftermathLogo(colors.Background, common.SmallLogoOptions())
 	return common.NewImageContent(common.Style{Width: playerWN8IconSize, Height: playerWN8IconSize}, icon)
+
+}
+
+func playerRatingIcon(value frame.Value) common.Block {
+	icon, ok := common.GetRatingIcon(value, playerRatingIconSize)
+	if !ok {
+		return common.NewEmptyContent(1, 1)
+	}
+	return icon
+
+}
+
+func playerWinrateIndicator(value frame.Value) common.Block {
+	color := common.GetWinrateColor(value)
+	if value.Float() == frame.InvalidValue.Float() {
+		color = common.TextAlt
+	}
+	ctx := gg.NewContext(int(playerWinrateIndicatorSize), int(playerWinrateIndicatorSize))
+	r := playerWinrateIndicatorSize / 2
+	ctx.DrawCircle(r, r, r)
+	ctx.SetColor(color)
+	ctx.Fill()
+	return common.NewImageContent(common.Style{}, ctx.Image())
 
 }

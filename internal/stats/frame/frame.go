@@ -114,6 +114,9 @@ func (r *StatsFrame) WinRate(_ ...any) Value {
 	if r.winRate == 0 {
 		r.winRate = ValueFloatPercent(r.BattlesWon.Float() / r.Battles.Float() * 100)
 	}
+	if math.IsNaN(float64(r.winRate)) {
+		return InvalidValue
+	}
 	return r.winRate
 }
 
