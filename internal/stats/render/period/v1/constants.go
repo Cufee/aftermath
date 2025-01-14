@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	wn8IconSize    = 60.0
+	wn8IconSize    = 54.0
 	ratingIconSize = 60.0
 )
 
