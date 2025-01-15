@@ -85,7 +85,7 @@ func init() {
 				var err error
 				var image stats.Image
 				switch subcommand {
-				case "stats":
+				case "career":
 					image, _, err = ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), accountID, options.PeriodStart, opts...)
 				case "session":
 					image, _, err = ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, opts...)
