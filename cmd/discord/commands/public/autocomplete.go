@@ -25,7 +25,7 @@ func init() {
 			ComponentType(func(s string) bool {
 				var keys []string
 				keys = append(keys, "autocomplete_links_favorite_selected", "autocomplete_links_remove_selected") // links
-				keys = append(keys, "autocomplete_my_session_account", "autocomplete_my_stats_account")           // my
+				keys = append(keys, "autocomplete_my_session_account", "autocomplete_my_career_account")          // my
 				keys = append(keys, "autocomplete_widget_account")                                                // widget
 				return slices.Contains(keys, s)
 			}).
@@ -63,8 +63,8 @@ func init() {
 		builder.NewCommand("autocomplete_tank_search").
 			ComponentType(func(s string) bool {
 				var keys []string
-				keys = append(keys, "autocomplete_stats_tank", "autocomplete_session_tank")       // stats/session
-				keys = append(keys, "autocomplete_my_session_tank", "autocomplete_my_stats_tank") // my
+				keys = append(keys, "autocomplete_career_tank", "autocomplete_stats_tank", "autocomplete_session_tank") // stats/session
+				keys = append(keys, "autocomplete_my_session_tank", "autocomplete_my_career_tank")                      // my
 				return slices.Contains(keys, s)
 			}).
 			Handler(func(ctx common.Context) error {
@@ -100,9 +100,9 @@ func init() {
 		builder.NewCommand("autocomplete_account_search").
 			ComponentType(func(s string) bool {
 				var keys []string
-				keys = append(keys, "autocomplete_manage_accounts_search_nickname")                 // manage
-				keys = append(keys, "autocomplete_stats_nickname", "autocomplete_session_nickname") // stats/session
-				keys = append(keys, "autocomplete_links_add_nickname")                              // links
+				keys = append(keys, "autocomplete_manage_accounts_search_nickname")                                                 // manage
+				keys = append(keys, "autocomplete_career_nickname", "autocomplete_stats_nickname", "autocomplete_session_nickname") // stats/session
+				keys = append(keys, "autocomplete_links_add_nickname")                                                              // links
 				return slices.Contains(keys, s)
 			}).
 			Handler(func(ctx common.Context) error {
