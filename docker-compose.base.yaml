@@ -25,7 +25,6 @@ services:
       dockerfile: Dockerfile
       args:
         BRAND_FLAVOR: ${BRAND_FLAVOR}
-    restart: always
     volumes:
       - ${DATABASE_PATH}:/data
     env_file:

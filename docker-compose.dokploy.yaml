@@ -3,6 +3,7 @@ services:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-collector-base
+    restart: always
     environment:
       - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
     networks:
@@ -19,6 +20,7 @@ services:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-service-base
+    restart: always
     environment:
       # the rest is imported from .env, which is going to be created by Dokploy automatically
       - PORT=3000 # the port does not matter, but it needs to match Traefik labels. we set it here explicitly in order to avoid any issues

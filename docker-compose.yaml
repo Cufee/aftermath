@@ -3,17 +3,20 @@ services:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-collector-base
+    restart: no
     command: --backend=aftermath-service:${PRIVATE_SERVER_PORT}
 
   aftermath-migrate:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-migrate-base
+    restart: no
 
   aftermath-service:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-service-base
+    restart: no
     environment:
       # use the default port from .env
       - DATABASE_PATH=/data # this is the path inside a container and needs to match the volume mount
