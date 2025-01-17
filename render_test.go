@@ -244,20 +244,25 @@ func TestRenderV2(t *testing.T) {
 		style.SetDebug(true),
 		style.SetFont(rc.FontLarge()),
 		style.SetWidth(100),
+		style.SetGrowX(true),
+		style.SetGrowY(true),
 	), "TEST - 1")
 	is.NoErr(err)
 
 	text2, err := renderV2.NewTextContent(style.NewStyle(
 		style.SetDebug(true),
 		// style.SetGrowX(true),
-		style.SetWidth(100),
+		style.SetWidth(50),
 		style.SetFont(rc.FontLarge()),
 	), "TEST - 2")
 	is.NoErr(err)
 
 	block1 := renderV2.NewBlocksContent(style.NewStyle(
+		style.Parent(style.Style{
+			// JustifyContent: style.JustifyContentCenter,
+		}),
 		style.SetDebug(true),
-		style.SetPadding(10),
+		style.SetPadding(20),
 		// style.SetGrowX(true),
 	), text2)
 
@@ -267,7 +272,7 @@ func TestRenderV2(t *testing.T) {
 		}),
 		style.SetDebug(true),
 		style.SetPadding(10),
-		// style.SetWidth(400),
+		style.SetWidth(300),
 	), text1, block1)
 
 	img, err := block2.Render()

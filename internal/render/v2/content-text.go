@@ -98,10 +98,11 @@ func (content *contentText) Render(ctx *gg.Context, pos Position) error {
 	}
 
 	var originX, originY float64 = pos.X + computed.PaddingLeft, pos.Y + computed.PaddingTop + 1
-	if computed.Position == style.PositionAbsolute {
-		originX += computed.MarginLeft
-		originY += computed.MarginTop
-	}
+
+	// if computed.Position == style.PositionAbsolute {
+	// 	originX += computed.MarginLeft
+	// 	originY += computed.MarginTop
+	// }
 
 	if computed.BackgroundColor != nil {
 		ctx.SetColor(computed.BackgroundColor)

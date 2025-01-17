@@ -2,7 +2,6 @@ package render
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/cufee/aftermath/internal/render/v2/style"
 	"github.com/fogleman/gg"
@@ -118,20 +117,19 @@ func (content *contentBlocks) Render(ctx *gg.Context, pos Position) error {
 		return nil
 	}
 
-	var originX, originY float64 = pos.X + computed.PaddingLeft, pos.Y + computed.PaddingTop
-	if computed.Position == style.PositionAbsolute {
-		originX += computed.MarginLeft
-		originY += computed.MarginTop
-	}
+	// if computed.Position == style.PositionAbsolute {
+	// pos.X += computed.MarginLeft
+	// pos.Y += computed.MarginTop
+	// }
 
 	if computed.BackgroundColor != nil {
 		ctx.SetColor(computed.BackgroundColor)
-		ctx.DrawRectangle(originX, originY, float64(dimensions.width), float64(dimensions.height))
+		ctx.DrawRectangle(pos.X, pos.Y, float64(dimensions.width), float64(dimensions.height))
 		ctx.Fill()
 	}
 	if computed.BackgroundImage != nil {
 		background := imaging.Fill(computed.BackgroundImage, dimensions.width, dimensions.height, imaging.Center, imaging.Lanczos)
-		ctx.DrawImage(background, ceil(originX), ceil(originY))
+		ctx.DrawImage(background, ceil(pos.X), ceil(pos.Y))
 	}
 
 	if computed.Debug {
@@ -141,7 +139,9 @@ func (content *contentBlocks) Render(ctx *gg.Context, pos Position) error {
 	}
 
 	applyGrowth(computed, dimensions, content.value...)
-	return renderBlocksContent(ctx, computed, dimensions, pos, content.value...)
+
+	var originX, originY = pos.X + computed.PaddingLeft, pos.Y + computed.PaddingTop
+	return renderBlocksContent(ctx, computed, dimensions, Position{X: originX, Y: originY}, content.value...)
 }
 
 func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container contentDimensions, pos Position, blocks ...*Block) error {
@@ -149,36 +149,7 @@ func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container 
 		return errors.New("no blocks to render")
 	}
 
-	var originX, originY = pos.X + containerStyle.PaddingLeft, pos.Y + containerStyle.PaddingTop
-
-	var lastX, lastY float64 = originX, originY
-	var justifyOffsetX, justifyOffsetY float64
-
-	var freeSpaceX, freeSpaceY = float64(container.width) - container.paddingAndGapsX, float64(container.height) - container.paddingAndGapsY
-
-	// Set correct gaps and offsets based on justify content
-	switch containerStyle.JustifyContent {
-	case style.JustifyContentCenter:
-		lastX += freeSpaceX / 2
-		lastY += freeSpaceY / 2
-	case style.JustifyContentEnd:
-		lastX += freeSpaceX
-		lastY += freeSpaceY
-	case style.JustifyContentSpaceBetween:
-		if len(blocks) > 0 {
-			justifyOffsetX = float64(freeSpaceX / float64(len(blocks)-1))
-			justifyOffsetY = float64(freeSpaceY / float64(len(blocks)-1))
-		}
-	case style.JustifyContentSpaceAround:
-		spacingX := float64(freeSpaceX / float64(len(blocks)+1))
-		spacingY := float64(freeSpaceY / float64(len(blocks)+1))
-		justifyOffsetX = spacingX
-		justifyOffsetY = spacingY
-		lastX += spacingX
-		lastY += spacingY
-	default: // JustifyContentStart
-	}
-
+	var lastX, lastY float64 = pos.X, pos.Y
 	for i, block := range blocks {
 		blockSize := block.content.dimensions()
 		posX, posY := lastX, lastY
@@ -186,31 +157,57 @@ func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container 
 		switch containerStyle.Direction {
 		case style.DirectionVertical:
 			if i > 0 {
-				posY += justifyOffsetY + containerStyle.Gap
+				posY += containerStyle.Gap
 			}
-			lastY = posY + float64(blockSize.height)
 
+			// align content vertically
+			switch containerStyle.JustifyContent {
+			case style.JustifyContentCenter:
+				posY += float64(container.height-blockSize.height) / 2
+			case style.JustifyContentEnd:
+				posY += float64(container.height - blockSize.height)
+			case style.JustifyContentSpaceAround:
+				posY += float64((container.height - blockSize.height) / (len(blocks) + 1))
+			case style.JustifyContentSpaceBetween:
+				if len(blocks) > 1 {
+					posY += float64((container.height - blockSize.height) / (len(blocks) - 1))
+				}
+			}
+
+			// align content horizontally
+			posX = pos.X
 			switch containerStyle.AlignItems {
 			case style.AlignItemsCenter:
-				posX = float64(container.width-blockSize.width) / 2
+				posX += float64(container.width-blockSize.width) / 2
 			case style.AlignItemsEnd:
-				posX = float64(container.width-blockSize.width) - containerStyle.PaddingRight
-			default: // AlignItemsStart
-				posX = containerStyle.PaddingLeft
+				posX += float64(blockSize.width)
 			}
 		default: // DirectionHorizontal
 			if i > 0 {
-				posX += justifyOffsetX + containerStyle.Gap
+				posX += containerStyle.Gap
 			}
-			lastX = posX + float64(blockSize.width)
 
+			// align content horizontally
+			switch containerStyle.JustifyContent {
+			case style.JustifyContentCenter:
+				posX += float64(container.width-blockSize.width) / 2
+			case style.JustifyContentEnd:
+				posX += float64(container.width - blockSize.width)
+			case style.JustifyContentSpaceAround:
+				posX += float64((container.width - blockSize.width) / (len(blocks) + 1))
+			case style.JustifyContentSpaceBetween:
+				if len(blocks) > 1 {
+					posX += float64((container.width - blockSize.width) / (len(blocks) - 1))
+				}
+			}
+
+			// align content vertically
+			posY = pos.Y
 			switch containerStyle.AlignItems {
 			case style.AlignItemsCenter:
-				posY = float64(container.height-blockSize.height) / 2
+				posY += (float64(container.height-blockSize.height) / 2)
 			case style.AlignItemsEnd:
-				posY = float64(container.height-blockSize.height) - containerStyle.PaddingBottom
-			default: // AlignItemsStart
-				posY = containerStyle.PaddingTop
+				posY += float64(blockSize.height)
 			}
 
 		}
@@ -218,6 +215,14 @@ func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container 
 		err := block.content.Render(ctx, Position{posX, posY})
 		if err != nil {
 			return err
+		}
+
+		// save the position we rendered at
+		switch containerStyle.Direction {
+		case style.DirectionVertical:
+			lastY = posY + float64(blockSize.height)
+		default:
+			lastX = posX + float64(blockSize.width)
 		}
 	}
 
@@ -264,8 +269,6 @@ func applyGrowth(containerStyle style.Style, container contentDimensions, blocks
 			growSpaceY = container.height - ceil(container.paddingAndGapsY) - blockWidthTotal
 		}
 	}
-
-	fmt.Printf("grow x %v container %v %v blocks %v \n", growSpaceX, container.width, container.paddingAndGapsX, blockWidthTotal)
 
 	// apply growth to blocks
 	if growBlocksX > 0 || growBlocksY > 0 {

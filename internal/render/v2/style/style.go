@@ -31,7 +31,7 @@ type positionValue byte
 
 const (
 	PositionRelative positionValue = iota
-	PositionAbsolute
+	// PositionAbsolute
 )
 
 type overflowValue byte
@@ -60,6 +60,7 @@ type Style struct {
 	JustifyContent justifyContentValue
 	AlignItems     alignItemsValue // Depends on Direction
 	Direction      directionValue
+	Position       positionValue
 
 	Gap float64
 
@@ -68,10 +69,10 @@ type Style struct {
 	PaddingTop    float64
 	PaddingBottom float64
 
-	Position positionValue
-	// margin should generally be used for absolute position
-	MarginLeft float64
-	MarginTop  float64
+	// MarginLeft   float64
+	// MarginRight  float64
+	// MarginTop    float64
+	// MarginBottom float64
 
 	GrowHorizontal bool
 	GrowVertical   bool
