@@ -36,7 +36,8 @@ func TestRenderV2(t *testing.T) {
 		style.Parent(style.Style{
 			Left: -5,
 			Top:  -5,
-			// Blur: 1,      1,
+			// Blur: 1,
+			ZIndex: 1,
 		}),
 		style.SetDebug(true),
 		style.SetPosition(style.PositionAbsolute),
