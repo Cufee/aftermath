@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/cufee/aftermath/internal/render/v2/internal/tests"
 	"github.com/cufee/aftermath/internal/render/v2/style"
 	"github.com/cufee/aftermath/tests/path"
 	"github.com/matryer/is"
@@ -22,6 +23,58 @@ var contentColor = color.RGBA{255, 255, 255, 255}
 func init() {
 	_, _, _, a := contentColor.RGBA()
 	contentColorValue = a
+}
+
+func TestRenderV2(t *testing.T) {
+	is := is.New(t)
+
+	text1, err := NewTextContent(style.NewStyle(
+		style.SetDebug(true),
+		style.SetFont(tests.Font(), color.Black),
+		// style.SetWidth(100),
+		style.SetGrowX(true),
+		style.SetGrowY(true),
+	), "TEST - 1")
+	is.NoErr(err)
+
+	text2, err := NewTextContent(style.NewStyle(
+		style.Parent(style.Style{
+			Blur: 2,
+		}),
+		// style.SetDebug(true),
+		// style.SetGrowX(true),
+		style.SetGrowY(true),
+		style.SetPadding(10),
+		style.SetFont(tests.Font(), color.Black),
+	), "TEST - 2")
+	is.NoErr(err)
+
+	block1 := NewBlocksContent(style.NewStyle(
+		style.Parent(style.Style{
+			// JustifyContent: style.JustifyContentCenter,
+		}),
+		style.SetDebug(true),
+		style.SetPadding(20),
+		// style.SetGrowX(true),
+	), text2)
+
+	block2 := NewBlocksContent(style.NewStyle(
+		style.Parent(style.Style{
+			Gap: 10,
+		}),
+		style.SetDebug(true),
+		style.SetPadding(10),
+		style.SetWidth(300),
+	), text1, block1)
+
+	img, err := block2.Render()
+	is.NoErr(err)
+
+	f, err := os.Create(filepath.Join(path.Root(), "tmp", "test_render_blocks.png"))
+	is.NoErr(err)
+
+	err = png.Encode(f, img)
+	is.NoErr(err)
 }
 
 func TestApplyPadding(t *testing.T) {

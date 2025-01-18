@@ -31,7 +31,7 @@ type positionValue byte
 
 const (
 	PositionRelative positionValue = iota
-	// PositionAbsolute
+	PositionAbsolute
 )
 
 type overflowValue byte

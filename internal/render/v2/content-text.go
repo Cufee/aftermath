@@ -2,6 +2,7 @@ package render
 
 import (
 	"math"
+	"strings"
 
 	"github.com/cufee/aftermath/internal/render/v2/style"
 	"github.com/fogleman/gg"
@@ -41,6 +42,10 @@ func (content *contentText) setStyle(style style.StyleOptions) {
 }
 
 func (content *contentText) measure(font style.Font) StringSize {
+	if content.sizeCache != nil {
+		return *content.sizeCache
+	}
+
 	size := MeasureString(content.value, font)
 	content.sizeCache = &size
 	return size
@@ -58,12 +63,12 @@ func (content *contentText) dimensions() contentDimensions {
 	if computed.Width > 0 {
 		width = computed.Width
 	} else {
-		width = size.TotalWidth + ((computed.PaddingLeft + computed.PaddingRight) * 2)
+		width = size.TotalWidth + (computed.PaddingLeft + computed.PaddingRight)
 	}
 	if computed.Height > 0 {
 		height = computed.Height
 	} else {
-		height = size.TotalHeight + ((computed.PaddingTop + computed.PaddingBottom) * 2)
+		height = size.TotalHeight + (computed.PaddingTop + computed.PaddingBottom)
 	}
 
 	content.dimensionsCache = &contentDimensions{width: int(math.Ceil(width)), height: int(math.Ceil(height))}
@@ -84,20 +89,21 @@ func (content *contentText) Render(ctx *gg.Context, pos Position) error {
 	dimensions := content.dimensions()
 
 	if computed.Blur > 0 {
-		blur := computed.Blur
-		computed.Blur = 0
+		// reset blur
+		current := content.Style()
+		current.Add(style.SetBlur(0))
+		content.setStyle(current)
+
 		// render the content onto a new image, blur it, render onto parent
 		child := gg.NewContext(dimensions.width, dimensions.height)
 		err := content.Render(child, Position{0, 0})
 		if err != nil {
 			return err
 		}
-		img := imaging.Blur(ctx.Image(), blur)
+		img := imaging.Blur(child.Image(), computed.Blur)
 		ctx.DrawImage(img, ceil(pos.X), ceil(pos.Y))
 		return nil
 	}
-
-	var originX, originY float64 = pos.X + computed.PaddingLeft, pos.Y + computed.PaddingTop + 1
 
 	// if computed.Position == style.PositionAbsolute {
 	// 	originX += computed.MarginLeft
@@ -106,12 +112,12 @@ func (content *contentText) Render(ctx *gg.Context, pos Position) error {
 
 	if computed.BackgroundColor != nil {
 		ctx.SetColor(computed.BackgroundColor)
-		ctx.DrawRectangle(originX, originY, float64(dimensions.width), float64(dimensions.height))
+		ctx.DrawRectangle(pos.X, pos.Y, float64(dimensions.width), float64(dimensions.height))
 		ctx.Fill()
 	}
 	if computed.BackgroundImage != nil {
 		background := imaging.Fill(computed.BackgroundImage, dimensions.width, dimensions.height, imaging.Center, imaging.Lanczos)
-		ctx.DrawImage(background, ceil(originX), ceil(originY))
+		ctx.DrawImage(background, ceil(pos.X), ceil(pos.Y))
 	}
 
 	if computed.Debug {
@@ -120,7 +126,7 @@ func (content *contentText) Render(ctx *gg.Context, pos Position) error {
 		ctx.Stroke()
 	}
 
-	var lastX, lastY float64 = originX, originY
+	var lastX, lastY float64 = pos.X + computed.PaddingLeft, pos.Y + computed.PaddingTop + 1
 
 	switch computed.JustifyContent {
 	case style.JustifyContentEnd:
@@ -142,11 +148,11 @@ func (content *contentText) Render(ctx *gg.Context, pos Position) error {
 	ctx.SetFontFace(face)
 	ctx.SetColor(computed.Color)
 
-	// for _, str := range strings.Split(content.value, "\n") {
-	// 	lastY += size.LineHeight
-	// 	x, y := lastX, lastY-size.LineOffset
-	// 	ctx.DrawString(str, x, y)
-	// }
+	for _, str := range strings.Split(content.value, "\n") {
+		lastY += size.LineHeight
+		x, y := lastX, lastY-size.LineOffset
+		ctx.DrawString(str, x, y)
+	}
 
 	return nil
 }

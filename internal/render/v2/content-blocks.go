@@ -55,6 +55,10 @@ func (content *contentBlocks) dimensions() contentDimensions {
 	for _, block := range content.value {
 		blockDimensions := block.content.dimensions()
 
+		if block.Style().Computed().Position == style.PositionAbsolute {
+			continue
+		}
+
 		blockWidthTotal += blockDimensions.width
 		blockWidthMax = max(blockWidthMax, blockDimensions.width)
 
@@ -257,6 +261,7 @@ func applyBlocksGrowth(containerStyle style.Style, container contentDimensions, 
 		for _, block := range blocks {
 			blockStyle := block.Style()
 			blockComputed := blockStyle.Computed()
+			blockSize := block.Dimensions()
 
 			if !blockComputed.GrowHorizontal && !blockComputed.GrowVertical {
 				continue
@@ -266,7 +271,7 @@ func applyBlocksGrowth(containerStyle style.Style, container contentDimensions, 
 			case style.DirectionHorizontal:
 				// update the block width
 				if blockComputed.GrowHorizontal {
-					blockStyle.Add(style.SetWidth(blockComputed.Width + float64(blockGrowX)))
+					blockStyle.Add(style.SetWidth(float64(blockSize.width) + float64(blockGrowX)))
 					block.content.setStyle(blockStyle)
 				}
 				// update the block height
@@ -282,7 +287,7 @@ func applyBlocksGrowth(containerStyle style.Style, container contentDimensions, 
 				}
 				// update the block height
 				if blockComputed.GrowVertical {
-					blockStyle.Add(style.SetHeight(blockComputed.Height + float64(blockGrowY)))
+					blockStyle.Add(style.SetHeight(float64(blockSize.height) + float64(blockGrowY)))
 					block.content.setStyle(blockStyle)
 				}
 			}

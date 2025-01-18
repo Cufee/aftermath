@@ -5,15 +5,12 @@ import (
 	"context"
 	"image/png"
 	"os"
-	"path/filepath"
 	"slices"
 	"testing"
 	"time"
 
 	"github.com/cufee/aftermath/internal/localization"
 	rc "github.com/cufee/aftermath/internal/render/v1"
-	renderV2 "github.com/cufee/aftermath/internal/render/v2"
-	"github.com/cufee/aftermath/internal/render/v2/style"
 	client "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
@@ -22,7 +19,6 @@ import (
 	session "github.com/cufee/aftermath/internal/stats/render/session/v1"
 	"github.com/cufee/aftermath/tests"
 	"github.com/cufee/aftermath/tests/env"
-	"github.com/cufee/aftermath/tests/path"
 	"github.com/matryer/is"
 	"github.com/nao1215/imaging"
 	"github.com/rs/zerolog"
@@ -235,52 +231,4 @@ func TestRenderReplay(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestRenderV2(t *testing.T) {
-	is := is.New(t)
-
-	text1, err := renderV2.NewTextContent(style.NewStyle(
-		style.SetDebug(true),
-		style.SetFont(rc.FontLarge()),
-		style.SetWidth(100),
-		style.SetGrowX(true),
-		style.SetGrowY(true),
-	), "TEST - 1")
-	is.NoErr(err)
-
-	text2, err := renderV2.NewTextContent(style.NewStyle(
-		style.SetDebug(true),
-		// style.SetGrowX(true),
-		style.SetWidth(50),
-		style.SetFont(rc.FontLarge()),
-	), "TEST - 2")
-	is.NoErr(err)
-
-	block1 := renderV2.NewBlocksContent(style.NewStyle(
-		style.Parent(style.Style{
-			// JustifyContent: style.JustifyContentCenter,
-		}),
-		style.SetDebug(true),
-		style.SetPadding(20),
-		// style.SetGrowX(true),
-	), text2)
-
-	block2 := renderV2.NewBlocksContent(style.NewStyle(
-		style.Parent(style.Style{
-			Gap: 10,
-		}),
-		style.SetDebug(true),
-		style.SetPadding(10),
-		style.SetWidth(300),
-	), text1, block1)
-
-	img, err := block2.Render()
-	is.NoErr(err)
-
-	f, err := os.Create(filepath.Join(path.Root(), "tmp", "test_render_blocks.png"))
-	is.NoErr(err)
-
-	err = png.Encode(f, img)
-	is.NoErr(err)
 }

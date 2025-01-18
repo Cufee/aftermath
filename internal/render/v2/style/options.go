@@ -1,5 +1,7 @@
 package style
 
+import "image/color"
+
 func NewStyle(opts ...styleOption) StyleOptions {
 	return opts
 }
@@ -24,8 +26,8 @@ func Parent(parent Style) styleOption {
 	return func(s *Style) { *s = parent }
 }
 
-func SetFont(value Font) styleOption {
-	return func(s *Style) { s.Font = value }
+func SetFont(value Font, color color.Color) styleOption {
+	return func(s *Style) { s.Font = value; s.Color = color }
 }
 
 func SetDebug(value bool) styleOption {
@@ -74,6 +76,12 @@ func SetGrowX(value bool) styleOption {
 func SetGrowY(value bool) styleOption {
 	return func(s *Style) {
 		s.GrowVertical = value
+	}
+}
+
+func SetBlur(value float64) styleOption {
+	return func(s *Style) {
+		s.Blur = value
 	}
 }
 
