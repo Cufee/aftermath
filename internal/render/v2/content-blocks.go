@@ -68,7 +68,7 @@ func (content *contentBlocks) dimensions() contentDimensions {
 
 	// calculate final block width if it was not set already
 	if dimensions.width == 0 {
-		dimensions.width = ceil(computed.PaddingLeft) + ceil(computed.PaddingRight)
+		dimensions.width = ceil(dimensions.paddingAndGapsX)
 
 		switch computed.Direction {
 		case style.DirectionHorizontal:
@@ -80,7 +80,7 @@ func (content *contentBlocks) dimensions() contentDimensions {
 	}
 	// calculate final block height if it was not set already
 	if dimensions.height == 0 {
-		dimensions.height = ceil(computed.PaddingTop + computed.PaddingBottom)
+		dimensions.height = ceil(dimensions.paddingAndGapsY)
 
 		switch computed.Direction {
 		case style.DirectionHorizontal:

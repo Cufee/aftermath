@@ -17,12 +17,12 @@ import (
 var _ = saveImage
 
 var contentSize = 12.0
-var contentColorValue uint32
+var contentColorAlphaValue uint32
 var contentColor = color.RGBA{255, 255, 255, 255}
 
 func init() {
 	_, _, _, a := contentColor.RGBA()
-	contentColorValue = a
+	contentColorAlphaValue = a
 }
 
 func TestRenderV2(t *testing.T) {
@@ -64,17 +64,13 @@ func TestRenderV2(t *testing.T) {
 		}),
 		style.SetDebug(true),
 		style.SetPadding(10),
-		style.SetWidth(300),
+		// style.SetWidth(300),
 	), text1, block1)
 
 	img, err := block2.Render()
 	is.NoErr(err)
 
-	f, err := os.Create(filepath.Join(path.Root(), "tmp", "test_render_blocks.png"))
-	is.NoErr(err)
-
-	err = png.Encode(f, img)
-	is.NoErr(err)
+	saveImage(is, img)
 }
 
 func TestApplyPadding(t *testing.T) {
@@ -102,7 +98,7 @@ func TestApplyPadding(t *testing.T) {
 		}
 		{
 			_, _, _, a := img.At(10, 10).RGBA()
-			is.True(a == contentColorValue)
+			is.True(a == contentColorAlphaValue)
 		}
 	})
 
@@ -157,7 +153,7 @@ func TestApplyPadding(t *testing.T) {
 		}
 		{
 			_, _, _, a := img.At(10, 0).RGBA()
-			is.True(a == contentColorValue)
+			is.True(a == contentColorAlphaValue)
 		}
 	})
 
@@ -181,7 +177,7 @@ func TestApplyPadding(t *testing.T) {
 		}
 		{
 			_, _, _, a := img.At(0, 10).RGBA()
-			is.True(a == contentColorValue)
+			is.True(a == contentColorAlphaValue)
 		}
 	})
 }
@@ -204,7 +200,7 @@ func TestRenderJustify(t *testing.T) {
 
 			{
 				_, _, _, imgA := img.At(0, 0).RGBA()
-				is.True(imgA == contentColorValue)
+				is.True(imgA == contentColorAlphaValue)
 			}
 			{
 				_, _, _, imgA := img.At(int(contentSize*2-1), 0).RGBA()
@@ -231,7 +227,7 @@ func TestRenderJustify(t *testing.T) {
 			}
 			{
 				_, _, _, imgA := img.At(int(contentSize), 0).RGBA()
-				is.True(imgA == contentColorValue)
+				is.True(imgA == contentColorAlphaValue)
 			}
 			{
 				_, _, _, imgA := img.At(int(contentSize*2-contentSize/3), 0).RGBA()
@@ -258,7 +254,7 @@ func TestRenderJustify(t *testing.T) {
 			}
 			{
 				_, _, _, imgA := img.At(int(contentSize*2-1), 0).RGBA()
-				is.True(imgA == contentColorValue)
+				is.True(imgA == contentColorAlphaValue)
 			}
 		})
 	})
@@ -279,7 +275,7 @@ func TestRenderJustify(t *testing.T) {
 
 			{
 				_, _, _, imgA := img.At(0, 0).RGBA()
-				is.True(imgA == contentColorValue)
+				is.True(imgA == contentColorAlphaValue)
 			}
 			{
 				_, _, _, imgA := img.At(0, int(contentSize*2-1)).RGBA()
@@ -307,7 +303,7 @@ func TestRenderJustify(t *testing.T) {
 			}
 			{
 				_, _, _, imgA := img.At(0, int(contentSize)).RGBA()
-				is.True(imgA == contentColorValue)
+				is.True(imgA == contentColorAlphaValue)
 			}
 			{
 				_, _, _, imgA := img.At(0, int(contentSize*2-contentSize/4)).RGBA()
@@ -335,7 +331,7 @@ func TestRenderJustify(t *testing.T) {
 			}
 			{
 				_, _, _, imgA := img.At(0, int(contentSize*2-1)).RGBA()
-				is.True(imgA == contentColorValue)
+				is.True(imgA == contentColorAlphaValue)
 			}
 		})
 	})

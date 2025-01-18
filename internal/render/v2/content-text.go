@@ -13,8 +13,12 @@ import (
 var _ BlockContent = &contentText{}
 
 func NewTextContent(style style.StyleOptions, value string) (*Block, error) {
-	if !style.Computed().Font.Valid() {
+	computed := style.Computed()
+	if !computed.Font.Valid() {
 		return nil, errors.New("invalid or missing font")
+	}
+	if computed.Color == nil {
+		return nil, errors.New("text requires a non nil color")
 	}
 	return NewBlock(&contentText{
 		value: value,
