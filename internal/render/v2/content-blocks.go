@@ -39,6 +39,13 @@ func (content *contentBlocks) dimensions() contentDimensions {
 		paddingAndGapsY: computed.PaddingTop + computed.PaddingBottom,
 	}
 
+	switch computed.Direction {
+	case style.DirectionHorizontal:
+		dimensions.paddingAndGapsX += computed.Gap * float64(len(content.value)-1)
+	case style.DirectionVertical:
+		dimensions.paddingAndGapsY += computed.Gap * float64(len(content.value)-1)
+	}
+
 	if dimensions.width > 0 && dimensions.height > 0 {
 		return dimensions
 	}
@@ -63,10 +70,6 @@ func (content *contentBlocks) dimensions() contentDimensions {
 		case style.DirectionHorizontal:
 			dimensions.width += blockWidthTotal
 
-			gaps := computed.Gap * float64(len(content.value)-1)
-			dimensions.width += ceil(gaps)
-			dimensions.paddingAndGapsX += gaps
-
 		case style.DirectionVertical:
 			dimensions.width += blockWidthMax
 		}
@@ -80,11 +83,6 @@ func (content *contentBlocks) dimensions() contentDimensions {
 			dimensions.height += blockHeightMax
 		case style.DirectionVertical:
 			dimensions.height += blockHeightTotal
-
-			gaps := computed.Gap * float64(len(content.value)-1)
-			dimensions.height += ceil(gaps)
-			dimensions.paddingAndGapsY += gaps
-
 		}
 	}
 
@@ -138,7 +136,7 @@ func (content *contentBlocks) Render(ctx *gg.Context, pos Position) error {
 		ctx.Stroke()
 	}
 
-	applyGrowth(computed, dimensions, content.value...)
+	applyBlocksGrowth(computed, dimensions, content.value...)
 
 	var originX, originY = pos.X + computed.PaddingLeft, pos.Y + computed.PaddingTop
 	return renderBlocksContent(ctx, computed, dimensions, Position{X: originX, Y: originY}, content.value...)
@@ -229,7 +227,7 @@ func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container 
 	return nil
 }
 
-func applyGrowth(containerStyle style.Style, container contentDimensions, blocks ...*Block) {
+func applyBlocksGrowth(containerStyle style.Style, container contentDimensions, blocks ...*Block) {
 	// calculate content dimensions before growth
 	var blockWidthTotal, blockWidthMax, blockHeightTotal, blockHeightMax int
 	var growBlocksX, growBlocksY = 0, 0
@@ -251,42 +249,44 @@ func applyGrowth(containerStyle style.Style, container contentDimensions, blocks
 		}
 	}
 
-	// calculate empty space blocks can use to grow
-	var growSpaceX, growSpaceY = 0, 0
-	if growBlocksX > 0 {
-		switch containerStyle.Direction {
-		case style.DirectionHorizontal:
-			growSpaceX = container.width - ceil(container.paddingAndGapsX) - blockWidthTotal
-		case style.DirectionVertical:
-			growSpaceX = container.width - ceil(container.paddingAndGapsX) - blockWidthMax
-		}
-	}
-	if growBlocksY > 0 {
-		switch containerStyle.Direction {
-		case style.DirectionHorizontal:
-			growSpaceY = container.height - ceil(container.paddingAndGapsY) - blockHeightMax
-		case style.DirectionVertical:
-			growSpaceY = container.height - ceil(container.paddingAndGapsY) - blockWidthTotal
-		}
-	}
-
 	// apply growth to blocks
 	if growBlocksX > 0 || growBlocksY > 0 {
-		var blockGrowX, blockGrowY = max(0, growSpaceX) / max(1, growBlocksX), max(0, growSpaceY) / max(1, growBlocksY)
+		blockGrowX := max(0, container.width-ceil(container.paddingAndGapsX)-blockWidthTotal) / max(1, growBlocksX)
+		blockGrowY := max(0, container.height-ceil(container.paddingAndGapsY)-blockHeightTotal) / max(1, growBlocksY)
+
 		for _, block := range blocks {
 			blockStyle := block.Style()
 			blockComputed := blockStyle.Computed()
 
-			// update the block width
-			if blockComputed.GrowHorizontal {
-				blockStyle.Add(style.SetWidth(blockComputed.Width + float64(blockGrowX)))
-				block.content.setStyle(blockStyle)
+			if !blockComputed.GrowHorizontal && !blockComputed.GrowVertical {
+				continue
 			}
-			// update the block height
-			if blockComputed.GrowVertical {
-				blockStyle.Add(style.SetHeight(blockComputed.Height + float64(blockGrowY)))
-				block.content.setStyle(blockStyle)
+
+			switch containerStyle.Direction {
+			case style.DirectionHorizontal:
+				// update the block width
+				if blockComputed.GrowHorizontal {
+					blockStyle.Add(style.SetWidth(blockComputed.Width + float64(blockGrowX)))
+					block.content.setStyle(blockStyle)
+				}
+				// update the block height
+				if blockComputed.GrowVertical {
+					blockStyle.Add(style.SetHeight(float64(blockHeightMax)))
+					block.content.setStyle(blockStyle)
+				}
+			case style.DirectionVertical:
+				// update the block width
+				if blockComputed.GrowHorizontal {
+					blockStyle.Add(style.SetWidth(float64(blockWidthMax)))
+					block.content.setStyle(blockStyle)
+				}
+				// update the block height
+				if blockComputed.GrowVertical {
+					blockStyle.Add(style.SetHeight(blockComputed.Height + float64(blockGrowY)))
+					block.content.setStyle(blockStyle)
+				}
 			}
+
 		}
 	}
 }
