@@ -26,12 +26,17 @@ func init() {
 }
 
 func TestRenderV2(t *testing.T) {
+	if os.Getenv("CI") == "true" {
+		return // this is a local test for visual debugging
+	}
+
 	is := is.New(t)
 
 	text1, err := NewTextContent(style.NewStyle(
 		style.Parent(style.Style{
-			Right: -5,
-			Top:   -5,
+			Left: -5,
+			Top:  -5,
+			// Blur: 1,      1,
 		}),
 		style.SetDebug(true),
 		style.SetPosition(style.PositionAbsolute),

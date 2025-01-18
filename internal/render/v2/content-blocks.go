@@ -105,13 +105,27 @@ func (content *contentBlocks) Type() blockContentType {
 	return BlockContentTypeBlocks
 }
 
+func (content *contentBlocks) Layers() map[int]struct{} {
+	var layers = make(map[int]struct{}, len(content.value))
+	for _, block := range content.value {
+		for i, v := range block.Layers() {
+			layers[i] = v
+		}
+	}
+	return layers
+}
+
 func (content *contentBlocks) Style() style.StyleOptions {
 	return content.style
 }
 
-func (content *contentBlocks) Render(ctx *gg.Context, pos Position) error {
+func (content *contentBlocks) Render(layers layerContext, pos Position) error {
 	computed := content.style.Computed()
 	dimensions := content.dimensions()
+	ctx, err := layers.layer(computed.ZIndex)
+	if err != nil {
+		return err
+	}
 
 	if computed.Position == style.PositionAbsolute {
 		if computed.Left != 0 {
@@ -127,17 +141,16 @@ func (content *contentBlocks) Render(ctx *gg.Context, pos Position) error {
 	}
 
 	if computed.Blur > 0 {
-		blur := computed.Blur
-		computed.Blur = 0
-		// render the content onto a new image, blur it, render onto parent
-		child := gg.NewContext(dimensions.width, dimensions.height)
-		err := content.Render(child, Position{0, 0})
-		if err != nil {
-			return err
-		}
-		img := imaging.Blur(ctx.Image(), blur)
-		ctx.DrawImage(img, ceil(pos.X), ceil(pos.Y))
-		return nil
+		// replace the context
+		parentPosition := pos
+		pos = Position{X: 0, Y: 0}
+		ctx = gg.NewContext(dimensions.width, dimensions.height)
+		defer func() {
+			// blur the result and paste onto the parent layer
+			parent, _ := layers.layer(computed.ZIndex)
+			img := imaging.Blur(ctx.Image(), computed.Blur)
+			parent.DrawImage(img, ceil(parentPosition.X), ceil(parentPosition.Y))
+		}()
 	}
 
 	if computed.BackgroundColor != nil {
@@ -159,10 +172,10 @@ func (content *contentBlocks) Render(ctx *gg.Context, pos Position) error {
 	applyBlocksGrowth(computed, dimensions, content.value...)
 
 	var originX, originY = pos.X + computed.PaddingLeft, pos.Y + computed.PaddingTop
-	return renderBlocksContent(ctx, computed, dimensions, Position{X: originX, Y: originY}, content.value...)
+	return renderBlocksContent(layers, computed, dimensions, Position{X: originX, Y: originY}, content.value...)
 }
 
-func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container contentDimensions, pos Position, blocks ...*Block) error {
+func renderBlocksContent(ctx layerContext, containerStyle style.Style, container contentDimensions, pos Position, blocks ...*Block) error {
 	if len(blocks) < 1 {
 		return errors.New("no blocks to render")
 	}

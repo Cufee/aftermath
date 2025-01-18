@@ -1,6 +1,7 @@
 package render
 
 import (
+	"errors"
 	"fmt"
 	"image"
 
@@ -39,10 +40,12 @@ type BlockContent interface {
 	Type() blockContentType
 
 	// Renders the block onto an image
-	Render(*gg.Context, Position) error
+	Render(layerContext, Position) error
 
 	Style() style.StyleOptions
 	setStyle(style.StyleOptions)
+
+	Layers() map[int]struct{}
 
 	// returns final block image dimensions without rendering
 	dimensions() contentDimensions
@@ -50,6 +53,10 @@ type BlockContent interface {
 
 type Block struct {
 	content BlockContent
+}
+
+func (b *Block) Layers() map[int]struct{} {
+	return b.content.Layers()
 }
 
 func (b *Block) Style() style.StyleOptions {
@@ -61,8 +68,14 @@ func (b *Block) Type() blockContentType {
 }
 
 func (b *Block) Render() (image.Image, error) {
-	dimensions := b.content.dimensions()
-	ctx := gg.NewContext(dimensions.width, dimensions.height)
+	dimensions := b.Dimensions()
+
+	layers := b.Layers()
+	ctx := make(layerContext, len(layers))
+	for idx := range layers {
+		ctx[idx] = gg.NewContext(dimensions.width, dimensions.height)
+	}
+
 	err := b.RenderTo(ctx, Position{0, 0})
 	if err != nil {
 		return nil, err
@@ -71,7 +84,10 @@ func (b *Block) Render() (image.Image, error) {
 
 }
 
-func (b *Block) RenderTo(ctx *gg.Context, pos Position) error {
+func (b *Block) RenderTo(ctx layerContext, pos Position) error {
+	if ctx == nil {
+		return errors.New("layer context cannot be nil")
+	}
 	return b.content.Render(ctx, pos)
 }
 

@@ -2,7 +2,6 @@ package render
 
 import (
 	"github.com/cufee/aftermath/internal/render/v2/style"
-	"github.com/fogleman/gg"
 )
 
 var _ BlockContent = &contentEmpty{}
@@ -35,13 +34,21 @@ func (content *contentEmpty) Type() blockContentType {
 	return BlockContentTypeEmpty
 }
 
+func (content *contentEmpty) Layers() map[int]struct{} {
+	return map[int]struct{}{content.style.Computed().ZIndex: {}}
+}
+
 func (content *contentEmpty) Style() style.StyleOptions {
 	return content.style
 }
 
-func (content *contentEmpty) Render(ctx *gg.Context, pos Position) error {
+func (content *contentEmpty) Render(layers layerContext, pos Position) error {
 	computed := content.style.Computed()
 	dimensions := content.dimensions()
+	ctx, err := layers.layer(computed.ZIndex)
+	if err != nil {
+		return err
+	}
 
 	var originX, originY float64 = pos.X + computed.PaddingLeft, pos.Y + computed.PaddingTop
 	if computed.BackgroundColor != nil {

@@ -83,30 +83,42 @@ func (content *contentText) Type() blockContentType {
 	return BlockContentTypeText
 }
 
+func (content *contentText) Layers() map[int]struct{} {
+	return map[int]struct{}{content.style.Computed().ZIndex: {}}
+}
+
 func (content *contentText) Style() style.StyleOptions {
 	return content.style
 }
 
-func (content *contentText) Render(ctx *gg.Context, pos Position) error {
+func (content *contentText) Render(layers layerContext, pos Position) error {
 	computed := content.style.Computed()
-	size := content.measure(computed.Font)
 	dimensions := content.dimensions()
 
-	if computed.Blur > 0 {
-		// reset blur
-		current := content.Style()
-		current.Add(style.SetBlur(0))
-		content.setStyle(current)
+	if computed.Color == nil {
+		return errors.New("color cannot be nil")
+	}
+	if computed.Font == nil {
+		return errors.New("font cannot be nil")
+	}
+	ctx, err := layers.layer(computed.ZIndex)
+	if err != nil {
+		return err
+	}
 
-		// render the content onto a new image, blur it, render onto parent
-		child := gg.NewContext(dimensions.width, dimensions.height)
-		err := content.Render(child, Position{0, 0})
-		if err != nil {
-			return err
-		}
-		img := imaging.Blur(child.Image(), computed.Blur)
-		ctx.DrawImage(img, ceil(pos.X), ceil(pos.Y))
-		return nil
+	size := content.measure(computed.Font)
+
+	if computed.Blur > 0 {
+		// replace the context
+		parentPosition := pos
+		pos = Position{X: 0, Y: 0}
+		ctx = gg.NewContext(dimensions.width, dimensions.height)
+		defer func() {
+			// blur the result and paste onto the parent layer
+			parent, _ := layers.layer(computed.ZIndex)
+			img := imaging.Blur(ctx.Image(), computed.Blur)
+			parent.DrawImage(img, ceil(parentPosition.X), ceil(parentPosition.Y))
+		}()
 	}
 
 	if computed.BackgroundColor != nil {
