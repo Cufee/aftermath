@@ -34,6 +34,10 @@ func SetDebug(value bool) styleOption {
 	return func(s *Style) { s.Debug = value }
 }
 
+func SetPosition(value positionValue) styleOption {
+	return func(s *Style) { s.Position = value }
+}
+
 func SetWidth(value float64) styleOption {
 	return func(s *Style) { s.Width = value }
 }

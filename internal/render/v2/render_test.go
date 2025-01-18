@@ -29,18 +29,20 @@ func TestRenderV2(t *testing.T) {
 	is := is.New(t)
 
 	text1, err := NewTextContent(style.NewStyle(
+		style.Parent(style.Style{
+			Right: -5,
+			Top:   -5,
+		}),
 		style.SetDebug(true),
+		style.SetPosition(style.PositionAbsolute),
 		style.SetFont(tests.Font(), color.Black),
 		// style.SetWidth(100),
-		style.SetGrowX(true),
-		style.SetGrowY(true),
+		// style.SetGrowX(true),
+		// style.SetGrowY(true),
 	), "TEST - 1")
 	is.NoErr(err)
 
 	text2, err := NewTextContent(style.NewStyle(
-		style.Parent(style.Style{
-			Blur: 2,
-		}),
 		// style.SetDebug(true),
 		// style.SetGrowX(true),
 		style.SetGrowY(true),

@@ -44,12 +44,6 @@ func (content *contentEmpty) Render(ctx *gg.Context, pos Position) error {
 	dimensions := content.dimensions()
 
 	var originX, originY float64 = pos.X + computed.PaddingLeft, pos.Y + computed.PaddingTop
-
-	// if computed.Position == style.PositionAbsolute {
-	// 	originX += computed.MarginLeft
-	// 	originY += computed.MarginTop
-	// }
-
 	if computed.BackgroundColor != nil {
 		ctx.SetColor(computed.BackgroundColor)
 		ctx.DrawRectangle(originX, originY, float64(dimensions.width), float64(dimensions.height))

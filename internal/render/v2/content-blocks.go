@@ -39,11 +39,19 @@ func (content *contentBlocks) dimensions() contentDimensions {
 		paddingAndGapsY: computed.PaddingTop + computed.PaddingBottom,
 	}
 
+	var gapCount = 0
+	for _, block := range content.value {
+		switch block.Style().Computed().Position {
+		case style.PositionRelative:
+			gapCount++
+		}
+	}
+
 	switch computed.Direction {
 	case style.DirectionHorizontal:
-		dimensions.paddingAndGapsX += computed.Gap * float64(len(content.value)-1)
+		dimensions.paddingAndGapsX += max(0, computed.Gap*float64(gapCount-1))
 	case style.DirectionVertical:
-		dimensions.paddingAndGapsY += computed.Gap * float64(len(content.value)-1)
+		dimensions.paddingAndGapsY += max(0, computed.Gap*float64(gapCount-1))
 	}
 
 	if dimensions.width > 0 && dimensions.height > 0 {
@@ -53,7 +61,7 @@ func (content *contentBlocks) dimensions() contentDimensions {
 	// add content dimensions of each block to the total
 	var blockWidthTotal, blockWidthMax, blockHeightTotal, blockHeightMax int
 	for _, block := range content.value {
-		blockDimensions := block.content.dimensions()
+		blockDimensions := block.Dimensions()
 
 		if block.Style().Computed().Position == style.PositionAbsolute {
 			continue
@@ -105,6 +113,19 @@ func (content *contentBlocks) Render(ctx *gg.Context, pos Position) error {
 	computed := content.style.Computed()
 	dimensions := content.dimensions()
 
+	if computed.Position == style.PositionAbsolute {
+		if computed.Left != 0 {
+			pos.X += computed.Left
+		} else if computed.Right != 0 {
+			pos.X += float64(dimensions.width) - computed.Right
+		}
+		if computed.Top != 0 {
+			pos.Y += computed.Top
+		} else if computed.Bottom != 0 {
+			pos.Y += float64(dimensions.height) - computed.Bottom
+		}
+	}
+
 	if computed.Blur > 0 {
 		blur := computed.Blur
 		computed.Blur = 0
@@ -118,11 +139,6 @@ func (content *contentBlocks) Render(ctx *gg.Context, pos Position) error {
 		ctx.DrawImage(img, ceil(pos.X), ceil(pos.Y))
 		return nil
 	}
-
-	// if computed.Position == style.PositionAbsolute {
-	// pos.X += computed.MarginLeft
-	// pos.Y += computed.MarginTop
-	// }
 
 	if computed.BackgroundColor != nil {
 		ctx.SetColor(computed.BackgroundColor)
@@ -152,16 +168,27 @@ func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container 
 	}
 
 	var lastX, lastY float64 = pos.X, pos.Y
-	for i, block := range blocks {
-		blockSize := block.content.dimensions()
+	for _, block := range blocks {
+		blockStyle := block.Style().Computed()
+		blockSize := block.Dimensions()
 		posX, posY := lastX, lastY
+
+		// apply absolute position margins
+		if blockStyle.Position == style.PositionAbsolute {
+			if blockStyle.Left != 0 {
+				posX += blockStyle.Left
+			} else if blockStyle.Right != 0 {
+				posX += float64(container.width-int(container.paddingAndGapsX)-blockSize.width) - blockStyle.Right
+			}
+			if blockStyle.Top != 0 {
+				posY += blockStyle.Top
+			} else if blockStyle.Bottom != 0 {
+				posY += float64(container.height-int(container.paddingAndGapsY)-blockSize.height) - blockStyle.Bottom
+			}
+		}
 
 		switch containerStyle.Direction {
 		case style.DirectionVertical:
-			if i > 0 {
-				posY += containerStyle.Gap
-			}
-
 			// align content vertically
 			switch containerStyle.JustifyContent {
 			case style.JustifyContentCenter:
@@ -177,7 +204,6 @@ func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container 
 			}
 
 			// align content horizontally
-			posX = pos.X
 			switch containerStyle.AlignItems {
 			case style.AlignItemsCenter:
 				posX += float64(container.width-blockSize.width) / 2
@@ -185,10 +211,6 @@ func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container 
 				posX += float64(blockSize.width)
 			}
 		default: // DirectionHorizontal
-			if i > 0 {
-				posX += containerStyle.Gap
-			}
-
 			// align content horizontally
 			switch containerStyle.JustifyContent {
 			case style.JustifyContentCenter:
@@ -204,7 +226,6 @@ func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container 
 			}
 
 			// align content vertically
-			posY = pos.Y
 			switch containerStyle.AlignItems {
 			case style.AlignItemsCenter:
 				posY += (float64(container.height-blockSize.height) / 2)
@@ -219,12 +240,16 @@ func renderBlocksContent(ctx *gg.Context, containerStyle style.Style, container 
 			return err
 		}
 
+		if block.Style().Computed().Position == style.PositionAbsolute {
+			continue
+		}
+
 		// save the position we rendered at
 		switch containerStyle.Direction {
 		case style.DirectionVertical:
-			lastY = posY + float64(blockSize.height)
+			lastY = posY + float64(blockSize.height) + containerStyle.Gap
 		default:
-			lastX = posX + float64(blockSize.width)
+			lastX = posX + float64(blockSize.width) + containerStyle.Gap
 		}
 	}
 
@@ -236,7 +261,7 @@ func applyBlocksGrowth(containerStyle style.Style, container contentDimensions, 
 	var blockWidthTotal, blockWidthMax, blockHeightTotal, blockHeightMax int
 	var growBlocksX, growBlocksY = 0, 0
 	for _, block := range blocks {
-		blockDimensions := block.content.dimensions()
+		blockDimensions := block.Dimensions()
 
 		blockWidthTotal += blockDimensions.width
 		blockWidthMax = max(blockWidthMax, blockDimensions.width)
@@ -244,54 +269,59 @@ func applyBlocksGrowth(containerStyle style.Style, container contentDimensions, 
 		blockHeightTotal += blockDimensions.height
 		blockHeightMax = max(blockHeightMax, blockDimensions.height)
 
-		style := block.Style().Computed()
-		if style.GrowHorizontal {
+		blockStyle := block.Style().Computed()
+		switch {
+		case blockStyle.Position == style.PositionAbsolute:
+			// absolute blocks do not "consume" grow space
+		case blockStyle.GrowHorizontal:
 			growBlocksX++
-		}
-		if style.GrowVertical {
+		case blockStyle.GrowVertical:
 			growBlocksY++
 		}
 	}
 
+	blockGrowX := max(0, container.width-ceil(container.paddingAndGapsX)-blockWidthTotal) / max(1, growBlocksX)
+	blockGrowY := max(0, container.height-ceil(container.paddingAndGapsY)-blockHeightTotal) / max(1, growBlocksY)
+
 	// apply growth to blocks
-	if growBlocksX > 0 || growBlocksY > 0 {
-		blockGrowX := max(0, container.width-ceil(container.paddingAndGapsX)-blockWidthTotal) / max(1, growBlocksX)
-		blockGrowY := max(0, container.height-ceil(container.paddingAndGapsY)-blockHeightTotal) / max(1, growBlocksY)
+	for _, block := range blocks {
+		blockStyle := block.Style()
+		blockComputed := blockStyle.Computed()
+		blockSize := block.Dimensions()
 
-		for _, block := range blocks {
-			blockStyle := block.Style()
-			blockComputed := blockStyle.Computed()
-			blockSize := block.Dimensions()
+		if !blockComputed.GrowHorizontal && !blockComputed.GrowVertical {
+			continue
+		}
 
-			if !blockComputed.GrowHorizontal && !blockComputed.GrowVertical {
-				continue
+		switch containerStyle.Direction {
+		case style.DirectionHorizontal:
+			// update the block width
+			if blockComputed.GrowHorizontal && blockComputed.Position == style.PositionAbsolute {
+				blockStyle.Add(style.SetWidth(float64(container.width) - containerStyle.PaddingLeft - containerStyle.PaddingRight))
+				block.content.setStyle(blockStyle)
+			} else if blockComputed.GrowHorizontal {
+				blockStyle.Add(style.SetWidth(float64(blockSize.width) + float64(blockGrowX)))
+				block.content.setStyle(blockStyle)
 			}
-
-			switch containerStyle.Direction {
-			case style.DirectionHorizontal:
-				// update the block width
-				if blockComputed.GrowHorizontal {
-					blockStyle.Add(style.SetWidth(float64(blockSize.width) + float64(blockGrowX)))
-					block.content.setStyle(blockStyle)
-				}
-				// update the block height
-				if blockComputed.GrowVertical {
-					blockStyle.Add(style.SetHeight(float64(blockHeightMax)))
-					block.content.setStyle(blockStyle)
-				}
-			case style.DirectionVertical:
-				// update the block width
-				if blockComputed.GrowHorizontal {
-					blockStyle.Add(style.SetWidth(float64(blockWidthMax)))
-					block.content.setStyle(blockStyle)
-				}
-				// update the block height
-				if blockComputed.GrowVertical {
-					blockStyle.Add(style.SetHeight(float64(blockSize.height) + float64(blockGrowY)))
-					block.content.setStyle(blockStyle)
-				}
+			// update the block height
+			if blockComputed.GrowVertical {
+				blockStyle.Add(style.SetHeight(float64(blockHeightMax)))
+				block.content.setStyle(blockStyle)
 			}
-
+		case style.DirectionVertical:
+			// update the block width
+			if blockComputed.GrowHorizontal {
+				blockStyle.Add(style.SetWidth(float64(blockWidthMax)))
+				block.content.setStyle(blockStyle)
+			}
+			// update the block height
+			if blockComputed.GrowVertical && blockComputed.Position == style.PositionAbsolute {
+				blockStyle.Add(style.SetWidth(float64(container.height) - containerStyle.PaddingTop - containerStyle.PaddingBottom))
+				block.content.setStyle(blockStyle)
+			} else if blockComputed.GrowVertical {
+				blockStyle.Add(style.SetHeight(float64(blockSize.height) + float64(blockGrowY)))
+				block.content.setStyle(blockStyle)
+			}
 		}
 	}
 }

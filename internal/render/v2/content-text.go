@@ -109,11 +109,6 @@ func (content *contentText) Render(ctx *gg.Context, pos Position) error {
 		return nil
 	}
 
-	// if computed.Position == style.PositionAbsolute {
-	// 	originX += computed.MarginLeft
-	// 	originY += computed.MarginTop
-	// }
-
 	if computed.BackgroundColor != nil {
 		ctx.SetColor(computed.BackgroundColor)
 		ctx.DrawRectangle(pos.X, pos.Y, float64(dimensions.width), float64(dimensions.height))

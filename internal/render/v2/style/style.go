@@ -69,10 +69,10 @@ type Style struct {
 	PaddingTop    float64
 	PaddingBottom float64
 
-	// MarginLeft   float64
-	// MarginRight  float64
-	// MarginTop    float64
-	// MarginBottom float64
+	Left   float64
+	Right  float64
+	Top    float64
+	Bottom float64
 
 	GrowHorizontal bool
 	GrowVertical   bool
@@ -81,4 +81,6 @@ type Style struct {
 	BorderRadiusTopRight    float64
 	BorderRadiusBottomLeft  float64
 	BorderRadiusBottomRight float64
+
+	ZIndex int
 }
