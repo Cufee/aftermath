@@ -1,7 +1,6 @@
 package render
 
 import (
-	"errors"
 	"fmt"
 	"image"
 
@@ -76,19 +75,11 @@ func (b *Block) Render() (image.Image, error) {
 		ctx[idx] = gg.NewContext(dimensions.width, dimensions.height)
 	}
 
-	err := b.RenderTo(ctx, Position{0, 0})
+	err := b.content.Render(ctx, Position{0, 0})
 	if err != nil {
 		return nil, err
 	}
 	return ctx.Image(), nil
-
-}
-
-func (b *Block) RenderTo(ctx layerContext, pos Position) error {
-	if ctx == nil {
-		return errors.New("layer context cannot be nil")
-	}
-	return b.content.Render(ctx, pos)
 }
 
 func (b *Block) Dimensions() contentDimensions {
