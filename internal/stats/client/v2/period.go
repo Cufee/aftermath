@@ -10,7 +10,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period/v1"
-	render "github.com/cufee/aftermath/internal/stats/render/period/v1"
+	render "github.com/cufee/aftermath/internal/stats/render/period/v2"
 )
 
 func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Time, o ...common.RequestOption) (prepare.Cards, common.Metadata, error) {

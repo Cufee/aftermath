@@ -17,7 +17,7 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
-	stats "github.com/cufee/aftermath/internal/stats/client/v1"
+	stats "github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/utils"
 )
 

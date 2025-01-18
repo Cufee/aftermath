@@ -7,18 +7,16 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
+	"github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/replay/v1"
 )
 
-func (r *client) ReplayCards(ctx context.Context, replayURL string, o ...RequestOption) (prepare.Cards, Metadata, error) {
-	var opts = requestOptions{}
-	for _, apply := range o {
-		apply(&opts)
-	}
+func (r *client) ReplayCards(ctx context.Context, replayURL string, o ...common.RequestOption) (prepare.Cards, common.Metadata, error) {
+	opts := common.RequestOptions(o).Options()
 
-	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
+	meta := common.Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
 	printer, err := localization.NewPrinterWithFallback("stats", r.locale)
 	if err != nil {
@@ -59,12 +57,7 @@ func (r *client) ReplayCards(ctx context.Context, replayURL string, o ...Request
 	return cards, meta, err
 }
 
-func (r *client) ReplayImage(ctx context.Context, replayURL string, o ...RequestOption) (Image, Metadata, error) {
-	var opts = requestOptions{}
-	for _, apply := range o {
-		apply(&opts)
-	}
-
+func (r *client) ReplayImage(ctx context.Context, replayURL string, o ...common.RequestOption) (common.Image, common.Metadata, error) {
 	cards, meta, err := r.ReplayCards(ctx, replayURL, o...)
 	if err != nil {
 		return nil, meta, err
@@ -76,8 +69,9 @@ func (r *client) ReplayImage(ctx context.Context, replayURL string, o ...Request
 	}
 
 	if img, _, err := logic.GetAccountBackgroundImage(ctx, r.database, meta.Replay.Protagonist.ID); err == nil {
-		opts.backgroundImage = img
+		o = append(o, common.WithBackground(img, true))
 	}
+	opts := common.RequestOptions(o).Options()
 
 	stop := meta.Timer("render#CardsToImage")
 	image, err := render.CardsToImage(meta.Replay, cards, opts.RenderOpts(printer)...)
