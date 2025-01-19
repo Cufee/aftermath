@@ -6,7 +6,7 @@ import (
 )
 
 var defaultBlocks = []common.Tag{common.TagDamageDealt, TagDamageAssistedCombined, common.TagFrags, common.TagWinrate, common.TagWN8}
-var blocksRating = []common.Tag{common.TagDamageDealt, TagDamageAssistedCombined, TagDamageBlocked, common.TagFrags, common.TagWinrate, common.TagRankedRating}
+var blocksRating = []common.Tag{common.TagDamageDealt, TagDamageAssistedCombined, common.TagFrags, common.TagWinrate, common.TagRankedRating}
 var blocksNoWN8 = []common.Tag{common.TagDamageDealt, TagDamageAssisted, TagDamageBlocked, common.TagFrags, common.TagWinrate}
 
 const (
