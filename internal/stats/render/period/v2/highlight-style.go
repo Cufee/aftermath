@@ -34,10 +34,10 @@ var styledHighlightCard = highlightCardStyle{
 		GrowHorizontal: true,
 		Gap:            20,
 
-		PaddingLeft:   20,
-		PaddingRight:  20,
-		PaddingTop:    15,
-		PaddingBottom: 15,
+		PaddingLeft:   25,
+		PaddingRight:  25,
+		PaddingTop:    20,
+		PaddingBottom: 20,
 	},
 	titleWrapper: style.Style{
 		// Debug: true,

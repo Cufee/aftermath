@@ -68,7 +68,7 @@ var styledUnratedOverviewCard = overviewCardStyle{
 
 		Direction:      style.DirectionHorizontal,
 		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentSpaceAround,
+		JustifyContent: style.JustifyContentSpaceBetween,
 
 		BackgroundColor: common.DefaultCardColor,
 
@@ -80,8 +80,8 @@ var styledUnratedOverviewCard = overviewCardStyle{
 		GrowHorizontal: true,
 		Gap:            20,
 
-		PaddingLeft:   30,
-		PaddingRight:  30,
+		PaddingLeft:   25,
+		PaddingRight:  25,
 		PaddingTop:    20,
 		PaddingBottom: 20,
 	},
