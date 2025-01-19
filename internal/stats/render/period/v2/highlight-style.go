@@ -13,6 +13,7 @@ type highlightCardStyle struct {
 	titleWrapper style.Style
 	titleLabel   func() *style.Style
 	titleVehicle func() *style.Style
+	statsWrapper style.Style
 	stats        style.Style
 	blockValue   func() *style.Style
 	blockLabel   func() *style.Style
@@ -20,9 +21,10 @@ type highlightCardStyle struct {
 
 var styledHighlightCard = highlightCardStyle{
 	card: style.Style{
-		Direction:      style.DirectionHorizontal,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentSpaceAround,
+		// Debug: true,
+
+		Direction:  style.DirectionHorizontal,
+		AlignItems: style.AlignItemsCenter,
 
 		BackgroundColor: common.DefaultCardColor,
 
@@ -35,12 +37,12 @@ var styledHighlightCard = highlightCardStyle{
 
 		PaddingLeft:   20,
 		PaddingRight:  20,
-		PaddingTop:    20,
-		PaddingBottom: 20,
+		PaddingTop:    15,
+		PaddingBottom: 15,
 	},
 	titleWrapper: style.Style{
+		GrowHorizontal: true,
 		Direction:      style.DirectionVertical,
-		JustifyContent: style.JustifyContentCenter,
 	},
 	titleLabel: func() *style.Style {
 		return &style.Style{
@@ -58,6 +60,13 @@ var styledHighlightCard = highlightCardStyle{
 		Direction:      style.DirectionVertical,
 		AlignItems:     style.AlignItemsCenter,
 		JustifyContent: style.JustifyContentCenter,
+	},
+	statsWrapper: style.Style{
+		// Debug: true,
+
+		Direction:  style.DirectionHorizontal,
+		AlignItems: style.AlignItemsCenter,
+		Gap:        10,
 	},
 	blockValue: func() *style.Style {
 		return &style.Style{

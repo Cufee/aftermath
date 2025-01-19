@@ -22,7 +22,8 @@ func newHighlightCard(data period.VehicleCard, blockSizes map[prepare.Tag]float6
 	}
 
 	return facepaint.NewBlocksContent(styledHighlightCard.card.Options(),
-		append([]*facepaint.Block{leftSide}, rightSide...)...,
+		leftSide,
+		facepaint.NewBlocksContent(styledHighlightCard.statsWrapper.Options(), rightSide...),
 	)
 
 }

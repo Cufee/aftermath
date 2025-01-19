@@ -52,7 +52,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 	for _, highlight := range cards.Highlights {
 		for _, block := range highlight.Blocks {
 			label := facepaint.MeasureString(block.Label, styledHighlightCard.blockLabel().Font).TotalWidth
-			value := facepaint.MeasureString(block.Value().String(), styledHighlightCard.blockLabel().Font).TotalWidth
+			value := facepaint.MeasureString(block.Value().String(), styledHighlightCard.blockValue().Font).TotalWidth
 			highlightBlockWidth[block.Tag] = max(highlightBlockWidth[block.Tag], label, value)
 		}
 	}
