@@ -90,7 +90,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 	// resize and place background
 	if opts.Background != nil {
 		cardsFrameSize := cardsFrame.Dimensions()
-		opts.Background = imaging.Resize(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Lanczos)
+		opts.Background = imaging.Fill(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Center, imaging.Lanczos)
 		if !opts.BackgroundIsCustom {
 			seed, _ := strconv.Atoi(stats.Account.ID)
 			opts.Background = addBackgroundBranding(opts.Background, stats.RegularBattles.Vehicles, seed)
