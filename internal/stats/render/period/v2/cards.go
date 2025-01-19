@@ -16,7 +16,7 @@ import (
 	"github.com/cufee/facepaint"
 )
 
-func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts common.Options) (*facepaint.Block, error) {
+func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []models.UserSubscription, opts common.Options) (*facepaint.Block, error) {
 	if len(cards.Overview.Blocks) == 0 && len(cards.Highlights) == 0 {
 		log.Error().Msg("player cards slice is 0 length, this should not happen")
 		return nil, errors.New("no cards provided")
@@ -47,19 +47,43 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		}
 	}
 
+	// calculate per block type width of highlight stats to make things even
+	var highlightBlockWidth = make(map[prepare.Tag]float64)
+	for _, highlight := range cards.Highlights {
+		for _, block := range highlight.Blocks {
+			label := facepaint.MeasureString(block.Label, styledHighlightCard.blockLabel().Font).TotalWidth
+			value := facepaint.MeasureString(block.Value().String(), styledHighlightCard.blockLabel().Font).TotalWidth
+			highlightBlockWidth[block.Tag] = max(highlightBlockWidth[block.Tag], label, value)
+		}
+	}
 	var statsCards []*facepaint.Block
 
+	// player name card
 	statsCards = append(statsCards, newPlayerNameCard(stats.Account))
 
 	if card := newUnratedOverviewCard(cards.Overview, maxWidthOverviewBlock); card != nil {
 		statsCards = append(statsCards, card)
 	}
-	if card := newRatingOverviewCard(cards.Rating, maxWidthOverviewBlock); card != nil {
+
+	// rating battles
+	if card := newRatingOverviewCard(cards.Rating, maxWidthOverviewBlock); cards.Rating.Meta && card != nil {
 		statsCards = append(statsCards, card)
 	}
+
+	// highlights
+	for i, card := range cards.Highlights {
+		if i > 0 && cards.Rating.Meta {
+			break // only show 1 highlight when rating battles card is visible
+		}
+		statsCards = append(statsCards, newHighlightCard(card, highlightBlockWidth))
+	}
+
 	if len(statsCards) == 0 {
 		return nil, errors.New("no cards to render")
 	}
+
+	footer := newFooterCard(stats, cards, opts)
+	// footerSize := footer.Dimensions()
 
 	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsFrame)), statsCards...)
 
@@ -79,6 +103,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 
 	var frameCards []*facepaint.Block
 	frameCards = append(frameCards, cardsFrame)
+	frameCards = append(frameCards, footer)
 
 	return facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledFinalFrame)), frameCards...), nil
 
