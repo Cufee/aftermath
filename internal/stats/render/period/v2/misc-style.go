@@ -41,6 +41,8 @@ var styledPlayerNameWrapper = style.Style{
 	PaddingTop:    5,
 	PaddingBottom: 5,
 
+	Height: 50,
+
 	GrowHorizontal: true,
 	Gap:            20,
 }
@@ -51,7 +53,6 @@ var styledPlayerNameCard = style.Style{
 	JustifyContent: style.JustifyContentSpaceAround,
 
 	GrowHorizontal: true,
-	// GrowVertical:   true,
 }
 
 var styledPlayerClanTagCard = style.Style{
@@ -66,6 +67,8 @@ var styledPlayerClanTagCard = style.Style{
 	BorderRadiusBottomLeft:  common.BorderRadiusMD,
 	BorderRadiusBottomRight: common.BorderRadiusMD,
 
+	GrowVertical: true,
+
 	PaddingLeft:   12,
 	PaddingRight:  12,
 	PaddingTop:    10,
@@ -78,6 +81,8 @@ var styledCardsFrame = style.Style{
 	Direction:  style.DirectionVertical,
 	AlignItems: style.AlignItemsCenter,
 	Gap:        10,
+
+	GrowHorizontal: true,
 
 	PaddingLeft:   20,
 	PaddingRight:  20,
@@ -99,3 +104,28 @@ var styledCardsBackground = style.NewStyle(
 	style.SetPosition(style.PositionAbsolute),
 	style.SetZIndex(-99),
 )
+
+var styledFooterWrapper = style.Style{
+	Direction:  style.DirectionHorizontal,
+	AlignItems: style.AlignItemsCenter,
+	Gap:        5,
+}
+
+func styledFooterCard() style.Style {
+	return style.Style{
+		Font:  common.FontSmall(),
+		Color: common.TextAlt,
+
+		BackgroundColor: common.DefaultCardColor,
+
+		BorderRadiusTopLeft:     common.BorderRadiusSM,
+		BorderRadiusTopRight:    common.BorderRadiusSM,
+		BorderRadiusBottomLeft:  common.BorderRadiusSM,
+		BorderRadiusBottomRight: common.BorderRadiusSM,
+
+		PaddingLeft:   10,
+		PaddingRight:  10,
+		PaddingTop:    5,
+		PaddingBottom: 5,
+	}
+}
