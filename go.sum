@@ -24,8 +24,8 @@ github.com/cufee/aftermath-assets v0.1.0 h1:r8p2mUN+h/cw1T6/oEX7bntD+lrL9Nz27GXO
 github.com/cufee/aftermath-assets v0.1.0/go.mod h1:6yCITCiz7POJnUMn1oohvadLA4z5YrFNo3p9EKgRdGU=
 github.com/cufee/am-wg-proxy-next/v2 v2.2.6 h1:6RAnPuYbPGtaLzOPhTk/N2Hx4KJx14x/c/cIik668xA=
 github.com/cufee/am-wg-proxy-next/v2 v2.2.6/go.mod h1:x6fkRfYry3l4Ykxl+v6pJAw5ISw+CuGzJzSkc5y5SYs=
-github.com/cufee/facepaint v0.0.6 h1:hs565X06BKNGJ2Yx5Iikpi1rSImIPL6Y2KBC9YM89OI=
-github.com/cufee/facepaint v0.0.6/go.mod h1:7zR5lQMN3EO3qNtff0J8nzIhDb258UoYbRzhRToLQdg=
+github.com/cufee/facepaint v0.0.7 h1:X8ihx5t8Zmwr9Qhx9AdmhiV+fC2qajf1mWEoMB1oo7w=
+github.com/cufee/facepaint v0.0.7/go.mod h1:7zR5lQMN3EO3qNtff0J8nzIhDb258UoYbRzhRToLQdg=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
