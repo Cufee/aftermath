@@ -8,14 +8,16 @@ import (
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
+	options "github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/session/v1"
 )
 
-func (c *client) EmptySessionCards(ctx context.Context, accountId string) (prepare.Cards, Metadata, error) {
-	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
+func (c *client) EmptySessionCards(ctx context.Context, accountId string) (prepare.Cards, options.Metadata, error) {
+
+	meta := options.Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
 	stop := meta.Timer("database#GetAccountByID")
 	account, err := c.database.GetAccountByID(ctx, accountId)
@@ -26,7 +28,7 @@ func (c *client) EmptySessionCards(ctx context.Context, accountId string) (prepa
 			if err != nil {
 				return prepare.Cards{}, meta, err
 			}
-			return prepare.Cards{}, meta, ErrAccountNotTracked
+			return prepare.Cards{}, meta, options.ErrAccountNotTracked
 		}
 		return prepare.Cards{}, meta, err
 	}
@@ -47,22 +49,19 @@ func (c *client) EmptySessionCards(ctx context.Context, accountId string) (prepa
 
 }
 
-func (c *client) SessionCards(ctx context.Context, accountId string, from time.Time, o ...RequestOption) (prepare.Cards, Metadata, error) {
-	var opts = requestOptions{}
-	for _, apply := range o {
-		apply(&opts)
-	}
+func (c *client) SessionCards(ctx context.Context, accountId string, from time.Time, o ...options.RequestOption) (prepare.Cards, options.Metadata, error) {
+	opts := options.RequestOptions(o).Options()
 
-	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
+	meta := options.Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
 	stop := meta.Timer("database#GetAccountByID")
 	_, err := c.database.GetAccountByID(ctx, accountId)
 	stop()
 	if database.IsNotFound(err) {
 		// record a session in the background
-		go recordAccountSnapshots(c.wargaming, c.database, accountId, opts.referenceID)
+		go recordAccountSnapshots(c.wargaming, c.database, accountId, opts.ReferenceID())
 
-		return prepare.Cards{}, meta, ErrAccountNotTracked
+		return prepare.Cards{}, meta, options.ErrAccountNotTracked
 	}
 	if err != nil {
 		return prepare.Cards{}, meta, err
@@ -81,7 +80,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	stop()
 	if err != nil {
 		if errors.Is(err, fetch.ErrSessionNotFound) {
-			go recordAccountSnapshots(c.wargaming, c.database, accountId, opts.referenceID)
+			go recordAccountSnapshots(c.wargaming, c.database, accountId, opts.ReferenceID())
 		}
 		return prepare.Cards{}, meta, err
 	}
@@ -108,8 +107,8 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 			vehicles = append(vehicles, id)
 		}
 	}
-	if opts.vehicleID != "" && !slices.Contains(vehicles, opts.vehicleID) {
-		vehicles = append(vehicles, opts.vehicleID)
+	if opts.VehicleID() != "" && !slices.Contains(vehicles, opts.VehicleID()) {
+		vehicles = append(vehicles, opts.VehicleID())
 	}
 
 	glossary, err := c.database.GetVehicles(ctx, vehicles)
@@ -129,11 +128,8 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	return cards, meta, nil
 }
 
-func (c *client) SessionImage(ctx context.Context, accountId string, from time.Time, o ...RequestOption) (Image, Metadata, error) {
-	var opts = requestOptions{}
-	for _, apply := range o {
-		apply(&opts)
-	}
+func (c *client) SessionImage(ctx context.Context, accountId string, from time.Time, o ...options.RequestOption) (options.Image, options.Metadata, error) {
+	opts := options.RequestOptions(o).Options()
 
 	cards, meta, err := c.SessionCards(ctx, accountId, from, o...)
 	if err != nil {
@@ -146,7 +142,7 @@ func (c *client) SessionImage(ctx context.Context, accountId string, from time.T
 	}
 
 	stop := meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(meta.Stats["session"], meta.Stats["career"], cards, opts.subscriptions, opts.RenderOpts(printer)...)
+	image, err := render.CardsToImage(meta.Stats["session"], meta.Stats["career"], cards, opts.Subscriptions, opts.RenderOpts(printer)...)
 	stop()
 	if err != nil {
 		return nil, meta, err

@@ -14,15 +14,15 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	backend "github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/realtime"
-	"github.com/cufee/aftermath/internal/stats/client/v1"
+	client "github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/pkg/errors"
 	"golang.org/x/text/language"
 	"strconv"
+	"time"
 
 	"net/http"
-	"time"
 )
 
 type widgetEndpointResponse struct {

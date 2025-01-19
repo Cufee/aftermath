@@ -46,6 +46,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/render/assets"
+	"github.com/cufee/aftermath/internal/render/common"
 	render "github.com/cufee/aftermath/internal/render/v1"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -388,6 +389,10 @@ func loadStaticAssets(static fs.FS) {
 	err = render.InitLoadedAssets()
 	if err != nil {
 		log.Fatal().Msgf("render#InitLoadedAssets failed %s", err)
+	}
+	err = common.InitLoadedAssets()
+	if err != nil {
+		log.Fatal().Msgf("common#InitLoadedAssets failed %s", err)
 	}
 	err = localization.LoadAssets(static, "static/localization")
 	if err != nil {

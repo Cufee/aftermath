@@ -6,7 +6,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	common "github.com/cufee/aftermath/internal/render/v1"
+	"github.com/cufee/aftermath/internal/render/common"
+	v1 "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
@@ -14,22 +15,22 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 )
 
-func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
+func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs []models.UserSubscription, opts common.Options) (v1.Segments, error) {
 	if len(cards.Overview.Blocks) == 0 && len(cards.Highlights) == 0 {
 		log.Error().Msg("player cards slice is 0 length, this should not happen")
-		return common.Segments{}, errors.New("no cards provided")
+		return v1.Segments{}, errors.New("no cards provided")
 	}
 
-	var segments common.Segments
+	var segments v1.Segments
 
 	// Calculate minimal card width to fit all the content
 	var cardWidth float64
 	overviewColumnWidth := float64(common.DefaultLogoOptions().Width())
 	{
 		{
-			titleStyle := common.DefaultPlayerTitleStyle(stats.Account.Nickname, titleCardStyle(cardWidth))
-			clanSize := common.MeasureString(stats.Account.ClanTag, titleStyle.ClanTag.Font)
-			nameSize := common.MeasureString(stats.Account.Nickname, titleStyle.Nickname.Font)
+			titleStyle := v1.DefaultPlayerTitleStyle(stats.Account.Nickname, titleCardStyle(cardWidth))
+			clanSize := v1.MeasureString(stats.Account.ClanTag, titleStyle.ClanTag.Font)
+			nameSize := v1.MeasureString(stats.Account.Nickname, titleStyle.Nickname.Font)
 			cardWidth = max(cardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
 		}
 		{
@@ -45,8 +46,8 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 					if block.Tag == prepare.TagRankedRating {
 						label = common.GetRatingTierName(block.Value().Float())
 					}
-					labelSize := common.MeasureString(label, labelStyle.Font)
-					valueSize := common.MeasureString(block.Value().String(), valueStyle.Font)
+					labelSize := v1.MeasureString(label, labelStyle.Font)
+					valueSize := v1.MeasureString(block.Value().String(), valueStyle.Font)
 
 					overviewColumnWidth = max(overviewColumnWidth, max(labelSize.TotalWidth+overviewSpecialRatingPillStyle().PaddingX*2, valueSize.TotalWidth))
 				}
@@ -64,15 +65,15 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 			var highlightBlocksMaxCount, highlightTitleMaxWidth, highlightBlockMaxSize float64
 			for _, highlight := range cards.Highlights {
 				// Title and tank name
-				metaSize := common.MeasureString(highlight.Meta, highlightStyle.cardTitle.Font)
-				titleSize := common.MeasureString(highlight.Title, highlightStyle.tankName.Font)
+				metaSize := v1.MeasureString(highlight.Meta, highlightStyle.cardTitle.Font)
+				titleSize := v1.MeasureString(highlight.Title, highlightStyle.tankName.Font)
 				highlightTitleMaxWidth = max(highlightTitleMaxWidth, metaSize.TotalWidth, titleSize.TotalWidth)
 
 				// Blocks
 				highlightBlocksMaxCount = max(highlightBlocksMaxCount, float64(len(highlight.Blocks)))
 				for _, block := range highlight.Blocks {
-					labelSize := common.MeasureString(block.Label, highlightStyle.blockLabel.Font)
-					valueSize := common.MeasureString(block.Value().String(), highlightStyle.blockValue.Font)
+					labelSize := v1.MeasureString(block.Label, highlightStyle.blockLabel.Font)
+					valueSize := v1.MeasureString(block.Value().String(), highlightStyle.blockValue.Font)
 					highlightBlockMaxSize = max(highlightBlockMaxSize, valueSize.TotalWidth, labelSize.TotalWidth)
 				}
 			}
@@ -96,27 +97,27 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 		} else {
 			footer = append(footer, sessionFrom+" - "+sessionTo)
 		}
-		footerBlock := common.NewFooterCard(strings.Join(footer, " • "))
+		footerBlock := v1.NewFooterCard(strings.Join(footer, " • "))
 		footerImage, err := footerBlock.Render()
 		if err != nil {
 			return segments, err
 		}
 
 		cardWidth = max(cardWidth, float64(footerImage.Bounds().Dx()))
-		segments.AddFooter(common.NewImageContent(common.Style{}, footerImage))
+		segments.AddFooter(v1.NewImageContent(v1.Style{}, footerImage))
 	}
 
 	// Header card
-	if headerCard, headerCardExists := common.NewHeaderCard(cardWidth, subs, opts.PromoText); headerCardExists {
+	if headerCard, headerCardExists := v1.NewHeaderCard(cardWidth, subs, opts.PromoText); headerCardExists {
 		segments.AddHeader(headerCard)
 	}
 
 	// Player Title card
-	segments.AddContent(common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(stats.Account.Nickname, titleCardStyle(cardWidth)), stats.Account.Nickname, stats.Account.ClanTag, subs))
+	segments.AddContent(v1.NewPlayerTitleCard(v1.DefaultPlayerTitleStyle(stats.Account.Nickname, titleCardStyle(cardWidth)), stats.Account.Nickname, stats.Account.ClanTag, subs))
 
 	// Overview Card
 	if len(cards.Overview.Blocks) > 0 {
-		var overviewStatsBlocks []common.Block
+		var overviewStatsBlocks []v1.Block
 		for _, column := range cards.Overview.Blocks {
 			columnBlock, err := statsBlocksToColumnBlock(getOverviewStyle(overviewColumnWidth), column.Blocks)
 			if err != nil {
@@ -124,14 +125,14 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 			}
 			overviewStatsBlocks = append(overviewStatsBlocks, columnBlock)
 		}
-		var overviewCardBlocks []common.Block
-		overviewCardBlocks = append(overviewCardBlocks, common.NewBlocksContent(overviewCardBlocksStyle(cardWidth), overviewStatsBlocks...))
-		segments.AddContent(common.NewBlocksContent(overviewCardStyle(), overviewCardBlocks...))
+		var overviewCardBlocks []v1.Block
+		overviewCardBlocks = append(overviewCardBlocks, v1.NewBlocksContent(overviewCardBlocksStyle(cardWidth), overviewStatsBlocks...))
+		segments.AddContent(v1.NewBlocksContent(overviewCardStyle(), overviewCardBlocks...))
 	}
 
 	// Rating Card -- only when player has current season rating
 	if cards.Rating.Meta {
-		var ratingStatsBlocks []common.Block
+		var ratingStatsBlocks []v1.Block
 		for _, column := range cards.Rating.Blocks {
 			columnBlock, err := statsBlocksToColumnBlock(getOverviewStyle(overviewColumnWidth), column.Blocks)
 			if err != nil {
@@ -139,9 +140,9 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 			}
 			ratingStatsBlocks = append(ratingStatsBlocks, columnBlock)
 		}
-		var ratingCardBlocks []common.Block
-		ratingCardBlocks = append(ratingCardBlocks, common.NewBlocksContent(overviewCardBlocksStyle(cardWidth), ratingStatsBlocks...))
-		segments.AddContent(common.NewBlocksContent(overviewCardStyle(), ratingCardBlocks...))
+		var ratingCardBlocks []v1.Block
+		ratingCardBlocks = append(ratingCardBlocks, v1.NewBlocksContent(overviewCardBlocksStyle(cardWidth), ratingStatsBlocks...))
+		segments.AddContent(v1.NewBlocksContent(overviewCardStyle(), ratingCardBlocks...))
 	}
 
 	// Highlights
@@ -155,24 +156,24 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	return segments, nil
 }
 
-func newHighlightCard(style highlightStyle, card period.VehicleCard) common.Block {
+func newHighlightCard(style highlightStyle, card period.VehicleCard) v1.Block {
 	titleBlock :=
-		common.NewBlocksContent(common.Style{
-			Direction: common.DirectionVertical,
+		v1.NewBlocksContent(v1.Style{
+			Direction: v1.DirectionVertical,
 		},
-			common.NewTextContent(style.cardTitle, card.Meta),
-			common.NewTextContent(style.tankName, card.Title),
+			v1.NewTextContent(style.cardTitle, card.Meta),
+			v1.NewTextContent(style.tankName, card.Title),
 		)
 
-	var contentRow []common.Block
+	var contentRow []v1.Block
 	for _, block := range card.Blocks {
-		contentRow = append(contentRow, common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter},
-			common.NewTextContent(style.blockValue, block.Value().String()),
-			common.NewTextContent(style.blockLabel, block.Label),
+		contentRow = append(contentRow, v1.NewBlocksContent(v1.Style{Direction: v1.DirectionVertical, AlignItems: v1.AlignItemsCenter},
+			v1.NewTextContent(style.blockValue, block.Value().String()),
+			v1.NewTextContent(style.blockLabel, block.Label),
 		))
 	}
 
-	return common.NewBlocksContent(style.container, titleBlock, common.NewBlocksContent(common.Style{
+	return v1.NewBlocksContent(style.container, titleBlock, v1.NewBlocksContent(v1.Style{
 		Gap: style.container.Gap,
 	}, contentRow...))
 }
