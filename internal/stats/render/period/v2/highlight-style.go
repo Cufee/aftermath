@@ -34,6 +34,7 @@ var styledHighlightCard = highlightCardStyle{
 		BorderRadiusBottomRight: common.BorderRadiusLG,
 
 		GrowHorizontal: true,
+		Gap:            20,
 
 		PaddingLeft:   20,
 		PaddingRight:  20,
