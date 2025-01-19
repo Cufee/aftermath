@@ -8,40 +8,52 @@ import (
 	"github.com/cufee/facepaint/style"
 )
 
-func newOverviewCard(data period.OverviewCard, columnWidth float64) *facepaint.Block {
+func newRatingOverviewCard(data period.RatingOverviewCard, columnWidth float64) *facepaint.Block {
 	if len(data.Blocks) == 0 {
 		return nil
 	}
 
 	var columns []*facepaint.Block
 	for _, column := range data.Blocks {
-		columns = append(columns, newOverviewColumn(column, columnWidth))
+		columns = append(columns, newOverviewColumn(styledRatingOverviewCard, column, columnWidth))
 	}
 	// card
-	return facepaint.NewBlocksContent(styledOverviewCard.card.Options(), columns...)
+	return facepaint.NewBlocksContent(styledRatingOverviewCard.card.Options(), columns...)
 }
 
-func newOverviewColumn(data period.OverviewColumn, columnWidth float64) *facepaint.Block {
+func newUnratedOverviewCard(data period.OverviewCard, columnWidth float64) *facepaint.Block {
+	if len(data.Blocks) == 0 {
+		return nil
+	}
+
+	var columns []*facepaint.Block
+	for _, column := range data.Blocks {
+		columns = append(columns, newOverviewColumn(styledUnratedOverviewCard, column, columnWidth))
+	}
+	// card
+	return facepaint.NewBlocksContent(styledUnratedOverviewCard.card.Options(), columns...)
+}
+
+func newOverviewColumn(stl overviewCardStyle, data period.OverviewColumn, columnWidth float64) *facepaint.Block {
 	var columnBlocks []*facepaint.Block
 	for _, block := range data.Blocks {
 		switch block.Tag {
 		default:
-			columnBlocks = append(columnBlocks, newOverviewBlockWithIcon(block, nil))
+			columnBlocks = append(columnBlocks, newOverviewBlockWithIcon(stl.styleBlock(block), block, nil))
 		case prepare.TagWN8:
-			columnBlocks = append(columnBlocks, newOverviewWN8Block(block))
+			columnBlocks = append(columnBlocks, newOverviewWN8Block(stl.styleBlock(block), block))
 		case prepare.TagRankedRating:
-			columnBlocks = append(columnBlocks, newOverviewRatingBlock(block))
+			columnBlocks = append(columnBlocks, newOverviewRatingBlock(stl.styleBlock(block), block))
 		}
 	}
 	// column
 	return facepaint.NewBlocksContent(style.NewStyle(
-		style.Parent(styledOverviewCard.column),
+		style.Parent(stl.column),
 		style.SetWidth(columnWidth),
 	), columnBlocks...)
 }
 
-func newOverviewBlockWithIcon(block prepare.StatsBlock[period.BlockData, string], icon *facepaint.Block) *facepaint.Block {
-	blockStyle := styledOverviewCard.styleBlock(block)
+func newOverviewBlockWithIcon(blockStyle blockStyle, block prepare.StatsBlock[period.BlockData, string], icon *facepaint.Block) *facepaint.Block {
 	if icon == nil {
 		// block
 		return facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
@@ -63,7 +75,7 @@ func newOverviewBlockWithIcon(block prepare.StatsBlock[period.BlockData, string]
 		))
 }
 
-func newOverviewWN8Block(block prepare.StatsBlock[period.BlockData, string]) *facepaint.Block {
+func newOverviewWN8Block(blockStyle blockStyle, block prepare.StatsBlock[period.BlockData, string]) *facepaint.Block {
 	ratingColors := common.GetWN8Colors(block.Value().Float())
 	if block.Value().Float() <= 0 {
 		ratingColors.Background = common.TextAlt
@@ -73,13 +85,13 @@ func newOverviewWN8Block(block prepare.StatsBlock[period.BlockData, string]) *fa
 		common.AftermathLogo(ratingColors.Background, common.DefaultLogoOptions()),
 	)
 	block.Label = common.GetWN8TierName(block.Value().Float())
-	return newOverviewBlockWithIcon(block, icon)
+	return newOverviewBlockWithIcon(blockStyle, block, icon)
 }
 
-func newOverviewRatingBlock(block prepare.StatsBlock[period.BlockData, string]) *facepaint.Block {
+func newOverviewRatingBlock(blockStyle blockStyle, block prepare.StatsBlock[period.BlockData, string]) *facepaint.Block {
 	icon, _ := common.GetRatingIcon(block.V, iconSizeRating)
 	block.Label = common.GetRatingTierName(block.Value().Float())
-	return newOverviewBlockWithIcon(block, icon)
+	return newOverviewBlockWithIcon(blockStyle, block, icon)
 }
 
 // func newHighlightCard(style highlightStyle, card period.VehicleCard) common.Block {

@@ -23,7 +23,7 @@ func FontSmall() style.Font {
 
 func getFont(size float64) style.Font {
 	if fonts[size] == nil {
-		fonts[size] = style.NewFont(defaultFont, size)
+		fonts[size], _ = style.NewFont(defaultFont, size)
 	}
 	return fonts[size]
 }

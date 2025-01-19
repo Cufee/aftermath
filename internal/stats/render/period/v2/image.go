@@ -2,15 +2,12 @@ package period
 
 import (
 	"image"
-	"strconv"
 
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/render/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
-	"github.com/cufee/facepaint"
-	"github.com/cufee/facepaint/style"
 )
 
 type vehicleWN8 struct {
@@ -31,27 +28,7 @@ func CardsToImage(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs [
 		return nil, err
 	}
 
-	if o.Background == nil {
-		return cardsBlock.Render()
-	}
-
-	if !o.BackgroundIsCustom {
-		seed, _ := strconv.Atoi(stats.Account.ID)
-		o.Background = addBackgroundBranding(o.Background, stats.RegularBattles.Vehicles, seed)
-	}
-
-	contentSize := cardsBlock.Dimensions()
-	withBackground := facepaint.NewBlocksContent(style.NewStyle(),
-		facepaint.MustNewImageContent(
-			style.NewStyle(
-				style.SetWidth(float64(contentSize.Width)),
-				style.SetHeight(float64(contentSize.Height)),
-				style.SetBlur(common.DefaultBackgroundBlur),
-				style.SetPosition(style.PositionAbsolute),
-				style.SetZIndex(-99),
-			), o.Background),
-		cardsBlock,
-	)
-	return withBackground.Render()
+	// Render
+	return cardsBlock.Render()
 
 }

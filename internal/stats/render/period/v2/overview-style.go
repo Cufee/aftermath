@@ -11,7 +11,7 @@ const (
 	debugOverviewCards = false
 
 	iconSizeWN8    = 54.0
-	iconSizeRating = 60.0
+	iconSizeRating = 54.0
 )
 
 type blockStyle struct {
@@ -22,11 +22,77 @@ type blockStyle struct {
 }
 
 type overviewCardStyle struct {
-	card   style.Style
-	column style.Style
+	card       style.Style
+	column     style.Style
+	styleBlock func(block prepare.StatsBlock[period.BlockData, string]) blockStyle
 }
 
-func (s *overviewCardStyle) styleBlock(block prepare.StatsBlock[period.BlockData, string]) blockStyle {
+// rating
+
+var styledRatingOverviewCard = overviewCardStyle{
+	styleBlock: styleRatingOverviewBlock,
+	card:       styledUnratedOverviewCard.card,
+	column: style.Style{
+		Debug: debugOverviewCards,
+
+		Direction:      style.DirectionVertical,
+		AlignItems:     style.AlignItemsCenter,
+		JustifyContent: style.JustifyContentCenter,
+		GrowVertical:   false,
+		Gap:            10,
+	},
+}
+
+func styleRatingOverviewBlock(block prepare.StatsBlock[period.BlockData, string]) blockStyle {
+	stl := styleUnratedOverviewBlock(block)
+	if block.Data.Flavor != period.BlockFlavorSpecial {
+		return stl
+	}
+	stl.wrapper = style.Style{
+		Debug: debugOverviewCards,
+
+		Direction:      style.DirectionVertical,
+		AlignItems:     style.AlignItemsCenter,
+		JustifyContent: style.JustifyContentCenter,
+		Gap:            10,
+	}
+	return stl
+}
+
+// unrated
+
+var styledUnratedOverviewCard = overviewCardStyle{
+	styleBlock: styleUnratedOverviewBlock,
+	card: style.Style{
+		Debug: debugOverviewCards,
+
+		Direction:               style.DirectionHorizontal,
+		AlignItems:              style.AlignItemsCenter,
+		JustifyContent:          style.JustifyContentSpaceAround,
+		BackgroundColor:         common.DefaultCardColor,
+		BorderRadiusTopLeft:     common.BorderRadiusLG,
+		BorderRadiusTopRight:    common.BorderRadiusLG,
+		BorderRadiusBottomLeft:  common.BorderRadiusLG,
+		BorderRadiusBottomRight: common.BorderRadiusLG,
+		GrowHorizontal:          true,
+		Gap:                     10,
+		PaddingLeft:             20,
+		PaddingRight:            20,
+		PaddingTop:              20,
+		PaddingBottom:           20,
+	},
+	column: style.Style{
+		Debug: debugOverviewCards,
+
+		Direction:      style.DirectionVertical,
+		AlignItems:     style.AlignItemsCenter,
+		JustifyContent: style.JustifyContentCenter,
+		GrowVertical:   true,
+		Gap:            10,
+	},
+}
+
+func styleUnratedOverviewBlock(block prepare.StatsBlock[period.BlockData, string]) blockStyle {
 	switch block.Data.Flavor {
 	case period.BlockFlavorSpecial:
 		return blockStyle{
@@ -37,7 +103,7 @@ func (s *overviewCardStyle) styleBlock(block prepare.StatsBlock[period.BlockData
 				AlignItems:     style.AlignItemsCenter,
 				JustifyContent: style.JustifyContentSpaceAround,
 				GrowVertical:   true,
-				Gap:            10,
+				Gap:            5,
 			},
 			valueContainer: style.Style{
 				Debug: debugOverviewCards,
@@ -46,12 +112,14 @@ func (s *overviewCardStyle) styleBlock(block prepare.StatsBlock[period.BlockData
 				AlignItems:     style.AlignItemsCenter,
 				JustifyContent: style.JustifyContentEnd,
 				// GrowVertical:   true,
+				Gap: 5,
 			},
 			value: style.Style{
 				Debug: debugOverviewCards,
 
-				Color: common.TextPrimary,
-				Font:  common.FontXL(),
+				PaddingTop: -6,
+				Color:      common.TextPrimary,
+				Font:       common.FontXL(),
 			},
 			label: style.Style{
 				Color:      common.TextAlt,
@@ -106,36 +174,6 @@ func (s *overviewCardStyle) styleBlock(block prepare.StatsBlock[period.BlockData
 	}
 }
 
-var styledOverviewCard = overviewCardStyle{
-	card: style.Style{
-		Debug: debugOverviewCards,
-
-		Direction:               style.DirectionHorizontal,
-		AlignItems:              style.AlignItemsCenter,
-		JustifyContent:          style.JustifyContentSpaceAround,
-		BackgroundColor:         common.DefaultCardColor,
-		BorderRadiusTopLeft:     common.BorderRadiusLG,
-		BorderRadiusTopRight:    common.BorderRadiusLG,
-		BorderRadiusBottomLeft:  common.BorderRadiusLG,
-		BorderRadiusBottomRight: common.BorderRadiusLG,
-		GrowHorizontal:          true,
-		Gap:                     10,
-		PaddingLeft:             20,
-		PaddingRight:            20,
-		PaddingTop:              20,
-		PaddingBottom:           20,
-	},
-	column: style.Style{
-		Debug: debugOverviewCards,
-
-		Direction:      style.DirectionVertical,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentCenter,
-		GrowVertical:   true,
-		Gap:            10,
-	},
-}
-
 // wrapped around special block text and icon
 var styledOverviewSpecialBlockWrapper = style.Style{
 	Debug: debugOverviewCards,
@@ -144,15 +182,4 @@ var styledOverviewSpecialBlockWrapper = style.Style{
 	AlignItems:     style.AlignItemsCenter,
 	JustifyContent: style.JustifyContentCenter,
 	Gap:            10,
-}
-
-var styledCardsFrame = style.Style{
-	Debug: false,
-
-	Direction:     style.DirectionVertical,
-	Gap:           10,
-	PaddingLeft:   20,
-	PaddingRight:  20,
-	PaddingTop:    20,
-	PaddingBottom: 20,
 }

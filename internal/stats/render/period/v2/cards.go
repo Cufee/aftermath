@@ -2,9 +2,11 @@ package period
 
 import (
 	"errors"
+	"strconv"
 
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/facepaint/style"
+	"github.com/nao1215/imaging"
 
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
@@ -22,19 +24,26 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 
 	// calculate max overview block width to make all blocks the same size
 	var maxWidthOverviewBlock float64
-	for _, column := range append(cards.Overview.Blocks, cards.Rating.Blocks...) {
+	for _, column := range cards.Overview.Blocks {
 		for _, block := range column.Blocks {
 			switch block.Tag {
 			case prepare.TagWN8:
 				block.Label = common.GetWN8TierName(block.Value().Float())
 				maxWidthOverviewBlock = max(maxWidthOverviewBlock, iconSizeWN8)
-
+			}
+			maxWidthOverviewBlock = max(maxWidthOverviewBlock, facepaint.MeasureString(block.Label, styledUnratedOverviewCard.styleBlock(block).label.Font).TotalWidth)
+			maxWidthOverviewBlock = max(maxWidthOverviewBlock, facepaint.MeasureString(block.Value().String(), styledUnratedOverviewCard.styleBlock(block).value.Font).TotalWidth)
+		}
+	}
+	for _, column := range cards.Rating.Blocks {
+		for _, block := range column.Blocks {
+			switch block.Tag {
 			case prepare.TagRankedRating:
 				block.Label = common.GetRatingTierName(block.Value().Float())
 				maxWidthOverviewBlock = max(maxWidthOverviewBlock, iconSizeRating)
 			}
-			maxWidthOverviewBlock = max(maxWidthOverviewBlock, facepaint.MeasureString(block.Label, styledOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewBlock = max(maxWidthOverviewBlock, facepaint.MeasureString(block.Value().String(), styledOverviewCard.styleBlock(block).value.Font).TotalWidth)
+			maxWidthOverviewBlock = max(maxWidthOverviewBlock, facepaint.MeasureString(block.Label, styledRatingOverviewCard.styleBlock(block).label.Font).TotalWidth)
+			maxWidthOverviewBlock = max(maxWidthOverviewBlock, facepaint.MeasureString(block.Value().String(), styledRatingOverviewCard.styleBlock(block).value.Font).TotalWidth)
 		}
 	}
 
@@ -61,7 +70,9 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	// 	}
 	// }
 
-	var finalCards []*facepaint.Block
+	var statsCards []*facepaint.Block
+
+	statsCards = append(statsCards, newPlayerNameCard(stats.Account))
 
 	// // We first render a footer in order to calculate the minimum required width
 	// {
@@ -95,25 +106,12 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	// // Player Title card
 	// segments.AddContent(common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(stats.Account.Nickname, titleCardStyle(cardWidth)), stats.Account.Nickname, stats.Account.ClanTag, subs))
 
-	// unrated overview card
-	if card := newOverviewCard(cards.Overview, maxWidthOverviewBlock); card != nil {
-		finalCards = append(finalCards, card)
+	if card := newUnratedOverviewCard(cards.Overview, maxWidthOverviewBlock); card != nil {
+		statsCards = append(statsCards, card)
 	}
-
-	// // Rating Card -- only when player has current season rating
-	// if cards.Rating.Meta {
-	// 	var ratingStatsBlocks []common.Block
-	// 	for _, column := range cards.Rating.Blocks {
-	// 		columnBlock, err := statsBlocksToColumnBlock(getOverviewStyle(overviewColumnWidth), column.Blocks)
-	// 		if err != nil {
-	// 			return segments, err
-	// 		}
-	// 		ratingStatsBlocks = append(ratingStatsBlocks, columnBlock)
-	// 	}
-	// 	var ratingCardBlocks []common.Block
-	// 	ratingCardBlocks = append(ratingCardBlocks, common.NewBlocksContent(overviewCardBlocksStyle(cardWidth), ratingStatsBlocks...))
-	// 	segments.AddContent(common.NewBlocksContent(overviewCardStyle(), ratingCardBlocks...))
-	// }
+	if card := newRatingOverviewCard(cards.Rating, maxWidthOverviewBlock); card != nil {
+		statsCards = append(statsCards, card)
+	}
 
 	// // Highlights
 	// for i, card := range cards.Highlights {
@@ -123,10 +121,29 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	// 	segments.AddContent(newHighlightCard(highlightCardStyle(defaultCardStyle(cardWidth)), card))
 	// }
 
-	if len(finalCards) == 0 {
+	if len(statsCards) == 0 {
 		return nil, errors.New("no cards to render")
 	}
 
-	return facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsFrame)), finalCards...), nil
+	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsFrame)), statsCards...)
+
+	// add background branding
+	if opts.Background != nil && !opts.BackgroundIsCustom {
+		cardsFrameSize := cardsFrame.Dimensions()
+		seed, _ := strconv.Atoi(stats.Account.ID)
+		opts.Background = imaging.Resize(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Lanczos)
+		opts.Background = addBackgroundBranding(opts.Background, stats.RegularBattles.Vehicles, seed)
+	}
+	// add background
+	if opts.Background != nil {
+		cardsFrame = facepaint.NewBlocksContent(style.NewStyle(),
+			facepaint.MustNewImageContent(styledCardsBackground, opts.Background), cardsFrame,
+		)
+	}
+
+	var frameCards []*facepaint.Block
+	frameCards = append(frameCards, cardsFrame)
+
+	return facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledFinalFrame)), frameCards...), nil
 
 }
