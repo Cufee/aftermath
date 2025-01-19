@@ -66,7 +66,7 @@ func GetRatingColors(rating float32) ratingColors {
 }
 
 func GetRatingIcon(rating frame.Value, size float64) (*facepaint.Block, bool) {
-	style := style.Style{Width: size, Height: 0}
+	style := style.Style{Width: size, Height: size}
 	if rating.Float() < 0 {
 		style.Color = TextAlt
 	}
