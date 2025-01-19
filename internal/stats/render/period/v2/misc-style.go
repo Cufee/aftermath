@@ -89,10 +89,10 @@ var styledCardsFrame = style.Style{
 
 	GrowHorizontal: true,
 
-	PaddingLeft:   20,
-	PaddingRight:  20,
-	PaddingTop:    20,
-	PaddingBottom: 20,
+	PaddingLeft:   30,
+	PaddingRight:  30,
+	PaddingTop:    30,
+	PaddingBottom: 30,
 }
 
 var styledFinalFrame = style.Style{
