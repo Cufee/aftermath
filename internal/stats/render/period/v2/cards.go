@@ -23,16 +23,16 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	}
 
 	// calculate max overview block width to make all blocks the same size
-	var maxWidthOverviewBlock float64
+	var maxWidthOverviewBlock = make(map[string]float64)
 	for _, column := range cards.Overview.Blocks {
 		for _, block := range column.Blocks {
 			switch block.Tag {
 			case prepare.TagWN8:
 				block.Label = common.GetWN8TierName(block.Value().Float())
-				maxWidthOverviewBlock = max(maxWidthOverviewBlock, iconSizeWN8)
+				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], iconSizeWN8)
 			}
-			maxWidthOverviewBlock = max(maxWidthOverviewBlock, facepaint.MeasureString(block.Label, styledUnratedOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewBlock = max(maxWidthOverviewBlock, facepaint.MeasureString(block.Value().String(), styledUnratedOverviewCard.styleBlock(block).value.Font).TotalWidth)
+			maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Label, styledUnratedOverviewCard.styleBlock(block).label.Font).TotalWidth)
+			maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Value().String(), styledUnratedOverviewCard.styleBlock(block).value.Font).TotalWidth)
 		}
 	}
 	for _, column := range cards.Rating.Blocks {
@@ -40,71 +40,16 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 			switch block.Tag {
 			case prepare.TagRankedRating:
 				block.Label = common.GetRatingTierName(block.Value().Float())
-				maxWidthOverviewBlock = max(maxWidthOverviewBlock, iconSizeRating)
+				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], iconSizeRating)
 			}
-			maxWidthOverviewBlock = max(maxWidthOverviewBlock, facepaint.MeasureString(block.Label, styledRatingOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewBlock = max(maxWidthOverviewBlock, facepaint.MeasureString(block.Value().String(), styledRatingOverviewCard.styleBlock(block).value.Font).TotalWidth)
+			maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Label, styledRatingOverviewCard.styleBlock(block).label.Font).TotalWidth)
+			maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Value().String(), styledRatingOverviewCard.styleBlock(block).value.Font).TotalWidth)
 		}
 	}
-
-	// 	{
-	// 		highlightStyle := highlightCardStyle(defaultCardStyle(0))
-	// 		var highlightBlocksMaxCount, highlightTitleMaxWidth, highlightBlockMaxSize float64
-	// 		for _, highlight := range cards.Highlights {
-	// 			// Title and tank name
-	// 			metaSize := common.MeasureString(highlight.Meta, highlightStyle.cardTitle.Font)
-	// 			titleSize := common.MeasureString(highlight.Title, highlightStyle.tankName.Font)
-	// 			highlightTitleMaxWidth = max(highlightTitleMaxWidth, metaSize.TotalWidth, titleSize.TotalWidth)
-
-	// 			// Blocks
-	// 			highlightBlocksMaxCount = max(highlightBlocksMaxCount, float64(len(highlight.Blocks)))
-	// 			for _, block := range highlight.Blocks {
-	// 				labelSize := common.MeasureString(block.Label, highlightStyle.blockLabel.Font)
-	// 				valueSize := common.MeasureString(block.Value().String(), highlightStyle.blockValue.Font)
-	// 				highlightBlockMaxSize = max(highlightBlockMaxSize, valueSize.TotalWidth, labelSize.TotalWidth)
-	// 			}
-	// 		}
-
-	// 		highlightCardWidthMax := (highlightStyle.container.PaddingX * 2) + (highlightStyle.container.Gap * highlightBlocksMaxCount) + (highlightBlockMaxSize * highlightBlocksMaxCount) + highlightTitleMaxWidth
-	// 		cardWidth = max(cardWidth, highlightCardWidthMax)
-	// 	}
-	// }
 
 	var statsCards []*facepaint.Block
 
 	statsCards = append(statsCards, newPlayerNameCard(stats.Account))
-
-	// // We first render a footer in order to calculate the minimum required width
-	// {
-	// 	var footer []string
-	// 	if opts.VehicleID != "" {
-	// 		footer = append(footer, cards.Overview.Title)
-	// 	}
-
-	// 	sessionTo := stats.PeriodEnd.Format("Jan 2, 2006")
-	// 	sessionFrom := stats.PeriodStart.Format("Jan 2, 2006")
-	// 	if sessionFrom == sessionTo {
-	// 		footer = append(footer, sessionTo)
-	// 	} else {
-	// 		footer = append(footer, sessionFrom+" - "+sessionTo)
-	// 	}
-	// 	footerBlock := common.NewFooterCard(strings.Join(footer, " • "))
-	// 	footerImage, err := footerBlock.Render()
-	// 	if err != nil {
-	// 		return segments, err
-	// 	}
-
-	// 	cardWidth = max(cardWidth, float64(footerImage.Bounds().Dx()))
-	// 	segments.AddFooter(common.NewImageContent(common.Style{}, footerImage))
-	// }
-
-	// // Header card
-	// if headerCard, headerCardExists := common.NewHeaderCard(cardWidth, subs, opts.PromoText); headerCardExists {
-	// 	segments.AddHeader(headerCard)
-	// }
-
-	// // Player Title card
-	// segments.AddContent(common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(stats.Account.Nickname, titleCardStyle(cardWidth)), stats.Account.Nickname, stats.Account.ClanTag, subs))
 
 	if card := newUnratedOverviewCard(cards.Overview, maxWidthOverviewBlock); card != nil {
 		statsCards = append(statsCards, card)
@@ -112,15 +57,6 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, subs 
 	if card := newRatingOverviewCard(cards.Rating, maxWidthOverviewBlock); card != nil {
 		statsCards = append(statsCards, card)
 	}
-
-	// // Highlights
-	// for i, card := range cards.Highlights {
-	// 	if i > 0 && cards.Rating.Meta {
-	// 		break // only show 1 highlight when rating battles card is visible
-	// 	}
-	// 	segments.AddContent(newHighlightCard(highlightCardStyle(defaultCardStyle(cardWidth)), card))
-	// }
-
 	if len(statsCards) == 0 {
 		return nil, errors.New("no cards to render")
 	}

@@ -8,27 +8,27 @@ import (
 	"github.com/cufee/facepaint/style"
 )
 
-func newRatingOverviewCard(data period.RatingOverviewCard, columnWidth float64) *facepaint.Block {
+func newRatingOverviewCard(data period.RatingOverviewCard, columnWidth map[string]float64) *facepaint.Block {
 	if len(data.Blocks) == 0 {
 		return nil
 	}
 
 	var columns []*facepaint.Block
 	for _, column := range data.Blocks {
-		columns = append(columns, newOverviewColumn(styledRatingOverviewCard, column, columnWidth))
+		columns = append(columns, newOverviewColumn(styledRatingOverviewCard, column, columnWidth[string(column.Flavor)]))
 	}
 	// card
 	return facepaint.NewBlocksContent(styledRatingOverviewCard.card.Options(), columns...)
 }
 
-func newUnratedOverviewCard(data period.OverviewCard, columnWidth float64) *facepaint.Block {
+func newUnratedOverviewCard(data period.OverviewCard, columnWidth map[string]float64) *facepaint.Block {
 	if len(data.Blocks) == 0 {
 		return nil
 	}
 
 	var columns []*facepaint.Block
 	for _, column := range data.Blocks {
-		columns = append(columns, newOverviewColumn(styledUnratedOverviewCard, column, columnWidth))
+		columns = append(columns, newOverviewColumn(styledUnratedOverviewCard, column, columnWidth[string(column.Flavor)]))
 	}
 	// card
 	return facepaint.NewBlocksContent(styledUnratedOverviewCard.card.Options(), columns...)
