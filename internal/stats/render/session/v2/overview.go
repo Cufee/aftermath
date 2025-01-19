@@ -1,27 +1,27 @@
-package period
+package session
 
 import (
 	"github.com/cufee/aftermath/internal/render/common"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
-	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/facepaint"
 	"github.com/cufee/facepaint/style"
 )
 
-func newRatingOverviewCard(data period.RatingOverviewCard, columnWidth map[string]float64) *facepaint.Block {
-	if len(data.Blocks) == 0 {
+func newRatingOverviewCard(data session.RatingCards, columnWidth map[string]float64) *facepaint.Block {
+	if len(data.Overview.Blocks) == 0 {
 		return nil
 	}
 
 	var columns []*facepaint.Block
-	for _, column := range data.Blocks {
+	for _, column := range data.Overview.Blocks {
 		columns = append(columns, newOverviewColumn(styledRatingOverviewCard, column, columnWidth[string(column.Flavor)]))
 	}
 	// card
 	return facepaint.NewBlocksContent(styledRatingOverviewCard.card.Options(), columns...)
 }
 
-func newUnratedOverviewCard(data period.OverviewCard, columnWidth map[string]float64) *facepaint.Block {
+func newUnratedOverviewCard(data session.OverviewCard, columnWidth map[string]float64) *facepaint.Block {
 	if len(data.Blocks) == 0 {
 		return nil
 	}
@@ -34,7 +34,7 @@ func newUnratedOverviewCard(data period.OverviewCard, columnWidth map[string]flo
 	return facepaint.NewBlocksContent(styledUnratedOverviewCard.card.Options(), columns...)
 }
 
-func newOverviewColumn(stl overviewCardStyle, data period.OverviewColumn, columnWidth float64) *facepaint.Block {
+func newOverviewColumn(stl overviewCardStyle, data session.OverviewColumn, columnWidth float64) *facepaint.Block {
 	var columnBlocks []*facepaint.Block
 	for _, block := range data.Blocks {
 		switch block.Tag {
@@ -53,7 +53,7 @@ func newOverviewColumn(stl overviewCardStyle, data period.OverviewColumn, column
 	), columnBlocks...)
 }
 
-func newOverviewBlockWithIcon(blockStyle blockStyle, block prepare.StatsBlock[period.BlockData, string], icon *facepaint.Block) *facepaint.Block {
+func newOverviewBlockWithIcon(blockStyle blockStyle, block prepare.StatsBlock[session.BlockData, string], icon *facepaint.Block) *facepaint.Block {
 	if icon == nil {
 		// block
 		return facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
@@ -65,6 +65,7 @@ func newOverviewBlockWithIcon(blockStyle blockStyle, block prepare.StatsBlock[pe
 	}
 	// wrapper
 	return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
+		// icon
 		icon,
 		// block
 		facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
@@ -75,7 +76,7 @@ func newOverviewBlockWithIcon(blockStyle blockStyle, block prepare.StatsBlock[pe
 		))
 }
 
-func newOverviewWN8Block(blockStyle blockStyle, block prepare.StatsBlock[period.BlockData, string]) *facepaint.Block {
+func newOverviewWN8Block(blockStyle blockStyle, block prepare.StatsBlock[session.BlockData, string]) *facepaint.Block {
 	ratingColors := common.GetWN8Colors(block.Value().Float())
 	if block.Value().Float() <= 0 {
 		ratingColors.Background = common.TextAlt
@@ -88,7 +89,7 @@ func newOverviewWN8Block(blockStyle blockStyle, block prepare.StatsBlock[period.
 	return newOverviewBlockWithIcon(blockStyle, block, icon)
 }
 
-func newOverviewRatingBlock(blockStyle blockStyle, block prepare.StatsBlock[period.BlockData, string]) *facepaint.Block {
+func newOverviewRatingBlock(blockStyle blockStyle, block prepare.StatsBlock[session.BlockData, string]) *facepaint.Block {
 	icon, _ := common.GetRatingIcon(block.V, iconSizeRating)
 	block.Label = common.GetRatingTierName(block.Value().Float())
 	return newOverviewBlockWithIcon(blockStyle, block, icon)
