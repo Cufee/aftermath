@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"sync"
 
+	"github.com/cufee/aftermath/internal/render/common"
 	"github.com/cufee/aftermath/internal/retry"
 	"github.com/pkg/errors"
 )
@@ -33,9 +34,9 @@ func (s *Segments) AddFooter(blocks ...Block) {
 	s.footer = append(s.footer, blocks...)
 }
 
-func (s *Segments) ContentBounds(opts ...Option) (image.Rectangle, error) {
+func (s *Segments) ContentBounds(opts ...common.Option) (image.Rectangle, error) {
 	if s.rendered.content == nil {
-		options := DefaultOptions()
+		options := common.DefaultOptions()
 		for _, apply := range opts {
 			apply(&options)
 		}
@@ -50,9 +51,9 @@ func (s *Segments) ContentBounds(opts ...Option) (image.Rectangle, error) {
 	return s.rendered.content.Bounds(), nil
 }
 
-func (s *Segments) ContentMask(opts ...Option) (*image.Alpha, error) {
+func (s *Segments) ContentMask(opts ...common.Option) (*image.Alpha, error) {
 	if s.rendered.content == nil {
-		options := DefaultOptions()
+		options := common.DefaultOptions()
 		for _, apply := range opts {
 			apply(&options)
 		}
@@ -95,7 +96,7 @@ func (s *Segments) ContentMask(opts ...Option) (*image.Alpha, error) {
 	return mask, nil
 }
 
-func (s *Segments) renderHeader(_ Options) (image.Image, error) {
+func (s *Segments) renderHeader(_ common.Options) (image.Image, error) {
 	header := NewBlocksContent(
 		Style{
 			Direction:  DirectionVertical,
@@ -105,7 +106,7 @@ func (s *Segments) renderHeader(_ Options) (image.Image, error) {
 	return header.Render()
 }
 
-func (s *Segments) renderFooter(_ Options) (image.Image, error) {
+func (s *Segments) renderFooter(_ common.Options) (image.Image, error) {
 	footer := NewBlocksContent(
 		Style{
 			Direction:  DirectionVertical,
@@ -115,7 +116,7 @@ func (s *Segments) renderFooter(_ Options) (image.Image, error) {
 	return footer.Render()
 }
 
-func (s *Segments) renderContent(_ Options) (image.Image, error) {
+func (s *Segments) renderContent(_ common.Options) (image.Image, error) {
 	mainSegment := NewBlocksContent(
 		Style{
 			Direction:  DirectionVertical,
@@ -127,12 +128,12 @@ func (s *Segments) renderContent(_ Options) (image.Image, error) {
 	return mainSegment.Render()
 }
 
-func (s *Segments) Render(opts ...Option) (image.Image, error) {
+func (s *Segments) Render(opts ...common.Option) (image.Image, error) {
 	if len(s.content) < 1 {
 		return nil, errors.New("segments.content cannot be empty")
 	}
 
-	options := DefaultOptions()
+	options := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&options)
 	}

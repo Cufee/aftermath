@@ -28,7 +28,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/text/language"
 
-	stats "github.com/cufee/aftermath/internal/stats/client/v1"
+	stats "github.com/cufee/aftermath/internal/stats/client/common"
 
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"

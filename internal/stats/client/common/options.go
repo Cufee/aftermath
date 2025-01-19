@@ -1,10 +1,10 @@
-package client
+package common
 
 import (
 	"image"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	common "github.com/cufee/aftermath/internal/render/v1"
+	common "github.com/cufee/aftermath/internal/render/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"golang.org/x/text/language"
@@ -19,17 +19,33 @@ type requestOptions struct {
 	promoText          []string
 	vehicleID          string
 	withWN8            bool
-	subscriptions      []models.UserSubscription
+	Subscriptions      []models.UserSubscription
 
 	vehicleTags    []prepare.Tag
 	ratingColumns  []prepare.TagColumn[string]
 	unratedColumns []prepare.TagColumn[string]
 }
 
+func (o requestOptions) ReferenceID() string {
+	return o.referenceID
+}
+func (o requestOptions) VehicleID() string {
+	return o.vehicleID
+}
+
 type RequestOption func(o *requestOptions)
+type RequestOptions []RequestOption
+
+func (o RequestOptions) Options() requestOptions {
+	var opts = requestOptions{}
+	for _, apply := range o {
+		apply(&opts)
+	}
+	return opts
+}
 
 func WithSubscriptions(subs []models.UserSubscription) RequestOption {
-	return func(o *requestOptions) { o.subscriptions = subs }
+	return func(o *requestOptions) { o.Subscriptions = subs }
 }
 func WithWN8() RequestOption {
 	return func(o *requestOptions) { o.withWN8 = true }
