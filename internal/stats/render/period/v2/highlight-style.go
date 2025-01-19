@@ -25,6 +25,7 @@ var styledHighlightCard = highlightCardStyle{
 		AlignItems: style.AlignItemsCenter,
 
 		BackgroundColor: common.DefaultCardColor,
+		BlurBackground:  cardBackgroundBlur,
 
 		BorderRadiusTopLeft:     common.BorderRadiusLG,
 		BorderRadiusTopRight:    common.BorderRadiusLG,
@@ -34,10 +35,10 @@ var styledHighlightCard = highlightCardStyle{
 		GrowHorizontal: true,
 		Gap:            20,
 
-		PaddingLeft:   25,
-		PaddingRight:  25,
-		PaddingTop:    20,
-		PaddingBottom: 20,
+		PaddingLeft:   cardPaddingX / 1.5,
+		PaddingRight:  cardPaddingX / 1.5,
+		PaddingTop:    cardPaddingY / 1.5,
+		PaddingBottom: cardPaddingY / 1.5,
 	},
 	titleWrapper: style.Style{
 		// Debug: true,

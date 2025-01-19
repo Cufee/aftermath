@@ -71,6 +71,7 @@ var styledUnratedOverviewCard = overviewCardStyle{
 		JustifyContent: style.JustifyContentSpaceBetween,
 
 		BackgroundColor: common.DefaultCardColor,
+		BlurBackground:  cardBackgroundBlur,
 
 		BorderRadiusTopLeft:     common.BorderRadiusLG,
 		BorderRadiusTopRight:    common.BorderRadiusLG,
@@ -80,10 +81,10 @@ var styledUnratedOverviewCard = overviewCardStyle{
 		GrowHorizontal: true,
 		Gap:            15,
 
-		PaddingLeft:   25,
-		PaddingRight:  25,
-		PaddingTop:    20,
-		PaddingBottom: 20,
+		PaddingLeft:   cardPaddingX,
+		PaddingRight:  cardPaddingX,
+		PaddingTop:    cardPaddingY,
+		PaddingBottom: cardPaddingY,
 	},
 	column: style.Style{
 		Debug: debugOverviewCards,
