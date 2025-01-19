@@ -18,7 +18,7 @@ var overviewBlocksRating = []common.TagColumn[string]{
 	{Tags: []common.Tag{common.TagAvgDamage, common.TagDamageRatio}, Meta: string(BlockFlavorDefault)},
 }
 
-var highlights = []common.Highlight{common.HighlightRecentBattle, common.HighlightBattles, common.HighlightWN8, common.HighlightAvgDamage}
+var highlights = []common.Highlight{common.HighlightBattles, common.HighlightWN8, common.HighlightAvgDamage}
 
 type Cards struct {
 	Rating     RatingOverviewCard `json:"rating"`
