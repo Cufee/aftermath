@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	clanTagBackgroundColor = color.NRGBA{60, 60, 60, 100}
+	clanTagBackgroundColor = color.NRGBA{40, 40, 40, 100}
 )
 
 func styledPlayerName() style.Style {
