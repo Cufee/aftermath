@@ -87,15 +87,14 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 
 	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsFrame)), statsCards...)
 
-	// add background branding
-	if opts.Background != nil && !opts.BackgroundIsCustom {
-		cardsFrameSize := cardsFrame.Dimensions()
-		seed, _ := strconv.Atoi(stats.Account.ID)
-		opts.Background = imaging.Resize(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Lanczos)
-		opts.Background = addBackgroundBranding(opts.Background, stats.RegularBattles.Vehicles, seed)
-	}
-	// add background
+	// resize and place background
 	if opts.Background != nil {
+		cardsFrameSize := cardsFrame.Dimensions()
+		opts.Background = imaging.Resize(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Lanczos)
+		if !opts.BackgroundIsCustom {
+			seed, _ := strconv.Atoi(stats.Account.ID)
+			opts.Background = addBackgroundBranding(opts.Background, stats.RegularBattles.Vehicles, seed)
+		}
 		cardsFrame = facepaint.NewBlocksContent(style.NewStyle(),
 			facepaint.MustNewImageContent(styledCardsBackground, opts.Background), cardsFrame,
 		)
