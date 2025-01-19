@@ -38,7 +38,7 @@ func GetWN8Colors(r float32) ratingColors {
 		return ratingColors{color.NRGBA{208, 108, 255, 255}, color.White}
 	}
 	if r > 2900 {
-		return ratingColors{color.NRGBA{142, 65, 177, 255}, color.White}
+		return ratingColors{color.NRGBA{142, 65, 177, 255}, color.Black}
 	}
 	return ratingColors{color.Transparent, color.Transparent}
 }

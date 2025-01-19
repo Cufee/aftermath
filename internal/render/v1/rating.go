@@ -49,7 +49,7 @@ func GetRatingTierName(rating float32) string {
 func GetRatingColors(rating float32) ratingColors {
 	switch {
 	case rating > 5000:
-		return ratingColors{color.NRGBA{181, 106, 181, 255}, color.White}
+		return ratingColors{color.NRGBA{181, 106, 181, 255}, color.Black}
 	case rating > 4000:
 		return ratingColors{color.NRGBA{154, 197, 219, 255}, color.Black}
 	case rating > 3000:

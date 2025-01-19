@@ -14,7 +14,7 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
-	stats "github.com/cufee/aftermath/internal/stats/client/v1"
+	stats "github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/utils"
 	"github.com/pkg/errors"
@@ -24,7 +24,7 @@ func init() {
 	commands.LoadedPublic.Add(
 		builder.NewCommand("session").
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
-			Options(commands.DefaultStatsOptions...).
+			Options(commands.SessionStatsOptions...).
 			Handler(func(ctx common.Context) error {
 				options := commands.GetDefaultStatsOptions(ctx.Options())
 				message, valid := options.Validate(ctx)

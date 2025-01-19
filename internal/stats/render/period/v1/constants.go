@@ -1,15 +1,13 @@
 package period
 
 import (
-	"image/color"
-
 	common "github.com/cufee/aftermath/internal/render/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 )
 
 const (
-	wn8IconSize    = 60.0
+	wn8IconSize    = 54.0
 	ratingIconSize = 60.0
 )
 
@@ -102,13 +100,8 @@ func overviewCardBlocksStyle(width float64) common.Style {
 	return style
 }
 
-func overviewSpecialRatingPillStyle(color color.Color) common.Style {
-	return common.Style{
-		PaddingY:        2,
-		PaddingX:        7.5,
-		BorderRadius:    common.BorderRadiusXS,
-		BackgroundColor: color,
-	}
+func overviewSpecialRatingPillStyle() common.Style {
+	return common.Style{}
 }
 
 func highlightCardStyle(containerStyle common.Style) highlightStyle {

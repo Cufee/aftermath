@@ -5,14 +5,15 @@ import (
 	"strings"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	common "github.com/cufee/aftermath/internal/render/v1"
+	"github.com/cufee/aftermath/internal/render/common"
+	v1 "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 )
 
-func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts common.Options) (common.Segments, error) {
+func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts common.Options) (v1.Segments, error) {
 	var (
 		renderUnratedVehiclesCount = 3 // minimum number of vehicle cards
 		// primary cards
@@ -34,9 +35,9 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		renderUnratedVehiclesCount += 1
 	}
 
-	var segments common.Segments
-	var primaryColumn []common.Block
-	var secondaryColumn []common.Block
+	var segments v1.Segments
+	var primaryColumn []v1.Block
+	var secondaryColumn []v1.Block
 
 	// Calculate minimal card width to fit all the content
 	overviewColumnSizes := make(map[string]float64)
@@ -47,14 +48,14 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	var secondaryCardWidth, totalFrameWidth float64
 
 	{
-		titleStyle := common.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(0))
-		clanSize := common.MeasureString(session.Account.ClanTag, titleStyle.ClanTag.Font)
-		nameSize := common.MeasureString(session.Account.Nickname, titleStyle.Nickname.Font)
+		titleStyle := v1.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(0))
+		clanSize := v1.MeasureString(session.Account.ClanTag, titleStyle.ClanTag.Font)
+		nameSize := v1.MeasureString(session.Account.Nickname, titleStyle.Nickname.Font)
 		primaryCardWidth = max(primaryCardWidth, titleStyle.TotalPaddingAndGaps()+nameSize.TotalWidth+clanSize.TotalWidth*2)
 	}
 	{
 		for _, text := range opts.PromoText {
-			size := common.MeasureString(text, promoTextStyle().Font)
+			size := v1.MeasureString(text, promoTextStyle().Font)
 			totalFrameWidth = max(size.TotalWidth, totalFrameWidth)
 		}
 	}
@@ -102,8 +103,8 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	// highlighted vehicles go on the primary block
 	if shouldRenderUnratedHighlights {
 		for _, card := range cards.Unrated.Highlights {
-			labelSize := common.MeasureString(card.Meta, highlightCardTitleTextStyle().Font)
-			titleSize := common.MeasureString(card.Title, highlightVehicleNameTextStyle().Font)
+			labelSize := v1.MeasureString(card.Meta, highlightCardTitleTextStyle().Font)
+			titleSize := v1.MeasureString(card.Title, highlightVehicleNameTextStyle().Font)
 
 			style := vehicleBlockStyle()
 			presetBlockWidth, contentWidth := highlightedVehicleBlocksWidth(card.Blocks, style.session, style.career, style.label, highlightedVehicleBlockRowStyle(0))
@@ -126,7 +127,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 			presetBlockWidth, contentWidth := vehicleBlocksWidth(card.Blocks, styleWithIconOffset.session, styleWithIconOffset.career, styleWithIconOffset.label, vehicleBlocksRowStyle(0))
 			contentWidth += vehicleBlocksRowStyle(0).Gap*float64(len(card.Blocks)-1) + vehicleCardStyle(0).PaddingX*2
 
-			titleSize := common.MeasureString(card.Title, vehicleCardTitleTextStyle().Font)
+			titleSize := v1.MeasureString(card.Title, vehicleCardTitleTextStyle().Font)
 			secondaryCardWidth = max(secondaryCardWidth, contentWidth, titleSize.TotalWidth+vehicleCardStyle(0).PaddingX*2)
 
 			for key, width := range presetBlockWidth {
@@ -139,8 +140,6 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		var footer []string
 		if opts.VehicleID != "" {
 			footer = append(footer, cards.Unrated.Overview.Title)
-		} else {
-			footer = append(footer, common.RealmLabel(session.Realm))
 		}
 		if session.LastBattleTime.Unix() > 1 {
 			sessionTo := session.PeriodEnd.Format("Jan 2")
@@ -153,7 +152,7 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		}
 
 		if len(footer) > 0 {
-			segments.AddFooter(common.NewFooterCard(strings.Join(footer, " • ")))
+			segments.AddFooter(v1.NewFooterCard(strings.Join(footer, " • ")))
 		}
 	}
 
@@ -164,13 +163,13 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 	totalFrameWidth = max(totalFrameWidth, frameWidth)
 
 	// header card
-	if headerCard, headerCardExists := common.NewHeaderCard(totalFrameWidth, subs, opts.PromoText); headerCardExists {
+	if headerCard, headerCardExists := v1.NewHeaderCard(totalFrameWidth, subs, opts.PromoText); headerCardExists {
 		segments.AddHeader(headerCard)
 	}
 
 	// player title
 	primaryColumn = append(primaryColumn,
-		common.NewPlayerTitleCard(common.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(primaryCardWidth)), session.Account.Nickname, session.Account.ClanTag, subs),
+		v1.NewPlayerTitleCard(v1.DefaultPlayerTitleStyle(session.Account.Nickname, playerNameCardStyle(primaryCardWidth)), session.Account.Nickname, session.Account.ClanTag, subs),
 	)
 
 	// overview cards
@@ -200,38 +199,38 @@ func cardsToSegments(session, _ fetch.AccountStatsOverPeriod, cards session.Card
 		}
 	}
 
-	columns := []common.Block{common.NewBlocksContent(overviewColumnStyle(primaryCardWidth), primaryColumn...)}
+	columns := []v1.Block{v1.NewBlocksContent(overviewColumnStyle(primaryCardWidth), primaryColumn...)}
 	if len(secondaryColumn) > 0 {
-		columns = append(columns, common.NewBlocksContent(overviewColumnStyle(secondaryCardWidth), secondaryColumn...))
+		columns = append(columns, v1.NewBlocksContent(overviewColumnStyle(secondaryCardWidth), secondaryColumn...))
 	}
-	segments.AddContent(common.NewBlocksContent(frameStyle(), columns...))
+	segments.AddContent(v1.NewBlocksContent(frameStyle(), columns...))
 
 	return segments, nil
 }
 
-func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], sessionStyle, careerStyle, labelStyle, containerStyle common.Style) (map[string]float64, float64) {
+func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], sessionStyle, careerStyle, labelStyle, containerStyle v1.Style) (map[string]float64, float64) {
 	presetBlockWidth := make(map[string]float64)
 	var contentWidth float64
 	var maxBlockWidth float64
 	for _, block := range blocks {
 		var width float64
 		{
-			size := common.MeasureString(block.Data.Session().String(), sessionStyle.Font)
+			size := v1.MeasureString(block.Data.Session().String(), sessionStyle.Font)
 			width = max(width, size.TotalWidth+sessionStyle.PaddingX*2)
 		}
 		{
-			size := common.MeasureString(block.Data.Career().String(), careerStyle.Font)
+			size := v1.MeasureString(block.Data.Career().String(), careerStyle.Font)
 			width = max(width, size.TotalWidth+careerStyle.PaddingX*2)
 		}
 		{
-			size := common.MeasureString(block.Label, labelStyle.Font)
+			size := v1.MeasureString(block.Label, labelStyle.Font)
 			width = max(width, size.TotalWidth+labelStyle.PaddingX*2+vehicleLegendLabelContainer.PaddingX*2)
 		}
 		maxBlockWidth = max(maxBlockWidth, width)
 		presetBlockWidth[block.Tag.String()] = max(presetBlockWidth[block.Tag.String()], width)
 	}
 
-	if containerStyle.Direction == common.DirectionHorizontal {
+	if containerStyle.Direction == v1.DirectionHorizontal {
 		for _, w := range presetBlockWidth {
 			contentWidth += w
 		}
@@ -242,25 +241,25 @@ func vehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], 
 	return presetBlockWidth, contentWidth
 }
 
-func highlightedVehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], sessionStyle, _, labelStyle, containerStyle common.Style) (map[string]float64, float64) {
+func highlightedVehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], sessionStyle, _, labelStyle, containerStyle v1.Style) (map[string]float64, float64) {
 	presetBlockWidth := make(map[string]float64)
 	var contentWidth float64
 	var maxBlockWidth float64
 	for _, block := range blocks {
 		var width float64
 		{
-			size := common.MeasureString(block.Data.Session().String(), sessionStyle.Font)
+			size := v1.MeasureString(block.Data.Session().String(), sessionStyle.Font)
 			width = max(width, size.TotalWidth+sessionStyle.PaddingX*2)
 		}
 		{
-			size := common.MeasureString(block.Label, labelStyle.Font)
+			size := v1.MeasureString(block.Label, labelStyle.Font)
 			width = max(width, size.TotalWidth+labelStyle.PaddingX*2)
 		}
 		maxBlockWidth = max(maxBlockWidth, width)
 		presetBlockWidth[block.Tag.String()] = max(presetBlockWidth[block.Tag.String()], width)
 	}
 
-	if containerStyle.Direction == common.DirectionHorizontal {
+	if containerStyle.Direction == v1.DirectionHorizontal {
 		for _, w := range presetBlockWidth {
 			contentWidth += w
 		}
@@ -271,19 +270,19 @@ func highlightedVehicleBlocksWidth(blocks []prepare.StatsBlock[session.BlockData
 	return presetBlockWidth, contentWidth
 }
 
-func overviewColumnBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], sessionStyle, careerStyle, labelStyle, containerStyle common.Style) (map[string]float64, float64) {
+func overviewColumnBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, string], sessionStyle, careerStyle, labelStyle, containerStyle v1.Style) (map[string]float64, float64) {
 	presetBlockWidth, contentWidth := vehicleBlocksWidth(blocks, sessionStyle, careerStyle, labelStyle, containerStyle)
 	for _, block := range blocks {
 		// adjust width if this column includes a special icon
 		if block.Tag == prepare.TagWN8 {
-			tierNameSize := common.MeasureString(common.GetWN8TierName(block.Value().Float()), overviewSpecialRatingLabelStyle(nil).Font)
-			tierNameWithPadding := tierNameSize.TotalWidth + overviewSpecialRatingPillStyle(nil).PaddingX*2
+			tierNameSize := v1.MeasureString(v1.GetWN8TierName(block.Value().Float()), overviewSpecialRatingLabelStyle().Font)
+			tierNameWithPadding := tierNameSize.TotalWidth + overviewSpecialRatingPillStyle().PaddingX*2
 			presetBlockWidth[block.Tag.String()] = max(presetBlockWidth[block.Tag.String()], specialWN8IconSize, tierNameWithPadding)
 			contentWidth = max(contentWidth, tierNameWithPadding)
 		}
 		if block.Tag == prepare.TagRankedRating {
-			valueSize := common.MeasureString(common.GetRatingTierName(block.Value().Float()), overviewSpecialRatingLabelStyle(nil).Font)
-			tierNameWithPadding := valueSize.TotalWidth + overviewSpecialRatingPillStyle(nil).PaddingX*2
+			valueSize := v1.MeasureString(v1.GetRatingTierName(block.Value().Float()), overviewSpecialRatingLabelStyle().Font)
+			tierNameWithPadding := valueSize.TotalWidth + overviewSpecialRatingPillStyle().PaddingX*2
 			presetBlockWidth[block.Tag.String()] = max(presetBlockWidth[block.Tag.String()], specialRatingIconSize, tierNameWithPadding)
 			contentWidth = max(contentWidth, tierNameWithPadding)
 		}
@@ -291,21 +290,21 @@ func overviewColumnBlocksWidth(blocks []prepare.StatsBlock[session.BlockData, st
 	return presetBlockWidth, contentWidth
 }
 
-func makeVehicleCard(vehicle session.VehicleCard, blockSizes map[string]float64, cardWidth float64) common.Block {
+func makeVehicleCard(vehicle session.VehicleCard, blockSizes map[string]float64, cardWidth float64) v1.Block {
 	var vehicleWN8 frame.Value = frame.InvalidValue
-	var content []common.Block
+	var content []v1.Block
 	for _, block := range vehicle.Blocks {
 		style := vehicleBlockStyle()
-		var blockContent []common.Block
+		var blockContent []v1.Block
 		if blockShouldHaveCompareIcon(block) {
-			blockContent = append(blockContent, blockWithVehicleIcon(common.NewTextContent(style.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()))
+			blockContent = append(blockContent, blockWithVehicleIcon(v1.NewTextContent(style.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()))
 		} else {
-			blockContent = append(blockContent, common.NewTextContent(style.session, block.Data.Session().String()))
+			blockContent = append(blockContent, v1.NewTextContent(style.session, block.Data.Session().String()))
 		}
 
 		containerStyle := statsBlockStyle(blockSizes[block.Tag.String()])
 		content = append(content,
-			common.NewBlocksContent(containerStyle, blockContent...),
+			v1.NewBlocksContent(containerStyle, blockContent...),
 		)
 
 		if block.Tag == prepare.TagWN8 {
@@ -315,81 +314,81 @@ func makeVehicleCard(vehicle session.VehicleCard, blockSizes map[string]float64,
 
 	titleStyle := vehicleCardTitleContainerStyle(cardWidth)
 	titleStyle.Width -= vehicleCardStyle(0).PaddingX * 2
-	return common.NewBlocksContent(vehicleCardStyle(cardWidth),
-		common.NewBlocksContent(titleStyle,
-			common.NewTextContent(vehicleCardTitleTextStyle(), fmt.Sprintf("%s %s", vehicle.Meta, vehicle.Title)), // name and tier
+	return v1.NewBlocksContent(vehicleCardStyle(cardWidth),
+		v1.NewBlocksContent(titleStyle,
+			v1.NewTextContent(vehicleCardTitleTextStyle(), fmt.Sprintf("%s %s", vehicle.Meta, vehicle.Title)), // name and tier
 			vehicleWN8Icon(vehicleWN8),
 		),
-		common.NewBlocksContent(vehicleBlocksRowStyle(0), content...),
+		v1.NewBlocksContent(vehicleBlocksRowStyle(0), content...),
 	)
 }
 
-func makeVehicleHighlightCard(vehicle session.VehicleCard, blockSizes map[string]float64, cardWidth float64) common.Block {
-	var content []common.Block
+func makeVehicleHighlightCard(vehicle session.VehicleCard, blockSizes map[string]float64, cardWidth float64) v1.Block {
+	var content []v1.Block
 	style := vehicleBlockStyle()
 	for _, block := range vehicle.Blocks {
 		content = append(content,
-			common.NewBlocksContent(statsBlockStyle(blockSizes[block.Tag.String()]),
-				common.NewTextContent(style.session, block.Data.Session().String()),
-				common.NewTextContent(style.label, block.Label),
+			v1.NewBlocksContent(statsBlockStyle(blockSizes[block.Tag.String()]),
+				v1.NewTextContent(style.session, block.Data.Session().String()),
+				v1.NewTextContent(style.label, block.Label),
 			),
 		)
 	}
 
-	return common.NewBlocksContent(highlightedVehicleCardStyle(cardWidth),
-		common.NewBlocksContent(common.Style{Direction: common.DirectionVertical},
-			common.NewTextContent(highlightCardTitleTextStyle(), vehicle.Meta),
-			common.NewTextContent(highlightVehicleNameTextStyle(), vehicle.Title),
+	return v1.NewBlocksContent(highlightedVehicleCardStyle(cardWidth),
+		v1.NewBlocksContent(v1.Style{Direction: v1.DirectionVertical},
+			v1.NewTextContent(highlightCardTitleTextStyle(), vehicle.Meta),
+			v1.NewTextContent(highlightVehicleNameTextStyle(), vehicle.Title),
 		),
-		common.NewBlocksContent(highlightedVehicleBlockRowStyle(0), content...),
+		v1.NewBlocksContent(highlightedVehicleBlockRowStyle(0), content...),
 	)
 }
 
-func makeVehicleLegendCard(reference session.VehicleCard, blockSizes map[string]float64, cardWidth float64) common.Block {
-	var content []common.Block
+func makeVehicleLegendCard(reference session.VehicleCard, blockSizes map[string]float64, cardWidth float64) v1.Block {
+	var content []v1.Block
 	style := vehicleBlockStyle()
 	for _, block := range reference.Blocks {
-		label := common.NewBlocksContent(vehicleLegendLabelContainer, common.NewTextContent(style.label, block.Label))
+		label := v1.NewBlocksContent(vehicleLegendLabelContainer, v1.NewTextContent(style.label, block.Label))
 		if blockShouldHaveCompareIcon(block) {
-			label = blockWithVehicleIcon(common.NewBlocksContent(vehicleLegendLabelContainer, common.NewTextContent(style.label, block.Label)), frame.InvalidValue, frame.InvalidValue)
+			label = blockWithVehicleIcon(v1.NewBlocksContent(vehicleLegendLabelContainer, v1.NewTextContent(style.label, block.Label)), frame.InvalidValue, frame.InvalidValue)
 		}
 		containerStyle := statsBlockStyle(blockSizes[block.Tag.String()])
 		content = append(content,
-			common.NewBlocksContent(containerStyle, label),
+			v1.NewBlocksContent(containerStyle, label),
 		)
 	}
 	containerStyle := vehicleCardStyle(cardWidth)
 	containerStyle.BackgroundColor = nil
 	containerStyle.PaddingY = 0
 	containerStyle.PaddingX = 0
-	return common.NewBlocksContent(containerStyle, common.NewBlocksContent(vehicleBlocksRowStyle(0), content...))
+	return v1.NewBlocksContent(containerStyle, v1.NewBlocksContent(vehicleBlocksRowStyle(0), content...))
 }
 
-func makeOverviewCard(card session.OverviewCard, columnSizes map[string]float64, style common.Style) common.Block {
+func makeOverviewCard(card session.OverviewCard, columnSizes map[string]float64, style v1.Style) v1.Block {
 	// made all columns the same width for things to be centered
-	var content []common.Block // add a blank block to balance the offset added from icons
+	var content []v1.Block // add a blank block to balance the offset added from icons
 	blockStyle := vehicleBlockStyle()
 	for _, column := range card.Blocks {
-		var columnContent []common.Block
+		var columnContent []v1.Block
 		for _, block := range column.Blocks {
-			var col common.Block
+			var col v1.Block
 			blockWidth := columnSizes[string(column.Flavor)] // fit the block to column width to make things look even
 			if block.Tag == prepare.TagWN8 || block.Tag == prepare.TagRankedRating {
 				col = makeSpecialRatingColumn(block, blockWidth)
 			} else if blockShouldHaveCompareIcon(block) {
-				col = common.NewBlocksContent(statsBlockStyle(blockWidth),
-					blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()),
-					common.NewTextContent(blockStyle.label, block.Label),
+				col = v1.NewBlocksContent(statsBlockStyle(blockWidth),
+					blockWithDoubleVehicleIcon(v1.NewTextContent(blockStyle.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()),
+					v1.NewTextContent(blockStyle.label, block.Label),
 				)
 			} else {
-				col = common.NewBlocksContent(statsBlockStyle(blockWidth),
-					common.NewTextContent(blockStyle.session, block.Data.Session().String()),
-					common.NewTextContent(blockStyle.label, block.Label),
+				col = v1.NewBlocksContent(statsBlockStyle(blockWidth),
+					v1.NewTextContent(blockStyle.session, block.Data.Session().String()),
+					v1.NewTextContent(blockStyle.label, block.Label),
 				)
 			}
 			columnContent = append(columnContent, col)
 		}
-		content = append(content, common.NewBlocksContent(overviewColumnStyle(0), columnContent...))
+		content = append(content, v1.NewBlocksContent(overviewColumnStyle(0), columnContent...))
 	}
-	return common.NewBlocksContent(style, content...)
+	return v1.NewBlocksContent(style, content...)
 }

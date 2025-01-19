@@ -18,7 +18,6 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData, string]
 	case prepare.TagWN8:
 		ratingColors := common.GetWN8Colors(block.Value().Float())
 		if block.Value().Float() <= 0 {
-			ratingColors.Content = common.TextAlt
 			ratingColors.Background = common.TextAlt
 		}
 
@@ -26,15 +25,16 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData, string]
 		iconTop := common.AftermathLogo(ratingColors.Background, common.DefaultLogoOptions())
 		column = append(column, common.NewImageContent(common.Style{Width: specialWN8IconSize, Height: specialWN8IconSize}, iconTop))
 
-		pillColor := ratingColors.Background
-		if block.Value().Float() < 0 {
-			pillColor = color.Transparent
-		}
-		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
+		column = append(column, common.NewBlocksContent(common.Style{
+			Width:          width,
+			AlignItems:     common.AlignItemsCenter,
+			Direction:      common.DirectionVertical,
+			JustifyContent: common.JustifyContentCenter,
+		},
 			blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()),
 			common.NewBlocksContent(
-				overviewSpecialRatingPillStyle(pillColor),
-				common.NewTextContent(overviewSpecialRatingLabelStyle(ratingColors.Content), common.GetWN8TierName(block.Value().Float())),
+				overviewSpecialRatingPillStyle(),
+				common.NewTextContent(overviewSpecialRatingLabelStyle(), common.GetWN8TierName(block.Value().Float())),
 			),
 		))
 		return common.NewBlocksContent(specialRatingColumnStyle(), column...)
@@ -46,12 +46,16 @@ func makeSpecialRatingColumn(block prepare.StatsBlock[session.BlockData, string]
 			column = append(column, icon)
 		}
 
-		ratingColors := common.GetRatingColors(block.Value().Float())
-		column = append(column, common.NewBlocksContent(overviewColumnStyle(width),
+		column = append(column, common.NewBlocksContent(common.Style{
+			Width:          width,
+			AlignItems:     common.AlignItemsCenter,
+			Direction:      common.DirectionVertical,
+			JustifyContent: common.JustifyContentCenter,
+		},
 			blockWithDoubleVehicleIcon(common.NewTextContent(blockStyle.session, block.Data.Session().String()), block.Data.Session(), block.Data.Career()),
 			common.NewBlocksContent(
-				overviewSpecialRatingPillStyle(ratingColors.Background),
-				common.NewTextContent(overviewSpecialRatingLabelStyle(ratingColors.Content), common.GetRatingTierName(block.Value().Float())),
+				overviewSpecialRatingPillStyle(),
+				common.NewTextContent(overviewSpecialRatingLabelStyle(), common.GetRatingTierName(block.Value().Float())),
 			),
 		))
 

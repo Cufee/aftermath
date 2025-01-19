@@ -28,7 +28,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/text/language"
 
-	stats "github.com/cufee/aftermath/internal/stats/client/v1"
+	stats "github.com/cufee/aftermath/internal/stats/client/common"
 
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
@@ -315,7 +315,7 @@ func init() {
 				var image stats.Image
 				var meta stats.Metadata
 				switch interaction.EventID {
-				case "stats":
+				case "career", "stats":
 					img, mt, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), ioptions.AccountID, ioptions.PeriodStart, opts...)
 					if errors.Is(err, blitzstars.ErrServiceUnavailable) {
 						return ctx.Reply().

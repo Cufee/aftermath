@@ -13,7 +13,6 @@ var ErrServiceUnavailable = errors.New("blitz stars unavailable")
 
 type Client interface {
 	CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error)
-	AccountTankHistories(ctx context.Context, accountId string) (map[int][]TankHistoryEntry, error)
 }
 
 // var _ Client = &client{} // just a marker to see if it is implemented correctly

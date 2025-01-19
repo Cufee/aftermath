@@ -7,18 +7,16 @@ import (
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/period/v1"
 )
 
-func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Time, o ...RequestOption) (prepare.Cards, Metadata, error) {
-	var opts = requestOptions{}
-	for _, apply := range o {
-		apply(&opts)
-	}
+func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Time, o ...common.RequestOption) (prepare.Cards, common.Metadata, error) {
+	opts := common.RequestOptions(o).Options()
 
-	meta := Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
+	meta := common.Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
 	printer, err := localization.NewPrinterWithFallback("stats", r.locale)
 	if err != nil {
@@ -33,10 +31,10 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 			return
 		}
 		recordAccountSnapshots(r.wargaming, r.database, id, reference)
-	}(accountId, opts.referenceID)
+	}(accountId, opts.ReferenceID())
 
 	stop := meta.Timer("fetchClient#PeriodStats")
-	stats, err := r.fetchClient.PeriodStats(ctx, accountId, from, opts.FetchOpts()...)
+	stats, err := r.fetchClient.CurrentStats(ctx, accountId, opts.FetchOpts()...)
 	stop()
 	if err != nil {
 		return prepare.Cards{}, meta, err
@@ -53,8 +51,8 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 			vehicles = append(vehicles, id)
 		}
 	}
-	if opts.vehicleID != "" && !slices.Contains(vehicles, opts.vehicleID) {
-		vehicles = append(vehicles, opts.vehicleID)
+	if opts.VehicleID() != "" && !slices.Contains(vehicles, opts.VehicleID()) {
+		vehicles = append(vehicles, opts.VehicleID())
 	}
 
 	glossary, err := r.database.GetVehicles(ctx, vehicles)
@@ -70,11 +68,8 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 	return cards, meta, err
 }
 
-func (r *client) PeriodImage(ctx context.Context, accountId string, from time.Time, o ...RequestOption) (Image, Metadata, error) {
-	var opts = requestOptions{}
-	for _, apply := range o {
-		apply(&opts)
-	}
+func (r *client) PeriodImage(ctx context.Context, accountId string, from time.Time, o ...common.RequestOption) (common.Image, common.Metadata, error) {
+	opts := common.RequestOptions(o).Options()
 
 	cards, meta, err := r.PeriodCards(ctx, accountId, from, o...)
 	if err != nil {
@@ -87,7 +82,7 @@ func (r *client) PeriodImage(ctx context.Context, accountId string, from time.Ti
 	}
 
 	stop := meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(meta.Stats["period"], cards, opts.subscriptions, opts.RenderOpts(printer)...)
+	image, err := render.CardsToImage(meta.Stats["period"], cards, opts.Subscriptions, opts.RenderOpts(printer)...)
 	stop()
 	if err != nil {
 		return nil, meta, err

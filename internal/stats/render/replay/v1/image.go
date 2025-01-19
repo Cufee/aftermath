@@ -7,7 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	common "github.com/cufee/aftermath/internal/render/v1"
+	"github.com/cufee/aftermath/internal/render/common"
+	v1 "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
@@ -63,7 +64,7 @@ func CardsToImage(replay fetch.Replay, cards replay.Cards, opts ...common.Option
 	return segments.Render(func(op *common.Options) { op.Background = o.Background })
 }
 
-func CardsToSegments(replay fetch.Replay, cards replay.Cards, opts ...common.Option) (*common.Segments, error) {
+func CardsToSegments(replay fetch.Replay, cards replay.Cards, opts ...common.Option) (*v1.Segments, error) {
 	o := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&o)

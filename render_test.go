@@ -10,7 +10,8 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/localization"
-	rc "github.com/cufee/aftermath/internal/render/v1"
+	rc "github.com/cufee/aftermath/internal/render/common"
+	options "github.com/cufee/aftermath/internal/stats/client/common"
 	client "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/common/v1"
@@ -29,8 +30,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-var bgImage = "static://bg-default"
-var bgIsCustom = false
+var bgImage = "static://test_user_background"
+var bgIsCustom = true
 
 func init() {
 	loadStaticAssets(static)
@@ -45,7 +46,7 @@ func TestStressRenderSession(t *testing.T) {
 	var group errgroup.Group
 	for range 100 {
 		group.Go(func() error {
-			_, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithWN8())
+			_, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithWN8())
 			return err
 		})
 	}
@@ -58,7 +59,7 @@ func TestRenderSession(t *testing.T) {
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 
 	t.Run("generate content mask before generating image", func(t *testing.T) {
-		cards, meta, err := stats.SessionCards(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithWN8())
+		cards, meta, err := stats.SessionCards(context.Background(), tests.DefaultAccountNAShort, time.Now(), options.WithWN8())
 		assert.NoError(t, err, "failed to generate session cards")
 
 		segments, err := session.CardsToSegments(meta.Stats["session"], meta.Stats["career"], cards, nil)
@@ -80,7 +81,7 @@ func TestRenderSession(t *testing.T) {
 	})
 
 	t.Run("render session image for small nickname", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), options.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -93,7 +94,7 @@ func TestRenderSession(t *testing.T) {
 	})
 
 	t.Run("render session image for large nickname", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -106,7 +107,7 @@ func TestRenderSession(t *testing.T) {
 	})
 
 	t.Run("render session image for large nickname and no vehicles", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithVehicleID("0"), client.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithVehicleID("0"), options.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -124,7 +125,7 @@ func TestRenderPeriod(t *testing.T) {
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 
 	t.Run("render period image for small nickname", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), options.WithWN8())
 		assert.NoError(t, err, "failed to render a period image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -137,7 +138,7 @@ func TestRenderPeriod(t *testing.T) {
 	})
 
 	t.Run("render period image for large nickname", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -150,7 +151,7 @@ func TestRenderPeriod(t *testing.T) {
 	})
 
 	t.Run("render period image with large name no highlights", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithVehicleID("0"), client.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithVehicleID("0"), options.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -163,7 +164,7 @@ func TestRenderPeriod(t *testing.T) {
 	})
 
 	t.Run("render period image with small name and no highlights", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), client.WithBackgroundURL(bgImage, bgIsCustom), client.WithVehicleID("0"), client.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithVehicleID("0"), options.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 

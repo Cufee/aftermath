@@ -48,7 +48,6 @@ func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockDa
 
 	ratingColors := common.GetWN8Colors(stats.Value().Float())
 	if stats.Value().Float() <= 0 {
-		ratingColors.Content = common.TextAlt
 		ratingColors.Background = common.TextAlt
 	}
 
@@ -59,8 +58,7 @@ func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockDa
 	blocks = append(blocks, common.NewBlocksContent(style.blockContainer, iconBlockTop, valueBlock))
 
 	if stats.Value().Float() >= 0 {
-		labelStyle.FontColor = ratingColors.Content
-		blocks = append(blocks, common.NewBlocksContent(overviewSpecialRatingPillStyle(ratingColors.Background), common.NewTextContent(labelStyle, common.GetWN8TierName(stats.Value().Float()))))
+		blocks = append(blocks, common.NewBlocksContent(overviewSpecialRatingPillStyle(), common.NewTextContent(labelStyle, common.GetWN8TierName(stats.Value().Float()))))
 	}
 
 	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Gap: 0}, blocks...)
@@ -68,12 +66,6 @@ func uniqueBlockWN8(style overviewStyle, stats prepare.StatsBlock[period.BlockDa
 
 func uniqueBlockRating(style overviewStyle, stats prepare.StatsBlock[period.BlockData, string]) common.Block {
 	var blocks []common.Block
-
-	ratingColors := common.GetRatingColors(stats.Value().Float())
-	if stats.Value().Float() <= 0 {
-		ratingColors.Content = common.TextAlt
-		ratingColors.Background = common.TextAlt
-	}
 
 	var valueBlocks []common.Block
 	iconTop, ok := common.GetRatingIcon(stats.V, ratingIconSize)
@@ -86,8 +78,7 @@ func uniqueBlockRating(style overviewStyle, stats prepare.StatsBlock[period.Bloc
 
 	blocks = append(blocks, common.NewBlocksContent(style.blockContainer, valueBlocks...))
 	if stats.Value().Float() != frame.InvalidValue.Float() {
-		labelStyle.FontColor = ratingColors.Content
-		blocks = append(blocks, common.NewBlocksContent(overviewSpecialRatingPillStyle(ratingColors.Background), common.NewTextContent(labelStyle, common.GetRatingTierName(stats.Value().Float()))))
+		blocks = append(blocks, common.NewBlocksContent(overviewSpecialRatingPillStyle(), common.NewTextContent(labelStyle, common.GetRatingTierName(stats.Value().Float()))))
 	}
 
 	return common.NewBlocksContent(common.Style{Direction: common.DirectionVertical, AlignItems: common.AlignItemsCenter, Gap: 0}, blocks...)
