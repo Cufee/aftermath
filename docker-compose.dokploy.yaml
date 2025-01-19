@@ -3,7 +3,7 @@ services:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-collector-base
-    restart: always
+    restart: no
     environment:
       - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
     networks:
