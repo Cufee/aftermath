@@ -78,7 +78,7 @@ var styledUnratedOverviewCard = overviewCardStyle{
 		BorderRadiusBottomRight: common.BorderRadiusLG,
 
 		GrowHorizontal: true,
-		Gap:            20,
+		Gap:            15,
 
 		PaddingLeft:   25,
 		PaddingRight:  25,
