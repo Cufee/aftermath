@@ -4,8 +4,6 @@ go 1.23.5
 
 require github.com/go-jet/jet/v2 v2.12.0
 
-replace github.com/cufee/facepaint => ../facepaint
-
 require (
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/PuerkitoBio/goquery v1.10.1
@@ -13,7 +11,7 @@ require (
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/cufee/aftermath-assets v0.1.0
 	github.com/cufee/am-wg-proxy-next/v2 v2.2.6
-	github.com/cufee/facepaint v0.0.3
+	github.com/cufee/facepaint v0.0.4
 	github.com/fogleman/gg v1.3.0
 	github.com/go-co-op/gocron v1.37.0
 	github.com/goccy/go-json v0.10.4
