@@ -21,8 +21,6 @@ type highlightCardStyle struct {
 
 var styledHighlightCard = highlightCardStyle{
 	card: style.Style{
-		// Debug: true,
-
 		Direction:  style.DirectionHorizontal,
 		AlignItems: style.AlignItemsCenter,
 
@@ -42,6 +40,8 @@ var styledHighlightCard = highlightCardStyle{
 		PaddingBottom: 15,
 	},
 	titleWrapper: style.Style{
+		// Debug: true,
+
 		GrowHorizontal: true,
 		Direction:      style.DirectionVertical,
 	},

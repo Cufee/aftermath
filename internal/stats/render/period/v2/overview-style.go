@@ -66,20 +66,24 @@ var styledUnratedOverviewCard = overviewCardStyle{
 	card: style.Style{
 		Debug: debugOverviewCards,
 
-		Direction:               style.DirectionHorizontal,
-		AlignItems:              style.AlignItemsCenter,
-		JustifyContent:          style.JustifyContentSpaceAround,
-		BackgroundColor:         common.DefaultCardColor,
+		Direction:      style.DirectionHorizontal,
+		AlignItems:     style.AlignItemsCenter,
+		JustifyContent: style.JustifyContentSpaceAround,
+
+		BackgroundColor: common.DefaultCardColor,
+
 		BorderRadiusTopLeft:     common.BorderRadiusLG,
 		BorderRadiusTopRight:    common.BorderRadiusLG,
 		BorderRadiusBottomLeft:  common.BorderRadiusLG,
 		BorderRadiusBottomRight: common.BorderRadiusLG,
-		GrowHorizontal:          true,
-		Gap:                     15,
-		PaddingLeft:             30,
-		PaddingRight:            30,
-		PaddingTop:              20,
-		PaddingBottom:           20,
+
+		GrowHorizontal: true,
+		Gap:            20,
+
+		PaddingLeft:   30,
+		PaddingRight:  30,
+		PaddingTop:    20,
+		PaddingBottom: 20,
 	},
 	column: style.Style{
 		Debug: debugOverviewCards,
