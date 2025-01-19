@@ -9,6 +9,10 @@ import (
 
 var (
 	clanTagBackgroundColor = color.NRGBA{40, 40, 40, 100}
+
+	cardBackgroundBlur = 20.0
+	cardPaddingX       = 35.0
+	cardPaddingY       = 30.0
 )
 
 func styledPlayerName() style.Style {
@@ -30,6 +34,7 @@ var styledPlayerNameWrapper = style.Style{
 	AlignItems: style.AlignItemsCenter,
 
 	BackgroundColor: common.DefaultCardColor,
+	BlurBackground:  cardBackgroundBlur,
 
 	BorderRadiusTopLeft:     common.BorderRadiusLG,
 	BorderRadiusTopRight:    common.BorderRadiusLG,
@@ -84,10 +89,10 @@ var styledCardsFrame = style.Style{
 
 	GrowHorizontal: true,
 
-	PaddingLeft:   20,
-	PaddingRight:  20,
-	PaddingTop:    20,
-	PaddingBottom: 20,
+	PaddingLeft:   30,
+	PaddingRight:  30,
+	PaddingTop:    30,
+	PaddingBottom: 30,
 }
 
 var styledFinalFrame = style.Style{
