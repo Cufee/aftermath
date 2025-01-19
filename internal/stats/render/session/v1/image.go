@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/models"
-	common "github.com/cufee/aftermath/internal/render/v1"
+	"github.com/cufee/aftermath/internal/render/common"
+	v1 "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
@@ -69,7 +70,7 @@ func CardsToImage(session, career fetch.AccountStatsOverPeriod, cards session.Ca
 	return segments.Render(func(opt *common.Options) { opt.Background = o.Background })
 }
 
-func CardsToSegments(session, career fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts ...common.Option) (*common.Segments, error) {
+func CardsToSegments(session, career fetch.AccountStatsOverPeriod, cards session.Cards, subs []models.UserSubscription, opts ...common.Option) (*v1.Segments, error) {
 	o := common.DefaultOptions()
 	for _, apply := range opts {
 		apply(&o)

@@ -4,7 +4,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/realtime"
-	stats "github.com/cufee/aftermath/internal/stats/client/v1"
+	stats "github.com/cufee/aftermath/internal/stats/client/v2"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"golang.org/x/text/language"
 )
