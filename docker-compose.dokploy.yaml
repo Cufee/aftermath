@@ -33,7 +33,7 @@ services:
       - docker-volume-backup.stop-during-backup=true # https://hub.docker.com/r/offen/docker-volume-backup
     depends_on:
       aftermath-migrate:
-        condition: service_completed_successfully
+        condition: service_started
 
 networks:
   dokploy-network:
