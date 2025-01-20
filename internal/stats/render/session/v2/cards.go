@@ -1,7 +1,6 @@
 package session
 
 import (
-	"errors"
 	"strconv"
 
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
@@ -46,8 +45,8 @@ func generateCards(session, career fetch.AccountStatsOverPeriod, cards session.C
 				block.Label = common.GetWN8TierName(block.Value().Float())
 				maxWidthOverviewColumn[string(column.Flavor)] = max(maxWidthOverviewColumn[string(column.Flavor)], iconSizeWN8)
 			}
-			maxWidthOverviewColumn[string(column.Flavor)] = max(maxWidthOverviewColumn[string(column.Flavor)], facepaint.MeasureString(block.Label, styledUnratedOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewColumn[string(column.Flavor)] = max(maxWidthOverviewColumn[string(column.Flavor)], facepaint.MeasureString(block.Value().String(), styledUnratedOverviewCard.styleBlock(block).value.Font).TotalWidth)
+			maxWidthOverviewColumn[string(column.Flavor)] = max(maxWidthOverviewColumn[string(column.Flavor)], facepaint.MeasureString(block.Label, styledOverviewCard.styleBlock(block).label.Font).TotalWidth)
+			maxWidthOverviewColumn[string(column.Flavor)] = max(maxWidthOverviewColumn[string(column.Flavor)], facepaint.MeasureString(block.Value().String(), styledOverviewCard.styleBlock(block).value.Font).TotalWidth)
 		}
 	}
 	for _, column := range cards.Rating.Overview.Blocks {
@@ -57,8 +56,8 @@ func generateCards(session, career fetch.AccountStatsOverPeriod, cards session.C
 				block.Label = common.GetRatingTierName(block.Value().Float())
 				maxWidthOverviewColumn[string(column.Flavor)] = max(maxWidthOverviewColumn[string(column.Flavor)], iconSizeRating)
 			}
-			maxWidthOverviewColumn[string(column.Flavor)] = max(maxWidthOverviewColumn[string(column.Flavor)], facepaint.MeasureString(block.Label, styledRatingOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewColumn[string(column.Flavor)] = max(maxWidthOverviewColumn[string(column.Flavor)], facepaint.MeasureString(block.Value().String(), styledRatingOverviewCard.styleBlock(block).value.Font).TotalWidth)
+			maxWidthOverviewColumn[string(column.Flavor)] = max(maxWidthOverviewColumn[string(column.Flavor)], facepaint.MeasureString(block.Label, styledOverviewCard.styleBlock(block).label.Font).TotalWidth)
+			maxWidthOverviewColumn[string(column.Flavor)] = max(maxWidthOverviewColumn[string(column.Flavor)], facepaint.MeasureString(block.Value().String(), styledOverviewCard.styleBlock(block).value.Font).TotalWidth)
 		}
 	}
 
@@ -72,7 +71,18 @@ func generateCards(session, career fetch.AccountStatsOverPeriod, cards session.C
 		}
 	}
 
-	var overviewCards []*facepaint.Block
+	// calculate per block type width of vehicle stats to make things even
+	var vehicleBlockWidth = make(map[prepare.Tag]float64)
+	for _, card := range cards.Unrated.Vehicles {
+		for _, block := range card.Blocks {
+			labelStyle := styledVehicleLegendPill()
+			label := facepaint.MeasureString(block.Label, labelStyle.Font).TotalWidth + labelStyle.PaddingLeft + labelStyle.PaddingRight
+			value := facepaint.MeasureString(block.Value().String(), styledVehicleCard.value(0).Font).TotalWidth
+			vehicleBlockWidth[block.Tag] = max(vehicleBlockWidth[block.Tag], label, value)
+		}
+	}
+
+	var overviewCards = []*facepaint.Block{newPlayerNameCard(career.Account)}
 	// unrated overview
 	if shouldRenderUnratedOverview {
 		if card := newUnratedOverviewCard(cards.Unrated.Overview, maxWidthOverviewColumn); card != nil {
@@ -92,22 +102,26 @@ func generateCards(session, career fetch.AccountStatsOverPeriod, cards session.C
 		}
 	}
 
-	var vehicleCards []*facepaint.Block
 	// vehicles
-	_ = shouldRenderUnratedVehicles
-
-	if len(overviewCards) == 0 {
-		return nil, errors.New("no cards to render")
+	var vehicleCards []*facepaint.Block
+	if shouldRenderUnratedVehicles {
+		for i, card := range cards.Unrated.Vehicles {
+			if i == renderUnratedVehiclesCount {
+				break
+			}
+			vehicleCards = append(vehicleCards, newVehicleCard(card, vehicleBlockWidth))
+		}
 	}
 
 	var sectionBlocks []*facepaint.Block
 	sectionBlocks = append(sectionBlocks, facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSection)), overviewCards...))
 	if len(vehicleCards) > 0 {
+		vehicleCards = append(vehicleCards, newVehicleLegendCard(cards.Unrated.Vehicles[0], vehicleBlockWidth))
 		sectionBlocks = append(sectionBlocks, facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSection)), vehicleCards...))
 	}
 	statsCardsBlock := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSectionsWrapper)), sectionBlocks...)
 
-	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledStatsFrame)), newPlayerNameCard(career.Account), statsCardsBlock)
+	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledStatsFrame)), statsCardsBlock)
 
 	// resize and place background
 	if opts.Background != nil {

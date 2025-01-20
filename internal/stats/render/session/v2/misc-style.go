@@ -92,7 +92,7 @@ var styledCardsSectionsWrapper = style.Style{
 	Debug: false,
 
 	Direction: style.DirectionHorizontal,
-	Gap:       10,
+	Gap:       20,
 }
 
 var styledStatsFrame = style.Style{

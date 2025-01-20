@@ -15,10 +15,10 @@ func newRatingOverviewCard(data session.RatingCards, columnWidth map[string]floa
 
 	var columns []*facepaint.Block
 	for _, column := range data.Overview.Blocks {
-		columns = append(columns, newOverviewColumn(styledRatingOverviewCard, column, columnWidth[string(column.Flavor)]))
+		columns = append(columns, newOverviewColumn(styledOverviewCard, column, columnWidth[string(column.Flavor)]))
 	}
 	// card
-	return facepaint.NewBlocksContent(styledRatingOverviewCard.card.Options(), columns...)
+	return facepaint.NewBlocksContent(styledOverviewCard.card.Options(), columns...)
 }
 
 func newUnratedOverviewCard(data session.OverviewCard, columnWidth map[string]float64) *facepaint.Block {
@@ -28,10 +28,10 @@ func newUnratedOverviewCard(data session.OverviewCard, columnWidth map[string]fl
 
 	var columns []*facepaint.Block
 	for _, column := range data.Blocks {
-		columns = append(columns, newOverviewColumn(styledUnratedOverviewCard, column, columnWidth[string(column.Flavor)]))
+		columns = append(columns, newOverviewColumn(styledOverviewCard, column, columnWidth[string(column.Flavor)]))
 	}
 	// card
-	return facepaint.NewBlocksContent(styledUnratedOverviewCard.card.Options(), columns...)
+	return facepaint.NewBlocksContent(styledOverviewCard.card.Options(), columns...)
 }
 
 func newOverviewColumn(stl overviewCardStyle, data session.OverviewColumn, columnWidth float64) *facepaint.Block {

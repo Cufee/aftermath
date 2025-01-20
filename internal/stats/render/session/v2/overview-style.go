@@ -27,39 +27,10 @@ type overviewCardStyle struct {
 	styleBlock func(block prepare.StatsBlock[session.BlockData, string]) blockStyle
 }
 
-// rating
-
-var styledRatingOverviewCard = overviewCardStyle{
-	styleBlock: styleRatingOverviewBlock,
-	card:       styledUnratedOverviewCard.card,
-	column: style.Style{
-		Debug: debugOverviewCards,
-
-		Direction:      style.DirectionVertical,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentCenter,
-		GrowVertical:   false,
-		Gap:            10,
-	},
-}
-
-func styleRatingOverviewBlock(block prepare.StatsBlock[session.BlockData, string]) blockStyle {
-	stl := styleUnratedOverviewBlock(block)
-	stl.wrapper = style.Style{
-		Debug: debugOverviewCards,
-
-		Direction:      style.DirectionVertical,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentCenter,
-		Gap:            10,
-	}
-	return stl
-}
-
 // unrated
 
-var styledUnratedOverviewCard = overviewCardStyle{
-	styleBlock: styleUnratedOverviewBlock,
+var styledOverviewCard = overviewCardStyle{
+	styleBlock: styleOverviewBlock,
 	card: style.Style{
 		Debug: debugOverviewCards,
 
@@ -88,13 +59,13 @@ var styledUnratedOverviewCard = overviewCardStyle{
 
 		Direction:      style.DirectionVertical,
 		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentCenter,
+		JustifyContent: style.JustifyContentSpaceAround,
 		GrowVertical:   true,
 		Gap:            10,
 	},
 }
 
-func styleUnratedOverviewBlock(block prepare.StatsBlock[session.BlockData, string]) blockStyle {
+func styleOverviewBlock(block prepare.StatsBlock[session.BlockData, string]) blockStyle {
 	switch block.Tag {
 	case prepare.TagWN8, prepare.TagRankedRating:
 		return blockStyle{
@@ -103,9 +74,8 @@ func styleUnratedOverviewBlock(block prepare.StatsBlock[session.BlockData, strin
 
 				Direction:      style.DirectionVertical,
 				AlignItems:     style.AlignItemsCenter,
-				JustifyContent: style.JustifyContentSpaceAround,
-				GrowVertical:   true,
-				Gap:            5,
+				JustifyContent: style.JustifyContentCenter,
+				Gap:            15,
 			},
 			valueContainer: style.Style{
 				Debug: debugOverviewCards,
@@ -113,8 +83,7 @@ func styleUnratedOverviewBlock(block prepare.StatsBlock[session.BlockData, strin
 				Direction:      style.DirectionVertical,
 				AlignItems:     style.AlignItemsCenter,
 				JustifyContent: style.JustifyContentEnd,
-				// GrowVertical:   true,
-				Gap: 5,
+				Gap:            0,
 			},
 			value: style.Style{
 				Debug: debugOverviewCards,
