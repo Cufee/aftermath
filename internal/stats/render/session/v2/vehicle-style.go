@@ -22,7 +22,7 @@ type vehicleCardStyle struct {
 
 var styledVehicleLegendPillWrapper = style.NewStyle(style.Parent(style.Style{
 	Direction:      style.DirectionHorizontal,
-	JustifyContent: style.JustifyContentSpaceAround,
+	JustifyContent: style.JustifyContentSpaceBetween,
 	Gap:            5,
 }))
 

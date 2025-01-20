@@ -26,7 +26,7 @@ func newVehicleCard(data session.VehicleCard, blockWidth map[prepare.Tag]float64
 
 }
 
-func newVehicleLegendCard(data session.VehicleCard, blockWidth map[prepare.Tag]float64) *facepaint.Block {
+func newVehicleLegendCard(data session.VehicleCard) *facepaint.Block {
 	var legendBlocks []*facepaint.Block
 	for _, block := range data.Blocks {
 		legendBlocks = append(legendBlocks, facepaint.MustNewTextContent(styledVehicleLegendPill().Options(), block.Label))

@@ -116,7 +116,7 @@ func generateCards(session, career fetch.AccountStatsOverPeriod, cards session.C
 	var sectionBlocks []*facepaint.Block
 	sectionBlocks = append(sectionBlocks, facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSection)), overviewCards...))
 	if len(vehicleCards) > 0 {
-		vehicleCards = append(vehicleCards, newVehicleLegendCard(cards.Unrated.Vehicles[0], vehicleBlockWidth))
+		vehicleCards = append(vehicleCards, newVehicleLegendCard(cards.Unrated.Vehicles[0]))
 		sectionBlocks = append(sectionBlocks, facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSection)), vehicleCards...))
 	}
 	statsCardsBlock := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSectionsWrapper)), sectionBlocks...)
