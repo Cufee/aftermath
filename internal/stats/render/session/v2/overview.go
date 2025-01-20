@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/cufee/aftermath/internal/render/common"
+	"github.com/cufee/aftermath/internal/stats/frame"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/facepaint"
@@ -83,11 +84,13 @@ func newOverviewBlock(blockStyle blockStyle, block prepare.StatsBlock[session.Bl
 
 	default:
 		var indicatorColor color.Color = color.Transparent
-		if block.Data.S.Float() > block.Data.C.Float() {
-			indicatorColor = color.NRGBA{163, 235, 177, 255}
-		}
-		if block.Data.S.Float() < block.Data.C.Float() {
-			indicatorColor = color.NRGBA{219, 154, 156, 255}
+		if block.Data.S.Float() != frame.InvalidValue.Float() && block.Data.C.Float() != frame.InvalidValue.Float() {
+			if block.Data.S.Float() > block.Data.C.Float() {
+				indicatorColor = color.NRGBA{163, 235, 177, 255}
+			}
+			if block.Data.S.Float() < block.Data.C.Float() {
+				indicatorColor = color.NRGBA{219, 154, 156, 255}
+			}
 		}
 
 		indicator := facepaint.NewEmptyContent(style.NewStyle(style.Parent(style.Style{
