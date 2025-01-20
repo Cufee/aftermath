@@ -16,7 +16,6 @@ import (
 )
 
 func (c *client) EmptySessionCards(ctx context.Context, accountId string) (prepare.Cards, options.Metadata, error) {
-
 	meta := options.Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
 	stop := meta.Timer("database#GetAccountByID")
@@ -46,7 +45,6 @@ func (c *client) EmptySessionCards(ctx context.Context, accountId string) (prepa
 	}
 
 	return cards, meta, nil
-
 }
 
 func (c *client) SessionCards(ctx context.Context, accountId string, from time.Time, o ...options.RequestOption) (prepare.Cards, options.Metadata, error) {

@@ -7,7 +7,7 @@ variable "database_path" {
   default = getenv("DATABASE_PATH")
 }
 variable "sources" {
-  type    = list(string)
+  type = list(string)
   default = [
     "file://internal/database/schema/schema.hcl",
     "file://internal/database/schema/accounts.hcl",
@@ -24,7 +24,7 @@ env "local" {
   src = var.sources
 
   migration {
-    dir = "file://internal/database/migrations"
+    dir = "file://internal/database/migrations?format=golang-migrate"
   }
 
   url = "sqlite://${var.database_path}/${var.database_name}?_fk=1"
