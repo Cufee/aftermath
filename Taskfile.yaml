@@ -55,14 +55,14 @@ tasks:
     cmds:
       # variables will be pulled from global vars declaration unless overwritten in the task call
       - echo "Applying migrations to $DATABASE_PATH/$DATABASE_NAME"
-      - atlas migrate apply --env local
+      - migrate -verbose -path internal/database/migrations -database sqlite3://{{.DATABASE_PATH}}/{{.DATABASE_NAME}}?_fk=1 up
 
   db-migrate-tests:
     desc: apply migrations using atlas
     dotenv:
       - ".env.test"
     cmds:
-      - atlas migrate apply --env local
+      - migrate -verbose -path internal/database/migrations -database sqlite3://{{.DATABASE_PATH}}/{{.DATABASE_NAME}}?_fk=1 up
 
   build-widget:
     desc: Build amth-widget js assets
