@@ -34,7 +34,7 @@ func newVehicleBlockValue(block prepare.StatsBlock[session.BlockData, string], b
 		if block.Data.S.Float() > block.Data.C.Float() {
 			indicatorColor = color.NRGBA{163, 235, 177, 255}
 		}
-		if block.Data.S.Float() <= block.Data.C.Float() {
+		if block.Data.S.Float() < block.Data.C.Float() {
 			indicatorColor = color.NRGBA{219, 154, 156, 255}
 		}
 
