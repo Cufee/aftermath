@@ -193,17 +193,18 @@ func RenderRatingIcon(settings ratingIcon) (*facepaint.Block, bool) {
 	iconHeight := len(rows) * (ratingIconLineWidth)
 	iconWidth := (len(rows[0]) * ratingIconLineWidth) + ((len(rows[0]) - 1) * (ratingIconLineWidth / 2))
 
-	ctx := gg.NewContext(iconWidth, iconHeight)
+	iconSize := max(iconWidth, iconHeight)
+	ctx := gg.NewContext(iconSize, iconSize)
 	ctx.SetColor(settings.Color)
 
 	for rowI, row := range rows {
-		positionY := float64(rowI * ratingIconLineWidth)
+		positionY := float64(rowI*ratingIconLineWidth) + float64(iconSize-iconHeight)/2
 		for itemI, item := range strings.Split(row, "") {
 			if strings.ToLower(item) != "x" {
 				continue
 			}
 
-			positionX := itemI*ratingIconLineWidth + max(0, (itemI)*(ratingIconLineWidth/2))
+			positionX := itemI*ratingIconLineWidth + max(0, (itemI)*(ratingIconLineWidth/2)) + (iconSize-iconWidth)/2
 
 			var topRounded bool = true
 			var bottomRounded bool = true
@@ -230,7 +231,6 @@ func RenderRatingIcon(settings ratingIcon) (*facepaint.Block, bool) {
 
 			// draw bottom part
 			if bottomRounded {
-
 				ctx.DrawArc(float64(positionX)+float64(ratingIconLineWidth/2), positionY+float64(ratingIconLineWidth/2), float64(ratingIconLineWidth)/2, math.Pi, 0)
 				ctx.Fill()
 			} else {

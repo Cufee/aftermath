@@ -64,6 +64,14 @@ func SmallLogoOptions() LogoSizingOptions {
 	}
 }
 
+func TinyLogoOptions() LogoSizingOptions {
+	return LogoSizingOptions{
+		Lines:     3,
+		BaseWidth: 6,
+		Gap:       3,
+	}
+}
+
 func LargeLogoOptions() LogoSizingOptions {
 	return LogoSizingOptions{
 		Lines:     7,

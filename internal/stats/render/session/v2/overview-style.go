@@ -11,7 +11,7 @@ const (
 	debugOverviewCards = false
 
 	iconSizeWN8    = 54.0
-	iconSizeRating = 54.0
+	iconSizeRating = 60.0
 )
 
 type blockStyle struct {

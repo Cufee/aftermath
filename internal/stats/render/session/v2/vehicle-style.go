@@ -8,7 +8,7 @@ import (
 const (
 	debugVehicleCards = false
 
-	vehicleIconSizeWN8 = 20.0
+	vehicleIconSizeWN8 = 22.0
 )
 
 type vehicleCardStyle struct {

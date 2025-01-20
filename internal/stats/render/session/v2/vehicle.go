@@ -52,8 +52,8 @@ func newVehicleWN8Icon(data session.VehicleCard) *facepaint.Block {
 			ratingColors.Background = common.TextAlt
 		}
 		icon, _ := facepaint.NewImageContent(
-			style.NewStyle(style.SetWidth(vehicleIconSizeWN8)),
-			common.AftermathLogo(ratingColors.Background, common.SmallLogoOptions()),
+			style.NewStyle(style.SetWidth(vehicleIconSizeWN8), style.SetWidth(vehicleIconSizeWN8)),
+			common.AftermathLogo(ratingColors.Background, common.TinyLogoOptions()),
 		)
 		return icon
 	}
