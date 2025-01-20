@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	iconBackgroundColorOverview = color.NRGBA{40, 40, 40, 120}
+	iconBackgroundColorOverview = color.NRGBA{40, 40, 40, 50}
 )
 
 type blockStyle struct {
@@ -73,6 +73,8 @@ func (overviewCardStyle) column(column session.OverviewColumn) style.Style {
 			JustifyContent: style.JustifyContentCenter,
 			// GrowVertical:   true,
 			GrowHorizontal: true,
+
+			BlurBackground: cardBackgroundBlur,
 
 			BorderRadiusTopLeft:     common.BorderRadiusSM,
 			BorderRadiusTopRight:    common.BorderRadiusSM,

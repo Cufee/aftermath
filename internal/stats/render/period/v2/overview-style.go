@@ -1,6 +1,8 @@
 package period
 
 import (
+	"image/color"
+
 	"github.com/cufee/aftermath/internal/render/common"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
@@ -14,6 +16,10 @@ const (
 	iconSizeRating = 64.0
 )
 
+var (
+	iconBackgroundColorOverview = color.NRGBA{40, 40, 40, 50}
+)
+
 type blockStyle struct {
 	wrapper        style.Style
 	valueContainer style.Style
@@ -23,7 +29,6 @@ type blockStyle struct {
 
 type overviewCardStyle struct {
 	card       style.Style
-	column     style.Style
 	styleBlock func(block prepare.StatsBlock[period.BlockData, string]) blockStyle
 }
 
@@ -32,15 +37,6 @@ type overviewCardStyle struct {
 var styledRatingOverviewCard = overviewCardStyle{
 	styleBlock: styleRatingOverviewBlock,
 	card:       styledUnratedOverviewCard.card,
-	column: style.Style{
-		Debug: debugOverviewCards,
-
-		Direction:      style.DirectionVertical,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentCenter,
-		GrowVertical:   false,
-		Gap:            10,
-	},
 }
 
 func styleRatingOverviewBlock(block prepare.StatsBlock[period.BlockData, string]) blockStyle {
@@ -79,22 +75,56 @@ var styledUnratedOverviewCard = overviewCardStyle{
 		BorderRadiusBottomRight: common.BorderRadiusLG,
 
 		GrowHorizontal: true,
-		Gap:            15,
+		Gap:            10,
 
 		PaddingLeft:   cardPaddingX,
 		PaddingRight:  cardPaddingX,
-		PaddingTop:    cardPaddingY,
-		PaddingBottom: cardPaddingY,
+		PaddingTop:    cardPaddingY / 2,
+		PaddingBottom: cardPaddingY / 2,
 	},
-	column: style.Style{
-		Debug: debugOverviewCards,
+}
 
-		Direction:      style.DirectionVertical,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentCenter,
-		GrowVertical:   true,
-		Gap:            10,
-	},
+func (overviewCardStyle) column(column period.OverviewColumn) style.Style {
+	switch column.Flavor {
+	case period.BlockFlavorSpecial:
+		return style.Style{
+			Debug: debugOverviewCards,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+			GrowVertical:   true,
+			GrowHorizontal: true,
+			Gap:            15,
+
+			BlurBackground: cardBackgroundBlur,
+
+			BorderRadiusTopLeft:     common.BorderRadiusSM,
+			BorderRadiusTopRight:    common.BorderRadiusSM,
+			BorderRadiusBottomLeft:  common.BorderRadiusSM,
+			BorderRadiusBottomRight: common.BorderRadiusSM,
+
+			BackgroundColor: iconBackgroundColorOverview,
+
+			PaddingLeft:   15,
+			PaddingRight:  15,
+			PaddingTop:    cardPaddingY / 2,
+			PaddingBottom: cardPaddingY / 2,
+		}
+	default:
+		return style.Style{
+			Debug: debugOverviewCards,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+			GrowVertical:   false,
+			Gap:            10,
+
+			PaddingTop:    cardPaddingY / 2,
+			PaddingBottom: cardPaddingY / 2,
+		}
+	}
 }
 
 func styleUnratedOverviewBlock(block prepare.StatsBlock[period.BlockData, string]) blockStyle {

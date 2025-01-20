@@ -14,7 +14,7 @@ const (
 )
 
 var (
-	iconBackgroundColorVehicle = color.NRGBA{40, 40, 40, 100}
+	iconBackgroundColorVehicle = color.NRGBA{40, 40, 40, 80}
 )
 
 type vehicleCardStyle struct {
@@ -93,8 +93,10 @@ var styledVehicleCard = vehicleCardStyle{
 
 		BackgroundColor: iconBackgroundColorVehicle,
 
+		BlurBackground: cardBackgroundBlur,
+
 		PaddingLeft:   7,
-		PaddingRight:  7,
+		PaddingRight:  8,
 		PaddingTop:    7,
 		PaddingBottom: 7,
 	})),

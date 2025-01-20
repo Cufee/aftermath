@@ -30,7 +30,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-var bgImage = "static://test_user_background"
+var bgImage = "static://test_user_background_2"
 var bgIsCustom = true
 
 func init() {
