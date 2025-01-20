@@ -58,7 +58,7 @@ var styledOverviewCard = overviewCardStyle{
 		PaddingBottom: cardPaddingY / 2,
 
 		GrowHorizontal: true,
-		Gap:            10,
+		Gap:            15,
 	},
 }
 
@@ -83,8 +83,8 @@ func (overviewCardStyle) column(column session.OverviewColumn) style.Style {
 
 			BackgroundColor: iconBackgroundColorOverview,
 
-			PaddingLeft:   10,
-			PaddingRight:  10,
+			PaddingLeft:   20,
+			PaddingRight:  20,
 			PaddingTop:    cardPaddingY / 2,
 			PaddingBottom: cardPaddingY / 2,
 
