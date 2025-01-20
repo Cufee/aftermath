@@ -14,6 +14,8 @@ const (
 
 	iconSizeWN8    = 54.0
 	iconSizeRating = 60.0
+
+	iconSizeIndicatorOverview = 10
 )
 
 var (
@@ -106,6 +108,30 @@ func (overviewCardStyle) column(column session.OverviewColumn) style.Style {
 }
 
 func styleOverviewBlock(block prepare.StatsBlock[session.BlockData, string]) blockStyle {
+	defaultStyle := blockStyle{
+		wrapper: style.Style{},
+		valueContainer: style.Style{
+			Debug: debugOverviewCards,
+
+			Gap: 6,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+		},
+		value: style.Style{
+			Debug: debugOverviewCards,
+
+			Color: common.TextPrimary,
+			Font:  common.FontLarge(),
+		},
+		label: style.Style{
+			Color:      common.TextAlt,
+			Font:       common.FontSmall(),
+			PaddingTop: -5,
+		},
+	}
+
 	switch block.Tag {
 	case prepare.TagWN8, prepare.TagRankedRating:
 		return blockStyle{
@@ -141,27 +167,7 @@ func styleOverviewBlock(block prepare.StatsBlock[session.BlockData, string]) blo
 			},
 		}
 	default:
-		return blockStyle{
-			wrapper: style.Style{},
-			valueContainer: style.Style{
-				Debug: debugOverviewCards,
-
-				Direction:      style.DirectionVertical,
-				AlignItems:     style.AlignItemsCenter,
-				JustifyContent: style.JustifyContentCenter,
-			},
-			value: style.Style{
-				Debug: debugOverviewCards,
-
-				Color: common.TextPrimary,
-				Font:  common.FontLarge(),
-			},
-			label: style.Style{
-				Color:      common.TextAlt,
-				Font:       common.FontSmall(),
-				PaddingTop: -5,
-			},
-		}
+		return defaultStyle
 	}
 }
 

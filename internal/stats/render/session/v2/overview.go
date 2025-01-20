@@ -1,6 +1,8 @@
 package session
 
 import (
+	"image/color"
+
 	"github.com/cufee/aftermath/internal/render/common"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
@@ -56,6 +58,20 @@ func newOverviewColumn(stl overviewCardStyle, data session.OverviewColumn, colum
 func newOverviewBlockWithIcon(blockStyle blockStyle, block prepare.StatsBlock[session.BlockData, string], icon *facepaint.Block) *facepaint.Block {
 	if icon == nil {
 		// block
+		return facepaint.NewBlocksContent(blockStyle.wrapper.Options(), newOverviewBlock(blockStyle, block))
+	}
+	// wrapper
+	return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
+		// icon
+		facepaint.NewBlocksContent(blockStyle.iconWrapper.Options(), icon),
+		// block
+		newOverviewBlock(blockStyle, block),
+	)
+}
+
+func newOverviewBlock(blockStyle blockStyle, block prepare.StatsBlock[session.BlockData, string]) *facepaint.Block {
+	switch block.Tag {
+	case prepare.TagBattles, prepare.TagWN8, prepare.TagRankedRating:
 		return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
 			facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
 				// value
@@ -64,18 +80,37 @@ func newOverviewBlockWithIcon(blockStyle blockStyle, block prepare.StatsBlock[se
 				facepaint.MustNewTextContent(blockStyle.label.Options(), block.Label),
 			),
 		)
+
+	default:
+		var indicatorColor color.Color = color.Transparent
+		if block.Data.S.Float() > block.Data.C.Float() {
+			indicatorColor = color.NRGBA{163, 235, 177, 255}
+		}
+		if block.Data.S.Float() < block.Data.C.Float() {
+			indicatorColor = color.NRGBA{219, 154, 156, 255}
+		}
+
+		indicator := facepaint.NewEmptyContent(style.NewStyle(style.Parent(style.Style{
+			Position:                style.PositionAbsolute,
+			BackgroundColor:         indicatorColor,
+			MinWidth:                20,
+			Height:                  3,
+			BorderRadiusTopLeft:     1.5,
+			BorderRadiusTopRight:    1.5,
+			BorderRadiusBottomLeft:  1.5,
+			BorderRadiusBottomRight: 1.5,
+			Bottom:                  4,
+		})))
+
+		return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
+			facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
+				// value
+				facepaint.NewBlocksContent(style.NewStyle(), indicator, facepaint.MustNewTextContent(blockStyle.value.Options(), block.V.String())),
+				// label
+				facepaint.MustNewTextContent(blockStyle.label.Options(), block.Label),
+			),
+		)
 	}
-	// wrapper
-	return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
-		// icon
-		facepaint.NewBlocksContent(blockStyle.iconWrapper.Options(), icon),
-		// block
-		facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
-			// value
-			facepaint.MustNewTextContent(blockStyle.value.Options(), block.V.String()),
-			// label
-			facepaint.MustNewTextContent(blockStyle.label.Options(), block.Label),
-		))
 }
 
 func newOverviewWN8Block(blockStyle blockStyle, block prepare.StatsBlock[session.BlockData, string]) *facepaint.Block {

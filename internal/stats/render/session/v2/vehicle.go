@@ -47,7 +47,7 @@ func newVehicleBlockValue(block prepare.StatsBlock[session.BlockData, string], b
 			BorderRadiusTopRight:    1.5,
 			BorderRadiusBottomLeft:  1.5,
 			BorderRadiusBottomRight: 1.5,
-			Bottom:                  18,
+			Bottom:                  20,
 		})))
 
 		return facepaint.NewBlocksContent(styledVehicleCard.valueWrapper(blockWidth[block.Tag]).Options(),
