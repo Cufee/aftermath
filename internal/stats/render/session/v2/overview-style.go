@@ -1,6 +1,8 @@
 package session
 
 import (
+	"image/color"
+
 	"github.com/cufee/aftermath/internal/render/common"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
@@ -14,8 +16,13 @@ const (
 	iconSizeRating = 60.0
 )
 
+var (
+	iconBackgroundColorOverview = color.NRGBA{40, 40, 40, 120}
+)
+
 type blockStyle struct {
 	wrapper        style.Style
+	iconWrapper    style.Style
 	valueContainer style.Style
 	value          style.Style
 	label          style.Style
@@ -23,7 +30,6 @@ type blockStyle struct {
 
 type overviewCardStyle struct {
 	card       style.Style
-	column     style.Style
 	styleBlock func(block prepare.StatsBlock[session.BlockData, string]) blockStyle
 }
 
@@ -46,23 +52,55 @@ var styledOverviewCard = overviewCardStyle{
 		BorderRadiusBottomLeft:  common.BorderRadiusLG,
 		BorderRadiusBottomRight: common.BorderRadiusLG,
 
-		GrowHorizontal: true,
-		Gap:            15,
-
 		PaddingLeft:   cardPaddingX,
 		PaddingRight:  cardPaddingX,
-		PaddingTop:    cardPaddingY,
-		PaddingBottom: cardPaddingY,
-	},
-	column: style.Style{
-		Debug: debugOverviewCards,
+		PaddingTop:    cardPaddingY / 2,
+		PaddingBottom: cardPaddingY / 2,
 
-		Direction:      style.DirectionVertical,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentSpaceAround,
-		GrowVertical:   true,
+		GrowHorizontal: true,
 		Gap:            10,
 	},
+}
+
+func (overviewCardStyle) column(column session.OverviewColumn) style.Style {
+	switch column.Flavor {
+	case session.BlockFlavorRating, session.BlockFlavorWN8:
+		return style.Style{
+			Debug: debugOverviewCards,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+			// GrowVertical:   true,
+			GrowHorizontal: true,
+
+			BorderRadiusTopLeft:     common.BorderRadiusSM,
+			BorderRadiusTopRight:    common.BorderRadiusSM,
+			BorderRadiusBottomLeft:  common.BorderRadiusSM,
+			BorderRadiusBottomRight: common.BorderRadiusSM,
+
+			BackgroundColor: iconBackgroundColorOverview,
+
+			PaddingLeft:   10,
+			PaddingRight:  10,
+			PaddingTop:    cardPaddingY / 2,
+			PaddingBottom: cardPaddingY / 2,
+
+			Gap: 15,
+		}
+	default:
+		return style.Style{
+			Debug: debugOverviewCards,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+			Gap:            15,
+
+			PaddingTop:    cardPaddingY / 2,
+			PaddingBottom: cardPaddingY / 2,
+		}
+	}
 }
 
 func styleOverviewBlock(block prepare.StatsBlock[session.BlockData, string]) blockStyle {
@@ -75,7 +113,9 @@ func styleOverviewBlock(block prepare.StatsBlock[session.BlockData, string]) blo
 				Direction:      style.DirectionVertical,
 				AlignItems:     style.AlignItemsCenter,
 				JustifyContent: style.JustifyContentCenter,
-				Gap:            15,
+				Gap:            10,
+
+				GrowVertical: true,
 			},
 			valueContainer: style.Style{
 				Debug: debugOverviewCards,

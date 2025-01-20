@@ -1,6 +1,8 @@
 package session
 
 import (
+	"image/color"
+
 	"github.com/cufee/aftermath/internal/render/common"
 	"github.com/cufee/facepaint/style"
 )
@@ -8,16 +10,22 @@ import (
 const (
 	debugVehicleCards = false
 
-	vehicleIconSizeWN8 = 20.0
+	vehicleIconSizeWN8 = 14.0
+)
+
+var (
+	iconBackgroundColorVehicle = color.NRGBA{40, 40, 40, 100}
 )
 
 type vehicleCardStyle struct {
-	card         style.StyleOptions
-	titleWrapper style.StyleOptions
-	titleText    func() style.StyleOptions
+	card             style.StyleOptions
+	titleIconWrapper style.StyleOptions
+	titleWrapper     style.StyleOptions
+	titleText        func() style.StyleOptions
 
-	stats style.StyleOptions
-	value func(float64) *style.Style
+	stats        style.StyleOptions
+	value        func() *style.Style
+	valueWrapper func(float64) *style.Style
 }
 
 var styledVehicleLegendPillWrapper = style.NewStyle(style.Parent(style.Style{
@@ -77,17 +85,30 @@ var styledVehicleCard = vehicleCardStyle{
 		PaddingBottom: cardPaddingY / 2,
 	})),
 
+	titleIconWrapper: style.NewStyle(style.Parent(style.Style{
+		BorderRadiusTopLeft:     common.BorderRadiusXS,
+		BorderRadiusTopRight:    common.BorderRadiusXS,
+		BorderRadiusBottomLeft:  common.BorderRadiusXS,
+		BorderRadiusBottomRight: common.BorderRadiusXS,
+
+		BackgroundColor: iconBackgroundColorVehicle,
+
+		PaddingLeft:   7,
+		PaddingRight:  7,
+		PaddingTop:    7,
+		PaddingBottom: 7,
+	})),
 	titleWrapper: style.NewStyle(style.Parent(style.Style{
 		Debug: debugVehicleCards,
 
 		GrowHorizontal: true,
 		Gap:            10,
-		JustifyContent: style.JustifyContentSpaceBetween,
 	})),
 	titleText: func() style.StyleOptions {
 		return style.NewStyle(style.Parent(style.Style{
-			Color: common.TextSecondary,
-			Font:  common.FontMedium(),
+			Color:          common.TextSecondary,
+			Font:           common.FontMedium(),
+			GrowHorizontal: true,
 		}))
 	},
 
@@ -99,13 +120,18 @@ var styledVehicleCard = vehicleCardStyle{
 		GrowHorizontal: true,
 		Gap:            10,
 	})),
-	value: func(width float64) *style.Style {
+	value: func() *style.Style {
 		return &style.Style{
-			Width:          width,
 			Color:          common.TextPrimary,
 			Font:           common.FontLarge(),
-			GrowHorizontal: true,
 			JustifyContent: style.JustifyContentCenter,
+		}
+	},
+	valueWrapper: func(width float64) *style.Style {
+		return &style.Style{
+			Width:          width,
+			JustifyContent: style.JustifyContentCenter,
+			AlignItems:     style.AlignItemsCenter,
 		}
 	},
 }

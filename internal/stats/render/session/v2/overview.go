@@ -8,27 +8,27 @@ import (
 	"github.com/cufee/facepaint/style"
 )
 
-func newRatingOverviewCard(data session.RatingCards, columnWidth map[string]float64) *facepaint.Block {
+func newRatingOverviewCard(data session.RatingCards, columnWidth map[bool]float64) *facepaint.Block {
 	if len(data.Overview.Blocks) == 0 {
 		return nil
 	}
 
 	var columns []*facepaint.Block
 	for _, column := range data.Overview.Blocks {
-		columns = append(columns, newOverviewColumn(styledOverviewCard, column, columnWidth[string(column.Flavor)]))
+		columns = append(columns, newOverviewColumn(styledOverviewCard, column, columnWidth[column.Flavor == session.BlockFlavorDefault]))
 	}
 	// card
 	return facepaint.NewBlocksContent(styledOverviewCard.card.Options(), columns...)
 }
 
-func newUnratedOverviewCard(data session.OverviewCard, columnWidth map[string]float64) *facepaint.Block {
+func newUnratedOverviewCard(data session.OverviewCard, columnWidth map[bool]float64) *facepaint.Block {
 	if len(data.Blocks) == 0 {
 		return nil
 	}
 
 	var columns []*facepaint.Block
 	for _, column := range data.Blocks {
-		columns = append(columns, newOverviewColumn(styledOverviewCard, column, columnWidth[string(column.Flavor)]))
+		columns = append(columns, newOverviewColumn(styledOverviewCard, column, columnWidth[column.Flavor == session.BlockFlavorDefault]))
 	}
 	// card
 	return facepaint.NewBlocksContent(styledOverviewCard.card.Options(), columns...)
@@ -48,25 +48,27 @@ func newOverviewColumn(stl overviewCardStyle, data session.OverviewColumn, colum
 	}
 	// column
 	return facepaint.NewBlocksContent(style.NewStyle(
-		style.Parent(stl.column),
-		style.SetWidth(columnWidth),
+		style.Parent(stl.column(data)),
+		style.SetMinWidth(columnWidth),
 	), columnBlocks...)
 }
 
 func newOverviewBlockWithIcon(blockStyle blockStyle, block prepare.StatsBlock[session.BlockData, string], icon *facepaint.Block) *facepaint.Block {
 	if icon == nil {
 		// block
-		return facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
-			// value
-			facepaint.MustNewTextContent(blockStyle.value.Options(), block.V.String()),
-			// label
-			facepaint.MustNewTextContent(blockStyle.label.Options(), block.Label),
+		return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
+			facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
+				// value
+				facepaint.MustNewTextContent(blockStyle.value.Options(), block.V.String()),
+				// label
+				facepaint.MustNewTextContent(blockStyle.label.Options(), block.Label),
+			),
 		)
 	}
 	// wrapper
 	return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
 		// icon
-		icon,
+		facepaint.NewBlocksContent(blockStyle.iconWrapper.Options(), icon),
 		// block
 		facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
 			// value
