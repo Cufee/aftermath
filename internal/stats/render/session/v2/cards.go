@@ -75,7 +75,7 @@ func generateCards(session, career fetch.AccountStatsOverPeriod, cards session.C
 	var vehicleBlockWidth = make(map[prepare.Tag]float64)
 	for _, card := range cards.Unrated.Vehicles {
 		for _, block := range card.Blocks {
-			labelStyle := styledVehicleLegendPill()
+			labelStyle := styledVehicleLegendPill(0)
 			label := facepaint.MeasureString(block.Label, labelStyle.Font).TotalWidth + labelStyle.PaddingLeft + labelStyle.PaddingRight
 			value := facepaint.MeasureString(block.Value().String(), styledVehicleCard.value(0).Font).TotalWidth
 			vehicleBlockWidth[block.Tag] = max(vehicleBlockWidth[block.Tag], label, value)
@@ -116,7 +116,7 @@ func generateCards(session, career fetch.AccountStatsOverPeriod, cards session.C
 	var sectionBlocks []*facepaint.Block
 	sectionBlocks = append(sectionBlocks, facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSection)), overviewCards...))
 	if len(vehicleCards) > 0 {
-		vehicleCards = append(vehicleCards, newVehicleLegendCard(cards.Unrated.Vehicles[0]))
+		vehicleCards = append(vehicleCards, newVehicleLegendCard(cards.Unrated.Vehicles[0], vehicleBlockWidth))
 		sectionBlocks = append(sectionBlocks, facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSection)), vehicleCards...))
 	}
 	statsCardsBlock := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSectionsWrapper)), sectionBlocks...)

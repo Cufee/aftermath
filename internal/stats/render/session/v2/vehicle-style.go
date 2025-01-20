@@ -26,10 +26,11 @@ var styledVehicleLegendPillWrapper = style.NewStyle(style.Parent(style.Style{
 	Gap:            5,
 }))
 
-func styledVehicleLegendPill() *style.Style {
+func styledVehicleLegendPill(width float64) *style.Style {
 	return &style.Style{
 		Debug: debugVehicleCards,
 
+		Width: width,
 		Color: common.TextAlt,
 		Font:  common.FontSmall(),
 
