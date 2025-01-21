@@ -97,17 +97,8 @@ func (overviewCardStyle) column(column period.OverviewColumn) style.Style {
 			GrowHorizontal: true,
 			Gap:            15,
 
-			BlurBackground: cardBackgroundBlur,
-
-			BorderRadiusTopLeft:     common.BorderRadiusSM,
-			BorderRadiusTopRight:    common.BorderRadiusSM,
-			BorderRadiusBottomLeft:  common.BorderRadiusSM,
-			BorderRadiusBottomRight: common.BorderRadiusSM,
-
-			BackgroundColor: iconBackgroundColorOverview,
-
-			PaddingLeft:   20,
-			PaddingRight:  20,
+			PaddingLeft:   10,
+			PaddingRight:  10,
 			PaddingTop:    cardPaddingY / 2,
 			PaddingBottom: cardPaddingY / 2,
 		}
