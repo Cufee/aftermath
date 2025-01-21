@@ -44,12 +44,13 @@ func newVehicleBlockValue(block prepare.StatsBlock[session.BlockData, string], b
 		indicator := facepaint.NewEmptyContent(style.NewStyle(style.Parent(style.Style{
 			Position:                style.PositionAbsolute,
 			BackgroundColor:         indicatorColor,
-			MinWidth:                14,
+			MinWidth:                12,
 			Height:                  3,
 			BorderRadiusTopLeft:     1.5,
 			BorderRadiusTopRight:    1.5,
 			BorderRadiusBottomLeft:  1.5,
 			BorderRadiusBottomRight: 1.5,
+			Left:                    1,
 			Bottom:                  20,
 		})))
 
