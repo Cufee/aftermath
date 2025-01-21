@@ -47,7 +47,7 @@ func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Clie
 func (c *multiSourceClient) Search(ctx context.Context, nickname string, realm types.Realm, limit int) (types.Account, error) {
 	accounts, err := c.wargaming.SearchAccounts(ctx, realm, nickname, types.WithLimit(limit))
 	if err != nil {
-		return types.Account{}, err
+		return types.Account{}, parseWargamingError(err)
 	}
 	if len(accounts) < 1 {
 		return types.Account{}, AccountNotFound
@@ -104,7 +104,7 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 	if len(data) == 0 && len(errors) > 0 {
 		for err := range errors {
 			if err != nil {
-				return nil, err
+				return nil, parseWargamingError(err)
 			}
 		}
 	}
@@ -148,7 +148,7 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Acco
 	group.Wait()
 
 	if wgAccount.Err != nil {
-		return models.Account{}, wgAccount.Err
+		return models.Account{}, parseWargamingError(wgAccount.Err)
 	}
 
 	account := WargamingToAccount(realm, wgAccount.Data, clan, false)
@@ -232,10 +232,10 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 	group.Wait()
 
 	if account.Err != nil {
-		return AccountStatsOverPeriod{}, account.Err
+		return AccountStatsOverPeriod{}, parseWargamingError(account.Err)
 	}
 	if vehicles.Err != nil {
-		return AccountStatsOverPeriod{}, vehicles.Err
+		return AccountStatsOverPeriod{}, parseWargamingError(vehicles.Err)
 	}
 	if averages.Err != nil {
 		// not critical, this will only affect WN8
@@ -443,7 +443,7 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 		group.Go(func() error {
 			data, err := c.wargaming.BatchAccountByID(ctx, realm, ids)
 			if err != nil {
-				return err
+				return parseWargamingError(err)
 			}
 
 			playerDataMx.Lock()
