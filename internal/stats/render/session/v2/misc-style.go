@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	clanTagBackgroundColor = color.NRGBA{40, 40, 40, 100}
+	clanTagBackgroundColor = color.NRGBA{0, 0, 0, 100}
 
 	cardBackgroundBlur = 20.0
 	cardPaddingX       = 35.0

@@ -1,8 +1,6 @@
 package session
 
 import (
-	"image/color"
-
 	"github.com/cufee/aftermath/internal/render/common"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
@@ -14,12 +12,6 @@ const (
 
 	iconSizeWN8    = 54.0
 	iconSizeRating = 60.0
-
-	iconSizeIndicatorOverview = 10
-)
-
-var (
-	iconBackgroundColorOverview = color.NRGBA{40, 40, 40, 50}
 )
 
 type blockStyle struct {
@@ -76,17 +68,13 @@ func (overviewCardStyle) column(column session.OverviewColumn) style.Style {
 			// GrowVertical:   true,
 			GrowHorizontal: true,
 
-			BlurBackground: cardBackgroundBlur,
-
 			BorderRadiusTopLeft:     common.BorderRadiusSM,
 			BorderRadiusTopRight:    common.BorderRadiusSM,
 			BorderRadiusBottomLeft:  common.BorderRadiusSM,
 			BorderRadiusBottomRight: common.BorderRadiusSM,
 
-			BackgroundColor: iconBackgroundColorOverview,
-
-			PaddingLeft:   20,
-			PaddingRight:  20,
+			PaddingLeft:   10,
+			PaddingRight:  10,
 			PaddingTop:    cardPaddingY / 2,
 			PaddingBottom: cardPaddingY / 2,
 

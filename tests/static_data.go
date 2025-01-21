@@ -25,7 +25,7 @@ var (
 		Battles:              100,
 		BattlesWon:           80,
 		BattlesSurvived:      70,
-		DamageDealt:          234567,
+		DamageDealt:          214567,
 		DamageReceived:       123567,
 		ShotsHit:             690,
 		ShotsFired:           1000,

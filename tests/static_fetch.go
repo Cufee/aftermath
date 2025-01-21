@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/models"
@@ -98,15 +99,15 @@ func (c *staticTestingFetch) SessionStats(ctx context.Context, id string, sessio
 		return fetch.AccountStatsOverPeriod{}, fetch.AccountStatsOverPeriod{}, err
 	}
 
-	session.RegularBattles.SetWN8(3495)
-	career.RegularBattles.SetWN8(3495)
+	session.RegularBattles.SetWN8(rand.Int() % 4000)
+	career.RegularBattles.SetWN8(rand.Int() % 4000)
 
 	for id, stats := range session.RegularBattles.Vehicles {
-		stats.SetWN8(3495)
+		stats.SetWN8(rand.Int() % 4000)
 		session.RegularBattles.Vehicles[id] = stats
 	}
 	for id, stats := range career.RegularBattles.Vehicles {
-		stats.SetWN8(3295)
+		stats.SetWN8(rand.Int() % 4000)
 		career.RegularBattles.Vehicles[id] = stats
 	}
 

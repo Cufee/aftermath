@@ -96,7 +96,7 @@ func newOverviewBlock(blockStyle blockStyle, block prepare.StatsBlock[session.Bl
 		indicator := facepaint.NewEmptyContent(style.NewStyle(style.Parent(style.Style{
 			Position:                style.PositionAbsolute,
 			BackgroundColor:         indicatorColor,
-			MinWidth:                20,
+			MinWidth:                14,
 			Height:                  3,
 			BorderRadiusTopLeft:     1.5,
 			BorderRadiusTopRight:    1.5,
