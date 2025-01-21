@@ -12,7 +12,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
-	render "github.com/cufee/aftermath/internal/stats/render/session/v2"
+	"github.com/cufee/aftermath/internal/stats/render/session/special"
 )
 
 func (c *client) SessionCards(ctx context.Context, accountId string, from time.Time, o ...common.RequestOption) (session.Cards, common.Metadata, error) {
@@ -84,7 +84,6 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	stop()
 
 	stop = meta.Timer("prepare#NewCards")
-
 	cards, err := session.NewCards(sessionStats, careerStats, glossary, opts.PrepareOpts(printer, c.locale)...)
 	stop()
 	if err != nil {
@@ -108,7 +107,8 @@ func (c *client) SessionImage(ctx context.Context, accountId string, from time.T
 	}
 
 	stop := meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(meta.Stats["session"], meta.Stats["career"], cards, opts.Subscriptions, opts.RenderOpts(printer)...)
+	handler := special.SelectStyle(opts.Style)
+	image, err := handler(meta.Stats["session"], meta.Stats["career"], cards, opts.Subscriptions, opts.RenderOpts(printer)...)
 	stop()
 	if err != nil {
 		return nil, meta, err

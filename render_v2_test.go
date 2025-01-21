@@ -19,12 +19,14 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+var styleOption = ""
+
 func TestRenderPeriodV2(t *testing.T) {
 	env.LoadTestEnv(t)
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 
 	t.Run("render period image for small nickname", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), common.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), common.WithWN8(), common.WithStyle(styleOption))
 		assert.NoError(t, err, "failed to render a period image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -37,7 +39,7 @@ func TestRenderPeriodV2(t *testing.T) {
 	})
 
 	t.Run("render period image for large nickname", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), common.WithBackgroundURL(bgImage, bgIsCustom), common.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), common.WithBackgroundURL(bgImage, bgIsCustom), common.WithWN8(), common.WithStyle(styleOption))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -50,7 +52,7 @@ func TestRenderPeriodV2(t *testing.T) {
 	})
 
 	t.Run("render period image with large name no highlights", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), common.WithBackgroundURL(bgImage, bgIsCustom), common.WithVehicleID("0"), common.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNA, time.Now(), common.WithBackgroundURL(bgImage, bgIsCustom), common.WithVehicleID("0"), common.WithWN8(), common.WithStyle(styleOption))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -63,7 +65,7 @@ func TestRenderPeriodV2(t *testing.T) {
 	})
 
 	t.Run("render period image with small name and no highlights", func(t *testing.T) {
-		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), common.WithBackgroundURL(bgImage, bgIsCustom), common.WithVehicleID("0"), common.WithWN8())
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), common.WithBackgroundURL(bgImage, bgIsCustom), common.WithVehicleID("0"), common.WithWN8(), common.WithStyle(styleOption))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -81,7 +83,7 @@ func TestRenderSessionV2(t *testing.T) {
 	stats := client.NewClient(tests.StaticTestingFetch(), tests.StaticTestingDatabase(), nil, language.English)
 
 	t.Run("generate content mask before generating image", func(t *testing.T) {
-		cards, meta, err := stats.SessionCards(context.Background(), tests.DefaultAccountNAShort, time.Now(), options.WithWN8())
+		cards, meta, err := stats.SessionCards(context.Background(), tests.DefaultAccountNAShort, time.Now(), options.WithWN8(), common.WithStyle(styleOption))
 		assert.NoError(t, err, "failed to generate session cards")
 
 		segments, err := session.CardsToSegments(meta.Stats["session"], meta.Stats["career"], cards, nil)
@@ -103,7 +105,7 @@ func TestRenderSessionV2(t *testing.T) {
 	})
 
 	t.Run("render session image for small nickname", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), options.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), options.WithWN8(), common.WithStyle(styleOption))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -116,7 +118,7 @@ func TestRenderSessionV2(t *testing.T) {
 	})
 
 	t.Run("render session image for large nickname", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithWN8(), common.WithStyle(styleOption))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
@@ -129,7 +131,7 @@ func TestRenderSessionV2(t *testing.T) {
 	})
 
 	t.Run("render session image for large nickname and no vehicles", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithVehicleID("0"), options.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithVehicleID("0"), options.WithWN8(), common.WithStyle(styleOption))
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 

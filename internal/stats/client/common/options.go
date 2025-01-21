@@ -20,6 +20,7 @@ type requestOptions struct {
 	vehicleID          string
 	withWN8            bool
 	Subscriptions      []models.UserSubscription
+	Style              string
 
 	vehicleTags    []prepare.Tag
 	ratingColumns  []prepare.TagColumn[string]
@@ -42,6 +43,10 @@ func (o RequestOptions) Options() requestOptions {
 		apply(&opts)
 	}
 	return opts
+}
+
+func WithStyle(name string) RequestOption {
+	return func(o *requestOptions) { o.Style = name }
 }
 
 func WithSubscriptions(subs []models.UserSubscription) RequestOption {
