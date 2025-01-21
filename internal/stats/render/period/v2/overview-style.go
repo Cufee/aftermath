@@ -1,8 +1,6 @@
 package period
 
 import (
-	"image/color"
-
 	"github.com/cufee/aftermath/internal/render/common"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
@@ -14,10 +12,6 @@ const (
 
 	iconSizeWN8    = 54.0
 	iconSizeRating = 64.0
-)
-
-var (
-	iconBackgroundColorOverview = color.NRGBA{40, 40, 40, 50}
 )
 
 type blockStyle struct {
