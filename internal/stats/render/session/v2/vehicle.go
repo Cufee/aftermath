@@ -13,7 +13,7 @@ import (
 
 func newVehicleCard(data session.VehicleCard, blockWidth map[prepare.Tag]float64) *facepaint.Block {
 	title := facepaint.NewBlocksContent(styledVehicleCard.titleWrapper,
-		facepaint.MustNewTextContent(styledVehicleCard.titleText(), data.Title),
+		facepaint.MustNewTextContent(styledVehicleCard.titleText(), data.Meta+" "+data.Title),
 		newVehicleWN8Icon(data),
 	)
 
