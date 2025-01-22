@@ -1,8 +1,6 @@
 package session
 
 import (
-	"image/color"
-
 	"github.com/cufee/aftermath/internal/render/common"
 	"github.com/cufee/facepaint/style"
 )
@@ -10,11 +8,7 @@ import (
 const (
 	debugVehicleCards = false
 
-	vehicleIconSizeWN8 = 14.0
-)
-
-var (
-	iconBackgroundColorVehicle = color.NRGBA{40, 40, 40, 80}
+	vehicleIconSizeWN8 = 16.0
 )
 
 type vehicleCardStyle struct {
@@ -85,23 +79,10 @@ var styledVehicleCard = vehicleCardStyle{
 		PaddingBottom: cardPaddingY / 2,
 	})),
 
-	titleIconWrapper: style.NewStyle(style.Parent(style.Style{
-		BorderRadiusTopLeft:     common.BorderRadiusXS,
-		BorderRadiusTopRight:    common.BorderRadiusXS,
-		BorderRadiusBottomLeft:  common.BorderRadiusXS,
-		BorderRadiusBottomRight: common.BorderRadiusXS,
-
-		BackgroundColor: iconBackgroundColorVehicle,
-
-		BlurBackground: cardBackgroundBlur,
-
-		PaddingLeft:   7,
-		PaddingRight:  8,
-		PaddingTop:    7,
-		PaddingBottom: 7,
-	})),
+	titleIconWrapper: style.NewStyle(style.Parent(style.Style{})),
 	titleWrapper: style.NewStyle(style.Parent(style.Style{
-		Debug: debugVehicleCards,
+		Debug:      debugVehicleCards,
+		AlignItems: style.AlignItemsCenter,
 
 		GrowHorizontal: true,
 		Gap:            10,

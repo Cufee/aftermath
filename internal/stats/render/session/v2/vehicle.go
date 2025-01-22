@@ -13,7 +13,7 @@ import (
 
 func newVehicleCard(data session.VehicleCard, blockWidth map[prepare.Tag]float64) *facepaint.Block {
 	title := facepaint.NewBlocksContent(styledVehicleCard.titleWrapper,
-		facepaint.MustNewTextContent(styledVehicleCard.titleText(), data.Title),
+		facepaint.MustNewTextContent(styledVehicleCard.titleText(), data.Meta+" "+data.Title),
 		newVehicleWN8Icon(data),
 	)
 
@@ -44,12 +44,13 @@ func newVehicleBlockValue(block prepare.StatsBlock[session.BlockData, string], b
 		indicator := facepaint.NewEmptyContent(style.NewStyle(style.Parent(style.Style{
 			Position:                style.PositionAbsolute,
 			BackgroundColor:         indicatorColor,
-			MinWidth:                20,
+			MinWidth:                12,
 			Height:                  3,
 			BorderRadiusTopLeft:     1.5,
 			BorderRadiusTopRight:    1.5,
 			BorderRadiusBottomLeft:  1.5,
 			BorderRadiusBottomRight: 1.5,
+			Left:                    1,
 			Bottom:                  20,
 		})))
 

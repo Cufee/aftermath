@@ -11,8 +11,10 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/pkg/errors"
 	"golang.org/x/text/language"
 )
@@ -202,7 +204,31 @@ func (c *routeContext) Reply() common.Reply {
 }
 
 func (c *routeContext) Err(err error) error {
-	log.Err(err).Str("interactionId", c.interaction.ID).Msg("error while handling an interaction")
+	var isCommonError bool
+	defer func() {
+		if isCommonError {
+			log.Err(err).Str("interactionId", c.interaction.ID).Msg("known error while processing an interaction")
+		} else {
+			log.Err(err).Str("interactionId", c.interaction.ID).Msg("unhandled error while processing an interaction")
+		}
+	}()
+
+	// common errors from external services
+	if errors.Is(err, blitzstars.ErrServiceUnavailable) {
+		isCommonError = true
+		return c.Reply().
+			Hint(c.InteractionID()).
+			Component(discordgo.ActionsRow{Components: []discordgo.MessageComponent{common.ButtonJoinPrimaryGuild(c.Localize("buttons_have_a_question_question"))}}).
+			Send("blitz_stars_error_service_down")
+	}
+	if errors.Is(err, fetch.ErrSourceNotAvailable) {
+		isCommonError = true
+		return c.Reply().
+			Hint(c.InteractionID()).
+			Component(discordgo.ActionsRow{Components: []discordgo.MessageComponent{common.ButtonJoinPrimaryGuild(c.Localize("buttons_have_a_question_question"))}}).
+			Send("wargaming_error_outage")
+	}
+
 	button := discordgo.ActionsRow{
 		Components: []discordgo.MessageComponent{
 			common.ButtonJoinPrimaryGuild(c.localize("buttons_have_a_question_question")),
