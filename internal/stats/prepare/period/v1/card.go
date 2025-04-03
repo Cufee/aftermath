@@ -21,7 +21,7 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 	}
 
 	var cards Cards
-	if stats.RatingBattles.Battles > 0 && options.VehicleID == "" {
+	if stats.RatingBattles.Battles > 0 && options.VehicleIDs == nil {
 		cards.Rating.Meta = stats.RatingBattles.Rating() != frame.InvalidValue
 		for _, column := range overviewBlocksRating {
 			var columnBlocks []common.StatsBlock[BlockData, string]
@@ -42,9 +42,9 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 	}
 
 	overviewUnrated := stats.RegularBattles.StatsFrame
-	if options.VehicleID != "" {
+	if len(options.VehicleIDs) == 1 {
 		overviewUnrated = frame.StatsFrame{}
-		if stats, ok := stats.RegularBattles.Vehicles[options.VehicleID]; ok {
+		if stats, ok := stats.RegularBattles.Vehicles[options.VehicleIDs[0]]; ok {
 			overviewUnrated = *stats.StatsFrame
 		}
 	}
@@ -62,16 +62,16 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 			columnBlocks = append(columnBlocks, block)
 		}
 
-		if options.VehicleID != "" {
-			glossary := glossary[options.VehicleID]
-			glossary.ID = options.VehicleID
+		if len(options.VehicleIDs) == 1 {
+			glossary := glossary[options.VehicleIDs[0]]
+			glossary.ID = options.VehicleIDs[0]
 			cards.Overview.Title = fmt.Sprintf("%s %s", logic.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
 		}
 		cards.Overview.Type = common.CardTypeOverview
 		cards.Overview.Blocks = append(cards.Overview.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
 	}
 
-	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 || options.VehicleID != "" {
+	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 || len(options.VehicleIDs) == 1 {
 		return cards, nil
 	}
 

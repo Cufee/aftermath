@@ -73,9 +73,6 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 			vehicles = append(vehicles, id)
 		}
 	}
-	if opts.VehicleID() != "" && !slices.Contains(vehicles, opts.VehicleID()) {
-		vehicles = append(vehicles, opts.VehicleID())
-	}
 
 	glossary, err := c.database.GetVehicles(ctx, vehicles)
 	if err != nil {

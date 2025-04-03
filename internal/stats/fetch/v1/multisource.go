@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"slices"
 	"sync"
 	"time"
 
@@ -208,8 +209,9 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		defer group.Done()
 
 		var vehicleIDs []string // nil array will return all vehicles
-		if options.vehicleID != "" {
-			vehicleIDs = append(vehicleIDs, options.vehicleID)
+		if options.vehicleIDs != nil && len(options.vehicleIDs) < 100 {
+			// wg only supports 100 vehicles IDs per request
+			vehicleIDs = options.vehicleIDs
 		}
 
 		vehicles = retry.Retry(func() ([]types.VehicleStatsFrame, error) {
@@ -218,6 +220,18 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 
 		if vehicles.Err != nil || len(vehicles.Data) < 1 || !options.withWN8 {
 			return
+		}
+
+		// manually filter vehicles for cases where the slice of ids was 100+
+		if options.vehicleIDs != nil && len(options.vehicleIDs) >= 100 {
+			var filtered []types.VehicleStatsFrame
+			for _, v := range vehicles.Data {
+				if !slices.Contains(options.vehicleIDs, fmt.Sprint(v.TankID)) {
+					continue
+				}
+				filtered = append(filtered, v)
+			}
+			vehicles.Data = filtered
 		}
 
 		var ids []string
@@ -319,12 +333,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		}
 		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s[0]}
 
-		var vehicles []string
-		if options.vehicleID != "" {
-			vehicles = append(vehicles, options.vehicleID)
-		}
-
-		v, err := c.database.GetVehicleSnapshots(ctx, id, vehicles, options.snapshotType, opts...)
+		v, err := c.database.GetVehicleSnapshots(ctx, id, options.vehicleIDs, options.snapshotType, opts...)
 		vehiclesSnapshots = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
 	}()
 
