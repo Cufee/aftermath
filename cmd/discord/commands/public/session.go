@@ -11,6 +11,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/glossary"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
@@ -33,7 +34,16 @@ func init() {
 				}
 
 				var accountID string
-				var opts = []stats.RequestOption{stats.WithWN8(), stats.WithVehicleID(options.TankID)}
+				var opts = []stats.RequestOption{stats.WithWN8()}
+				if options.TankID != "" {
+					opts = append(opts, stats.WithVehicleIDs(options.TankID))
+				}
+				if options.TankTier > 0 && options.TankTier <= 10 {
+					ids, ok := glossary.TierVehicleIDs(options.TankTier)
+					if ok {
+						opts = append(opts, stats.WithVehicleIDs(ids...))
+					}
+				}
 
 				ioptions := statsOptions{StatsOptions: options}
 

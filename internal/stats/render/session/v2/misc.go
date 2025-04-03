@@ -42,9 +42,6 @@ func newPlayerNameCard(account models.Account) *facepaint.Block {
 func newFooterCard(stats fetch.AccountStatsOverPeriod, cards session.Cards, opts common.Options) *facepaint.Block {
 	stl := styledFooterCard()
 	var footer []*facepaint.Block
-	if opts.VehicleID != "" {
-		footer = append(footer, facepaint.MustNewTextContent(stl.Options(), cards.Unrated.Overview.Title))
-	}
 
 	sessionTo := stats.PeriodEnd.Format("Jan 2, 2006")
 	sessionFromFormat := "Jan 2, 2006"

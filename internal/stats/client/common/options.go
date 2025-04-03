@@ -90,9 +90,6 @@ func (o requestOptions) RenderOpts(printer func(string) string) []common.Option 
 func (o requestOptions) PrepareOpts(printer func(string) string, locale language.Tag) []prepare.Option {
 	var popts []prepare.Option
 	popts = append(popts, prepare.WithPrinter(printer, locale))
-	if o.VehicleIDs != nil {
-		popts = append(popts, prepare.WithVehicleIDs(o.VehicleIDs...))
-	}
 	if o.vehicleTags != nil {
 		popts = append(popts, prepare.WithVehicleTags(o.vehicleTags...))
 	}

@@ -7,7 +7,6 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/stats/client/common"
-	v1 "github.com/cufee/aftermath/internal/stats/client/v1"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	period "github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/replay/v1"
@@ -18,8 +17,6 @@ import (
 var _ Client = &client{}
 
 type client struct {
-	v1 v1.Client
-
 	fetchClient fetch.Client
 	wargaming   wargaming.Client
 	database    database.Client
@@ -39,5 +36,5 @@ type Client interface {
 }
 
 func NewClient(fetch fetch.Client, database database.Client, wargaming wargaming.Client, locale language.Tag) Client {
-	return &client{v1.NewClient(fetch, database, wargaming, locale), fetch, wargaming, database, locale}
+	return &client{fetch, wargaming, database, locale}
 }

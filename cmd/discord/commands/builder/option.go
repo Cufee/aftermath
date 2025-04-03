@@ -2,7 +2,6 @@ package builder
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/common"
@@ -109,7 +108,7 @@ func (o Option) Build(command string) discordgo.ApplicationCommandOption {
 	}
 
 	return discordgo.ApplicationCommandOption{
-		Name:                     strings.ToLower(stringOr(nameLocalized[discordgo.EnglishUS], o.name)),
+		Name:                     o.name,
 		Description:              stringOr(descLocalized[discordgo.EnglishUS], o.name),
 		Autocomplete:             o.autocomplete,
 		NameLocalizations:        nameLocalized,

@@ -23,7 +23,7 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 		// when there are 3 vehicle cards and no rating overview cards or there are 6 vehicle cards and some rating battles
 		shouldRenderUnratedHighlights = (sessionData.RegularBattles.Battles > 0 && sessionData.RatingBattles.Battles < 1 && len(cards.Unrated.Vehicles) > renderUnratedVehiclesCount) ||
 			(sessionData.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 3)
-		shouldRenderRatingOverview = sessionData.RatingBattles.Battles > 0 && opts.VehicleID == ""
+		shouldRenderRatingOverview = sessionData.RatingBattles.Battles > 0
 		// secondary cards
 		shouldRenderUnratedVehicles = sessionData.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 0
 	)
