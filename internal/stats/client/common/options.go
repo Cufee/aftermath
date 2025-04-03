@@ -16,6 +16,7 @@ type requestOptions struct {
 	backgroundURL      string
 	backgroundIsCustom bool
 	referenceID        string
+	footerText         []string
 	promoText          []string
 	withWN8            bool
 	VehicleIDs         []string
@@ -56,6 +57,9 @@ func WithReferenceID(refID string) RequestOption {
 func WithPromoText(text ...string) RequestOption {
 	return func(o *requestOptions) { o.promoText = append(o.promoText, text...) }
 }
+func WithFooterText(text ...string) RequestOption {
+	return func(o *requestOptions) { o.footerText = append(o.footerText, text...) }
+}
 func WithType(t models.SnapshotType) RequestOption {
 	return func(o *requestOptions) { o.snapshotType = t }
 }
@@ -70,6 +74,9 @@ func (o requestOptions) RenderOpts(printer func(string) string) []common.Option 
 	var copts []common.Option
 	if o.promoText != nil {
 		copts = append(copts, common.WithPromoText(o.promoText...))
+	}
+	if o.footerText != nil {
+		copts = append(copts, common.WithFooterText(o.footerText...))
 	}
 	if o.VehicleIDs != nil {
 		copts = append(copts, common.WithVehicleIDs(o.VehicleIDs...))

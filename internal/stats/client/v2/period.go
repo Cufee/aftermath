@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/glossary"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/client/common"
@@ -64,13 +65,6 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 	cards, err := prepare.NewCards(stats, glossary, opts.PrepareOpts(printer, r.locale)...)
 	stop()
 
-	if len(opts.VehicleIDs) == 1 {
-		for _, id := range opts.VehicleIDs {
-			vehicle := glossary[id]
-			cards.Overview.Meta = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(r.locale))
-		}
-	}
-
 	return cards, meta, err
 }
 
@@ -85,6 +79,13 @@ func (r *client) PeriodImage(ctx context.Context, accountId string, from time.Ti
 	printer, err := localization.NewPrinterWithFallback("stats", r.locale)
 	if err != nil {
 		return nil, meta, err
+	}
+
+	if len(opts.VehicleIDs) == 1 {
+		for _, id := range opts.VehicleIDs {
+			vehicle, _ := glossary.GetVehicleFromCache(r.locale, id)
+			common.WithFooterText(fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(r.locale)))(&opts)
+		}
 	}
 
 	stop := meta.Timer("render#CardsToImage")

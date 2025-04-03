@@ -91,13 +91,16 @@ func (o StatsOptions) Validate(ctx common.Context) (string, bool) {
 func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataOption) StatsOptions {
 	var options StatsOptions
 
-	tier, _ := common.GetOption[float64](data, "tier")
-	options.TankTier = int(tier)
-
 	options.TankSearch, _ = common.GetOption[string](data, "tank")
 	if strings.HasPrefix(options.TankSearch, "valid#vehicle#") {
 		options.TankID = strings.TrimPrefix(options.TankSearch, "valid#vehicle#")
 	}
+
+	tier, ok := common.GetOption[float64](data, "tier")
+	if ok && options.TankID == "" {
+		options.TankTier = int(tier)
+	}
+
 	options.NicknameSearch, _ = common.GetOption[string](data, "nickname")
 	if strings.HasPrefix(options.NicknameSearch, "valid#account#") {
 		data := strings.Split(strings.TrimPrefix(options.NicknameSearch, "valid#account#"), "#")
@@ -124,8 +127,9 @@ func ValidatePlayerName(name string) bool {
 func buildTierChoices() []builder.OptionChoice {
 	var opts []builder.OptionChoice
 	for i := range 10 {
-		roman := logic.IntToRoman(i + 1)
-		opts = append(opts, builder.NewChoice(fmt.Sprintf("tier_%s", roman), i+1).Params(builder.SetNameKey(fmt.Sprintf("common_label_tier_%d", i+1))))
+		tier := 10 - i
+		roman := logic.IntToRoman(tier)
+		opts = append(opts, builder.NewChoice(fmt.Sprintf("tier_%s", roman), tier).Params(builder.SetNameKey(fmt.Sprintf("common_label_tier_%d", tier))))
 	}
 	return opts
 }

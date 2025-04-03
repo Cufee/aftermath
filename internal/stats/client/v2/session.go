@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/glossary"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/client/common"
@@ -90,13 +91,6 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 		return session.Cards{}, meta, err
 	}
 
-	if len(opts.VehicleIDs) == 1 {
-		for _, id := range opts.VehicleIDs {
-			vehicle := glossary[id]
-			cards.Unrated.Overview.Meta = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(c.locale))
-		}
-	}
-
 	return cards, meta, nil
 }
 
@@ -111,6 +105,13 @@ func (c *client) SessionImage(ctx context.Context, accountId string, from time.T
 	printer, err := localization.NewPrinterWithFallback("stats", c.locale)
 	if err != nil {
 		return nil, meta, err
+	}
+
+	if len(opts.VehicleIDs) == 1 {
+		for _, id := range opts.VehicleIDs {
+			vehicle, _ := glossary.GetVehicleFromCache(c.locale, id)
+			common.WithFooterText(fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(c.locale)))(&opts)
+		}
 	}
 
 	stop := meta.Timer("render#CardsToImage")

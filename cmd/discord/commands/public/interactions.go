@@ -311,7 +311,7 @@ func init() {
 				if ioptions.TankTier > 0 && ioptions.TankTier <= 10 {
 					ids, ok := glossary.TierVehicleIDs(ioptions.TankTier)
 					if ok {
-						opts = append(opts, stats.WithVehicleIDs(ids...))
+						opts = append(opts, stats.WithVehicleIDs(ids...), stats.WithFooterText(ctx.Localize(fmt.Sprintf("common_label_tier_%d", ioptions.TankTier))))
 					}
 				}
 

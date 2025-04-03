@@ -39,7 +39,7 @@ func careerCommandHandler(ctx common.Context) error {
 	if options.TankTier > 0 && options.TankTier <= 10 {
 		ids, ok := glossary.TierVehicleIDs(options.TankTier)
 		if ok {
-			opts = append(opts, stats.WithVehicleIDs(ids...))
+			opts = append(opts, stats.WithVehicleIDs(ids...), stats.WithFooterText(ctx.Localize(fmt.Sprintf("common_label_tier_%d", options.TankTier))))
 		}
 	}
 
