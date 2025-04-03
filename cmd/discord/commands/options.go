@@ -53,7 +53,7 @@ var SessionStatsOptions = []builder.Option{
 	DaysOption,
 	NicknameOption,
 	VehicleOption,
-	// VehicleTierOption,
+	VehicleTierOption,
 	UserOption,
 }
 
