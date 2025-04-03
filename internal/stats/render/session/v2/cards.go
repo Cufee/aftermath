@@ -23,7 +23,7 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 		// when there are 3 vehicle cards and no rating overview cards or there are 6 vehicle cards and some rating battles
 		shouldRenderUnratedHighlights = (sessionData.RegularBattles.Battles > 0 && sessionData.RatingBattles.Battles < 1 && len(cards.Unrated.Vehicles) > renderUnratedVehiclesCount) ||
 			(sessionData.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 3)
-		shouldRenderRatingOverview = sessionData.RatingBattles.Battles > 0 && opts.VehicleID == ""
+		shouldRenderRatingOverview = sessionData.RatingBattles.Battles > 0 && opts.VehicleIDs == nil
 		// secondary cards
 		shouldRenderUnratedVehicles = sessionData.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 0
 	)
@@ -34,6 +34,9 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 	}
 	if shouldRenderRatingOverview {
 		renderUnratedVehiclesCount += 1
+	}
+	if len(opts.VehicleIDs) == 1 {
+		renderUnratedVehiclesCount = 0
 	}
 
 	// calculate max overview block width to make all blocks the same size
@@ -138,7 +141,7 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 
 	var frameCards []*facepaint.Block
 	frameCards = append(frameCards, cardsFrame)
-	frameCards = append(frameCards, newFooterCard(sessionData, cards, opts))
+	frameCards = append(frameCards, newFooterCard(sessionData, cards, opts, cards.Unrated.Overview.Title))
 
 	return facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledFinalFrame)), frameCards...), nil
 }

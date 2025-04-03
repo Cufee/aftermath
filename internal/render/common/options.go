@@ -8,7 +8,7 @@ import (
 )
 
 type Options struct {
-	VehicleID          string
+	VehicleIDs         []string
 	PromoText          []string
 	Background         image.Image
 	BackgroundIsCustom bool
@@ -26,9 +26,9 @@ func WithPromoText(text ...string) Option {
 		o.PromoText = text
 	}
 }
-func WithVehicleID(vid string) Option {
+func WithVehicleIDs(vid ...string) Option {
 	return func(o *Options) {
-		o.VehicleID = vid
+		o.VehicleIDs = vid
 	}
 }
 

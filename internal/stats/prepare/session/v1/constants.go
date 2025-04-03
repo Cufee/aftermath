@@ -11,12 +11,6 @@ var unratedOverviewBlocks = []common.TagColumn[string]{
 	{Tags: []common.Tag{common.TagAvgTier, common.TagAvgDamage}, Meta: string(BlockFlavorDefault)},
 }
 
-var unratedOverviewBlocksSingleVehicle = []common.TagColumn[string]{
-	{Tags: []common.Tag{common.TagBattles, common.TagWinrate}, Meta: string(BlockFlavorDefault)},
-	{Tags: []common.Tag{common.TagWN8}, Meta: string(BlockFlavorWN8)},
-	{Tags: []common.Tag{common.TagDamageRatio, common.TagAvgDamage}, Meta: string(BlockFlavorDefault)},
-}
-
 var ratingOverviewBlocks = []common.TagColumn[string]{
 	{Tags: []common.Tag{common.TagBattles, common.TagWinrate}, Meta: string(BlockFlavorDefault)},
 	{Tags: []common.Tag{common.TagRankedRating}, Meta: string(BlockFlavorRating)},
@@ -38,8 +32,7 @@ type UnratedCards struct {
 }
 
 type RatingCards struct {
-	Overview OverviewCard  `json:"overview"`
-	Vehicles []VehicleCard `json:"vehicles"`
+	Overview OverviewCard `json:"overview"`
 }
 
 type OverviewColumn struct {

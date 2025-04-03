@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
 
@@ -17,7 +19,6 @@ var DaysOption = builder.NewOption("days", discordgo.ApplicationCommandOptionInt
 	Min(1).
 	Max(90).
 	Params(
-		builder.SetNameKey("common_option_stats_days_name"),
 		builder.SetDescKey("common_option_stats_days_description"),
 	)
 
@@ -26,22 +27,25 @@ var VehicleOption = builder.NewOption("tank", discordgo.ApplicationCommandOption
 	Min(3).
 	Max(64).
 	Params(
-		builder.SetNameKey("common_option_stats_tank_name"),
 		builder.SetDescKey("common_option_stats_tank_description"),
 	)
+
+var VehicleTierOption = builder.NewOption("tier", discordgo.ApplicationCommandOptionInteger).
+	Params(
+		builder.SetDescKey("common_option_stats_tank_tier_description"),
+	).
+	Choices(buildTierChoices()...)
 
 var NicknameOption = builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
 	Autocomplete().
 	Min(3).
 	Max(64).
 	Params(
-		builder.SetNameKey("common_option_stats_nickname_name"),
 		builder.SetDescKey("common_option_stats_nickname_description"),
 	)
 
 var UserOption = builder.NewOption("user", discordgo.ApplicationCommandOptionUser).
 	Params(
-		builder.SetNameKey("common_option_stats_user_name"),
 		builder.SetDescKey("common_option_stats_user_description"),
 	)
 
@@ -49,12 +53,14 @@ var SessionStatsOptions = []builder.Option{
 	DaysOption,
 	NicknameOption,
 	VehicleOption,
+	VehicleTierOption,
 	UserOption,
 }
 
 var CareerStatsOptions = []builder.Option{
 	NicknameOption,
 	VehicleOption,
+	VehicleTierOption,
 	UserOption,
 }
 
@@ -67,6 +73,7 @@ type StatsOptions struct {
 	UserID         string
 	TankSearch     string
 	TankID         string
+	TankTier       int
 }
 
 func (o StatsOptions) Validate(ctx common.Context) (string, bool) {
@@ -83,6 +90,9 @@ func (o StatsOptions) Validate(ctx common.Context) (string, bool) {
 
 func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataOption) StatsOptions {
 	var options StatsOptions
+
+	tier, _ := common.GetOption[float64](data, "tier")
+	options.TankTier = int(tier)
 
 	options.TankSearch, _ = common.GetOption[string](data, "tank")
 	if strings.HasPrefix(options.TankSearch, "valid#vehicle#") {
@@ -109,4 +119,13 @@ func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataO
 
 func ValidatePlayerName(name string) bool {
 	return len(name) > 3 && len(name) < 24 && strings.HasPrefix(name, "valid#account#") || !validNameRegex.MatchString(name)
+}
+
+func buildTierChoices() []builder.OptionChoice {
+	var opts []builder.OptionChoice
+	for i := range 10 {
+		roman := logic.IntToRoman(i + 1)
+		opts = append(opts, builder.NewChoice(fmt.Sprintf("tier_%s", roman), i+1).Params(builder.SetNameKey(fmt.Sprintf("common_label_tier_%d", i+1))))
+	}
+	return opts
 }
