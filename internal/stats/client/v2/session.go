@@ -3,11 +3,13 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
@@ -86,6 +88,13 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	stop()
 	if err != nil {
 		return session.Cards{}, meta, err
+	}
+
+	if len(opts.VehicleIDs) == 1 {
+		for _, id := range opts.VehicleIDs {
+			vehicle := glossary[id]
+			cards.Unrated.Overview.Title = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(c.locale))
+		}
 	}
 
 	return cards, meta, nil

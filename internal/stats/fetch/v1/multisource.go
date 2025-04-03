@@ -408,7 +408,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 
 	// compute total from selected/all vehicles
 	if options.VehicleIDs != nil {
-		session.RegularBattles.StatsFrame = vehiclesToOverview(session.RegularBattles.Vehicles)
+		session.RegularBattles.StatsFrame = VehiclesToFrame(session.RegularBattles.Vehicles)
 	} else {
 		session.RegularBattles.StatsFrame.Subtract(accountSnapshot.Data.RegularBattles)
 	}

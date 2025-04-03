@@ -72,6 +72,19 @@ func TestRenderPeriodV2(t *testing.T) {
 		err = image.PNG(f)
 		assert.NoError(t, err, "failed to encode a png image")
 	})
+
+	t.Run("render period image with no vehicles", func(t *testing.T) {
+		image, _, err := stats.PeriodImage(context.Background(), tests.DefaultAccountNAShort, time.Now(), common.WithBackgroundURL(bgImage, bgIsCustom), common.WithVehicleIDs("-"), common.WithWN8())
+		assert.NoError(t, err, "failed to render a session image")
+		assert.NotNil(t, image, "image is nil")
+
+		f, err := os.Create("tmp/render_test_period_v2_none_small.png")
+		assert.NoError(t, err, "failed to create a file")
+		defer f.Close()
+
+		err = image.PNG(f)
+		assert.NoError(t, err, "failed to encode a png image")
+	})
 }
 
 func TestRenderSessionV2(t *testing.T) {

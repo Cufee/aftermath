@@ -39,12 +39,11 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 		cards.Rating.Blocks = append(cards.Rating.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
 	}
 
-	overviewUnrated := stats.RegularBattles.StatsFrame
 	for _, column := range overviewBlocks {
 		var columnBlocks []common.StatsBlock[BlockData, string]
 		for _, preset := range column.Tags {
 			var block common.StatsBlock[BlockData, string]
-			b, err := presetToBlock(preset, overviewUnrated, stats.RegularBattles.Vehicles, glossary)
+			b, err := presetToBlock(preset, stats.RegularBattles.StatsFrame, stats.RegularBattles.Vehicles, glossary)
 			if err != nil {
 				return Cards{}, err
 			}
@@ -56,13 +55,6 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 
 		cards.Overview.Type = common.CardTypeOverview
 		cards.Overview.Blocks = append(cards.Overview.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
-	}
-
-	if len(stats.RegularBattles.Vehicles) == 1 {
-		for id := range stats.RegularBattles.Vehicles {
-			vehicle := glossary[id]
-			cards.Overview.Meta = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
-		}
 	}
 
 	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 {

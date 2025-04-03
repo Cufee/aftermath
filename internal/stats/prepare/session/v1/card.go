@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"slices"
 
 	"github.com/cufee/aftermath/cmd/frontend/assets"
@@ -85,13 +84,6 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 			return Cards{}, err
 		}
 		cards.Unrated.Overview = card
-
-		if len(session.RegularBattles.Vehicles) == 1 {
-			for id := range session.RegularBattles.Vehicles {
-				vehicle := glossary[id]
-				cards.Unrated.Overview.Meta = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
-			}
-		}
 	}
 
 	{ // Regular battles vehicles

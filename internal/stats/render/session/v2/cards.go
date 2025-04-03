@@ -139,14 +139,9 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 		)
 	}
 
-	var label string
-	if len(opts.VehicleIDs) == 1 {
-		label = cards.Unrated.Overview.Meta
-	}
-
 	var frameCards []*facepaint.Block
 	frameCards = append(frameCards, cardsFrame)
-	frameCards = append(frameCards, newFooterCard(sessionData, cards, opts, label))
+	frameCards = append(frameCards, newFooterCard(sessionData, cards, opts, cards.Unrated.Overview.Title))
 
 	return facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledFinalFrame)), frameCards...), nil
 }

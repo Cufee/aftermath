@@ -2,11 +2,13 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period/v1"
@@ -61,6 +63,13 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 	stop = meta.Timer("prepare#NewCards")
 	cards, err := prepare.NewCards(stats, glossary, opts.PrepareOpts(printer, r.locale)...)
 	stop()
+
+	if len(opts.VehicleIDs) == 1 {
+		for _, id := range opts.VehicleIDs {
+			vehicle := glossary[id]
+			cards.Overview.Title = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(r.locale))
+		}
+	}
 
 	return cards, meta, err
 }

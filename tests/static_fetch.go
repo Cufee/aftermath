@@ -67,12 +67,13 @@ func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts .
 
 		RegularBattles: fetch.StatsWithVehicles{
 			Vehicles:   vehicles,
-			StatsFrame: DefaultStatsFrameBig1,
-		},
-		RatingBattles: fetch.StatsWithVehicles{
-			StatsFrame: DefaultStatsFrameBig2,
+			StatsFrame: fetch.VehiclesToFrame(vehicles),
 		},
 	}
+	if options.VehicleIDs == nil {
+		stats.RatingBattles.StatsFrame = DefaultStatsFrameBig2
+	}
+
 	stats.RegularBattles.SetWN8(9999)
 	return stats, nil
 }
@@ -87,8 +88,13 @@ func (c *staticTestingFetch) PeriodStats(ctx context.Context, id string, from ti
 
 	current.PeriodStart = from
 	current.RegularBattles.SetWN8(9999)
-	current.RegularBattles.StatsFrame.Subtract(DefaultStatsFrameSmall1)
-	current.RatingBattles.StatsFrame.Subtract(DefaultStatsFrameSmall2)
+
+	if len(current.RegularBattles.Vehicles) > 0 {
+		current.RegularBattles.StatsFrame.Subtract(DefaultStatsFrameSmall1)
+	}
+	if len(current.RatingBattles.Vehicles) > 0 {
+		current.RatingBattles.StatsFrame.Subtract(DefaultStatsFrameSmall2)
+	}
 
 	for id, stats := range current.RegularBattles.Vehicles {
 		if options.VehicleIDs != nil && !slices.Contains(options.VehicleIDs, id) {
