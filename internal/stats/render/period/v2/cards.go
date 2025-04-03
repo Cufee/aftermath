@@ -110,7 +110,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 		return nil, errors.New("no cards to render")
 	}
 
-	footer := newFooterCard(stats, cards, opts, cards.Overview.Title)
+	footer := newFooterCard(stats, cards, opts, cards.Overview.Meta)
 	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsFrame)), statsCards...)
 
 	// resize and place background

@@ -93,7 +93,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	if len(opts.VehicleIDs) == 1 {
 		for _, id := range opts.VehicleIDs {
 			vehicle := glossary[id]
-			cards.Unrated.Overview.Title = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(c.locale))
+			cards.Unrated.Overview.Meta = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(c.locale))
 		}
 	}
 

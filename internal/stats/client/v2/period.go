@@ -67,7 +67,7 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 	if len(opts.VehicleIDs) == 1 {
 		for _, id := range opts.VehicleIDs {
 			vehicle := glossary[id]
-			cards.Overview.Title = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(r.locale))
+			cards.Overview.Meta = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(r.locale))
 		}
 	}
 

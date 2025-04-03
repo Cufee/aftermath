@@ -141,7 +141,7 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 
 	var frameCards []*facepaint.Block
 	frameCards = append(frameCards, cardsFrame)
-	frameCards = append(frameCards, newFooterCard(sessionData, cards, opts, cards.Unrated.Overview.Title))
+	frameCards = append(frameCards, newFooterCard(sessionData, cards, opts, cards.Unrated.Overview.Meta))
 
 	return facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledFinalFrame)), frameCards...), nil
 }
