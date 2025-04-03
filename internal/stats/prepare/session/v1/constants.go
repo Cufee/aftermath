@@ -32,8 +32,7 @@ type UnratedCards struct {
 }
 
 type RatingCards struct {
-	Overview OverviewCard  `json:"overview"`
-	Vehicles []VehicleCard `json:"vehicles"`
+	Overview OverviewCard `json:"overview"`
 }
 
 type OverviewColumn struct {

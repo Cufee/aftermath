@@ -105,11 +105,50 @@ func TestRenderSessionV2(t *testing.T) {
 	})
 
 	t.Run("render session image for large nickname and no vehicles", func(t *testing.T) {
-		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithVehicleIDs("0"), options.WithWN8())
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithVehicleIDs("-"), options.WithWN8())
 		assert.NoError(t, err, "failed to render a session image")
 		assert.NotNil(t, image, "image is nil")
 
-		f, err := os.Create("tmp/render_test_session_single_large.png")
+		f, err := os.Create("tmp/render_test_session_0_large.png")
+		assert.NoError(t, err, "failed to create a file")
+		defer f.Close()
+
+		err = image.PNG(f)
+		assert.NoError(t, err, "failed to encode a png image")
+	})
+
+	t.Run("render session image for large nickname and 1 vehicle", func(t *testing.T) {
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithVehicleIDs("1"), options.WithWN8())
+		assert.NoError(t, err, "failed to render a session image")
+		assert.NotNil(t, image, "image is nil")
+
+		f, err := os.Create("tmp/render_test_session_1_large.png")
+		assert.NoError(t, err, "failed to create a file")
+		defer f.Close()
+
+		err = image.PNG(f)
+		assert.NoError(t, err, "failed to encode a png image")
+	})
+
+	t.Run("render session image for large nickname and 3 vehicles", func(t *testing.T) {
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithVehicleIDs("1", "2", "3"), options.WithWN8())
+		assert.NoError(t, err, "failed to render a session image")
+		assert.NotNil(t, image, "image is nil")
+
+		f, err := os.Create("tmp/render_test_session_3_large.png")
+		assert.NoError(t, err, "failed to create a file")
+		defer f.Close()
+
+		err = image.PNG(f)
+		assert.NoError(t, err, "failed to encode a png image")
+	})
+
+	t.Run("render session image for large nickname and 5 vehicles", func(t *testing.T) {
+		image, _, err := stats.SessionImage(context.Background(), tests.DefaultAccountNA, time.Now(), options.WithBackgroundURL(bgImage, bgIsCustom), options.WithVehicleIDs("1", "2", "3", "4", "5"), options.WithWN8())
+		assert.NoError(t, err, "failed to render a session image")
+		assert.NotNil(t, image, "image is nil")
+
+		f, err := os.Create("tmp/render_test_session_5_large.png")
 		assert.NoError(t, err, "failed to create a file")
 		defer f.Close()
 

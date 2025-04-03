@@ -209,24 +209,24 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		defer group.Done()
 
 		var vehicleIDs []string // nil array will return all vehicles
-		if options.vehicleIDs != nil && len(options.vehicleIDs) < 100 {
+		if options.VehicleIDs != nil && len(options.VehicleIDs) < 100 {
 			// wg only supports 100 vehicles IDs per request
-			vehicleIDs = options.vehicleIDs
+			vehicleIDs = options.VehicleIDs
 		}
 
 		vehicles = retry.Retry(func() ([]types.VehicleStatsFrame, error) {
 			return c.wargaming.AccountVehicles(ctx, realm, id, vehicleIDs)
 		}, c.retriesPerRequest, c.retrySleepInterval)
 
-		if vehicles.Err != nil || len(vehicles.Data) < 1 || !options.withWN8 {
+		if vehicles.Err != nil || len(vehicles.Data) < 1 || !options.WithWN8 {
 			return
 		}
 
 		// manually filter vehicles for cases where the slice of ids was 100+
-		if options.vehicleIDs != nil && len(options.vehicleIDs) >= 100 {
+		if options.VehicleIDs != nil && len(options.VehicleIDs) >= 100 {
 			var filtered []types.VehicleStatsFrame
 			for _, v := range vehicles.Data {
-				if !slices.Contains(options.vehicleIDs, fmt.Sprint(v.TankID)) {
+				if !slices.Contains(options.VehicleIDs, fmt.Sprint(v.TankID)) {
 					continue
 				}
 				filtered = append(filtered, v)
@@ -257,7 +257,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 	}
 
 	stats := WargamingToStats(realm, account.Data, clan, vehicles.Data)
-	if options.withWN8 {
+	if options.WithWN8 {
 		stats.AddWN8(averages.Data)
 	}
 
@@ -278,7 +278,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 }
 
 func (c *multiSourceClient) SessionStats(ctx context.Context, id string, sessionStart time.Time, opts ...StatsOption) (AccountStatsOverPeriod, AccountStatsOverPeriod, error) {
-	var options = statsOptions{snapshotType: models.SnapshotTypeDaily, referenceID: id}
+	var options = statsOptions{SnapshotType: models.SnapshotTypeDaily, ReferenceID: id}
 	for _, apply := range opts {
 		apply(&options)
 	}
@@ -302,7 +302,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		stats, err := c.CurrentStats(ctx, id, opts...)
 		current = retry.DataWithErr[AccountStatsOverPeriod]{Data: stats, Err: err}
 
-		if err != nil || stats.RegularBattles.Battles < 1 || !options.withWN8 {
+		if err != nil || stats.RegularBattles.Battles < 1 || !options.WithWN8 {
 			return
 		}
 
@@ -317,12 +317,12 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	group.Add(1)
 	go func() {
 		var opts = []database.Query{database.WithCreatedBefore(sessionBefore)}
-		if options.referenceID != "" {
-			opts = append(opts, database.WithReferenceIDIn(options.referenceID))
+		if options.ReferenceID != "" {
+			opts = append(opts, database.WithReferenceIDIn(options.ReferenceID))
 		}
 
 		defer group.Done()
-		s, err := c.database.GetAccountSnapshots(ctx, []string{id}, options.snapshotType, opts...)
+		s, err := c.database.GetAccountSnapshots(ctx, []string{id}, options.SnapshotType, opts...)
 		if err != nil {
 			accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Err: err}
 			return
@@ -333,7 +333,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		}
 		accountSnapshot = retry.DataWithErr[models.AccountSnapshot]{Data: s[0]}
 
-		v, err := c.database.GetVehicleSnapshots(ctx, id, options.vehicleIDs, options.snapshotType, opts...)
+		v, err := c.database.GetVehicleSnapshots(ctx, id, options.VehicleIDs, options.SnapshotType, opts...)
 		vehiclesSnapshots = retry.DataWithErr[[]models.VehicleSnapshot]{Data: v, Err: err}
 	}()
 
@@ -353,11 +353,16 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		log.Err(averages.Err).Msg("failed to get tank averages")
 	}
 
+	if options.VehicleIDs != nil {
+		// if vehicle ids are set, there is not enough data to show rating stats
+		current.Data.RatingBattles = StatsWithVehicles{}
+		accountSnapshot.Data.RatingBattles = frame.StatsFrame{}
+	}
+
 	session := current.Data
 	session.PeriodEnd = time.Now()
 	session.PeriodStart = accountSnapshot.Data.LastBattleTime
 	session.RatingBattles.StatsFrame.Subtract(accountSnapshot.Data.RatingBattles)
-	session.RegularBattles.StatsFrame.Subtract(accountSnapshot.Data.RegularBattles)
 	session.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, len(current.Data.RegularBattles.Vehicles))
 
 	career := AccountStatsOverPeriod{
@@ -369,21 +374,21 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	}
 	career.Account.LastBattleTime = accountSnapshot.Data.LastBattleTime
 	career.RatingBattles.StatsFrame = accountSnapshot.Data.RatingBattles
-	career.RegularBattles.StatsFrame = accountSnapshot.Data.RegularBattles
 	career.RatingBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, 0)
 	career.RegularBattles.Vehicles = make(map[string]frame.VehicleStatsFrame, len(vehiclesSnapshots.Data))
 
+	// save career vehicle stats and make a snapshots map
 	snapshotsMap := make(map[string]*models.VehicleSnapshot, len(vehiclesSnapshots.Data))
 	for _, data := range vehiclesSnapshots.Data {
-		snapshotsMap[data.VehicleID] = &data
-
 		career.RegularBattles.Vehicles[data.VehicleID] = frame.VehicleStatsFrame{
 			LastBattleTime: data.LastBattleTime,
 			VehicleID:      data.VehicleID,
 			StatsFrame:     &data.Stats,
 		}
+		snapshotsMap[data.VehicleID] = &data
 	}
 
+	// compute per vehicle sessions
 	for id, current := range current.Data.RegularBattles.Vehicles {
 		snapshot, exists := snapshotsMap[id]
 		if !exists {
@@ -401,7 +406,14 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		session.RegularBattles.Vehicles[id] = sessionFrame
 	}
 
-	if options.withWN8 {
+	// compute total from selected/all vehicles
+	if options.VehicleIDs != nil {
+		session.RegularBattles.StatsFrame = vehiclesToOverview(session.RegularBattles.Vehicles)
+	} else {
+		session.RegularBattles.StatsFrame.Subtract(accountSnapshot.Data.RegularBattles)
+	}
+
+	if options.WithWN8 {
 		career.AddWN8(averages.Data)
 		session.AddWN8(averages.Data)
 	}

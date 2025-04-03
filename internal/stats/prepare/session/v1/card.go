@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/cufee/aftermath/cmd/frontend/assets"
@@ -84,34 +85,12 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 			return Cards{}, err
 		}
 		cards.Unrated.Overview = card
-	}
 
-	{ // Rating battles vehicles
-		var ratingVehicles []frame.VehicleStatsFrame
-		for _, vehicle := range session.RatingBattles.Vehicles {
-			ratingVehicles = append(ratingVehicles, vehicle)
-		}
-		slices.SortFunc(ratingVehicles, func(a, b frame.VehicleStatsFrame) int {
-			return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
-		})
-		for _, data := range ratingVehicles {
-			if len(cards.Rating.Vehicles) >= 10 {
-				break
+		if len(session.RegularBattles.Vehicles) == 1 {
+			for id := range session.RegularBattles.Vehicles {
+				vehicle := glossary[id]
+				cards.Unrated.Overview.Meta = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
 			}
-
-			card, err := builder.makeVehicleCard(
-				data.VehicleID,
-				[]common.Tag{common.TagWN8},
-				common.CardTypeRatingVehicle,
-				data,
-				career.RatingBattles.Vehicles[data.VehicleID],
-				options.Printer(),
-				options.Locale(),
-			)
-			if err != nil {
-				return Cards{}, err
-			}
-			cards.Rating.Vehicles = append(cards.Rating.Vehicles, card)
 		}
 	}
 

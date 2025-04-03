@@ -21,24 +21,22 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 	}
 
 	var cards Cards
-	if stats.RatingBattles.Battles > 0 {
-		cards.Rating.Meta = stats.RatingBattles.Rating() != frame.InvalidValue
-		for _, column := range overviewBlocksRating {
-			var columnBlocks []common.StatsBlock[BlockData, string]
-			for _, preset := range column.Tags {
-				var block common.StatsBlock[BlockData, string]
-				b, err := presetToBlock(preset, stats.RatingBattles.StatsFrame, stats.RatingBattles.Vehicles, glossary)
-				if err != nil {
-					return Cards{}, err
-				}
-				block = b
-
-				block.Localize(options.Printer())
-				columnBlocks = append(columnBlocks, block)
+	cards.Rating.Meta = stats.RatingBattles.Rating() != frame.InvalidValue
+	for _, column := range overviewBlocksRating {
+		var columnBlocks []common.StatsBlock[BlockData, string]
+		for _, preset := range column.Tags {
+			var block common.StatsBlock[BlockData, string]
+			b, err := presetToBlock(preset, stats.RatingBattles.StatsFrame, stats.RatingBattles.Vehicles, glossary)
+			if err != nil {
+				return Cards{}, err
 			}
-			cards.Rating.Type = common.CardTypeOverview
-			cards.Rating.Blocks = append(cards.Rating.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
+			block = b
+
+			block.Localize(options.Printer())
+			columnBlocks = append(columnBlocks, block)
 		}
+		cards.Rating.Type = common.CardTypeOverview
+		cards.Rating.Blocks = append(cards.Rating.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
 	}
 
 	overviewUnrated := stats.RegularBattles.StatsFrame
@@ -58,6 +56,13 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 
 		cards.Overview.Type = common.CardTypeOverview
 		cards.Overview.Blocks = append(cards.Overview.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
+	}
+
+	if len(stats.RegularBattles.Vehicles) == 1 {
+		for id := range stats.RegularBattles.Vehicles {
+			vehicle := glossary[id]
+			cards.Overview.Meta = fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(options.Locale()))
+		}
 	}
 
 	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 {
