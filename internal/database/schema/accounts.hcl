@@ -168,6 +168,9 @@ table "account_snapshot" {
   index "account_snapshot_type_account_id_created_at_idx" {
     columns = [column.type, column.account_id, column.created_at]
   }
+  index "account_snapshot_account_id_type_reference_id_created_at_idx" {
+    columns = [column.account_id, column.type, column.reference_id, column.created_at]
+  }
   index "account_snapshot_type_account_id_reference_id_created_at_idx" {
     columns = [column.type, column.account_id, column.reference_id, column.created_at]
   }
@@ -231,6 +234,9 @@ table "account_achievements_snapshot" {
   }
   index "account_achievements_snapshot_type_account_id_created_at_idx" {
     columns = [column.type, column.account_id, column.created_at]
+  }
+  index "account_achievements_snapshot_account_id_type_reference_id_created_at_idx" {
+    columns = [column.account_id, column.type, column.reference_id, column.created_at]
   }
   index "account_achievements_snapshot_type_account_id_reference_id_created_at_idx" {
     columns = [column.type, column.account_id, column.reference_id, column.created_at]
@@ -300,6 +306,9 @@ table "vehicle_snapshot" {
   index "vehicle_snapshot_type_account_id_created_at_idx" {
     columns = [column.type, column.account_id, column.created_at]
   }
+  index "vehicle_snapshot_vehicle_id_type_reference_id_created_at_idx" {
+      columns = [column.vehicle_id, column.type, column.reference_id, column.created_at]
+  }
   index "vehicle_snapshot_type_account_id_vehicle_id_created_at_idx" {
     columns = [column.type, column.account_id, column.vehicle_id, column.created_at]
   }
@@ -310,7 +319,6 @@ table "vehicle_snapshot" {
     columns = [column.vehicle_id, column.reference_id, column.created_at]
   }
 }
-
 
 table "vehicle_achievements_snapshot" {
   schema = schema.main
@@ -371,6 +379,9 @@ table "vehicle_achievements_snapshot" {
   }
   index "vehicle_achievements_snapshot_type_account_id_created_at_idx" {
     columns = [column.type, column.account_id, column.created_at]
+  }
+  index "vehicle_achievements_snapshot_vehicle_id_type_reference_id_created_at_idx" {
+    columns = [column.vehicle_id, column.type, column.reference_id, column.created_at]
   }
   index "vehicle_achievements_snapshot_type_account_id_vehicle_id_created_at_idx" {
     columns = [column.type, column.account_id, column.vehicle_id, column.created_at]

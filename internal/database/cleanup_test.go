@@ -61,7 +61,7 @@ func TestSnapshotCleanup(t *testing.T) {
 
 		err := client.CreateVehicleSnapshots(context.Background(), &expired, &notExpired)
 		is.NoErr(err)
-		err = client.DeleteExpiredSnapshots(context.Background(), notExpiredTime.Add(time.Minute*-1))
+		_, err = client.DeleteExpiredSnapshots(context.Background(), notExpiredTime.Add(time.Minute*-1))
 		is.NoErr(err)
 		{
 			survived, err := client.GetVehicleSnapshots(context.Background(), accountID, nil, models.SnapshotTypeDaily)
@@ -96,7 +96,7 @@ func TestSnapshotCleanup(t *testing.T) {
 
 		err := client.CreateVehicleSnapshots(context.Background(), &expired)
 		is.NoErr(err)
-		err = client.DeleteExpiredSnapshots(context.Background(), expiredTime.Add(time.Hour))
+		_, err = client.DeleteExpiredSnapshots(context.Background(), expiredTime.Add(time.Hour))
 		is.NoErr(err)
 
 		survived, err := client.GetVehicleSnapshots(context.Background(), accountID, nil, models.SnapshotTypeDaily)
