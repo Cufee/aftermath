@@ -11,7 +11,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
-	common "github.com/cufee/aftermath/internal/render/v1"
+	"github.com/cufee/aftermath/internal/render/common"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
 	"golang.org/x/text/language"

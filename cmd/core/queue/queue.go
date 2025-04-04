@@ -36,7 +36,7 @@ func New(workerLimit int, newCoreClient func() (core.Client, error)) *queue {
 		handlers:      make(map[models.TaskType]tasks.TaskHandler, 10),
 
 		workerLimit:   workerLimit,
-		workerTimeout: time.Second * 60, // a single cron scheduler cycle
+		workerTimeout: time.Minute * 5,
 		workerLimiter: make(chan struct{}, workerLimit),
 
 		activeTasksMx: &sync.Mutex{},

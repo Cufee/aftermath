@@ -152,8 +152,8 @@ func (c *staticTestingDatabase) GetVehicleSnapshots(ctx context.Context, account
 func (c *staticTestingDatabase) CreateVehicleSnapshots(ctx context.Context, snapshots ...*models.VehicleSnapshot) error {
 	return errors.New("CreateVehicleSnapshots not implemented")
 }
-func (c *staticTestingDatabase) DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) error {
-	return errors.New("DeleteExpiredSnapshots not implemented")
+func (c *staticTestingDatabase) DeleteExpiredSnapshots(ctx context.Context, expiration time.Time) (int, error) {
+	return 0, errors.New("DeleteExpiredSnapshots not implemented")
 }
 
 func (c *staticTestingDatabase) CreateTasks(ctx context.Context, tasks ...models.Task) error {

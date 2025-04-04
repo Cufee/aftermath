@@ -11,11 +11,12 @@ const (
 	debugOverviewCards = false
 
 	iconSizeWN8    = 54.0
-	iconSizeRating = 54.0
+	iconSizeRating = 60.0
 )
 
 type blockStyle struct {
 	wrapper        style.Style
+	iconWrapper    style.Style
 	valueContainer style.Style
 	value          style.Style
 	label          style.Style
@@ -23,7 +24,6 @@ type blockStyle struct {
 
 type overviewCardStyle struct {
 	card       style.Style
-	column     style.Style
 	styleBlock func(block prepare.StatsBlock[session.BlockData, string]) blockStyle
 }
 
@@ -46,26 +46,80 @@ var styledOverviewCard = overviewCardStyle{
 		BorderRadiusBottomLeft:  common.BorderRadiusLG,
 		BorderRadiusBottomRight: common.BorderRadiusLG,
 
-		GrowHorizontal: true,
-		Gap:            15,
-
 		PaddingLeft:   cardPaddingX,
 		PaddingRight:  cardPaddingX,
-		PaddingTop:    cardPaddingY,
-		PaddingBottom: cardPaddingY,
-	},
-	column: style.Style{
-		Debug: debugOverviewCards,
+		PaddingTop:    cardPaddingY / 2,
+		PaddingBottom: cardPaddingY / 2,
 
-		Direction:      style.DirectionVertical,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentSpaceAround,
-		GrowVertical:   true,
-		Gap:            10,
+		GrowHorizontal: true,
+		Gap:            15,
 	},
 }
 
+func (overviewCardStyle) column(column session.OverviewColumn) style.Style {
+	switch column.Flavor {
+	case session.BlockFlavorRating, session.BlockFlavorWN8:
+		return style.Style{
+			Debug: debugOverviewCards,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+			// GrowVertical:   true,
+			GrowHorizontal: true,
+
+			BorderRadiusTopLeft:     common.BorderRadiusSM,
+			BorderRadiusTopRight:    common.BorderRadiusSM,
+			BorderRadiusBottomLeft:  common.BorderRadiusSM,
+			BorderRadiusBottomRight: common.BorderRadiusSM,
+
+			PaddingLeft:   10,
+			PaddingRight:  10,
+			PaddingTop:    cardPaddingY / 2,
+			PaddingBottom: cardPaddingY / 2,
+
+			Gap: 15,
+		}
+	default:
+		return style.Style{
+			Debug: debugOverviewCards,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+			Gap:            15,
+
+			PaddingTop:    cardPaddingY / 2,
+			PaddingBottom: cardPaddingY / 2,
+		}
+	}
+}
+
 func styleOverviewBlock(block prepare.StatsBlock[session.BlockData, string]) blockStyle {
+	defaultStyle := blockStyle{
+		wrapper: style.Style{},
+		valueContainer: style.Style{
+			Debug: debugOverviewCards,
+
+			Gap: 6,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+		},
+		value: style.Style{
+			Debug: debugOverviewCards,
+
+			Color: common.TextPrimary,
+			Font:  common.FontLarge(),
+		},
+		label: style.Style{
+			Color:      common.TextAlt,
+			Font:       common.FontSmall(),
+			PaddingTop: -5,
+		},
+	}
+
 	switch block.Tag {
 	case prepare.TagWN8, prepare.TagRankedRating:
 		return blockStyle{
@@ -75,7 +129,9 @@ func styleOverviewBlock(block prepare.StatsBlock[session.BlockData, string]) blo
 				Direction:      style.DirectionVertical,
 				AlignItems:     style.AlignItemsCenter,
 				JustifyContent: style.JustifyContentCenter,
-				Gap:            15,
+				Gap:            10,
+
+				GrowVertical: true,
 			},
 			valueContainer: style.Style{
 				Debug: debugOverviewCards,
@@ -99,27 +155,7 @@ func styleOverviewBlock(block prepare.StatsBlock[session.BlockData, string]) blo
 			},
 		}
 	default:
-		return blockStyle{
-			wrapper: style.Style{},
-			valueContainer: style.Style{
-				Debug: debugOverviewCards,
-
-				Direction:      style.DirectionVertical,
-				AlignItems:     style.AlignItemsCenter,
-				JustifyContent: style.JustifyContentCenter,
-			},
-			value: style.Style{
-				Debug: debugOverviewCards,
-
-				Color: common.TextPrimary,
-				Font:  common.FontLarge(),
-			},
-			label: style.Style{
-				Color:      common.TextAlt,
-				Font:       common.FontSmall(),
-				PaddingTop: -5,
-			},
-		}
+		return defaultStyle
 	}
 }
 

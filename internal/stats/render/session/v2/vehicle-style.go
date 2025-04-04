@@ -8,31 +8,39 @@ import (
 const (
 	debugVehicleCards = false
 
-	vehicleIconSizeWN8 = 20.0
+	vehicleIconSizeWN8 = 16.0
 )
 
 type vehicleCardStyle struct {
-	card         style.StyleOptions
-	titleWrapper style.StyleOptions
-	titleText    func() style.StyleOptions
+	card             style.StyleOptions
+	titleIconWrapper style.StyleOptions
+	titleWrapper     style.StyleOptions
+	titleText        func() style.StyleOptions
 
-	stats style.StyleOptions
-	value func(float64) *style.Style
+	stats        style.StyleOptions
+	value        func() *style.Style
+	valueWrapper func(float64) *style.Style
 }
 
 var styledVehicleLegendPillWrapper = style.NewStyle(style.Parent(style.Style{
 	Direction:      style.DirectionHorizontal,
-	JustifyContent: style.JustifyContentSpaceAround,
+	JustifyContent: style.JustifyContentSpaceBetween,
 	Gap:            5,
 }))
 
-func styledVehicleLegendPill() *style.Style {
-	return &style.Style{
+func styledVehicleLegendPill(width float64) style.StyleOptions {
+	return style.NewStyle(style.Parent(style.Style{
 		Debug: debugVehicleCards,
+		Width: width,
 
-		Color: common.TextAlt,
-		Font:  common.FontSmall(),
+		JustifyContent: style.JustifyContentCenter,
+	}))
+}
 
+func styledVehicleLegendPillText() *style.Style {
+	return &style.Style{
+		Color:           common.TextAlt,
+		Font:            common.FontSmall(),
 		BackgroundColor: common.DefaultCardColor,
 		BlurBackground:  cardBackgroundBlur,
 
@@ -71,17 +79,19 @@ var styledVehicleCard = vehicleCardStyle{
 		PaddingBottom: cardPaddingY / 2,
 	})),
 
+	titleIconWrapper: style.NewStyle(style.Parent(style.Style{})),
 	titleWrapper: style.NewStyle(style.Parent(style.Style{
-		Debug: debugVehicleCards,
+		Debug:      debugVehicleCards,
+		AlignItems: style.AlignItemsCenter,
 
 		GrowHorizontal: true,
 		Gap:            10,
-		JustifyContent: style.JustifyContentSpaceBetween,
 	})),
 	titleText: func() style.StyleOptions {
 		return style.NewStyle(style.Parent(style.Style{
-			Color: common.TextSecondary,
-			Font:  common.FontMedium(),
+			Color:          common.TextSecondary,
+			Font:           common.FontMedium(),
+			GrowHorizontal: true,
 		}))
 	},
 
@@ -93,13 +103,18 @@ var styledVehicleCard = vehicleCardStyle{
 		GrowHorizontal: true,
 		Gap:            10,
 	})),
-	value: func(width float64) *style.Style {
+	value: func() *style.Style {
 		return &style.Style{
-			Width:          width,
 			Color:          common.TextPrimary,
 			Font:           common.FontLarge(),
-			GrowHorizontal: true,
 			JustifyContent: style.JustifyContentCenter,
+		}
+	},
+	valueWrapper: func(width float64) *style.Style {
+		return &style.Style{
+			Width:          width,
+			JustifyContent: style.JustifyContentCenter,
+			AlignItems:     style.AlignItemsCenter,
 		}
 	},
 }

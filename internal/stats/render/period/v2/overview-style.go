@@ -11,7 +11,7 @@ const (
 	debugOverviewCards = false
 
 	iconSizeWN8    = 54.0
-	iconSizeRating = 54.0
+	iconSizeRating = 64.0
 )
 
 type blockStyle struct {
@@ -23,7 +23,6 @@ type blockStyle struct {
 
 type overviewCardStyle struct {
 	card       style.Style
-	column     style.Style
 	styleBlock func(block prepare.StatsBlock[period.BlockData, string]) blockStyle
 }
 
@@ -32,15 +31,6 @@ type overviewCardStyle struct {
 var styledRatingOverviewCard = overviewCardStyle{
 	styleBlock: styleRatingOverviewBlock,
 	card:       styledUnratedOverviewCard.card,
-	column: style.Style{
-		Debug: debugOverviewCards,
-
-		Direction:      style.DirectionVertical,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentCenter,
-		GrowVertical:   false,
-		Gap:            10,
-	},
 }
 
 func styleRatingOverviewBlock(block prepare.StatsBlock[period.BlockData, string]) blockStyle {
@@ -79,22 +69,47 @@ var styledUnratedOverviewCard = overviewCardStyle{
 		BorderRadiusBottomRight: common.BorderRadiusLG,
 
 		GrowHorizontal: true,
-		Gap:            15,
+		Gap:            10,
 
 		PaddingLeft:   cardPaddingX,
 		PaddingRight:  cardPaddingX,
-		PaddingTop:    cardPaddingY,
-		PaddingBottom: cardPaddingY,
+		PaddingTop:    cardPaddingY / 2,
+		PaddingBottom: cardPaddingY / 2,
 	},
-	column: style.Style{
-		Debug: debugOverviewCards,
+}
 
-		Direction:      style.DirectionVertical,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentCenter,
-		GrowVertical:   true,
-		Gap:            10,
-	},
+func (overviewCardStyle) column(column period.OverviewColumn) style.Style {
+	switch column.Flavor {
+	case period.BlockFlavorSpecial:
+		return style.Style{
+			Debug: debugOverviewCards,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+			GrowVertical:   true,
+			GrowHorizontal: true,
+			Gap:            15,
+
+			PaddingLeft:   10,
+			PaddingRight:  10,
+			PaddingTop:    cardPaddingY / 2,
+			PaddingBottom: cardPaddingY / 2,
+		}
+	default:
+		return style.Style{
+			Debug: debugOverviewCards,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+			GrowVertical:   false,
+			Gap:            10,
+
+			PaddingTop:    cardPaddingY / 2,
+			PaddingBottom: cardPaddingY / 2,
+		}
+	}
 }
 
 func styleUnratedOverviewBlock(block prepare.StatsBlock[period.BlockData, string]) blockStyle {

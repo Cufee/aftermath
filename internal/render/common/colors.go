@@ -14,7 +14,7 @@ var (
 	TextSubscriptionPlus    = color.NRGBA{72, 167, 250, 255}
 	TextSubscriptionPremium = color.NRGBA{255, 223, 0, 255}
 
-	DefaultCardColor        = color.NRGBA{10, 10, 10, 150}
+	DefaultCardColor        = color.NRGBA{0, 0, 0, 170}
 	DefaultCardColorNoAlpha = color.NRGBA{10, 10, 10, 255}
 	ClanTagBackgroundColor  = color.NRGBA{10, 10, 10, 100}
 

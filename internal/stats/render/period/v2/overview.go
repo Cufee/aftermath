@@ -48,8 +48,8 @@ func newOverviewColumn(stl overviewCardStyle, data period.OverviewColumn, column
 	}
 	// column
 	return facepaint.NewBlocksContent(style.NewStyle(
-		style.Parent(stl.column),
-		style.SetWidth(columnWidth),
+		style.Parent(stl.column(data)),
+		style.SetMinWidth(columnWidth),
 	), columnBlocks...)
 }
 

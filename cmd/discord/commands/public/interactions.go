@@ -19,6 +19,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
+	"github.com/cufee/aftermath/internal/glossary"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
@@ -303,7 +304,16 @@ func init() {
 					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
 				}
 
-				var opts = []stats.RequestOption{stats.WithWN8(), stats.WithVehicleID(ioptions.TankID)}
+				var opts = []stats.RequestOption{stats.WithWN8()}
+				if ioptions.TankID != "" {
+					opts = append(opts, stats.WithVehicleIDs(ioptions.TankID))
+				}
+				if ioptions.TankTier > 0 && ioptions.TankTier <= 10 {
+					ids, ok := glossary.TierVehicleIDs(ioptions.TankTier)
+					if ok {
+						opts = append(opts, stats.WithVehicleIDs(ids...), stats.WithFooterText(ctx.Localize(fmt.Sprintf("common_label_tier_%d", ioptions.TankTier))))
+					}
+				}
 
 				if ioptions.BackgroundID != "" {
 					background, _ := ctx.Core().Database().GetUserContent(ctx.Ctx(), ioptions.BackgroundID)

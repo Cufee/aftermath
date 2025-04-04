@@ -66,31 +66,39 @@ type Client interface {
 }
 
 type statsOptions struct {
-	withWN8      bool
-	vehicleID    string
-	referenceID  string
-	snapshotType models.SnapshotType
+	WithWN8      bool
+	VehicleIDs   []string
+	ReferenceID  string
+	SnapshotType models.SnapshotType
 }
 
 type StatsOption func(*statsOptions)
 
+func ParseOptions(opts []StatsOption) statsOptions {
+	var o statsOptions
+	for _, apply := range opts {
+		apply(&o)
+	}
+	return o
+}
+
 func WithWN8() StatsOption {
 	return func(so *statsOptions) {
-		so.withWN8 = true
+		so.WithWN8 = true
 	}
 }
 func WithType(sType models.SnapshotType) StatsOption {
 	return func(so *statsOptions) {
-		so.snapshotType = sType
+		so.SnapshotType = sType
 	}
 }
 func WithReferenceID(reference string) StatsOption {
 	return func(so *statsOptions) {
-		so.referenceID = reference
+		so.ReferenceID = reference
 	}
 }
-func WithVehicleID(id string) StatsOption {
+func WithVehicleIDs(ids ...string) StatsOption {
 	return func(so *statsOptions) {
-		so.vehicleID = id
+		so.VehicleIDs = ids
 	}
 }

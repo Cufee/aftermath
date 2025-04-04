@@ -9,7 +9,6 @@ func DefaultOptions() options {
 }
 
 type options struct {
-	VehicleID     string
 	localePrinter func(string) string
 	locale        *language.Tag
 
@@ -36,9 +35,6 @@ type Option func(*options)
 
 func WithPrinter(printer func(string) string, locale language.Tag) func(*options) {
 	return func(o *options) { o.localePrinter = printer; o.locale = &locale }
-}
-func WithVehicleID(vid string) func(*options) {
-	return func(o *options) { o.VehicleID = vid }
 }
 func WithVehicleTags(tags ...Tag) func(*options) {
 	return func(o *options) { o.VehicleTags = tags }

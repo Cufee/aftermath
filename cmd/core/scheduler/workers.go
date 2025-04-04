@@ -15,9 +15,9 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/github"
+	"github.com/cufee/aftermath/internal/glossary"
 	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/log"
-	"github.com/cufee/aftermath/internal/search"
 )
 
 func CreateCleanupTaskWorker(client core.Client) func() {
@@ -157,7 +157,7 @@ func UpdateGlossaryWorker(client core.Client) func() {
 		// load new glossary into the search memory cache
 		cctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
-		err = search.RefreshVehicleCache(cctx, client.Database())
+		err = glossary.RefreshVehicleCache(cctx, client.Database())
 		if err != nil {
 			log.Err(err).Msg("failed to refresh glossary cache")
 			return

@@ -13,9 +13,9 @@ services:
     deploy:
       resources:
         reservations:
-          memory: 1024m
+          memory: 2048m
         limits:
-          memory: 1024m
+          memory: 2048m
 
   aftermath-service-base:
     pull_policy: always
@@ -33,9 +33,9 @@ services:
       # go runtime will try to keep memory usage right under the container limit
       resources:
         reservations:
-          memory: 256m
+          memory: 1024m
         limits:
-          memory: 256m
+          memory: 1024m
 
   aftermath-collector-base:
     image: ghcr.io/cufee/aftermath-collector:${ENVIRONMENT}
