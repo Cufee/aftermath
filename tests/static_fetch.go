@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"slices"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database/models"
@@ -39,6 +40,8 @@ func (c *staticTestingFetch) BroadSearch(ctx context.Context, nickname string, l
 	return nil, nil
 }
 func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts ...fetch.StatsOption) (fetch.AccountStatsOverPeriod, error) {
+	options := fetch.ParseOptions(opts)
+
 	account, err := c.Account(ctx, id)
 	if err != nil {
 		return fetch.AccountStatsOverPeriod{}, err
@@ -46,6 +49,9 @@ func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts .
 
 	var vehicles = make(map[string]frame.VehicleStatsFrame)
 	for id := range 10 {
+		if options.VehicleIDs != nil && !slices.Contains(options.VehicleIDs, fmt.Sprint(id)) {
+			continue
+		}
 		f := DefaultVehicleStatsFrameBig1(fmt.Sprint(id))
 		f.SetWN8(9999)
 		vehicles[fmt.Sprint(id)] = f
@@ -61,17 +67,20 @@ func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts .
 
 		RegularBattles: fetch.StatsWithVehicles{
 			Vehicles:   vehicles,
-			StatsFrame: DefaultStatsFrameBig1,
-		},
-		RatingBattles: fetch.StatsWithVehicles{
-			StatsFrame: DefaultStatsFrameBig2,
+			StatsFrame: fetch.VehiclesToFrame(vehicles),
 		},
 	}
+	if options.VehicleIDs == nil {
+		stats.RatingBattles.StatsFrame = DefaultStatsFrameBig2
+	}
+
 	stats.RegularBattles.SetWN8(9999)
 	return stats, nil
 }
 
 func (c *staticTestingFetch) PeriodStats(ctx context.Context, id string, from time.Time, opts ...fetch.StatsOption) (fetch.AccountStatsOverPeriod, error) {
+	options := fetch.ParseOptions(opts)
+
 	current, err := c.CurrentStats(ctx, id, opts...)
 	if err != nil {
 		return fetch.AccountStatsOverPeriod{}, err
@@ -79,10 +88,18 @@ func (c *staticTestingFetch) PeriodStats(ctx context.Context, id string, from ti
 
 	current.PeriodStart = from
 	current.RegularBattles.SetWN8(9999)
-	current.RegularBattles.StatsFrame.Subtract(DefaultStatsFrameSmall1)
-	current.RatingBattles.StatsFrame.Subtract(DefaultStatsFrameSmall2)
+
+	if len(current.RegularBattles.Vehicles) > 0 {
+		current.RegularBattles.StatsFrame.Subtract(DefaultStatsFrameSmall1)
+	}
+	if len(current.RatingBattles.Vehicles) > 0 {
+		current.RatingBattles.StatsFrame.Subtract(DefaultStatsFrameSmall2)
+	}
 
 	for id, stats := range current.RegularBattles.Vehicles {
+		if options.VehicleIDs != nil && !slices.Contains(options.VehicleIDs, id) {
+			continue
+		}
 		stats.SetWN8(9999)
 		stats.StatsFrame.Subtract(DefaultStatsFrameSmall1)
 		current.RegularBattles.Vehicles[id] = stats
@@ -103,6 +120,7 @@ func (c *staticTestingFetch) SessionStats(ctx context.Context, id string, sessio
 	career.RegularBattles.SetWN8(rand.Int() % 4000)
 
 	for id, stats := range session.RegularBattles.Vehicles {
+
 		stats.SetWN8(rand.Int() % 4000)
 		session.RegularBattles.Vehicles[id] = stats
 	}

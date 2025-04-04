@@ -33,13 +33,15 @@ func WargamingToAccount(realm types.Realm, account types.ExtendedAccount, clan t
 }
 
 func WargamingToStats(realm types.Realm, accountData types.ExtendedAccount, clanMember types.ClanMember, vehicleData []types.VehicleStatsFrame) AccountStatsOverPeriod {
+	unratedVehicles := WargamingVehiclesToFrame(vehicleData)
+
 	stats := AccountStatsOverPeriod{
 		Realm: realm,
 		// we got the stats, so the account is obv not private at this point
 		Account: WargamingToAccount(realm, accountData, clanMember, false),
 		RegularBattles: StatsWithVehicles{
-			StatsFrame: WargamingToFrame(accountData.Statistics.All),
-			Vehicles:   WargamingVehiclesToFrame(vehicleData),
+			StatsFrame: VehiclesToFrame(unratedVehicles),
+			Vehicles:   unratedVehicles,
 		},
 		RatingBattles: StatsWithVehicles{
 			StatsFrame: WargamingToFrame(accountData.Statistics.Rating),
@@ -55,6 +57,14 @@ func WargamingToStats(realm types.Realm, accountData types.ExtendedAccount, clan
 	}
 
 	return stats
+}
+
+func VehiclesToFrame(vehicles map[string]frame.VehicleStatsFrame) frame.StatsFrame {
+	var frame frame.StatsFrame
+	for _, v := range vehicles {
+		frame.Add(*v.StatsFrame)
+	}
+	return frame
 }
 
 func WargamingToFrame(wg types.StatsFrame) frame.StatsFrame {

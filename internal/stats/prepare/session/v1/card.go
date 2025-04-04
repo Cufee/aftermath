@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"slices"
 
 	"github.com/cufee/aftermath/cmd/frontend/assets"
@@ -45,25 +44,23 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		}
 
 		// Rating battles overview
-		if options.VehicleID == "" {
-			card, err := builder.makeOverviewCard(
-				ratingColumns,
-				session.RatingBattles.StatsFrame,
-				career.RatingBattles.StatsFrame,
-				"label_overview_rating",
-				options.Printer(),
-				func(t common.Tag) common.Tag {
-					if t == common.TagWN8 {
-						return common.TagRankedRating
-					}
-					return t
-				},
-			)
-			if err != nil {
-				return Cards{}, err
-			}
-			cards.Rating.Overview = card
+		card, err := builder.makeOverviewCard(
+			ratingColumns,
+			session.RatingBattles.StatsFrame,
+			career.RatingBattles.StatsFrame,
+			"label_overview_rating",
+			options.Printer(),
+			func(t common.Tag) common.Tag {
+				if t == common.TagWN8 {
+					return common.TagRankedRating
+				}
+				return t
+			},
+		)
+		if err != nil {
+			return Cards{}, err
 		}
+		cards.Rating.Overview = card
 	}
 	{ // Regular battles overview
 		sessionFrame := session.RegularBattles.StatsFrame
@@ -73,27 +70,6 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		blocks := unratedOverviewBlocks
 		if options.UnratedColumns != nil {
 			blocks = options.UnratedColumns
-		}
-
-		if options.VehicleID != "" {
-			blocks = unratedOverviewBlocksSingleVehicle
-			if options.UnratedColumns != nil {
-				blocks = options.UnratedColumns
-			}
-
-			sessionFrame = frame.StatsFrame{}
-			careerFrame = frame.StatsFrame{}
-			s, ok := session.RegularBattles.Vehicles[options.VehicleID]
-			if ok {
-				sessionFrame = *s.StatsFrame
-			}
-			c, ok := career.RegularBattles.Vehicles[options.VehicleID]
-			if ok {
-				careerFrame = *c.StatsFrame
-			}
-			glossary := glossary[options.VehicleID]
-			glossary.ID = options.VehicleID
-			overviewLabel = fmt.Sprintf("%s %s", logic.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
 		}
 
 		card, err := builder.makeOverviewCard(
@@ -108,39 +84,6 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 			return Cards{}, err
 		}
 		cards.Unrated.Overview = card
-	}
-
-	if options.VehicleID != "" { // we don't vehicle cards if a specific vehicle was selected
-		return cards, nil
-	}
-
-	{ // Rating battles vehicles
-		var ratingVehicles []frame.VehicleStatsFrame
-		for _, vehicle := range session.RatingBattles.Vehicles {
-			ratingVehicles = append(ratingVehicles, vehicle)
-		}
-		slices.SortFunc(ratingVehicles, func(a, b frame.VehicleStatsFrame) int {
-			return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
-		})
-		for _, data := range ratingVehicles {
-			if len(cards.Rating.Vehicles) >= 10 {
-				break
-			}
-
-			card, err := builder.makeVehicleCard(
-				data.VehicleID,
-				[]common.Tag{common.TagWN8},
-				common.CardTypeRatingVehicle,
-				data,
-				career.RatingBattles.Vehicles[data.VehicleID],
-				options.Printer(),
-				options.Locale(),
-			)
-			if err != nil {
-				return Cards{}, err
-			}
-			cards.Rating.Vehicles = append(cards.Rating.Vehicles, card)
-		}
 	}
 
 	{ // Regular battles vehicles

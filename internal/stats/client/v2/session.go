@@ -3,11 +3,14 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/glossary"
 	"github.com/cufee/aftermath/internal/localization"
+	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
@@ -73,9 +76,6 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 			vehicles = append(vehicles, id)
 		}
 	}
-	if opts.VehicleID() != "" && !slices.Contains(vehicles, opts.VehicleID()) {
-		vehicles = append(vehicles, opts.VehicleID())
-	}
 
 	glossary, err := c.database.GetVehicles(ctx, vehicles)
 	if err != nil {
@@ -105,6 +105,13 @@ func (c *client) SessionImage(ctx context.Context, accountId string, from time.T
 	printer, err := localization.NewPrinterWithFallback("stats", c.locale)
 	if err != nil {
 		return nil, meta, err
+	}
+
+	if len(opts.VehicleIDs) == 1 {
+		for _, id := range opts.VehicleIDs {
+			vehicle, _ := glossary.GetVehicleFromCache(c.locale, id)
+			common.WithFooterText(fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(c.locale)))(&opts)
+		}
 	}
 
 	stop := meta.Timer("render#CardsToImage")

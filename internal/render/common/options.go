@@ -8,8 +8,9 @@ import (
 )
 
 type Options struct {
-	VehicleID          string
+	VehicleIDs         []string
 	PromoText          []string
+	FooterText         []string
 	Background         image.Image
 	BackgroundIsCustom bool
 	Printer            func(string) string
@@ -26,9 +27,14 @@ func WithPromoText(text ...string) Option {
 		o.PromoText = text
 	}
 }
-func WithVehicleID(vid string) Option {
+func WithFooterText(text ...string) Option {
 	return func(o *Options) {
-		o.VehicleID = vid
+		o.FooterText = text
+	}
+}
+func WithVehicleIDs(vid ...string) Option {
+	return func(o *Options) {
+		o.VehicleIDs = vid
 	}
 }
 

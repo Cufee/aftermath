@@ -13,9 +13,9 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/internal/database/models"
+	"github.com/cufee/aftermath/internal/glossary"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
-	"github.com/cufee/aftermath/internal/search"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 )
 
@@ -71,7 +71,7 @@ func init() {
 				options := commands.GetDefaultStatsOptions(ctx.Options())
 				// if the tank was already found, return the tank
 				if options.TankID != "" {
-					vehicle, ok := search.GetVehicleFromCache(ctx.Locale(), options.TankID)
+					vehicle, ok := glossary.GetVehicleFromCache(ctx.Locale(), options.TankID)
 					if !ok {
 						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"}).Send()
 					}
@@ -82,7 +82,7 @@ func init() {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_enough_length"), Value: "error#stats_autocomplete_not_enough_length"}).Send()
 				}
 
-				vehicles, ok := search.SearchVehicles(ctx.Locale(), options.TankSearch, 5)
+				vehicles, ok := glossary.SearchVehicles(ctx.Locale(), options.TankSearch, 5)
 				if !ok || len(vehicles) < 1 {
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"}).Send()
 				}

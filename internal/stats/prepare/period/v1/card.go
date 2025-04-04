@@ -21,38 +21,29 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 	}
 
 	var cards Cards
-	if stats.RatingBattles.Battles > 0 && options.VehicleID == "" {
-		cards.Rating.Meta = stats.RatingBattles.Rating() != frame.InvalidValue
-		for _, column := range overviewBlocksRating {
-			var columnBlocks []common.StatsBlock[BlockData, string]
-			for _, preset := range column.Tags {
-				var block common.StatsBlock[BlockData, string]
-				b, err := presetToBlock(preset, stats.RatingBattles.StatsFrame, stats.RatingBattles.Vehicles, glossary)
-				if err != nil {
-					return Cards{}, err
-				}
-				block = b
-
-				block.Localize(options.Printer())
-				columnBlocks = append(columnBlocks, block)
+	cards.Rating.Meta = stats.RatingBattles.Rating() != frame.InvalidValue
+	for _, column := range overviewBlocksRating {
+		var columnBlocks []common.StatsBlock[BlockData, string]
+		for _, preset := range column.Tags {
+			var block common.StatsBlock[BlockData, string]
+			b, err := presetToBlock(preset, stats.RatingBattles.StatsFrame, stats.RatingBattles.Vehicles, glossary)
+			if err != nil {
+				return Cards{}, err
 			}
-			cards.Rating.Type = common.CardTypeOverview
-			cards.Rating.Blocks = append(cards.Rating.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
+			block = b
+
+			block.Localize(options.Printer())
+			columnBlocks = append(columnBlocks, block)
 		}
+		cards.Rating.Type = common.CardTypeOverview
+		cards.Rating.Blocks = append(cards.Rating.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
 	}
 
-	overviewUnrated := stats.RegularBattles.StatsFrame
-	if options.VehicleID != "" {
-		overviewUnrated = frame.StatsFrame{}
-		if stats, ok := stats.RegularBattles.Vehicles[options.VehicleID]; ok {
-			overviewUnrated = *stats.StatsFrame
-		}
-	}
 	for _, column := range overviewBlocks {
 		var columnBlocks []common.StatsBlock[BlockData, string]
 		for _, preset := range column.Tags {
 			var block common.StatsBlock[BlockData, string]
-			b, err := presetToBlock(preset, overviewUnrated, stats.RegularBattles.Vehicles, glossary)
+			b, err := presetToBlock(preset, stats.RegularBattles.StatsFrame, stats.RegularBattles.Vehicles, glossary)
 			if err != nil {
 				return Cards{}, err
 			}
@@ -62,16 +53,11 @@ func NewCards(stats fetch.AccountStatsOverPeriod, glossary map[string]models.Veh
 			columnBlocks = append(columnBlocks, block)
 		}
 
-		if options.VehicleID != "" {
-			glossary := glossary[options.VehicleID]
-			glossary.ID = options.VehicleID
-			cards.Overview.Title = fmt.Sprintf("%s %s", logic.IntToRoman(glossary.Tier), glossary.Name(options.Locale()))
-		}
 		cards.Overview.Type = common.CardTypeOverview
 		cards.Overview.Blocks = append(cards.Overview.Blocks, OverviewColumn{columnBlocks, blockFlavor(column.Meta)})
 	}
 
-	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 || options.VehicleID != "" {
+	if len(stats.RegularBattles.Vehicles) < 1 || len(highlights) < 1 {
 		return cards, nil
 	}
 

@@ -16,9 +16,10 @@ type requestOptions struct {
 	backgroundURL      string
 	backgroundIsCustom bool
 	referenceID        string
+	footerText         []string
 	promoText          []string
-	vehicleID          string
 	withWN8            bool
+	VehicleIDs         []string
 	Subscriptions      []models.UserSubscription
 
 	vehicleTags    []prepare.Tag
@@ -28,9 +29,6 @@ type requestOptions struct {
 
 func (o requestOptions) ReferenceID() string {
 	return o.referenceID
-}
-func (o requestOptions) VehicleID() string {
-	return o.vehicleID
 }
 
 type RequestOption func(o *requestOptions)
@@ -50,14 +48,17 @@ func WithSubscriptions(subs []models.UserSubscription) RequestOption {
 func WithWN8() RequestOption {
 	return func(o *requestOptions) { o.withWN8 = true }
 }
-func WithVehicleID(vid string) RequestOption {
-	return func(o *requestOptions) { o.vehicleID = vid }
+func WithVehicleIDs(vid ...string) RequestOption {
+	return func(o *requestOptions) { o.VehicleIDs = vid }
 }
 func WithReferenceID(refID string) RequestOption {
 	return func(o *requestOptions) { o.referenceID = refID }
 }
 func WithPromoText(text ...string) RequestOption {
 	return func(o *requestOptions) { o.promoText = append(o.promoText, text...) }
+}
+func WithFooterText(text ...string) RequestOption {
+	return func(o *requestOptions) { o.footerText = append(o.footerText, text...) }
 }
 func WithType(t models.SnapshotType) RequestOption {
 	return func(o *requestOptions) { o.snapshotType = t }
@@ -74,8 +75,11 @@ func (o requestOptions) RenderOpts(printer func(string) string) []common.Option 
 	if o.promoText != nil {
 		copts = append(copts, common.WithPromoText(o.promoText...))
 	}
-	if o.vehicleID != "" {
-		copts = append(copts, common.WithVehicleID(o.vehicleID))
+	if o.footerText != nil {
+		copts = append(copts, common.WithFooterText(o.footerText...))
+	}
+	if o.VehicleIDs != nil {
+		copts = append(copts, common.WithVehicleIDs(o.VehicleIDs...))
 	}
 	if printer != nil {
 		copts = append(copts, common.WithPrinter(printer))
@@ -93,9 +97,6 @@ func (o requestOptions) RenderOpts(printer func(string) string) []common.Option 
 func (o requestOptions) PrepareOpts(printer func(string) string, locale language.Tag) []prepare.Option {
 	var popts []prepare.Option
 	popts = append(popts, prepare.WithPrinter(printer, locale))
-	if o.vehicleID != "" {
-		popts = append(popts, prepare.WithVehicleID(o.vehicleID))
-	}
 	if o.vehicleTags != nil {
 		popts = append(popts, prepare.WithVehicleTags(o.vehicleTags...))
 	}
@@ -119,8 +120,8 @@ func (o requestOptions) FetchOpts() []fetch.StatsOption {
 	if o.withWN8 {
 		opts = append(opts, fetch.WithWN8())
 	}
-	if o.vehicleID != "" {
-		opts = append(opts, fetch.WithVehicleID(o.vehicleID))
+	if o.VehicleIDs != nil {
+		opts = append(opts, fetch.WithVehicleIDs(o.VehicleIDs...))
 	}
 	return opts
 }

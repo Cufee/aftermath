@@ -22,34 +22,57 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 		return nil, errors.New("no cards provided")
 	}
 
+	var (
+		// renderUnratedVehiclesCount = 3 // minimum number of vehicle cards
+		shouldRenderUnratedOverview = stats.RegularBattles.Battles > 0 || stats.RatingBattles.Battles < 1
+		shouldRenderRatingOverview  = cards.Rating.Meta && stats.RatingBattles.Battles > 0 && opts.VehicleIDs == nil
+		highlightCardsCount         = 3
+	)
+	if shouldRenderRatingOverview {
+		highlightCardsCount = 1
+	}
+	if len(opts.VehicleIDs) == 1 {
+		highlightCardsCount = 0
+	}
+
 	// calculate max overview block width to make all blocks the same size
 	var maxWidthOverviewBlock = make(map[string]float64)
-	for _, column := range cards.Overview.Blocks {
-		for _, block := range column.Blocks {
-			switch block.Tag {
-			case prepare.TagWN8:
-				block.Label = common.GetWN8TierName(block.Value().Float())
-				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], iconSizeWN8)
+
+	if shouldRenderUnratedOverview {
+		for _, column := range cards.Overview.Blocks {
+			for _, block := range column.Blocks {
+				switch block.Tag {
+				case prepare.TagWN8:
+					block.Label = common.GetWN8TierName(block.Value().Float())
+					maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], iconSizeWN8)
+				}
+				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Label, styledUnratedOverviewCard.styleBlock(block).label.Font).TotalWidth)
+				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Value().String(), styledUnratedOverviewCard.styleBlock(block).value.Font).TotalWidth)
 			}
-			maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Label, styledUnratedOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Value().String(), styledUnratedOverviewCard.styleBlock(block).value.Font).TotalWidth)
 		}
 	}
-	for _, column := range cards.Rating.Blocks {
-		for _, block := range column.Blocks {
-			switch block.Tag {
-			case prepare.TagRankedRating:
-				block.Label = common.GetRatingTierName(block.Value().Float())
-				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], iconSizeRating)
+
+	if shouldRenderRatingOverview {
+		for _, column := range cards.Rating.Blocks {
+			for _, block := range column.Blocks {
+				switch block.Tag {
+				case prepare.TagRankedRating:
+					block.Label = common.GetRatingTierName(block.Value().Float())
+					maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], iconSizeRating)
+				}
+				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Label, styledRatingOverviewCard.styleBlock(block).label.Font).TotalWidth)
+				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Value().String(), styledRatingOverviewCard.styleBlock(block).value.Font).TotalWidth)
 			}
-			maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Label, styledRatingOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Value().String(), styledRatingOverviewCard.styleBlock(block).value.Font).TotalWidth)
 		}
 	}
 
 	// calculate per block type width of highlight stats to make things even
 	var highlightBlockWidth = make(map[prepare.Tag]float64)
-	for _, highlight := range cards.Highlights {
+	for i, highlight := range cards.Highlights {
+		if i >= highlightCardsCount {
+			break
+		}
+
 		for _, block := range highlight.Blocks {
 			label := facepaint.MeasureString(block.Label, styledHighlightCard.blockLabel().Font).TotalWidth
 			value := facepaint.MeasureString(block.Value().String(), styledHighlightCard.blockValue().Font).TotalWidth
@@ -61,20 +84,25 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 	// player name card
 	statsCards = append(statsCards, newPlayerNameCard(stats.Account))
 
-	if card := newUnratedOverviewCard(cards.Overview, maxWidthOverviewBlock); card != nil {
-		statsCards = append(statsCards, card)
+	if shouldRenderUnratedOverview {
+		if card := newUnratedOverviewCard(cards.Overview, maxWidthOverviewBlock); card != nil {
+			statsCards = append(statsCards, card)
+		}
 	}
 
 	// rating battles
-	if card := newRatingOverviewCard(cards.Rating, maxWidthOverviewBlock); cards.Rating.Meta && card != nil {
-		statsCards = append(statsCards, card)
+	if shouldRenderRatingOverview {
+		if card := newRatingOverviewCard(cards.Rating, maxWidthOverviewBlock); card != nil {
+			statsCards = append(statsCards, card)
+		}
 	}
 
 	// highlights
 	for i, card := range cards.Highlights {
-		if i > 0 && cards.Rating.Meta {
-			break // only show 1 highlight when rating battles card is visible
+		if i >= highlightCardsCount {
+			break
 		}
+
 		statsCards = append(statsCards, newHighlightCard(card, highlightBlockWidth))
 	}
 
@@ -83,8 +111,6 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 	}
 
 	footer := newFooterCard(stats, cards, opts)
-	// footerSize := footer.Dimensions()
-
 	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsFrame)), statsCards...)
 
 	// resize and place background

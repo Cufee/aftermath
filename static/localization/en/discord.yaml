@@ -189,6 +189,12 @@
 - key: common_option_stats_realm_description
   value: What server is this account on?
   context: Description for server command option, shown while typing a command
+# vehicle
+- key: common_option_stats_tank_description
+  value: Filter vehicles by name
+# vehicle tier
+- key: common_option_stats_tank_tier_description
+  value: Filter vehicles by tier
 
 # Common labels that are safe to use in multiple contexts
 - key: common_label_realm_na
@@ -211,6 +217,28 @@
   value: Have a Question?
 - key: buttons_submit
   value: Submit
+# tiers
+- key: common_label_tier_1
+  value: Tier I
+- key: common_label_tier_2
+  value: Tier II
+- key: common_label_tier_3
+  value: Tier III
+- key: common_label_tier_4
+  value: Tier IV
+- key: common_label_tier_5
+  value: Tier V
+- key: common_label_tier_6
+  value: Tier VI
+- key: common_label_tier_7
+  value: Tier VII
+- key: common_label_tier_8
+  value: Tier VIII
+- key: common_label_tier_9
+  value: Tier IX
+- key: common_label_tier_10
+  value: Tier X
+
 
 # Errors
 # permissions
