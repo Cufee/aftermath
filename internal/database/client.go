@@ -172,6 +172,12 @@ func NewPostgresClient(connString string, options ...ClientOption) (*client, err
 	if err != nil {
 		return nil, err
 	}
+	sqldb.SetMaxOpenConns(25)
+	sqldb.SetMaxIdleConns(10)
+
+	if err := sqldb.Ping(); err != nil {
+		return nil, err
+	}
 
 	return &client{
 		options: opts,
