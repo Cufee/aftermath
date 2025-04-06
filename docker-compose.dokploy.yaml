@@ -12,6 +12,8 @@ services:
       file: docker-compose.base.yaml
       service: aftermath-database-base
     restart: always
+    networks:
+      - dokploy-network
 
   aftermath-migrate:
     extends:
@@ -35,8 +37,6 @@ services:
         condition: service_completed_successfully
       aftermath-database:
         condition: service_healthy
-    links:
-      - aftermath-database
     expose:
       - 3000
     networks:
