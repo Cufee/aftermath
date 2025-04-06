@@ -25,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.migrate
-    command: migrate --config /atlas.hcl apply --env migrate
+    command: migrate apply --dir "file:///migrations" --tx-mode all --url "postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?sslmode=disable"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
