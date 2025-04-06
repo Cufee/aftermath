@@ -12,6 +12,8 @@ services:
       file: docker-compose.base.yaml
       service: aftermath-database-base
     restart: always
+    networks:
+      - dokploy-network
 
   aftermath-migrate:
     extends:
