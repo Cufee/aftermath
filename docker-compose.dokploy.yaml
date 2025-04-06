@@ -7,7 +7,7 @@ services:
     environment:
       - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
     networks:
-      - aftermath
+      - aftermath-internal
 
   aftermath-database:
     extends:
@@ -15,7 +15,7 @@ services:
       service: aftermath-database-base
     restart: always
     networks:
-      - aftermath
+      - aftermath-internal
 
   aftermath-migrate:
     extends:
@@ -25,7 +25,7 @@ services:
       aftermath-database:
         condition: service_started
     networks:
-      - aftermath
+      - aftermath-internal
 
   aftermath-service:
     extends:
@@ -43,12 +43,12 @@ services:
         condition: service_started
     networks:
       - dokploy-network
-      - aftermath
+      - aftermath-internal
     labels:
       - docker-volume-backup.stop-during-backup=true # https://hub.docker.com/r/offen/docker-volume-backup
 
 networks:
   dokploy-network:
     external: true
-  aftermath:
+  aftermath-internal:
     internal: true
