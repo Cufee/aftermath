@@ -80,22 +80,21 @@ func (c *client) DeleteExpiredSnapshots(ctx context.Context, expiration time.Tim
 }
 
 func snapshotCleanup(table string, idField string, expiration time.Time) (string, []any) {
-	time := models.TimeToString(expiration)
+	timeStr := models.TimeToString(expiration)
 	return fmt.Sprintf(`
-DELETE from %[1]s
+DELETE FROM %[1]s
 WHERE id IN (
-	SELECT id
-	FROM %[1]s AS snapshots_1
-	WHERE created_at < ?
-	AND (
-		EXISTS (
-			SELECT 1
-			FROM %[1]s AS snapshots_2
-			WHERE snapshots_1.%[2]s = snapshots_2.%[2]s
-			AND snapshots_1.reference_id = snapshots_2.reference_id
-			AND snapshots_1.type = snapshots_2.type
-			AND snapshots_2.created_at >= ?
-		)
-	)
-);`, table, idField, models.SnapshotTypeDaily), []any{time, time}
+    SELECT s1.id
+    FROM %[1]s AS s1
+    WHERE s1.created_at < $1
+    AND EXISTS (
+        SELECT 1
+        FROM %[1]s AS s2
+        WHERE s1.%[2]s = s2.%[2]s
+        AND s1.reference_id = s2.reference_id
+        AND s1.type = s2.type
+        AND s2.type = $3
+        AND s2.created_at >= $2
+    )
+)`, table, idField), []any{timeStr, timeStr, models.SnapshotTypeDaily}
 }

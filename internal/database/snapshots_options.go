@@ -66,7 +66,7 @@ func (q *baseQueryOptions) refIDIn() []string {
 }
 
 // build a complete query for vehicle snapshots
-func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy s.GroupByClause, query baseQueryOptions) s.Statement {
+func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotType, groupBy s.Column, query baseQueryOptions) s.Statement {
 	// required where constraints
 	var innerWhere []s.BoolExpression
 	innerWhere = append(innerWhere, column(t.VehicleSnapshot.Type).EQ(s.String(string(kind))), column(t.VehicleSnapshot.AccountID).EQ(s.String(accountID)))
@@ -92,17 +92,18 @@ func vehiclesQuery(accountID string, vehicleIDs []string, kind models.SnapshotTy
 	innerQuery := t.VehicleSnapshot.
 		SELECT(s.STAR).
 		WHERE(s.AND(innerWhere...)).
-		ORDER_BY(innerOrder).
+		ORDER_BY(groupBy, innerOrder).
 		AsTable(t.VehicleSnapshot.TableName())
 
 	return s.
 		SELECT(query.columns).
+		DISTINCT(groupBy).
 		FROM(innerQuery).
-		GROUP_BY(groupBy)
+		ORDER_BY(groupBy, innerOrder)
 }
 
 // build a complete query for account snapshot
-func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy s.GroupByClause, query baseQueryOptions) s.SelectStatement {
+func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy s.Column, query baseQueryOptions) s.SelectStatement {
 	var innerWhere []s.BoolExpression
 	innerWhere = append(innerWhere, column(t.AccountSnapshot.Type).EQ(s.String(string(kind))), column(t.AccountSnapshot.AccountID).IN(stringsToExp(accountIDs)...))
 
@@ -125,13 +126,14 @@ func accountsQuery(accountIDs []string, kind models.SnapshotType, groupBy s.Grou
 	innerQuery := t.AccountSnapshot.
 		SELECT(s.STAR).
 		WHERE(s.AND(innerWhere...)).
-		ORDER_BY(innerOrder).
+		ORDER_BY(groupBy, innerOrder).
 		AsTable(t.AccountSnapshot.TableName())
 
 	return s.
 		SELECT(query.columns).
+		DISTINCT(groupBy).
 		FROM(innerQuery).
-		GROUP_BY(groupBy)
+		ORDER_BY(groupBy, innerOrder)
 }
 
 type named interface {
