@@ -22,6 +22,8 @@ services:
     depends_on:
       aftermath-database:
         condition: service_healthy
+    networks:
+      - dokploy-network
 
   aftermath-service:
     extends:
