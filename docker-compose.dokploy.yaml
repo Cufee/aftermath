@@ -44,13 +44,11 @@ services:
     expose:
       - 3000
     networks:
-      - dokploy-network
       - aftermath-internal
-    labels:
-      - docker-volume-backup.stop-during-backup=true # https://hub.docker.com/r/offen/docker-volume-backup
+      - dokploy-network
 
 networks:
   dokploy-network:
     external: true
   aftermath-internal:
-    internal: true
+    driver: bridge
