@@ -12,10 +12,10 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/stats/frame"
-	"github.com/go-jet/jet/v2/sqlite"
+	pg "github.com/go-jet/jet/v2/postgres"
 	"golang.org/x/text/language"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 //go:generate go run ./generate.go
@@ -156,10 +156,10 @@ func WithDebug() func(*clientOptions) {
 	}
 }
 
-func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) {
+func NewPostgresClient(connString string, options ...ClientOption) (*client, error) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Fatal().Interface("error", r).Str("stack", string(debug.Stack())).Msg("NewSQLiteClient panic")
+			log.Fatal().Interface("error", r).Str("stack", string(debug.Stack())).Msg("NewClient panic")
 		}
 	}()
 
@@ -168,11 +168,10 @@ func NewSQLiteClient(filePath string, options ...ClientOption) (*client, error) 
 		apply(&opts)
 	}
 
-	sqldb, err := sql.Open("sqlite3", fmt.Sprintf("file://%s?_fk=1&_auto_vacuum=2&_synchronous=1&_journal_mode=WAL", filePath))
+	sqldb, err := sql.Open("postgres", connString)
 	if err != nil {
 		return nil, err
 	}
-	sqldb.SetMaxOpenConns(1)
 
 	return &client{
 		options: opts,
@@ -189,21 +188,21 @@ func (c *client) Unsafe() *sql.DB {
 	return c.db
 }
 
-func (c *client) query(ctx context.Context, stmt sqlite.Statement, dst interface{}) error {
+func (c *client) query(ctx context.Context, stmt pg.Statement, dst interface{}) error {
 	if c.options.debug {
 		println("SQL Query:", stmt.DebugSql())
 	}
 	return stmt.QueryContext(ctx, c.db, dst)
 }
 
-func (c *client) rows(ctx context.Context, stmt sqlite.Statement) (*sqlite.Rows, error) {
+func (c *client) rows(ctx context.Context, stmt pg.Statement) (*pg.Rows, error) {
 	if c.options.debug {
 		println("SQL Rows:", stmt.DebugSql())
 	}
 	return stmt.Rows(ctx, c.db)
 }
 
-func (c *client) exec(ctx context.Context, stmt sqlite.Statement) (sql.Result, error) {
+func (c *client) exec(ctx context.Context, stmt pg.Statement) (sql.Result, error) {
 	if c.options.debug {
 		println("SQL Exec:", stmt.DebugSql())
 	}
@@ -215,14 +214,14 @@ type transaction struct {
 	options clientOptions
 }
 
-func (t *transaction) query(ctx context.Context, stmt sqlite.Statement, dst interface{}) error {
+func (t *transaction) query(ctx context.Context, stmt pg.Statement, dst interface{}) error {
 	if t.options.debug {
 		println("SQL Query:", stmt.DebugSql())
 	}
 	return stmt.QueryContext(ctx, t.tx, dst)
 }
 
-func (t *transaction) exec(ctx context.Context, stmt sqlite.Statement) (sql.Result, error) {
+func (t *transaction) exec(ctx context.Context, stmt pg.Statement) (sql.Result, error) {
 	if t.options.debug {
 		println("SQL Exec:", stmt.DebugSql())
 	}
@@ -256,14 +255,14 @@ type clientOptions struct {
 	debug bool
 }
 
-func stringsToExp(s []string) []sqlite.Expression {
-	var a []sqlite.Expression
+func stringsToExp(s []string) []pg.Expression {
+	var a []pg.Expression
 	for _, i := range s {
-		a = append(a, sqlite.String(i))
+		a = append(a, pg.String(i))
 	}
 	return a
 }
 
-func timeToField(t time.Time) sqlite.StringExpression {
-	return sqlite.String(models.TimeToString(t))
+func timeToField(t time.Time) pg.StringExpression {
+	return pg.String(models.TimeToString(t))
 }

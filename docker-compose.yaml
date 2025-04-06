@@ -1,4 +1,12 @@
 services:
+  aftermath-database:
+    extends:
+      file: docker-compose.base.yaml
+      service: aftermath-database-base
+    restart: always
+    ports:
+      - "5432:5432"
+
   aftermath-collector:
     extends:
       file: docker-compose.base.yaml

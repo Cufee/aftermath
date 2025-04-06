@@ -9,7 +9,6 @@ import (
 	"io"
 	"io/fs"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 
 	"os"
@@ -416,12 +415,7 @@ func wargamingClientsFromEnv() (wargaming.Client, wargaming.Client) {
 }
 
 func newDatabaseClientFromEnv() (database.Client, error) {
-	err := os.MkdirAll(constants.DatabasePath, os.ModePerm)
-	if err != nil {
-		return nil, fmt.Errorf("os#MkdirAll failed %w", err)
-	}
-
-	client, err := database.NewSQLiteClient(filepath.Join(constants.DatabasePath, constants.DatabaseName))
+	client, err := database.NewPostgresClient(constants.DatabaseConnString)
 	if err != nil {
 		return nil, fmt.Errorf("database#NewClient failed %w", err)
 	}

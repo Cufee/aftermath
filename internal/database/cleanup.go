@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	t "github.com/cufee/aftermath/internal/database/gen/table"
+	t "github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
 	"golang.org/x/sync/errgroup"

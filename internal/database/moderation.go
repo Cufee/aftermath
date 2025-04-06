@@ -5,9 +5,9 @@ import (
 	"time"
 
 	m "github.com/cufee/aftermath/internal/database/gen/model"
-	t "github.com/cufee/aftermath/internal/database/gen/table"
+	t "github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
-	s "github.com/go-jet/jet/v2/sqlite"
+	s "github.com/go-jet/jet/v2/postgres"
 )
 
 func (c *client) CreateModerationRequest(ctx context.Context, request models.ModerationRequest) (models.ModerationRequest, error) {

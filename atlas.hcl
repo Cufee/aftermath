@@ -2,9 +2,17 @@ variable "database_name" {
   type    = string
   default = getenv("DATABASE_NAME")
 }
-variable "database_path" {
+variable "database_user" {
   type    = string
-  default = getenv("DATABASE_PATH")
+  default = getenv("DATABASE_USER")
+}
+variable "database_password" {
+  type    = string
+  default = getenv("DATABASE_PASSWORD")
+}
+variable "database_host" {
+  type    = string
+  default = getenv("DATABASE_HOST")
 }
 variable "sources" {
   type = list(string)
@@ -24,11 +32,11 @@ env "local" {
   src = var.sources
 
   migration {
-    dir = "file://internal/database/migrations?format=golang-migrate"
+    dir = "file://internal/database/migrations"
   }
 
-  url = "sqlite://${var.database_path}/${var.database_name}?_fk=1"
-  dev = "sqlite://file?mode=memory&_fk=1"
+  url = "postgresql://${var.database_user}:${var.database_password}@${var.database_host}/${var.database_name}?sslmode=disable"
+  dev = "docker://postgres/17/dev?search_path=public"
 }
 
 env "migrate" {
@@ -39,5 +47,5 @@ env "migrate" {
   }
   tx-mode = "all"
 
-  url = "sqlite:///data/${var.database_name}?_fk=1"
+  url = "postgresql://${var.database_user}:${var.database_password}@${var.database_host}/${var.database_name}?sslmode=disable"
 }

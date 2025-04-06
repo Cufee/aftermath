@@ -5,10 +5,10 @@ import (
 	"time"
 
 	m "github.com/cufee/aftermath/internal/database/gen/model"
-	t "github.com/cufee/aftermath/internal/database/gen/table"
+	t "github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/json"
-	s "github.com/go-jet/jet/v2/sqlite"
+	s "github.com/go-jet/jet/v2/postgres"
 	"golang.org/x/text/language"
 )
 

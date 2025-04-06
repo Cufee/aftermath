@@ -3,9 +3,9 @@ package database
 import (
 	"time"
 
-	t "github.com/cufee/aftermath/internal/database/gen/table"
+	t "github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
-	s "github.com/go-jet/jet/v2/sqlite"
+	s "github.com/go-jet/jet/v2/postgres"
 )
 
 type baseQueryOptions struct {

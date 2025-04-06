@@ -1,6 +1,25 @@
 # This file defines the base services that will be extended from in order for us to support multiple platforms/deployment options
 # While it is fine to import .env files through `env_file` option here, `environment` should never be defined in this file - it will be overwritten
 services:
+  aftermath-database-base:
+    image: postgres:17
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_DB: ${DATABASE_NAME}
+      PGDATA: /var/lib/pgdata
+    volumes:
+      - ${DATABASE_PATH}:/var/lib/pgdata
+    deploy:
+      resources:
+        reservations:
+          memory: 1024m
+        limits:
+          memory: 1024m
+
   aftermath-migrate-base:
     pull_policy: always
     # image: ghcr.io/cufee/aftermath-migrations:${ENVIRONMENT}

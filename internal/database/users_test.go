@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
 	"github.com/cufee/aftermath/internal/utils"
