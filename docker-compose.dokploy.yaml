@@ -7,7 +7,7 @@ services:
     environment:
       - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
     networks:
-      - dokploy-network
+      - default
 
   aftermath-database:
     extends:
@@ -15,7 +15,7 @@ services:
       service: aftermath-database-base
     restart: always
     networks:
-      - dokploy-network
+      - default
 
   aftermath-migrate:
     extends:
@@ -25,7 +25,7 @@ services:
       aftermath-database:
         condition: service_healthy
     networks:
-      - dokploy-network
+      - default
 
   aftermath-service:
     extends:
