@@ -1,5 +1,4 @@
 // package database
-
 //go:build exclude
 
 package main

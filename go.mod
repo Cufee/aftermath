@@ -27,7 +27,6 @@ require (
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/lucsky/cuid v1.2.1
 	github.com/matryer/is v1.4.1
-	github.com/mattn/go-sqlite3 v1.14.27
 	github.com/nao1215/imaging v1.0.9
 	github.com/nlpodyssey/gopickle v0.3.0
 	github.com/pkg/errors v0.9.1
