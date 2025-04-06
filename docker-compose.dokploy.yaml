@@ -35,6 +35,8 @@ services:
     depends_on:
       aftermath-migrate:
         condition: service_completed_successfully
+      aftermath-database:
+        condition: service_healthy
     networks:
       - dokploy-network
     labels:

@@ -40,7 +40,15 @@ env "local" {
 }
 
 env "migrate" {
-  src = var.sources
+  src = [
+    "file:///schema/schema.hcl",
+    "file:///schema/accounts.hcl",
+    "file:///schema/app.hcl",
+    "file:///schema/auth.hcl",
+    "file:///schema/discord.hcl",
+    "file:///schema/glossary.hcl",
+    "file:///schema/users.hcl",
+  ]
 
   migration {
     dir = "file:///migrations"
