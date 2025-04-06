@@ -26,6 +26,8 @@ services:
       context: .
       dockerfile: Dockerfile.migrate
     command: migrate --config /atlas.hcl apply --env migrate
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     deploy:
       resources:
         reservations:
