@@ -18,6 +18,9 @@ services:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-migrate-base
+    depends_on:
+      aftermath-database:
+        condition: service_started
     restart: no
 
   aftermath-service:
@@ -31,5 +34,5 @@ services:
     ports:
       - "${PORT}:${PORT}"
     depends_on:
-      aftermath-migrate:
-        condition: service_completed_successfully
+      aftermath-database:
+        condition: service_started
