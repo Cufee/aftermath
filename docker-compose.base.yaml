@@ -13,6 +13,11 @@ services:
       PGDATA: /var/lib/pgdata
     volumes:
       - ${DATABASE_PATH}:/var/lib/pgdata
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     deploy:
       resources:
         reservations:

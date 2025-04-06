@@ -19,7 +19,7 @@ services:
       service: aftermath-migrate-base
     depends_on:
       aftermath-database:
-        condition: service_started
+        condition: service_healthy
 
   aftermath-service:
     extends:
@@ -34,7 +34,7 @@ services:
       aftermath-migrate:
         condition: service_completed_successfully
       aftermath-database:
-        condition: service_started
+        condition: service_healthy
     expose:
       - 3000
     networks:
