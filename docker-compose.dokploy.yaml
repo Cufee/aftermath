@@ -6,12 +6,16 @@ services:
     restart: no
     environment:
       - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
+    networks:
+      - dokploy-network
 
   aftermath-database:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-database-base
     restart: always
+    networks:
+      - dokploy-network
 
   aftermath-migrate:
     extends:
@@ -20,6 +24,8 @@ services:
     depends_on:
       aftermath-database:
         condition: service_healthy
+    networks:
+      - dokploy-network
 
   aftermath-service:
     extends:
