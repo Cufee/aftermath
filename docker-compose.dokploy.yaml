@@ -27,8 +27,8 @@ services:
     expose:
       - 3000
     depends_on:
-      aftermath-database:
-        condition: service_started
+      aftermath-migrate:
+        condition: service_completed_successfully
     networks:
       - dokploy-network
     labels:
