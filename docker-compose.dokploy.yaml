@@ -7,6 +7,12 @@ services:
     environment:
       - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
 
+  aftermath-database:
+    extends:
+      file: docker-compose.base.yaml
+      service: aftermath-database-base
+    restart: always
+
   aftermath-migrate:
     extends:
       file: docker-compose.base.yaml
