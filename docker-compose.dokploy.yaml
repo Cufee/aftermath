@@ -44,6 +44,7 @@ services:
     expose:
       - 3000
     networks:
+      - default
       - dokploy-network
 
 networks:
