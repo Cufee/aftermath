@@ -25,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.migrate
-    command: migrate apply --allow-dirty --env migrate
+    command: migrate --config /atlas.hcl apply --env migrate
     deploy:
       resources:
         reservations:
