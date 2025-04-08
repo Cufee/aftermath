@@ -5,12 +5,12 @@ import (
 
 	"time"
 
-	m "github.com/cufee/aftermath/internal/database/gen/model"
-	t "github.com/cufee/aftermath/internal/database/gen/table"
+	m "github.com/cufee/aftermath/internal/database/gen/public/model"
+	t "github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/stats/frame"
-	s "github.com/go-jet/jet/v2/sqlite"
+	s "github.com/go-jet/jet/v2/postgres"
 )
 
 func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error) {

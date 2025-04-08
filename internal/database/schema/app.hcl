@@ -18,12 +18,12 @@ table "app_configuration" {
   }
   column "value" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "metadata" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   primary_key {
@@ -62,7 +62,7 @@ table "cron_task" {
   }
   column "targets" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "status" {
@@ -84,12 +84,12 @@ table "cron_task" {
   }
   column "logs" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "data" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   primary_key {
@@ -136,7 +136,7 @@ table "manual_migration" {
   }
   column "metadata" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   primary_key {

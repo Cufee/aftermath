@@ -5,18 +5,26 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/gen/model"
-	"github.com/cufee/aftermath/internal/database/gen/table"
+	"github.com/cufee/aftermath/internal/database/gen/public/model"
+	"github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/go-jet/jet/v2/sqlite"
+	pg "github.com/go-jet/jet/v2/postgres"
 	"github.com/lucsky/cuid"
 	"github.com/pkg/errors"
 )
 
 func Migrate(ctx context.Context, client database.Client) error {
-	err := ManualMigration_06112024(ctx, client)
-	if err != nil {
-		return err
+	var migrations []func(ctx context.Context, client database.Client) error
+	migrations = append(migrations,
+		migration_08042025,
+		// migration_08042025_5,
+	)
+
+	for _, m := range migrations {
+		err := m(ctx, client)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -24,7 +32,7 @@ func Migrate(ctx context.Context, client database.Client) error {
 
 func startMigration(ctx context.Context, client database.Client, key string) (bool, func(context.Context), error) {
 	var data model.ManualMigration
-	err := table.ManualMigration.SELECT(table.ManualMigration.AllColumns).WHERE(table.ManualMigration.Key.EQ(sqlite.String(key))).QueryContext(ctx, client.Unsafe(), &data)
+	err := table.ManualMigration.SELECT(table.ManualMigration.AllColumns).WHERE(table.ManualMigration.Key.EQ(pg.String(key))).QueryContext(ctx, client.Unsafe(), &data)
 	if err != nil && !database.IsNotFound(err) {
 		return false, func(ctx context.Context) {}, err
 	}
@@ -64,10 +72,10 @@ func finishMigration(ctx context.Context, client database.Client, id string) err
 			table.ManualMigration.Finished,
 			table.ManualMigration.UpdatedAt,
 		).
-		WHERE(table.ManualMigration.ID.EQ(sqlite.String(id))).
+		WHERE(table.ManualMigration.ID.EQ(pg.String(id))).
 		SET(
-			table.ManualMigration.Finished.SET(sqlite.Bool(true)),
-			table.ManualMigration.UpdatedAt.SET(sqlite.String(models.TimeToString(time.Now()))),
+			table.ManualMigration.Finished.SET(pg.Bool(true)),
+			table.ManualMigration.UpdatedAt.SET(pg.String(models.TimeToString(time.Now()))),
 		)
 	result, err := stmt.ExecContext(ctx, client.Unsafe())
 	if err != nil {

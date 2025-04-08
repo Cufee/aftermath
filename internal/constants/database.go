@@ -1,6 +1,7 @@
 package constants
 
+import "fmt"
+
 var (
-	DatabasePath = MustGetEnv("DATABASE_PATH")
-	DatabaseName = MustGetEnv("DATABASE_NAME")
+	DatabaseConnString = fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable", MustGetEnv("DATABASE_USER"), MustGetEnv("DATABASE_PASSWORD"), MustGetEnv("DATABASE_HOST"), MustGetEnv("DATABASE_NAME"))
 )
