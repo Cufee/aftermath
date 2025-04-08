@@ -24,7 +24,7 @@ table "user" {
   }
   column "feature_flags" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   primary_key {
@@ -77,7 +77,7 @@ table "user_connection" {
   }
   column "metadata" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "user_id" {
@@ -150,7 +150,7 @@ table "user_subscription" {
   }
   column "metadata" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
 
@@ -204,11 +204,11 @@ table "user_content" {
   }
   column "value" {
     null = false
-    type = text
+    type = bytea
   }
   column "metadata" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "user_id" {
@@ -280,7 +280,7 @@ table "user_restriction" {
   }
   column "events" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "user_id" {
@@ -343,7 +343,7 @@ table "moderation_request" {
   }
   column "data" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "requestor_id" {
@@ -417,12 +417,12 @@ table "widget_settings" {
   }
   column "metadata" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "styles" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "user_id" {

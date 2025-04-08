@@ -1,8 +1,8 @@
 package database
 
 import (
+	"fmt"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/cufee/aftermath/tests/env"
@@ -10,7 +10,9 @@ import (
 
 func MustTestClient(t *testing.T) *client {
 	env.LoadTestEnv(t)
-	client, err := NewSQLiteClient(filepath.Join(os.Getenv("DATABASE_PATH"), os.Getenv("DATABASE_NAME")))
+
+	connString := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable", os.Getenv("DATABASE_USER"), os.Getenv("DATABASE_PASSWORD"), os.Getenv("DATABASE_HOST"), os.Getenv("DATABASE_NAME"))
+	client, err := NewPostgresClient(connString)
 	if err != nil {
 		panic(err)
 	}

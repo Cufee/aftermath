@@ -137,7 +137,7 @@ func init() {
 						}
 					}
 
-					currentContent.Value = string(encoded)
+					currentContent.Value = encoded
 					currentContent.Type = models.UserContentTypeInModeration
 					content, err := ctx.Core().Database().UpsertUserContent(ctx.Ctx(), currentContent)
 					if err != nil {

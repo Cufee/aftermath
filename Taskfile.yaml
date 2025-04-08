@@ -17,31 +17,14 @@ tasks:
           go test -timeout 30s --count=1 -v -run {{ .CLI_ARGS }}
         fi
 
-  bench:
-    dotenv:
-      - ".env.test"
-    desc: runs tests
-    cmds:
-      # - task: db-migrate-apply-test
-      - |
-        if [ -z "{{ .CLI_ARGS }}" ]; then
-          go test -timeout 30s --count=1 -v -bench=. -benchmem -memprofile tmp/pprof/memory-test.out -cpuprofile tmp/pprof/cpu-test.out ./...
-        else
-          go test -timeout 30s --count=1 -v  -bench=. -benchmem -memprofile tmp/pprof/memory-test.out -cpuprofile tmp/pprof/cpu-test.out -run {{ .CLI_ARGS }}
-        fi
-
-  generate-db:
+  db-generate:
     desc: generate models from database schema
     cmd: go generate ./internal/database
-
-  generate-assets:
-    desc: generate static assets
-    cmd: go generate ./internal/assets
 
   db-migrate:
     desc: generate migrations
     cmds: 
-      - echo "Generating migrations for $DATABASE_PATH/$DATABASE_NAME"
+      - echo "Generating migrations"
       - task: db-migrate-hash
       - atlas migrate diff --env local
 
@@ -54,17 +37,21 @@ tasks:
     desc: apply migrations using atlas
     cmds:
       # variables will be pulled from global vars declaration unless overwritten in the task call
-      - echo "Applying migrations to $DATABASE_PATH/$DATABASE_NAME"
-      - migrate -verbose -path internal/database/migrations -database sqlite3://{{.DATABASE_PATH}}/{{.DATABASE_NAME}}?_fk=1 up
+      - echo "Applying migrations to $DATABASE_HOST/$DATABASE_NAME"
+      - atlas migrate apply --env local
 
   db-migrate-tests:
     desc: apply migrations using atlas
     dotenv:
       - ".env.test"
     cmds:
-      - migrate -verbose -path internal/database/migrations -database sqlite3://{{.DATABASE_PATH}}/{{.DATABASE_NAME}}?_fk=1 up
+      - atlas migrate apply --env local
 
-  build-widget:
+  assets-generate:
+    desc: generate static assets
+    cmd: go generate ./internal/assets
+
+  widget-build:
     desc: Build amth-widget js assets
     dir: cmd/frontend/widget
     cmds:

@@ -7,9 +7,9 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/models"
 
-	m "github.com/cufee/aftermath/internal/database/gen/model"
-	t "github.com/cufee/aftermath/internal/database/gen/table"
-	s "github.com/go-jet/jet/v2/sqlite"
+	m "github.com/cufee/aftermath/internal/database/gen/public/model"
+	t "github.com/cufee/aftermath/internal/database/gen/public/table"
+	s "github.com/go-jet/jet/v2/postgres"
 )
 
 func (c client) CreateDiscordInteraction(ctx context.Context, data models.DiscordInteraction) (models.DiscordInteraction, error) {

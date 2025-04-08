@@ -30,7 +30,7 @@ table "auth_nonce" {
   }
   column "metadata" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   primary_key {
@@ -69,7 +69,7 @@ table "session" {
   }
   column "metadata" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "user_id" {
