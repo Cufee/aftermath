@@ -204,7 +204,7 @@ table "user_content" {
   }
   column "value" {
     null = false
-    type = text
+    type = bytea
   }
   column "metadata" {
     null = false

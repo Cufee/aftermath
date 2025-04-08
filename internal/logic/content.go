@@ -12,7 +12,7 @@ import (
 )
 
 func UserContentToImage(content models.UserContent) (image.Image, error) {
-	if content.Value == "" {
+	if content.Value == nil {
 		return nil, errors.New("value is empty")
 	}
 	var img image.NRGBA

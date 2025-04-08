@@ -50,7 +50,7 @@ type UserContent struct {
 	UserID      string
 	ReferenceID string
 
-	Value string
+	Value []byte
 	Meta  map[string]any
 }
 

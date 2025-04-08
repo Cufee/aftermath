@@ -13,7 +13,7 @@ type UserContent struct {
 	UpdatedAt   string `db:"updated_at"`
 	Type        string `db:"type"`
 	ReferenceID string `db:"reference_id"`
-	Value       string `db:"value"`
+	Value       []byte `db:"value"`
 	Metadata    []byte `db:"metadata"`
 	UserID      string `db:"user_id"`
 }

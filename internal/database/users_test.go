@@ -153,11 +153,11 @@ func TestUsers(t *testing.T) {
 			Type:        models.UserContentTypePersonalBackground,
 			UserID:      user.ID,
 			ReferenceID: "ref-1",
-			Value:       "value-1",
+			Value:       []byte("value-1"),
 		}
 		inserted, err := client.CreateUserContent(context.Background(), data)
 		is.NoErr(err)
-		is.True(inserted.Value == data.Value)
+		is.True(string(inserted.Value) == string(data.Value))
 		is.True(inserted.ReferenceID == data.ReferenceID)
 
 		data.Meta = map[string]any{"test": "test"}

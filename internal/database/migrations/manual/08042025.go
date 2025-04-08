@@ -16,7 +16,7 @@ import (
 )
 
 func migration_08042025(ctx context.Context, client database.Client) error {
-	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025-1")
+	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025-3")
 	if err != nil {
 		return err
 	}
@@ -28,9 +28,7 @@ func migration_08042025(ctx context.Context, client database.Client) error {
 	if dbPath == "" {
 		return errors.New("missing required env variable")
 	}
-
 	log.Debug().Str("key", "migration_08042025").Msg("running migration")
-	defer cleanup(ctx)
 
 	db, err := sqlx.Open("sqlite3", dbPath)
 	if err != nil {
@@ -180,5 +178,7 @@ func migration_08042025(ctx context.Context, client database.Client) error {
 		}
 	}
 
+	// cleanup(ctx)
+	_ = cleanup
 	return nil
 }

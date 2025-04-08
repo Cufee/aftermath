@@ -22,7 +22,7 @@ type userContentTable struct {
 	UpdatedAt   postgres.ColumnString
 	Type        postgres.ColumnString
 	ReferenceID postgres.ColumnString
-	Value       postgres.ColumnString
+	Value       postgres.ColumnBytea
 	Metadata    postgres.ColumnBytea
 	UserID      postgres.ColumnString
 
@@ -71,7 +71,7 @@ func newUserContentTableImpl(schemaName, tableName, alias string) userContentTab
 		UpdatedAtColumn   = postgres.StringColumn("updated_at")
 		TypeColumn        = postgres.StringColumn("type")
 		ReferenceIDColumn = postgres.StringColumn("reference_id")
-		ValueColumn       = postgres.StringColumn("value")
+		ValueColumn       = postgres.ByteaColumn("value")
 		MetadataColumn    = postgres.ByteaColumn("metadata")
 		UserIDColumn      = postgres.StringColumn("user_id")
 		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, TypeColumn, ReferenceIDColumn, ValueColumn, MetadataColumn, UserIDColumn}
