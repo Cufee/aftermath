@@ -42,6 +42,11 @@ services:
     dns_search:
       - default
       - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aftermath-${ENVIRONMENT}.entrypoints=web"
+      - "traefik.http.routers.aftermath-${ENVIRONMENT}.rule=Host(`${TRAEFIK_HOST}`)"
+      - "traefik.http.services.aftermath-${ENVIRONMENT}.loadbalancer.server.port=3000"
 
 networks:
   dokploy-network:
