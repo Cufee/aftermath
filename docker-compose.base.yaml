@@ -49,8 +49,6 @@ services:
       dockerfile: Dockerfile
       args:
         BRAND_FLAVOR: ${BRAND_FLAVOR}
-    volumes:
-      - ${DATABASE_PATH_08042025}:${DATABASE_PATH_08042025}
     env_file:
       - .env
     deploy:

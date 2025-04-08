@@ -35,7 +35,6 @@ services:
     environment:
       # the rest is imported from .env, which is going to be created by Dokploy automatically
       - PORT=3000 # the port does not matter, but it needs to match Traefik labels. we set it here explicitly in order to avoid any issues
-      - DATABASE_PATH=/data # this is the path inside a container and needs to match the volume mount
     depends_on:
       aftermath-migrate:
         condition: service_completed_successfully
