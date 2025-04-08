@@ -1,5 +1,5 @@
 services:
-  aftermath-collector:
+  collector:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-collector-base
@@ -7,14 +7,13 @@ services:
     environment:
       - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
 
-  aftermath-database:
-    hostname: database
+  database:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-database-base
     restart: always
 
-  aftermath-migrate:
+  migrate:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-migrate-base
@@ -22,7 +21,7 @@ services:
       aftermath-database:
         condition: service_healthy
 
-  aftermath-service:
+  backend:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-service-base
