@@ -37,8 +37,8 @@ services:
     expose:
       - 3000
     networks:
-      dokploy-network:
-      default:
+      - dokploy-network
+      - default
     dns_search:
       - default
       - dokploy-network
