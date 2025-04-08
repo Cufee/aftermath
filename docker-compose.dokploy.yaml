@@ -42,6 +42,8 @@ services:
     dns_search:
       - default
       - dokploy-network
+    labels:
+      - "traefik.docker.network=dokploy-network"
 
 networks:
   dokploy-network:
