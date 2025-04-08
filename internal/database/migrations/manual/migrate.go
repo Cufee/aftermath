@@ -17,7 +17,7 @@ func Migrate(ctx context.Context, client database.Client) error {
 	var migrations []func(ctx context.Context, client database.Client) error
 	migrations = append(migrations,
 		migration_08042025,
-		migration_08042025_4,
+		// migration_08042025_5,
 	)
 
 	for _, m := range migrations {

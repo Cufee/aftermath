@@ -184,73 +184,81 @@ func migration_08042025(ctx context.Context, client database.Client) error {
 	return nil
 }
 
-func migration_08042025_4(ctx context.Context, client database.Client) error {
-	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025_4")
-	if err != nil {
-		return err
-	}
-	if !shouldRun {
-		log.Debug().Str("key", "migration_08042025_4").Msg("migration already complete")
-		return nil
-	}
-	dbPath := os.Getenv("DATABASE_PATH_08042025")
-	if dbPath == "" {
-		log.Debug().Str("key", "migration_08042025_4").Msg("migration skipped")
-		return nil
-	}
-	log.Debug().Str("key", "migration_08042025_4").Msg("running migration")
+// func migration_08042025_5(ctx context.Context, client database.Client) error {
+// 	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025_5")
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if !shouldRun {
+// 		log.Debug().Str("key", "migration_08042025_5").Msg("migration already complete")
+// 		return nil
+// 	}
+// 	dbPath := os.Getenv("DATABASE_PATH_08042025")
+// 	if dbPath == "" {
+// 		log.Debug().Str("key", "migration_08042025_5").Msg("migration skipped")
+// 		return nil
+// 	}
+// 	log.Debug().Str("key", "migration_08042025_5").Msg("running migration")
 
-	db, err := sqlx.Open("sqlite3", dbPath)
-	if err != nil {
-		return err
-	}
+// 	db, err := sqlx.Open("sqlite3", dbPath)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	{ // migrate account_snapshot
-		var count int
-		row := db.QueryRow("SELECT COUNT(*) from account_snapshot")
-		err = row.Scan(&count)
-		if err != nil {
-			return errors.Wrap(err, "failed to get account snapshots count")
-		}
-		for i := 0; i < count; i += 500 {
-			records := make([]*model.AccountSnapshot, 0, 500)
-			err := db.Select(&records, fmt.Sprintf("SELECT * FROM account_snapshot LIMIT 500 OFFSET %d;", i))
-			if len(records) > 0 {
-				stmt := table.AccountSnapshot.INSERT(table.AccountSnapshot.AllColumns).MODELS(records).ON_CONFLICT(table.AccountSnapshot.ID).DO_NOTHING()
-				_, err = stmt.ExecContext(ctx, client.Unsafe())
-				if err != nil {
-					return errors.Wrap(err, "failed to insert account snapshots")
-				}
-			}
-			if len(records) < 500 {
-				break
-			}
-		}
-	}
+// 	var group errgroup.Group
 
-	{ // migrate vehicle_snapshot
-		var count int
-		row := db.QueryRow("SELECT COUNT(*) from vehicle_snapshot")
-		err = row.Scan(&count)
-		if err != nil {
-			return errors.Wrap(err, "failed to get vehicle snapshots count")
-		}
-		for i := 0; i < count; i += 500 {
-			records := make([]*model.VehicleSnapshot, 0, 500)
-			err := db.Select(&records, fmt.Sprintf("SELECT * FROM vehicle_snapshot LIMIT 500 OFFSET %d;", i))
-			if len(records) > 0 {
-				stmt := table.VehicleSnapshot.INSERT(table.VehicleSnapshot.AllColumns).MODELS(records).ON_CONFLICT(table.VehicleSnapshot.ID).DO_NOTHING()
-				_, err = stmt.ExecContext(ctx, client.Unsafe())
-				if err != nil {
-					return errors.Wrap(err, "failed to insert vehicle snapshots")
-				}
-			}
-			if len(records) < 500 {
-				break
-			}
-		}
-	}
+// 	group.Go(func() error { // migrate account_snapshot
+// 		var count int
+// 		row := db.QueryRow("SELECT COUNT(*) from account_snapshot WHERE created_at > '2025-03-01T00:00:00+01:00'")
+// 		err = row.Scan(&count)
+// 		if err != nil {
+// 			return errors.Wrap(err, "failed to get account snapshots count")
+// 		}
+// 		for i := 0; i < count; i += 1000 {
+// 			records := make([]*model.AccountSnapshot, 0, 1000)
+// 			err := db.Select(&records, fmt.Sprintf("SELECT * FROM account_snapshot WHERE created_at > '2025-03-01T00:00:00+01:00' LIMIT 1000 OFFSET %d;", i))
+// 			if len(records) > 0 {
+// 				stmt := table.AccountSnapshot.INSERT(table.AccountSnapshot.AllColumns).MODELS(records).ON_CONFLICT(table.AccountSnapshot.ID).DO_NOTHING()
+// 				_, err = stmt.ExecContext(ctx, client.Unsafe())
+// 				if err != nil {
+// 					return errors.Wrap(err, "failed to insert account snapshots")
+// 				}
+// 			}
+// 			if len(records) < 1000 {
+// 				break
+// 			}
+// 		}
+// 		return nil
+// 	})
 
-	cleanup(ctx)
-	return nil
-}
+// 	group.Go(func() error { // migrate vehicle_snapshot
+// 		var count int
+// 		row := db.QueryRow("SELECT COUNT(*) from vehicle_snapshot WHERE created_at > '2025-03-01T00:00:00+01:00'")
+// 		err = row.Scan(&count)
+// 		if err != nil {
+// 			return errors.Wrap(err, "failed to get vehicle snapshots count")
+// 		}
+// 		for i := 0; i < count; i += 1000 {
+// 			records := make([]*model.VehicleSnapshot, 0, 1000)
+// 			err := db.Select(&records, fmt.Sprintf("SELECT * FROM vehicle_snapshot WHERE created_at > '2025-03-01T00:00:00+01:00' LIMIT 1000 OFFSET %d;", i))
+// 			if len(records) > 0 {
+// 				stmt := table.VehicleSnapshot.INSERT(table.VehicleSnapshot.AllColumns).MODELS(records).ON_CONFLICT(table.VehicleSnapshot.ID).DO_NOTHING()
+// 				_, err = stmt.ExecContext(ctx, client.Unsafe())
+// 				if err != nil {
+// 					return errors.Wrap(err, "failed to insert vehicle snapshots")
+// 				}
+// 			}
+// 			if len(records) < 1000 {
+// 				break
+// 			}
+// 		}
+// 		return nil
+// 	})
+
+// 	if err := group.Wait(); err != nil {
+// 		return err
+// 	}
+
+// 	cleanup(ctx)
+// 	return nil
+// }
