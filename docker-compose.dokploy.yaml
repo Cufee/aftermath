@@ -6,6 +6,8 @@ services:
     restart: no
     environment:
       - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
+    networks:
+      - internal
 
   aftermath-database:
     extends:
@@ -13,7 +15,7 @@ services:
       service: aftermath-database-base
     restart: always
     networks:
-      - dokploy-network
+      - internal
 
   aftermath-migrate:
     extends:
@@ -23,7 +25,7 @@ services:
       aftermath-database:
         condition: service_healthy
     networks:
-      - dokploy-network
+      - internal
 
   aftermath-service:
     extends:
@@ -42,7 +44,9 @@ services:
       - 3000
     networks:
       - dokploy-network
+      - internal
 
 networks:
   dokploy-network:
     external: true
+  internal:
