@@ -1,7 +1,3 @@
-FROM golang:1.23-bookworm as builder-go
-
-RUN go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest  
+FROM arigaio/atlas:latest
 
 COPY ./internal/database/migrations /migrations
-
-ENTRYPOINT [ "migrate" ]

@@ -86,7 +86,7 @@ table "clan" {
   }
   column "members" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   primary_key {
@@ -131,7 +131,7 @@ table "account_snapshot" {
   }
   column "rating_frame" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "regular_battles" {
@@ -140,7 +140,7 @@ table "account_snapshot" {
   }
   column "regular_frame" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "account_id" {
@@ -207,7 +207,7 @@ table "account_achievements_snapshot" {
   }
   column "frame" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "account_id" {
@@ -278,7 +278,7 @@ table "vehicle_snapshot" {
   }
   column "frame" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "account_id" {
@@ -352,7 +352,7 @@ table "vehicle_achievements_snapshot" {
   }
   column "frame" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "account_id" {

@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/database/gen/public/model"
 	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/utils"
 	"github.com/lucsky/cuid"
@@ -50,7 +50,7 @@ type UserContent struct {
 	UserID      string
 	ReferenceID string
 
-	Value string
+	Value []byte
 	Meta  map[string]any
 }
 

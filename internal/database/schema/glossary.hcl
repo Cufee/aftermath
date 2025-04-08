@@ -18,7 +18,7 @@ table "vehicle" {
   }
   column "localized_names" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   primary_key {
@@ -45,7 +45,7 @@ table "vehicle_average" {
   }
   column "data" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   primary_key {
@@ -72,7 +72,7 @@ table "game_map" {
   }
   column "game_modes" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   column "supremacy_points" {
@@ -81,7 +81,7 @@ table "game_map" {
   }
   column "localized_names" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   primary_key {
@@ -108,7 +108,7 @@ table "game_mode" {
   }
   column "localized_names" {
     null = false
-    type = blob
+    type = bytea
     default = ""
   }
   primary_key {

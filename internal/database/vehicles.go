@@ -6,10 +6,10 @@ import (
 
 	"github.com/cufee/aftermath/internal/json"
 
-	m "github.com/cufee/aftermath/internal/database/gen/model"
-	t "github.com/cufee/aftermath/internal/database/gen/table"
+	m "github.com/cufee/aftermath/internal/database/gen/public/model"
+	t "github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
-	s "github.com/go-jet/jet/v2/sqlite"
+	s "github.com/go-jet/jet/v2/postgres"
 )
 
 func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) (map[string]error, error) {

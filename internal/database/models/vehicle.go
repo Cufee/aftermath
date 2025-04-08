@@ -6,7 +6,7 @@ import (
 	"github.com/cufee/aftermath/internal/json"
 
 	assets "github.com/cufee/aftermath-assets/types"
-	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/database/gen/public/model"
 	"golang.org/x/text/language"
 )
 

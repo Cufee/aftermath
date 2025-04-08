@@ -1,5 +1,5 @@
 # Build javascript
-FROM oven/bun:latest as builder-js
+FROM oven/bun:latest AS builder-js
 
 WORKDIR /workspace
 
@@ -11,7 +11,7 @@ COPY ./cmd/frontend/widget/ ./
 RUN bun run build
 
 # Build app
-FROM golang:1.23-bookworm as builder-go
+FROM golang:1.23-bookworm AS builder-go
 
 ARG BRAND_FLAVOR=red
 ENV BRAND_FLAVOR $BRAND_FLAVOR
