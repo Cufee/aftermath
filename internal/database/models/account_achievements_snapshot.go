@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/database/gen/public/model"
 	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/aftermath/internal/utils"
 	"github.com/cufee/am-wg-proxy-next/v2/types"

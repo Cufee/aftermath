@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	m "github.com/cufee/aftermath/internal/database/gen/model"
+	m "github.com/cufee/aftermath/internal/database/gen/public/model"
 	t "github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/utils"

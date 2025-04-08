@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/gen/model"
+	"github.com/cufee/aftermath/internal/database/gen/public/model"
 	"github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	pg "github.com/go-jet/jet/v2/postgres"
@@ -14,6 +14,11 @@ import (
 )
 
 func Migrate(ctx context.Context, client database.Client) error {
+	err := migration_08042025(ctx, client)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

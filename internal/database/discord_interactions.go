@@ -7,7 +7,7 @@ import (
 
 	"github.com/cufee/aftermath/internal/database/models"
 
-	m "github.com/cufee/aftermath/internal/database/gen/model"
+	m "github.com/cufee/aftermath/internal/database/gen/public/model"
 	t "github.com/cufee/aftermath/internal/database/gen/public/table"
 	s "github.com/go-jet/jet/v2/postgres"
 )
