@@ -26,7 +26,7 @@ func migration_08042025(ctx context.Context, client database.Client) error {
 	}
 	dbPath := os.Getenv("DATABASE_PATH_08042025")
 	if dbPath == "" {
-		return errors.New("missing required env variable")
+		return nil
 	}
 	log.Debug().Str("key", "migration_08042025").Msg("running migration")
 
@@ -182,3 +182,42 @@ func migration_08042025(ctx context.Context, client database.Client) error {
 	_ = cleanup
 	return nil
 }
+
+// func migration_08042025_4(ctx context.Context, client database.Client) error {
+// 	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025-4")
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if !shouldRun {
+// 		log.Debug().Str("key", "migration_08042025").Msg("migration already complete")
+// 		return nil
+// 	}
+// 	dbPath := os.Getenv("DATABASE_PATH_08042025")
+// 	if dbPath == "" {
+// 		return errors.New("missing required env variable")
+// 	}
+// 	log.Debug().Str("key", "migration_08042025").Msg("running migration")
+
+// 	db, err := sqlx.Open("sqlite3", dbPath)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	{ // migrate snapshots
+// 		var records []*model.UserRestriction
+// 		err := db.Select(&records, "SELECT * from user_restriction")
+// 		if err != nil && !database.IsNotFound(err) {
+// 			return errors.Wrap(err, "failed to get user restrictions")
+// 		}
+// 		if len(records) > 0 {
+// 			stmt := table.UserRestriction.INSERT(table.UserRestriction.AllColumns).MODELS(records).ON_CONFLICT(table.UserRestriction.ID).DO_NOTHING()
+// 			_, err = stmt.ExecContext(ctx, client.Unsafe())
+// 			if err != nil {
+// 				return errors.Wrap(err, "failed to insert user restrictions")
+// 			}
+// 		}
+// 	}
+
+// 	cleanup(ctx)
+// 	return nil
+// }

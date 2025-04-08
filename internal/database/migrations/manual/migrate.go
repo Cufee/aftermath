@@ -19,6 +19,11 @@ func Migrate(ctx context.Context, client database.Client) error {
 		return err
 	}
 
+	// err = migration_08042025_4(ctx, client)
+	// if err != nil {
+	// 	return err
+	// }
+
 	return nil
 }
 
