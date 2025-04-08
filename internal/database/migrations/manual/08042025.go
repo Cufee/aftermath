@@ -16,7 +16,7 @@ import (
 )
 
 func migration_08042025(ctx context.Context, client database.Client) error {
-	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025")
+	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025-1")
 	if err != nil {
 		return err
 	}
