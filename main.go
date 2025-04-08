@@ -70,7 +70,7 @@ func main() {
 		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*15)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*120)
 	err = manual.Migrate(ctx, db)
 	cancel()
 	if err != nil {

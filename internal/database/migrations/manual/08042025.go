@@ -16,7 +16,7 @@ import (
 )
 
 func migration_08042025(ctx context.Context, client database.Client) error {
-	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025-3")
+	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025")
 	if err != nil {
 		return err
 	}
@@ -183,41 +183,72 @@ func migration_08042025(ctx context.Context, client database.Client) error {
 	return nil
 }
 
-// func migration_08042025_4(ctx context.Context, client database.Client) error {
-// 	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025-4")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if !shouldRun {
-// 		log.Debug().Str("key", "migration_08042025").Msg("migration already complete")
-// 		return nil
-// 	}
-// 	dbPath := os.Getenv("DATABASE_PATH_08042025")
-// 	if dbPath == "" {
-// 		return errors.New("missing required env variable")
-// 	}
-// 	log.Debug().Str("key", "migration_08042025").Msg("running migration")
+func migration_08042025_4(ctx context.Context, client database.Client) error {
+	shouldRun, cleanup, err := startMigration(ctx, client, "migration_08042025_4")
+	if err != nil {
+		return err
+	}
+	if !shouldRun {
+		log.Debug().Str("key", "migration_08042025_4").Msg("migration already complete")
+		return nil
+	}
+	dbPath := os.Getenv("DATABASE_PATH_08042025")
+	if dbPath == "" {
+		return errors.New("missing required env variable")
+	}
+	log.Debug().Str("key", "migration_08042025_4").Msg("running migration")
 
-// 	db, err := sqlx.Open("sqlite3", dbPath)
-// 	if err != nil {
-// 		return err
-// 	}
+	db, err := sqlx.Open("sqlite3", dbPath)
+	if err != nil {
+		return err
+	}
 
-// 	{ // migrate snapshots
-// 		var records []*model.UserRestriction
-// 		err := db.Select(&records, "SELECT * from user_restriction")
-// 		if err != nil && !database.IsNotFound(err) {
-// 			return errors.Wrap(err, "failed to get user restrictions")
-// 		}
-// 		if len(records) > 0 {
-// 			stmt := table.UserRestriction.INSERT(table.UserRestriction.AllColumns).MODELS(records).ON_CONFLICT(table.UserRestriction.ID).DO_NOTHING()
-// 			_, err = stmt.ExecContext(ctx, client.Unsafe())
-// 			if err != nil {
-// 				return errors.Wrap(err, "failed to insert user restrictions")
-// 			}
-// 		}
-// 	}
+	{ // migrate account_snapshot
+		var count int
+		row := db.QueryRow("SELECT COUNT(*) from account_snapshot")
+		err = row.Scan(&count)
+		if err != nil {
+			return errors.Wrap(err, "failed to get account snapshots count")
+		}
+		for i := 0; i < count; i += 500 {
+			records := make([]*model.AccountSnapshot, 0, 500)
+			err := db.Select(&records, fmt.Sprintf("SELECT * FROM account_snapshot LIMIT 500 OFFSET %d;", i))
+			if len(records) > 0 {
+				stmt := table.AccountSnapshot.INSERT(table.AccountSnapshot.AllColumns).MODELS(records).ON_CONFLICT(table.AccountSnapshot.ID).DO_NOTHING()
+				_, err = stmt.ExecContext(ctx, client.Unsafe())
+				if err != nil {
+					return errors.Wrap(err, "failed to insert account snapshots")
+				}
+			}
+			if len(records) < 500 {
+				break
+			}
+		}
+	}
 
-// 	cleanup(ctx)
-// 	return nil
-// }
+	{ // migrate vehicle_snapshot
+		var count int
+		row := db.QueryRow("SELECT COUNT(*) from vehicle_snapshot")
+		err = row.Scan(&count)
+		if err != nil {
+			return errors.Wrap(err, "failed to get vehicle snapshots count")
+		}
+		for i := 0; i < count; i += 500 {
+			records := make([]*model.VehicleSnapshot, 0, 500)
+			err := db.Select(&records, fmt.Sprintf("SELECT * FROM vehicle_snapshot LIMIT 500 OFFSET %d;", i))
+			if len(records) > 0 {
+				stmt := table.VehicleSnapshot.INSERT(table.VehicleSnapshot.AllColumns).MODELS(records).ON_CONFLICT(table.VehicleSnapshot.ID).DO_NOTHING()
+				_, err = stmt.ExecContext(ctx, client.Unsafe())
+				if err != nil {
+					return errors.Wrap(err, "failed to insert vehicle snapshots")
+				}
+			}
+			if len(records) < 500 {
+				break
+			}
+		}
+	}
+
+	cleanup(ctx)
+	return nil
+}

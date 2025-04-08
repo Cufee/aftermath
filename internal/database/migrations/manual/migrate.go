@@ -14,15 +14,18 @@ import (
 )
 
 func Migrate(ctx context.Context, client database.Client) error {
-	err := migration_08042025(ctx, client)
-	if err != nil {
-		return err
-	}
+	var migrations []func(ctx context.Context, client database.Client) error
+	migrations = append(migrations,
+		migration_08042025,
+		migration_08042025_4,
+	)
 
-	// err = migration_08042025_4(ctx, client)
-	// if err != nil {
-	// 	return err
-	// }
+	for _, m := range migrations {
+		err := m(ctx, client)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
