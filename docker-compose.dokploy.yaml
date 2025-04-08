@@ -15,7 +15,9 @@ services:
       service: aftermath-database-base
     restart: always
     networks:
-      - internal
+      internal:
+        aliases:
+          - aftermath-database
 
   aftermath-migrate:
     extends:
@@ -43,8 +45,8 @@ services:
     expose:
       - 3000
     networks:
-      - dokploy-network
-      - internal
+      dokploy-network:
+      internal:
 
 networks:
   dokploy-network:
