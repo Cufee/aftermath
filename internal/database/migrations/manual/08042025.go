@@ -26,6 +26,7 @@ func migration_08042025(ctx context.Context, client database.Client) error {
 	}
 	dbPath := os.Getenv("DATABASE_PATH_08042025")
 	if dbPath == "" {
+		log.Debug().Str("key", "migration_08042025_4").Msg("migration skipped")
 		return nil
 	}
 	log.Debug().Str("key", "migration_08042025").Msg("running migration")
@@ -194,7 +195,8 @@ func migration_08042025_4(ctx context.Context, client database.Client) error {
 	}
 	dbPath := os.Getenv("DATABASE_PATH_08042025")
 	if dbPath == "" {
-		return errors.New("missing required env variable")
+		log.Debug().Str("key", "migration_08042025_4").Msg("migration skipped")
+		return nil
 	}
 	log.Debug().Str("key", "migration_08042025_4").Msg("running migration")
 
