@@ -8,7 +8,6 @@ services:
       - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
 
   aftermath-database:
-    hostname: "database"
     extends:
       file: docker-compose.base.yaml
       service: aftermath-database-base
@@ -39,6 +38,7 @@ services:
       - 3000
     networks:
       dokploy-network:
+      default:
 
 networks:
   dokploy-network:
