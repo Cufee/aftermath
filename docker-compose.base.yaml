@@ -50,7 +50,7 @@ services:
       args:
         BRAND_FLAVOR: ${BRAND_FLAVOR}
     volumes:
-      - ${DATABASE_PATH}:/data
+      - ${DATABASE_PATH_08042025}:/database
     env_file:
       - .env
     deploy:
