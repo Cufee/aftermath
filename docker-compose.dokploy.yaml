@@ -38,6 +38,7 @@ services:
       - 3000
     networks:
       - dokploy-network
+      - default
     dns_search:
       - default
       - dokploy-network
