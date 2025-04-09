@@ -1,33 +1,27 @@
 services:
-  aftermath-collector:
+  collector:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-collector-base
     restart: no
     environment:
-      - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
+      - COLLECTOR_BACKEND_URL=backend:${PRIVATE_SERVER_PORT}
 
-  aftermath-database:
+  database:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-database-base
     restart: always
-    ports:
-      - 5433:5432
-    networks:
-      - dokploy-network
 
-  aftermath-migrate:
+  migrate:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-migrate-base
     depends_on:
-      aftermath-database:
+      database:
         condition: service_healthy
-    networks:
-      - dokploy-network
 
-  aftermath-service:
+  backend:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-service-base
@@ -36,14 +30,20 @@ services:
       # the rest is imported from .env, which is going to be created by Dokploy automatically
       - PORT=3000 # the port does not matter, but it needs to match Traefik labels. we set it here explicitly in order to avoid any issues
     depends_on:
-      aftermath-migrate:
+      migrate:
         condition: service_completed_successfully
-      aftermath-database:
+      database:
         condition: service_healthy
     expose:
       - 3000
     networks:
+      - default
       - dokploy-network
+    dns_search:
+      - default
+      - dokploy-network
+    labels:
+      - "traefik.docker.network=dokploy-network"
 
 networks:
   dokploy-network:

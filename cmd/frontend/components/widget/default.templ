@@ -78,7 +78,7 @@ templ (w defaultWidget) overviewCard(card session.OverviewCard, style models.Wid
 				{ card.Title }
 			</span>
 		}
-		<div class={ fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-1 items-center bg-black rounded-xl bg-opacity-[0.975] p-4", len(card.Blocks)) }>
+		<div class={ fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-1 items-center bg-black rounded-xl bg-opacity-[0.80] p-4", len(card.Blocks)) }>
 			for _, column := range card.Blocks {
 				@w.overviewColumn(column, style)
 			}
@@ -87,7 +87,7 @@ templ (w defaultWidget) overviewCard(card session.OverviewCard, style models.Wid
 }
 
 templ (w defaultWidget) vehicleCard(card vehicleExtended, style models.WidgetVehicleCardStyle) {
-	<div class="flex flex-col gap-1 card vehicle-card grow bg-black rounded-lg bg-opacity-[0.975] p-4">
+	<div class="flex flex-col gap-1 card vehicle-card grow bg-black rounded-lg bg-opacity-[0.80] p-4">
 		if w.style.Vehicles.ShowTitle {
 			<div class="flex flex-row gap-2 justify-between">
 				<span class="text-gray-300 title">
@@ -108,7 +108,7 @@ templ (w defaultWidget) vehicleLegendCard(blocks []common.StatsBlock[session.Blo
 	<div class="flex flex-col gap-1 card legend-card grow">
 		<div class={ fmt.Sprintf("blocks legend-blocks grid grid-cols-%d gap-1 items-center justify-center px-4", len(blocks)) }>
 			for _, block := range blocks {
-				<div class="bg-black rounded-full bg-opacity-[0.975] m-auto px-3 py-1">
+				<div class="bg-black rounded-full bg-opacity-[0.80] m-auto px-3 py-1">
 					{ block.Label }
 				</div>
 			}
@@ -144,7 +144,7 @@ templ (w defaultWidget) specialOverviewColumn(column session.OverviewColumn) {
 }
 
 templ (w defaultWidget) block(block common.StatsBlock[session.BlockData, string], style models.WidgetCardStyle) {
-	<div class="flex flex-col items-center justify-between block">
+	<div class="flex flex-col items-center justify-between">
 		<span class="text-2xl text-white">{ block.Data.Session().String() }</span>
 		if style.ShowCareer {
 			<span class="text-xl text-gray-300">{ block.Data.Career().String() }</span>
