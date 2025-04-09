@@ -119,3 +119,86 @@ table "discord_interaction" {
     columns = [column.channel_id, column.type, column.created_at]
   }
 }
+
+table "discord_ad_run" {
+  schema = schema.main
+  column "id" {
+    null = false
+    type = bigint
+    identity {
+      generated = ALWAYS
+      increment = 1
+      start = 0
+    }
+  }
+  column "created_at" {
+    null = false
+    type = text
+  }
+  column "updated_at" {
+    null = false
+    type = text
+  }
+
+  column "campaign_id" {
+      null = false
+      type = text
+  }
+  column "content_id" {
+      null = false
+      type = text
+  }
+
+  column "guild_id" {
+    null = false
+    type = text
+  }
+  column "channel_id" {
+    null = false
+    type = text
+  }
+  column "message_id" {
+    null = false
+    type = text
+  }
+
+  column "locale" {
+    null = false
+    type = text
+  }
+  column "tags" {
+      null = false
+      type = text
+  }
+  column "metadata" {
+    null = false
+    type = bytea
+    default = ""
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "discord_ad_run_created_at_idx" {
+    columns = [column.created_at]
+  }
+  index "discord_ad_run_created_at_channel_id_idx" {
+    columns = [column.created_at, column.channel_id]
+  }
+  index "discord_ad_run_campaign_id_idx" {
+    columns = [column.campaign_id]
+  }
+  index "discord_ad_run_content_id_idx" {
+    columns = [column.content_id]
+  }
+  index "discord_ad_run_guild_id_idx" {
+    columns = [column.guild_id]
+  }
+  index "discord_ad_run_channel_id_idx" {
+    columns = [column.channel_id]
+  }
+  index "discord_ad_run_message_id_idx" {
+    columns = [column.message_id]
+  }
+}

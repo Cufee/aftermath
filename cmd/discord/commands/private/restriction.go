@@ -36,7 +36,7 @@ func init() {
 				restrictionID, _ := subOptions.Value("restriction_id").(string)
 
 				if userID == "" && restrictionID == "" {
-					return ctx.Reply().Send("user id or restriction id needs to be provided")
+					return ctx.Reply().IsError(common.UserError).Send("user id or restriction id needs to be provided")
 				}
 
 				switch subcommand {
@@ -50,7 +50,7 @@ func init() {
 						data, err = ctx.Core().Database().GetUserRestrictions(ctx.Ctx(), userID)
 					}
 					if err != nil {
-						return ctx.Reply().Send("failed to get restriction", err.Error())
+						return ctx.Reply().IsError(common.ApplicationError).Send("failed to get restriction", err.Error())
 					}
 					d, _ := json.MarshalIndent(data, "", "  ")
 					return ctx.Reply().Send(string(d))
@@ -58,11 +58,11 @@ func init() {
 				case "update":
 					data, err := ctx.Core().Database().GetUserRestriction(ctx.Ctx(), restrictionID)
 					if err != nil {
-						return ctx.Reply().Send("failed to get restriction", err.Error())
+						return ctx.Reply().IsError(common.ApplicationError).Send("failed to get restriction", err.Error())
 					}
 					expiresAtUnix, ok := subOptions.Value("expires_at_unix").(float64)
 					if !ok {
-						return ctx.Reply().Send("failed to parse expires_at_unix")
+						return ctx.Reply().IsError(common.UserError).Send("failed to parse expires_at_unix")
 					}
 					expiresAt := time.Unix(int64(expiresAtUnix), 0)
 					data.ExpiresAt = expiresAt
@@ -70,13 +70,13 @@ func init() {
 
 					data, err = ctx.Core().Database().UpdateUserRestriction(ctx.Ctx(), data)
 					if err != nil {
-						return ctx.Reply().Send("failed to update restriction", err.Error())
+						return ctx.Reply().IsError(common.ApplicationError).Send("failed to update restriction", err.Error())
 					}
 					d, _ := json.MarshalIndent(data, "", "  ")
 					return ctx.Reply().Send(string(d))
 
 				default:
-					return ctx.Error("invalid subcommand: " + subcommand)
+					return ctx.Error("invalid subcommand: "+subcommand, common.ApplicationError)
 				}
 			}),
 	)

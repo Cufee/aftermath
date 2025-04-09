@@ -51,7 +51,7 @@ func careerCommandHandler(ctx common.Context) error {
 		mentionedUser, _ := ctx.Core().Database().GetUserByID(ctx.Ctx(), options.UserID, database.WithConnections(), database.WithSubscriptions(), database.WithContent())
 		defaultAccount, hasDefaultAccount := mentionedUser.Connection(models.ConnectionTypeWargaming, nil, utils.Pointer(true))
 		if !hasDefaultAccount {
-			return ctx.Reply().Send("stats_error_connection_not_found_vague")
+			return ctx.Reply().IsError(common.UserError).Send("stats_error_connection_not_found_vague")
 		}
 		accountID = defaultAccount.ReferenceID
 
@@ -73,10 +73,10 @@ func careerCommandHandler(ctx common.Context) error {
 		// nickname provided, but user did not select an option from autocomplete
 		accounts, err := accountsFromBadInput(ctx.Ctx(), ctx.Core().Fetch(), options.NicknameSearch)
 		if err != nil {
-			return ctx.Err(err)
+			return ctx.Err(err, common.ApplicationError)
 		}
 		if len(accounts) == 0 {
-			return ctx.Reply().Send("stats_account_not_found")
+			return ctx.Reply().IsError(common.UserError).Send("stats_account_not_found")
 		}
 
 		realms := make(map[string]struct{})
@@ -86,7 +86,7 @@ func careerCommandHandler(ctx common.Context) error {
 		if len(realms) > 1 {
 			reply, err := realmSelectButtons(ctx, ctx.ID(), accounts)
 			if err != nil {
-				return ctx.Err(err)
+				return ctx.Err(err, common.ApplicationError)
 			}
 			return reply.Send()
 		}
@@ -117,7 +117,7 @@ func careerCommandHandler(ctx common.Context) error {
 
 	image, meta, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), accountID, options.PeriodStart, opts...)
 	if err != nil {
-		return ctx.Err(err)
+		return ctx.Err(err, common.ApplicationError)
 	}
 
 	ioptions.AccountID = accountID
@@ -130,7 +130,7 @@ func careerCommandHandler(ctx common.Context) error {
 	var buf bytes.Buffer
 	err = image.PNG(&buf)
 	if err != nil {
-		return ctx.Err(err)
+		return ctx.Err(err, common.ApplicationError)
 	}
 
 	var timings []string

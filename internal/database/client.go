@@ -116,6 +116,9 @@ type DiscordDataClient interface {
 	GetDiscordInteraction(ctx context.Context, id string) (models.DiscordInteraction, error)
 	FindDiscordInteractions(ctx context.Context, opts ...InteractionQuery) ([]models.DiscordInteraction, error)
 	DeleteExpiredInteractions(ctx context.Context, expiration time.Time) error
+
+	GetChannelLastAdRun(ctx context.Context, channelID string) (time.Time, error)
+	CreateDiscordAdRun(ctx context.Context, data models.DiscordAdRun) (models.DiscordAdRun, error)
 }
 
 type ModerationClient interface {

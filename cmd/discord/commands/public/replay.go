@@ -36,7 +36,7 @@ func init() {
 				link, linkOK := ctx.Options().Value("link").(string)
 				file, fileOK := ctx.Options().Value("file").(string)
 				if (!linkOK && !fileOK) || (link == "" && file == "") {
-					return ctx.Reply().Send("replay_errors_missing_attachment")
+					return ctx.Reply().IsError(common.UserError).Send("replay_errors_missing_attachment")
 				}
 				var hintMessage string
 				if linkOK && fileOK {
@@ -52,24 +52,24 @@ func init() {
 
 				parsed, err := url.Parse(replayURL)
 				if err != nil {
-					return ctx.Reply().Send("replay_errors_invalid_attachment")
+					return ctx.Reply().IsError(common.UserError).Send("replay_errors_invalid_attachment")
 				}
 				if !strings.Contains(parsed.Path, ".wotbreplay") {
-					return ctx.Reply().Send("replay_errors_invalid_attachment")
+					return ctx.Reply().IsError(common.UserError).Send("replay_errors_invalid_attachment")
 				}
 
 				image, _, err := ctx.Core().Stats(ctx.Locale()).ReplayImage(context.Background(), parsed.String(), stats.WithWN8())
 				if err != nil {
 					if errors.Is(err, replay.ErrInvalidReplayFile) {
-						return ctx.Reply().Send("replay_errors_invalid_attachment")
+						return ctx.Reply().IsError(common.UserError).Send("replay_errors_invalid_attachment")
 					}
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				var buf bytes.Buffer
 				err = image.PNG(&buf)
 				if err != nil {
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 				return ctx.Reply().WithAds().Hint(hintMessage).File(buf.Bytes(), "replay_command_by_aftermath.png").Send()
 			}),

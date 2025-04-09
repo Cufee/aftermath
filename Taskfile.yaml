@@ -49,7 +49,9 @@ tasks:
 
   assets-generate:
     desc: generate static assets
-    cmd: go generate ./internal/assets
+    cmds:
+      - go generate ./internal/assets
+      - go generate ./cmd/frontend/assets/generate
 
   dev:
     desc: Start a local dev server
