@@ -1,6 +1,5 @@
 services:
   collector:
-    container_name: collector-${ENVIRONMENT}
     extends:
       file: docker-compose.base.yaml
       service: aftermath-collector-base
@@ -9,19 +8,22 @@ services:
       - COLLECTOR_BACKEND_URL=backend-${ENVIRONMENT}:${PRIVATE_SERVER_PORT}
       - DATABASE_HOST=database-${ENVIRONMENT}:5432
     networks:
-      - dokploy-network
+      dokploy-network:
+        aliases:
+          - collector-${ENVIRONMENT}
 
   database:
-    container_name: database-${ENVIRONMENT}
+    hostname: database-${ENVIRONMENT}
     extends:
       file: docker-compose.base.yaml
       service: aftermath-database-base
     restart: always
     networks:
-      - dokploy-network
+      dokploy-network:
+        aliases:
+          - database-${ENVIRONMENT}
 
   migrate:
-    container_name: migrate-${ENVIRONMENT}
     extends:
       file: docker-compose.base.yaml
       service: aftermath-migrate-base
@@ -31,10 +33,11 @@ services:
       database:
         condition: service_healthy
     networks:
-      - dokploy-network
+      dokploy-network:
+        aliases:
+          - migrate-${ENVIRONMENT}
 
   backend:
-    container_name: backend-${ENVIRONMENT}
     extends:
       file: docker-compose.base.yaml
       service: aftermath-service-base
@@ -51,9 +54,9 @@ services:
     expose:
       - 3000
     networks:
-      - dokploy-network
-    labels:
-      - "traefik.docker.network=dokploy-network"
+      dokploy-network:
+        aliases:
+          - backend-${ENVIRONMENT}
 
 networks:
   dokploy-network:
