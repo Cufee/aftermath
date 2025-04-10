@@ -17,6 +17,7 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -138,6 +139,9 @@ func init() {
 					if os.IsTimeout(err) || sCtx.Err() != nil {
 						log.Err(sCtx.Err()).Msg("broad search accounts for autocompletion timed out")
 						return ctx.Reply().IsError(common.ApplicationError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("wargaming_error_outage_short"), Value: "error#wargaming_error_outage_short"}).Send()
+					}
+					if errors.Is(err, fetch.ErrInvalidSearch) {
+						return ctx.Reply().IsError(common.ApplicationError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_invalid_input"), Value: "error#nickname_autocomplete_invalid_input"}).Send()
 					}
 
 					log.Err(err).Msg("failed to broad search accounts")
