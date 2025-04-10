@@ -14,7 +14,9 @@ import (
 	"github.com/cufee/aftermath/internal/permissions"
 )
 
-var adCooldownPeriod = time.Hour * 6
+var adCooldownPeriod = time.Second * 6
+
+// var adCooldownPeriod = time.Hour * 6
 
 type MiddlewareFunc func(common.Context, func(common.Context) error) func(common.Context) error
 
