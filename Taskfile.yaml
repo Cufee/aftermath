@@ -23,14 +23,14 @@ tasks:
 
   db-migrate:
     desc: generate migrations
-    cmds: 
+    cmds:
       - echo "Generating migrations"
       - task: db-migrate-hash
       - atlas migrate diff --env local
 
   db-migrate-hash:
     desc: generate migrations
-    cmds: 
+    cmds:
       - atlas migrate hash --env local
 
   db-migrate-apply:
@@ -49,16 +49,9 @@ tasks:
 
   assets-generate:
     desc: generate static assets
-    cmd: go generate ./internal/assets
-
-  widget-build:
-    desc: Build amth-widget js assets
-    dir: cmd/frontend/widget
     cmds:
-      - bun run build
-      - rm -rf ../public/js/widget
-      - mkdir -p ../public/js/widget
-      - cp dist/components/* ../public/js/widget/
+      - go generate ./internal/assets
+      - go generate ./cmd/frontend/assets/generate
 
   dev:
     desc: Start a local dev server

@@ -68,7 +68,7 @@ func init() {
 				subcommand, subOptions, _ := ctx.Options().Subcommand()
 				switch subcommand {
 				default:
-					return ctx.Error("received an unexpected subcommand: " + subcommand)
+					return ctx.Error("received an unexpected subcommand: "+subcommand, common.ApplicationError)
 
 				case "verify":
 					server, _ := ctx.Options().Value("server").(string)
@@ -80,7 +80,7 @@ func init() {
 					value, _ := subOptions.Value("selected").(string)
 					parts := strings.Split(value, "#")
 					if len(parts) != 4 || parts[0] != "valid" {
-						return ctx.Reply().Send("links_error_connection_not_found")
+						return ctx.Reply().IsError(common.UserError).Send("links_error_connection_not_found")
 					}
 					accountID := parts[1]
 					nickname := parts[2]
@@ -89,9 +89,9 @@ func init() {
 					updated, err := logic.UpdateDefaultUserConnection(ctx.Ctx(), ctx.Core().Database(), ctx.User().ID, accountID)
 					if err != nil {
 						if errors.Is(err, logic.ErrConnectionNotFound) {
-							return ctx.Reply().Send("links_error_connection_not_found")
+							return ctx.Reply().IsError(common.UserError).Send("links_error_connection_not_found")
 						}
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 
 					var content = []string{fmt.Sprintf(ctx.Localize("command_links_set_default_successfully_fmt"), nickname, realm)}
@@ -104,7 +104,7 @@ func init() {
 					value, _ := subOptions.Value("selected").(string)
 					parts := strings.Split(value, "#")
 					if len(parts) != 4 || parts[0] != "valid" {
-						return ctx.Reply().Send("links_error_connection_not_found_selected")
+						return ctx.Reply().IsError(common.UserError).Send("links_error_connection_not_found_selected")
 					}
 					accountID := parts[1]
 
@@ -115,12 +115,12 @@ func init() {
 						if conn.ReferenceID == accountID {
 							err := ctx.Core().Database().DeleteUserConnection(ctx.Ctx(), ctx.User().ID, conn.ID)
 							if err != nil {
-								return ctx.Err(err)
+								return ctx.Err(err, common.ApplicationError)
 							}
 							return ctx.Reply().Send("command_links_unlinked_successfully")
 						}
 					}
-					return ctx.Reply().Send("links_error_connection_not_found_selected")
+					return ctx.Reply().IsError(common.UserError).Send("links_error_connection_not_found_selected")
 
 				case "view":
 					connections := make(map[string]models.UserConnection)
@@ -135,10 +135,10 @@ func init() {
 
 					accounts, err := ctx.Core().Database().GetAccounts(ctx.Ctx(), linkedAccounts)
 					if err != nil && !database.IsNotFound(err) {
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 					if len(accounts) == 0 {
-						return ctx.Reply().Send("stats_error_connection_not_found_personal")
+						return ctx.Reply().IsError(common.UserError).Send("stats_error_connection_not_found_personal")
 					}
 
 					manageButton := discordgo.Button{
@@ -159,21 +159,21 @@ func init() {
 						wgConnections = append(wgConnections, conn)
 					}
 					if len(wgConnections) >= 3 {
-						return ctx.Reply().Send("links_error_too_many_connections")
+						return ctx.Reply().IsError(common.UserError).Send("links_error_too_many_connections")
 					}
 
 					options := commands.GetDefaultStatsOptions(subOptions)
 					message, valid := options.Validate(ctx)
 					if !valid {
-						return ctx.Reply().Send(message)
+						return ctx.Reply().IsError(common.UserError).Send(message)
 					}
 					if options.AccountID == "" {
-						return ctx.Reply().Send("links_error_no_account_selected")
+						return ctx.Reply().IsError(common.UserError).Send("links_error_no_account_selected")
 					}
 
 					account, err := ctx.Core().Fetch().Account(ctx.Ctx(), options.AccountID)
 					if err != nil {
-						return ctx.Reply().Send("nickname_autocomplete_not_found")
+						return ctx.Reply().IsError(common.UserError).Send("nickname_autocomplete_not_found")
 					}
 
 					var found bool
@@ -186,7 +186,7 @@ func init() {
 
 						_, err := ctx.Core().Database().UpsertUserConnection(ctx.Ctx(), conn)
 						if err != nil {
-							return ctx.Err(err)
+							return ctx.Err(err, common.ApplicationError)
 						}
 					}
 					if !found {
@@ -198,7 +198,7 @@ func init() {
 							UserID:      ctx.User().ID,
 						})
 						if err != nil {
-							return ctx.Err(err)
+							return ctx.Err(err, common.ApplicationError)
 						}
 					}
 

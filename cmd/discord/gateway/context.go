@@ -16,7 +16,9 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
+	"github.com/guregu/null/v6"
 	"github.com/lucsky/cuid"
+
 	"golang.org/x/text/language"
 )
 
@@ -36,6 +38,9 @@ type eventContext struct {
 	messageID string
 	channelID string
 	eventType string
+
+	adsRequested bool
+	errorType    common.Error
 }
 
 var ErrUnsupportedEvent = errors.New("event type not supported")
@@ -125,8 +130,8 @@ func (c *eventContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 	return c.CreateMessage(c.Context, c.channelID, reply)
 }
 
-func (c *eventContext) InteractionFollowUp(reply common.Reply) (discordgo.Message, error) {
-	return c.CreateMessage(c.Context, c.channelID, reply)
+func (c *eventContext) InteractionFollowUp(ctx context.Context, reply common.Reply) (discordgo.Message, error) {
+	return c.CreateMessage(ctx, c.channelID, reply)
 }
 
 func (c *eventContext) Ctx() context.Context {
@@ -139,6 +144,14 @@ func (c *eventContext) User() models.User {
 
 func (c *eventContext) Member() discordgo.User {
 	return discordgo.User{ID: c.userID}
+}
+
+func (c *eventContext) ChannelID() string {
+	return c.channelID
+}
+
+func (c *eventContext) GuildID() null.String {
+	return null.NewString(c.guildID, c.guildID != "")
 }
 
 func (c *eventContext) Locale() language.Tag {
@@ -169,7 +182,19 @@ func (c *eventContext) Reply() common.Reply {
 	return common.ContextReply(c)
 }
 
-func (c *eventContext) Err(err error) error {
+func (c *eventContext) SetError(e common.Error) {
+	c.errorType = e
+}
+func (c *eventContext) ErrorType() common.Error {
+	return c.errorType
+}
+func (c *eventContext) HasError() bool {
+	return c.errorType.Valid
+}
+
+func (c *eventContext) Err(err error, e common.Error) error {
+	c.SetError(e)
+
 	log.Err(err).Str("interactionId", c.id).Msg("error while handling an interaction")
 	button := discordgo.ActionsRow{
 		Components: []discordgo.MessageComponent{
@@ -178,8 +203,8 @@ func (c *eventContext) Err(err error) error {
 	return c.Reply().Hint(c.id).Component(button).Send("common_error_unhandled_reported")
 }
 
-func (c *eventContext) Error(message string) error {
-	return c.Err(errors.New(message))
+func (c *eventContext) Error(message string, e common.Error) error {
+	return c.Err(errors.New(message), e)
 }
 
 func (c *eventContext) ID() string {
@@ -238,4 +263,11 @@ func (c *eventContext) UpdateMessage(ctx context.Context, channelID string, mess
 }
 func (c *eventContext) CreateDMChannel(ctx context.Context, userID string) (discordgo.Channel, error) {
 	return c.gw.rest.CreateDMChannel(ctx, userID)
+}
+
+func (c *eventContext) WithAds(v bool) {
+	c.adsRequested = v
+}
+func (c *eventContext) ShowAds() bool {
+	return c.adsRequested
 }

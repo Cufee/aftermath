@@ -320,3 +320,9 @@ func (c *staticTestingDatabase) CreateUserRestriction(ctx context.Context, data 
 func (c *staticTestingDatabase) UpdateUserRestriction(ctx context.Context, data models.UserRestriction) (models.UserRestriction, error) {
 	return models.UserRestriction{}, errors.New("UpdateUserRestriction not implemented")
 }
+func (c staticTestingDatabase) CreateDiscordAdRun(ctx context.Context, data models.DiscordAdRun) (models.DiscordAdRun, error) {
+	return models.DiscordAdRun{}, errors.New("not implemented")
+}
+func (c staticTestingDatabase) GetChannelLastAdRun(ctx context.Context, channelID string) (time.Time, error) {
+	return time.Time{}, nil
+}

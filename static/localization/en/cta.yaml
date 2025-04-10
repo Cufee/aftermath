@@ -9,17 +9,17 @@
 - key: cta_command_links_add_head
   value: "Link your Blitz account!"
 - key: cta_command_links_add_body
-  value: "You can link your Blitz account to Aftermath to make checking stats ever easier! Give it a try with `/links add`."
+  value: "You can link your Blitz account to Aftermath to make checking stats ever easier!\nGive it a try with `/links add`"
 
 - key: cta_command_links_verify_head
   value: "Verify your Blitz account!"
 - key: cta_command_links_verify_body
-  value: "You can verify your Blitz account using `/link verify`. This will allow other players to see your custom background images uploaded with `/fancy`!"
+  value: "You can verify your Blitz account using `/link verify`.\nThis will allow other players to see your custom background image!"
 
 - key: cta_command_help_head
   value: "Learn about Aftermath!"
 - key: cta_command_help_body
-  value: "Looking for more information on all the awesome features? Check `/help` for an overview of every supported command!"
+  value: "Looking for more information on all the awesome features?\nCheck `/help` for an overview of every supported command!"
 - key: cta_command_help_button
   value: "Have a question?"
 
@@ -27,7 +27,7 @@
 - key: cta_report_issues_head
   value: "Want to report an error or share some feedback?"
 - key: cta_report_issues_body
-  value: "You can report any errors and submit feature requests on [Aftermath Official](https://amth.one/join)!"
+  value: "You can report any errors and submit feature requests on the [Aftermath Official](https://amth.one/join) Discord server!"
 - key: cta_report_issues_button
   value: "Share Feedback"
 
@@ -38,18 +38,25 @@
 - key: cta_personal_install_button
   value: "Install Aftermath"
 
+- key: cta_guild_install_head
+  value: "Want to add Aftermath to another server?"
+- key: cta_guild_install_body
+  value: "Just share this link with a server owner!\nhttps://amth.one/install"
+- key: cta_guild_install_button
+  value: "Install Aftermath"
+
 # Abandoned
 - key: cta_abandoned_positive_growth_head
   value: "We miss you :cry:"
 - key: cta_abandoned_positive_growth_body
-  value: "It looks like you haven't used Aftermath in a while, but your growth is impressive! Here is your recent session, try using `/session` if you want to dive deeper into your stats"
+  value: "It looks like you haven't used Aftermath in a while, but your growth is impressive!\nHere is your recent session, try using `/session` if you want to dive deeper into your stats."
 
 - key: cta_abandoned_negative_growth_head
   value: "We miss you :cry:"
 - key: cta_abandoned_negative_growth_body
-  value: "It looks like you haven't used Aftermath in a while, but I can be really helpful for players looking to improve their stats. Here is your recent session, try using `/session` if you want to dive deeper into your stats!"
+  value: "It looks like you haven't used Aftermath in a while, but I can be really helpful for players looking to improve their stats.\nHere is your recent session, try using `/session` if you want to dive deeper into your stats!"
 
 - key: cta_abandoned_neutral_growth_head
   value: "We miss you :cry:"
 - key: cta_abandoned_neutral_growth_body
-  value: "It looks like you haven't used Aftermath in a while. Check out your recent stats, you can also dive deeper using the `/session` command!"
+  value: "It looks like you haven't used Aftermath in a while.\nCheck out your recent stats, you can also dive deeper using the `/session` command!"

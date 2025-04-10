@@ -52,7 +52,7 @@ func init() {
 				options := commands.GetDefaultStatsOptions(ctx.Options())
 				message, valid := options.Validate(ctx)
 				if !valid {
-					return ctx.Reply().Send(message)
+					return ctx.Reply().IsError(common.UserError).Send(message)
 				}
 
 				var accountID string
@@ -87,7 +87,7 @@ func init() {
 				} else {
 					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, nil, utils.Pointer(true))
 					if !hasDefaultAccount {
-						return ctx.Reply().Send("my_error_no_account_linked")
+						return ctx.Reply().IsError(common.UserError).Send("my_error_no_account_linked")
 					}
 					accountID = defaultAccount.ReferenceID
 				}
@@ -100,16 +100,16 @@ func init() {
 				case "session":
 					image, _, err = ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, opts...)
 				default:
-					return ctx.Error("invalid subcommand in /my - " + subcommand)
+					return ctx.Error("invalid subcommand in /my - "+subcommand, common.ApplicationError)
 				}
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
-						return ctx.Reply().Send("session_error_account_was_not_tracked")
+						return ctx.Reply().IsError(common.UserError).Send("session_error_account_was_not_tracked")
 					}
 					if errors.Is(err, fetch.ErrSessionNotFound) {
-						return ctx.Reply().Send("session_error_no_session_for_period")
+						return ctx.Reply().IsError(common.UserError).Send("session_error_no_session_for_period")
 					}
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				ioptions.AccountID = accountID
@@ -122,7 +122,7 @@ func init() {
 				var buf bytes.Buffer
 				err = image.PNG(&buf)
 				if err != nil {
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 				return ctx.Reply().WithAds().File(buf.Bytes(), "session_command_by_aftermath.png").Component(button).Send()
 			}),

@@ -60,17 +60,17 @@ func init() {
 					// check if a user has a pending/recent request
 					pending, err := ctx.Core().Database().FindUserModerationRequests(ctx.Ctx(), ctx.User().ID, []string{"background-upload"}, []models.ModerationStatus{models.ModerationStatusSubmitted, models.ModerationStatusApproved, models.ModerationStatusDeclined}, time.Now().Add(-time.Hour*72))
 					if err != nil && !database.IsNotFound(err) {
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 					slices.SortFunc(pending, func(a, b models.ModerationRequest) int {
 						return b.CreatedAt.Compare(a.CreatedAt)
 					})
 					for _, req := range pending {
 						if req.ActionStatus == models.ModerationStatusSubmitted {
-							return ctx.Reply().Component(helpButton).Send("fancy_errors_pending_request_exists")
+							return ctx.Reply().IsError(common.UserError).Component(helpButton).Send("fancy_errors_pending_request_exists")
 						}
 						if time.Since(req.CreatedAt) < time.Hour*24 {
-							return ctx.Reply().Component(helpButton).Format("fancy_errors_upload_timeout_fmt", req.CreatedAt.Add(time.Hour*24).Unix()).Send()
+							return ctx.Reply().IsError(common.UserError).Component(helpButton).Format("fancy_errors_upload_timeout_fmt", req.CreatedAt.Add(time.Hour*24).Unix()).Send()
 						}
 					}
 
@@ -81,7 +81,7 @@ func init() {
 					link, linkOK := subOptions.Value("link").(string)
 					file, fileOK := subOptions.Value("file").(string)
 					if (!linkOK && !fileOK) || (link == "" && file == "") {
-						return ctx.Reply().Send("fancy_errors_missing_attachment")
+						return ctx.Reply().IsError(common.UserError).Send("fancy_errors_missing_attachment")
 					}
 					var hintMessage string = "fancy_hint_image_transformation"
 					if linkOK && fileOK {
@@ -97,7 +97,7 @@ func init() {
 
 					parsed, err := url.Parse(imageURL)
 					if err != nil {
-						return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_link")
+						return ctx.Reply().IsError(common.UserError).Component(helpButton).Send("fancy_errors_invalid_link")
 					}
 
 					// download and resize the image
@@ -107,12 +107,12 @@ func init() {
 					img, err := images.SafeLoadFromURL(ictx, parsed, constants.ImageUploadMaxSize)
 					if err != nil {
 						if errors.Is(err, images.ErrUnsupportedImageFormat) {
-							return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_format")
+							return ctx.Reply().IsError(common.UserError).Component(helpButton).Send("fancy_errors_invalid_format")
 						}
 						if errors.Is(err, images.ErrInvalidImage) {
-							return ctx.Reply().Component(helpButton).Send("fancy_errors_invalid_image")
+							return ctx.Reply().IsError(common.UserError).Component(helpButton).Send("fancy_errors_invalid_image")
 						}
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 					img = imaging.Fill(img, 300, 300, imaging.Center, imaging.Linear)
 					withBg := gg.NewContext(300, 300)
@@ -123,12 +123,12 @@ func init() {
 					// save the image
 					encoded, err := logic.ImageToUserContentValue(img)
 					if err != nil {
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 
 					currentContent, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypeInModeration)
 					if err != nil && !database.IsNotFound(err) {
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 					if database.IsNotFound(err) {
 						currentContent = models.UserContent{
@@ -141,7 +141,7 @@ func init() {
 					currentContent.Type = models.UserContentTypeInModeration
 					content, err := ctx.Core().Database().UpsertUserContent(ctx.Ctx(), currentContent)
 					if err != nil {
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 
 					buttons := discordgo.ActionsRow{
@@ -164,7 +164,7 @@ func init() {
 					imaging.Encode(&buf, imaging.Blur(withBg.Image(), render.DefaultBackgroundBlur), imaging.JPEG, imaging.JPEGQuality(80))
 					err = ctx.Reply().File(buf.Bytes(), "preview.jpeg").Component(buttons).Hint(hintMessage).Send("fancy_preview_msg")
 					if err != nil {
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 
 					go func(ctx common.Context) {
@@ -181,15 +181,15 @@ func init() {
 				case "remove":
 					currentContent, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypePersonalBackground)
 					if err != nil && !database.IsNotFound(err) {
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 					if database.IsNotFound(err) {
-						return ctx.Reply().Send("fancy_remove_not_found")
+						return ctx.Reply().IsError(common.UserError).Send("fancy_remove_not_found")
 					}
 
 					err = ctx.Core().Database().DeleteUserContent(ctx.Ctx(), currentContent.ID)
 					if err != nil {
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 					return ctx.Reply().Send("fancy_remove_completed")
 				}
@@ -211,41 +211,41 @@ func init() {
 
 				data, ok := ctx.ComponentData()
 				if !ok {
-					return ctx.Error("failed to get component data on interaction command")
+					return ctx.Error("failed to get component data on interaction command", common.ApplicationError)
 				}
 				contentID := strings.ReplaceAll(data.CustomID, "fancy_image_submit#", "")
 				if contentID == "" {
-					return ctx.Error("failed to get content id from custom id")
+					return ctx.Error("failed to get content id from custom id", common.ApplicationError)
 				}
 
 				// check if a user has a pending/recent request
 				pending, err := ctx.Core().Database().FindUserModerationRequests(ctx.Ctx(), ctx.User().ID, []string{"background-upload"}, []models.ModerationStatus{models.ModerationStatusSubmitted, models.ModerationStatusApproved, models.ModerationStatusDeclined}, time.Now().Add(-time.Hour*72))
 				if err != nil && !database.IsNotFound(err) {
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 				slices.SortFunc(pending, func(a, b models.ModerationRequest) int {
 					return b.CreatedAt.Compare(a.CreatedAt)
 				})
 				for _, req := range pending {
 					if req.ActionStatus == models.ModerationStatusSubmitted {
-						return ctx.Reply().Component(helpButton).Send("fancy_errors_pending_request_exists")
+						return ctx.Reply().IsError(common.UserError).Component(helpButton).Send("fancy_errors_pending_request_exists")
 					}
 					if time.Since(req.CreatedAt) < time.Hour*24 {
-						return ctx.Reply().Component(helpButton).Format("fancy_errors_upload_timeout_fmt", req.CreatedAt.Add(time.Hour*24).Unix()).Send()
+						return ctx.Reply().IsError(common.UserError).Component(helpButton).Format("fancy_errors_upload_timeout_fmt", req.CreatedAt.Add(time.Hour*24).Unix()).Send()
 					}
 				}
 
 				content, err := ctx.Core().Database().GetUserContent(ctx.Ctx(), contentID)
 				if err != nil {
 					if database.IsNotFound(err) {
-						return ctx.Reply().Send("fancy_errors_preview_expired")
+						return ctx.Reply().IsError(common.UserError).Send("fancy_errors_preview_expired")
 					}
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				img, err := logic.UserContentToImage(content)
 				if err != nil {
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				request := models.ModerationRequest{
@@ -258,13 +258,13 @@ func init() {
 
 				request, err = ctx.Core().Database().CreateModerationRequest(ctx.Ctx(), request)
 				if err != nil {
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				var buf bytes.Buffer
 				err = imaging.Encode(&buf, img, imaging.PNG)
 				if err != nil {
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				_, err = ctx.CreateMessage(ctx.Ctx(), constants.DiscordContentModerationChannelID, ctx.Reply().
@@ -280,7 +280,7 @@ func init() {
 					File(buf.Bytes(), "user_background.png"),
 				)
 				if err != nil {
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				return ctx.Reply().Hint(request.ID).Send("fancy_submitted_msg")

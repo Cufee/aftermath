@@ -15,6 +15,7 @@ import (
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/guregu/null/v6"
 	"github.com/pkg/errors"
 	"golang.org/x/text/language"
 )
@@ -32,6 +33,10 @@ type routeContext struct {
 
 	rest        *rest.Client
 	interaction discordgo.Interaction
+
+	adsRequested bool
+
+	errorType common.Error
 }
 
 func newContext(ctx context.Context, interaction discordgo.Interaction, rest *rest.Client, client core.Client) (common.Context, error) {
@@ -144,17 +149,14 @@ func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 	}
 }
 
-func (c *routeContext) InteractionFollowUp(reply common.Reply) (discordgo.Message, error) {
+func (c *routeContext) InteractionFollowUp(ctx context.Context, reply common.Reply) (discordgo.Message, error) {
 	data, files := reply.Peek().Build(c.localize)
 	select {
-	case <-c.Context.Done():
-		go c.saveInteractionEvent(discordgo.Message{}, c.Context.Err(), reply)
-		return discordgo.Message{}, c.Context.Err()
+	case <-ctx.Done():
+		go c.saveInteractionEvent(discordgo.Message{}, ctx.Err(), reply)
+		return discordgo.Message{}, ctx.Err()
 	default:
 		return common.WithRetry(func() (discordgo.Message, error) {
-			// since we already finished handling the interaction, there is no need to use the handler context
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
 			msg, err := c.rest.SendInteractionFollowup(ctx, c.interaction.AppID, c.interaction.Token, data.Interaction(), files)
 
 			go c.saveInteractionEvent(msg, err, reply)
@@ -173,6 +175,14 @@ func (c *routeContext) User() models.User {
 
 func (c *routeContext) Member() discordgo.User {
 	return c.member
+}
+
+func (c *routeContext) ChannelID() string {
+	return c.interaction.ChannelID
+}
+
+func (c *routeContext) GuildID() null.String {
+	return null.NewString(c.interaction.GuildID, c.interaction.GuildID != "")
 }
 
 func (c *routeContext) Locale() language.Tag {
@@ -203,7 +213,19 @@ func (c *routeContext) Reply() common.Reply {
 	return common.ContextReply(c)
 }
 
-func (c *routeContext) Err(err error) error {
+func (c *routeContext) SetError(e common.Error) {
+	c.errorType = e
+}
+func (c *routeContext) ErrorType() common.Error {
+	return c.errorType
+}
+func (c *routeContext) HasError() bool {
+	return c.errorType.Valid
+}
+
+func (c *routeContext) Err(err error, e common.Error) error {
+	c.SetError(e)
+
 	var isCommonError bool
 	defer func() {
 		if isCommonError {
@@ -236,8 +258,8 @@ func (c *routeContext) Err(err error) error {
 	return c.Reply().Hint(c.interaction.ID).Component(button).Send("common_error_unhandled_reported")
 }
 
-func (c *routeContext) Error(message string) error {
-	return c.Err(errors.New(message))
+func (c *routeContext) Error(message string, e common.Error) error {
+	return c.Err(errors.New(message), e)
 }
 
 func (c *routeContext) isCommand() bool {
@@ -339,4 +361,11 @@ func (c *routeContext) UpdateMessage(ctx context.Context, channelID string, mess
 }
 func (c *routeContext) CreateDMChannel(ctx context.Context, userID string) (discordgo.Channel, error) {
 	return c.rest.CreateDMChannel(ctx, userID)
+}
+
+func (c *routeContext) WithAds(v bool) {
+	c.adsRequested = v
+}
+func (c *routeContext) ShowAds() bool {
+	return c.adsRequested
 }

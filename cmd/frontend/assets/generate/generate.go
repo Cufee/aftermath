@@ -85,19 +85,20 @@ func generateLogoOptions() {
 	log.Debug().Msg("generating logo options")
 
 	for _, size := range []int{16, 32, 64, 128, 256, 512} {
-		filename := fmt.Sprintf("icon/%d.png", size)
-
 		opts := common.LargeLogoOptions()
 		img := common.AftermathLogo(brandColor, opts)
-		f, err := os.Create(filepath.Join(outDirPath, filename))
-		if err != nil {
-			panic(err)
+		{
+			filename := fmt.Sprintf("icon/%d.png", size)
+			f, err := os.Create(filepath.Join(outDirPath, filename))
+			if err != nil {
+				panic(err)
+			}
+			err = png.Encode(f, imaging.Fit(img, size, size, imaging.Linear))
+			if err != nil {
+				panic(err)
+			}
+			f.Close()
 		}
-		err = png.Encode(f, imaging.Fit(img, size, size, imaging.Linear))
-		if err != nil {
-			panic(err)
-		}
-		f.Close()
 
 		if size == 16 {
 			f, err := os.Create(filepath.Join(outDirPath, "favicon.ico"))

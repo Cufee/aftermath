@@ -21,6 +21,7 @@ require (
 	github.com/google/go-github/v63 v63.0.0
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/gorilla/websocket v1.5.3
+	github.com/guregu/null/v6 v6.0.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/justinas/alice v1.2.0
