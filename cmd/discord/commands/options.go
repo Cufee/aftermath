@@ -2,18 +2,16 @@ package commands
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
-
-var validNameRegex = regexp.MustCompile(`[^\w\_]`)
 
 var DaysOption = builder.NewOption("days", discordgo.ApplicationCommandOptionInteger).
 	Min(1).
@@ -121,7 +119,7 @@ func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataO
 }
 
 func ValidatePlayerName(name string) bool {
-	return len(name) > 3 && len(name) < 24 && strings.HasPrefix(name, "valid#account#") || !validNameRegex.MatchString(name)
+	return strings.HasPrefix(name, "valid#account#") || wargaming.ValidatePlayerNickname(name)
 }
 
 func buildTierChoices() []builder.OptionChoice {

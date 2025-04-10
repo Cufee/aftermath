@@ -239,7 +239,6 @@
 - key: common_label_tier_10
   value: Tier X
 
-
 # Errors
 # permissions
 - key: errors_help_missing_dm_permissions_fmt
@@ -353,6 +352,10 @@
 - key: nickname_autocomplete_not_found
   value: "Nothing found. Please select a nickname from the autocompletion list"
   context: Search returned no results when a user was typing the name in autocomplete
+
+- key: nickname_autocomplete_invalid_input
+  value: "The nickname you have entered is invalid"
+  context: User entered an invalid/impossible nickname
 
 - key: nickname_autocomplete_not_enough_length
   value: "Continue typing to search for accounts..."

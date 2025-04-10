@@ -108,7 +108,7 @@ func accountsFromBadInput(ctx context.Context, client fetch.Client, input string
 			}
 
 			account, err := client.Search(ctx, search, realm, 3)
-			if err != nil && errors.Is(err, fetch.AccountNotFound) {
+			if err != nil && errors.Is(err, fetch.ErrAccountNotFound) {
 				return nil, err
 			}
 			if account.ID == 0 {
