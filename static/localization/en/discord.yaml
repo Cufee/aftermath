@@ -353,10 +353,6 @@
   value: "Nothing found. Please select a nickname from the autocompletion list"
   context: Search returned no results when a user was typing the name in autocomplete
 
-- key: nickname_autocomplete_invalid_input
-  value: "The nickname you have entered is invalid"
-  context: User entered an invalid/impossible nickname
-
 - key: nickname_autocomplete_not_enough_length
   value: "Continue typing to search for accounts..."
   context: Shown when a user just started typing and there are not enough characters to search
