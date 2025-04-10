@@ -166,7 +166,7 @@ optionsLoop:
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     constants.FrontendURL,
 			Name:    constants.FrontendAppName,
-			IconURL: constants.FrontendURL + "/assets/icon/64.webp",
+			IconURL: constants.FrontendURL + "/assets/icon/64.png",
 		},
 		Title:       selected.HeadText(printer),
 		Description: selected.BodyText(printer),

@@ -13,8 +13,6 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	common "github.com/cufee/aftermath/internal/render/v1"
 	"github.com/fogleman/gg"
-	"github.com/kolesa-team/go-webp/encoder"
-	"github.com/kolesa-team/go-webp/webp"
 	"github.com/nao1215/imaging"
 
 	ico "github.com/Kodeworks/golang-image-ico"
@@ -85,10 +83,6 @@ func generateWN8Icons() {
 
 func generateLogoOptions() {
 	log.Debug().Msg("generating logo options")
-	encoderOpts, err := encoder.NewLosslessEncoderOptions(encoder.PresetDefault, 1)
-	if err != nil {
-		panic(err)
-	}
 
 	for _, size := range []int{16, 32, 64, 128, 256, 512} {
 		opts := common.LargeLogoOptions()
@@ -100,18 +94,6 @@ func generateLogoOptions() {
 				panic(err)
 			}
 			err = png.Encode(f, imaging.Fit(img, size, size, imaging.Linear))
-			if err != nil {
-				panic(err)
-			}
-			f.Close()
-		}
-		{
-			filename := fmt.Sprintf("icon/%d.webp", size)
-			f, err := os.Create(filepath.Join(outDirPath, filename))
-			if err != nil {
-				panic(err)
-			}
-			err = webp.Encode(f, imaging.Fit(img, size, size, imaging.Linear), encoderOpts)
 			if err != nil {
 				panic(err)
 			}

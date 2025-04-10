@@ -25,7 +25,6 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/justinas/alice v1.2.0
-	github.com/kolesa-team/go-webp v1.0.5
 	github.com/lib/pq v1.10.9
 	github.com/lithammer/fuzzysearch v1.1.8
 	github.com/lucsky/cuid v1.2.1
