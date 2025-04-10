@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -25,8 +26,7 @@ type replyInternal struct {
 	Components []discordgo.MessageComponent
 	Choices    []*discordgo.ApplicationCommandOptionChoice
 
-	Reference  *discordgo.MessageReference
-	IncludeAds bool
+	Reference *discordgo.MessageReference
 
 	eventMetadata map[string]any
 }
@@ -129,17 +129,12 @@ func (r Reply) Component(components ...discordgo.MessageComponent) Reply {
 }
 
 func (r Reply) Embed(embeds ...*discordgo.MessageEmbed) Reply {
-	if len(embeds) == 1 && embeds[0] == nil {
-		r.internal.Embeds = make([]*discordgo.MessageEmbed, 0)
-		return r
-	}
-
 	r.internal.Embeds = append(r.internal.Embeds, embeds...)
 	return r
 }
 
 func (r Reply) WithAds() Reply {
-	r.internal.IncludeAds = true
+	r.ctx.WithAds(true)
 	return r
 }
 
@@ -148,14 +143,19 @@ func (r Reply) Send(content ...string) error {
 	return err
 }
 
+func (r Reply) IsError(e Error) Reply {
+	r.ctx.SetError(e)
+	return r
+}
+
 func (r Reply) Message(content ...string) (discordgo.Message, error) {
 	r.internal.Text = append(r.internal.Text, content...)
 	return r.ctx.InteractionResponse(r)
 }
 
-func (r Reply) Followup(content ...string) (discordgo.Message, error) {
+func (r Reply) Followup(ctx context.Context, content ...string) (discordgo.Message, error) {
 	r.internal.Text = append(r.internal.Text, content...)
-	return r.ctx.InteractionFollowUp(r)
+	return r.ctx.InteractionFollowUp(ctx, r)
 }
 
 func (r replyInternal) Build(localize func(string) string) (ResponseData, []rest.File) {

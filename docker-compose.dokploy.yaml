@@ -1,33 +1,43 @@
 services:
-  aftermath-collector:
+  collector:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-collector-base
     restart: no
     environment:
-      - COLLECTOR_BACKEND_URL=aftermath-service:${PRIVATE_SERVER_PORT}
+      - COLLECTOR_BACKEND_URL=backend-${ENVIRONMENT}:${PRIVATE_SERVER_PORT}
+      - DATABASE_HOST=database-${ENVIRONMENT}:5432
+    networks:
+      dokploy-network:
+        aliases:
+          - collector-${ENVIRONMENT}
 
-  aftermath-database:
+  database:
+    hostname: database-${ENVIRONMENT}
     extends:
       file: docker-compose.base.yaml
       service: aftermath-database-base
     restart: always
-    ports:
-      - 5433:5432
     networks:
-      - dokploy-network
+      dokploy-network:
+        aliases:
+          - database-${ENVIRONMENT}
 
-  aftermath-migrate:
+  migrate:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-migrate-base
+    environment:
+      - DATABASE_HOST=database-${ENVIRONMENT}:5432
     depends_on:
-      aftermath-database:
+      database:
         condition: service_healthy
     networks:
-      - dokploy-network
+      dokploy-network:
+        aliases:
+          - migrate-${ENVIRONMENT}
 
-  aftermath-service:
+  backend:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-service-base
@@ -35,15 +45,18 @@ services:
     environment:
       # the rest is imported from .env, which is going to be created by Dokploy automatically
       - PORT=3000 # the port does not matter, but it needs to match Traefik labels. we set it here explicitly in order to avoid any issues
+      - DATABASE_HOST=database-${ENVIRONMENT}:5432
     depends_on:
-      aftermath-migrate:
+      migrate:
         condition: service_completed_successfully
-      aftermath-database:
+      database:
         condition: service_healthy
     expose:
       - 3000
     networks:
-      - dokploy-network
+      dokploy-network:
+        aliases:
+          - backend-${ENVIRONMENT}
 
 networks:
   dokploy-network:

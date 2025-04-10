@@ -30,7 +30,7 @@ func init() {
 				options := commands.GetDefaultStatsOptions(ctx.Options())
 				message, valid := options.Validate(ctx)
 				if !valid {
-					return ctx.Reply().Send(message)
+					return ctx.Reply().IsError(common.UserError).Send(message)
 				}
 
 				var accountID string
@@ -53,7 +53,7 @@ func init() {
 					mentionedUser, _ := ctx.Core().Database().GetUserByID(ctx.Ctx(), options.UserID, database.WithConnections(), database.WithSubscriptions(), database.WithContent())
 					defaultAccount, hasDefaultAccount := mentionedUser.Connection(models.ConnectionTypeWargaming, nil, utils.Pointer(true))
 					if !hasDefaultAccount {
-						return ctx.Reply().Send("stats_error_connection_not_found_vague")
+						return ctx.Reply().IsError(common.UserError).Send("stats_error_connection_not_found_vague")
 					}
 					accountID = defaultAccount.ReferenceID
 
@@ -75,10 +75,10 @@ func init() {
 					// nickname provided, but user did not select an option from autocomplete
 					accounts, err := accountsFromBadInput(ctx.Ctx(), ctx.Core().Fetch(), options.NicknameSearch)
 					if err != nil {
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 					if len(accounts) == 0 {
-						return ctx.Reply().Send("stats_account_not_found")
+						return ctx.Reply().IsError(common.UserError).Send("stats_account_not_found")
 					}
 
 					realms := make(map[string]struct{})
@@ -88,7 +88,7 @@ func init() {
 					if len(realms) > 1 {
 						reply, err := realmSelectButtons(ctx, ctx.ID(), accounts)
 						if err != nil {
-							return ctx.Err(err)
+							return ctx.Err(err, common.ApplicationError)
 						}
 						return reply.Send()
 					}
@@ -120,12 +120,12 @@ func init() {
 				image, meta, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, opts...)
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
-						return ctx.Reply().Send("session_error_account_was_not_tracked")
+						return ctx.Reply().IsError(common.UserError).Send("session_error_account_was_not_tracked")
 					}
 					if errors.Is(err, fetch.ErrSessionNotFound) {
-						return ctx.Reply().Send("session_error_no_session_for_period")
+						return ctx.Reply().IsError(common.UserError).Send("session_error_no_session_for_period")
 					}
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				ioptions.AccountID = accountID
@@ -138,7 +138,7 @@ func init() {
 				var buf bytes.Buffer
 				err = image.PNG(&buf)
 				if err != nil {
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				var timings []string

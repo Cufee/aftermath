@@ -30,12 +30,12 @@ func init() {
 				subcommand, subOptions, _ := ctx.Options().Subcommand()
 				userID, _ := subOptions.Value("user_id").(string)
 				if userID == "" {
-					return ctx.Error("invalid user id")
+					return ctx.Error("invalid user id", common.UserError)
 				}
 
 				target, err := ctx.Core().Database().GetUserByID(ctx.Ctx(), userID, database.WithSubscriptions())
 				if err != nil {
-					return ctx.Error("user not found: " + err.Error())
+					return ctx.Error("user not found: "+err.Error(), common.UserError)
 				}
 
 				subscription, ok := target.Subscription(models.SubscriptionTypeThumbsCounter)
@@ -48,13 +48,13 @@ func init() {
 						Meta:        map[string]any{"count": float64(0)},
 					})
 					if err != nil {
-						return ctx.Error("failed to create a subscription: " + err.Error())
+						return ctx.Error("failed to create a subscription: "+err.Error(), common.ApplicationError)
 					}
 				}
 
 				switch subcommand {
 				default:
-					return ctx.Error("invalid subcommand: " + subcommand)
+					return ctx.Error("invalid subcommand: "+subcommand, common.ApplicationError)
 				case "up":
 					count, _ := subscription.Meta["count"].(float64)
 					count++
@@ -69,7 +69,7 @@ func init() {
 
 				_, err = ctx.Core().Database().UpdateUserSubscription(ctx.Ctx(), subscription.ID, subscription)
 				if err != nil {
-					return ctx.Error("failed to update a subscription: " + err.Error())
+					return ctx.Error("failed to update a subscription: "+err.Error(), common.ApplicationError)
 				}
 				return ctx.Reply().Send("updated user thumbs-up subscription")
 			}),

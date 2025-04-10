@@ -24,7 +24,7 @@ func NewServer(port string, handlers []Handler, middleware ...func(http.Handler)
 	}
 
 	srv := &http.Server{
-		Addr:         ":" + port,
+		Addr:         "0.0.0.0:" + port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  5 * time.Second,
 		Handler:      finalHandler,

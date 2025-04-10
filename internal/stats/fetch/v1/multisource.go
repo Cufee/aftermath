@@ -46,12 +46,16 @@ func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Clie
 }
 
 func (c *multiSourceClient) Search(ctx context.Context, nickname string, realm types.Realm, limit int) (types.Account, error) {
+	if !wargaming.ValidatePlayerNickname(nickname) {
+		return types.Account{}, ErrInvalidSearch
+	}
+
 	accounts, err := c.wargaming.SearchAccounts(ctx, realm, nickname, types.WithLimit(limit))
 	if err != nil {
 		return types.Account{}, parseWargamingError(err)
 	}
 	if len(accounts) < 1 {
-		return types.Account{}, AccountNotFound
+		return types.Account{}, ErrAccountNotFound
 	}
 
 	return accounts[0], nil

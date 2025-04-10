@@ -17,6 +17,7 @@ import (
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -43,12 +44,12 @@ func init() {
 
 				}
 				if len(linkedAccounts) < 1 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"}).Send()
+					return ctx.Reply().IsError(common.UserError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"}).Send()
 				}
 
 				accounts, err := ctx.Core().Database().GetAccounts(ctx.Ctx(), linkedAccounts)
 				if err != nil {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"}).Send()
+					return ctx.Reply().IsError(common.UserError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("links_error_no_accounts_linked"), Value: "error#links_error_no_accounts_linked"}).Send()
 				}
 
 				var opts []*discordgo.ApplicationCommandOptionChoice
@@ -73,18 +74,18 @@ func init() {
 				if options.TankID != "" {
 					vehicle, ok := glossary.GetVehicleFromCache(ctx.Locale(), options.TankID)
 					if !ok {
-						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"}).Send()
+						return ctx.Reply().IsError(common.ApplicationError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"}).Send()
 					}
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)}).Send()
+					return ctx.Reply().IsError(common.UserError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("%s %s", logic.IntToRoman(vehicle.Tier), vehicle.Name(ctx.Locale())), Value: fmt.Sprintf("valid#vehicle#%s", vehicle.ID)}).Send()
 				}
 
 				if len(options.TankSearch) < 3 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_enough_length"), Value: "error#stats_autocomplete_not_enough_length"}).Send()
+					return ctx.Reply().IsError(common.UserError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_enough_length"), Value: "error#stats_autocomplete_not_enough_length"}).Send()
 				}
 
 				vehicles, ok := glossary.SearchVehicles(ctx.Locale(), options.TankSearch, 5)
 				if !ok || len(vehicles) < 1 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"}).Send()
+					return ctx.Reply().IsError(common.UserError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("stats_autocomplete_not_found"), Value: "error#stats_autocomplete_not_found"}).Send()
 				}
 
 				var opts []*discordgo.ApplicationCommandOptionChoice
@@ -116,18 +117,18 @@ func init() {
 					if err != nil {
 						if os.IsTimeout(err) || fCtx.Err() != nil {
 							log.Err(fCtx.Err()).Msg("account fetch for autocompletion timed out")
-							return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("wargaming_error_outage_short"), Value: "error#wargaming_error_outage_short"}).Send()
+							return ctx.Reply().IsError(common.ApplicationError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("wargaming_error_outage_short"), Value: "error#wargaming_error_outage_short"}).Send()
 						}
-						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
+						return ctx.Reply().IsError(common.UserError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
 					}
 					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: fmt.Sprintf("[%s] %s", account.Realm, account.Nickname), Value: fmt.Sprintf("valid#account#%s#%s", account.ID, account.Realm)}).Send()
 				}
 
 				if len(options.NicknameSearch) < 5 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_enough_length"), Value: "error#nickname_autocomplete_not_enough_length"}).Send()
+					return ctx.Reply().IsError(common.UserError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_enough_length"), Value: "error#nickname_autocomplete_not_enough_length"}).Send()
 				}
 				if !commands.ValidatePlayerName(options.NicknameSearch) {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_invalid_input"), Value: "error#nickname_autocomplete_invalid_input"}).Send()
+					return ctx.Reply().IsError(common.UserError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_invalid_input"), Value: "error#nickname_autocomplete_invalid_input"}).Send()
 				}
 
 				sCtx, cancel := context.WithTimeout(ctx.Ctx(), time.Millisecond*2500)
@@ -137,14 +138,17 @@ func init() {
 				if err != nil {
 					if os.IsTimeout(err) || sCtx.Err() != nil {
 						log.Err(sCtx.Err()).Msg("broad search accounts for autocompletion timed out")
-						return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("wargaming_error_outage_short"), Value: "error#wargaming_error_outage_short"}).Send()
+						return ctx.Reply().IsError(common.ApplicationError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("wargaming_error_outage_short"), Value: "error#wargaming_error_outage_short"}).Send()
+					}
+					if errors.Is(err, fetch.ErrInvalidSearch) {
+						return ctx.Reply().IsError(common.ApplicationError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_invalid_input"), Value: "error#nickname_autocomplete_invalid_input"}).Send()
 					}
 
 					log.Err(err).Msg("failed to broad search accounts")
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
+					return ctx.Reply().IsError(common.ApplicationError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
 				}
 				if len(accounts) < 1 {
-					return ctx.Reply().Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
+					return ctx.Reply().IsError(common.UserError).Choices(&discordgo.ApplicationCommandOptionChoice{Name: ctx.Localize("nickname_autocomplete_not_found"), Value: "error#nickname_autocomplete_not_found"}).Send()
 				}
 
 				slices.SortFunc(accounts, func(a, b fetch.AccountWithRealm) int {

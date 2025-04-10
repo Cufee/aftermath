@@ -152,7 +152,7 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 		message, err := ctx.Rest().GetMessage(ctx.Ctx(), event.ChannelID, event.MessageID)
 		if err != nil {
 			if errors.Is(err, rest.ErrMissingPermissions) {
-				return ctx.Reply().Send("replay_errors_missing_permissions_vague")
+				return ctx.Reply().IsError(common.UserError).Send("replay_errors_missing_permissions_vague")
 			}
 			log.Err(err).Msg("failed to get channel message")
 			return nil // this is a silent error for the user
@@ -213,7 +213,7 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 		close(images)
 
 		if errors.Is(err, replay.ErrInvalidReplayFile) || len(images) == 0 {
-			return ctx.Reply().Send("replay_errors_all_attachments_invalid")
+			return ctx.Reply().IsError(common.UserError).Send("replay_errors_all_attachments_invalid")
 		}
 
 		reply := ctx.Reply()
@@ -245,7 +245,7 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 		}
 		err = group.Wait()
 		if err != nil {
-			return ctx.Reply().Send("replay_errors_all_attachments_invalid")
+			return ctx.Reply().IsError(common.UserError).Send("replay_errors_all_attachments_invalid")
 		}
 
 		for _, file := range files {
@@ -254,7 +254,7 @@ var ReplayInteractionHandler = common.EventHandler[discordgo.MessageReactionAdd]
 			}
 			reply = reply.File(file.Data, file.Name)
 		}
-		return reply.Reference(event.MessageID, event.ChannelID, event.GuildID).Format("-# <@%s> used a replay reaction", ctx.User().ID).Send()
+		return reply.WithAds().Reference(event.MessageID, event.ChannelID, event.GuildID).Format("-# <@%s> used a replay reaction", ctx.User().ID).Send()
 	},
 }
 
@@ -285,23 +285,23 @@ func init() {
 				data, ok := ctx.ComponentData()
 				if !ok {
 					log.Error().Msg("failed to get component data on interaction command")
-					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
+					return ctx.Reply().IsError(common.UserError).Send("stats_refresh_interaction_error_expired")
 				}
 				interactionID := strings.ReplaceAll(data.CustomID, "refresh_stats_from_button#", "")
 				if interactionID == "" {
 					log.Error().Str("id", data.CustomID).Msg("failed to get interaction id from custom id")
-					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
+					return ctx.Reply().IsError(common.UserError).Send("stats_refresh_interaction_error_expired")
 				}
 
 				interaction, err := ctx.Core().Database().GetDiscordInteraction(ctx.Ctx(), interactionID)
 				if err != nil {
-					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
+					return ctx.Reply().IsError(common.UserError).Send("stats_refresh_interaction_error_expired")
 				}
 
 				ioptions, err := statsOptions{}.fromInteraction(interaction)
 				if err != nil {
 					log.Warn().Err(err).Msg("failed to decode stats options for a refresh button")
-					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
+					return ctx.Reply().IsError(common.UserError).Send("stats_refresh_interaction_error_expired")
 				}
 
 				var opts = []stats.RequestOption{stats.WithWN8()}
@@ -330,11 +330,12 @@ func init() {
 					if errors.Is(err, blitzstars.ErrServiceUnavailable) {
 						return ctx.Reply().
 							Hint(ctx.InteractionID()).
+							IsError(common.ApplicationError).
 							Component(discordgo.ActionsRow{Components: []discordgo.MessageComponent{common.ButtonJoinPrimaryGuild(ctx.Localize("buttons_have_a_question_question"))}}).
 							Send("blitz_stars_error_service_down")
 					}
 					if err != nil {
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 					image = img
 					meta = mt
@@ -343,19 +344,19 @@ func init() {
 					img, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), ioptions.AccountID, ioptions.PeriodStart, opts...)
 					if err != nil {
 						if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && ioptions.Days < 1) {
-							return ctx.Reply().Send("session_error_account_was_not_tracked")
+							return ctx.Reply().IsError(common.UserError).Send("session_error_account_was_not_tracked")
 						}
 						if errors.Is(err, fetch.ErrSessionNotFound) {
-							return ctx.Reply().Send("session_error_no_session_for_period")
+							return ctx.Reply().IsError(common.UserError).Send("session_error_no_session_for_period")
 						}
-						return ctx.Err(err)
+						return ctx.Err(err, common.ApplicationError)
 					}
 					image = img
 					meta = mt
 
 				default:
 					log.Error().Str("customId", data.CustomID).Str("command", interaction.EventID).Msg("received an unexpected component interaction callback")
-					return ctx.Reply().Send("stats_refresh_interaction_error_expired")
+					return ctx.Reply().IsError(common.UserError).Send("stats_refresh_interaction_error_expired")
 				}
 
 				button, saveErr := ioptions.refreshButton(ctx, interaction.EventID)
@@ -367,7 +368,7 @@ func init() {
 				var buf bytes.Buffer
 				err = image.PNG(&buf)
 				if err != nil {
-					return ctx.Err(err)
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				var timings []string

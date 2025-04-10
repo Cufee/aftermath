@@ -1,15 +1,3 @@
-# Build javascript
-FROM oven/bun:latest AS builder-js
-
-WORKDIR /workspace
-
-COPY ./cmd/frontend/widget/package.json ./
-RUN bun install
-
-COPY ./cmd/frontend/widget/ ./
-
-RUN bun run build
-
 # Build app
 FROM golang:1.23-bookworm AS builder-go
 
@@ -31,9 +19,6 @@ RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/assets
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./cmd/frontend/assets/generate
 
 RUN templ generate
-
-# Copy js assets
-COPY --from=builder-js /workspace/dist/components/* ./cmd/frontend/public/js/widget/
 
 RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux go build -ldflags='-s -w' -trimpath -o /bin/aftermath .
 

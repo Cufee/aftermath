@@ -26,6 +26,7 @@ func UseSchema(schema string) {
 	Clans = Clans.FromSchema(schema)
 	CronTask = CronTask.FromSchema(schema)
 	CronTasks = CronTasks.FromSchema(schema)
+	DiscordAdRun = DiscordAdRun.FromSchema(schema)
 	DiscordInteraction = DiscordInteraction.FromSchema(schema)
 	DiscordInteractions = DiscordInteractions.FromSchema(schema)
 	GameMap = GameMap.FromSchema(schema)

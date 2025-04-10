@@ -267,8 +267,8 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 		log.Fatal().Msgf("router#NewRouterHandler failed %s", err)
 	}
 
-	// metrics middleware
-	router.LoadMiddleware(collector.Middleware())
+	// router.LoadMiddleware(middleware.ServeAds())  // ads middleware
+	router.LoadMiddleware(collector.Middleware()) // metrics middleware
 
 	router.LoadCommands(public.Help().Build())
 	router.LoadCommands(commands.LoadedPublic.Compose()...)
