@@ -34,7 +34,6 @@ import (
 	"github.com/cufee/aftermath/cmd/core/server/handlers/private"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
-	"github.com/cufee/aftermath/internal/database/migrations/manual"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
@@ -68,13 +67,6 @@ func main() {
 	db, err := newDatabaseClientFromEnv()
 	if err != nil {
 		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*120)
-	err = manual.Migrate(ctx, db)
-	cancel()
-	if err != nil {
-		log.Fatal().Err(err).Msg("manual.Migrate failed")
 	}
 
 	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db)
@@ -294,9 +286,7 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 	return handlers
 }
 
-func discordInternalHandlersFromEnv(coreClient core.Client, instrument metrics.Instrument) []server.Handler {
-	_ = instrument
-
+func discordInternalHandlersFromEnv(coreClient core.Client, _ metrics.Instrument) []server.Handler {
 	var handlers []server.Handler
 	// secondary Discord bot with mod/admin commands - permissions are still checked
 	if constants.DiscordPrivateBotEnabled {
