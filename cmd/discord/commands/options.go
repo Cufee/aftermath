@@ -8,7 +8,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
-	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
@@ -116,10 +115,6 @@ func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataO
 	}
 
 	return options
-}
-
-func ValidatePlayerName(name string) bool {
-	return strings.HasPrefix(name, "valid#account#") || wargaming.ValidatePlayerNickname(name)
 }
 
 func buildTierChoices() []builder.OptionChoice {
