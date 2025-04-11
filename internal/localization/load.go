@@ -10,23 +10,17 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/cufee/aftermath/internal/files"
+	"github.com/cufee/aftermath/internal/log"
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v3"
 )
-
-type localizationString struct {
-	Key     string `yaml:"key"`
-	Value   string `yaml:"value"`
-	Notes   string `yaml:"notes"`
-	Context string `yaml:"context"`
-}
 
 type localizationStrings struct {
 	// format [module_name][lang_tag][key]value
 	data map[string]map[language.Tag]map[string]string
 }
 
-func (l *localizationStrings) AddStrings(module string, lang language.Tag, newStrings []localizationString) error {
+func (l *localizationStrings) AddStrings(module string, lang language.Tag, newStrings map[string]string) error {
 	if l.data == nil {
 		l.data = make(map[string]map[language.Tag]map[string]string)
 	}
@@ -36,14 +30,14 @@ func (l *localizationStrings) AddStrings(module string, lang language.Tag, newSt
 	if l.data[module][lang] == nil {
 		l.data[module][lang] = make(map[string]string)
 	}
-	for _, data := range newStrings {
-		if strings.HasPrefix("_skip", data.Key) {
+	for key, value := range newStrings {
+		if strings.HasPrefix("_skip", key) {
 			continue
 		}
-		if _, ok := l.data[module][lang][data.Key]; ok {
-			return fmt.Errorf("%s/%s/%s already registered", module, lang.String(), data.Key)
+		if _, ok := l.data[module][lang][key]; ok {
+			return fmt.Errorf("%s/%s/%s already registered", module, lang.String(), key)
 		}
-		l.data[module][lang][data.Key] = data.Value
+		l.data[module][lang][key] = value
 	}
 
 	return nil
@@ -108,7 +102,7 @@ func LoadAssets(assets fs.FS, directory string) error {
 			return fmt.Errorf("failed to parse language tag: %w", err)
 		}
 
-		var localeStrings []localizationString
+		var localeStrings map[string]string
 		decoder := yaml.NewDecoder(bytes.NewBuffer(data))
 
 		err = decoder.Decode(&localeStrings)
@@ -121,6 +115,8 @@ func LoadAssets(assets fs.FS, directory string) error {
 		if err != nil {
 			return err
 		}
+
+		log.Debug().Str("locale", tag.String()).Str("module", module).Msg("loaded localization module")
 	}
 
 	return nil
