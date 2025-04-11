@@ -8,7 +8,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
-	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 )
@@ -37,7 +36,7 @@ var VehicleTierOption = builder.NewOption("tier", discordgo.ApplicationCommandOp
 var NicknameOption = builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
 	Autocomplete().
 	Min(3).
-	Max(64).
+	Max(24).
 	Params(
 		builder.SetDescKey("common_option_stats_nickname_description"),
 	)
@@ -116,10 +115,6 @@ func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataO
 	}
 
 	return options
-}
-
-func ValidatePlayerName(name string) bool {
-	return strings.HasPrefix(name, "valid#account#") || wargaming.ValidatePlayerNickname(name)
 }
 
 func buildTierChoices() []builder.OptionChoice {

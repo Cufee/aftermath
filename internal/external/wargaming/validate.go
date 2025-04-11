@@ -2,9 +2,9 @@ package wargaming
 
 import "unicode"
 
-// returns true if the input is a valid wargaming nickname
-// https://worldoftanks.com/en/content/guide/general/username_change/#:~:text=Full%20Guide,-Full%20Guide&text=Whatever%20the%20reason%20may%20be,Click%20CHANGE.
-// Must be between 3 and 24 characters. Use Latin characters, numbers, and underscores only.
+// Returns true if a nickname is between 3 and 24 characters, uses Latin characters, numbers, and underscores only.
+//
+// https://worldoftanks.com/en/content/guide/general/username_change/
 func ValidatePlayerNickname(input string) bool {
 	if l := len(input); l < 3 || l > 24 {
 		return false
