@@ -39,11 +39,10 @@ func init() {
 				if err != nil {
 					return errors.Wrap(err, "failed to parse expiration_snapshots to time")
 				}
-				rows, err := client.Database().DeleteExpiredSnapshots(ctx, snapshotExpiration)
+				_, err = client.Database().DeleteExpiredSnapshots(ctx, snapshotExpiration)
 				if err != nil && !database.IsNotFound(err) {
 					return errors.Wrap(err, "failed to delete expired snapshots")
 				}
-				_ = rows
 			}
 			return nil
 		},

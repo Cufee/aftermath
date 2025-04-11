@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/json"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 
@@ -80,7 +81,7 @@ var validFuzzyServers = map[string]types.Realm{
 
 func accountsFromBadInput(ctx context.Context, client fetch.Client, input string) ([]fetch.AccountWithRealm, error) {
 	// input is most likely a valid account nickname
-	if commands.ValidatePlayerName(input) {
+	if wargaming.ValidatePlayerNickname(input) {
 		return client.BroadSearch(ctx, input, 2)
 	}
 
@@ -103,7 +104,7 @@ func accountsFromBadInput(ctx context.Context, client fetch.Client, input string
 			if search == "" {
 				continue
 			}
-			if !commands.ValidatePlayerName(search) {
+			if !wargaming.ValidatePlayerNickname(search) {
 				return nil, nil // nothing found
 			}
 
