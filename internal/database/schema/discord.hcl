@@ -158,7 +158,7 @@ table "discord_ad_run" {
     type = text
   }
   column "message_id" {
-    null = false
+    null = true
     type = text
   }
 

@@ -119,6 +119,7 @@ type DiscordDataClient interface {
 
 	GetChannelLastAdRun(ctx context.Context, channelID string) (time.Time, error)
 	CreateDiscordAdRun(ctx context.Context, data models.DiscordAdRun) (models.DiscordAdRun, error)
+	UpdateDiscordAdRun(ctx context.Context, data models.DiscordAdRun) (models.DiscordAdRun, error)
 }
 
 type ModerationClient interface {
