@@ -8,15 +8,15 @@
 package model
 
 type DiscordAdRun struct {
-	ID         int64  `sql:"primary_key" db:"id"`
-	CreatedAt  string `db:"created_at"`
-	UpdatedAt  string `db:"updated_at"`
-	CampaignID string `db:"campaign_id"`
-	ContentID  string `db:"content_id"`
-	GuildID    string `db:"guild_id"`
-	ChannelID  string `db:"channel_id"`
-	MessageID  string `db:"message_id"`
-	Locale     string `db:"locale"`
-	Tags       string `db:"tags"`
-	Metadata   []byte `db:"metadata"`
+	ID         int64   `sql:"primary_key" db:"id"`
+	CreatedAt  string  `db:"created_at"`
+	UpdatedAt  string  `db:"updated_at"`
+	CampaignID string  `db:"campaign_id"`
+	ContentID  string  `db:"content_id"`
+	GuildID    string  `db:"guild_id"`
+	ChannelID  string  `db:"channel_id"`
+	MessageID  *string `db:"message_id"`
+	Locale     string  `db:"locale"`
+	Tags       string  `db:"tags"`
+	Metadata   []byte  `db:"metadata"`
 }

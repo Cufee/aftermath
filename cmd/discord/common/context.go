@@ -53,8 +53,8 @@ type Context interface {
 	HasError() bool
 	ErrorType() Error
 
-	WithAds(v bool)
-	ShowAds() bool
+	WithAds(v bool) // set if the ads should be shown
+	ShowAds() bool  // should the ads be shown
 
 	DeleteResponse(ctx context.Context) error
 	CreateMessage(ctx context.Context, channelID string, reply Reply) (discordgo.Message, error)

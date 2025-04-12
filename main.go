@@ -23,6 +23,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands"
 	_ "github.com/cufee/aftermath/cmd/discord/commands/private"
 	"github.com/cufee/aftermath/cmd/discord/commands/public"
+	"github.com/cufee/aftermath/cmd/discord/cta"
 	"github.com/cufee/aftermath/cmd/discord/gateway"
 	"github.com/cufee/aftermath/cmd/discord/router"
 	"github.com/cufee/aftermath/cmd/frontend"
@@ -259,8 +260,8 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 		log.Fatal().Msgf("router#NewRouterHandler failed %s", err)
 	}
 
-	// router.LoadMiddleware(middleware.ServeAds())  // ads middleware
-	router.LoadMiddleware(collector.Middleware()) // metrics middleware
+	router.LoadMiddleware(cta.Middleware(cta.DefaultCooldownPeriod)) // cta messages
+	router.LoadMiddleware(collector.Middleware())                    // metrics
 
 	router.LoadCommands(public.Help().Build())
 	router.LoadCommands(commands.LoadedPublic.Compose()...)

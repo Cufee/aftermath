@@ -6,7 +6,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/common"
-	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/localization"
 	"golang.org/x/text/language"
 )
@@ -112,7 +111,7 @@ var (
 
 type MessageCollection []CallToActionMessage
 
-var DefaultCTACollection = MessageCollection{
+var defaultCTACollection = MessageCollection{
 	ctaPersonalInstall,
 	ctaGuildInstall,
 	ctaReportIssues,
@@ -123,17 +122,13 @@ var DefaultCTACollection = MessageCollection{
 	ctaCommandLinksVerify,
 }
 
-func printer(locale language.Tag) localization.Printer {
-	p, err := localization.NewPrinterWithFallback("cta", locale, language.English)
-	if err != nil {
-		return func(s string) string { return s }
-	}
-	return p
-}
-
 func (c MessageCollection) NewEmbed(locale language.Tag, tags []string) (discordgo.MessageEmbed, []discordgo.MessageComponent, bool) {
 	var applicable []CallToActionMessage
-	printer := printer(locale)
+	printer, err := localization.NewPrinter("cta", locale)
+	if err != nil {
+		// if the requested locale is not supported, we should not send any ads
+		return discordgo.MessageEmbed{}, nil, false
+	}
 
 optionsLoop:
 	for _, option := range c {
@@ -163,11 +158,11 @@ optionsLoop:
 
 	// body
 	embed := discordgo.MessageEmbed{
-		Author: &discordgo.MessageEmbedAuthor{
-			URL:     constants.FrontendURL,
-			Name:    constants.FrontendAppName,
-			IconURL: constants.FrontendURL + "/assets/icon/64.png",
-		},
+		// Author: &discordgo.MessageEmbedAuthor{
+		// 	URL:     constants.FrontendURL,
+		// 	Name:    constants.FrontendAppName,
+		// 	IconURL: constants.FrontendURL + "/assets/icon/64.png",
+		// },
 		Title:       selected.HeadText(printer),
 		Description: selected.BodyText(printer),
 	}
