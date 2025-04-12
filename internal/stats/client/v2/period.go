@@ -14,6 +14,7 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/period/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/period/v2"
+	"golang.org/x/text/language"
 )
 
 func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Time, o ...common.RequestOption) (prepare.Cards, common.Metadata, error) {
@@ -21,7 +22,7 @@ func (r *client) PeriodCards(ctx context.Context, accountId string, from time.Ti
 
 	meta := common.Metadata{Stats: make(map[string]fetch.AccountStatsOverPeriod)}
 
-	printer, err := localization.NewPrinterWithFallback("stats", r.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", r.locale, language.English)
 	if err != nil {
 		return prepare.Cards{}, meta, err
 	}
@@ -76,7 +77,7 @@ func (r *client) PeriodImage(ctx context.Context, accountId string, from time.Ti
 		return nil, meta, err
 	}
 
-	printer, err := localization.NewPrinterWithFallback("stats", r.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", r.locale, language.English)
 	if err != nil {
 		return nil, meta, err
 	}

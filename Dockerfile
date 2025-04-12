@@ -10,7 +10,7 @@ RUN npm install @tolgee/cli
 
 COPY ./.tolgeerc ./
 
-RUN npx tolgee pull --api-key "${LOCALIZE_API_KEY}"
+RUN npx tolgee pull --api-key "${LOCALIZE_API_KEY}" --states REVIEWED
 
 # Build app
 FROM golang:1.23-bookworm AS builder-go

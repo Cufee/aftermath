@@ -49,7 +49,7 @@ func MentionHandler(errorImage []byte) common.EventHandler[discordgo.MessageCrea
 						locale = common.LocaleToLanguageTag(discordgo.Locale(mention.Locale))
 					}
 
-					printer, err := localization.NewPrinterWithFallback("discord", locale)
+					printer, err := localization.NewPrinterWithFallback("discord", locale, language.English)
 					if err != nil {
 						log.Err(err).Msg("failed to get a localization printer for context")
 						printer = func(s string) string { return s }

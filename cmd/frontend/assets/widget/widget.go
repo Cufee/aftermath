@@ -38,7 +38,7 @@ func loadWidgetData() {
 		panic(err)
 	}
 
-	printer, err := localization.NewPrinterWithFallback("stats", language.English)
+	printer, err := localization.NewPrinter("stats", language.English)
 	if err != nil {
 		panic(err)
 	}

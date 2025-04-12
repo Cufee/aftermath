@@ -22,7 +22,7 @@ func LocaleToLanguageTag(locale discordgo.Locale) language.Tag {
 		return language.Spanish
 
 	case discordgo.PortugueseBR:
-		return language.Portuguese
+		return language.BrazilianPortuguese
 
 	case "":
 		return language.English

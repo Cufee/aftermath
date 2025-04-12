@@ -58,6 +58,30 @@ func (l *localizationStrings) Printer(module string, lang language.Tag) (Printer
 	}, nil
 }
 
+func (l *localizationStrings) PrinterWithFallback(module string, lang, fallback language.Tag) (Printer, error) {
+	if l.data[module] == nil {
+		return nil, fmt.Errorf("module %s not registered", module)
+	}
+	if l.data[module][fallback] == nil {
+		return nil, fmt.Errorf("language %s not registered", fallback.String())
+	}
+
+	return func(key string) string {
+		dict, ok := l.data[module][lang]
+		if !ok {
+			dict = l.data[module][fallback]
+		}
+		value, ok := dict[key]
+		if !ok {
+			value = l.data[module][fallback][key]
+		}
+		if value == "" {
+			value = key
+		}
+		return value
+	}, nil
+}
+
 func (l *localizationStrings) AllLanguages(module string, key string) (map[language.Tag]string, error) {
 	if l.data[module] == nil {
 		return nil, fmt.Errorf("module %s not registered", module)
