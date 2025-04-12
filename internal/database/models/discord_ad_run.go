@@ -18,7 +18,7 @@ type DiscordAdRun struct {
 	ContentID  string
 	GuildID    null.String
 	ChannelID  string
-	MessageID  string
+	MessageID  null.String
 	Locale     language.Tag
 	Tags       []string
 	Metadata   map[string]string
@@ -41,7 +41,7 @@ func ToDiscordAdRun(record *model.DiscordAdRun) DiscordAdRun {
 		ContentID:  record.ContentID,
 		GuildID:    null.NewString(record.GuildID, record.GuildID != ""),
 		ChannelID:  record.ChannelID,
-		MessageID:  record.MessageID,
+		MessageID:  null.StringFromPtr(record.MessageID),
 		Locale:     locale,
 		Tags:       strings.Split(record.Tags, ","),
 		Metadata:   meta,
@@ -52,13 +52,14 @@ func (m *DiscordAdRun) Model() model.DiscordAdRun {
 	locale := m.Locale.String()
 	meta, _ := json.Marshal(m.Metadata)
 	return model.DiscordAdRun{
+		ID:         int64(m.ID),
 		CreatedAt:  TimeToString(time.Now()),
 		UpdatedAt:  TimeToString(time.Now()),
 		CampaignID: m.CampaignID,
 		ContentID:  m.ContentID,
 		GuildID:    m.GuildID.String,
 		ChannelID:  m.ChannelID,
-		MessageID:  m.MessageID,
+		MessageID:  m.MessageID.Ptr(),
 		Locale:     locale,
 		Tags:       strings.Join(m.Tags, ","),
 		Metadata:   meta,

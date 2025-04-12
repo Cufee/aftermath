@@ -326,3 +326,6 @@ func (c staticTestingDatabase) CreateDiscordAdRun(ctx context.Context, data mode
 func (c staticTestingDatabase) GetChannelLastAdRun(ctx context.Context, channelID string) (time.Time, error) {
 	return time.Time{}, nil
 }
+func (c staticTestingDatabase) UpdateDiscordAdRun(ctx context.Context, data models.DiscordAdRun) (models.DiscordAdRun, error) {
+	return models.DiscordAdRun{}, errors.New("not implemented")
+}
