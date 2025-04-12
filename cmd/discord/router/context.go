@@ -64,7 +64,7 @@ func newContext(ctx context.Context, interaction discordgo.Interaction, rest *re
 		c.locale = common.LocaleToLanguageTag(c.interaction.Locale)
 	}
 
-	printer, err := localization.NewPrinterWithFallback("discord", c.locale)
+	printer, err := localization.NewPrinterWithFallback("discord", c.locale, language.English)
 	if err != nil {
 		log.Err(err).Msg("failed to get a localization printer for context")
 		c.localize = func(s string) string { return s }

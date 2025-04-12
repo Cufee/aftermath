@@ -17,6 +17,10 @@ tasks:
           go test -timeout 30s --count=1 -v -run {{ .CLI_ARGS }}
         fi
 
+  localization-download:
+    desc: Download latest localization files
+    cmd: tolgee pull
+
   db-generate:
     desc: generate models from database schema
     cmd: go generate ./internal/database

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://docs.tolgee.io/cli-schema.json",
+  "apiUrl": "https://translate.byvko.dev",
+  "projectId": 2,
+  "format": "YAML_ICU",
+  "pull": {
+    "path": "static/localization",
+    "fileStructureTemplate": "{languageTag}/{namespace}.{extension}"
+  }
+}

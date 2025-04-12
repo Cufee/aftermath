@@ -78,6 +78,7 @@ jobs:
           file: Dockerfile
           build-args: |
             BRAND_FLAVOR=${{ vars.BRAND_FLAVOR }}
+            LOCALIZE_API_KEY=${{ secrets.LOCALIZE_API_KEY }}
       - name: Build and push migrations Docker image
         id: push-migrations
         uses: docker/build-push-action@v6

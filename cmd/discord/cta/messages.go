@@ -124,7 +124,7 @@ var DefaultCTACollection = MessageCollection{
 }
 
 func printer(locale language.Tag) localization.Printer {
-	p, err := localization.NewPrinter("cta", locale, language.English)
+	p, err := localization.NewPrinterWithFallback("cta", locale, language.English)
 	if err != nil {
 		return func(s string) string { return s }
 	}
