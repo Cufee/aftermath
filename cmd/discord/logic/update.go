@@ -10,7 +10,6 @@ import (
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/discord"
 	"github.com/cufee/aftermath/internal/log"
-	"github.com/cufee/aftermath/internal/logic"
 )
 
 type command struct {
@@ -57,7 +56,7 @@ func UpdateCommands(ctx context.Context, db database.Client, rest *rest.Client, 
 		switch {
 		case data.requested != nil && data.current == nil:
 			log.Debug().Str("name", data.requested.Name).Msg("creating a global command")
-			hash, err := logic.HashAny(data.requested.ApplicationCommand)
+			hash, err := hashAny(data.requested.ApplicationCommand)
 			if err != nil {
 				return err
 			}
@@ -80,13 +79,13 @@ func UpdateCommands(ctx context.Context, db database.Client, rest *rest.Client, 
 			log.Debug().Str("name", data.current.Name).Str("id", data.current.ID).Msg("deleted a global command")
 
 		case data.current != nil && data.requested != nil:
-			hash, err := logic.HashAny(data.requested.ApplicationCommand)
+			hash, err := hashAny(data.requested.ApplicationCommand)
 			if err != nil {
 				return err
 			}
 			if data.cached == nil || data.cached.Hash != hash || os.Getenv("FORCE_UPDATE_DISCORD_COMMANDS") == "true" {
 				log.Debug().Str("name", data.current.Name).Str("id", data.current.ID).Msg("updating a global command")
-				hash, err := logic.HashAny(data.requested.ApplicationCommand)
+				hash, err := hashAny(data.requested.ApplicationCommand)
 				if err != nil {
 					return err
 				}

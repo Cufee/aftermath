@@ -16,6 +16,7 @@ import (
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	render "github.com/cufee/aftermath/internal/stats/render/session/v2"
+	"golang.org/x/text/language"
 )
 
 func (c *client) SessionCards(ctx context.Context, accountId string, from time.Time, o ...common.RequestOption) (session.Cards, common.Metadata, error) {
@@ -36,7 +37,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 		return session.Cards{}, meta, err
 	}
 
-	printer, err := localization.NewPrinterWithFallback("stats", c.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", c.locale, language.English)
 	if err != nil {
 		return session.Cards{}, meta, err
 	}
@@ -102,7 +103,7 @@ func (c *client) SessionImage(ctx context.Context, accountId string, from time.T
 		return nil, meta, err
 	}
 
-	printer, err := localization.NewPrinterWithFallback("stats", c.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", c.locale, language.English)
 	if err != nil {
 		return nil, meta, err
 	}
@@ -141,7 +142,7 @@ func (c *client) EmptySessionCards(ctx context.Context, accountId string) (sessi
 		return session.Cards{}, meta, err
 	}
 
-	printer, err := localization.NewPrinterWithFallback("stats", c.locale)
+	printer, err := localization.NewPrinterWithFallback("stats", c.locale, language.English)
 	if err != nil {
 		return session.Cards{}, meta, err
 	}

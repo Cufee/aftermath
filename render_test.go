@@ -43,7 +43,7 @@ func TestRenderReplay(t *testing.T) {
 	db := tests.StaticTestingDatabase()
 	wg, _ := wargamingClientsFromEnv()
 
-	printer, err := localization.NewPrinterWithFallback("stats", language.English)
+	printer, err := localization.NewPrinter("stats", language.English)
 	is.NoErr(err)
 
 	fetch, err := fetch.NewMultiSourceClient(wg, nil, db)

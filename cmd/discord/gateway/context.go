@@ -85,7 +85,7 @@ func newContext(ctx context.Context, gw *gatewayClient, event any) (common.Conte
 	}
 	c.user = user
 
-	printer, err := localization.NewPrinterWithFallback("discord", c.locale)
+	printer, err := localization.NewPrinterWithFallback("discord", c.locale, language.English)
 	if err != nil {
 		log.Err(err).Msg("failed to get a localization printer for context")
 		c.localize = func(s string) string { return s }

@@ -22,11 +22,11 @@ type CommandHandler func(common.Context) error
 type Command struct {
 	discord.ApplicationCommand
 
-	Type       commandType
-	Match      func(string) bool
-	Handler    CommandHandler
-	Middleware []middleware.MiddlewareFunc
-	Ephemeral  bool
+	Type       commandType                 `json:"-"`
+	Match      func(string) bool           `json:"-"`
+	Handler    CommandHandler              `json:"-"`
+	Middleware []middleware.MiddlewareFunc `json:"-"`
+	Ephemeral  bool                        `json:"-"`
 }
 
 const (

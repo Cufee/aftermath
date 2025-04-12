@@ -49,6 +49,7 @@ services:
       dockerfile: Dockerfile
       args:
         BRAND_FLAVOR: ${BRAND_FLAVOR}
+        LOCALIZE_API_KEY: ${LOCALIZE_API_KEY}
     env_file:
       - .env
     deploy:
