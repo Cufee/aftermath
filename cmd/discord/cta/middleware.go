@@ -26,6 +26,9 @@ func Middleware(cooldown time.Duration) middleware.MiddlewareFunc {
 			if err != nil {
 				return err
 			}
+			if !ctx.ShowAds() || ctx.HasError() {
+				return nil
+			}
 
 			guildID := ctx.GuildID()
 			channelID := ctx.ChannelID()
