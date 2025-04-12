@@ -6,7 +6,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/common"
-	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/localization"
 	"golang.org/x/text/language"
 )
@@ -159,11 +158,11 @@ optionsLoop:
 
 	// body
 	embed := discordgo.MessageEmbed{
-		Author: &discordgo.MessageEmbedAuthor{
-			URL:     constants.FrontendURL,
-			Name:    constants.FrontendAppName,
-			IconURL: constants.FrontendURL + "/assets/icon/64.png",
-		},
+		// Author: &discordgo.MessageEmbedAuthor{
+		// 	URL:     constants.FrontendURL,
+		// 	Name:    constants.FrontendAppName,
+		// 	IconURL: constants.FrontendURL + "/assets/icon/64.png",
+		// },
 		Title:       selected.HeadText(printer),
 		Description: selected.BodyText(printer),
 	}
