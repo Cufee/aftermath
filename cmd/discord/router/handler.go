@@ -171,7 +171,7 @@ func (r *router) handleInteraction(ctx context.Context, interaction discordgo.In
 
 	err = handler(cCtx)
 	if err != nil {
-		log.Err(err).Msg("handler returned an error")
+		log.Err(err).Str("command", cCtx.ID()).Str("interactionId", cCtx.InteractionID()).Msg("handler returned an error")
 		r.sendInteractionReply(interaction, discordgo.InteractionResponseData{Content: cCtx.Localize("common_error_unhandled_not_reported") + "\n-# " + interaction.ID,
 			Components: []discordgo.MessageComponent{
 				discordgo.ActionsRow{
