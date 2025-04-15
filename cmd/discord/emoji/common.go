@@ -12,6 +12,10 @@ var aftermathLogo = map[string]discordgo.ComponentEmoji{
 	"blue":   {Name: "blue", ID: constants.DiscordEmojiBlueID},
 	"yellow": {Name: "yellow", ID: constants.DiscordEmojiYellowID},
 }
+var refreshEmoji = discordgo.ComponentEmoji{
+	ID:   constants.MustGetEnv("EMOJI_REFRESH_ID"),
+	Name: "refresh",
+}
 
 func AftermathLogoColored(color string) *discordgo.ComponentEmoji {
 	e, ok := aftermathLogo[color]
@@ -27,4 +31,8 @@ func AftermathLogoDefault() *discordgo.ComponentEmoji {
 		e = aftermathLogo["red"]
 	}
 	return &e
+}
+
+func Refresh() *discordgo.ComponentEmoji {
+	return &refreshEmoji
 }

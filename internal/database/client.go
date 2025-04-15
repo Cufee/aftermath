@@ -160,7 +160,7 @@ func WithDebug() func(*clientOptions) {
 	}
 }
 
-func NewPostgresClient(connString string, options ...ClientOption) (*client, error) {
+func NewPostgresClient(ctx context.Context, connString string, options ...ClientOption) (*client, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Fatal().Interface("error", r).Str("stack", string(debug.Stack())).Msg("NewClient panic")
@@ -179,7 +179,7 @@ func NewPostgresClient(connString string, options ...ClientOption) (*client, err
 	sqldb.SetMaxOpenConns(25)
 	sqldb.SetMaxIdleConns(10)
 
-	if err := sqldb.Ping(); err != nil {
+	if err := sqldb.PingContext(ctx); err != nil {
 		return nil, err
 	}
 
