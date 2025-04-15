@@ -38,7 +38,10 @@ import (
 func MentionHandler(errorImage []byte) common.EventHandler[discordgo.MessageCreate] {
 	return common.EventHandler[discordgo.MessageCreate]{
 		Match: func(c database.Client, s *discordgo.Session, event *discordgo.MessageCreate) bool {
-			return len(event.Mentions) > 0 && event.Author.ID != constants.DiscordBotUserID
+			return len(event.Mentions) > 0 && // has mentions
+				event.Type != discordgo.MessageTypeReply && // not a reply
+				event.Author.ID != constants.DiscordBotUserID && // not from self
+				len(event.Content) < len(constants.DiscordBotUserID)+4 // only includes the mention text
 		},
 		Handle: func(ctx common.Context, event *discordgo.MessageCreate) error {
 			for _, mention := range event.Mentions {

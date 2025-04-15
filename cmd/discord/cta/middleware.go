@@ -17,7 +17,6 @@ import (
 var DefaultCooldownDM = time.Hour * 24
 var DefaultCooldownServer = time.Hour * 6
 
-// var DefaultCooldownPeriod = time.Second * 30
 var followUpResponseDelay = time.Second * 15
 
 func Middleware(cooldownServer, cooldownDM time.Duration) middleware.MiddlewareFunc {
@@ -33,6 +32,7 @@ func Middleware(cooldownServer, cooldownDM time.Duration) middleware.MiddlewareF
 
 			guildID := ctx.GuildID()
 			channelID := ctx.ChannelID()
+
 			cooldown := cooldownDM
 			if guildID.Valid {
 				cooldown = cooldownServer
