@@ -36,7 +36,7 @@ var VehicleTierOption = builder.NewOption("tier", discordgo.ApplicationCommandOp
 var NicknameOption = builder.NewOption("nickname", discordgo.ApplicationCommandOptionString).
 	Autocomplete().
 	Min(3).
-	Max(24).
+	Max(64). // 64 to allow for custom options with account#valid#...
 	Params(
 		builder.SetDescKey("common_option_stats_nickname_description"),
 	)
