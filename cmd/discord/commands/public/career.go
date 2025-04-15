@@ -3,6 +3,7 @@ package public
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/cufee/aftermath/cmd/discord/commands"
@@ -16,6 +17,7 @@ import (
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
 	stats "github.com/cufee/aftermath/internal/stats/client/common"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/aftermath/internal/utils"
 )
 
@@ -72,7 +74,7 @@ func careerCommandHandler(ctx common.Context) error {
 	case options.NicknameSearch != "" && options.AccountID == "":
 		// nickname provided, but user did not select an option from autocomplete
 		accounts, err := accountsFromBadInput(ctx.Ctx(), ctx.Core().Fetch(), options.NicknameSearch)
-		if err != nil {
+		if err != nil && !errors.Is(err, fetch.ErrAccountNotFound) {
 			return ctx.Err(err, common.ApplicationError)
 		}
 		if len(accounts) == 0 {
