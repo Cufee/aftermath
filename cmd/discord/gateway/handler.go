@@ -41,7 +41,7 @@ func ToGatewayHandler[T any](client *gatewayClient, handler common.EventHandler[
 		}
 		err = chain(cCtx)
 		if err != nil {
-			log.Err(err).Msg("gateway event handler returned an error")
+			log.Err(err).Str("command", cCtx.ID()).Str("interactionId", cCtx.InteractionID()).Msg("gateway event handler returned an error")
 			return
 		}
 	}

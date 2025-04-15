@@ -74,7 +74,7 @@ func init() {
 				case options.NicknameSearch != "" && options.AccountID == "":
 					// nickname provided, but user did not select an option from autocomplete
 					accounts, err := accountsFromBadInput(ctx.Ctx(), ctx.Core().Fetch(), options.NicknameSearch)
-					if err != nil {
+					if err != nil && !errors.Is(err, fetch.ErrAccountNotFound) {
 						return ctx.Err(err, common.ApplicationError)
 					}
 					if len(accounts) == 0 {

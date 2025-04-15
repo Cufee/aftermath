@@ -65,10 +65,13 @@ var static embed.FS
 
 func main() {
 	loadStaticAssets(static)
-	db, err := newDatabaseClientFromEnv()
+
+	loadCtx, cancelLoadCtx := context.WithTimeout(context.Background(), time.Second*5)
+	db, err := newDatabaseClientFromEnv(loadCtx)
 	if err != nil {
 		log.Fatal().Err(err).Msg("newDatabaseClientFromEnv failed")
 	}
+	cancelLoadCtx()
 
 	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db)
 
@@ -260,8 +263,8 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 		log.Fatal().Msgf("router#NewRouterHandler failed %s", err)
 	}
 
-	router.LoadMiddleware(cta.Middleware(cta.DefaultCooldownPeriod)) // cta messages
-	router.LoadMiddleware(collector.Middleware())                    // metrics
+	router.LoadMiddleware(cta.Middleware(cta.DefaultCooldownServer, cta.DefaultCooldownDM)) // cta messages
+	router.LoadMiddleware(collector.Middleware())                                           // metrics
 
 	router.LoadCommands(public.Help().Build())
 	router.LoadCommands(commands.LoadedPublic.Compose()...)
@@ -405,8 +408,8 @@ func wargamingClientsFromEnv() (wargaming.Client, wargaming.Client) {
 	return liveClient, cacheClient
 }
 
-func newDatabaseClientFromEnv() (database.Client, error) {
-	client, err := database.NewPostgresClient(constants.DatabaseConnString)
+func newDatabaseClientFromEnv(ctx context.Context) (database.Client, error) {
+	client, err := database.NewPostgresClient(ctx, constants.DatabaseConnString)
 	if err != nil {
 		return nil, fmt.Errorf("database#NewClient failed %w", err)
 	}
