@@ -13,6 +13,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/cmd/discord/emoji"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 )
@@ -167,4 +168,14 @@ func realmSelectButtons(ctx common.Context, id string, accounts []fetch.AccountW
 		})
 	}
 	return ctx.Reply().Hint("stats_bad_nickname_input_hint").Component(row).Text(strings.Join(message, "\n")), nil
+}
+
+func newStatsRefreshButton(data models.DiscordInteraction) discordgo.MessageComponent {
+	return discordgo.ActionsRow{
+		Components: []discordgo.MessageComponent{discordgo.Button{
+			Style:    discordgo.SecondaryButton,
+			Emoji:    emoji.Refresh(),
+			CustomID: fmt.Sprintf("refresh_stats_from_button#%s", data.ID),
+		}},
+	}
 }
