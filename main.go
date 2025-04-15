@@ -260,8 +260,8 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 		log.Fatal().Msgf("router#NewRouterHandler failed %s", err)
 	}
 
-	router.LoadMiddleware(cta.Middleware(cta.DefaultCooldownPeriod)) // cta messages
-	router.LoadMiddleware(collector.Middleware())                    // metrics
+	router.LoadMiddleware(cta.Middleware(cta.DefaultCooldownServer, cta.DefaultCooldownDM)) // cta messages
+	router.LoadMiddleware(collector.Middleware())                                           // metrics
 
 	router.LoadCommands(public.Help().Build())
 	router.LoadCommands(commands.LoadedPublic.Compose()...)
