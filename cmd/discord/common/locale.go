@@ -59,7 +59,12 @@ func LanguageToLocale(tag language.Tag) discordgo.Locale {
 		return discordgo.PortugueseBR
 
 	default:
-		return discordgo.EnglishUS
+		locale := discordgo.Locale(tag.String())
+		_, ok := discordgo.Locales[locale]
+		if !ok {
+			return discordgo.EnglishUS
+		}
+		return locale
 	}
 }
 
