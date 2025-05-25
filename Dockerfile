@@ -36,15 +36,15 @@ RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./cmd/frontend/assets/
 RUN go tool templ generate
 
 # build a fully standalone binary with zero dependencies
-RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux go build -ldflags='-s -w' -trimpath -o /bin/aftermath .
+RUN --mount=type=cache,target=$GOPATH/pkg/mod GOOS=linux go build -ldflags='-s -w' -trimpath -o /bin/aftermath .
 
 # Make a scratch container with required files and binary
 FROM scratch
 
 ENV TZ=Etc/UTC
 ENV ZONEINFO=/zoneinfo.zip
-COPY --from=builder-go /bin/aftermath /usr/bin/aftermath
+COPY --from=builder-go /bin/aftermath /aftermath
 COPY --from=builder-go /usr/local/go/lib/time/zoneinfo.zip /
 COPY --from=builder-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-ENTRYPOINT [ "aftermath" ]
+ENTRYPOINT [ "/aftermath" ]
