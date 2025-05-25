@@ -43,8 +43,8 @@ FROM scratch
 
 ENV TZ=Etc/UTC
 ENV ZONEINFO=/zoneinfo.zip
-COPY --from=builder-go /bin/aftermath /aftermath
+COPY --from=builder-go /bin/aftermath /go/bin/app
 COPY --from=builder-go /usr/local/go/lib/time/zoneinfo.zip /
 COPY --from=builder-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-ENTRYPOINT [ "/aftermath" ]
+ENTRYPOINT [ "/go/bin/app" ]
