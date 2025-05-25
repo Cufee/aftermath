@@ -10,7 +10,7 @@ COPY ./ ./
 RUN --mount=type=cache,target=$GOPATH/pkg/mod GOOS=linux go build -ldflags='-s -w' -trimpath -o /bin/collector collector.go
 
 # Make a scratch container with required files and binary
-FROM slim
+FROM scratch
 
 ENV TZ=Etc/UTC
 ENV ZONEINFO=/zoneinfo.zip
