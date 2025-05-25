@@ -54,7 +54,7 @@ import (
 	"net/http/pprof"
 )
 
-//go:generate templ generate
+//go:generate go tool templ generate
 //go:generate go generate ./internal/assets
 //go:generate go generate ./internal/database
 //go:generate go generate ./cmd/frontend/assets/generate
