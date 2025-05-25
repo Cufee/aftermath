@@ -20,6 +20,7 @@ import (
 func init() {
 	commands.LoadedPublic.Add(
 		builder.NewCommand("replay").
+			Params(builder.SetDescKey("commands_replay_name"), builder.SetDescKey("commands_replay_description")).
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands, permissions.UseImageCommands)).
 			Options(
 				builder.NewOption("file", discordgo.ApplicationCommandOptionAttachment).
