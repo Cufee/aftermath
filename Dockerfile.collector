@@ -1,4 +1,4 @@
-FROM golang:1.23-bookworm AS builder-go
+FROM golang:latest AS builder-go
 
 WORKDIR /workspace
 
@@ -7,10 +7,10 @@ RUN --mount=type=cache,target=$GOPATH/pkg/mod go mod download
 
 COPY ./ ./
 
-RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=1 GOOS=linux go build -ldflags='-s -w' -trimpath -o /bin/collector collector.go
+RUN --mount=type=cache,target=$GOPATH/pkg/mod GOOS=linux go build -ldflags='-s -w' -trimpath -o /bin/collector collector.go
 
 # Make a scratch container with required files and binary
-FROM debian:stable-slim
+FROM slim
 
 ENV TZ=Etc/UTC
 ENV ZONEINFO=/zoneinfo.zip
