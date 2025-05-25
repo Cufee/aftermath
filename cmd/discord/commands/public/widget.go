@@ -17,6 +17,7 @@ import (
 func init() {
 	commands.LoadedPublic.Add(
 		builder.NewCommand("widget").
+			Params(builder.SetDescKey("commands_widget_name"), builder.SetDescKey("commands_widget_description")).
 			Middleware(middleware.RequirePermissions(permissions.UseTextCommands)).
 			Ephemeral().
 			Options(
