@@ -58,9 +58,9 @@ func CreateCleanupTasks(client core.Client) error {
 		ReferenceID:    "database_cleanup",
 		Type:           models.TaskTypeDatabaseCleanup,
 		Data: map[string]string{
-			"expiration_interactions": now.Add(-1 * time.Hour * 24 * 7).Format(time.RFC3339),  // 7 days
-			"expiration_snapshots":    now.Add(-1 * time.Hour * 24 * 90).Format(time.RFC3339), // 90 days
-			"expiration_tasks":        now.Add(-1 * time.Hour * 24 * 7).Format(time.RFC3339),  // 7 days
+			"expiration_interactions": now.Add(-1 * time.Hour * 24 * 45).Format(time.RFC3339),  // 45 days
+			"expiration_snapshots":    now.Add(-1 * time.Hour * 24 * 90).Format(time.RFC3339), 	// 90 days
+			"expiration_tasks":        now.Add(-1 * time.Hour * 24 * 7).Format(time.RFC3339),  	// 7 days
 		},
 	}
 
