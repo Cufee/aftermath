@@ -14,8 +14,8 @@ import (
 	"github.com/guregu/null/v6"
 )
 
-var DefaultCooldownDM = time.Hour * 24
-var DefaultCooldownServer = time.Hour * 6
+var DefaultCooldownDM = time.Hour * 24 * 7
+var DefaultCooldownServer = time.Hour * 24 * 3
 
 var followUpResponseDelay = time.Second * 15
 
