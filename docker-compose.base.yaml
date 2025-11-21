@@ -28,7 +28,7 @@ services:
 
   aftermath-migrate-base:
     image: ghcr.io/cufee/aftermath-migrations:${ENVIRONMENT}
-    command: migrate apply --dir "file:///migrations" --allow-dirty --tx-mode all --url "postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?sslmode=require"
+    command: migrate apply --dir "file:///migrations" --allow-dirty --tx-mode all --url "${DATABASE_URL}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
