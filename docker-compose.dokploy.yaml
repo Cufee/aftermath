@@ -18,9 +18,6 @@ services:
       service: aftermath-migrate-base
     environment:
       - DATABASE_HOST=${DATABASE_HOST}
-    depends_on:
-      database:
-        condition: service_healthy
     networks:
       dokploy-network:
         aliases:
