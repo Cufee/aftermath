@@ -6,18 +6,32 @@ services:
     restart: no
     environment:
       - COLLECTOR_BACKEND_URL=backend-${ENVIRONMENT}:${PRIVATE_SERVER_PORT}
-      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_HOST=database-${ENVIRONMENT}:5432
     networks:
       dokploy-network:
         aliases:
           - collector-${ENVIRONMENT}
+
+  database:
+    hostname: database-${ENVIRONMENT}
+    extends:
+      file: docker-compose.base.yaml
+      service: aftermath-database-base
+    restart: always
+    networks:
+      dokploy-network:
+        aliases:
+          - database-${ENVIRONMENT}
 
   migrate:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-migrate-base
     environment:
-      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_HOST=database-${ENVIRONMENT}:5432
+    depends_on:
+      database:
+        condition: service_healthy
     networks:
       dokploy-network:
         aliases:
@@ -31,10 +45,12 @@ services:
     environment:
       # the rest is imported from .env, which is going to be created by Dokploy automatically
       - PORT=3000 # the port does not matter, but it needs to match Traefik labels. we set it here explicitly in order to avoid any issues
-      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_HOST=database-${ENVIRONMENT}:5432
     depends_on:
       migrate:
         condition: service_completed_successfully
+      database:
+        condition: service_healthy
     expose:
       - 3000
     networks:
