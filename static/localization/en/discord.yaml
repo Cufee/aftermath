@@ -1,0 +1,436 @@
+# Commands
+# name is always the command name shown when typing /, names have to be lowercase
+# description is shown next to the command name
+# /help
+- key: command_help_name
+  value: help
+- key: command_help_description
+  value: Get some helpful information about the bot
+- key: commands_help_refresh_times_fmt
+  value: "North America: <t:%d:t> (<t:%d:R>)\nEurope: <t:%d:t> (<t:%d:R>)\nAsia: <t:%d:t> (<t:%d:R>)"
+- key: commands_help_message_fmt
+  value: "## :chart_with_upwards_trend: Track your progress\n### ○ /session\nGet an image with your current session stats. You can also mention another user to view their session.\n### Aftermath sessions will be reset at the following times:\n%s\n### ○ /career\nGet an image with your career stats. You can also mention another user to view their stats.\n## :film_frames: Dive deeper into every battle\n### ○ /replay\nUpload your replay and get an overview of the battle you have played.\n## :link: Tell Aftermath your Blitz nickname\n### ○ /links\nYou can set a default account by using the _/links favorite_ command to use _/session_ and _/career_ without providing a nickname and server.\n### ○ /links verify\nVerify your Wargaming account to unlock additional features.\n## :frame_photo: Add a splash of style\n### ○ /fancy\nUpload a custom background image for your session stats. Your unique style will be visible to everyone who views your stats.\n## :desktop: Show off on your stream\n### ○ /widget\nGet a link to a streaming widget for your stream overlay.\nThis widget will automatically update with your latest session stats.\n\n_Found a translation error? Let us know on Aftermath Official_\n## :heart: Share the love!"
+# /career
+- key: command_career_name
+  value: career
+- key: command_career_desc
+  value: Get an overview of your career stats
+- key: command_career_help_message
+  value: "## View Career Stats for Your Account!\nTo get started, include a nickname and server, mention another user, or link an account using `/links add`!"
+# /session
+- key: command_session_name
+  value: session
+- key: command_session_description
+  value: Get detailed stats for your recent session
+- key: command_session_help_message
+  value: "## View Session Stats for Your Account!\nTo get started, include a nickname and server, mention another user, or link an account using `/links add`!"
+# /my
+- key: command_my_name
+  value: my
+- key: command_my_description
+  value: View stats for your linked accounts
+- key: command_my_session_name
+  value: session
+- key: command_my_session_description
+  value: View session stats for your linked account
+- key: command_my_career_name
+  value: career
+- key: command_my_career_description
+  value: View career stats for your linked accounts
+- key: command_option_my_account_name
+  value: account
+- key: command_option_my_account_description
+  value: Select one of your linked account
+# /links
+- key: command_links_name
+  value: links
+- key: command_links_description
+  value: Manage your linked Blitz accounts
+- key: command_option_links_add_name
+  value: add
+- key: command_option_links_add_desc
+  value: Link a new Blitz account
+- key: command_option_links_remove_name
+  value: remove
+- key: command_option_links_remove_desc
+  value: Remove your linked Blitz account
+- key: command_option_links_fav_name
+  value: favorite
+- key: command_option_links_fav_desc
+  value: Mark your linked account as default for Aftermath to check
+- key: command_option_links_view_name
+  value: view
+- key: command_option_links_view_desc
+  value: View your linked Blitz accounts
+- key: command_links_linked_successfully_fmt
+  value: "Your account has been linked! Aftermath will now default to **%s** on **%s** when checking stats.\nYou can also verify your account with `/links verify`"
+- key: command_option_links_verify_name
+  value: "verify"
+- key: command_option_links_verify_desc
+  value: "Link and verify your Blitz account to unlock more features!"
+- key: command_links_verify_response_fmt
+  value: "## Here is your verification link!\n### You will need to log in using the Discord account you are currently using in order to link your Blitz account.\n_This link is specific to %s. It does not contain any personal information._\n:link: %s"
+- key: command_links_set_default_successfully_fmt
+  value: "Your default account has been updated! Aftermath will now default to **%s** on **%s** when checking stats."
+- key: command_links_unlinked_successfully
+  value: "Your linked account was removed."
+- key: command_links_verify_cta
+  value: "You can also verify your account with `/links verify`"
+  context: A new default account was set, but it is not verified
+- key: command_links_view_content_fmt
+  value: "## Here is a list of your linked Blitz accounts!\n%s\n \nYou can manage and verify them on our website!"
+  context: The message body for showing a list of linked accounts
+- key: command_links_buttons_manage
+  value: Manage Accounts
+# /widget
+- key: "commands_widget_name"
+  value: "widget"
+- key: "commands_widget_description"
+  value: "Get a live streaming widget for your account"
+- key: commands_widget_message_fmt
+  value: "## [Here is your widget link!](%s)\n_Add it as a Browser Source in OBS_ [_(learn more)_](https://obsproject.com/kb/browser-source)."
+- key: command_option_widget_account_name
+  value: account
+- key: command_option_widget_account_description
+  value: Select one of your linked account
+# /replay
+- key: "commands_replay_name"
+  value: "replay"
+- key: "commands_replay_description"
+  value: "Analyze your replay and view stats for every single player"
+- key: "command_replay_help_message"
+  value: "## Analyze Your Replay and View Stats for All Players!\nTo get started, attach a replay file or provide a link to a replay file when sending the command!"
+- key: command_option_replay_file_name
+  value: "file"
+- key: command_option_replay_file_description
+  value: "A Blitz replay file"
+- key: command_option_replay_link_name
+  value: "link"
+- key: command_option_replay_link_description
+  value: "A link to a Blitz replay file"
+# /fancy
+- key: command_fancy_name
+  value: "fancy"
+- key: command_fancy_description
+  value: "Manage your custom background images"
+- key: command_fancy_help_message
+  value: "## Upload a Custom Background!\nTo get started, attach an image or provide a link to an image when sending the command!"
+- key: command_option_fancy_upload_name
+  value: "upload"
+- key: command_option_fancy_upload_desc
+  value: "Upload a new custom background for your stats"
+- key: command_option_fancy_remove_name
+  value: "remove"
+- key: command_option_fancy_remove_desc
+  value: "Remove a custom background you have previously uploaded"
+- key: fancy_remove_not_found
+  value: "## You don't have a custom background image uploaded\nTo get started, use `/fancy upload`."
+- key: fancy_remove_completed
+  value: "Your custom background image was removed."
+- key: command_option_fancy_link_name
+  value: "link"
+- key: command_option_fancy_link_description
+  value: "A link to a JPEG or PNG image"
+- key: command_option_fancy_file_name
+  value: "file"
+- key: command_option_fancy_file_description
+  value: "A JPEG or PNG image file"
+- key: fancy_hint_image_transformation
+  value: "Images uploaded to Aftermath via this command will be scaled down and blurred. They will also require manual moderation."
+  context: "Images need to be manually approved by a moderator"
+- key: fancy_preview_msg
+  value: "## Here is a preview of your image!\nUse the buttons below to submit it for moderation."
+- key: fancy_submitted_msg
+  value: "**Your request was submitted**\nYou will get a Direct Message when it is reviewed - no further action is required.\n\n_Please make sure your Direct Messages are open._"
+- key: fancy_moderation_request_approved
+  value: "## :tada: **Your Custom Background is set!** :tada:\nThe image you have submitted was approved by a moderator and is now set as your stats background. Other users will only see this background if your default linked account is verified."
+- key: fancy_moderation_request_declined
+  value: "**Your recent image moderation request was declined**\nIt looks like the image you have uploaded did not pass out safety standards. You background will not be updated."
+- key: fancy_moderation_request_declined_and_banned_fmt
+  value: "**Your recent image moderation request was declined**\nIt looks like you have tried to upload an image that is against Aftermath Terms Of Service. As a result, your account will be restricted from uploading custom content until <t:%d:D>. This decision is final and cannot be appealed."
+
+# Seasonal Commands
+# auction
+- key: command_auction_name
+  value: auction
+- key: command_auction_description
+  value: View the current Blitz Auction
+- key: command_auction_result_fmt
+  value: "### Updated <t:%d:R>"
+- key: error_command_auction_still_refreshing
+  value: Aftermath is still working on refreshing the current auction offers, please try again in a couple minutes.
+
+# Common command options
+# days
+- key: common_option_stats_days_name
+  value: days
+  context: Label for days command option, shown while typing a command
+- key: common_option_stats_days_description
+  value: How far back should the session go?
+  context: Description for days command option, shown while typing a command
+# user mention
+- key: common_option_stats_user_name
+  value: user
+  context: Label for discord @member command option, shown while typing a command
+- key: common_option_stats_user_description
+  value: Select another user to view their stats
+  context: Description for user command option, shown while typing a command
+  # nickname
+- key: common_option_stats_nickname_name
+  value: nickname
+  context: Label for nickname command option, shown while typing a command
+- key: common_option_stats_nickname_description
+  value: Blitz player name
+  context: Description for nickname command option, shown while typing a command
+# server/realm
+- key: common_option_stats_realm_name
+  value: server
+  context: Label for server command option, shown while typing a command
+- key: common_option_stats_realm_description
+  value: What server is this account on?
+  context: Description for server command option, shown while typing a command
+
+# Common labels that are safe to use in multiple contexts
+- key: common_label_realm_na
+  value: North America
+- key: common_label_realm_eu
+  value: Europe
+- key: common_label_realm_as
+  value: Asia
+- key: common_label_realm_ru
+  value: CIS
+- key: commands_subscribe_action_button
+  value: Subscribe
+- key: buttons_add_aftermath_to_your_server
+  value: Install Aftermath
+- key: buttons_join_primary_guild
+  value: Join Aftermath Official
+- key: buttons_need_help_question
+  value: Need Help?
+- key: buttons_have_a_question_question
+  value: Have a Question?
+- key: buttons_submit
+  value: Submit
+
+# Errors
+# permissions
+- key: errors_help_missing_dm_permissions_fmt
+  value: "Hey %s, Aftermath is not able to send you a direct message. Try using `/help` instead."
+  context: Aftermath is missing DM permissions to reply with a help message
+
+# internal/Unknown errors
+- key: common_error_service_outage
+  value: "Aftermath is currently undergoing maintenance and is temporarily unavailable. Please try again in a few moments."
+  context: Failed to reach some internal service
+- key: common_error_discord_outage
+  value: "It looks like Discord is having some temporary issues. Please try again in a few seconds."
+  context: Discord request timed out for unknown reasons
+
+- key: common_error_unhandled_reported
+  value: "Something unexpected happened and your command failed.\n*This error was reported automatically, you can also reach out to our team on Aftermath Official*"
+  context: We failed to execute a command, the error is not user-facing and will be reported to a dev automatically
+
+- key: common_error_unhandled_not_reported
+  value: "Something unexpected happened and your command failed.\n*You can reach out to our team on Aftermath Official if you would like to report this error*"
+  context: We failed to execute a command, the error is not user-facing
+
+- key: common_error_user_spam_detected
+  value: "Hey there! It seems like you're using commands too quickly. To ensure a smooth experience for everyone, please refrain from spamming."
+  context: User is spamming using commands/buttons
+
+- key: common_error_command_missing_permissions
+  value: "You don't have permission to use this command."
+
+- key: common_error_command_expired_fmt
+  value: "This is a seasonal command that was disabled on <t:%d:D> and will be removed soon."
+
+- key: common_error_payment_required
+  value: "This feature of Aftermath is only available for users with an active subscription.\nYou can subscribe by using the `/subscribe` command."
+
+- key: common_error_user_restricted_vague_fmt
+  value: "### You are banned from using some or all features of Aftermath until <t:%d:f>"
+  context: User has some kind of restriction/ban in place, but we did not check what the restriction is
+
+- key: common_error_missing_permissions_dm
+  value: "Aftermath is not able to send you a direct message."
+  context: User has DMs restricted to friends only
+
+- key: common_error_missing_permissions_dm_mention_fmt
+  value: "Hey %s, Aftermath is not able to send you a direct message."
+  context: User has DMs restricted to friends only
+
+# stats-related errors
+- key: stats_error_connection_not_verified
+  value: "Looks like you haven't verified your Blitz account yet. Give the `/links verify` command a shot."
+  context: User does not have a verified connection and the command requires one
+
+- key: stats_error_connection_not_found_vague
+  value: "The user you mentioned does not have a Blitz account linked."
+  context: No Blitz account linked for a user mentioned
+
+- key: stats_error_mentioned_self_non_blocking
+  value: "You don't need to @mention yourself when checking stats, just type the command without any options to check your own account."
+  context: Mentioned self when checking stats, will not prevent the command from running, this will not cause an error
+
+- key: stats_error_too_many_arguments_non_blocking
+  value: "When using this command, you only need to mention a user or provide a nickname. The mentioned user will override the nickname if both are provided."
+  context: User mentioned someone AND provided a nickname, this will not cause an error
+
+- key: stats_error_connection_not_found_personal
+  value: "Looks like you don't have a Blitz account linked yet. Give the `/links add` command a shot."
+  context: No Blitz account linked
+
+- key: stats_error_nickname_invalid
+  value: "This does not look like a valid player name, make sure you are using your in-game name."
+  context: Invalid Blitz username provided
+  notes: This does not mean it was not found, just that the input provided cannot possibly be a valid nickname
+
+- key: nickname_autocomplete_invalid_input
+  value: "This does not look like a valid player name, make sure you are using your in-game name"
+  context: Invalid Blitz username provided
+  notes: This does not mean it was not found, just that the input provided cannot possibly be a valid nickname
+
+- key: session_error_account_was_not_tracked
+  value: "Aftermath just started tracking this account. Please play a few battles before using this command again."
+  context: We were not tracking this account, but successfully started tracking it just now
+
+- key: session_error_no_session_for_period
+  value: "Aftermath does not yet have a session for this period. Try changing the number of days or using `/career` instead."
+  context: This account is being tracked, but there is no session available
+
+- key: stats_refresh_interaction_error_expired
+  value: "This refresh button has expired. Please use the command instead."
+  context: Failed to find required data in order to refresh stats/session
+
+- key: stats_autocomplete_not_found
+  value: "Nothing found. Please select a tank from the autocompletion list"
+  context: Search returned no results when a user was typing the tank name in autocomplete
+
+- key: stats_autocomplete_not_enough_length
+  value: "Continue typing to search for available tanks..."
+  context: Shown when a user just started typing and there are not enough characters to search
+
+- key: stats_multiple_accounts_found
+  value: "### It looks like there are multiple Blitz accounts matching your search, please select one using the buttons below."
+  context: Shown when a user did not select an account from autocomplete, but did provide some input (nickname)
+
+- key: stats_bad_nickname_input_hint
+  value: "Wrong account? When searching for a Blitz account by nickname, try selecting a specific account from the results shown as you type"
+  context: Shown when a user did not select an account from autocomplete, but did provide some input (nickname). This is a hint that does not trigger an error
+
+- key: stats_account_not_found
+  value: "It looks like there are no Blitz accounts matching your search, please select an option from the list of accounts that is shown as you type in the nickname."
+  context: Shown when a user did not select an account from autocomplete, but did provide some input (nickname), and this input was invalid
+
+- key: nickname_autocomplete_not_found
+  value: "Nothing found. Please select a nickname from the autocompletion list"
+  context: Search returned no results when a user was typing the name in autocomplete
+
+- key: nickname_autocomplete_not_enough_length
+  value: "Continue typing to search for accounts..."
+  context: Shown when a user just started typing and there are not enough characters to search
+
+- key: my_error_no_account_linked
+  value: "It looks like you don't have a default Blitz account set. You can manage your accounts with `/links`."
+  context: Shown when a user uses one of the /my commands, but does not have a linked account
+
+# /background errors
+- key: background_error_payment_required
+  value: "This feature of Aftermath is only available for users with an active subscription.\nYou can subscribe by using the `/subscribe` command or pick a background using `/fancy` instead."
+  context: User does not have a paid subscription, but tried to set a background
+
+- key: background_error_missing_attachment
+  value: "You need to attach an image or provide a link in order to upload a custom background."
+  context: Command used without a file attached or a link provided
+
+- key: background_error_invalid_attachment_vague
+  value: "The file attached is not a valid image."
+  context: Invalid file attached
+
+- key: background_error_invalid_attachment_image
+  value: "The image you have provided is invalid. Please make sure it is a PNG or JPEG image."
+  context: Invalid file attached
+
+  # /replay errors
+- key: replay_errors_invalid_attachment
+  value: "The file you have attached is not a valid WoT Blitz replay."
+  context: Invalid file attached
+- key: replay_errors_missing_attachment
+  value: "You need to provide a link or attach a WoT Blitz replay file."
+  context: No link or file provided
+- key: replay_error_too_many_options_non_blocking
+  value: "When using this command, you only need to provide either a link or a replay file. The replay file will override the link if both are provided."
+  context: User provided a link AND a file, this will not cause an error
+
+  # replay interaction errors
+- key: replay_errors_all_attachments_invalid
+  value: "None of the files you have attached are valid WoT Blitz replays."
+  context: All attached files are invalid
+- key: replay_errors_some_attachments_invalid
+  value: "Some of the files you have attached are valid WoT Blitz replays and were skipped."
+  context: Some attached files are invalid
+- key: replay_errors_too_many_files
+  value: "Aftermath can process up to 5 replays at once. Please use the `/replay` command to upload any additional files."
+  context: 5+ replays uploaded
+- key: replay_errors_missing_permissions_vague
+  value: "Aftermath is missing some required permissions in this channel. Try using the `/replay` command instead."
+  context: Missing some (unknown) perms
+
+  # /links errors
+- key: links_error_too_many_connections
+  value: "It looks like you have reached the limit for the number of Blitz accounts linked.\nTry removing an existing account with `/links remove` before adding a new one."
+  context: User reached their connection limit for Blitz accounts
+- key: links_error_connection_not_found
+  value: "I was not able to find a linked account with this nickname. Try adding a new one with `/links add`."
+  context: Nickname is invalid or failed to find a valid connection
+- key: links_error_connection_not_found_selected
+  value: "I was not able to the account you have selected."
+  context: Failed to find the selected account by ID
+- key: links_error_no_accounts_linked
+  value: "You don't have any linked accounts."
+- key: links_error_no_account_selected
+  value: "It looks like you did not select an account from the options provided. Please pick one of the accounts shown as you type."
+  context: USer did not select an account from the autocompletion options
+
+# /fancy errors
+- key: fancy_errors_upload_timeout_fmt
+  value: "It looks like you have uploaded a custom background image recently.\nYou will be able to use this command again <t:%d:R>."
+  context: Shown when a user has a recent moderation request that was approved. The timestamp will show [in xx days/months/hours]
+- key: fancy_errors_pending_request_exists
+  value: "You have a pending moderation request. Please wait until your previously submitted image is approved or rejected."
+- key: fancy_errors_preview_expired
+  value: "This preview has expired. Please create a new one to submit it for moderation."
+- key: fancy_errors_missing_attachment
+  value: "You need to provide a link or attach an image file."
+- key: fancy_errors_invalid_link
+  value: "The image you have provided is invalid, Aftermath was not able to view it."
+- key: fancy_errors_invalid_format
+  value: "The image you have provided is not in a JPEG or PNG format. This command does not support other file formats."
+- key: fancy_errors_invalid_image
+  value: "The image you have provided may be broken or is too large.\n_The maximum recommended image size is 1000px x 1000px._"
+- key: fancy_error_too_many_options_non_blocking
+  value: "When using this command, you only need to provide either a link or a file. The image file will override the link if both are provided."
+  context: User provided a link AND a file, this will not cause an error
+
+  # Wargaming specific errors
+- key: wargaming_error_private_account
+  value: "This account is marked private by Wargaming and no stats are available for it at this time."
+  context: Some accounts are valid, but do not return any stats data
+
+- key: wargaming_error_outage
+  value: "It looks like Wargaming are having some temporary issues. Please try again in a few seconds."
+  context: This error is sent whenever a request to WG fails for whatever reason
+
+- key: wargaming_error_outage_short
+  value: "It looks like Wargaming are having some issues. Please try again"
+  context: This error is sent whenever a request to WG fails for whatever reason. Short version
+
+  # Discord specific errors
+- key: discord_error_invalid_interaction_fmt
+  value: "-# <@%s> used a command\n**It looks like Discord is having some issues at the moment.**\nAftermath replies might be delayed, but we will try our best to make things work!\n"
+  context: Discord sometimes does not process the interaction ack corrctly, this will lead to an infinite "Aftermath is thinking" message, but we still reply
+
+# Blitz Stars specific errors
+- key: blitz_stars_error_service_down
+  value: "Some of your career stats rely on BlitzStars, which is currently unavailable. However, most other commands, including sessions, are still working."
+  context: BlitzStars goes down with 500 sometimes, this is a message to describe what happened

@@ -1,0 +1,107 @@
+- key: label_victory
+  value: Victory
+
+- key: label_assisted_combined
+  value: Assisted+
+- key: label_assisted
+  value: Assisted
+- key: label_blocked
+  value: Blocked
+
+- key: label_ranked_rating
+  value: Rating
+- key: label_winrate
+  value: Winrate
+- key: label_frags
+  value: Kills
+- key: label_damage_ratio
+  value: Dmg. Ratio
+- key: label_damage_blocked
+  value: Blocked
+- key: label_avg_tier
+  value: Tier
+- key: label_survival_ratio
+  value: Survival
+
+- key: label_overview_unrated
+  value: Regular Battles
+
+- key: label_map_name_unknown
+  value: Unknown
+
+- key: label_game_mode_unknown
+  value: Unknown
+- key: label_battle_type_regular
+  value: Encounter
+- key: label_game_mode_quick_tournament
+  value: Quick Tournament
+- key: label_game_mode_mad_games
+  value: Mad Games
+- key: label_game_mode_uprising
+  value: Uprising
+
+- key: label_highlight_wn8
+  value: Biggest Impact
+- key: label_game_mode_regular
+  value: Regular Battle
+- key: label_highlight_avg_damage
+  value: Best Performance
+- key: label_highlight_recent_battle
+  value: Last Battle
+
+- key: label_game_mode_rating
+  value: Rating Battle
+- key: label_survival_percent
+  value: Survived
+- key: label_avg_damage
+  value: Damage
+- key: label_defeat
+  value: Defeat
+- key: label_wn8
+  value: WN8
+- key: label_overview_rating
+  value: Rating Battles
+- key: label_game_mode_burning_games
+  value: Burning Games
+- key: label_game_mode_realistic
+  value: Realistic Battle
+- key: label_damage_assisted
+  value: Assisted
+- key: label_game_mode_training
+  value: Training Room
+- key: label_battle_type_supremacy
+  value: Supremacy
+- key: label_game_mode_tournament
+  value: Tournament
+- key: label_battles
+  value: Battles
+- key: label_game_mode_gravity
+  value: Gravity
+- key: label_damage_dealt
+  value: Damage
+- key: label_damage_taken
+  value: Damage Received
+- key: label_highlight_battles
+  value: Favorite Tank
+- key: label_game_mode_skirmish
+  value: Skirmish
+- key: label_battle_type_unknown
+  value: Unknown
+- key: label_accuracy
+  value: Accuracy
+
+# game modes not present in game files
+- key: game_mode_unknown
+  value: Unknown
+- key: game_mode_lunar
+  value: Lunar
+- key: game_mode_training
+  value: Training Room
+- key: game_mode_tutorial
+  value: Tutorial
+
+# game mode tags
+- key: tag_tournament
+  value: Tournament
+- key: tag_quick_tournament
+  value: Quick Tournament
