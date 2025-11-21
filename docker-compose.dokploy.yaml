@@ -1,18 +1,6 @@
 services:
-  # collector:
-  #   extends:
-  #     file: docker-compose.base.yaml
-  #     service: aftermath-collector-base
-  #   restart: no
-  #   environment:
-  #     - COLLECTOR_BACKEND_URL=backend-${ENVIRONMENT}:${PRIVATE_SERVER_PORT}
-  #     - DATABASE_URL=${DATABASE_URL}
-  #   networks:
-  #     dokploy-network:
-  #       aliases:
-  #         - collector-${ENVIRONMENT}
-
   migrate:
+    platform: linux/arm64/v8
     extends:
       file: docker-compose.base.yaml
       service: aftermath-migrate-base
@@ -24,6 +12,7 @@ services:
           - migrate-${ENVIRONMENT}
 
   backend:
+    platform: linux/arm64/v8
     extends:
       file: docker-compose.base.yaml
       service: aftermath-service-base
