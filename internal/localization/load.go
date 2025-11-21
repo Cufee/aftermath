@@ -107,7 +107,6 @@ func LoadAssets(assets fs.FS, directory string) error {
 	}
 
 	for name, data := range dirFiles {
-		println("dir", name)
 		if !strings.HasSuffix(name, ".yaml") {
 			continue
 		}
@@ -127,7 +126,11 @@ func LoadAssets(assets fs.FS, directory string) error {
 			return fmt.Errorf("failed to parse language tag: %w", err)
 		}
 
-		var localeStrings map[string]string
+		var localeStrings []struct {
+			Key   string `yaml:"key"`
+			Value string `yaml:"value"`
+		}
+
 		decoder := yaml.NewDecoder(bytes.NewBuffer(data))
 
 		err = decoder.Decode(&localeStrings)
@@ -135,8 +138,13 @@ func LoadAssets(assets fs.FS, directory string) error {
 			return fmt.Errorf("failed to unmarshal a locale file: %w", err)
 		}
 
+		localeStringsMap := map[string]string{}
+		for _, item := range localeStrings {
+			localeStringsMap[item.Key] = item.Value
+		}
+
 		module := strings.Split(nameSlice[1], ".")[0]
-		err = loadedLocalizationStrings.AddStrings(module, tag, localeStrings)
+		err = loadedLocalizationStrings.AddStrings(module, tag, localeStringsMap)
 		if err != nil {
 			return err
 		}
