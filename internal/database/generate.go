@@ -23,7 +23,7 @@ func main() {
 	basepath := filepath.Dir(b)
 	out := filepath.Join(basepath, "gen")
 
-	connString := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable", os.Getenv("DATABASE_USER"), os.Getenv("DATABASE_PASSWORD"), os.Getenv("DATABASE_HOST"), os.Getenv("DATABASE_NAME"))
+	connString := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("postgres", connString)
 	if err != nil {
 		panic(err)
