@@ -28,9 +28,6 @@ services:
 
   aftermath-migrate-base:
     image: ghcr.io/cufee/aftermath-migrations:${ENVIRONMENT}
-    build:
-      context: .
-      dockerfile: Dockerfile.migrate
     command: migrate apply --dir "file:///migrations" --tx-mode all --url "postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?sslmode=disable"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -44,12 +41,6 @@ services:
   aftermath-service-base:
     pull_policy: always
     image: ghcr.io/cufee/aftermath:${ENVIRONMENT}
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        BRAND_FLAVOR: ${BRAND_FLAVOR}
-        LOCALIZE_API_KEY: ${LOCALIZE_API_KEY}
     env_file:
       - .env
     deploy:
@@ -62,9 +53,6 @@ services:
 
   aftermath-collector-base:
     image: ghcr.io/cufee/aftermath-collector:${ENVIRONMENT}
-    build:
-      context: .
-      dockerfile: Dockerfile.collector
     env_file:
       - .env
     deploy:
