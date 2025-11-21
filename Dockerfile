@@ -1,16 +1,16 @@
-# Download localizations
-FROM node:23 AS builder-node
+# # Download localizations
+# FROM node:23 AS builder-node
 
-ARG LOCALIZE_API_KEY
-ENV LOCALIZE_API_KEY $LOCALIZE_API_KEY
+# ARG LOCALIZE_API_KEY
+# ENV LOCALIZE_API_KEY $LOCALIZE_API_KEY
 
-WORKDIR /workspace
+# WORKDIR /workspace
 
-RUN npm install @tolgee/cli
+# RUN npm install @tolgee/cli
 
-COPY ./.tolgeerc ./
+# COPY ./.tolgeerc ./
 
-RUN npx tolgee pull --api-key "${LOCALIZE_API_KEY}" --states REVIEWED
+# RUN npx tolgee pull --api-key "${LOCALIZE_API_KEY}" --states REVIEWED
 
 # Build app
 FROM golang:1.24.3 AS builder-go
@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=$GOPATH/pkg/mod go mod download
 COPY ./ ./
 
 # load localizations
-COPY --from=builder-node /workspace/static/localization/ ./static/localization/
+# COPY --from=builder-node /workspace/static/localization/ ./static/localization/
 
 # generate static assets
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/assets

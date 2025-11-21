@@ -1,0 +1,241 @@
+background_error_invalid_attachment_image: "A imagem que você enviou não é valida. Tenha certeza de que o arquivo é uma imagem em formato PNG ou JPEG."
+background_error_invalid_attachment_vague: "O arquivo anexado não é uma imagem valida."
+background_error_missing_attachment: "Você deve anexar uma imagem ou um link para ter um fundo personalizado."
+background_error_payment_required: |-
+  Esse recurso é exclusivo de assinantes.
+
+  Você pode ter uma assinatura pelo comando `/subscribe` ou  usar `/fancy` para escolher um fundo.
+blitz_stars_error_service_down: "Algumas estatísticas da sua carreira dependem do BlitzStars, que no momento está indisponível. Entretanto, a maioria dos outros comandos, incluindo o de sessões, ainda funcionam."
+buttons_add_aftermath_to_your_server: "Instale o Aftermath"
+buttons_have_a_question_question: "Tem Dúvidas?"
+buttons_join_primary_guild: "Entre no Aftermath Oficial"
+buttons_need_help_question: "Precisa de Ajuda?"
+buttons_submit: "Enviar"
+command_auction_description: "Veja o Leilão atual no Blitz"
+command_auction_name: "leilão"
+command_auction_result_fmt: "### Atualizado <t:%d:R>"
+command_career_desc: "Tenha um resumo das estatísticas da sua carreira"
+command_career_help_message: |-
+  ## Veja as Estatísticas da sua Conta!
+  Para começar, coloque o seu nome e um servidor, mencione outro usuário ou vincule uma conta usando `/links add`!
+command_career_name: "carreira"
+command_fancy_description: "Veja suas imagens de fundo personalizado"
+command_fancy_help_message: |-
+  ## Tenha um fundo personalizado!
+  Para começar, anexe uma imagem ou um link para uma imagem ao enviar o comando!
+command_fancy_name: "chique"
+command_help_description: "Veja informações úteis sobre o bot"
+command_help_name: "ajuda"
+command_links_buttons_manage: "Gerenciar Contas"
+command_links_description: "Gerencie as suas contas Blitz vinculadas"
+command_links_linked_successfully_fmt: |-
+  Sua conta foi vinculada! O Aftermath agora exibirá como padrão **%s** em **%s** ao verificar as estatísticas.
+  Você também pode verificar sua conta com "/links verify".
+command_links_name: "links"
+command_links_set_default_successfully_fmt: "Sua conta padrão foi atualizada! O Aftermath agora exibirá como padrão **%s** em **%s** ao verificar as estatísticas."
+command_links_unlinked_successfully: "Sua conta vinculada foi removida."
+command_links_verify_cta: "Você também pode verificar sua conta com \"/links verify\""
+command_links_verify_response_fmt: |-
+  ## Aqui está o seu link de verificação!
+  ### Você precisará fazer login com a conta do Discord que está usando atualmente para vincular sua conta do Blitz.
+  _Este link é específico para %s. Ele não contém nenhuma informação pessoal._
+  :link: %s
+command_links_view_content_fmt: |-
+  ## Aqui está uma lista das suas contas Blitz vinculadas!
+  %s
+   
+  Você pode gerenciá-las e verificá-las em nosso site!
+command_my_career_description: "Veja estatísticas de carreira das suas contas vinculadas"
+command_my_career_name: "carreira"
+command_my_description: "Ver estatísticas das suas contas vinculadas"
+command_my_name: "minha"
+command_my_session_description: "Ver estatísticas de sessão para sua conta vinculada"
+command_my_session_name: "sessão"
+command_option_fancy_file_description: "Um arquivo de imagem JPEG ou PNG"
+command_option_fancy_file_name: "arquivo"
+command_option_fancy_link_description: "Link para uma imagem JPEG ou PNG"
+command_option_fancy_link_name: "link"
+command_option_fancy_remove_desc: "Remova um plano de fundo personalizado que você enviou anteriormente"
+command_option_fancy_remove_name: "remover"
+command_option_fancy_upload_desc: "Envie um novo fundo personalizado para suas estatísticas"
+command_option_fancy_upload_name: "enviar"
+command_option_links_add_desc: "Vincular uma nova conta Blitz"
+command_option_links_add_name: "adicionar"
+command_option_links_fav_desc: "Marque sua conta vinculada como principal para o Aftermath verificar"
+command_option_links_fav_name: "favorito"
+command_option_links_remove_desc: "Remover sua conta Blitz vinculada"
+command_option_links_remove_name: "remover"
+command_option_links_verify_desc: "Vincule e verifique sua conta Blitz para desbloquear mais recursos!"
+command_option_links_verify_name: "verificar"
+command_option_links_view_desc: "Veja suas contas Blitz vinculadas"
+command_option_links_view_name: "visualizar"
+command_option_my_account_description: "Selecione uma das suas contas vinculadas"
+command_option_my_account_name: "conta"
+command_option_replay_file_description: "Um arquivo de replay do Blitz"
+command_option_replay_file_name: "arquivo"
+command_option_replay_link_description: "Um link para uma replay do Blitz"
+command_option_replay_link_name: "link"
+command_option_widget_account_description: "Selecione uma das suas contas vinculadas"
+command_option_widget_account_name: "conta"
+command_replay_help_message: |-
+  ## Analise seu replay e veja estatística de todos os jogadores!
+  Para começar, anexe um arquivo de replay ou forneça um link do replay ao enviar o comando!
+command_session_description: "Obtenha estatísticas detalhadas da sua sessão recente"
+command_session_help_message: |-
+  ## Veja as estatísticas da sessão da sua conta!
+  Para começar, inclua um nome e um servidor, mencione outro usuário ou vincule uma conta usando `/links add`!
+command_session_name: "sessão"
+commands_help_message_fmt: |-
+  ## :chart_with_upwards_trend: Acompanhe seu progresso
+  ### ○ /session
+  Obtenha uma imagem com as estatísticas da sua sessão atual. Você também pode mencionar outro usuário para visualizar a sessão dele.
+  ### As sessões do Aftermath serão reiniciadas nos seguintes horários:
+  %s
+  ### ○ /career
+  Obtenha uma imagem com as estatísticas da sua carreira. Você também pode mencionar outro usuário para visualizar as estatísticas dele.
+  ## :film_frames: Mergulhe mais fundo em cada batalha
+  ### ○ /replay
+  Envie seu replay e tenha uma visão geral da batalha que você jogou.
+  ## :link: Informe seu nome do Blitz para o Aftermath
+  ### ○ /links
+  Você pode definir uma conta padrão usando o comando _/links favorite_ para usar _/session_ e _/career_ sem fornecer um nome e servidor.
+  ### ○ /links verify
+  Verifique sua conta Wargaming para desbloquear recursos adicionais.
+  ## :frame_photo: Adicione um toque de estilo
+  ### ○ /fancy
+  Envie uma imagem de fundo personalizada para as estatísticas da sua sessão. Seu estilo único ficará visível para todos que visualizarem suas estatísticas.
+  ## :desktop: Se exiba na transmissão
+  ### ○ /widget
+  Obtenha um link para um widget de transmissão para o overlay da sua transmissão.
+  Este widget será atualizado automaticamente com as estatísticas mais recentes da sua sessão.
+
+  _Encontrou um erro de tradução? Avise-nos no Aftermath Official_
+  ## :heart: Compartilhe amor!
+commands_help_refresh_times_fmt: |-
+  América do Norte: <t:%d:t> (<t:%d:R>)
+  Europa: <t:%d:t> (<t:%d:R>)
+  Ásia: <t:%d:t> (<t:%d:R>)
+commands_replay_description: "Analise o seu replay e veja as estatísticas de cada jogador"
+commands_replay_name: "replay"
+commands_subscribe_action_button: "Inscrever-se"
+commands_widget_description: "Obtenha um widget de transmissão para sua conta"
+commands_widget_message_fmt: |-
+  ## [Aqui está o link do seu widget!](%s)
+  _Adicione-o como uma fonte do navegador no OBS_ [_(saiba mais)_](https://obsproject.com/kb/browser-source).
+commands_widget_name: "widget"
+common_error_command_expired_fmt: "Este é um comando sazonal que foi desabilitado em <t:%d:D> e será removido em breve."
+common_error_command_missing_permissions: "Você não tem permissão para usar este comando."
+common_error_discord_outage: "Parece que o Discord está com problemas temporários. Tente novamente em alguns segundos."
+common_error_missing_permissions_dm: "O Aftermath não pode te enviar uma mensagem direta."
+common_error_missing_permissions_dm_mention_fmt: "Olá %s, o Aftermath não pode lhe enviar uma mensagem direta."
+common_error_payment_required: |-
+  Este recurso é exclusivo de assinantes.
+  Você pode ter uma assinatura pelo comando `/subscribe`.
+common_error_service_outage: "O Aftermath está em manutenção e temporariamente indisponível. Tente novamente em alguns instantes."
+common_error_unhandled_not_reported: |-
+  Algo inesperado aconteceu e seu comando falhou.
+  *Você pode entrar em contato com nossa equipe no Aftermath Oficial se desejar reportar este erro*
+common_error_unhandled_reported: |-
+  Algo inesperado aconteceu e seu comando falhou.
+  *Este erro foi reportado automaticamente. Você também pode entrar em contato com nossa equipe no Aftermath Oficial*
+common_error_user_restricted_vague_fmt: "### Você está proibido de usar alguns ou todos os recursos do Aftermath até <t:%d:f>"
+common_error_user_spam_detected: "Ei! Parece que você está usando os comandos muito rápido. Para garantir uma boa experiência para todos, evite spam."
+common_label_realm_as: "Ásia"
+common_label_realm_eu: "Europa"
+common_label_realm_na: "América do Norte"
+common_label_realm_ru: "CEI"
+common_label_tier_1: "Nível I"
+common_label_tier_10: "Nível X"
+common_label_tier_2: "Nível II"
+common_label_tier_3: "Nível III"
+common_label_tier_4: "Nível IV"
+common_label_tier_5: "Nível V"
+common_label_tier_6: "Nível VI"
+common_label_tier_7: "Nível VII"
+common_label_tier_8: "Nível VIII"
+common_label_tier_9: "Nível IX"
+common_option_stats_days_description: "Até quando a sessão deve ir?"
+common_option_stats_days_name: "dias"
+common_option_stats_nickname_description: "Nome do jogador Blitz"
+common_option_stats_nickname_name: "nome"
+common_option_stats_realm_description: "Em qual servidor esta conta está?"
+common_option_stats_realm_name: "servidor"
+common_option_stats_tank_description: "Filtrar veículos por nome"
+common_option_stats_tank_tier_description: "Filtrar veículos por nível"
+common_option_stats_user_description: "Selecione outro usuário para visualizar suas estatísticas"
+common_option_stats_user_name: "usuário"
+discord_error_invalid_interaction_fmt: |
+  -# <@%s> usou um comando
+  **Parece que o Discord está com alguns problemas no momento.**
+  As respostas do Aftermath podem demorar, mas faremos o possível para que tudo funcione!
+error_command_auction_still_refreshing: "O Aftermath ainda está tentando atualizar as ofertas atuais do leilão. Tente novamente em alguns minutos."
+errors_help_missing_dm_permissions_fmt: "Olá %s, o Aftermath não conseguiu enviar uma mensagem direta para você. Tente usar `/help`."
+fancy_error_too_many_options_non_blocking: "Ao usar este comando, você só precisa fornecer uma imagem ou um link. A imagem terá prioridade se ambos forem fornecidos."
+fancy_errors_invalid_format: "A imagem que você forneceu não está no formato JPEG ou PNG. Este comando não suporta outros tipos de formatos."
+fancy_errors_invalid_image: |-
+  A imagem que você forneceu pode estar corrompida ou ser muito grande.
+  _O tamanho máximo de imagem recomendado é 1000px por 1000px._
+fancy_errors_invalid_link: "A imagem que você forneceu é inválida, o Aftermath não conseguiu visualizá-la."
+fancy_errors_missing_attachment: "Você precisa fornecer um link ou anexar um arquivo de imagem."
+fancy_errors_pending_request_exists: "Você tem uma solicitação de moderação pendente. Aguarde até que a imagem enviada anteriormente seja aprovada ou rejeitada."
+fancy_errors_preview_expired: "Esta prévia expirou. Crie uma nova para envia-la à moderação."
+fancy_errors_upload_timeout_fmt: |-
+  Parece que você enviou uma imagem de fundo personalizada recentemente.
+  Você poderá usar este comando novamente <t:%d:R>.
+fancy_hint_image_transformation: "As imagens enviadas para o Aftermath por meio deste comando serão reduzidas e desfocadas. Elas também precisarão de moderação manual."
+fancy_moderation_request_approved: |-
+  ## :tada: **Seu plano de fundo personalizado foi definido!** :tada:
+  A imagem que você enviou foi aprovada por um moderador e agora está definida como seu plano de fundo de estatísticas. Outros usuários só verão este plano de fundo se sua conta vinculada padrão for verificada.
+fancy_moderation_request_declined: |-
+  **Sua solicitação recente de moderação de imagem foi recusada**
+  Parece que a imagem que você enviou não atendeu aos padrões de segurança. Seu plano de fundo não será atualizado.
+fancy_moderation_request_declined_and_banned_fmt: |-
+  **Sua solicitação recente de moderação de imagem foi recusada**
+  Parece que você tentou enviar uma imagem que viola os Termos de Serviço do Aftermath. Como resultado, sua conta ficará suspensa de enviar conteúdo personalizado até <t:%d:D>. Esta decisão é final e não pode ser apelada.
+fancy_preview_msg: |-
+  ## Aqui está uma prévia da sua imagem!
+  Use os botões abaixo para envia-la à moderação.
+fancy_remove_completed: "Sua imagem de fundo personalizada foi removida."
+fancy_remove_not_found: |-
+  ## Você não possui uma imagem de fundo personalizada enviada
+  Para começar, use `/fancy upload`.
+fancy_submitted_msg: |-
+  **Sua solicitação foi enviada**
+  Você receberá uma Mensagem Direta quando ela for analisada - nenhuma outra ação é necessária.
+
+  _Certifique-se de que suas Mensagens Diretas estejam abertas._
+links_error_connection_not_found: "Não consegui encontrar uma conta vinculada com este nome. Tente adicionar uma com `/links add`."
+links_error_connection_not_found_selected: "Não consegui acessar a conta que você selecionou."
+links_error_no_account_selected: "Parece que você não selecionou uma conta entre as opções fornecidas. Escolha uma das contas exibidas conforme você digita."
+links_error_no_accounts_linked: "Você não tem nenhuma conta vinculada."
+links_error_too_many_connections: |-
+  Parece que você atingiu o limite de contas vinculadas do Blitz.
+  Tente remover uma conta existente com `/links remove` antes de adicionar uma nova.
+my_error_no_account_linked: "Parece que você não tem uma conta padrão do Blitz definida. Você pode gerenciar suas contas com `/links`."
+nickname_autocomplete_invalid_input: "Este não parece ser um nome de jogador válido, certifique-se de que está usando seu nome no jogo"
+nickname_autocomplete_not_enough_length: "Continue digitando para procurar contas..."
+nickname_autocomplete_not_found: "Nada encontrado. Selecione um nome na lista de preenchimento automático."
+replay_error_too_many_options_non_blocking: "Ao usar este comando, você só precisa fornecer um replay ou um link. O replay terá prioridade se ambos forem fornecidos."
+replay_errors_all_attachments_invalid: "Nenhum dos arquivos que você anexou são replays válidos do WoT Blitz."
+replay_errors_invalid_attachment: "O arquivo que você anexou não é um replay válido do WoT Blitz."
+replay_errors_missing_attachment: "Você precisa fornecer um link ou anexar um arquivo de replay do WoT Blitz."
+replay_errors_missing_permissions_vague: "O Aftermath não possui algumas permissões necessárias neste canal. Tente usar o comando `/replay`."
+replay_errors_some_attachments_invalid: "Alguns dos arquivos que você anexou são replays válidos do WoT Blitz e foram pulados."
+replay_errors_too_many_files: "O Aftermath pode processar até 5 replays simultaneamente. Use o comando `/replay` para enviar arquivos adicionais."
+session_error_account_was_not_tracked: "O Aftermath começou a rastrear esta conta. Jogue algumas batalhas antes de usar este comando novamente."
+session_error_no_session_for_period: "O Aftermath ainda não possui uma sessão para este período. Tente alterar o número de dias ou use `/career`."
+stats_account_not_found: "Parece que não há contas do Blitz que correspondam à sua pesquisa. Selecione uma opção na lista de contas que é exibida conforme você digita o nome."
+stats_autocomplete_not_enough_length: "Continue digitando para procurar por tanques disponíveis..."
+stats_autocomplete_not_found: "Nada encontrado. Selecione um tanque na lista de preenchimento automático."
+stats_bad_nickname_input_hint: "Conta errada? Ao procurar uma conta do Blitz pelo nome, tente selecionar uma conta específica nos resultados exibidos conforme você digita."
+stats_error_connection_not_found_personal: "Parece que você ainda não tem uma conta Blitz vinculada. Experimente o comando `/links add`."
+stats_error_connection_not_found_vague: "O usuário que você mencionou não tem uma conta Blitz vinculada."
+stats_error_connection_not_verified: "Parece que você ainda não verificou sua conta do Blitz. Experimente o comando `/links verify`."
+stats_error_mentioned_self_non_blocking: "Você não precisa @mencionar a si mesmo ao verificar as estatísticas, basta digitar o comando sem nenhuma opção para verificar sua própria conta."
+stats_error_nickname_invalid: "Este não parece ser um nome de jogador válido. Certifique-se de que você está usando seu nome no jogo."
+stats_error_too_many_arguments_non_blocking: "Ao usar este comando, você só precisa mencionar um usuário ou fornecer um nome. O nome terá prioridade se ambos forem fornecidos."
+stats_multiple_accounts_found: "### Parece que há várias contas do Blitz que correspondem à sua pesquisa. Selecione uma usando os botões abaixo."
+stats_refresh_interaction_error_expired: "Este botão de atualização expirou. Em vez disso, use o comando."
+wargaming_error_outage: "Parece que a Wargaming está com problemas temporários. Tente novamente em alguns segundos."
+wargaming_error_outage_short: "Parece que a Wargaming está com problemas. Tente novamente."
+wargaming_error_private_account: "Esta conta foi marcada como privada pela Wargaming e não há estatísticas disponíveis para ela no momento."

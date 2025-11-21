@@ -1,0 +1,50 @@
+cta_abandoned_negative_growth_body: |-
+  Parece que você não usou o Aftermath já faz um tempo, mas eu posso ser muito útil para jogadores que querem melhorar suas estatísticas.
+
+  Esta é a sua Sessão mais recente, tente usar `/session` se você deseja se aprofundar mais!
+cta_abandoned_negative_growth_head: "Estamos com saudades :cry:"
+cta_abandoned_neutral_growth_body: |-
+  Parece que você não usou o Aftermath já faz um tempo.
+
+  Dê uma olhada nas suas estatísticas mais recentes, use `/session` se você desejar se aprofundar mais!
+cta_abandoned_neutral_growth_head: "Estamos com saudades :cry:"
+cta_abandoned_positive_growth_body: |-
+  Parece que você não usou o Aftermath já faz um tempo, mas você melhorou muito!
+
+  Esta é a sua sessão mais recente, tente usar `/session` se você deseja se aprofundar mais!
+cta_abandoned_positive_growth_head: "Estamos com saudades :cry:"
+cta_command_help_body: |-
+  Quer informações sobre todos os recursos incríveis?
+
+  Use `/help` para receber uma lista com os comandos disponíveis!
+cta_command_help_button: "Dúvidas?"
+cta_command_help_head: "Aprenda mais sobre o Aftermath!"
+cta_command_links_add_body: |-
+  Você pode vincular sua conta do Blitz ao Aftermath para faciliar o uso de comandos!
+
+  Tente usando o comandos `/links add`.
+cta_command_links_add_head: "Vincule a sua conta Blitz!"
+cta_command_links_verify_body: |-
+  Você pode verificar sua conta do Blitz usando `/link verify`.
+
+  Isso fará com que outros usuários possam ver o seu fundo e desbloqueará o comando `/my`!
+cta_command_links_verify_head: "Verifique sua conta Blitz!"
+cta_command_replay_body: |-
+  Você pode enviar um replay usando `/replay` para obter uma visão geral da sua batalha com estatísticas para cada jogador!
+
+  Os replays são sempre mantidos em sigilo, nunca armazenados e nunca enviamos para nenhum serviço de terceiros - suas estratégias estão seguras conosco!
+cta_command_replay_head: "O Aftermath também pode verificar os seus replays!"
+cta_guild_install_body: |-
+  Compartilhe este link com o dono do servidor!
+  https://amth.one/install
+cta_guild_install_button: "Compartilhe o Aftermath"
+cta_guild_install_head: "Quer adicionar o Aftermath ao seu servidor favorito?"
+cta_personal_install_body: |-
+  Instale o Aftermath como um aplicativo pessoal e use-o em todos os servidores e grupos de conversa!
+
+  Basta selecionar **Adicionar aos Meus Aplicativos** ao instalar o Aftermath.
+cta_personal_install_button: "Instale o Aftermath"
+cta_personal_install_head: "Você pode usar o Aftermath em todos os seus servidores!"
+cta_report_issues_body: "Você pode reportar quaisquer erros e enviar solicitações de recursos no servidor oficial do Aftermath no Discord!"
+cta_report_issues_button: "Junte-se ao Aftermath Oficial"
+cta_report_issues_head: "Viu algum erro ou quer compartilhar algum feedback?"

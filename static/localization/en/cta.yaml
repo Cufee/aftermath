@@ -1,0 +1,50 @@
+cta_abandoned_negative_growth_body: |-
+  It looks like you haven't used Aftermath in a while, but I can be really helpful for players looking to improve their stats.
+
+  Here is your recent session, try using `/session` if you want to dive deeper into your stats!
+cta_abandoned_negative_growth_head: "We miss you :cry:"
+cta_abandoned_neutral_growth_body: |-
+  It looks like you haven't used Aftermath in a while.
+
+  Check out your recent stats, you can also dive deeper using the `/session` command!
+cta_abandoned_neutral_growth_head: "We miss you :cry:"
+cta_abandoned_positive_growth_body: |-
+  It looks like you haven't used Aftermath in a while, but your growth is impressive!
+
+  Here is your recent session, try using `/session` if you want to dive deeper into your stats.
+cta_abandoned_positive_growth_head: "We miss you :cry:"
+cta_command_help_body: |-
+  Looking for more information on all the awesome features?
+
+  Check `/help` for an overview of every supported command!
+cta_command_help_button: "Have a question?"
+cta_command_help_head: "Learn about Aftermath!"
+cta_command_links_add_body: |-
+  You can link your Blitz account to Aftermath to make checking stats even easier!
+
+  Give it a try with `/links add`
+cta_command_links_add_head: "Link your Blitz account!"
+cta_command_links_verify_body: |-
+  You can verify your Blitz account using `/link verify`.
+
+  This will make your custom background images visible to other users and unlock the `/my` command!
+cta_command_links_verify_head: "Verify your Blitz account!"
+cta_command_replay_body: |-
+  You can upload a replay using `/replay` to get an overview of your battle with stats for every player!
+
+  Replays are always kept private, never stored, and never uploaded to any third party service - your strats are safe with us!
+cta_command_replay_head: "Aftermath can also process your replays!"
+cta_guild_install_body: |-
+  Just share this link with a server owner!
+  https://amth.one/install
+cta_guild_install_button: "Share Aftermath"
+cta_guild_install_head: "Want to add Aftermath to your favorite server?"
+cta_personal_install_body: |-
+  Install Aftermath as a personal App and use it across all servers and Direct Message groups!
+
+  Just select **Add to My Apps** when installing Aftermath
+cta_personal_install_button: "Install Aftermath"
+cta_personal_install_head: "You can use Aftermath across all of your servers!"
+cta_report_issues_body: "You can report any errors and submit feature requests on the Aftermath Official Discord server!"
+cta_report_issues_button: "Join Aftermath Official"
+cta_report_issues_head: "Spotted an error or want to share some feedback?"
