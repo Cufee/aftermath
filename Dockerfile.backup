@@ -1,0 +1,12 @@
+FROM postgres:17
+
+# Add AWS cli
+RUN apt-get update; \
+    apt-get install -y --no-install-recommends \
+    awscli
+
+# Add the backup script
+COPY ./backup-database.sh /backup.sh
+RUN chmod +x /backup.sh
+
+ENTRYPOINT [ "/backup.sh" ]

@@ -26,6 +26,18 @@ services:
         limits:
           memory: 2048m
 
+  aftermath-backup-base:
+    image: ghcr.io/cufee/aftermath-backup:${ENVIRONMENT}
+    build:
+      context: .
+      dockerfile: Dockerfile.backup
+    deploy:
+      resources:
+        reservations:
+          memory: 2048m
+        limits:
+          memory: 2048m
+  
   aftermath-migrate-base:
     image: ghcr.io/cufee/aftermath-migrations:${ENVIRONMENT}
     command: "migrate apply --dir 'file:///migrations' --tx-mode all --url 'postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?sslmode=disable'"

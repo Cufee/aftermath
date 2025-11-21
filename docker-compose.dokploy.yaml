@@ -23,6 +23,24 @@ services:
         aliases:
           - database-${ENVIRONMENT}
 
+  # database-backup:
+  #   hostname: database-backup-${ENVIRONMENT}
+  #   extends:
+  #     file: docker-compose.base.yaml
+  #     service: aftermath-backup-base
+  #   restart: never
+  #   environment:
+  #     - DATABASE_URL=${DATABASE_URL}
+  #   depends_on:
+  #     migrate:
+  #       condition: service_completed_successfully
+  #     database:
+  #       condition: service_healthy
+  #   networks:
+  #     dokploy-network:
+  #       aliases:
+  #         - database-backup-${ENVIRONMENT}
+
   migrate:
     extends:
       file: docker-compose.base.yaml
@@ -43,8 +61,6 @@ services:
       service: aftermath-service-base
     restart: always
     environment:
-      # the rest is imported from .env, which is going to be created by Dokploy automatically
-      - PORT=3000 # the port does not matter, but it needs to match Traefik labels. we set it here explicitly in order to avoid any issues
       - DATABASE_HOST=database-${ENVIRONMENT}:5432
     depends_on:
       migrate:
