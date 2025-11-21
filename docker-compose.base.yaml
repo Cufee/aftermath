@@ -2,7 +2,7 @@
 # While it is fine to import .env files through `env_file` option here, `environment` should never be defined in this file - it will be overwritten
 services:
   aftermath-migrate-base:
-    image: ghcr.io/cufee/aftermath-migrations:${ENVIRONMENT}
+    image: aftermath-migrations:${ENVIRONMENT}
     build:
       context: .
       dockerfile: Dockerfile.migrate
@@ -18,7 +18,7 @@ services:
 
   aftermath-service-base:
     pull_policy: always
-    image: ghcr.io/cufee/aftermath:${ENVIRONMENT}
+    image: aftermath:${ENVIRONMENT}
     env_file:
       - .env
     deploy:
@@ -30,7 +30,7 @@ services:
           memory: 256m
 
   aftermath-collector-base:
-    image: ghcr.io/cufee/aftermath-collector:${ENVIRONMENT}
+    image: aftermath-collector:${ENVIRONMENT}
     build:
       context: .
       dockerfile: Dockerfile
