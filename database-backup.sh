@@ -35,7 +35,7 @@ fi
 echo "Starting backup to $BACKUP_FILE..."
 
 # pg_dump accepts a URI as the dbname argument
-pg_dump "$CONNECTION_ARG" $TABLE_FLAGS -f "/tmp/$BACKUP_FILE"
+pg_dump "$CONNECTION_ARG" $TABLE_FLAGS -Fc -a -f "/tmp/$BACKUP_FILE"
 
 echo "Backup created. Uploading to $S3_PATH..."
 
