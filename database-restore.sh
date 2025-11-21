@@ -30,13 +30,17 @@ else
         echo "Error: Input file not found locally and S3_BUCKET env var is missing."
         exit 1
     fi
+    if [ -z "$ENDPOINT_URL" ]; then
+        echo "Error: ENDPOINT_URL is missing."
+        exit 1
+    fi
     
     S3_FULL_PATH="s3://${S3_BUCKET}/${S3_PREFIX}${INPUT_ARG}"
     RESTORE_FILE="/tmp/restore_temp.dump"
     SHOULD_CLEANUP=true
     
     echo "Local file '$INPUT_ARG' not found. Attempting download from $S3_FULL_PATH..."
-    aws s3 cp "$S3_FULL_PATH" "$RESTORE_FILE"
+    aws s3 cp "$S3_FULL_PATH" "$RESTORE_FILE" --endpoint-url "$ENDPOINT_URL"
 fi
 
 echo "Restoring data to database..."

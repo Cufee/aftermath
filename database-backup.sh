@@ -19,6 +19,11 @@ else
     exit 1
 fi
 
+if [ -z "$ENDPOINT_URL" ]; then
+    echo "Error: ENDPOINT_URL is missing."
+    exit 1
+fi
+
 if [ -z "$S3_BUCKET" ]; then
     echo "Error: S3_BUCKET is missing."
     exit 1
@@ -39,7 +44,7 @@ pg_dump "$CONNECTION_ARG" $TABLE_FLAGS -Fc -a -f "/tmp/$BACKUP_FILE"
 
 echo "Backup created. Uploading to $S3_PATH..."
 
-aws s3 cp "/tmp/$BACKUP_FILE" "$S3_PATH"
+aws s3 cp "/tmp/$BACKUP_FILE" "$S3_PATH" --endpoint-url "$ENDPOINT_URL"
 
 rm "/tmp/$BACKUP_FILE"
 
