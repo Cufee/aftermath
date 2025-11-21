@@ -107,6 +107,7 @@ func LoadAssets(assets fs.FS, directory string) error {
 	}
 
 	for name, data := range dirFiles {
+		println("dir", name)
 		if !strings.HasSuffix(name, ".yaml") {
 			continue
 		}

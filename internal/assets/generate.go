@@ -40,7 +40,10 @@ func main() {
 	}
 
 	localization.LoadAssets(os.DirFS("../../static/localization"), ".")
-	printer, _ := localization.NewPrinter("discord", language.English)
+	printer, err := localization.NewPrinter("discord", language.English)
+	if err != nil {
+		panic(err)
+	}
 
 	generateDiscordHelpImage(printer)
 
