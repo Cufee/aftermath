@@ -40,7 +40,19 @@ services:
           memory: 2048m
         limits:
           memory: 2048m
-
+  
+  aftermath-backup-base:
+    image: ghcr.io/cufee/aftermath-backup:${ENVIRONMENT}
+    build:
+      context: .
+      dockerfile: Dockerfile.backup
+    deploy:
+      resources:
+        reservations:
+          memory: 2048m
+        limits:
+          memory: 2048m
+  
   aftermath-service-base:
     pull_policy: always
     image: ghcr.io/cufee/aftermath:${ENVIRONMENT}

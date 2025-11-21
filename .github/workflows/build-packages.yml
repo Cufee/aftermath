@@ -49,6 +49,20 @@ jobs:
             type=semver,pattern={{major}}
             type=raw,latest
             type=sha
+      - name: Extract backup metadata (tags, labels) for Docker
+        id: meta-backup
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backup
+          tags: |
+            type=schedule
+            type=ref,event=pr
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,latest
+            type=sha
       - name: Extract service metadata (tags, labels) for Docker
         id: meta-service
         uses: docker/metadata-action@v5
@@ -89,12 +103,29 @@ jobs:
           tags: ${{ steps.meta-migrations.outputs.tags }}
           labels: ${{ steps.meta-migrations.outputs.labels }}
           file: Dockerfile.migrate
+      - name: Build and push backup Docker image
+        id: push-backup
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          context: .
+          platforms: linux/amd64
+          tags: ${{ steps.meta-backup.outputs.tags }}
+          labels: ${{ steps.meta-backup.outputs.labels }}
+          file: Dockerfile.backup
+      
       # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built. It increases supply chain security for people who consume the image. For more information, see "[AUTOTITLE](/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)."
       - name: Generate migrations artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}-migrations
           subject-digest: ${{ steps.push-migrations.outputs.digest }}
+          push-to-registry: true
+      - name: Generate backup artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}-backup
+          subject-digest: ${{ steps.push-backup.outputs.digest }}
           push-to-registry: true
       - name: Generate service artifact attestation
         uses: actions/attest-build-provenance@v1
