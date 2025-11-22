@@ -123,7 +123,7 @@ func generateDiscordHelpImage(printer func(string) string) {
 				dctx.Fill()
 
 				fontSize := 20.0
-				commands := []string{"help", "links", "stats", "session"}
+				commands := []string{"help", "links", "career", "session"}
 				for i, name := range commands {
 					drawY := float64((padding + int(fontSize)) + i*(int(fontSize*2)+padding))
 					dctx.SetColor(color.White)

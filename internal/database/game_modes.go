@@ -12,18 +12,16 @@ import (
 	"golang.org/x/text/language"
 )
 
-func (c *client) UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) (map[string]error, error) {
+func (c *client) UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) error {
 	if len(modes) < 1 {
-		return nil, nil
+		return nil
 	}
 
-	errors := make(map[string]error)
-	return errors, c.withTx(ctx, func(tx *transaction) error {
+	return c.withTx(ctx, func(tx *transaction) error {
 		for id, locales := range modes {
 			encoded, err := json.Marshal(locales)
 			if err != nil {
-				errors[id] = err
-				continue
+				return err
 			}
 
 			model := m.GameMode{
@@ -43,7 +41,7 @@ func (c *client) UpsertGameModes(ctx context.Context, modes map[string]map[langu
 				))
 			_, err = tx.exec(ctx, stmt)
 			if err != nil {
-				errors[id] = err
+				return err
 			}
 		}
 		return nil

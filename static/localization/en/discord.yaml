@@ -1,0 +1,241 @@
+background_error_invalid_attachment_image: "The image you have provided is invalid. Please make sure it is a PNG or JPEG image."
+background_error_invalid_attachment_vague: "The file attached is not a valid image."
+background_error_missing_attachment: "You need to attach an image or provide a link in order to upload a custom background."
+background_error_payment_required: |-
+  This feature of Aftermath is only available for users with an active subscription.
+
+  You can subscribe by using the `/subscribe` command or pick a background using `/fancy` instead.
+blitz_stars_error_service_down: "Some of your career stats rely on BlitzStars, which is currently unavailable. However, most other commands, including sessions, are still working."
+buttons_add_aftermath_to_your_server: "Install Aftermath"
+buttons_have_a_question_question: "Have a Question?"
+buttons_join_primary_guild: "Join Aftermath Official"
+buttons_need_help_question: "Need Help?"
+buttons_submit: "Submit"
+command_auction_description: "View the current Blitz Auction"
+command_auction_name: "auction"
+command_auction_result_fmt: "### Updated <t:%d:R>"
+command_career_desc: "Get an overview of your career stats"
+command_career_help_message: |-
+  ## View Career Stats for Your Account!
+  To get started, include a nickname and server, mention another user, or link an account using `/links add`!
+command_career_name: "career"
+command_fancy_description: "Manage your custom background images"
+command_fancy_help_message: |-
+  ## Upload a Custom Background!
+  To get started, attach an image or provide a link to an image when sending the command!
+command_fancy_name: "fancy"
+command_help_description: "Get some helpful information about the bot"
+command_help_name: "help"
+command_links_buttons_manage: "Manage Accounts"
+command_links_description: "Manage your linked Blitz accounts"
+command_links_linked_successfully_fmt: |-
+  Your account has been linked! Aftermath will now default to **%s** on **%s** when checking stats.
+  You can also verify your account with `/links verify`
+command_links_name: "links"
+command_links_set_default_successfully_fmt: "Your default account has been updated! Aftermath will now default to **%s** on **%s** when checking stats."
+command_links_unlinked_successfully: "Your linked account was removed."
+command_links_verify_cta: "You can also verify your account with `/links verify`"
+command_links_verify_response_fmt: |-
+  ## Here is your verification link!
+  ### You will need to log in using the Discord account you are currently using in order to link your Blitz account.
+  _This link is specific to %s. It does not contain any personal information._
+  :link: %s
+command_links_view_content_fmt: |-
+  ## Here is a list of your linked Blitz accounts!
+  %s
+   
+  You can manage and verify them on our website!
+command_my_career_description: "View career stats for your linked accounts"
+command_my_career_name: "career"
+command_my_description: "View stats for your linked accounts"
+command_my_name: "my"
+command_my_session_description: "View session stats for your linked account"
+command_my_session_name: "session"
+command_option_fancy_file_description: "A JPEG or PNG image file"
+command_option_fancy_file_name: "file"
+command_option_fancy_link_description: "A link to a JPEG or PNG image"
+command_option_fancy_link_name: "link"
+command_option_fancy_remove_desc: "Remove a custom background you have previously uploaded"
+command_option_fancy_remove_name: "remove"
+command_option_fancy_upload_desc: "Upload a new custom background for your stats"
+command_option_fancy_upload_name: "upload"
+command_option_links_add_desc: "Link a new Blitz account"
+command_option_links_add_name: "add"
+command_option_links_fav_desc: "Mark your linked account as default for Aftermath to check"
+command_option_links_fav_name: "favorite"
+command_option_links_remove_desc: "Remove your linked Blitz account"
+command_option_links_remove_name: "remove"
+command_option_links_verify_desc: "Link and verify your Blitz account to unlock more features!"
+command_option_links_verify_name: "verify"
+command_option_links_view_desc: "View your linked Blitz accounts"
+command_option_links_view_name: "view"
+command_option_my_account_description: "Select one of your linked account"
+command_option_my_account_name: "account"
+command_option_replay_file_description: "A Blitz replay file"
+command_option_replay_file_name: "file"
+command_option_replay_link_description: "A link to a Blitz replay file"
+command_option_replay_link_name: "link"
+command_option_widget_account_description: "Select one of your linked account"
+command_option_widget_account_name: "account"
+command_replay_help_message: |-
+  ## Analyze Your Replay and View Stats for All Players!
+  To get started, attach a replay file or provide a link to a replay file when sending the command!
+command_session_description: "Get detailed stats for your recent session"
+command_session_help_message: |-
+  ## View Session Stats for Your Account!
+  To get started, include a nickname and server, mention another user, or link an account using `/links add`!
+command_session_name: "session"
+commands_help_message_fmt: |-
+  ## :chart_with_upwards_trend: Track your progress
+  ### ○ /session
+  Get an image with your current session stats. You can also mention another user to view their session.
+  ### Aftermath sessions will be reset at the following times:
+  %s
+  ### ○ /career
+  Get an image with your career stats. You can also mention another user to view their stats.
+  ## :film_frames: Dive deeper into every battle
+  ### ○ /replay
+  Upload your replay and get an overview of the battle you have played.
+  ## :link: Tell Aftermath your Blitz nickname
+  ### ○ /links
+  You can set a default account by using the _/links favorite_ command to use _/session_ and _/career_ without providing a nickname and server.
+  ### ○ /links verify
+  Verify your Wargaming account to unlock additional features.
+  ## :frame_photo: Add a splash of style
+  ### ○ /fancy
+  Upload a custom background image for your session stats. Your unique style will be visible to everyone who views your stats.
+  ## :desktop: Show off on your stream
+  ### ○ /widget
+  Get a link to a streaming widget for your stream overlay.
+  This widget will automatically update with your latest session stats.
+
+  _Found a translation error? Let us know on Aftermath Official_
+  ## :heart: Share the love!
+commands_help_refresh_times_fmt: |-
+  North America: <t:%d:t> (<t:%d:R>)
+  Europe: <t:%d:t> (<t:%d:R>)
+  Asia: <t:%d:t> (<t:%d:R>)
+commands_replay_description: "Analyze your replay and view stats for every single player"
+commands_replay_name: "replay"
+commands_subscribe_action_button: "Subscribe"
+commands_widget_description: "Get a live streaming widget for your account"
+commands_widget_message_fmt: |-
+  ## [Here is your widget link!](%s)
+  _Add it as a Browser Source in OBS_ [_(learn more)_](https://obsproject.com/kb/browser-source).
+commands_widget_name: "widget"
+common_error_command_expired_fmt: "This is a seasonal command that was disabled on <t:%d:D> and will be removed soon."
+common_error_command_missing_permissions: "You don't have permission to use this command."
+common_error_discord_outage: "It looks like Discord is having some temporary issues. Please try again in a few seconds."
+common_error_missing_permissions_dm: "Aftermath is not able to send you a direct message."
+common_error_missing_permissions_dm_mention_fmt: "Hey %s, Aftermath is not able to send you a direct message."
+common_error_payment_required: |-
+  This feature of Aftermath is only available for users with an active subscription.
+  You can subscribe by using the `/subscribe` command.
+common_error_service_outage: "Aftermath is currently undergoing maintenance and is temporarily unavailable. Please try again in a few moments."
+common_error_unhandled_not_reported: |-
+  Something unexpected happened and your command failed.
+  *You can reach out to our team on Aftermath Official if you would like to report this error*
+common_error_unhandled_reported: |-
+  Something unexpected happened and your command failed.
+  *This error was reported automatically, you can also reach out to our team on Aftermath Official*
+common_error_user_restricted_vague_fmt: "### You are banned from using some or all features of Aftermath until <t:%d:f>"
+common_error_user_spam_detected: "Hey there! It seems like you're using commands too quickly. To ensure a smooth experience for everyone, please refrain from spamming."
+common_label_realm_as: "Asia"
+common_label_realm_eu: "Europe"
+common_label_realm_na: "North America"
+common_label_realm_ru: "CIS"
+common_label_tier_1: "Tier I"
+common_label_tier_10: "Tier X"
+common_label_tier_2: "Tier II"
+common_label_tier_3: "Tier III"
+common_label_tier_4: "Tier IV"
+common_label_tier_5: "Tier V"
+common_label_tier_6: "Tier VI"
+common_label_tier_7: "Tier VII"
+common_label_tier_8: "Tier VIII"
+common_label_tier_9: "Tier IX"
+common_option_stats_days_description: "How far back should the session go?"
+common_option_stats_days_name: "days"
+common_option_stats_nickname_description: "Blitz player name"
+common_option_stats_nickname_name: "nickname"
+common_option_stats_realm_description: "What server is this account on?"
+common_option_stats_realm_name: "server"
+common_option_stats_tank_description: "Filter vehicles by name"
+common_option_stats_tank_tier_description: "Filter vehicles by tier"
+common_option_stats_user_description: "Select another user to view their stats"
+common_option_stats_user_name: "user"
+discord_error_invalid_interaction_fmt: |
+  -# <@%s> used a command
+  **It looks like Discord is having some issues at the moment.**
+  Aftermath replies might be delayed, but we will try our best to make things work!
+error_command_auction_still_refreshing: "Aftermath is still working on refreshing the current auction offers, please try again in a couple minutes."
+errors_help_missing_dm_permissions_fmt: "Hey %s, Aftermath is not able to send you a direct message. Try using `/help` instead."
+fancy_error_too_many_options_non_blocking: "When using this command, you only need to provide either a link or a file. The image file will override the link if both are provided."
+fancy_errors_invalid_format: "The image you have provided is not in a JPEG or PNG format. This command does not support other file formats."
+fancy_errors_invalid_image: |-
+  The image you have provided may be broken or is too large.
+  _The maximum recommended image size is 1000px x 1000px._
+fancy_errors_invalid_link: "The image you have provided is invalid, Aftermath was not able to view it."
+fancy_errors_missing_attachment: "You need to provide a link or attach an image file."
+fancy_errors_pending_request_exists: "You have a pending moderation request. Please wait until your previously submitted image is approved or rejected."
+fancy_errors_preview_expired: "This preview has expired. Please create a new one to submit it for moderation."
+fancy_errors_upload_timeout_fmt: |-
+  It looks like you have uploaded a custom background image recently.
+  You will be able to use this command again <t:%d:R>.
+fancy_hint_image_transformation: "Images uploaded to Aftermath via this command will be scaled down and blurred. They will also require manual moderation."
+fancy_moderation_request_approved: |-
+  ## :tada: **Your Custom Background is set!** :tada:
+  The image you have submitted was approved by a moderator and is now set as your stats background. Other users will only see this background if your default linked account is verified.
+fancy_moderation_request_declined: |-
+  **Your recent image moderation request was declined**
+  It looks like the image you have uploaded did not pass out safety standards. You background will not be updated.
+fancy_moderation_request_declined_and_banned_fmt: |-
+  **Your recent image moderation request was declined**
+  It looks like you have tried to upload an image that is against Aftermath Terms Of Service. As a result, your account will be restricted from uploading custom content until <t:%d:D>. This decision is final and cannot be appealed.
+fancy_preview_msg: |-
+  ## Here is a preview of your image!
+  Use the buttons below to submit it for moderation.
+fancy_remove_completed: "Your custom background image was removed."
+fancy_remove_not_found: |-
+  ## You don't have a custom background image uploaded
+  To get started, use `/fancy upload`.
+fancy_submitted_msg: |-
+  **Your request was submitted**
+  You will get a Direct Message when it is reviewed - no further action is required.
+
+  _Please make sure your Direct Messages are open._
+links_error_connection_not_found: "Your linked account is no longer available. Try adding a new one with `/links add`."
+links_error_connection_not_found_selected: "The account you have selected is no longer available"
+links_error_no_account_selected: "It looks like you did not select an account from the options provided. Please pick one of the accounts shown as you type."
+links_error_no_accounts_linked: "You don't have any linked accounts."
+links_error_too_many_connections: |-
+  It looks like you have reached the limit for the number of Blitz accounts linked.
+  Try removing an existing account with `/links remove` before adding a new one.
+my_error_no_account_linked: "It looks like you don't have a default Blitz account set. You can manage your accounts with `/links`."
+nickname_autocomplete_invalid_input: "This does not look like a valid player name, make sure you are using your in-game name"
+nickname_autocomplete_not_enough_length: "Continue typing to search for accounts..."
+nickname_autocomplete_not_found: "Nothing found. Please select a nickname from the autocompletion list"
+replay_error_too_many_options_non_blocking: "When using this command, you only need to provide either a link or a replay file. The replay file will override the link if both are provided."
+replay_errors_all_attachments_invalid: "None of the files you have attached are valid WoT Blitz replays."
+replay_errors_invalid_attachment: "The file you have attached is not a valid WoT Blitz replay."
+replay_errors_missing_attachment: "You need to provide a link or attach a WoT Blitz replay file."
+replay_errors_missing_permissions_vague: "Aftermath is missing some required permissions in this channel. Try using the `/replay` command instead."
+replay_errors_some_attachments_invalid: "Some of the files you have attached are valid WoT Blitz replays and were skipped."
+replay_errors_too_many_files: "Aftermath can process up to 5 replays at once. Please use the `/replay` command to upload any additional files."
+session_error_account_was_not_tracked: "Aftermath just started tracking this account. Please play a few battles before using this command again."
+session_error_no_session_for_period: "Aftermath does not yet have a session for this period. Try changing the number of days or using `/career` instead."
+stats_account_not_found: "It looks like there are no Blitz accounts matching your search, please select an option from the list of accounts that is shown as you type in the nickname."
+stats_autocomplete_not_enough_length: "Continue typing to search for available tanks..."
+stats_autocomplete_not_found: "Nothing found. Please select a tank from the autocompletion list"
+stats_bad_nickname_input_hint: "Wrong account? When searching for a Blitz account by nickname, try selecting a specific account from the results shown as you type"
+stats_error_connection_not_found_personal: "Looks like you don't have a Blitz account linked yet. Give the `/links add` command a shot."
+stats_error_connection_not_found_vague: "The user you mentioned does not have a Blitz account linked."
+stats_error_connection_not_verified: "Looks like you haven't verified your Blitz account yet. Give the `/links verify` command a shot."
+stats_error_mentioned_self_non_blocking: "You don't need to @mention yourself when checking stats, just type the command without any options to check your own account."
+stats_error_nickname_invalid: "This does not look like a valid player name, make sure you are using your in-game name."
+stats_error_too_many_arguments_non_blocking: "When using this command, you only need to mention a user or provide a nickname. The mentioned user will override the nickname if both are provided."
+stats_multiple_accounts_found: "### It looks like there are multiple Blitz accounts matching your search, please select one using the buttons below."
+stats_refresh_interaction_error_expired: "This refresh button has expired. Please use the command instead."
+wargaming_error_outage: "It looks like Wargaming are having some temporary issues. Please try again in a few seconds."
+wargaming_error_outage_short: "It looks like Wargaming are having some issues. Please try again"
+wargaming_error_private_account: "This account is marked private by Wargaming and no stats are available for it at this time."

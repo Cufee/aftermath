@@ -31,7 +31,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.migrate
-    command: migrate apply --dir "file:///migrations" --tx-mode all --url "postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?sslmode=disable"
+    command: migrate apply --dir "file:///migrations" --tx-mode all --url "${DATABASE_URL}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:

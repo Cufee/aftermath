@@ -24,7 +24,7 @@ func TestSnapshotCleanup(t *testing.T) {
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.AccountSnapshot.TableName()))
 
 	accountID := "a-TestSnapshotCleanup"
-	_, err := client.UpsertAccounts(context.Background(), &models.Account{ID: accountID, Realm: "test", Nickname: "test_account"})
+	err := client.UpsertAccounts(context.Background(), &models.Account{ID: accountID, Realm: "test", Nickname: "test_account"})
 	assert.NoError(t, err, "failed to upsert an account")
 
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = '%s';", table.Account.TableName(), accountID))

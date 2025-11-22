@@ -6,7 +6,7 @@ services:
     restart: no
     environment:
       - COLLECTOR_BACKEND_URL=backend-${ENVIRONMENT}:${PRIVATE_SERVER_PORT}
-      - DATABASE_HOST=database-${ENVIRONMENT}:5432
+      - DATABASE_URL=${DATABASE_URL}
     networks:
       dokploy-network:
         aliases:
@@ -28,7 +28,7 @@ services:
       file: docker-compose.base.yaml
       service: aftermath-migrate-base
     environment:
-      - DATABASE_HOST=database-${ENVIRONMENT}:5432
+      - DATABASE_URL=${DATABASE_URL}
     depends_on:
       database:
         condition: service_healthy
@@ -41,11 +41,16 @@ services:
     extends:
       file: docker-compose.base.yaml
       service: aftermath-backup-base
-    restart: no
+    restart: always
+    entrypoint: ["/bin/sh", "-c", "sleep infinity"]
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.backup-run.schedule: "@daily"
+      ofelia.job-exec.backup-run.command: "/backup.sh"
     environment:
       # relations will not be scanned when making a backup
       - TARGET_TABLES=account,clan,app_configuration,application_command,user,user_connection,user_subscription,user_content,user_restriction,moderation_request,widget_settings
-      - DATABASE_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?sslmode=disable
+      - DATABASE_URL=${DATABASE_URL}
       - S3_BUCKET=${DATABASE_BACKUP_S3_BUCKET}
       - ENDPOINT_URL=${DATABASE_BACKUP_ENDPOINT_URL}
       - AWS_ACCESS_KEY_ID=${DATABASE_BACKUP_AWS_ACCESS_KEY_ID}
@@ -68,7 +73,7 @@ services:
     environment:
       # the rest is imported from .env, which is going to be created by Dokploy automatically
       - PORT=3000 # the port does not matter, but it needs to match Traefik labels. we set it here explicitly in order to avoid any issues
-      - DATABASE_HOST=database-${ENVIRONMENT}:5432
+      - DATABASE_URL=${DATABASE_URL}
     depends_on:
       migrate:
         condition: service_completed_successfully

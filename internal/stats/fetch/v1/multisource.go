@@ -161,11 +161,8 @@ func (c *multiSourceClient) Account(ctx context.Context, id string) (models.Acco
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
 
-		aErr, err := c.database.UpsertAccounts(ctx, &account)
+		err := c.database.UpsertAccounts(ctx, &account)
 		if err != nil {
-			log.Err(err).Msg("failed to update account cache")
-		}
-		if err := aErr[account.ID]; err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
 	}(account)
@@ -227,7 +224,7 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		}
 
 		// manually filter vehicles for cases where the slice of ids was 100+
-		if options.VehicleIDs != nil && len(options.VehicleIDs) >= 100 {
+		if len(options.VehicleIDs) >= 100 {
 			var filtered []types.VehicleStatsFrame
 			for _, v := range vehicles.Data {
 				if !slices.Contains(options.VehicleIDs, fmt.Sprint(v.TankID)) {
@@ -269,11 +266,8 @@ func (c *multiSourceClient) CurrentStats(ctx context.Context, id string, opts ..
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		aErr, err := c.database.UpsertAccounts(ctx, &account)
+		err := c.database.UpsertAccounts(ctx, &account)
 		if err != nil {
-			log.Err(err).Msg("failed to update account cache")
-		}
-		if err := aErr[account.ID]; err != nil {
 			log.Err(err).Msg("failed to update account cache")
 		}
 	}(stats.Account)

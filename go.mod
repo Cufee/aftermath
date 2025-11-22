@@ -4,8 +4,6 @@ go 1.24.3
 
 require github.com/go-jet/jet/v2 v2.13.0
 
-// replace github.com/cufee/facepaint => ../facepaint
-
 require (
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/PuerkitoBio/goquery v1.10.3

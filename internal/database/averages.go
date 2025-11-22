@@ -13,18 +13,16 @@ import (
 	s "github.com/go-jet/jet/v2/postgres"
 )
 
-func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error) {
+func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error {
 	if len(averages) < 1 {
-		return nil, nil
+		return nil
 	}
 
-	errors := make(map[string]error)
-	return errors, c.withTx(ctx, func(tx *transaction) error {
+	return c.withTx(ctx, func(tx *transaction) error {
 		for id, data := range averages {
 			encoded, err := json.Marshal(data)
 			if err != nil {
-				errors[id] = err
-				continue
+				return err
 			}
 
 			model := m.VehicleAverage{
@@ -44,7 +42,7 @@ func (c *client) UpsertVehicleAverages(ctx context.Context, averages map[string]
 				))
 			_, err = tx.exec(ctx, stmt)
 			if err != nil {
-				errors[id] = err
+				return err
 			}
 		}
 		return nil
