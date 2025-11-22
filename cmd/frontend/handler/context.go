@@ -304,7 +304,7 @@ func (ws WebSocket) Serve(ctx *Context) error {
 
 	conn, err := u.Upgrade(ctx.w, ctx.r, nil)
 	if err != nil {
-		return ctx.String(err.Error())
+		return ctx.String("%v", err)
 	}
 	return handler(conn)
 }

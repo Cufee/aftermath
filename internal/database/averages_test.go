@@ -24,11 +24,8 @@ func TestAverages(t *testing.T) {
 			"id-2": {Battles: 228},
 		}
 
-		errors, err := client.UpsertVehicleAverages(context.Background(), averages)
+		err := client.UpsertVehicleAverages(context.Background(), averages)
 		is.NoErr(err)
-		for _, err := range errors {
-			is.NoErr(err)
-		}
 
 		found, err := client.GetVehicleAverages(context.Background(), []string{"id-1", "id-2"})
 		is.NoErr(err)

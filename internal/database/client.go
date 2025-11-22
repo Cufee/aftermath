@@ -37,7 +37,7 @@ type AccountsClient interface {
 	GetAccountByID(ctx context.Context, id string) (models.Account, error)
 	GetRealmAccountIDs(ctx context.Context, realm string) ([]string, error)
 	AccountSetPrivate(ctx context.Context, id string, value bool) error
-	UpsertAccounts(ctx context.Context, accounts ...*models.Account) (map[string]error, error)
+	UpsertAccounts(ctx context.Context, accounts ...*models.Account) error
 }
 
 type GlossaryClient interface {
@@ -45,14 +45,14 @@ type GlossaryClient interface {
 	GetVehicles(ctx context.Context, ids []string) (map[string]models.Vehicle, error)
 	GetVehicleAverages(ctx context.Context, ids []string) (map[string]frame.StatsFrame, error)
 
-	UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) (map[string]error, error)
-	UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error)
+	UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) error
+	UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error
 
 	GetMap(ctx context.Context, id string) (types.Map, error)
 	UpsertMaps(ctx context.Context, maps map[string]types.Map) error
 
 	GetGameModeNames(ctx context.Context, id string) (map[language.Tag]string, error)
-	UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) (map[string]error, error)
+	UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) error
 }
 
 type UsersClient interface {

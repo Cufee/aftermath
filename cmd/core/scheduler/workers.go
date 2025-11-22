@@ -89,16 +89,10 @@ func UpdateAveragesWorker(client core.Client) func() {
 			return
 		}
 
-		aErr, err := client.Database().UpsertVehicleAverages(ctx, averages)
+		err = client.Database().UpsertVehicleAverages(ctx, averages)
 		if err != nil {
 			log.Err(err).Msg("failed to update averages cache")
 			return
-		}
-
-		for id, err := range aErr {
-			if err != nil {
-				log.Err(err).Str("", id).Msg("failed to update some average cache")
-			}
 		}
 
 		log.Info().Msg("averages cache updated")
@@ -148,7 +142,7 @@ func UpdateGlossaryWorker(client core.Client) func() {
 		vctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 		defer cancel()
 
-		_, err = client.Database().UpsertVehicles(vctx, vehicles)
+		err = client.Database().UpsertVehicles(vctx, vehicles)
 		if err != nil {
 			log.Err(err).Msg("failed to save vehicle glossary")
 			return
@@ -208,7 +202,7 @@ func UpdateGlossaryWorker(client core.Client) func() {
 		gmctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
 
-		_, err = client.Database().UpsertGameModes(gmctx, withTags)
+		err = client.Database().UpsertGameModes(gmctx, withTags)
 		if err != nil {
 			log.Err(err).Msg("failed save game modes glossary")
 			return

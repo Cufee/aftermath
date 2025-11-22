@@ -254,17 +254,12 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}
 	}
 
-outer:
 	for _, accountSnapshot := range accountSnapshots {
 		// update account cache
-		aErr, err := dbClient.UpsertAccounts(ctx, accountUpdates[accountSnapshot.AccountID])
+		err := dbClient.UpsertAccounts(ctx, accountUpdates[accountSnapshot.AccountID])
 		if err != nil {
 			log.Err(err).Str("accountId", accountSnapshot.AccountID).Msg("failed to upsert account")
-		}
-		for _, err := range aErr {
-			log.Err(err).Str("accountId", accountSnapshot.AccountID).Msg("failed to upsert account")
-			accountErrors[accountSnapshot.AccountID] = err
-			continue outer
+			continue
 		}
 
 		// save account snapshot

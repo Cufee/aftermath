@@ -12,13 +12,12 @@ import (
 	s "github.com/go-jet/jet/v2/postgres"
 )
 
-func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) (map[string]error, error) {
+func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) error {
 	if len(vehicles) < 1 {
-		return nil, nil
+		return nil
 	}
 
-	errors := make(map[string]error)
-	return errors, c.withTx(ctx, func(tx *transaction) error {
+	return c.withTx(ctx, func(tx *transaction) error {
 		for id, data := range vehicles {
 			model := m.Vehicle{
 				ID:        id,
@@ -28,8 +27,7 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.
 			}
 			names, err := json.Marshal(data.LocalizedNames)
 			if err != nil {
-				errors[id] = err
-				continue
+				return err
 			}
 			model.LocalizedNames = names
 
@@ -45,7 +43,7 @@ func (c *client) UpsertVehicles(ctx context.Context, vehicles map[string]models.
 
 			_, err = tx.exec(ctx, stmt)
 			if err != nil {
-				errors[id] = err
+				return err
 			}
 		}
 		return nil

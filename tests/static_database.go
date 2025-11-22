@@ -64,13 +64,13 @@ func (c *staticTestingDatabase) GetRealmAccountIDs(ctx context.Context, realm st
 func (c *staticTestingDatabase) AccountSetPrivate(ctx context.Context, id string, value bool) error {
 	return errors.New("AccountSetPrivate not implemented")
 }
-func (c *staticTestingDatabase) UpsertAccounts(ctx context.Context, accounts ...*models.Account) (map[string]error, error) {
+func (c *staticTestingDatabase) UpsertAccounts(ctx context.Context, accounts ...*models.Account) error {
 	for _, acc := range accounts {
 		if _, ok := staticAccounts[acc.ID]; ok {
 			staticAccounts[acc.ID] = *acc
 		}
 	}
-	return nil, nil
+	return nil
 }
 
 func (c *staticTestingDatabase) GetAllVehicles(ctx context.Context) (map[string]models.Vehicle, error) {
@@ -95,11 +95,11 @@ func (c *staticTestingDatabase) GetVehicleAverages(ctx context.Context, ids []st
 	}
 	return averages, nil
 }
-func (c *staticTestingDatabase) UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) (map[string]error, error) {
-	return nil, errors.New("UpsertVehicles not implemented")
+func (c *staticTestingDatabase) UpsertVehicles(ctx context.Context, vehicles map[string]models.Vehicle) error {
+	return errors.New("UpsertVehicles not implemented")
 }
-func (c *staticTestingDatabase) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) (map[string]error, error) {
-	return nil, errors.New("UpsertVehicleAverages not implemented")
+func (c *staticTestingDatabase) UpsertVehicleAverages(ctx context.Context, averages map[string]frame.StatsFrame) error {
+	return errors.New("UpsertVehicleAverages not implemented")
 }
 
 func (c *staticTestingDatabase) GetUserByID(ctx context.Context, id string, opts ...database.UserQueryOption) (models.User, error) {
@@ -270,8 +270,8 @@ func (c *staticTestingDatabase) CreateWidgetSettings(ctx context.Context, userID
 func (c *staticTestingDatabase) GetGameModeNames(ctx context.Context, id string) (map[language.Tag]string, error) {
 	return map[language.Tag]string{}, nil
 }
-func (c *staticTestingDatabase) UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) (map[string]error, error) {
-	return nil, nil
+func (c *staticTestingDatabase) UpsertGameModes(ctx context.Context, modes map[string]map[language.Tag]string) error {
+	return nil
 }
 
 func (c *staticTestingDatabase) FindUserModerationRequests(ctx context.Context, userID string, referenceIDs []string, status []models.ModerationStatus, since time.Time) ([]models.ModerationRequest, error) {

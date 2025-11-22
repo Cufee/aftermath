@@ -21,7 +21,7 @@ func TestVehicleSnapshots(t *testing.T) {
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.VehicleSnapshot.TableName()))
 
 	accountID := "a-TestVehicleSnapshots"
-	_, err := client.UpsertAccounts(ctx, &models.Account{ID: accountID, Realm: "test", Nickname: "test_account"})
+	err := client.UpsertAccounts(ctx, &models.Account{ID: accountID, Realm: "test", Nickname: "test_account"})
 	assert.NoError(t, err, "failed to upsert an account")
 
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = '%s';", table.Account.TableName(), accountID))
@@ -137,7 +137,7 @@ func TestAccountSnapshots(t *testing.T) {
 
 	accountID := "a-TestAccountSnapshots"
 	accountID2 := "a-TestAccountSnapshots-2"
-	_, err := client.UpsertAccounts(ctx, &models.Account{ID: accountID, Realm: "test", Nickname: "test_account"}, &models.Account{ID: accountID2, Realm: "test", Nickname: "test_account"})
+	err := client.UpsertAccounts(ctx, &models.Account{ID: accountID, Realm: "test", Nickname: "test_account"}, &models.Account{ID: accountID2, Realm: "test", Nickname: "test_account"})
 	is.NoErr(err)
 
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id IN ('%s', '%s');", table.Account.TableName(), accountID, accountID2))
