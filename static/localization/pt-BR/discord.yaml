@@ -14,7 +14,7 @@ buttons_submit: "Enviar"
 command_auction_description: "Veja o Leilão atual no Blitz"
 command_auction_name: "leilão"
 command_auction_result_fmt: "### Atualizado <t:%d:R>"
-command_career_desc: "Tenha um resumo das estatísticas da sua carreira"
+command_career_description: "Tenha um resumo das estatísticas da sua carreira"
 command_career_help_message: |-
   ## Veja as Estatísticas da sua Conta!
   Para começar, coloque o seu nome e um servidor, mencione outro usuário ou vincule uma conta usando `/links add`!
