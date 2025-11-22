@@ -31,7 +31,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.migrate
-    command: migrate apply --dir "file:///migrations" --tx-mode all --url "${DATABASE_URL}"
+    command: migrate apply --dir "file:///migrations?format=golang-migrate" --tx-mode all --url "${DATABASE_URL}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
@@ -40,7 +40,7 @@ services:
           memory: 2048m
         limits:
           memory: 2048m
-  
+
   aftermath-backup-base:
     image: ghcr.io/cufee/aftermath-backup:${ENVIRONMENT}
     build:
@@ -52,7 +52,7 @@ services:
           memory: 2048m
         limits:
           memory: 2048m
-  
+
   aftermath-service-base:
     pull_policy: always
     image: ghcr.io/cufee/aftermath:${ENVIRONMENT}
