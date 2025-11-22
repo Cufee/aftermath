@@ -1,18 +1,6 @@
-variable "database_name" {
+variable "database_url" {
   type    = string
-  default = getenv("DATABASE_NAME")
-}
-variable "database_user" {
-  type    = string
-  default = getenv("DATABASE_USER")
-}
-variable "database_password" {
-  type    = string
-  default = getenv("DATABASE_PASSWORD")
-}
-variable "database_host" {
-  type    = string
-  default = getenv("DATABASE_HOST")
+  default = getenv("DATABASE_URL")
 }
 variable "sources" {
   type = list(string)
@@ -35,7 +23,7 @@ env "local" {
     dir = "file://internal/database/migrations"
   }
 
-  url = "postgresql://${var.database_user}:${var.database_password}@${var.database_host}/${var.database_name}?sslmode=disable"
+  url = var.database_url
   dev = "docker://postgres/17/dev?search_path=public"
 }
 
@@ -55,5 +43,5 @@ env "migrate" {
   }
   tx-mode = "all"
 
-  url = "postgresql://${var.database_user}:${var.database_password}@${var.database_host}/${var.database_name}?sslmode=disable"
+  url = var.database_url
 }

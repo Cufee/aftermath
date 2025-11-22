@@ -9,10 +9,10 @@ tasks:
       - ".env.test"
     desc: runs tests
     cmds:
-      # - task: db-migrate-apply-test
+      - task: db-migrate-tests
       - |
         if [ -z "{{ .CLI_ARGS }}" ]; then
-          go test -timeout 30s --count=1 -v ./...
+          go test -timeout 30s --count=1 -v ./... | grep -v "\[no test files\]"
         else
           go test -timeout 30s --count=1 -v -run {{ .CLI_ARGS }}
         fi
