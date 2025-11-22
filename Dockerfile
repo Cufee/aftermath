@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/assets
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./cmd/frontend/assets/generate
 
 # generate frontend
-RUN go tool templ generate
+RUN --mount=type=cache,target=$GOPATH/pkg/mod go tool templ generate
 
 # build a fully standalone binary with zero dependencies
 RUN --mount=type=cache,target=$GOPATH/pkg/mod CGO_ENABLED=0 GOOS=linux go build -ldflags='-s -w' -trimpath -o /bin/aftermath .
