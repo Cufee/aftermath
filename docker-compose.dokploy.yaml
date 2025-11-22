@@ -42,7 +42,7 @@ services:
       file: docker-compose.base.yaml
       service: aftermath-backup-base
     restart: always
-    command: sleep infinity
+    entrypoint: ["/bin/sh", "-c", "sleep infinity"]
     labels:
       ofelia.enabled: "true"
       ofelia.job-exec.backup-run.schedule: "@daily"
