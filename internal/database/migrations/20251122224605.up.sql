@@ -1,5 +1,5 @@
 -- create "manual_migration" table
-CREATE TABLE "manual_migration" (
+CREATE TABLE IF NOT EXISTS "manual_migration" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -9,11 +9,11 @@ CREATE TABLE "manual_migration" (
   PRIMARY KEY ("id")
 );
 -- create index "manual_migration_id_idx" to table: "manual_migration"
-CREATE INDEX "manual_migration_id_idx" ON "manual_migration" ("id");
+CREATE INDEX IF NOT EXISTS "manual_migration_id_idx" ON "manual_migration" ("id");
 -- create index "manual_migration_key_idx" to table: "manual_migration"
-CREATE UNIQUE INDEX "manual_migration_key_idx" ON "manual_migration" ("key");
+CREATE UNIQUE INDEX IF NOT EXISTS "manual_migration_key_idx" ON "manual_migration" ("key");
 -- create "game_mode" table
-CREATE TABLE "game_mode" (
+CREATE TABLE IF NOT EXISTS "game_mode" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -21,9 +21,9 @@ CREATE TABLE "game_mode" (
   PRIMARY KEY ("id")
 );
 -- create index "game_mode_id_idx" to table: "game_mode"
-CREATE INDEX "game_mode_id_idx" ON "game_mode" ("id");
+CREATE INDEX IF NOT EXISTS "game_mode_id_idx" ON "game_mode" ("id");
 -- create "vehicle" table
-CREATE TABLE "vehicle" (
+CREATE TABLE IF NOT EXISTS "vehicle" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -32,9 +32,9 @@ CREATE TABLE "vehicle" (
   PRIMARY KEY ("id")
 );
 -- create index "vehicle_id_idx" to table: "vehicle"
-CREATE INDEX "vehicle_id_idx" ON "vehicle" ("id");
+CREATE INDEX IF NOT EXISTS "vehicle_id_idx" ON "vehicle" ("id");
 -- create "app_configuration" table
-CREATE TABLE "app_configuration" (
+CREATE TABLE IF NOT EXISTS "app_configuration" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -44,11 +44,11 @@ CREATE TABLE "app_configuration" (
   PRIMARY KEY ("id")
 );
 -- create index "app_configuration_id_idx" to table: "app_configuration"
-CREATE INDEX "app_configuration_id_idx" ON "app_configuration" ("id");
+CREATE INDEX IF NOT EXISTS "app_configuration_id_idx" ON "app_configuration" ("id");
 -- create index "app_configuration_key_idx" to table: "app_configuration"
-CREATE UNIQUE INDEX "app_configuration_key_idx" ON "app_configuration" ("key");
+CREATE UNIQUE INDEX IF NOT EXISTS "app_configuration_key_idx" ON "app_configuration" ("key");
 -- create "application_command" table
-CREATE TABLE "application_command" (
+CREATE TABLE IF NOT EXISTS "application_command" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -58,11 +58,11 @@ CREATE TABLE "application_command" (
   PRIMARY KEY ("id")
 );
 -- create index "application_command_id_idx" to table: "application_command"
-CREATE INDEX "application_command_id_idx" ON "application_command" ("id");
+CREATE INDEX IF NOT EXISTS "application_command_id_idx" ON "application_command" ("id");
 -- create index "application_command_options_hash_idx" to table: "application_command"
-CREATE INDEX "application_command_options_hash_idx" ON "application_command" ("options_hash");
+CREATE INDEX IF NOT EXISTS "application_command_options_hash_idx" ON "application_command" ("options_hash");
 -- create "auth_nonce" table
-CREATE TABLE "auth_nonce" (
+CREATE TABLE IF NOT EXISTS "auth_nonce" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -74,11 +74,11 @@ CREATE TABLE "auth_nonce" (
   PRIMARY KEY ("id")
 );
 -- create index "auth_nonce_public_id_active_expires_at_idx" to table: "auth_nonce"
-CREATE INDEX "auth_nonce_public_id_active_expires_at_idx" ON "auth_nonce" ("public_id", "active", "expires_at");
+CREATE INDEX IF NOT EXISTS "auth_nonce_public_id_active_expires_at_idx" ON "auth_nonce" ("public_id", "active", "expires_at");
 -- create index "auth_nonce_public_id_idx" to table: "auth_nonce"
-CREATE UNIQUE INDEX "auth_nonce_public_id_idx" ON "auth_nonce" ("public_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "auth_nonce_public_id_idx" ON "auth_nonce" ("public_id");
 -- create "clan" table
-CREATE TABLE "clan" (
+CREATE TABLE IF NOT EXISTS "clan" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -89,13 +89,13 @@ CREATE TABLE "clan" (
   PRIMARY KEY ("id")
 );
 -- create index "clan_id_idx" to table: "clan"
-CREATE INDEX "clan_id_idx" ON "clan" ("id");
+CREATE INDEX IF NOT EXISTS "clan_id_idx" ON "clan" ("id");
 -- create index "clan_name_idx" to table: "clan"
-CREATE INDEX "clan_name_idx" ON "clan" ("name");
+CREATE INDEX IF NOT EXISTS "clan_name_idx" ON "clan" ("name");
 -- create index "clan_tag_idx" to table: "clan"
-CREATE INDEX "clan_tag_idx" ON "clan" ("tag");
+CREATE INDEX IF NOT EXISTS "clan_tag_idx" ON "clan" ("tag");
 -- create "cron_task" table
-CREATE TABLE "cron_task" (
+CREATE TABLE IF NOT EXISTS "cron_task" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -111,17 +111,17 @@ CREATE TABLE "cron_task" (
   PRIMARY KEY ("id")
 );
 -- create index "cron_task_id_idx" to table: "cron_task"
-CREATE INDEX "cron_task_id_idx" ON "cron_task" ("id");
+CREATE INDEX IF NOT EXISTS "cron_task_id_idx" ON "cron_task" ("id");
 -- create index "cron_task_reference_id_idx" to table: "cron_task"
-CREATE INDEX "cron_task_reference_id_idx" ON "cron_task" ("reference_id");
+CREATE INDEX IF NOT EXISTS "cron_task_reference_id_idx" ON "cron_task" ("reference_id");
 -- create index "cron_task_status_created_at_idx" to table: "cron_task"
-CREATE INDEX "cron_task_status_created_at_idx" ON "cron_task" ("status", "created_at");
+CREATE INDEX IF NOT EXISTS "cron_task_status_created_at_idx" ON "cron_task" ("status", "created_at");
 -- create index "cron_task_status_last_run_idx" to table: "cron_task"
-CREATE INDEX "cron_task_status_last_run_idx" ON "cron_task" ("status", "last_run");
+CREATE INDEX IF NOT EXISTS "cron_task_status_last_run_idx" ON "cron_task" ("status", "last_run");
 -- create index "cron_task_status_scheduled_after_idx" to table: "cron_task"
-CREATE INDEX "cron_task_status_scheduled_after_idx" ON "cron_task" ("status", "scheduled_after");
+CREATE INDEX IF NOT EXISTS "cron_task_status_scheduled_after_idx" ON "cron_task" ("status", "scheduled_after");
 -- create "discord_ad_run" table
-CREATE TABLE "discord_ad_run" (
+CREATE TABLE IF NOT EXISTS "discord_ad_run" (
   "id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -136,21 +136,21 @@ CREATE TABLE "discord_ad_run" (
   PRIMARY KEY ("id")
 );
 -- create index "discord_ad_run_campaign_id_idx" to table: "discord_ad_run"
-CREATE INDEX "discord_ad_run_campaign_id_idx" ON "discord_ad_run" ("campaign_id");
+CREATE INDEX IF NOT EXISTS "discord_ad_run_campaign_id_idx" ON "discord_ad_run" ("campaign_id");
 -- create index "discord_ad_run_channel_id_idx" to table: "discord_ad_run"
-CREATE INDEX "discord_ad_run_channel_id_idx" ON "discord_ad_run" ("channel_id");
+CREATE INDEX IF NOT EXISTS "discord_ad_run_channel_id_idx" ON "discord_ad_run" ("channel_id");
 -- create index "discord_ad_run_content_id_idx" to table: "discord_ad_run"
-CREATE INDEX "discord_ad_run_content_id_idx" ON "discord_ad_run" ("content_id");
+CREATE INDEX IF NOT EXISTS "discord_ad_run_content_id_idx" ON "discord_ad_run" ("content_id");
 -- create index "discord_ad_run_created_at_channel_id_idx" to table: "discord_ad_run"
-CREATE INDEX "discord_ad_run_created_at_channel_id_idx" ON "discord_ad_run" ("created_at", "channel_id");
+CREATE INDEX IF NOT EXISTS "discord_ad_run_created_at_channel_id_idx" ON "discord_ad_run" ("created_at", "channel_id");
 -- create index "discord_ad_run_created_at_idx" to table: "discord_ad_run"
-CREATE INDEX "discord_ad_run_created_at_idx" ON "discord_ad_run" ("created_at");
+CREATE INDEX IF NOT EXISTS "discord_ad_run_created_at_idx" ON "discord_ad_run" ("created_at");
 -- create index "discord_ad_run_guild_id_idx" to table: "discord_ad_run"
-CREATE INDEX "discord_ad_run_guild_id_idx" ON "discord_ad_run" ("guild_id");
+CREATE INDEX IF NOT EXISTS "discord_ad_run_guild_id_idx" ON "discord_ad_run" ("guild_id");
 -- create index "discord_ad_run_message_id_idx" to table: "discord_ad_run"
-CREATE INDEX "discord_ad_run_message_id_idx" ON "discord_ad_run" ("message_id");
+CREATE INDEX IF NOT EXISTS "discord_ad_run_message_id_idx" ON "discord_ad_run" ("message_id");
 -- create "account" table
-CREATE TABLE "account" (
+CREATE TABLE IF NOT EXISTS "account" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -163,17 +163,17 @@ CREATE TABLE "account" (
   PRIMARY KEY ("id")
 );
 -- create index "account_clan_id_idx" to table: "account"
-CREATE INDEX "account_clan_id_idx" ON "account" ("clan_id");
+CREATE INDEX IF NOT EXISTS "account_clan_id_idx" ON "account" ("clan_id");
 -- create index "account_id_idx" to table: "account"
-CREATE INDEX "account_id_idx" ON "account" ("id");
+CREATE INDEX IF NOT EXISTS "account_id_idx" ON "account" ("id");
 -- create index "account_id_last_battle_time_idx" to table: "account"
-CREATE INDEX "account_id_last_battle_time_idx" ON "account" ("id", "last_battle_time");
+CREATE INDEX IF NOT EXISTS "account_id_last_battle_time_idx" ON "account" ("id", "last_battle_time");
 -- create index "account_realm_idx" to table: "account"
-CREATE INDEX "account_realm_idx" ON "account" ("realm");
+CREATE INDEX IF NOT EXISTS "account_realm_idx" ON "account" ("realm");
 -- create index "account_realm_last_battle_time_idx" to table: "account"
-CREATE INDEX "account_realm_last_battle_time_idx" ON "account" ("realm", "last_battle_time");
+CREATE INDEX IF NOT EXISTS "account_realm_last_battle_time_idx" ON "account" ("realm", "last_battle_time");
 -- create "game_map" table
-CREATE TABLE "game_map" (
+CREATE TABLE IF NOT EXISTS "game_map" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -183,9 +183,9 @@ CREATE TABLE "game_map" (
   PRIMARY KEY ("id")
 );
 -- create index "game_map_id_idx" to table: "game_map"
-CREATE INDEX "game_map_id_idx" ON "game_map" ("id");
+CREATE INDEX IF NOT EXISTS "game_map_id_idx" ON "game_map" ("id");
 -- create "vehicle_average" table
-CREATE TABLE "vehicle_average" (
+CREATE TABLE IF NOT EXISTS "vehicle_average" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -193,9 +193,9 @@ CREATE TABLE "vehicle_average" (
   PRIMARY KEY ("id")
 );
 -- create index "vehicle_average_id_idx" to table: "vehicle_average"
-CREATE INDEX "vehicle_average_id_idx" ON "vehicle_average" ("id");
+CREATE INDEX IF NOT EXISTS "vehicle_average_id_idx" ON "vehicle_average" ("id");
 -- create "account_achievements_snapshot" table
-CREATE TABLE "account_achievements_snapshot" (
+CREATE TABLE IF NOT EXISTS "account_achievements_snapshot" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "type" text NOT NULL,
@@ -208,21 +208,21 @@ CREATE TABLE "account_achievements_snapshot" (
   CONSTRAINT "account_id_account_achievements_snapshot_account_id_fk" FOREIGN KEY ("account_id") REFERENCES "account" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "account_achievements_created_at_idx" to table: "account_achievements_snapshot"
-CREATE INDEX "account_achievements_created_at_idx" ON "account_achievements_snapshot" ("created_at");
+CREATE INDEX IF NOT EXISTS "account_achievements_created_at_idx" ON "account_achievements_snapshot" ("created_at");
 -- create index "account_achievements_snapshot_account_id_reference_id_created_a" to table: "account_achievements_snapshot"
-CREATE INDEX "account_achievements_snapshot_account_id_reference_id_created_a" ON "account_achievements_snapshot" ("account_id", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "account_achievements_snapshot_account_id_reference_id_created_a" ON "account_achievements_snapshot" ("account_id", "reference_id", "created_at");
 -- create index "account_achievements_snapshot_account_id_type_reference_id_crea" to table: "account_achievements_snapshot"
-CREATE INDEX "account_achievements_snapshot_account_id_type_reference_id_crea" ON "account_achievements_snapshot" ("account_id", "type", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "account_achievements_snapshot_account_id_type_reference_id_crea" ON "account_achievements_snapshot" ("account_id", "type", "reference_id", "created_at");
 -- create index "account_achievements_snapshot_id_idx" to table: "account_achievements_snapshot"
-CREATE INDEX "account_achievements_snapshot_id_idx" ON "account_achievements_snapshot" ("id");
+CREATE INDEX IF NOT EXISTS "account_achievements_snapshot_id_idx" ON "account_achievements_snapshot" ("id");
 -- create index "account_achievements_snapshot_type_account_id_created_at_idx" to table: "account_achievements_snapshot"
-CREATE INDEX "account_achievements_snapshot_type_account_id_created_at_idx" ON "account_achievements_snapshot" ("type", "account_id", "created_at");
+CREATE INDEX IF NOT EXISTS "account_achievements_snapshot_type_account_id_created_at_idx" ON "account_achievements_snapshot" ("type", "account_id", "created_at");
 -- create index "account_achievements_snapshot_type_account_id_reference_id_crea" to table: "account_achievements_snapshot"
-CREATE INDEX "account_achievements_snapshot_type_account_id_reference_id_crea" ON "account_achievements_snapshot" ("type", "account_id", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "account_achievements_snapshot_type_account_id_reference_id_crea" ON "account_achievements_snapshot" ("type", "account_id", "reference_id", "created_at");
 -- create index "account_achievements_snapshot_type_idx" to table: "account_achievements_snapshot"
-CREATE INDEX "account_achievements_snapshot_type_idx" ON "account_achievements_snapshot" ("type");
+CREATE INDEX IF NOT EXISTS "account_achievements_snapshot_type_idx" ON "account_achievements_snapshot" ("type");
 -- create "account_snapshot" table
-CREATE TABLE "account_snapshot" (
+CREATE TABLE IF NOT EXISTS "account_snapshot" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "type" text NOT NULL,
@@ -237,21 +237,21 @@ CREATE TABLE "account_snapshot" (
   CONSTRAINT "account_account_id_snapshot_account_id_fk" FOREIGN KEY ("account_id") REFERENCES "account" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "account_snapshot_account_id_reference_id_created_at_idx" to table: "account_snapshot"
-CREATE INDEX "account_snapshot_account_id_reference_id_created_at_idx" ON "account_snapshot" ("account_id", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "account_snapshot_account_id_reference_id_created_at_idx" ON "account_snapshot" ("account_id", "reference_id", "created_at");
 -- create index "account_snapshot_account_id_type_reference_id_created_at_idx" to table: "account_snapshot"
-CREATE INDEX "account_snapshot_account_id_type_reference_id_created_at_idx" ON "account_snapshot" ("account_id", "type", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "account_snapshot_account_id_type_reference_id_created_at_idx" ON "account_snapshot" ("account_id", "type", "reference_id", "created_at");
 -- create index "account_snapshot_created_at_idx" to table: "account_snapshot"
-CREATE INDEX "account_snapshot_created_at_idx" ON "account_snapshot" ("created_at");
+CREATE INDEX IF NOT EXISTS "account_snapshot_created_at_idx" ON "account_snapshot" ("created_at");
 -- create index "account_snapshot_id_idx" to table: "account_snapshot"
-CREATE INDEX "account_snapshot_id_idx" ON "account_snapshot" ("id");
+CREATE INDEX IF NOT EXISTS "account_snapshot_id_idx" ON "account_snapshot" ("id");
 -- create index "account_snapshot_type_account_id_created_at_idx" to table: "account_snapshot"
-CREATE INDEX "account_snapshot_type_account_id_created_at_idx" ON "account_snapshot" ("type", "account_id", "created_at");
+CREATE INDEX IF NOT EXISTS "account_snapshot_type_account_id_created_at_idx" ON "account_snapshot" ("type", "account_id", "created_at");
 -- create index "account_snapshot_type_account_id_reference_id_created_at_idx" to table: "account_snapshot"
-CREATE INDEX "account_snapshot_type_account_id_reference_id_created_at_idx" ON "account_snapshot" ("type", "account_id", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "account_snapshot_type_account_id_reference_id_created_at_idx" ON "account_snapshot" ("type", "account_id", "reference_id", "created_at");
 -- create index "account_snapshot_type_idx" to table: "account_snapshot"
-CREATE INDEX "account_snapshot_type_idx" ON "account_snapshot" ("type");
+CREATE INDEX IF NOT EXISTS "account_snapshot_type_idx" ON "account_snapshot" ("type");
 -- create "user" table
-CREATE TABLE "user" (
+CREATE TABLE IF NOT EXISTS "user" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -262,11 +262,11 @@ CREATE TABLE "user" (
   PRIMARY KEY ("id")
 );
 -- create index "user_id_idx" to table: "user"
-CREATE INDEX "user_id_idx" ON "user" ("id");
+CREATE INDEX IF NOT EXISTS "user_id_idx" ON "user" ("id");
 -- create index "user_username_idx" to table: "user"
-CREATE INDEX "user_username_idx" ON "user" ("username");
+CREATE INDEX IF NOT EXISTS "user_username_idx" ON "user" ("username");
 -- create "discord_interaction" table
-CREATE TABLE "discord_interaction" (
+CREATE TABLE IF NOT EXISTS "discord_interaction" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -284,19 +284,19 @@ CREATE TABLE "discord_interaction" (
   CONSTRAINT "discord_interaction_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "discord_interaction_channel_id_type_created_at_idx" to table: "discord_interaction"
-CREATE INDEX "discord_interaction_channel_id_type_created_at_idx" ON "discord_interaction" ("channel_id", "type", "created_at");
+CREATE INDEX IF NOT EXISTS "discord_interaction_channel_id_type_created_at_idx" ON "discord_interaction" ("channel_id", "type", "created_at");
 -- create index "discord_interaction_created_at_idx" to table: "discord_interaction"
-CREATE INDEX "discord_interaction_created_at_idx" ON "discord_interaction" ("created_at");
+CREATE INDEX IF NOT EXISTS "discord_interaction_created_at_idx" ON "discord_interaction" ("created_at");
 -- create index "discord_interaction_id_idx" to table: "discord_interaction"
-CREATE INDEX "discord_interaction_id_idx" ON "discord_interaction" ("id");
+CREATE INDEX IF NOT EXISTS "discord_interaction_id_idx" ON "discord_interaction" ("id");
 -- create index "discord_interaction_snowflake_idx" to table: "discord_interaction"
-CREATE INDEX "discord_interaction_snowflake_idx" ON "discord_interaction" ("snowflake");
+CREATE INDEX IF NOT EXISTS "discord_interaction_snowflake_idx" ON "discord_interaction" ("snowflake");
 -- create index "discord_interaction_user_id_idx" to table: "discord_interaction"
-CREATE INDEX "discord_interaction_user_id_idx" ON "discord_interaction" ("user_id");
+CREATE INDEX IF NOT EXISTS "discord_interaction_user_id_idx" ON "discord_interaction" ("user_id");
 -- create index "discord_interaction_user_id_type_created_at_idx" to table: "discord_interaction"
-CREATE INDEX "discord_interaction_user_id_type_created_at_idx" ON "discord_interaction" ("user_id", "type", "created_at");
+CREATE INDEX IF NOT EXISTS "discord_interaction_user_id_type_created_at_idx" ON "discord_interaction" ("user_id", "type", "created_at");
 -- create "moderation_request" table
-CREATE TABLE "moderation_request" (
+CREATE TABLE IF NOT EXISTS "moderation_request" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -313,19 +313,19 @@ CREATE TABLE "moderation_request" (
   CONSTRAINT "moderation_request_requestor_id_user_id_fk" FOREIGN KEY ("requestor_id") REFERENCES "user" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "moderation_request_id_idx" to table: "moderation_request"
-CREATE INDEX "moderation_request_id_idx" ON "moderation_request" ("id");
+CREATE INDEX IF NOT EXISTS "moderation_request_id_idx" ON "moderation_request" ("id");
 -- create index "moderation_request_moderator_id_idx" to table: "moderation_request"
-CREATE INDEX "moderation_request_moderator_id_idx" ON "moderation_request" ("moderator_id");
+CREATE INDEX IF NOT EXISTS "moderation_request_moderator_id_idx" ON "moderation_request" ("moderator_id");
 -- create index "moderation_request_reference_id_idx" to table: "moderation_request"
-CREATE INDEX "moderation_request_reference_id_idx" ON "moderation_request" ("reference_id");
+CREATE INDEX IF NOT EXISTS "moderation_request_reference_id_idx" ON "moderation_request" ("reference_id");
 -- create index "moderation_request_requestor_id_idx" to table: "moderation_request"
-CREATE INDEX "moderation_request_requestor_id_idx" ON "moderation_request" ("requestor_id");
+CREATE INDEX IF NOT EXISTS "moderation_request_requestor_id_idx" ON "moderation_request" ("requestor_id");
 -- create index "moderation_request_requestor_id_reference_id_action_status_idx" to table: "moderation_request"
-CREATE INDEX "moderation_request_requestor_id_reference_id_action_status_idx" ON "moderation_request" ("requestor_id", "reference_id", "action_status");
+CREATE INDEX IF NOT EXISTS "moderation_request_requestor_id_reference_id_action_status_idx" ON "moderation_request" ("requestor_id", "reference_id", "action_status");
 -- create index "moderation_request_requestor_id_reference_id_idx" to table: "moderation_request"
-CREATE INDEX "moderation_request_requestor_id_reference_id_idx" ON "moderation_request" ("requestor_id", "reference_id");
+CREATE INDEX IF NOT EXISTS "moderation_request_requestor_id_reference_id_idx" ON "moderation_request" ("requestor_id", "reference_id");
 -- create "session" table
-CREATE TABLE "session" (
+CREATE TABLE IF NOT EXISTS "session" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -337,11 +337,11 @@ CREATE TABLE "session" (
   CONSTRAINT "session_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "session_public_id_expires_at_idx" to table: "session"
-CREATE INDEX "session_public_id_expires_at_idx" ON "session" ("public_id", "expires_at");
+CREATE INDEX IF NOT EXISTS "session_public_id_expires_at_idx" ON "session" ("public_id", "expires_at");
 -- create index "session_public_id_idx" to table: "session"
-CREATE UNIQUE INDEX "session_public_id_idx" ON "session" ("public_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "session_public_id_idx" ON "session" ("public_id");
 -- create "user_connection" table
-CREATE TABLE "user_connection" (
+CREATE TABLE IF NOT EXISTS "user_connection" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -356,19 +356,19 @@ CREATE TABLE "user_connection" (
   CONSTRAINT "user_connection_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "user_connection_id_idx" to table: "user_connection"
-CREATE INDEX "user_connection_id_idx" ON "user_connection" ("id");
+CREATE INDEX IF NOT EXISTS "user_connection_id_idx" ON "user_connection" ("id");
 -- create index "user_connection_reference_id_idx" to table: "user_connection"
-CREATE INDEX "user_connection_reference_id_idx" ON "user_connection" ("reference_id");
+CREATE INDEX IF NOT EXISTS "user_connection_reference_id_idx" ON "user_connection" ("reference_id");
 -- create index "user_connection_reference_id_user_id_type_idx" to table: "user_connection"
-CREATE UNIQUE INDEX "user_connection_reference_id_user_id_type_idx" ON "user_connection" ("reference_id", "user_id", "type");
+CREATE UNIQUE INDEX IF NOT EXISTS "user_connection_reference_id_user_id_type_idx" ON "user_connection" ("reference_id", "user_id", "type");
 -- create index "user_connection_type_reference_id_idx" to table: "user_connection"
-CREATE INDEX "user_connection_type_reference_id_idx" ON "user_connection" ("type", "reference_id");
+CREATE INDEX IF NOT EXISTS "user_connection_type_reference_id_idx" ON "user_connection" ("type", "reference_id");
 -- create index "user_connection_type_user_id_idx" to table: "user_connection"
-CREATE INDEX "user_connection_type_user_id_idx" ON "user_connection" ("type", "user_id");
+CREATE INDEX IF NOT EXISTS "user_connection_type_user_id_idx" ON "user_connection" ("type", "user_id");
 -- create index "user_connection_user_id_idx" to table: "user_connection"
-CREATE INDEX "user_connection_user_id_idx" ON "user_connection" ("user_id");
+CREATE INDEX IF NOT EXISTS "user_connection_user_id_idx" ON "user_connection" ("user_id");
 -- create "user_content" table
-CREATE TABLE "user_content" (
+CREATE TABLE IF NOT EXISTS "user_content" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -381,17 +381,17 @@ CREATE TABLE "user_content" (
   CONSTRAINT "user_content_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "user_content_id_idx" to table: "user_content"
-CREATE INDEX "user_content_id_idx" ON "user_content" ("id");
+CREATE INDEX IF NOT EXISTS "user_content_id_idx" ON "user_content" ("id");
 -- create index "user_content_reference_id_idx" to table: "user_content"
-CREATE INDEX "user_content_reference_id_idx" ON "user_content" ("reference_id");
+CREATE INDEX IF NOT EXISTS "user_content_reference_id_idx" ON "user_content" ("reference_id");
 -- create index "user_content_type_reference_id_idx" to table: "user_content"
-CREATE UNIQUE INDEX "user_content_type_reference_id_idx" ON "user_content" ("type", "reference_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "user_content_type_reference_id_idx" ON "user_content" ("type", "reference_id");
 -- create index "user_content_type_user_id_idx" to table: "user_content"
-CREATE UNIQUE INDEX "user_content_type_user_id_idx" ON "user_content" ("type", "user_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "user_content_type_user_id_idx" ON "user_content" ("type", "user_id");
 -- create index "user_content_user_id_idx" to table: "user_content"
-CREATE INDEX "user_content_user_id_idx" ON "user_content" ("user_id");
+CREATE INDEX IF NOT EXISTS "user_content_user_id_idx" ON "user_content" ("user_id");
 -- create "user_restriction" table
-CREATE TABLE "user_restriction" (
+CREATE TABLE IF NOT EXISTS "user_restriction" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -406,13 +406,13 @@ CREATE TABLE "user_restriction" (
   CONSTRAINT "user_restriction_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 -- create index "user_restriction_expires_at_user_id_idx" to table: "user_restriction"
-CREATE INDEX "user_restriction_expires_at_user_id_idx" ON "user_restriction" ("expires_at", "user_id");
+CREATE INDEX IF NOT EXISTS "user_restriction_expires_at_user_id_idx" ON "user_restriction" ("expires_at", "user_id");
 -- create index "user_restriction_id_idx" to table: "user_restriction"
-CREATE INDEX "user_restriction_id_idx" ON "user_restriction" ("id");
+CREATE INDEX IF NOT EXISTS "user_restriction_id_idx" ON "user_restriction" ("id");
 -- create index "user_restriction_user_id_idx" to table: "user_restriction"
-CREATE INDEX "user_restriction_user_id_idx" ON "user_restriction" ("user_id");
+CREATE INDEX IF NOT EXISTS "user_restriction_user_id_idx" ON "user_restriction" ("user_id");
 -- create "user_subscription" table
-CREATE TABLE "user_subscription" (
+CREATE TABLE IF NOT EXISTS "user_subscription" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -426,17 +426,17 @@ CREATE TABLE "user_subscription" (
   CONSTRAINT "user_subscription_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "user_subscription_expires_at_idx" to table: "user_subscription"
-CREATE INDEX "user_subscription_expires_at_idx" ON "user_subscription" ("expires_at");
+CREATE INDEX IF NOT EXISTS "user_subscription_expires_at_idx" ON "user_subscription" ("expires_at");
 -- create index "user_subscription_expires_at_user_id_idx" to table: "user_subscription"
-CREATE INDEX "user_subscription_expires_at_user_id_idx" ON "user_subscription" ("expires_at", "user_id");
+CREATE INDEX IF NOT EXISTS "user_subscription_expires_at_user_id_idx" ON "user_subscription" ("expires_at", "user_id");
 -- create index "user_subscription_id_idx" to table: "user_subscription"
-CREATE INDEX "user_subscription_id_idx" ON "user_subscription" ("id");
+CREATE INDEX IF NOT EXISTS "user_subscription_id_idx" ON "user_subscription" ("id");
 -- create index "user_subscription_type_user_id_idx" to table: "user_subscription"
-CREATE INDEX "user_subscription_type_user_id_idx" ON "user_subscription" ("type", "user_id");
+CREATE INDEX IF NOT EXISTS "user_subscription_type_user_id_idx" ON "user_subscription" ("type", "user_id");
 -- create index "user_subscription_user_id_idx" to table: "user_subscription"
-CREATE INDEX "user_subscription_user_id_idx" ON "user_subscription" ("user_id");
+CREATE INDEX IF NOT EXISTS "user_subscription_user_id_idx" ON "user_subscription" ("user_id");
 -- create "vehicle_achievements_snapshot" table
-CREATE TABLE "vehicle_achievements_snapshot" (
+CREATE TABLE IF NOT EXISTS "vehicle_achievements_snapshot" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "type" text NOT NULL,
@@ -450,23 +450,23 @@ CREATE TABLE "vehicle_achievements_snapshot" (
   CONSTRAINT "vehicle_achievements_snapshot_account_id_account_id_fk" FOREIGN KEY ("account_id") REFERENCES "account" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "vehicle_achievements_snapshot_created_at_idx" to table: "vehicle_achievements_snapshot"
-CREATE INDEX "vehicle_achievements_snapshot_created_at_idx" ON "vehicle_achievements_snapshot" ("created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_achievements_snapshot_created_at_idx" ON "vehicle_achievements_snapshot" ("created_at");
 -- create index "vehicle_achievements_snapshot_id_idx" to table: "vehicle_achievements_snapshot"
-CREATE INDEX "vehicle_achievements_snapshot_id_idx" ON "vehicle_achievements_snapshot" ("id");
+CREATE INDEX IF NOT EXISTS "vehicle_achievements_snapshot_id_idx" ON "vehicle_achievements_snapshot" ("id");
 -- create index "vehicle_achievements_snapshot_type_account_id_created_at_idx" to table: "vehicle_achievements_snapshot"
-CREATE INDEX "vehicle_achievements_snapshot_type_account_id_created_at_idx" ON "vehicle_achievements_snapshot" ("type", "account_id", "created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_achievements_snapshot_type_account_id_created_at_idx" ON "vehicle_achievements_snapshot" ("type", "account_id", "created_at");
 -- create index "vehicle_achievements_snapshot_type_account_id_vehicle_id_create" to table: "vehicle_achievements_snapshot"
-CREATE INDEX "vehicle_achievements_snapshot_type_account_id_vehicle_id_create" ON "vehicle_achievements_snapshot" ("type", "account_id", "vehicle_id", "created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_achievements_snapshot_type_account_id_vehicle_id_create" ON "vehicle_achievements_snapshot" ("type", "account_id", "vehicle_id", "created_at");
 -- create index "vehicle_achievements_snapshot_type_account_id_vehicle_id_refere" to table: "vehicle_achievements_snapshot"
-CREATE INDEX "vehicle_achievements_snapshot_type_account_id_vehicle_id_refere" ON "vehicle_achievements_snapshot" ("type", "account_id", "vehicle_id", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_achievements_snapshot_type_account_id_vehicle_id_refere" ON "vehicle_achievements_snapshot" ("type", "account_id", "vehicle_id", "reference_id", "created_at");
 -- create index "vehicle_achievements_snapshot_type_idx" to table: "vehicle_achievements_snapshot"
-CREATE INDEX "vehicle_achievements_snapshot_type_idx" ON "vehicle_achievements_snapshot" ("type");
+CREATE INDEX IF NOT EXISTS "vehicle_achievements_snapshot_type_idx" ON "vehicle_achievements_snapshot" ("type");
 -- create index "vehicle_achievements_snapshot_vehicle_id_reference_id_created_a" to table: "vehicle_achievements_snapshot"
-CREATE INDEX "vehicle_achievements_snapshot_vehicle_id_reference_id_created_a" ON "vehicle_achievements_snapshot" ("vehicle_id", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_achievements_snapshot_vehicle_id_reference_id_created_a" ON "vehicle_achievements_snapshot" ("vehicle_id", "reference_id", "created_at");
 -- create index "vehicle_achievements_snapshot_vehicle_id_type_reference_id_crea" to table: "vehicle_achievements_snapshot"
-CREATE INDEX "vehicle_achievements_snapshot_vehicle_id_type_reference_id_crea" ON "vehicle_achievements_snapshot" ("vehicle_id", "type", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_achievements_snapshot_vehicle_id_type_reference_id_crea" ON "vehicle_achievements_snapshot" ("vehicle_id", "type", "reference_id", "created_at");
 -- create "vehicle_snapshot" table
-CREATE TABLE "vehicle_snapshot" (
+CREATE TABLE IF NOT EXISTS "vehicle_snapshot" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "type" text NOT NULL,
@@ -480,23 +480,23 @@ CREATE TABLE "vehicle_snapshot" (
   CONSTRAINT "vehicle_snapshot_account_id_account_id_fk" FOREIGN KEY ("account_id") REFERENCES "account" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "vehicle_snapshot_created_at_idx" to table: "vehicle_snapshot"
-CREATE INDEX "vehicle_snapshot_created_at_idx" ON "vehicle_snapshot" ("created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_snapshot_created_at_idx" ON "vehicle_snapshot" ("created_at");
 -- create index "vehicle_snapshot_id_idx" to table: "vehicle_snapshot"
-CREATE INDEX "vehicle_snapshot_id_idx" ON "vehicle_snapshot" ("id");
+CREATE INDEX IF NOT EXISTS "vehicle_snapshot_id_idx" ON "vehicle_snapshot" ("id");
 -- create index "vehicle_snapshot_type_account_id_created_at_idx" to table: "vehicle_snapshot"
-CREATE INDEX "vehicle_snapshot_type_account_id_created_at_idx" ON "vehicle_snapshot" ("type", "account_id", "created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_snapshot_type_account_id_created_at_idx" ON "vehicle_snapshot" ("type", "account_id", "created_at");
 -- create index "vehicle_snapshot_type_account_id_vehicle_id_created_at_idx" to table: "vehicle_snapshot"
-CREATE INDEX "vehicle_snapshot_type_account_id_vehicle_id_created_at_idx" ON "vehicle_snapshot" ("type", "account_id", "vehicle_id", "created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_snapshot_type_account_id_vehicle_id_created_at_idx" ON "vehicle_snapshot" ("type", "account_id", "vehicle_id", "created_at");
 -- create index "vehicle_snapshot_type_account_id_vehicle_id_reference_id_create" to table: "vehicle_snapshot"
-CREATE INDEX "vehicle_snapshot_type_account_id_vehicle_id_reference_id_create" ON "vehicle_snapshot" ("type", "account_id", "vehicle_id", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_snapshot_type_account_id_vehicle_id_reference_id_create" ON "vehicle_snapshot" ("type", "account_id", "vehicle_id", "reference_id", "created_at");
 -- create index "vehicle_snapshot_type_idx" to table: "vehicle_snapshot"
-CREATE INDEX "vehicle_snapshot_type_idx" ON "vehicle_snapshot" ("type");
+CREATE INDEX IF NOT EXISTS "vehicle_snapshot_type_idx" ON "vehicle_snapshot" ("type");
 -- create index "vehicle_snapshot_vehicle_id_reference_id_created_at_idx" to table: "vehicle_snapshot"
-CREATE INDEX "vehicle_snapshot_vehicle_id_reference_id_created_at_idx" ON "vehicle_snapshot" ("vehicle_id", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_snapshot_vehicle_id_reference_id_created_at_idx" ON "vehicle_snapshot" ("vehicle_id", "reference_id", "created_at");
 -- create index "vehicle_snapshot_vehicle_id_type_reference_id_created_at_idx" to table: "vehicle_snapshot"
-CREATE INDEX "vehicle_snapshot_vehicle_id_type_reference_id_created_at_idx" ON "vehicle_snapshot" ("vehicle_id", "type", "reference_id", "created_at");
+CREATE INDEX IF NOT EXISTS "vehicle_snapshot_vehicle_id_type_reference_id_created_at_idx" ON "vehicle_snapshot" ("vehicle_id", "type", "reference_id", "created_at");
 -- create "widget_settings" table
-CREATE TABLE "widget_settings" (
+CREATE TABLE IF NOT EXISTS "widget_settings" (
   "id" text NOT NULL,
   "created_at" text NOT NULL,
   "updated_at" text NOT NULL,
@@ -511,4 +511,4 @@ CREATE TABLE "widget_settings" (
   CONSTRAINT "widget_setting_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create index "widget_settings_id" to table: "widget_settings"
-CREATE INDEX "widget_settings_id" ON "widget_settings" ("id");
+CREATE INDEX IF NOT EXISTS "widget_settings_id" ON "widget_settings" ("id");
