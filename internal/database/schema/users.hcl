@@ -27,6 +27,11 @@ table "user" {
     type = bytea
     default = ""
   }
+  column "automod_verified" {
+    null = false
+    type = bool
+    default = false
+  }
   primary_key {
     columns = [column.id]
   }

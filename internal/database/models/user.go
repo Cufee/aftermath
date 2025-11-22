@@ -16,6 +16,8 @@ type User struct {
 	Connections   []UserConnection
 	Restrictions  []UserRestriction
 	Subscriptions []UserSubscription
+
+	AutomodVerified bool
 }
 
 func (u User) HasPermission(values ...permissions.Permissions) bool {
@@ -85,8 +87,9 @@ func (u User) Content(kind UserContentType) (UserContent, bool) {
 
 func ToUser(record *model.User, connections []model.UserConnection, subscriptions []model.UserSubscription, content []model.UserContent, restrictions []model.UserRestriction) User {
 	user := User{
-		ID:          record.ID,
-		Permissions: permissions.Parse(record.Permissions, permissions.Blank),
+		ID:              record.ID,
+		AutomodVerified: record.AutomodVerified,
+		Permissions:     permissions.Parse(record.Permissions, permissions.Blank),
 	}
 	for _, c := range connections {
 		user.Connections = append(user.Connections, ToUserConnection(&c))

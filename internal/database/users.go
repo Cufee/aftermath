@@ -20,8 +20,9 @@ type userOpts struct {
 		subscriptions bool
 	}
 	insert struct {
-		username    *string
-		permissions *permissions.Permissions
+		username        *string
+		automodVerified bool
+		permissions     *permissions.Permissions
 	}
 }
 
@@ -63,6 +64,11 @@ func AddUsername(name string) UserQueryOption {
 		ugo.insert.username = &name
 	}
 }
+func AddAutomodVerified(value bool) UserQueryOption {
+	return func(ugo *userOpts) {
+		ugo.insert.automodVerified = value
+	}
+}
 
 /*
 Gets or creates a user with specified ID
@@ -79,11 +85,12 @@ func (c *client) GetOrCreateUserByID(ctx context.Context, id string, opts ...Use
 
 	options := UserQueryOptions(opts).ToOptions()
 	user := m.User{
-		ID:           id,
-		CreatedAt:    models.TimeToString(time.Now()),
-		UpdatedAt:    models.TimeToString(time.Now()),
-		Permissions:  permissions.User.String(),
-		FeatureFlags: make([]byte, 0),
+		ID:              id,
+		CreatedAt:       models.TimeToString(time.Now()),
+		UpdatedAt:       models.TimeToString(time.Now()),
+		Permissions:     permissions.User.String(),
+		FeatureFlags:    make([]byte, 0),
+		AutomodVerified: options.insert.automodVerified,
 	}
 	if options.insert.permissions != nil {
 		user.Permissions = permissions.User.Add(*options.insert.permissions).String()
@@ -147,6 +154,19 @@ func (c *client) GetUserByID(ctx context.Context, id string, opts ...UserQueryOp
 	}
 
 	return models.ToUser(&record.User, record.Connections, record.Subscriptions, record.Content, record.Restrictions), nil
+}
+
+func (c *client) UpdateUserAutomodVerified(ctx context.Context, id string, verified bool) error {
+	stmt := t.User.
+		UPDATE(t.User.AutomodVerified).
+		WHERE(t.User.ID.EQ(s.String(id))).
+		SET(t.User.AutomodVerified.SET(s.Bool(verified)))
+
+	_, err := c.exec(ctx, stmt)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type connectionOpts struct {
