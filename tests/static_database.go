@@ -108,6 +108,9 @@ func (c *staticTestingDatabase) GetUserByID(ctx context.Context, id string, opts
 func (c *staticTestingDatabase) GetOrCreateUserByID(ctx context.Context, id string, opts ...database.UserQueryOption) (models.User, error) {
 	return c.GetUserByID(ctx, id)
 }
+func (c *staticTestingDatabase) UpdateUserAutomodVerified(ctx context.Context, id string, verified bool) error {
+	return errors.New("UpdateUserAutomodVerified not implemented")
+}
 func (c *staticTestingDatabase) FindUserConnections(ctx context.Context, opts ...database.ConnectionQueryOption) ([]models.UserConnection, error) {
 	return nil, errors.New("FindUserConnections not implemented")
 }

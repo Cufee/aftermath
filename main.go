@@ -25,6 +25,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands/public"
 	"github.com/cufee/aftermath/cmd/discord/cta"
 	"github.com/cufee/aftermath/cmd/discord/gateway"
+	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/cmd/discord/router"
 	"github.com/cufee/aftermath/cmd/frontend"
 	"github.com/nao1215/imaging"
@@ -264,6 +265,7 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 	}
 
 	router.LoadMiddleware(cta.Middleware(cta.DefaultCooldownServer, cta.DefaultCooldownDM)) // cta messages
+	router.LoadMiddleware(middleware.MarkUsersVerified())                                   // automod verify users using the bot
 	router.LoadMiddleware(collector.Middleware())                                           // metrics
 
 	router.LoadCommands(public.Help().Build())

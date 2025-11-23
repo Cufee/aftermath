@@ -80,6 +80,8 @@ type UsersClient interface {
 
 	CreateUserSubscription(ctx context.Context, subscription models.UserSubscription) (models.UserSubscription, error)
 	UpdateUserSubscription(ctx context.Context, id string, subscription models.UserSubscription) (models.UserSubscription, error)
+
+	UpdateUserAutomodVerified(ctx context.Context, id string, verified bool) error
 }
 
 type SnapshotsClient interface {
