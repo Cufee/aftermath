@@ -20,7 +20,7 @@ env "local" {
   src = var.sources
 
   migration {
-    dir = "file://internal/database/migrations"
+    dir = "file://internal/database/migrations?format=golang-migrate"
   }
 
   url = var.database_url
@@ -39,7 +39,7 @@ env "migrate" {
   ]
 
   migration {
-    dir = "file:///migrations"
+    dir = "file:///migrations?format=golang-migrate"
   }
   tx-mode = "all"
 
