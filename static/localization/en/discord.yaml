@@ -239,3 +239,6 @@ stats_refresh_interaction_error_expired: "This refresh button has expired. Pleas
 wargaming_error_outage: "It looks like Wargaming are having some temporary issues. Please try again in a few seconds."
 wargaming_error_outage_short: "It looks like Wargaming are having some issues. Please try again"
 wargaming_error_private_account: "This account is marked private by Wargaming and no stats are available for it at this time."
+automod_unverified_user_message_deleted_fmt: |-
+  Hey <@%s>, your message was removed because your account has not been verified yet.
+  To start chatting, please use any Aftermath command first (try `/help`).

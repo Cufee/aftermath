@@ -17,12 +17,13 @@ type userTable struct {
 	postgres.Table
 
 	// Columns
-	ID           postgres.ColumnString
-	CreatedAt    postgres.ColumnString
-	UpdatedAt    postgres.ColumnString
-	Username     postgres.ColumnString
-	Permissions  postgres.ColumnString
-	FeatureFlags postgres.ColumnBytea
+	ID              postgres.ColumnString
+	CreatedAt       postgres.ColumnString
+	UpdatedAt       postgres.ColumnString
+	Username        postgres.ColumnString
+	Permissions     postgres.ColumnString
+	FeatureFlags    postgres.ColumnBytea
+	AutomodVerified postgres.ColumnBool
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -64,27 +65,29 @@ func newUserTable(schemaName, tableName, alias string) *UserTable {
 
 func newUserTableImpl(schemaName, tableName, alias string) userTable {
 	var (
-		IDColumn           = postgres.StringColumn("id")
-		CreatedAtColumn    = postgres.StringColumn("created_at")
-		UpdatedAtColumn    = postgres.StringColumn("updated_at")
-		UsernameColumn     = postgres.StringColumn("username")
-		PermissionsColumn  = postgres.StringColumn("permissions")
-		FeatureFlagsColumn = postgres.ByteaColumn("feature_flags")
-		allColumns         = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, UsernameColumn, PermissionsColumn, FeatureFlagsColumn}
-		mutableColumns     = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, UsernameColumn, PermissionsColumn, FeatureFlagsColumn}
-		defaultColumns     = postgres.ColumnList{UsernameColumn, PermissionsColumn, FeatureFlagsColumn}
+		IDColumn              = postgres.StringColumn("id")
+		CreatedAtColumn       = postgres.StringColumn("created_at")
+		UpdatedAtColumn       = postgres.StringColumn("updated_at")
+		UsernameColumn        = postgres.StringColumn("username")
+		PermissionsColumn     = postgres.StringColumn("permissions")
+		FeatureFlagsColumn    = postgres.ByteaColumn("feature_flags")
+		AutomodVerifiedColumn = postgres.BoolColumn("automod_verified")
+		allColumns            = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, UsernameColumn, PermissionsColumn, FeatureFlagsColumn, AutomodVerifiedColumn}
+		mutableColumns        = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, UsernameColumn, PermissionsColumn, FeatureFlagsColumn, AutomodVerifiedColumn}
+		defaultColumns        = postgres.ColumnList{UsernameColumn, PermissionsColumn, FeatureFlagsColumn, AutomodVerifiedColumn}
 	)
 
 	return userTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:           IDColumn,
-		CreatedAt:    CreatedAtColumn,
-		UpdatedAt:    UpdatedAtColumn,
-		Username:     UsernameColumn,
-		Permissions:  PermissionsColumn,
-		FeatureFlags: FeatureFlagsColumn,
+		ID:              IDColumn,
+		CreatedAt:       CreatedAtColumn,
+		UpdatedAt:       UpdatedAtColumn,
+		Username:        UsernameColumn,
+		Permissions:     PermissionsColumn,
+		FeatureFlags:    FeatureFlagsColumn,
+		AutomodVerified: AutomodVerifiedColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

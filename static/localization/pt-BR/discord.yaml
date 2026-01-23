@@ -239,3 +239,6 @@ stats_refresh_interaction_error_expired: "Este botão de atualização expirou. 
 wargaming_error_outage: "Parece que a Wargaming está com problemas temporários. Tente novamente em alguns segundos."
 wargaming_error_outage_short: "Parece que a Wargaming está com problemas. Tente novamente."
 wargaming_error_private_account: "Esta conta foi marcada como privada pela Wargaming e não há estatísticas disponíveis para ela no momento."
+automod_unverified_user_message_deleted_fmt: |-
+  Olá <@%s>, sua mensagem foi removida porque sua conta ainda não foi verificada.
+  Para começar a conversar, use qualquer comando do Aftermath primeiro (tente `/help`).

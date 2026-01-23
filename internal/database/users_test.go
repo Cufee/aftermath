@@ -18,17 +18,16 @@ func TestUsers(t *testing.T) {
 
 	client := MustTestClient(t)
 
-	client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.UserContent.TableName()))
-	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.UserContent.TableName()))
-	client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.UserConnection.TableName()))
-	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.UserConnection.TableName()))
-	client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.UserSubscription.TableName()))
-	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s;", table.UserSubscription.TableName()))
-
 	user, err := client.GetOrCreateUserByID(context.Background(), "user-TestUsers")
 	is.NoErr(err)
-
 	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id = '%s';", table.User.TableName(), user.ID))
+
+	client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE user_id = '%s';", table.UserContent.TableName(), user.ID))
+	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE user_id = '%s';", table.UserContent.TableName(), user.ID))
+	client.db.Exec(fmt.Sprintf("DELETE FROM %sWHERE user_id = '%s';", table.UserConnection.TableName(), user.ID))
+	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE user_id = '%s';", table.UserConnection.TableName(), user.ID))
+	client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE user_id = '%s';", table.UserSubscription.TableName(), user.ID))
+	defer client.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE user_id = '%s';", table.UserSubscription.TableName(), user.ID))
 
 	t.Run("create and get user connections", func(t *testing.T) {
 		is := is.New(t)
@@ -164,5 +163,23 @@ func TestUsers(t *testing.T) {
 		updated, err := client.UpdateUserContent(context.Background(), data)
 		is.NoErr(err)
 		is.True(updated.Meta["test"] == "test")
+	})
+
+	t.Run("update automod_verified", func(t *testing.T) {
+		is := is.New(t)
+
+		err := client.UpdateUserAutomodVerified(context.Background(), user.ID, false)
+		is.NoErr(err)
+
+		user, err := client.GetUserByID(t.Context(), user.ID)
+		is.NoErr(err)
+		is.True(!user.AutomodVerified)
+
+		err = client.UpdateUserAutomodVerified(context.Background(), user.ID, true)
+		is.NoErr(err)
+
+		user, err = client.GetUserByID(t.Context(), user.ID)
+		is.NoErr(err)
+		is.True(user.AutomodVerified)
 	})
 }

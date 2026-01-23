@@ -239,3 +239,6 @@ stats_refresh_interaction_error_expired: "Ten przycisk odświeżania wygasł. Pr
 wargaming_error_outage: "Wygląda na to, że Wargaming ma chwilowe problemy. Spróbuj ponownie za kilka sekund."
 wargaming_error_outage_short: "Wygląda na to, że Wargaming ma pewne problemy. Spróbuj ponownie"
 wargaming_error_private_account: "To konto zostało oznaczone przez Wargaming jako prywatne i w chwili obecnej nie są dla niego dostępne żadne statystyki."
+automod_unverified_user_message_deleted_fmt: |-
+  Hej <@%s>, Twoja wiadomość została usunięta, ponieważ Twoje konto nie zostało jeszcze zweryfikowane.
+  Aby rozpocząć czat, użyj najpierw dowolnej komendy Aftermath (spróbuj `/help`).

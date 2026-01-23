@@ -9,6 +9,7 @@ var (
 	DiscordBotUserID             = MustGetEnv("BOT_USER_ID")
 	DiscordBotInviteURL          = MustGetEnv("BOT_INVITE_LINK")
 	DiscordPrimaryGuildInviteURL = MustGetEnv("PRIMARY_GUILD_INVITE_LINK")
+	DiscordPrimaryGuildID        = MustGetEnv("DISCORD_PRIMARY_GUILD_ID")
 )
 
 var (

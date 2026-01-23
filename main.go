@@ -25,6 +25,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands/public"
 	"github.com/cufee/aftermath/cmd/discord/cta"
 	"github.com/cufee/aftermath/cmd/discord/gateway"
+	"github.com/cufee/aftermath/cmd/discord/middleware"
 	"github.com/cufee/aftermath/cmd/discord/router"
 	"github.com/cufee/aftermath/cmd/frontend"
 	"github.com/nao1215/imaging"
@@ -210,6 +211,7 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client, instrume
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encode help image")
 	}
+	gw.Handler(gateway.ToGatewayHandler(gw, public.AutomodHandler(buf.Bytes())))
 	gw.Handler(gateway.ToGatewayHandler(gw, public.MentionHandler(buf.Bytes())))
 	gw.Handler(gateway.ToGatewayHandler(gw, public.ReplayFileHandler))
 	gw.Handler(gateway.ToGatewayHandler(gw, public.ReplayInteractionHandler))
@@ -264,6 +266,7 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 	}
 
 	router.LoadMiddleware(cta.Middleware(cta.DefaultCooldownServer, cta.DefaultCooldownDM)) // cta messages
+	router.LoadMiddleware(middleware.MarkUsersVerified())                                   // automod verify users using the bot
 	router.LoadMiddleware(collector.Middleware())                                           // metrics
 
 	router.LoadCommands(public.Help().Build())

@@ -8,3 +8,5 @@ tmp
 **/.env*
 
 **/*_templ.go
+
+.claude
