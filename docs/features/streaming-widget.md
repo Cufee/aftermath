@@ -14,9 +14,11 @@ Users can configure the widget via:
 2.  **Custom Widget Editor:** `/app/widgets/new` (Authenticated).
 
 ### Layout & UX
-The preview pages use a **Split-Pane Grid Layout**:
+The preview pages use a **Split-Pane Grid Layout** on desktop:
 - **Left Panel (Settings):** A fixed-width sidebar containing configuration controls and player search. This ensures UI elements remain stable and don't "jump" when the preview updates.
-- **Right Panel (Preview):** A dedicated area featuring an **OBS Mockup** window. This mockup simulates a standard 16:9 screen (or fits the content) to give users a realistic view of how the widget will look in their broadcasting software.
+- **Right Panel (Preview):** An **OBS Mockup** window that fills available vertical space. The widget content inside is scrollable, while the OBS chrome (toolbar, bottom panels) stays fixed.
+
+On mobile devices, only the settings panel is shown (no preview). Users configure their widget on mobile and copy the OBS link to use on desktop.
 
 ### Client-Side Preview
 To ensure a smooth user experience, the preview pages utilize a **Client-Side Toggle** approach:
@@ -27,10 +29,10 @@ To ensure a smooth user experience, the preview pages utilize a **Client-Side To
 
 ## Key Files
 - `cmd/frontend/components/widget/default.templ`: Defines the widget HTML structure, rendering all components with appropriate ID/data attributes.
-- `cmd/frontend/components/obs.templ`: The OBS Mockup component window.
+- `cmd/frontend/components/obs.templ`: The OBS Mockup component (full-height with scrollable content area).
 - `cmd/frontend/routes/widget/index.templ`: Public mock preview page + Client-side toggle script.
 - `cmd/frontend/routes/widget/preview.templ`: Account specific preview page + Client-side toggle script.
-- `cmd/frontend/components/widget/options.templ`: Reusable settings form component.
+- `cmd/frontend/components/widget/settings.templ`: Reusable settings form component.
 
 ## Architecture Decisions
 - **Why Client-Side?** The backend cost to fetch stats for 1 vehicle vs 10 vehicles is negligible. By sending all data upfront, we eliminate "flash of unstyled content" (FOUC) and UI freezing associated with repeated network requests for minor layout changes.
