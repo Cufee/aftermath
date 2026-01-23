@@ -29,9 +29,9 @@ var WidgetPreview handler.Page = func(ctx *handler.Context) (handler.Layout, tem
 }
 
 templ widgetPreview(accountID string, widget templ.Component, or, ou bool, vl int) {
-	<div class="grid grid-cols-1 lg:grid-cols-[minmax(320px,400px)_1fr] gap-6 items-stretch h-[calc(100vh-8rem)]">
+	<div class="grow flex flex-col lg:flex-row gap-6">
 		// Settings panel
-		<div class="flex flex-col gap-4">
+		<div class="lg:w-[400px] lg:shrink-0 flex flex-col gap-4">
 			<div class="flex flex-col gap-2 text-center lg:text-left">
 				<h1 class="text-3xl font-bold">
 					Aftermath Streaming Widget
@@ -44,7 +44,7 @@ templ widgetPreview(accountID string, widget templ.Component, or, ou bool, vl in
 			<button type="button" id="copy-widget-link" class="btn btn-primary w-full transition-all duration-250 ease-in-out" onclick={ copyButtonAction() }>Copy OBS Link</button>
 		</div>
 		// Preview panel - OBS mockup (desktop only)
-		<div class="hidden lg:block w-full h-full">
+		<div class="hidden lg:flex flex-1 min-h-0">
 			@components.OBSMockup("/assets/widget-background.jpg") {
 				<div class="min-w-[400px] w-max mx-auto">
 					@widget
