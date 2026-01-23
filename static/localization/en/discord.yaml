@@ -14,7 +14,7 @@ buttons_submit: "Submit"
 command_auction_description: "View the current Blitz Auction"
 command_auction_name: "auction"
 command_auction_result_fmt: "### Updated <t:%d:R>"
-command_career_desc: "Get an overview of your career stats"
+command_career_description: "Get an overview of your career stats"
 command_career_help_message: |-
   ## View Career Stats for Your Account!
   To get started, include a nickname and server, mention another user, or link an account using `/links add`!

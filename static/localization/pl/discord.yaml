@@ -14,7 +14,7 @@ buttons_submit: "Wyślij"
 command_auction_description: "Zobacz aktualną aukcję Blitz"
 command_auction_name: "aukcja"
 command_auction_result_fmt: "### Zaktualizowano <t:%d:R>"
-command_career_desc: "Uzyskaj przegląd statystyk swojej kariery"
+command_career_description: "Uzyskaj przegląd statystyk swojej kariery"
 command_career_help_message: |-
   ## Zobacz statystyki kariery dla swojego konta!
   Aby rozpocząć, podaj pseudonim i serwer, wspomnij o innym użytkowniku lub połącz konto za pomocą `/links add`!

@@ -151,11 +151,11 @@ func init() {
 	commands.LoadedPublic.Add(builder.NewCommand("stats").
 		Middleware(careerCommandMiddleware...).
 		Options(careerCommandOptions...).
-		Params(builder.SetDescKey("command_career_desc")).
+		Params(builder.SetDescKey("command_career_description")).
 		Handler(careerCommandHandler))
 	commands.LoadedPublic.Add(builder.NewCommand("career").
 		Middleware(careerCommandMiddleware...).
 		Options(careerCommandOptions...).
-		Params(builder.SetNameKey("command_career_name"), builder.SetDescKey("command_career_desc")).
+		Params(builder.SetNameKey("command_career_name"), builder.SetDescKey("command_career_description")).
 		Handler(careerCommandHandler))
 }
