@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package blitzkit;
+
+option go_package = "github.com/cufee/aftermath/internal/external/blitzkit;blitzkit";
+
+message AverageDefinitions {
+  map<uint32, AverageDefinitionsEntry> averages = 1;
+}
+
+message AverageDefinitionsEntry {
+  AverageDefinitionsAllStats mu = 1;
+}
+
+message AverageDefinitionsAllStats {
+  float battles = 1;
+  float damage_dealt = 3;
+  float dropped_capture_points = 5;
+  float frags = 6;
+  float hits = 8;
+  float shots = 12;
+  float spotted = 13;
+  float wins = 16;
+}

@@ -7,10 +7,6 @@ import (
 )
 
 var (
-	BlitzStarsApiURL = MustGetEnv("BLITZ_STARS_API_URL")
-)
-
-var (
 	WargamingPrimaryAppID             = MustGetEnv("WG_PRIMARY_APP_ID")
 	WargamingPrimaryAppRPS            int
 	WargamingPrimaryAppRequestTimeout time.Duration
