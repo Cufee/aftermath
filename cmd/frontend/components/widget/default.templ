@@ -33,10 +33,10 @@ func (v vehicleExtended) fromCard(card session.VehicleCard) vehicleExtended {
 }
 
 func (w widget) defaultWidget() templ.Component {
-
+	// Prepare all vehicle cards (up to 10) for client-side toggling
 	var vehicles []vehicleExtended
 	for i, card := range w.cards.Unrated.Vehicles {
-		if i >= w.style.Vehicles.Limit {
+		if i >= 10 {
 			break
 		}
 		if len(card.Blocks) < 1 {
@@ -56,14 +56,14 @@ func (w widget) defaultWidget() templ.Component {
 
 templ (w defaultWidget) Render() {
 	<div class="flex flex-col w-full gap-2 widget">
-		if w.style.RatingOverview.Visible && len(w.cards.Rating.Overview.Blocks) > 0 {
-			@w.overviewCard(w.cards.Rating.Overview, w.style.RatingOverview)
+		if len(w.cards.Rating.Overview.Blocks) > 0 {
+			@w.ratingOverviewCard(w.cards.Rating.Overview, w.style.RatingOverview, !w.style.RatingOverview.Visible)
 		}
-		if w.style.UnratedOverview.Visible && len(w.cards.Unrated.Overview.Blocks) > 0 {
-			@w.overviewCard(w.cards.Unrated.Overview, w.style.UnratedOverview)
+		if len(w.cards.Unrated.Overview.Blocks) > 0 {
+			@w.unratedOverviewCard(w.cards.Unrated.Overview, w.style.UnratedOverview, !w.style.UnratedOverview.Visible)
 		}
-		for _, card := range w.vehicleCards {
-			@w.vehicleCard(card, w.style.Vehicles)
+		for i, card := range w.vehicleCards {
+			@w.vehicleCardWithIndex(card, w.style.Vehicles, i, i >= w.style.Vehicles.Limit)
 		}
 		if len(w.vehicleCards) > 0 && w.showLegend {
 			@w.vehicleLegendCard(w.vehicleCards[0].Blocks)
@@ -78,7 +78,37 @@ templ (w defaultWidget) overviewCard(card session.OverviewCard, style models.Wid
 				{ card.Title }
 			</span>
 		}
-		<div class={ fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-1 items-center bg-black rounded-xl bg-opacity-[0.80] p-4", len(card.Blocks)) }>
+		<div class={ fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-2 items-center bg-black rounded-xl bg-opacity-[0.80] p-4", len(card.Blocks)) }>
+			for _, column := range card.Blocks {
+				@w.overviewColumn(column, style)
+			}
+		</div>
+	</div>
+}
+
+templ (w defaultWidget) ratingOverviewCard(card session.OverviewCard, style models.WidgetCardStyle, hidden bool) {
+	<div id="widget-rating-overview" class={ "flex flex-col gap-1 card overview-card grow", templ.KV("hidden", hidden) }>
+		if style.ShowTitle {
+			<span class="text-center text-gray-300 title">
+				{ card.Title }
+			</span>
+		}
+		<div class={ fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-2 items-center bg-black rounded-xl bg-opacity-[0.80] p-4", len(card.Blocks)) }>
+			for _, column := range card.Blocks {
+				@w.overviewColumn(column, style)
+			}
+		</div>
+	</div>
+}
+
+templ (w defaultWidget) unratedOverviewCard(card session.OverviewCard, style models.WidgetCardStyle, hidden bool) {
+	<div id="widget-unrated-overview" class={ "flex flex-col gap-1 card overview-card grow", templ.KV("hidden", hidden) }>
+		if style.ShowTitle {
+			<span class="text-center text-gray-300 title">
+				{ card.Title }
+			</span>
+		}
+		<div class={ fmt.Sprintf("columns overview-columns grid grid-cols-%d gap-2 items-center bg-black rounded-xl bg-opacity-[0.80] p-4", len(card.Blocks)) }>
 			for _, column := range card.Blocks {
 				@w.overviewColumn(column, style)
 			}
@@ -96,7 +126,25 @@ templ (w defaultWidget) vehicleCard(card vehicleExtended, style models.WidgetVeh
 				<img src={ assets.WN8IconPathSmall(card.wn8.Float()) } class="size-5"/>
 			</div>
 		}
-		<div class={ fmt.Sprintf("blocks vehicle-blocks grid grid-cols-%d gap-1 items-center", len(card.Blocks)) }>
+		<div class={ fmt.Sprintf("blocks vehicle-blocks grid grid-cols-%d gap-3 items-center", len(card.Blocks)) }>
+			for _, block := range card.Blocks {
+				@w.block(block, style.WidgetCardStyle)
+			}
+		</div>
+	</div>
+}
+
+templ (w defaultWidget) vehicleCardWithIndex(card vehicleExtended, style models.WidgetVehicleCardStyle, index int, hidden bool) {
+	<div id={ fmt.Sprintf("widget-vehicle-%d", index) } class={ "flex flex-col gap-1 card vehicle-card grow bg-black rounded-lg bg-opacity-[0.80] p-4", templ.KV("hidden", hidden) }>
+		if w.style.Vehicles.ShowTitle {
+			<div class="flex flex-row gap-2 justify-between">
+				<span class="text-gray-300 title">
+					{ card.Title }
+				</span>
+				<img src={ assets.WN8IconPathSmall(card.wn8.Float()) } class="size-5"/>
+			</div>
+		}
+		<div class={ fmt.Sprintf("blocks vehicle-blocks grid grid-cols-%d gap-3 items-center", len(card.Blocks)) }>
 			for _, block := range card.Blocks {
 				@w.block(block, style.WidgetCardStyle)
 			}

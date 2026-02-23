@@ -1,23 +1,23 @@
 package components
 
 templ OBSMockup(backgroundURL string) {
-	<div class="mockup-browser bg-base-300 rounded-xl overflow-hidden w-full">
-		<div class="mockup-browser-toolbar">
+	<div class="mockup-browser bg-base-300 rounded-xl overflow-hidden w-full h-full flex flex-col">
+		<div class="mockup-browser-toolbar shrink-0">
 			<div class="w-full text-center mr-14">OBS Studio</div>
 		</div>
-		<div class="flex flex-col p-4 pt-0 gap-2">
-			<div class="grow relative rounded-md overflow-hidden">
+		<div class="flex flex-col p-4 pt-0 gap-2 flex-1 min-h-0 overflow-hidden">
+			<div class="flex-1 relative rounded-md overflow-hidden min-h-0">
 				if backgroundURL == "" {
-					<div class="absolute w-1/2 h-full bg-gray-300 left-0 top-0 z-10"></div>
+					<div class="absolute w-1/2 h-full bg-gray-300 left-0 top-0 z-0"></div>
 					<div class="absolute w-1/2 h-full bg-gray-600 right-0 top-0 z-0"></div>
 				} else {
-					<img src={ backgroundURL } class="object-cover absolute laft-0 top-0 z-0 w-full h-full"/>
+					<img src={ backgroundURL } class="object-cover absolute left-0 top-0 z-0 w-full h-full"/>
 				}
-				<div class="relative z-10 flex items-center justify-center h-full">
+				<div class="absolute inset-0 z-10 overflow-y-auto p-2">
 					{ children... }
 				</div>
 			</div>
-			<div class="grow flex flex-row gap-1 text-xs">
+			<div class="shrink-0 flex flex-row gap-1 text-xs">
 				<div class="grow flex flex-col gap-1 bg-base-200 p-2 rounded-md">
 					<div class="bg-gray-700 rounded-full px-2 py-1 whitespace-nowrap text-center">
 						❤︎ Aftermath

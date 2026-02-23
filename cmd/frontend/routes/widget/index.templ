@@ -28,13 +28,14 @@ var WidgetHome handler.Page = func(ctx *handler.Context) (handler.Layout, templ.
 }
 
 templ widgetHome(widget templ.Component, or, ou bool, vl int) {
-	<div class="flex flex-row flex-wrap gap-4">
-		<div class="flex flex-col gap-4 basis-1/2 grow">
-			<div class="flex flex-col gap-2 text-center">
-				<div class="text-3xl font-bold">
+	<div class="grow flex flex-col lg:flex-row gap-6">
+		// Settings panel
+		<div class="lg:w-[400px] lg:shrink-0 flex flex-col gap-4">
+			<div class="flex flex-col gap-2 text-center lg:text-left">
+				<h1 class="text-3xl font-bold">
 					Aftermath Streaming Widget
-				</div>
-				<p>
+				</h1>
+				<p class="text-base-content/70">
 					Level up your stream with a real-time stats widget!
 				</p>
 			</div>
@@ -54,12 +55,11 @@ templ widgetHome(widget templ.Component, or, ou bool, vl int) {
 				</div>
 			</div>
 		</div>
-		<div class="flex flex-col items-center justify-center grow overflow-auto">
+		// Preview panel - OBS mockup (desktop only)
+		<div class="hidden lg:flex flex-1 min-h-0">
 			@components.OBSMockup("/assets/widget-background.jpg") {
-				<div class="min-h-96 w-full overflow-auto p-2 relative">
-					<div class="min-w-[400px] w-max mx-auto h-1/2">
-						@widget
-					</div>
+				<div class="min-w-[400px] w-max mx-auto">
+					@widget
 				</div>
 			}
 		</div>
@@ -187,24 +187,34 @@ script handlePreviewOnHome() {
 	const orEl = document.getElementById("widget-settings-or");
 	const vlEl = document.getElementById("widget-settings-vl");
 
+	// Toggle rating overview visibility
+	const ratingOverview = document.getElementById("widget-rating-overview");
+	if (ratingOverview) {
+		ratingOverview.classList.toggle("hidden", !orEl.checked);
+	}
+
+	// Toggle unrated overview visibility
+	const unratedOverview = document.getElementById("widget-unrated-overview");
+	if (unratedOverview) {
+		unratedOverview.classList.toggle("hidden", !ouEl.checked);
+	}
+
+	// Toggle vehicle cards visibility based on slider value
+	const vehicleLimit = parseInt(vlEl.value, 10);
+	for (let i = 0; i < 10; i++) {
+		const vehicleCard = document.getElementById(`widget-vehicle-${i}`);
+		if (vehicleCard) {
+			vehicleCard.classList.toggle("hidden", i >= vehicleLimit);
+		}
+	}
+
+	// Update URL
 	const ou = ouEl.checked ? "1" : "0";
 	const or = orEl.checked ? "1" : "0";
 	const vl = vlEl.value;
 	const newQuery = `?or=${or}&ou=${ou}&vl=${vl}`;
 	if (newQuery != window.location.search) {
-		ouEl.disabled = true;
-		orEl.disabled = true;
-		vlEl.disabled = true;
-		fetch("/api/p/widget/mock"+newQuery).then((r) => r.text()).then((html) => {
-			document.getElementById("mock-widget").outerHTML = html;
-			const url = window.location.protocol + "//" + window.location.host + window.location.pathname + newQuery;
-			window.history?.pushState({path:url},'',url);
-		}).catch(e => console.log(e)).finally(() => {
-			setTimeout(() => {
-				ouEl.disabled = false;
-				orEl.disabled = false;
-				vlEl.disabled = false;
-			}, 500);
-		});
+		const url = window.location.protocol + "//" + window.location.host + window.location.pathname + newQuery;
+		window.history?.pushState({path:url},'',url);
 	}
 }

@@ -22,11 +22,19 @@ func init() {
 				builder.NewOption("id", discordgo.ApplicationCommandOptionString),
 				builder.NewOption("user_id", discordgo.ApplicationCommandOptionString),
 				builder.NewOption("snowflake", discordgo.ApplicationCommandOptionString),
+				builder.NewOption("timeframe_hours", discordgo.ApplicationCommandOptionNumber),
+				builder.NewOption("all_time", discordgo.ApplicationCommandOptionBoolean),
 			).
 			Handler(func(ctx common.Context) error {
 				snowflake, _ := ctx.Options().Value("snowflake").(string)
 				interactionID, _ := ctx.Options().Value("id").(string)
 				userID, _ := ctx.Options().Value("user_id").(string)
+				timeframeHours, _ := ctx.Options().Value("timeframe_hours").(float64)
+				allTime, _ := ctx.Options().Value("all_time").(bool)
+
+				if timeframeHours < 0 {
+					return ctx.Reply().Send("timeframe_hours cannot be a negative value")
+				}
 
 				var data any
 				var err error
@@ -37,7 +45,14 @@ func init() {
 					data, err = ctx.Core().Database().GetDiscordInteraction(ctx.Ctx(), interactionID)
 				}
 				if userID != "" {
-					data, err = ctx.Core().Database().FindDiscordInteractions(ctx.Ctx(), database.WithUserID(userID), database.WithSentAfter(time.Now().Add(-time.Hour*24)), database.WithLimit(10))
+					query := []database.InteractionQuery{database.WithUserID(userID)}
+					if !allTime {
+						if timeframeHours <= 0 {
+							timeframeHours = 24
+						}
+						query = append(query, database.WithSentAfter(time.Now().Add(-time.Duration(timeframeHours*float64(time.Hour)))))
+					}
+					data, err = ctx.Core().Database().FindDiscordInteractions(ctx.Ctx(), query...)
 				}
 				if err != nil {
 					return ctx.Reply().Send(err.Error())
