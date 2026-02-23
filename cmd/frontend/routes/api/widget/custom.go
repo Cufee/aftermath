@@ -72,7 +72,7 @@ func (p *widgetSettingsPayload) parse(values url.Values) {
 
 		if formValues, ok := values[formTag]; ok && len(formValues) > 0 {
 			switch field.Kind() {
-			case reflect.Ptr:
+			case reflect.Pointer:
 				switch fieldType.Type.Elem().Kind() {
 				case reflect.String:
 					strVal := formValues[0]

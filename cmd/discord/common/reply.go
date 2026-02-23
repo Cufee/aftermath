@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"maps"
 	"strings"
 	"time"
 
@@ -79,9 +80,7 @@ func (r Reply) Metadata() map[string]any {
 
 func (r Reply) WithMeta(data map[string]any) Reply {
 	meta := r.Metadata()
-	for key, value := range data {
-		meta[key] = value
-	}
+	maps.Copy(meta, data)
 	return r
 }
 

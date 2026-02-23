@@ -23,16 +23,14 @@ func TestPubSub(t *testing.T) {
 	payload := fmt.Sprint(time.Now().Unix())
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for data := range lch {
 			p, ok := data.Data.(string)
 			is.True(ok && p == payload)
 			println("received:", p)
 			return
 		}
-	}()
+	})
 
 	{
 		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)

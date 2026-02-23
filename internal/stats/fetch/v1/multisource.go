@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"slices"
 	"sync"
 	"time"
@@ -65,9 +66,7 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 	data := make(chan AccountWithRealm, 9)
 	errors := make(chan error, 3)
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmNorthAmerica, nickname, types.WithLimit(limitPerRealm))
 		if err != nil {
 			errors <- err
@@ -76,10 +75,8 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 		for _, a := range accounts {
 			data <- AccountWithRealm{a, types.RealmNorthAmerica}
 		}
-	}()
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	})
+	wg.Go(func() {
 		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmEurope, nickname, types.WithLimit(limitPerRealm))
 		if err != nil {
 			errors <- err
@@ -88,10 +85,8 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 		for _, a := range accounts {
 			data <- AccountWithRealm{a, types.RealmEurope}
 		}
-	}()
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	})
+	wg.Go(func() {
 		accounts, err := c.wargaming.SearchAccounts(ctx, types.RealmAsia, nickname, types.WithLimit(limitPerRealm))
 		if err != nil {
 			errors <- err
@@ -100,7 +95,7 @@ func (c *multiSourceClient) BroadSearch(ctx context.Context, nickname string, li
 		for _, a := range accounts {
 			data <- AccountWithRealm{a, types.RealmAsia}
 		}
-	}()
+	})
 	wg.Wait()
 	close(data)
 	close(errors)
@@ -293,9 +288,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 	var current retry.DataWithErr[AccountStatsOverPeriod]
 
 	var group sync.WaitGroup
-	group.Add(1)
-	go func() {
-		defer group.Done()
+	group.Go(func() {
 
 		stats, err := c.CurrentStats(ctx, id, opts...)
 		current = retry.DataWithErr[AccountStatsOverPeriod]{Data: stats, Err: err}
@@ -310,7 +303,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 		}
 		a, err := c.database.GetVehicleAverages(ctx, ids)
 		averages = retry.DataWithErr[map[string]frame.StatsFrame]{Data: a, Err: err}
-	}()
+	})
 
 	group.Add(1)
 	go func() {
@@ -467,9 +460,7 @@ func (c *multiSourceClient) replay(ctx context.Context, unpacked *replay.Unpacke
 
 			playerDataMx.Lock()
 			defer playerDataMx.Unlock()
-			for id, player := range data {
-				playerData[id] = player
-			}
+			maps.Copy(playerData, data)
 			return nil
 		})
 	}

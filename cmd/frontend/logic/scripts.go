@@ -12,7 +12,7 @@ import (
 	"github.com/tdewolff/minify/v2/js"
 )
 
-func EmbedScript(script templ.ComponentScript, params ...interface{}) templ.Component {
+func EmbedScript(script templ.ComponentScript, params ...any) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		if _, err = io.WriteString(w, `<script type="text/javascript">`+"\r\n"+script.Function+"\r\n"+script.Name+"("); err != nil {
 			return err
@@ -41,7 +41,7 @@ func EmbedScript(script templ.ComponentScript, params ...interface{}) templ.Comp
 
 var m = minify.New()
 
-func EmbedMinifiedScript(script templ.ComponentScript, params ...interface{}) templ.Component {
+func EmbedMinifiedScript(script templ.ComponentScript, params ...any) templ.Component {
 	r := bytes.NewReader([]byte(script.Function))
 	w := bytes.NewBuffer(nil)
 	err := js.Minify(m, w, r, nil)

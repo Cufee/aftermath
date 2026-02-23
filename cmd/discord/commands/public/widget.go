@@ -11,7 +11,6 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
-	"github.com/cufee/aftermath/internal/utils"
 )
 
 func init() {
@@ -32,7 +31,7 @@ func init() {
 				if len(parts) == 4 && parts[0] == "valid" {
 					accountID = parts[1]
 				} else {
-					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, nil, utils.Pointer(true))
+					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, nil, new(true))
 					if !hasDefaultAccount {
 						return ctx.Reply().Format("commands_widget_message_fmt", constants.FrontendURL+"/widget/").Send()
 					}

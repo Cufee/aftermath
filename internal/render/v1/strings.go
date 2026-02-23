@@ -31,7 +31,7 @@ func MeasureString(text string, font *Font) StringSize {
 	// Account for font descender height
 	result.LineOffset = float64(face.Metrics().Descent>>6) * 2
 
-	for _, line := range strings.Split(text, "\n") {
+	for line := range strings.SplitSeq(text, "\n") {
 		w, h := measureCtx.MeasureString(line)
 		h += result.LineOffset
 		w += 1

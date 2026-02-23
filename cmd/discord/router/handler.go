@@ -187,7 +187,7 @@ func (r *router) handleInteraction(ctx context.Context, interaction discordgo.In
 
 func sendPingReply(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
-	_, err := w.Write([]byte(fmt.Sprintf(`{"type": %d}`, discordgo.InteractionPing)))
+	_, err := w.Write(fmt.Appendf(nil, `{"type": %d}`, discordgo.InteractionPing))
 	if err != nil {
 		log.Err(err).Msg("failed to reply to a discord PING")
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

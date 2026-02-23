@@ -9,7 +9,6 @@ import (
 	"github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
-	"github.com/cufee/aftermath/internal/utils"
 	"github.com/matryer/is"
 )
 
@@ -77,19 +76,19 @@ func TestUsers(t *testing.T) {
 		localUser, err := client.GetOrCreateUserByID(context.Background(), user.ID, WithConnections())
 		is.NoErr(err)
 		{
-			found, ok := localUser.Connection(models.ConnectionTypeWargaming, utils.Pointer(true), nil)
+			found, ok := localUser.Connection(models.ConnectionTypeWargaming, new(true), nil)
 			is.True(ok)
 			is.True(found.Verified)
 			is.True(found.ID == verified.ID)
 		}
 		{
-			found, ok := localUser.Connection(models.ConnectionTypeWargaming, nil, utils.Pointer(true))
+			found, ok := localUser.Connection(models.ConnectionTypeWargaming, nil, new(true))
 			is.True(ok)
 			is.True(found.Selected)
 			is.True(found.ID == selected.ID)
 		}
 		{
-			found, ok := localUser.Connection(models.ConnectionTypeWargaming, utils.Pointer(false), utils.Pointer(false))
+			found, ok := localUser.Connection(models.ConnectionTypeWargaming, new(false), new(false))
 			is.True(ok)
 			is.True(found.ID == regular.ID)
 			is.True(!found.Selected && !found.Verified)

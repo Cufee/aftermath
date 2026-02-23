@@ -6,15 +6,15 @@ import (
 	"github.com/goccy/go-json"
 )
 
-func Unmarshal(data []byte, v interface{}) error {
+func Unmarshal(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }
 
-func Marshal(v interface{}) ([]byte, error) {
+func Marshal(v any) ([]byte, error) {
 	return json.Marshal(v)
 }
 
-func MarshalIndent(v interface{}, prefix string, indent string) ([]byte, error) {
+func MarshalIndent(v any, prefix string, indent string) ([]byte, error) {
 	return json.MarshalIndent(v, prefix, indent)
 }
 

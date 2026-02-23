@@ -209,7 +209,7 @@ func (ctx *Context) Error(format string, args ...any) error {
 }
 
 func (ctx *Context) String(format string, args ...any) error {
-	_, err := ctx.w.Write([]byte(fmt.Sprintf(format, args...)))
+	_, err := ctx.w.Write(fmt.Appendf(nil, format, args...))
 	return err
 }
 
@@ -217,7 +217,7 @@ func (ctx *Context) JSON(data any) error {
 	ctx.w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(ctx.w).Encode(data)
 	if err != nil {
-		ctx.w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err.Error())))
+		ctx.w.Write(fmt.Appendf(nil, `{"error":"%s"}`, err.Error()))
 	}
 	return nil
 }

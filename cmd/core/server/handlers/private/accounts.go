@@ -36,7 +36,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 			return
 		}
 
-		w.Write([]byte(fmt.Sprintf("working on %d accounts", len(accounts)-len(existing))))
+		w.Write(fmt.Appendf(nil, "working on %d accounts", len(accounts)-len(existing)))
 		log.Debug().Int("count", len(accounts)-len(existing)).Msg("importing accounts")
 
 		go func(accounts []string, existing []models.Account) {
@@ -64,10 +64,7 @@ func LoadAccountsHandler(client core.Client) http.HandlerFunc {
 			sem := semaphore.NewWeighted(5)
 			for realm, accounts := range accountsByRealm {
 				for i := 0; i < len(accounts); i += batchSize {
-					end := i + batchSize
-					if end > len(accounts) {
-						end = len(accounts)
-					}
+					end := min(i+batchSize, len(accounts))
 
 					wg.Add(1)
 					go func(accounts []string, realm types.Realm) {

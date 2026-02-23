@@ -89,8 +89,8 @@ func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataO
 	var options StatsOptions
 
 	options.TankSearch, _ = common.GetOption[string](data, "tank")
-	if strings.HasPrefix(options.TankSearch, "valid#vehicle#") {
-		options.TankID = strings.TrimPrefix(options.TankSearch, "valid#vehicle#")
+	if after, ok := strings.CutPrefix(options.TankSearch, "valid#vehicle#"); ok {
+		options.TankID = after
 	}
 
 	tier, ok := common.GetOption[float64](data, "tier")
@@ -99,8 +99,8 @@ func GetDefaultStatsOptions(data []*discordgo.ApplicationCommandInteractionDataO
 	}
 
 	options.NicknameSearch, _ = common.GetOption[string](data, "nickname")
-	if strings.HasPrefix(options.NicknameSearch, "valid#account#") {
-		data := strings.Split(strings.TrimPrefix(options.NicknameSearch, "valid#account#"), "#")
+	if after, ok0 := strings.CutPrefix(options.NicknameSearch, "valid#account#"); ok0 {
+		data := strings.Split(after, "#")
 		if len(data) == 2 {
 			options.Realm = types.Realm(data[1])
 			options.AccountID = data[0]
