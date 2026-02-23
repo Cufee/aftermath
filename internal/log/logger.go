@@ -3,6 +3,7 @@ package log
 import (
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -40,10 +41,8 @@ func NewMiddleware(logger zerolog.Logger, ignorePath ...string) func(http.Handle
 		if strings.HasPrefix(r.URL.Path, "/assets/") {
 			return
 		}
-		for _, path := range ignorePath {
-			if path == r.URL.Path {
-				return
-			}
+		if slices.Contains(ignorePath, r.URL.Path) {
+			return
 		}
 		hlog.FromRequest(r).Info().
 			Int("status", status).

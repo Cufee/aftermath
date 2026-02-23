@@ -200,7 +200,7 @@ func (c *client) Unsafe() *sql.DB {
 	return c.db
 }
 
-func (c *client) query(ctx context.Context, stmt pg.Statement, dst interface{}) error {
+func (c *client) query(ctx context.Context, stmt pg.Statement, dst any) error {
 	if c.options.debug {
 		println("SQL Query:", stmt.DebugSql())
 	}
@@ -226,7 +226,7 @@ type transaction struct {
 	options clientOptions
 }
 
-func (t *transaction) query(ctx context.Context, stmt pg.Statement, dst interface{}) error {
+func (t *transaction) query(ctx context.Context, stmt pg.Statement, dst any) error {
 	if t.options.debug {
 		println("SQL Query:", stmt.DebugSql())
 	}

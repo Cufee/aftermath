@@ -24,7 +24,7 @@ type Client interface {
 
 	Connect() error
 	Disconnect() error
-	Handler(fn interface{})
+	Handler(fn any)
 	SetStatus(status status, text string, emoji *discordgo.Emoji) error
 }
 
@@ -72,7 +72,7 @@ func (c *gatewayClient) Rest() *rest.Client {
 	return c.rest
 }
 
-func (c *gatewayClient) Handler(fn interface{}) {
+func (c *gatewayClient) Handler(fn any) {
 	c.manager.AddHandler(fn)
 }
 

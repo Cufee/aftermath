@@ -87,7 +87,7 @@ func (c Builder) Build() Command {
 			NameLocalizations:        &nameLocalized,
 			DescriptionLocalizations: &descLocalized,
 			Options:                  options,
-			DMPermission:             common.Pointer(!c.guildOnly),
+			DMPermission:             new(!c.guildOnly),
 			Type:                     discordgo.ChatApplicationCommand,
 			IntegrationTypes:         c.integrationTypes,
 			Contexts:                 c.interactionContexts,

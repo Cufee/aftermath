@@ -1,4 +1,4 @@
-FROM golang:latest AS builder-go
+FROM golang:1.26.0 AS builder-go
 
 WORKDIR /workspace
 

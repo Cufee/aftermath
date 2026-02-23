@@ -9,7 +9,6 @@ import (
 	t "github.com/cufee/aftermath/internal/database/gen/public/table"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/permissions"
-	"github.com/cufee/aftermath/internal/utils"
 	s "github.com/go-jet/jet/v2/postgres"
 )
 
@@ -198,13 +197,13 @@ func ConnectionType(kind models.ConnectionType) ConnectionQueryOption {
 
 func ConnectionVerified(verified bool) ConnectionQueryOption {
 	return func(ugo *connectionOpts) {
-		ugo.get.verified = utils.Pointer(verified)
+		ugo.get.verified = new(verified)
 	}
 }
 
 func ConnectionSelected(selected bool) ConnectionQueryOption {
 	return func(ugo *connectionOpts) {
-		ugo.get.selected = utils.Pointer(selected)
+		ugo.get.selected = new(selected)
 	}
 }
 

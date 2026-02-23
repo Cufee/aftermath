@@ -15,7 +15,7 @@ import (
 type blockContentType int
 
 func (t blockContentType) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("%d", t)), nil
+	return fmt.Appendf(nil, "%d", t), nil
 }
 func (t blockContentType) String() string {
 	return fmt.Sprintf("%d", t)
@@ -135,7 +135,7 @@ func (content *contentText) Render(style Style) (image.Image, error) {
 		lastY += (height - size.TotalHeight) / 2
 	}
 
-	for _, str := range strings.Split(content.value, "\n") {
+	for str := range strings.SplitSeq(content.value, "\n") {
 		lastY += size.LineHeight
 		ctx.DrawString(str, lastX, lastY-size.LineOffset)
 	}

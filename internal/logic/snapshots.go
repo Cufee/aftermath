@@ -158,14 +158,12 @@ func RecordAccountSnapshots(ctx context.Context, wgClient wargaming.Client, dbCl
 		}(id)
 	}
 
-	group.Add(1)
 	// get account clans, not critical
-	go func() {
-		defer group.Done()
+	group.Go(func() {
 		// clans are optional-ish
 		data, _ := wgClient.BatchAccountClan(ctx, realm, accountsNeedAnUpdate)
 		clans = data
-	}()
+	})
 
 	// get account vehicle last battle times
 	for _, accountID := range accountsNeedAnUpdate {

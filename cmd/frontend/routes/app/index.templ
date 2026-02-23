@@ -9,7 +9,6 @@ import (
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/utils"
 	"net/http"
 	"slices"
 )
@@ -64,7 +63,7 @@ var Index handler.Page = func(ctx *handler.Context) (handler.Layout, templ.Compo
 			}
 		}
 	}
-	defaultConn, _ := user.Connection(models.ConnectionTypeWargaming, nil, utils.Pointer(true))
+	defaultConn, _ := user.Connection(models.ConnectionTypeWargaming, nil, new(true))
 
 	return layouts.Main, index(connections, defaultConn.ID, 3, widgets, constants.WidgetAccountLimit), nil
 }

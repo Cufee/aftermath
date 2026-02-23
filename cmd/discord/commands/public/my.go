@@ -18,7 +18,6 @@ import (
 	"github.com/cufee/aftermath/internal/permissions"
 	stats "github.com/cufee/aftermath/internal/stats/client/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	"github.com/cufee/aftermath/internal/utils"
 	"github.com/pkg/errors"
 )
 
@@ -85,7 +84,7 @@ func init() {
 				if len(parts) == 4 && parts[0] == "valid" {
 					accountID = parts[1]
 				} else {
-					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, nil, utils.Pointer(true))
+					defaultAccount, hasDefaultAccount := ctx.User().Connection(models.ConnectionTypeWargaming, nil, new(true))
 					if !hasDefaultAccount {
 						return ctx.Reply().IsError(common.UserError).Send("my_error_no_account_linked")
 					}
