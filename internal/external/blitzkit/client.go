@@ -1,4 +1,4 @@
-package blitzstars
+package blitzkit
 
 import (
 	"context"
@@ -9,23 +9,23 @@ import (
 	"github.com/pkg/errors"
 )
 
-var ErrServiceUnavailable = errors.New("blitz stars unavailable")
+//go:generate go tool github.com/bufbuild/buf/cmd/buf generate --template buf.gen.yaml --path averages.proto
+
+var ErrServiceUnavailable = errors.New("blitzkit averages unavailable")
 
 type Client interface {
 	CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error)
 }
 
-// var _ Client = &client{} // just a marker to see if it is implemented correctly
+var _ Client = &client{} // just a marker to see if it is implemented correctly
 
 type client struct {
 	http           http.Client
-	apiURL         string
 	requestTimeout time.Duration
 }
 
-func NewClient(apiURL string, requestTimeout time.Duration) (client, error) {
+func NewClient(requestTimeout time.Duration) (client, error) {
 	return client{
-		apiURL:         apiURL,
 		requestTimeout: requestTimeout,
 		http:           http.Client{Timeout: requestTimeout},
 	}, nil

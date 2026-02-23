@@ -13,7 +13,7 @@
 # RUN npx tolgee pull --api-key "${LOCALIZE_API_KEY}" --states REVIEWED
 
 # Build app
-FROM golang:1.24.3 AS builder-go
+FROM golang:1.26.0 AS builder-go
 
 ARG BRAND_FLAVOR=red
 ENV BRAND_FLAVOR $BRAND_FLAVOR
@@ -30,6 +30,7 @@ COPY ./ ./
 
 # generate static assets
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/assets
+RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/external/blitzkit
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./cmd/frontend/assets/generate
 
 # generate frontend
