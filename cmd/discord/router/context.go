@@ -141,7 +141,9 @@ func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 			message := data.Message()
 			errorMessage := fmt.Sprintf(c.localize("discord_error_invalid_interaction_fmt"), c.Member().ID)
 			message.Content = errorMessage + message.Content
-			msg, err = c.rest.CreateMessage(c.Ctx(), c.interaction.ChannelID, message, files)
+			fallbackCtx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+			defer cancel()
+			msg, err = c.rest.CreateMessage(fallbackCtx, c.interaction.ChannelID, message, files)
 		}
 
 		go c.saveInteractionEvent(msg, err, reply)

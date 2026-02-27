@@ -2,7 +2,6 @@ package public
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 
 	"github.com/cufee/aftermath/cmd/discord/commands"
@@ -116,7 +115,7 @@ func init() {
 					}
 				}
 
-				image, meta, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, opts...)
+				image, meta, err := ctx.Core().Stats(ctx.Locale()).SessionImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
 						return ctx.Reply().IsError(common.UserError).Send("session_error_account_was_not_tracked")

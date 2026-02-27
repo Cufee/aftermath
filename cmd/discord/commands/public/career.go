@@ -2,7 +2,6 @@ package public
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"fmt"
 
@@ -116,7 +115,7 @@ func careerCommandHandler(ctx common.Context) error {
 		}
 	}
 
-	image, meta, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), accountID, options.PeriodStart, opts...)
+	image, meta, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
 	if err != nil {
 		return ctx.Err(err, common.ApplicationError)
 	}

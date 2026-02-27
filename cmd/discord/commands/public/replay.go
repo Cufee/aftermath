@@ -2,7 +2,6 @@ package public
 
 import (
 	"bytes"
-	"context"
 	"net/url"
 	"strings"
 
@@ -59,7 +58,7 @@ func init() {
 					return ctx.Reply().IsError(common.UserError).Send("replay_errors_invalid_attachment")
 				}
 
-				image, _, err := ctx.Core().Stats(ctx.Locale()).ReplayImage(context.Background(), parsed.String(), stats.WithWN8())
+				image, _, err := ctx.Core().Stats(ctx.Locale()).ReplayImage(ctx.Ctx(), parsed.String(), stats.WithWN8())
 				if err != nil {
 					if errors.Is(err, replay.ErrInvalidReplayFile) {
 						return ctx.Reply().IsError(common.UserError).Send("replay_errors_invalid_attachment")
