@@ -12,7 +12,7 @@ func (c *Client) OverwriteGlobalApplicationCommands(ctx context.Context, data []
 	if err != nil {
 		return err
 	}
-	return c.do(ctx, req, nil)
+	return c.do(ctx, "overwrite_global_application_commands", req, nil)
 }
 
 func (c *Client) CreateGlobalApplicationCommand(ctx context.Context, data discord.ApplicationCommand) (discord.ApplicationCommand, error) {
@@ -21,7 +21,7 @@ func (c *Client) CreateGlobalApplicationCommand(ctx context.Context, data discor
 		return discord.ApplicationCommand{}, err
 	}
 	var command discord.ApplicationCommand
-	return command, c.do(ctx, req, &command)
+	return command, c.do(ctx, "create_global_application_command", req, &command)
 }
 
 func (c *Client) GetGlobalApplicationCommands(ctx context.Context) ([]discord.ApplicationCommand, error) {
@@ -31,7 +31,7 @@ func (c *Client) GetGlobalApplicationCommands(ctx context.Context) ([]discord.Ap
 	}
 
 	var data []discord.ApplicationCommand
-	return data, c.do(ctx, req, &data)
+	return data, c.do(ctx, "get_global_application_commands", req, &data)
 }
 
 func (c *Client) UpdateGlobalApplicationCommand(ctx context.Context, id string, data discord.ApplicationCommand) (discord.ApplicationCommand, error) {
@@ -40,7 +40,7 @@ func (c *Client) UpdateGlobalApplicationCommand(ctx context.Context, id string, 
 		return discord.ApplicationCommand{}, err
 	}
 	var command discord.ApplicationCommand
-	return command, c.do(ctx, req, &command)
+	return command, c.do(ctx, "update_global_application_command", req, &command)
 }
 
 func (c *Client) DeleteGlobalApplicationCommand(ctx context.Context, id string) error {
@@ -48,5 +48,5 @@ func (c *Client) DeleteGlobalApplicationCommand(ctx context.Context, id string) 
 	if err != nil {
 		return err
 	}
-	return c.do(ctx, req, nil)
+	return c.do(ctx, "delete_global_application_command", req, nil)
 }

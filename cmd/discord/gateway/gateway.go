@@ -38,14 +38,14 @@ type gatewayClient struct {
 	middleware []middleware.MiddlewareFunc
 }
 
-func NewClient(core core.Client, token string, intent discordgo.Intent) (*gatewayClient, error) {
+func NewClient(core core.Client, token string, intent discordgo.Intent, restOpts ...rest.ClientOption) (*gatewayClient, error) {
 	mgr, err := shards.New("Bot " + token)
 	if err != nil {
 		return nil, err
 	}
 	mgr.RegisterIntent(intent)
 
-	rest, err := rest.NewClient(token)
+	rest, err := rest.NewClient(token, restOpts...)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a new rest client")
 	}

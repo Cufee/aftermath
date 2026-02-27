@@ -11,5 +11,5 @@ func (c *Client) PostWebhookMessage(ctx context.Context, webhookURL string, data
 	if err != nil {
 		return err
 	}
-	return c.do(ctx, req, nil)
+	return c.do(ctx, "post_webhook_message", req, nil)
 }

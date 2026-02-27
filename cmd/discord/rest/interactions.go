@@ -25,7 +25,7 @@ func (c *Client) AckInteractionResponse(ctx context.Context, interactionID, toke
 	if err != nil {
 		return err
 	}
-	return c.do(ctx, req, nil)
+	return c.do(ctx, "ack_interaction_response", req, nil)
 }
 
 func (c *Client) SendAutocompleteResponse(ctx context.Context, interactionID, token string, data []*discordgo.ApplicationCommandOptionChoice) error {
@@ -36,7 +36,7 @@ func (c *Client) SendAutocompleteResponse(ctx context.Context, interactionID, to
 	if err != nil {
 		return err
 	}
-	return c.do(ctx, req, nil)
+	return c.do(ctx, "send_autocomplete_response", req, nil)
 }
 
 func (c *Client) SendInteractionResponse(ctx context.Context, interactionID, token string, data discordgo.InteractionResponse, files []File) (discordgo.Message, error) {
@@ -45,7 +45,7 @@ func (c *Client) SendInteractionResponse(ctx context.Context, interactionID, tok
 		return discordgo.Message{}, err
 	}
 	var m discordgo.Message
-	return m, c.do(ctx, req, &m)
+	return m, c.do(ctx, "send_interaction_response", req, &m)
 }
 
 func (c *Client) UpdateInteractionResponse(ctx context.Context, appID, token string, data discordgo.InteractionResponseData, files []File) (discordgo.Message, error) {
@@ -54,7 +54,7 @@ func (c *Client) UpdateInteractionResponse(ctx context.Context, appID, token str
 		return discordgo.Message{}, err
 	}
 	var m discordgo.Message
-	return m, c.do(ctx, req, &m)
+	return m, c.do(ctx, "update_interaction_response", req, &m)
 }
 
 func (c *Client) DeleteInteractionResponse(ctx context.Context, appID, token string) error {
@@ -62,7 +62,7 @@ func (c *Client) DeleteInteractionResponse(ctx context.Context, appID, token str
 	if err != nil {
 		return err
 	}
-	return c.do(ctx, req, nil)
+	return c.do(ctx, "delete_interaction_response", req, nil)
 }
 
 func (c *Client) SendInteractionFollowup(ctx context.Context, appID, token string, data discordgo.InteractionResponseData, files []File) (discordgo.Message, error) {
@@ -71,7 +71,7 @@ func (c *Client) SendInteractionFollowup(ctx context.Context, appID, token strin
 		return discordgo.Message{}, err
 	}
 	var m discordgo.Message
-	return m, c.do(ctx, req, &m)
+	return m, c.do(ctx, "send_interaction_followup", req, &m)
 }
 
 func (c *Client) EditInteractionFollowup(ctx context.Context, appID, token string, data discordgo.InteractionResponseData, files []File) (discordgo.Message, error) {
@@ -80,5 +80,5 @@ func (c *Client) EditInteractionFollowup(ctx context.Context, appID, token strin
 		return discordgo.Message{}, err
 	}
 	var m discordgo.Message
-	return m, c.do(ctx, req, &m)
+	return m, c.do(ctx, "edit_interaction_followup", req, &m)
 }
