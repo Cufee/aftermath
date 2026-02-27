@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/fs"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"os"
@@ -26,6 +27,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/cta"
 	"github.com/cufee/aftermath/cmd/discord/gateway"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
+	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/cmd/discord/router"
 	"github.com/cufee/aftermath/cmd/frontend"
 	"github.com/nao1215/imaging"
@@ -74,13 +76,14 @@ func main() {
 	}
 	cancelLoadCtx()
 
-	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db)
-
 	// Logger
 	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
 	log.SetupGlobalLogger(func(l zerolog.Logger) zerolog.Logger {
 		return l.Level(level)
 	})
+
+	errorTracker := metrics.NewErrorTracker(metrics.DefaultErrorTrackerConfig())
+	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db, errorTracker)
 
 	// Metrics instrument
 	instrument, err := metrics.NewInstrument()
@@ -88,27 +91,33 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to create a new metrics instrument")
 	}
 
+	var alertClient alerts.DiscordAlertClient
 	if constants.DiscordAlertsEnabled {
-		alertClient, err := alerts.NewClient(constants.DiscordPrimaryToken, constants.DiscordAlertsWebhookURL)
+		c, err := alerts.NewClient(constants.DiscordPrimaryToken, constants.DiscordAlertsWebhookURL)
 		if err != nil {
 			log.Fatal().Err(err).Msg("alerts#NewClient failed")
 		}
+		alertClient = c
 
 		pr, pw := io.Pipe()
 		log.SetupGlobalLogger(func(l zerolog.Logger) zerolog.Logger {
 			return l.Output(zerolog.MultiLevelWriter(os.Stderr, pw))
 		})
-		alertClient.Reader(pr, zerolog.ErrorLevel)
+		c.Reader(pr, zerolog.ErrorLevel)
 	}
 
 	globalCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	restObserver := rest.WithObserver(errorTracker)
+
 	// Discord Gateway - commands public commands are handled through the gateway
-	gw, err := discordGatewayFromEnv(globalCtx, liveCoreClient, instrument)
+	gw, err := discordGatewayFromEnv(globalCtx, liveCoreClient, instrument, errorTracker, restObserver)
 	if err != nil {
 		log.Fatal().Err(err).Msg("discordGatewayFromEnv failed")
 	}
+	registerHealthTransitionSinks(gw, errorTracker, alertClient)
+	go errorTracker.Start(globalCtx)
 
 	stopQueue, err := startQueueFromEnv(globalCtx, cacheCoreClient)
 	if err != nil {
@@ -172,8 +181,8 @@ func main() {
 	handlers = append(handlers, frontendHandlers...)
 	handlers = append(handlers, redirectHandlersFromEnv()...)
 
-	handlers = append(handlers, discordPublicHandlersFromEnv(liveCoreClient, instrument)...)   // POST /discord/public/callback
-	handlers = append(handlers, discordInternalHandlersFromEnv(liveCoreClient, instrument)...) // POST /discord/internal/callback
+	handlers = append(handlers, discordPublicHandlersFromEnv(liveCoreClient, instrument, restObserver)...)   // POST /discord/public/callback
+	handlers = append(handlers, discordInternalHandlersFromEnv(liveCoreClient, instrument, restObserver)...) // POST /discord/internal/callback
 
 	port := os.Getenv("PORT")
 	servePublic := server.NewServer(port, handlers, log.NewMiddleware(log.Logger(), "/discord/public/callback"))
@@ -190,12 +199,12 @@ func main() {
 	log.Info().Msg("finished cleanup tasks")
 }
 
-func discordGatewayFromEnv(globalCtx context.Context, core core.Client, instrument metrics.Instrument) (gateway.Client, error) {
+func discordGatewayFromEnv(globalCtx context.Context, core core.Client, instrument metrics.Instrument, tracker *metrics.ErrorTracker, restOpts ...rest.ClientOption) (gateway.Client, error) {
 	collector := metrics.NewDiscordGatewayCollector("public")
 	instrument.Register(collector)
 
 	// discord gateway
-	gw, err := gateway.NewClient(core, constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages|discordgo.IntentGuildMessageReactions|discordgo.IntentDirectMessageReactions)
+	gw, err := gateway.NewClient(core, constants.DiscordPrimaryToken, discordgo.IntentDirectMessages|discordgo.IntentGuildMessages|discordgo.IntentGuildMessageReactions|discordgo.IntentDirectMessageReactions, restOpts...)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a gateway client")
 	}
@@ -221,14 +230,23 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client, instrume
 		return nil, errors.Wrap(err, "gateway client failed to connect")
 	}
 
-	gw.SetStatus(gateway.StatusListening, "/help", nil)
+	setHealthyStatus := func() {
+		if tracker.OverallState() != metrics.HealthStateHealthy {
+			return
+		}
+		if err := gw.SetStatus(gateway.StatusListening, "/help", nil); err != nil {
+			log.Err(err).Msg("failed to update gateway status")
+		}
+	}
+
+	setHealthyStatus()
 	go func(ctx context.Context) {
 		// the status update gets stuck sometimes, probably due to some Discord cache
 		time.Sleep(time.Second * 15)
-		gw.SetStatus(gateway.StatusListening, "/help", nil)
+		setHealthyStatus()
 
 		time.Sleep(time.Second * 45)
-		gw.SetStatus(gateway.StatusListening, "/help", nil)
+		setHealthyStatus()
 	}(globalCtx)
 
 	go func(ctx context.Context) {
@@ -240,7 +258,7 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client, instrume
 				ticker.Stop()
 				return
 			case <-ticker.C:
-				gw.SetStatus(gateway.StatusListening, "/help", nil)
+				setHealthyStatus()
 			}
 		}
 	}(globalCtx)
@@ -248,7 +266,7 @@ func discordGatewayFromEnv(globalCtx context.Context, core core.Client, instrume
 	return gw, nil
 }
 
-func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Instrument) []server.Handler {
+func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Instrument, restOpts ...rest.ClientOption) []server.Handler {
 	collector := metrics.NewDiscordInteractionCollector("public")
 	instrument.Register(collector)
 
@@ -260,7 +278,7 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 	}
 
 	log.Debug().Msg("setting up a public commands router handlers")
-	router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, router.NewPublicKeyValidator(publicKey))
+	router, err := router.NewRouter(coreClient, constants.DiscordPrimaryToken, router.NewPublicKeyValidator(publicKey), router.WithRestClientOptions(restOpts...))
 	if err != nil {
 		log.Fatal().Msgf("router#NewRouterHandler failed %s", err)
 	}
@@ -293,7 +311,7 @@ func discordPublicHandlersFromEnv(coreClient core.Client, instrument metrics.Ins
 	return handlers
 }
 
-func discordInternalHandlersFromEnv(coreClient core.Client, _ metrics.Instrument) []server.Handler {
+func discordInternalHandlersFromEnv(coreClient core.Client, _ metrics.Instrument, restOpts ...rest.ClientOption) []server.Handler {
 	var handlers []server.Handler
 	// secondary Discord bot with mod/admin commands - permissions are still checked
 	if constants.DiscordPrivateBotEnabled {
@@ -304,7 +322,7 @@ func discordInternalHandlersFromEnv(coreClient core.Client, _ metrics.Instrument
 			log.Fatal().Msg("invalid discord private public key")
 		}
 
-		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, router.NewPublicKeyValidator(publicKey))
+		router, err := router.NewRouter(coreClient, constants.DiscordPrivateToken, router.NewPublicKeyValidator(publicKey), router.WithRestClientOptions(restOpts...))
 		if err != nil {
 			log.Fatal().Msgf("discord#NewHTTPRouter failed %s", err)
 		}
@@ -351,13 +369,13 @@ func startQueueFromEnv(ctx context.Context, coreClient core.Client) (func(), err
 	return q.Start(ctx)
 }
 
-func coreClientsFromEnv(db database.Client) (core.Client, core.Client) {
+func coreClientsFromEnv(db database.Client, observer metrics.ErrorObserver) (core.Client, core.Client) {
 	bkClient, err := blitzkit.NewClient(time.Second * 10)
 	if err != nil {
 		log.Fatal().Msgf("failed to init a blitzkit client %s", err)
 	}
 
-	liveClient, cacheClient := wargamingClientsFromEnv()
+	liveClient, cacheClient := wargamingClientsFromEnv(observer)
 
 	// Fetch client
 	liveFetchClient, err := fetch.NewMultiSourceClient(liveClient, bkClient, db)
@@ -396,7 +414,7 @@ func loadStaticAssets(static fs.FS) {
 	}
 }
 
-func wargamingClientsFromEnv() (wargaming.Client, wargaming.Client) {
+func wargamingClientsFromEnv(observer metrics.ErrorObserver) (wargaming.Client, wargaming.Client) {
 	liveClient, err := wargaming.NewClientFromEnv(constants.WargamingPrimaryAppID, constants.WargamingPrimaryAppRPS, constants.WargamingPrimaryAppRequestTimeout, constants.WargamingPrimaryAppProxyHostList)
 	if err != nil {
 		log.Fatal().Msgf("wargamingClientsFromEnv#NewClientFromEnv failed %s", err)
@@ -408,6 +426,8 @@ func wargamingClientsFromEnv() (wargaming.Client, wargaming.Client) {
 		log.Fatal().Msgf("wargamingClientsFromEnv#NewClientFromEnv failed %s", err)
 	}
 
+	liveClient = wargaming.NewTrackedClient(liveClient, observer)
+
 	return liveClient, cacheClient
 }
 
@@ -418,6 +438,82 @@ func newDatabaseClientFromEnv(ctx context.Context) (database.Client, error) {
 	}
 
 	return client, nil
+}
+
+func registerHealthTransitionSinks(gw gateway.Client, tracker *metrics.ErrorTracker, alertClient alerts.DiscordAlertClient) {
+	tracker.RegisterSink(func(t metrics.Transition) {
+		setGatewayStatusFromHealthState(gw, t.To, t.Sources)
+	})
+
+	if alertClient == nil {
+		return
+	}
+
+	tracker.RegisterSink(func(t metrics.Transition) {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+
+		header := fmt.Sprintf("**[HEALTH]** %s -> %s", strings.ToUpper(string(t.From)), strings.ToUpper(string(t.To)))
+		err := alertClient.Error(ctx, header, formatTransitionSources(t.Sources))
+		if err != nil {
+			log.Err(err).Msg("failed to send health transition alert")
+		}
+	})
+}
+
+func setGatewayStatusFromHealthState(gw gateway.Client, state metrics.HealthState, sources []metrics.SourceHealth) {
+	var err error
+	switch state {
+	case metrics.HealthStateCritical:
+		err = gw.SetStatus(gateway.StatusRed, healthStatusText(sources), nil)
+	case metrics.HealthStateWarning:
+		err = gw.SetStatus(gateway.StatusYellow, healthStatusText(sources), nil)
+	default:
+		err = gw.SetStatus(gateway.StatusListening, "/help", nil)
+	}
+
+	if err != nil {
+		log.Err(err).Msg("failed to set gateway status")
+	}
+}
+
+func healthStatusText(sources []metrics.SourceHealth) string {
+	var hasDiscord bool
+	var hasWargaming bool
+
+	for _, source := range sources {
+		if source.State == metrics.HealthStateHealthy {
+			continue
+		}
+		if source.Source == "discord" {
+			hasDiscord = true
+		}
+		if source.Source == "wargaming" {
+			hasWargaming = true
+		}
+	}
+
+	if hasDiscord {
+		return "Service Disrupted - Discord"
+	}
+	if hasWargaming {
+		return "Service Disrupted - Wargaming"
+	}
+
+	return "Service Disrupted"
+}
+
+func formatTransitionSources(sources []metrics.SourceHealth) string {
+	if len(sources) < 1 {
+		return "no data points in rolling window"
+	}
+
+	var b strings.Builder
+	for _, source := range sources {
+		rate := source.ErrorRate * 100
+		_, _ = fmt.Fprintf(&b, "%s state=%s failed=%d total=%d rate=%.2f%%\n", source.Source, source.State, source.Failed, source.Total, rate)
+	}
+	return strings.TrimSpace(b.String())
 }
 
 func redirectHandlersFromEnv() []server.Handler {

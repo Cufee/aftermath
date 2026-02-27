@@ -15,5 +15,5 @@ func (c *Client) CreateDMChannel(ctx context.Context, userID string) (discordgo.
 		return discordgo.Channel{}, err
 	}
 	var ch discordgo.Channel
-	return ch, c.do(ctx, req, &ch)
+	return ch, c.do(ctx, "create_dm_channel", req, &ch)
 }

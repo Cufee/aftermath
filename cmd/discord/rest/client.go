@@ -3,6 +3,7 @@ package rest
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -15,10 +16,25 @@ import (
 	"github.com/cufee/aftermath/internal/json"
 
 	"github.com/cufee/aftermath/internal/log"
-	"github.com/pkg/errors"
 
 	"github.com/bwmarrin/discordgo"
 )
+
+type RequestObserver interface {
+	Record(source, operation string, failed bool)
+}
+
+type ClientOption func(*clientOptions)
+
+type clientOptions struct {
+	observer RequestObserver
+}
+
+func WithObserver(observer RequestObserver) ClientOption {
+	return func(options *clientOptions) {
+		options.observer = observer
+	}
+}
 
 type Client struct {
 	token string
@@ -28,14 +44,21 @@ type Client struct {
 	rateLimitBuckets map[string]time.Time
 
 	applicationID string
+	observer      RequestObserver
 }
 
-func NewClient(token string) (*Client, error) {
+func NewClient(token string, opts ...ClientOption) (*Client, error) {
+	options := clientOptions{}
+	for _, apply := range opts {
+		apply(&options)
+	}
+
 	client := &Client{
 		token:            token,
 		rateLimitMx:      sync.Mutex{},
 		rateLimitBuckets: make(map[string]time.Time),
 		http:             http.Client{Timeout: time.Millisecond * 5000}, // discord is very slow sometimes
+		observer:         options.observer,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -142,69 +165,85 @@ func partHeader(contentDisposition string, contentType string) textproto.MIMEHea
 	}
 }
 
-func (c *Client) do(ctx context.Context, makeReq func() (*http.Request, error), target any, bucket ...string) error {
+func (c *Client) do(ctx context.Context, operation string, makeReq func() (*http.Request, error), target any, bucket ...string) error {
+	var bucketID string
 	if len(bucket) > 0 {
-		c.rateLimitMx.Lock()
-		resetTime := c.rateLimitBuckets[bucket[0]]
-		c.rateLimitMx.Unlock()
-
-		time.Sleep(time.Until(resetTime))
+		bucketID = bucket[0]
 	}
 
-	req, err := makeReq()
-	if err != nil {
-		return err
-	}
-	req = req.WithContext(ctx)
+	for {
+		if bucketID != "" {
+			c.rateLimitMx.Lock()
+			resetTime := c.rateLimitBuckets[bucketID]
+			c.rateLimitMx.Unlock()
 
-	res, err := c.http.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode == 429 {
-		b := res.Header.Get("X-RateLimit-Bucket")
-		retryAfterSec := res.Header.Get("Retry-After")
-		retryAfter, _ := strconv.Atoi(retryAfterSec)
-		resetTime := time.Now().Add(time.Second * time.Duration(retryAfter+1))
-
-		log.Info().Str("bucket", b).Time("resetTime", resetTime).Msg("discord api: you are being rate limited")
-
-		c.rateLimitMx.Lock()
-		c.rateLimitBuckets[b] = resetTime
-		c.rateLimitMx.Unlock()
-
-		return c.do(ctx, makeReq, target, b)
-	}
-
-	if res.StatusCode > 299 {
-		var body discordgo.APIErrorMessage
-		raw, _ := io.ReadAll(res.Body)
-		_ = json.NewDecoder(bytes.NewBuffer(raw)).Decode(&body)
-		message := body.Message
-		if message == "" {
-			log.Warn().Str("body", string(raw)).Msg("discord api returned invalid response")
-			message = res.Status + ", response was not valid json"
-		}
-		if err := knownError(body.Code); err != nil {
-			return err
-		}
-		return errors.New("discord api: " + message)
-	}
-
-	if target != nil {
-		if res.Header.Get("Content-Type") != "application/json" {
-			log.Warn().Msg("discord api returned invalid headers when json response body was expected")
-			return nil
+			time.Sleep(time.Until(resetTime))
 		}
 
-		err = json.NewDecoder(res.Body).Decode(target)
+		req, err := makeReq()
 		if err != nil {
-			return fmt.Errorf("failed to decode response body :%w", err)
+			return c.observe(operation, err)
 		}
+		req = req.WithContext(ctx)
+
+		res, err := c.http.Do(req)
+		if err != nil {
+			return c.observe(operation, err)
+		}
+
+		if res.StatusCode == 429 {
+			b := res.Header.Get("X-RateLimit-Bucket")
+			retryAfterSec := res.Header.Get("Retry-After")
+			retryAfter, _ := strconv.Atoi(retryAfterSec)
+			resetTime := time.Now().Add(time.Second * time.Duration(retryAfter+1))
+
+			log.Info().Str("bucket", b).Time("resetTime", resetTime).Msg("discord api: you are being rate limited")
+
+			c.rateLimitMx.Lock()
+			c.rateLimitBuckets[b] = resetTime
+			c.rateLimitMx.Unlock()
+			_ = res.Body.Close()
+
+			bucketID = b
+			continue
+		}
+
+		if res.StatusCode > 299 {
+			var body discordgo.APIErrorMessage
+			raw, _ := io.ReadAll(res.Body)
+			_ = res.Body.Close()
+			_ = json.NewDecoder(bytes.NewBuffer(raw)).Decode(&body)
+
+			message := body.Message
+			if message == "" {
+				log.Warn().Str("body", string(raw)).Msg("discord api returned invalid response")
+				message = res.Status + ", response was not valid json"
+			}
+			if err := knownError(body.Code); err != nil {
+				return c.observe(operation, err)
+			}
+			return c.observe(operation, errors.New("discord api: "+message))
+		}
+
+		if target != nil {
+			if res.Header.Get("Content-Type") != "application/json" {
+				log.Warn().Msg("discord api returned invalid headers when json response body was expected")
+				_ = res.Body.Close()
+				return c.observe(operation, nil)
+			}
+
+			err = json.NewDecoder(res.Body).Decode(target)
+			_ = res.Body.Close()
+			if err != nil {
+				return c.observe(operation, fmt.Errorf("failed to decode response body :%w", err))
+			}
+
+			return c.observe(operation, nil)
+		}
+
+		_ = res.Body.Close()
+		return c.observe(operation, nil)
 	}
-	return nil
 }
 
 func (c *Client) lookupApplicationID(ctx context.Context) (string, error) {
@@ -214,7 +253,7 @@ func (c *Client) lookupApplicationID(ctx context.Context) (string, error) {
 	}
 
 	var data discordgo.Application
-	err = c.do(ctx, newReq, &data)
+	err = c.do(ctx, "lookup_application", newReq, &data)
 	if err != nil {
 		return "", err
 	}
@@ -224,4 +263,36 @@ func (c *Client) lookupApplicationID(ctx context.Context) (string, error) {
 
 	c.applicationID = data.ID
 	return data.ID, nil
+}
+
+func (c *Client) observe(operation string, err error) error {
+	if c.observer == nil {
+		return err
+	}
+
+	failed := err != nil && shouldCountDiscordFailure(err)
+	c.observer.Record("discord", operation, failed)
+	return err
+}
+
+func shouldCountDiscordFailure(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errors.Is(err, ErrUnknownWebhook) {
+		return false
+	}
+	if errors.Is(err, ErrUnknownInteraction) {
+		return false
+	}
+	if errors.Is(err, ErrInteractionAlreadyAcked) {
+		return false
+	}
+	if errors.Is(err, ErrMissingPermissions) {
+		return false
+	}
+	if errors.Is(err, ErrMissingUserUnreachable) {
+		return false
+	}
+	return true
 }

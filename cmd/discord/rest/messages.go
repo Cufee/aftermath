@@ -13,7 +13,7 @@ func (c *Client) CreateMessage(ctx context.Context, channelID string, data disco
 		return discordgo.Message{}, err
 	}
 	var m discordgo.Message
-	return m, c.do(ctx, req, &m)
+	return m, c.do(ctx, "create_message", req, &m)
 }
 
 func (c *Client) GetMessage(ctx context.Context, channelID string, messageID string) (discordgo.Message, error) {
@@ -22,7 +22,7 @@ func (c *Client) GetMessage(ctx context.Context, channelID string, messageID str
 		return discordgo.Message{}, err
 	}
 	var m discordgo.Message
-	return m, c.do(ctx, req, &m)
+	return m, c.do(ctx, "get_message", req, &m)
 }
 
 func (c *Client) UpdateMessage(ctx context.Context, channelID string, messageID string, data discordgo.MessageEdit, files []File) (discordgo.Message, error) {
@@ -31,7 +31,7 @@ func (c *Client) UpdateMessage(ctx context.Context, channelID string, messageID 
 		return discordgo.Message{}, err
 	}
 	var m discordgo.Message
-	return m, c.do(ctx, req, &m)
+	return m, c.do(ctx, "update_message", req, &m)
 }
 
 func (c *Client) DeleteMessage(ctx context.Context, channelID string, messageID string) error {
@@ -39,7 +39,7 @@ func (c *Client) DeleteMessage(ctx context.Context, channelID string, messageID 
 	if err != nil {
 		return err
 	}
-	return c.do(ctx, req, nil)
+	return c.do(ctx, "delete_message", req, nil)
 }
 
 func (c *Client) CreateMessageReaction(ctx context.Context, channelID string, messageID string, emojiID string) error {
@@ -47,7 +47,7 @@ func (c *Client) CreateMessageReaction(ctx context.Context, channelID string, me
 	if err != nil {
 		return err
 	}
-	return c.do(ctx, req, nil)
+	return c.do(ctx, "create_message_reaction", req, nil)
 }
 
 func (c *Client) DeleteOwnMessageReaction(ctx context.Context, channelID string, messageID string, emojiID string) error {
@@ -55,5 +55,5 @@ func (c *Client) DeleteOwnMessageReaction(ctx context.Context, channelID string,
 	if err != nil {
 		return err
 	}
-	return c.do(ctx, req, nil)
+	return c.do(ctx, "delete_own_message_reaction", req, nil)
 }

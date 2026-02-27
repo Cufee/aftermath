@@ -21,10 +21,22 @@ type Router interface {
 type applyRouterOption func(*routerOptions)
 
 type routerOptions struct {
+	restClientOptions []rest.ClientOption
+}
+
+func WithRestClientOptions(opts ...rest.ClientOption) applyRouterOption {
+	return func(options *routerOptions) {
+		options.restClientOptions = append(options.restClientOptions, opts...)
+	}
 }
 
 func NewRouter(coreClient core.Client, token string, requestValidator RequestValidator, opts ...applyRouterOption) (*router, error) {
-	restClient, err := rest.NewClient(token)
+	var options routerOptions
+	for _, apply := range opts {
+		apply(&options)
+	}
+
+	restClient, err := rest.NewClient(token, options.restClientOptions...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a new rest client :%w", err)
 	}
@@ -34,11 +46,6 @@ func NewRouter(coreClient core.Client, token string, requestValidator RequestVal
 		token:      token,
 		restClient: restClient,
 		validator:  requestValidator,
-	}
-
-	var options routerOptions
-	for _, apply := range opts {
-		apply(&options)
 	}
 
 	return &r, nil
