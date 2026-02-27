@@ -2,7 +2,6 @@ package public
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 
@@ -78,7 +77,7 @@ func init() {
 				var meta stats.Metadata
 				switch interaction.EventID {
 				case "career", "stats":
-					img, mt, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), ioptions.AccountID, ioptions.PeriodStart, opts...)
+					img, mt, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(ctx.Ctx(), ioptions.AccountID, ioptions.PeriodStart, opts...)
 					if errors.Is(err, blitzkit.ErrServiceUnavailable) {
 						return ctx.Reply().
 							Hint(ctx.InteractionID()).
@@ -93,7 +92,7 @@ func init() {
 					meta = mt
 
 				case "session":
-					img, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), ioptions.AccountID, ioptions.PeriodStart, opts...)
+					img, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(ctx.Ctx(), ioptions.AccountID, ioptions.PeriodStart, opts...)
 					if err != nil {
 						if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && ioptions.Days < 1) {
 							return ctx.Reply().IsError(common.UserError).Send("session_error_account_was_not_tracked")

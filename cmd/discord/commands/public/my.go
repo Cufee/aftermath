@@ -2,7 +2,6 @@ package public
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"strings"
 
@@ -95,9 +94,9 @@ func init() {
 				var image stats.Image
 				switch subcommand {
 				case "career":
-					image, _, err = ctx.Core().Stats(ctx.Locale()).PeriodImage(context.Background(), accountID, options.PeriodStart, opts...)
+					image, _, err = ctx.Core().Stats(ctx.Locale()).PeriodImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
 				case "session":
-					image, _, err = ctx.Core().Stats(ctx.Locale()).SessionImage(context.Background(), accountID, options.PeriodStart, opts...)
+					image, _, err = ctx.Core().Stats(ctx.Locale()).SessionImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
 				default:
 					return ctx.Error("invalid subcommand in /my - "+subcommand, common.ApplicationError)
 				}
