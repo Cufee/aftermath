@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/json"
@@ -37,15 +39,15 @@ func (o statsOptions) fromInteraction(data models.DiscordInteraction) (statsOpti
 	return o, json.Unmarshal([]byte(raw), &o)
 }
 
-func (o statsOptions) refreshButton(ctx common.Context, id string) (discordgo.MessageComponent, error) {
+func (o statsOptions) interactionButton(ctx common.Context, eventID string, result string) (models.DiscordInteraction, error) {
 	encoded, err := json.Marshal(o)
 	if err != nil {
-		return nil, err
+		return models.DiscordInteraction{}, err
 	}
 
 	interaction := models.DiscordInteraction{
-		Result:    "generated-refresh-button",
-		EventID:   id,
+		Result:    result,
+		EventID:   eventID,
 		Locale:    ctx.Locale(),
 		UserID:    ctx.User().ID,
 		GuildID:   ctx.RawInteraction().GuildID,
@@ -58,12 +60,31 @@ func (o statsOptions) refreshButton(ctx common.Context, id string) (discordgo.Me
 		interaction.MessageID = ctx.RawInteraction().Message.ID
 	}
 
-	interaction, err = ctx.Core().Database().CreateDiscordInteraction(ctx.Ctx(), interaction)
+	return ctx.Core().Database().CreateDiscordInteraction(ctx.Ctx(), interaction)
+}
+
+func (o statsOptions) actionRow(ctx common.Context, refreshEventID string, includeSession bool) (discordgo.MessageComponent, error) {
+	refresh, err := o.interactionButton(ctx, refreshEventID, "generated-refresh-button")
 	if err != nil {
 		return nil, err
 	}
 
-	return newStatsRefreshButton(interaction), nil
+	row := discordgo.ActionsRow{
+		Components: []discordgo.MessageComponent{
+			newStatsRefreshButton(refresh),
+		},
+	}
+	if !includeSession {
+		return row, nil
+	}
+
+	session, sessionErr := o.interactionButton(ctx, "session", "generated-session-button")
+	if sessionErr != nil {
+		return row, sessionErr
+	}
+
+	row.Components = append(row.Components, newStatsSessionButton(ctx, session))
+	return row, nil
 }
 
 var validNicknameSeparatorChars = []string{"!", "@", "#", "$", "%", "^", "&", "*", "-", "=", "+"}
@@ -170,12 +191,22 @@ func realmSelectButtons(ctx common.Context, id string, accounts []fetch.AccountW
 	return ctx.Reply().Hint("stats_bad_nickname_input_hint").Component(row).Text(strings.Join(message, "\n")), nil
 }
 
-func newStatsRefreshButton(data models.DiscordInteraction) discordgo.MessageComponent {
-	return discordgo.ActionsRow{
-		Components: []discordgo.MessageComponent{discordgo.Button{
-			Style:    discordgo.SecondaryButton,
-			Emoji:    emoji.Refresh(),
-			CustomID: fmt.Sprintf("refresh_stats_from_button#%s", data.ID),
-		}},
+func newStatsRefreshButton(data models.DiscordInteraction) discordgo.Button {
+	return discordgo.Button{
+		Style:    discordgo.SecondaryButton,
+		Emoji:    emoji.Refresh(),
+		CustomID: fmt.Sprintf("refresh_stats_from_button#%s", data.ID),
+	}
+}
+
+func newStatsSessionButton(ctx common.Context, data models.DiscordInteraction) discordgo.Button {
+	label := ctx.Localize("command_session_name")
+	r, size := utf8.DecodeRuneInString(label)
+	label = string(unicode.ToUpper(r)) + label[size:]
+
+	return discordgo.Button{
+		Style:    discordgo.SecondaryButton,
+		Label:    label,
+		CustomID: fmt.Sprintf("refresh_stats_from_button#%s", data.ID),
 	}
 }
