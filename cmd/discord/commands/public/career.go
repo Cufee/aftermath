@@ -121,10 +121,10 @@ func careerCommandHandler(ctx common.Context) error {
 	}
 
 	ioptions.AccountID = accountID
-	button, saveErr := ioptions.refreshButton(ctx, ctx.ID())
+	button, saveErr := ioptions.actionRow(ctx, ctx.ID(), true)
 	if saveErr != nil {
 		// nil button will not cause an error and will be ignored
-		log.Err(err).Str("interactionId", ctx.ID()).Str("command", "session").Msg("failed to save discord interaction")
+		log.Err(saveErr).Str("interactionId", ctx.ID()).Str("command", ctx.ID()).Msg("failed to save discord interaction")
 	}
 
 	var buf bytes.Buffer
