@@ -63,7 +63,7 @@ func (o statsOptions) interactionButton(ctx common.Context, eventID string, resu
 	return ctx.Core().Database().CreateDiscordInteraction(ctx.Ctx(), interaction)
 }
 
-func (o statsOptions) actionRow(ctx common.Context, refreshEventID string, includeSession bool) (discordgo.MessageComponent, error) {
+func (o statsOptions) actionRow(ctx common.Context, refreshEventID string, includeSession bool, includeCareer bool) (discordgo.MessageComponent, error) {
 	refresh, err := o.interactionButton(ctx, refreshEventID, "generated-refresh-button")
 	if err != nil {
 		return nil, err
@@ -74,16 +74,28 @@ func (o statsOptions) actionRow(ctx common.Context, refreshEventID string, inclu
 			newStatsRefreshButton(refresh),
 		},
 	}
-	if !includeSession {
+	if !includeSession && !includeCareer {
 		return row, nil
 	}
 
-	session, sessionErr := o.interactionButton(ctx, "session", "generated-session-button")
-	if sessionErr != nil {
-		return row, sessionErr
+	if includeSession {
+		session, sessionErr := o.interactionButton(ctx, "session", "generated-session-button")
+		if sessionErr != nil {
+			return row, sessionErr
+		}
+
+		row.Components = append(row.Components, newStatsSessionButton(ctx, session))
 	}
 
-	row.Components = append(row.Components, newStatsSessionButton(ctx, session))
+	if includeCareer {
+		career, careerErr := o.interactionButton(ctx, "career", "generated-career-button")
+		if careerErr != nil {
+			return row, careerErr
+		}
+
+		row.Components = append(row.Components, newStatsCareerButton(ctx, career))
+	}
+
 	return row, nil
 }
 
@@ -201,6 +213,18 @@ func newStatsRefreshButton(data models.DiscordInteraction) discordgo.Button {
 
 func newStatsSessionButton(ctx common.Context, data models.DiscordInteraction) discordgo.Button {
 	label := ctx.Localize("command_session_name")
+	r, size := utf8.DecodeRuneInString(label)
+	label = string(unicode.ToUpper(r)) + label[size:]
+
+	return discordgo.Button{
+		Style:    discordgo.SecondaryButton,
+		Label:    label,
+		CustomID: fmt.Sprintf("refresh_stats_from_button#%s", data.ID),
+	}
+}
+
+func newStatsCareerButton(ctx common.Context, data models.DiscordInteraction) discordgo.Button {
+	label := ctx.Localize("command_career_name")
 	r, size := utf8.DecodeRuneInString(label)
 	label = string(unicode.ToUpper(r)) + label[size:]
 

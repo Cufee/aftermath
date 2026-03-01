@@ -127,7 +127,7 @@ func init() {
 				}
 
 				ioptions.AccountID = accountID
-				button, saveErr := ioptions.actionRow(ctx, ctx.ID(), false)
+				button, saveErr := ioptions.actionRow(ctx, ctx.ID(), false, true)
 				if saveErr != nil {
 					// nil button will not cause an error and will be ignored
 					log.Err(saveErr).Str("interactionId", ctx.ID()).Str("command", "session").Msg("failed to save discord interaction")
