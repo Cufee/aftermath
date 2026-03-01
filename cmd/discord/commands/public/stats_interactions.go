@@ -111,7 +111,8 @@ func init() {
 				}
 
 				includeSession := interaction.EventID != "session" && interaction.EventID != "replay"
-				button, saveErr := ioptions.actionRow(ctx, interaction.EventID, includeSession)
+				includeCareer := interaction.EventID == "session"
+				button, saveErr := ioptions.actionRow(ctx, interaction.EventID, includeSession, includeCareer)
 				if saveErr != nil {
 					// nil button will not cause an error and will be ignored
 					log.Err(saveErr).Str("interactionId", ctx.ID()).Str("command", interaction.EventID).Msg("failed to save discord interaction")
