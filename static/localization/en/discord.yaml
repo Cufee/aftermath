@@ -69,13 +69,13 @@ command_option_links_verify_desc: "Link and verify your Blitz account to unlock 
 command_option_links_verify_name: "verify"
 command_option_links_view_desc: "View your linked Blitz accounts"
 command_option_links_view_name: "view"
-command_option_my_account_description: "Select one of your linked account"
+command_option_my_account_description: "Select one of your linked accounts"
 command_option_my_account_name: "account"
 command_option_replay_file_description: "A Blitz replay file"
 command_option_replay_file_name: "file"
 command_option_replay_link_description: "A link to a Blitz replay file"
 command_option_replay_link_name: "link"
-command_option_widget_account_description: "Select one of your linked account"
+command_option_widget_account_description: "Select one of your linked accounts"
 command_option_widget_account_name: "account"
 command_replay_help_message: |-
   ## Analyze Your Replay and View Stats for All Players!
@@ -188,7 +188,7 @@ fancy_moderation_request_approved: |-
   The image you have submitted was approved by a moderator and is now set as your stats background. Other users will only see this background if your default linked account is verified.
 fancy_moderation_request_declined: |-
   **Your recent image moderation request was declined**
-  It looks like the image you have uploaded did not pass out safety standards. You background will not be updated.
+  It looks like the image you have uploaded did not pass our safety standards. Your background will not be updated.
 fancy_moderation_request_declined_and_banned_fmt: |-
   **Your recent image moderation request was declined**
   It looks like you have tried to upload an image that is against Aftermath Terms Of Service. As a result, your account will be restricted from uploading custom content until <t:%d:D>. This decision is final and cannot be appealed.
@@ -205,29 +205,29 @@ fancy_submitted_msg: |-
 
   _Please make sure your Direct Messages are open._
 links_error_connection_not_found: "Your linked account is no longer available. Try adding a new one with `/links add`."
-links_error_connection_not_found_selected: "The account you have selected is no longer available"
+links_error_connection_not_found_selected: "The account you have selected is no longer available."
 links_error_no_account_selected: "It looks like you did not select an account from the options provided. Please pick one of the accounts shown as you type."
 links_error_no_accounts_linked: "You don't have any linked accounts."
 links_error_too_many_connections: |-
   It looks like you have reached the limit for the number of Blitz accounts linked.
   Try removing an existing account with `/links remove` before adding a new one.
 my_error_no_account_linked: "It looks like you don't have a default Blitz account set. You can manage your accounts with `/links`."
-nickname_autocomplete_invalid_input: "This does not look like a valid player name, make sure you are using your in-game name"
+nickname_autocomplete_invalid_input: "This does not look like a valid player name, make sure you are using your in-game name."
 nickname_autocomplete_not_enough_length: "Continue typing to search for accounts..."
-nickname_autocomplete_not_found: "Nothing found. Please select a nickname from the autocompletion list"
+nickname_autocomplete_not_found: "Nothing found. Please select a nickname from the autocompletion list."
 replay_error_too_many_options_non_blocking: "When using this command, you only need to provide either a link or a replay file. The replay file will override the link if both are provided."
 replay_errors_all_attachments_invalid: "None of the files you have attached are valid WoT Blitz replays."
 replay_errors_invalid_attachment: "The file you have attached is not a valid WoT Blitz replay."
 replay_errors_missing_attachment: "You need to provide a link or attach a WoT Blitz replay file."
 replay_errors_missing_permissions_vague: "Aftermath is missing some required permissions in this channel. Try using the `/replay` command instead."
-replay_errors_some_attachments_invalid: "Some of the files you have attached are valid WoT Blitz replays and were skipped."
+replay_errors_some_attachments_invalid: "Some of the files you have attached are not valid WoT Blitz replays and were skipped."
 replay_errors_too_many_files: "Aftermath can process up to 5 replays at once. Please use the `/replay` command to upload any additional files."
 session_error_account_was_not_tracked: "Aftermath just started tracking this account. Please play a few battles before using this command again."
 session_error_no_session_for_period: "Aftermath does not yet have a session for this period. Try changing the number of days or using `/career` instead."
-stats_account_not_found: "It looks like there are no Blitz accounts matching your search, please select an option from the list of accounts that is shown as you type in the nickname."
+stats_account_not_found: "It looks like there are no Blitz accounts matching your search. Please select an option from the list of accounts shown as you type in the nickname."
 stats_autocomplete_not_enough_length: "Continue typing to search for available tanks..."
-stats_autocomplete_not_found: "Nothing found. Please select a tank from the autocompletion list"
-stats_bad_nickname_input_hint: "Wrong account? When searching for a Blitz account by nickname, try selecting a specific account from the results shown as you type"
+stats_autocomplete_not_found: "Nothing found. Please select a tank from the autocompletion list."
+stats_bad_nickname_input_hint: "Wrong account? When searching for a Blitz account by nickname, try selecting a specific account from the results shown as you type."
 stats_error_connection_not_found_personal: "Looks like you don't have a Blitz account linked yet. Give the `/links add` command a shot."
 stats_error_connection_not_found_vague: "The user you mentioned does not have a Blitz account linked."
 stats_error_connection_not_verified: "Looks like you haven't verified your Blitz account yet. Give the `/links verify` command a shot."
@@ -236,8 +236,8 @@ stats_error_nickname_invalid: "This does not look like a valid player name, make
 stats_error_too_many_arguments_non_blocking: "When using this command, you only need to mention a user or provide a nickname. The mentioned user will override the nickname if both are provided."
 stats_multiple_accounts_found: "### It looks like there are multiple Blitz accounts matching your search, please select one using the buttons below."
 stats_refresh_interaction_error_expired: "This refresh button has expired. Please use the command instead."
-wargaming_error_outage: "It looks like Wargaming are having some temporary issues. Please try again in a few seconds."
-wargaming_error_outage_short: "It looks like Wargaming are having some issues. Please try again"
+wargaming_error_outage: "It looks like Wargaming is having some temporary issues. Please try again in a few seconds."
+wargaming_error_outage_short: "It looks like Wargaming is having some issues. Please try again."
 wargaming_error_private_account: "This account is marked private by Wargaming and no stats are available for it at this time."
 automod_unverified_user_message_deleted_fmt: |-
   Hey <@%s>, your message was removed because your account has not been verified yet.
