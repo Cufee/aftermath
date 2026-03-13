@@ -1,7 +1,9 @@
 package metrics
 
 import (
+	"context"
 	"testing"
+	"testing/synctest"
 	"time"
 )
 
@@ -82,4 +84,48 @@ func TestErrorTrackerTransitionsAndAggregation(t *testing.T) {
 	if transitions[2].From != HealthStateWarning || transitions[2].To != HealthStateHealthy {
 		t.Fatalf("unexpected third transition: %+v", transitions[2])
 	}
+}
+
+func TestRecordDoesNotBlockDuringSinkExecution(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		cfg := Config{
+			Window:             time.Minute,
+			BucketInterval:     time.Second,
+			EvaluationInterval: time.Second * 10,
+			MinRequests:        1,
+			WarningRate:        0.50,
+			CriticalRate:       0.90,
+			RecoveryRate:       0.10,
+		}
+		tracker := NewErrorTracker(cfg)
+
+		sinkDone := make(chan struct{})
+		tracker.RegisterSink(func(_ Transition) {
+			<-sinkDone
+		})
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		go tracker.Start(ctx)
+
+		tracker.Record("test", "op", true)
+
+		time.Sleep(cfg.EvaluationInterval)
+		synctest.Wait()
+
+		recorded := make(chan struct{})
+		go func() {
+			tracker.Record("test", "op", false)
+			close(recorded)
+		}()
+		synctest.Wait()
+
+		select {
+		case <-recorded:
+		default:
+			t.Fatal("Record() blocked while sink was executing")
+		}
+
+		close(sinkDone)
+	})
 }
