@@ -25,7 +25,7 @@ cta_command_links_add_body: |-
   Give it a try with `/links add`
 cta_command_links_add_head: "Link your Blitz account!"
 cta_command_links_verify_body: |-
-  You can verify your Blitz account using `/link verify`.
+  You can verify your Blitz account using `/links verify`.
 
   This will make your custom background images visible to other users and unlock the `/my` command!
 cta_command_links_verify_head: "Verify your Blitz account!"

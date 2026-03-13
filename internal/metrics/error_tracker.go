@@ -4,7 +4,7 @@ import (
 	"context"
 	"math"
 	"sort"
-	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -69,15 +69,21 @@ type errorBucket struct {
 	Sources map[string]bucketStats
 }
 
-type ErrorTracker struct {
-	mx sync.RWMutex
+type recordEvent struct {
+	source string
+	failed bool
+	at     time.Time
+}
 
-	cfg         Config
+type ErrorTracker struct {
+	cfg     Config
+	records chan recordEvent
+
 	buckets     []errorBucket
 	sourceState map[string]HealthState
-	overall     HealthState
+	sinks       []func(Transition)
 
-	sinks []func(Transition)
+	overall atomic.Value
 }
 
 func NewErrorTracker(cfg Config) *ErrorTracker {
@@ -92,21 +98,20 @@ func NewErrorTracker(cfg Config) *ErrorTracker {
 		buckets[i] = errorBucket{Sources: make(map[string]bucketStats)}
 	}
 
-	return &ErrorTracker{
+	t := &ErrorTracker{
 		cfg:         cfg,
+		records:     make(chan recordEvent, 4096),
 		buckets:     buckets,
 		sourceState: map[string]HealthState{},
-		overall:     HealthStateHealthy,
 	}
+	t.overall.Store(HealthStateHealthy)
+	return t
 }
 
 func (t *ErrorTracker) RegisterSink(sink func(Transition)) {
 	if sink == nil {
 		return
 	}
-
-	t.mx.Lock()
-	defer t.mx.Unlock()
 	t.sinks = append(t.sinks, sink)
 }
 
@@ -114,19 +119,10 @@ func (t *ErrorTracker) Record(source, _ string, failed bool) {
 	if source == "" {
 		source = "unknown"
 	}
-
-	now := time.Now()
-
-	t.mx.Lock()
-	defer t.mx.Unlock()
-
-	bucket := t.currentBucket(now)
-	stats := bucket.Sources[source]
-	stats.Total++
-	if failed {
-		stats.Failed++
+	select {
+	case t.records <- recordEvent{source: source, failed: failed, at: time.Now()}:
+	default:
 	}
-	bucket.Sources[source] = stats
 }
 
 func (t *ErrorTracker) Start(ctx context.Context) {
@@ -137,6 +133,8 @@ func (t *ErrorTracker) Start(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
+		case rec := <-t.records:
+			t.applyRecord(rec)
 		case now := <-ticker.C:
 			t.evaluate(now)
 		}
@@ -144,14 +142,35 @@ func (t *ErrorTracker) Start(ctx context.Context) {
 }
 
 func (t *ErrorTracker) OverallState() HealthState {
-	t.mx.RLock()
-	defer t.mx.RUnlock()
-	return t.overall
+	if v := t.overall.Load(); v != nil {
+		return v.(HealthState)
+	}
+	return HealthStateHealthy
+}
+
+func (t *ErrorTracker) applyRecord(rec recordEvent) {
+	bucket := t.currentBucket(rec.at)
+	stats := bucket.Sources[rec.source]
+	stats.Total++
+	if rec.failed {
+		stats.Failed++
+	}
+	bucket.Sources[rec.source] = stats
+}
+
+func (t *ErrorTracker) drainRecords() {
+	for {
+		select {
+		case rec := <-t.records:
+			t.applyRecord(rec)
+		default:
+			return
+		}
+	}
 }
 
 func (t *ErrorTracker) evaluate(now time.Time) {
-	t.mx.Lock()
-	defer t.mx.Unlock()
+	t.drainRecords()
 
 	statsBySource := t.windowStats(now)
 	nextSourceState := make(map[string]HealthState, len(statsBySource))
@@ -183,13 +202,13 @@ func (t *ErrorTracker) evaluate(now time.Time) {
 
 	transition := Transition{
 		At:      now,
-		From:    t.overall,
+		From:    t.overall.Load().(HealthState),
 		To:      overallState,
 		Sources: sources,
 	}
 
 	t.sourceState = nextSourceState
-	t.overall = overallState
+	t.overall.Store(overallState)
 
 	if transition.From == transition.To {
 		return
