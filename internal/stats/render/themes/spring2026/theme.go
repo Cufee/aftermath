@@ -17,8 +17,10 @@ var (
 )
 
 func Theme() common.Theme {
+	noBlur := 0.0
 	return common.Theme{
-		Background: backgroundImage,
+		Background:     backgroundImage,
+		BackgroundBlur: &noBlur,
 		Frame: style.NewStyle(func(s *style.Style) {
 			s.PaddingLeft = 15
 			s.PaddingRight = 15

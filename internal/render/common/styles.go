@@ -147,10 +147,22 @@ var (
 		style.SetZIndex(-99),
 	)
 
-
 	FooterWrapperLayout = style.Style{
 		Direction:  style.DirectionHorizontal,
 		AlignItems: style.AlignItemsCenter,
 		Gap:        5,
 	}
 )
+
+func CardsBackgroundStyleForTheme(theme Theme) style.StyleOptions {
+	blur := DefaultBackgroundBlur
+	if theme.BackgroundBlur != nil {
+		blur = *theme.BackgroundBlur
+	}
+	return style.NewStyle(
+		style.SetBorderRadius(BorderRadius2XL),
+		style.SetBlur(blur),
+		style.SetPosition(style.PositionAbsolute),
+		style.SetZIndex(-99),
+	)
+}

@@ -8,11 +8,9 @@ import (
 	_ "image/png"
 	"path"
 	"strings"
-
-	"github.com/nao1215/imaging"
 )
 
-//go:embed assets/background.jpg
+//go:embed assets/background_blurred.jpg
 var backgroundBytes []byte
 
 //go:embed assets/petals/processed
@@ -29,7 +27,6 @@ func init() {
 	if err != nil {
 		panic("spring2026: failed to decode background: " + err.Error())
 	}
-	backgroundImage = imaging.Blur(backgroundImage, 3)
 	backgroundBytes = nil
 
 	entries, err := petalsFS.ReadDir("assets/petals/processed")

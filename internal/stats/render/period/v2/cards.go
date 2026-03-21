@@ -128,11 +128,12 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 			opts.Background = common.AddWN8BackgroundBranding(opts.Background, stats.RegularBattles.Vehicles, seed)
 		}
 
+		bgStyle := common.CardsBackgroundStyleForTheme(theme)
 		var layers []*facepaint.Block
-		layers = append(layers, facepaint.MustNewImageContent(common.CardsBackgroundStyle, opts.Background))
+		layers = append(layers, facepaint.MustNewImageContent(bgStyle, opts.Background))
 		if theme.BackgroundOverlay != nil {
 			if overlay := theme.BackgroundOverlay(opts.Background.Bounds(), seed); overlay != nil {
-				layers = append(layers, facepaint.MustNewImageContent(common.CardsBackgroundStyle, overlay))
+				layers = append(layers, facepaint.MustNewImageContent(bgStyle, overlay))
 			}
 		}
 		layers = append(layers, cardsFrame)
