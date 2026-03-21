@@ -31,7 +31,7 @@ func Theme() common.Theme {
 			style.SetBorderRadius(common.BorderRadiusLG),
 			func(s *style.Style) {
 				s.BackgroundColor = cardColor
-				s.BlurBackground = 20.0
+				s.BlurBackground = 10.0
 			},
 		),
 		ClanTag: style.NewStyle(
