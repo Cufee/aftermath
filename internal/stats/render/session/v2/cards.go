@@ -21,7 +21,7 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 	legendPillText := newVehicleLegendPillText(theme)
 
 	var (
-		renderUnratedVehiclesCount    = 10
+		renderUnratedVehiclesCount    = 8
 		shouldRenderUnratedOverview   = sessionData.RegularBattles.Battles > 0 || sessionData.RatingBattles.Battles < 1
 		shouldRenderUnratedHighlights = sessionData.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > len(cards.Unrated.Highlights)
 		shouldRenderRatingOverview    = sessionData.RatingBattles.Battles > 0
@@ -103,26 +103,21 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledStatsFrame)), statsCardsBlock)
 
 	if opts.Background != nil {
-		cardsFrameSize := cardsFrame.Dimensions()
-		opts.Background = imaging.Fill(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Center, imaging.Lanczos)
+		bgDims := cardsFrame.Dimensions()
+		seed, _ := strconv.Atoi(careerData.Account.ID)
+		opts.Background = imaging.Fill(opts.Background, bgDims.Width, bgDims.Height, imaging.Center, imaging.Lanczos)
 		if !opts.BackgroundIsCustom {
-			seed, _ := strconv.Atoi(careerData.Account.ID)
 			opts.Background = common.AddWN8BackgroundBranding(opts.Background, sessionData.RegularBattles.Vehicles, seed)
 		}
 
 		var layers []*facepaint.Block
 		layers = append(layers, facepaint.MustNewImageContent(common.CardsBackgroundStyle, opts.Background))
 		if theme.BackgroundOverlay != nil {
-			if overlay := theme.BackgroundOverlay(opts.Background.Bounds()); overlay != nil {
+			if overlay := theme.BackgroundOverlay(opts.Background.Bounds(), seed); overlay != nil {
 				layers = append(layers, facepaint.MustNewImageContent(common.CardsBackgroundStyle, overlay))
 			}
 		}
 		layers = append(layers, cardsFrame)
-		if theme.ForegroundOverlay != nil {
-			if overlay := theme.ForegroundOverlay(opts.Background.Bounds()); overlay != nil {
-				layers = append(layers, facepaint.MustNewImageContent(common.CardsBackgroundStyle, overlay))
-			}
-		}
 		cardsFrame = facepaint.NewBlocksContent(style.NewStyle(), layers...)
 	}
 

@@ -21,9 +21,16 @@ type Theme struct {
 	TextSecondary func() style.StyleOptions
 	TextAlt       func() style.StyleOptions
 
-	// Flare layers
-	BackgroundOverlay func(bounds image.Rectangle) image.Image
-	ForegroundOverlay func(bounds image.Rectangle) image.Image
+	// Optional background image bundled with the theme.
+	// Used as the default background when no explicit background is provided.
+	Background image.Image
+
+	// BackgroundOverlay is rendered behind cards, on top of the background image.
+	// seed is derived from the account ID for deterministic patterns.
+	BackgroundOverlay func(bounds image.Rectangle, seed int) image.Image
+	// ForegroundOverlay is composited on the final rendered image, on top of everything.
+	// seed is derived from the account ID for deterministic patterns.
+	ForegroundOverlay func(rendered image.Image, frame image.Rectangle, seed int) image.Image
 }
 
 func DefaultTheme() Theme {

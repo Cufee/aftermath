@@ -67,3 +67,13 @@ func WithBackground(image image.Image, isCustom bool) Option {
 		o.Background = image
 	}
 }
+
+func WithTheme(theme Theme) Option {
+	return func(o *Options) {
+		o.Theme = theme
+		if theme.Background != nil {
+			o.Background = theme.Background
+			o.BackgroundIsCustom = true
+		}
+	}
+}

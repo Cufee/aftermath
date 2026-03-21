@@ -147,6 +147,7 @@ var (
 		style.SetZIndex(-99),
 	)
 
+
 	FooterWrapperLayout = style.Style{
 		Direction:  style.DirectionHorizontal,
 		AlignItems: style.AlignItemsCenter,

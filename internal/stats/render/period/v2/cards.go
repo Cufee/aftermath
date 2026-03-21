@@ -121,26 +121,21 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsFrame)), statsCards...)
 
 	if opts.Background != nil {
-		cardsFrameSize := cardsFrame.Dimensions()
-		opts.Background = imaging.Fill(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Center, imaging.Lanczos)
+		bgDims := cardsFrame.Dimensions()
+		seed, _ := strconv.Atoi(stats.Account.ID)
+		opts.Background = imaging.Fill(opts.Background, bgDims.Width, bgDims.Height, imaging.Center, imaging.Lanczos)
 		if !opts.BackgroundIsCustom {
-			seed, _ := strconv.Atoi(stats.Account.ID)
 			opts.Background = common.AddWN8BackgroundBranding(opts.Background, stats.RegularBattles.Vehicles, seed)
 		}
 
 		var layers []*facepaint.Block
 		layers = append(layers, facepaint.MustNewImageContent(common.CardsBackgroundStyle, opts.Background))
 		if theme.BackgroundOverlay != nil {
-			if overlay := theme.BackgroundOverlay(opts.Background.Bounds()); overlay != nil {
+			if overlay := theme.BackgroundOverlay(opts.Background.Bounds(), seed); overlay != nil {
 				layers = append(layers, facepaint.MustNewImageContent(common.CardsBackgroundStyle, overlay))
 			}
 		}
 		layers = append(layers, cardsFrame)
-		if theme.ForegroundOverlay != nil {
-			if overlay := theme.ForegroundOverlay(opts.Background.Bounds()); overlay != nil {
-				layers = append(layers, facepaint.MustNewImageContent(common.CardsBackgroundStyle, overlay))
-			}
-		}
 		cardsFrame = facepaint.NewBlocksContent(style.NewStyle(), layers...)
 	}
 

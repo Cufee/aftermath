@@ -21,6 +21,7 @@ type requestOptions struct {
 	withWN8            bool
 	VehicleIDs         []string
 	Subscriptions      []models.UserSubscription
+	theme              *common.Theme
 
 	vehicleTags    []prepare.Tag
 	ratingColumns  []prepare.TagColumn[string]
@@ -69,6 +70,9 @@ func WithBackgroundURL(url string, isCustom bool) RequestOption {
 func WithBackground(image image.Image, isCustom bool) RequestOption {
 	return func(o *requestOptions) { o.backgroundImage = image; o.backgroundIsCustom = isCustom }
 }
+func WithTheme(theme common.Theme) RequestOption {
+	return func(o *requestOptions) { o.theme = &theme }
+}
 
 func (o requestOptions) RenderOpts(printer func(string) string) []common.Option {
 	var copts []common.Option
@@ -90,6 +94,9 @@ func (o requestOptions) RenderOpts(printer func(string) string) []common.Option 
 		copts = append(copts, common.WithBackgroundURL(o.backgroundURL, o.backgroundIsCustom))
 	} else {
 		copts = append(copts, common.WithBackgroundURL("static://bg-default", false))
+	}
+	if o.theme != nil {
+		copts = append(copts, common.WithTheme(*o.theme))
 	}
 	return copts
 }

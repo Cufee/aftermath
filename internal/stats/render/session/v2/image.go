@@ -2,6 +2,7 @@ package session
 
 import (
 	"image"
+	"strconv"
 
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/render/common"
@@ -15,13 +16,20 @@ func CardsToImage(session, career fetch.AccountStatsOverPeriod, cards session.Ca
 		apply(&o)
 	}
 
-	// Generate cards
-	cardsBlock, err := generateCards(session, career, cards, subs, o)
+	block, err := generateCards(session, career, cards, subs, o)
 	if err != nil {
 		return nil, err
 	}
 
-	// Render
-	return cardsBlock.Render()
+	rendered, err := block.Render()
+	if err != nil {
+		return nil, err
+	}
 
+	if o.Theme.ForegroundOverlay != nil {
+		seed, _ := strconv.Atoi(career.Account.ID)
+		rendered = o.Theme.ForegroundOverlay(rendered, rendered.Bounds(), seed)
+	}
+
+	return rendered, nil
 }

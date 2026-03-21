@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"io"
 	"os"
 	"slices"
 	"testing"
@@ -34,6 +35,15 @@ func init() {
 	loadStaticAssets(static)
 	level, _ := zerolog.ParseLevel(os.Getenv("LOG_LEVEL"))
 	zerolog.SetGlobalLevel(level)
+}
+
+func saveTestImage(t *testing.T, dir, filename string, encode func(io.Writer) error) {
+	t.Helper()
+	assert.NoError(t, os.MkdirAll("tmp/"+dir, 0o755), "failed to create directory")
+	f, err := os.Create("tmp/" + dir + "/" + filename)
+	assert.NoError(t, err, "failed to create a file")
+	defer f.Close()
+	assert.NoError(t, encode(f), "failed to encode image")
 }
 
 func TestRenderReplay(t *testing.T) {
@@ -81,7 +91,8 @@ func TestRenderReplay(t *testing.T) {
 				assert.NoError(t, err, "failed to render a replay image")
 				assert.NotNil(t, image, "image is nil")
 
-				out := "tmp/render_test_" + name + ".png"
+				out := "tmp/replay/" + name + ".png"
+				assert.NoError(t, os.MkdirAll("tmp/replay", 0o755), "failed to create directory")
 				f, err := os.Create(out)
 				assert.NoError(t, err, "failed to create a file")
 				defer f.Close()
