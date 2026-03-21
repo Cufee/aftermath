@@ -111,7 +111,7 @@ func generatePetals() {
 
 func generateBlurredBackground() {
 	const (
-		minSigma = 0.5
+		minSigma = 1
 		maxSigma = 8.0
 		levels   = 8
 		quality  = 95
