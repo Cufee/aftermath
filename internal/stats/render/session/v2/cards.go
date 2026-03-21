@@ -43,24 +43,32 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 	var maxWidthOverviewColumn = make(map[bool]float64)
 	for _, column := range cards.Unrated.Overview.Blocks {
 		for _, block := range column.Blocks {
+			key := column.Flavor == session.BlockFlavorDefault
+			blockStyle := styledOverviewCard.styleBlock(block)
 			switch block.Tag {
 			case prepare.TagWN8:
 				block.Label = common.GetWN8TierName(block.Value().Float())
-				maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], iconSizeWN8)
+				maxWidthOverviewColumn[key] = max(maxWidthOverviewColumn[key], iconSizeWN8)
 			}
-			maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], facepaint.MeasureString(block.Label, styledOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], facepaint.MeasureString(block.Value().String(), styledOverviewCard.styleBlock(block).value.Font).TotalWidth)
+			maxWidthOverviewColumn[key] = max(maxWidthOverviewColumn[key],
+				facepaint.MeasureStringWidth(block.Label, blockStyle.label.Font),
+				facepaint.MeasureStringWidth(block.Value().String(), blockStyle.value.Font),
+			)
 		}
 	}
 	for _, column := range cards.Rating.Overview.Blocks {
 		for _, block := range column.Blocks {
+			key := column.Flavor == session.BlockFlavorDefault
+			blockStyle := styledOverviewCard.styleBlock(block)
 			switch block.Tag {
 			case prepare.TagRankedRating:
 				block.Label = common.GetRatingTierName(block.Value().Float())
-				maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], iconSizeRating)
+				maxWidthOverviewColumn[key] = max(maxWidthOverviewColumn[key], iconSizeRating)
 			}
-			maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], facepaint.MeasureString(block.Label, styledOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], facepaint.MeasureString(block.Value().String(), styledOverviewCard.styleBlock(block).value.Font).TotalWidth)
+			maxWidthOverviewColumn[key] = max(maxWidthOverviewColumn[key],
+				facepaint.MeasureStringWidth(block.Label, blockStyle.label.Font),
+				facepaint.MeasureStringWidth(block.Value().String(), blockStyle.value.Font),
+			)
 		}
 	}
 
@@ -68,9 +76,10 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 	var highlightBlockWidth = make(map[prepare.Tag]float64)
 	for _, highlight := range cards.Unrated.Highlights {
 		for _, block := range highlight.Blocks {
-			label := facepaint.MeasureString(block.Label, styledHighlightCard.blockLabel().Font).TotalWidth
-			value := facepaint.MeasureString(block.Value().String(), styledHighlightCard.blockValue().Font).TotalWidth
-			highlightBlockWidth[block.Tag] = max(highlightBlockWidth[block.Tag], label, value)
+			highlightBlockWidth[block.Tag] = max(highlightBlockWidth[block.Tag],
+				facepaint.MeasureStringWidth(block.Label, styledHighlightCard.blockLabel().Font),
+				facepaint.MeasureStringWidth(block.Value().String(), styledHighlightCard.blockValue().Font),
+			)
 		}
 	}
 
@@ -78,10 +87,10 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 	var vehicleBlockWidth = make(map[prepare.Tag]float64)
 	for _, card := range cards.Unrated.Vehicles {
 		for _, block := range card.Blocks {
-			labelStyle := styledVehicleLegendPillText()
-			label := facepaint.MeasureString(block.Label, labelStyle.Font).TotalWidth + labelStyle.PaddingLeft + labelStyle.PaddingRight
-			value := facepaint.MeasureString(block.Value().String(), styledVehicleCard.value().Font).TotalWidth
-			vehicleBlockWidth[block.Tag] = max(vehicleBlockWidth[block.Tag], label, value)
+			vehicleBlockWidth[block.Tag] = max(vehicleBlockWidth[block.Tag],
+				facepaint.MeasureBlockWidth(block.Label, *styledVehicleLegendPillText()),
+				facepaint.MeasureStringWidth(block.Value().String(), styledVehicleCard.value().Font),
+			)
 		}
 	}
 
