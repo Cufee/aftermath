@@ -28,7 +28,7 @@ type Client interface {
 	PeriodImage(ctx context.Context, accountId string, from time.Time, opts ...common.RequestOption) (common.Image, common.Metadata, error)
 
 	SessionCards(ctx context.Context, accountId string, from time.Time, opts ...common.RequestOption) (session.Cards, common.Metadata, error)
-	SessionImage(ctx context.Context, accountId string, from time.Time, opts ...common.RequestOption) (common.Image, common.Metadata, error)
+	SessionImage(ctx context.Context, accountId string, from time.Time, opts ...common.RequestOption) ([]common.Image, common.Metadata, error)
 	EmptySessionCards(ctx context.Context, accountId string) (session.Cards, common.Metadata, error)
 
 	ReplayCards(ctx context.Context, replayURL string, o ...common.RequestOption) (replay.Cards, common.Metadata, error)

@@ -73,7 +73,10 @@ func init() {
 					}
 				}
 
-				var image stats.Image
+				const maxSessionAttachmentPages = 10
+
+				var careerImage stats.Image
+				var sessionPages []stats.Image
 				var meta stats.Metadata
 				switch interaction.EventID {
 				case "career", "stats":
@@ -88,11 +91,11 @@ func init() {
 					if err != nil {
 						return ctx.Err(err, common.ApplicationError)
 					}
-					image = img
+					careerImage = img
 					meta = mt
 
 				case "session":
-					img, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(ctx.Ctx(), ioptions.AccountID, ioptions.PeriodStart, opts...)
+					pages, mt, err := ctx.Core().Stats(ctx.Locale()).SessionImage(ctx.Ctx(), ioptions.AccountID, ioptions.PeriodStart, opts...)
 					if err != nil {
 						if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && ioptions.Days < 1) {
 							return ctx.Reply().IsError(common.UserError).Send("session_error_account_was_not_tracked")
@@ -102,7 +105,7 @@ func init() {
 						}
 						return ctx.Err(err, common.ApplicationError)
 					}
-					image = img
+					sessionPages = pages
 					meta = mt
 
 				default:
@@ -118,12 +121,6 @@ func init() {
 					log.Err(saveErr).Str("interactionId", ctx.ID()).Str("command", interaction.EventID).Msg("failed to save discord interaction")
 				}
 
-				var buf bytes.Buffer
-				err = image.PNG(&buf)
-				if err != nil {
-					return ctx.Err(err, common.ApplicationError)
-				}
-
 				var timings []string
 				if ctx.User().HasPermission(permissions.UseDebugFeatures) {
 					timings = append(timings, "```")
@@ -131,6 +128,32 @@ func init() {
 						timings = append(timings, fmt.Sprintf("%s: %v", name, duration.Milliseconds()))
 					}
 					timings = append(timings, "```")
+				}
+
+				if interaction.EventID == "session" {
+					reply := ctx.Reply().WithAds()
+					pages := sessionPages
+					if len(pages) > maxSessionAttachmentPages {
+						reply = reply.Text("-# " + ctx.Localize("session_errors_too_many_attachment_pages"))
+						pages = pages[:maxSessionAttachmentPages]
+					}
+					for i, img := range pages {
+						var buf bytes.Buffer
+						if err := img.PNG(&buf); err != nil {
+							return ctx.Err(err, common.ApplicationError)
+						}
+						name := interaction.EventID + "_command_by_aftermath.png"
+						if len(pages) > 1 {
+							name = fmt.Sprintf("%s_command_by_aftermath_%d.png", interaction.EventID, i)
+						}
+						reply = reply.File(buf.Bytes(), name)
+					}
+					return reply.Component(button).Text(timings...).Send()
+				}
+
+				var buf bytes.Buffer
+				if err := careerImage.PNG(&buf); err != nil {
+					return ctx.Err(err, common.ApplicationError)
 				}
 
 				return ctx.Reply().WithAds().File(buf.Bytes(), interaction.EventID+"_command_by_aftermath.png").Component(button).Text(timings...).Send()

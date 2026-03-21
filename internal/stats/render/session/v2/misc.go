@@ -60,3 +60,10 @@ func newFooterCard(stats fetch.AccountStatsOverPeriod, cards session.Cards, opts
 
 	return facepaint.NewBlocksContent(styledFooterWrapper.Options(), footer...)
 }
+
+func newSessionNavPill(line string) *facepaint.Block {
+	stl := styledFooterCard()
+	return facepaint.NewBlocksContent(styledFooterWrapper.Options(),
+		facepaint.MustNewTextContent(stl.Options(), line),
+	)
+}

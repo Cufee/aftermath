@@ -115,7 +115,9 @@ func init() {
 					}
 				}
 
-				image, meta, err := ctx.Core().Stats(ctx.Locale()).SessionImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
+				const maxSessionAttachmentPages = 10
+
+				images, meta, err := ctx.Core().Stats(ctx.Locale()).SessionImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {
 						return ctx.Reply().IsError(common.UserError).Send("session_error_account_was_not_tracked")
@@ -133,12 +135,6 @@ func init() {
 					log.Err(saveErr).Str("interactionId", ctx.ID()).Str("command", "session").Msg("failed to save discord interaction")
 				}
 
-				var buf bytes.Buffer
-				err = image.PNG(&buf)
-				if err != nil {
-					return ctx.Err(err, common.ApplicationError)
-				}
-
 				var timings []string
 				if ctx.User().HasPermission(permissions.UseDebugFeatures) {
 					timings = append(timings, "```")
@@ -148,7 +144,27 @@ func init() {
 					timings = append(timings, "```")
 				}
 
-				return ctx.Reply().WithAds().Hint(message).File(buf.Bytes(), "session_command_by_aftermath.png").Component(button).Text(timings...).Send()
+				reply := ctx.Reply().WithAds()
+				if message != "" {
+					reply = reply.Hint(message)
+				}
+				pages := images
+				if len(pages) > maxSessionAttachmentPages {
+					reply = reply.Text("-# " + ctx.Localize("session_errors_too_many_attachment_pages"))
+					pages = pages[:maxSessionAttachmentPages]
+				}
+				for i, img := range pages {
+					var buf bytes.Buffer
+					if err := img.PNG(&buf); err != nil {
+						return ctx.Err(err, common.ApplicationError)
+					}
+					name := "session_command_by_aftermath.png"
+					if len(pages) > 1 {
+						name = fmt.Sprintf("session_command_by_aftermath_%d.png", i)
+					}
+					reply = reply.File(buf.Bytes(), name)
+				}
+				return reply.Component(button).Text(timings...).Send()
 			}),
 	)
 }

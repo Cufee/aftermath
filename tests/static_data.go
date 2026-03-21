@@ -12,10 +12,13 @@ const DefaultAccountNA = "10003333004"
 const DefaultAccountNAShort = "2000444005"
 const DefaultAccountEU = "20000555006"
 const DefaultAccountAS = "30000666007"
+// DefaultAccountNASessionNoRating is session data with no rating battles (regular only) for render/layout tests.
+const DefaultAccountNASessionNoRating = "10003333008"
 
 var staticAccounts = map[string]models.Account{
 	DefaultAccountNA:      {ID: DefaultAccountNA, Realm: "NA", Nickname: "Stylish_Player_One", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan1", ClanTag: "AMTH"},
 	DefaultAccountNAShort: {ID: DefaultAccountNA, Realm: "NA", Nickname: "test_acc", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan1", ClanTag: "AMTH"},
+	DefaultAccountNASessionNoRating: {ID: DefaultAccountNASessionNoRating, Realm: "NA", Nickname: "Session_No_Rating_NA", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan1", ClanTag: "AMTH"},
 	DefaultAccountEU:      {ID: DefaultAccountEU, Realm: "EU", Nickname: "test_account_eu_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan2", ClanTag: "AMTH"},
 	DefaultAccountAS:      {ID: DefaultAccountAS, Realm: "AS", Nickname: "test_account_as_1", CreatedAt: time.Now(), LastBattleTime: time.Now(), ClanID: "clan3", ClanTag: "AMTH"},
 }

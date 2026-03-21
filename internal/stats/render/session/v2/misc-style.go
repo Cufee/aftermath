@@ -81,18 +81,12 @@ var styledPlayerClanTagCard = style.Style{
 }
 
 var styledCardsSection = style.Style{
-	Debug: false,
+	Debug:          false,
+	GrowHorizontal: true,
 
 	Direction:  style.DirectionVertical,
 	AlignItems: style.AlignItemsCenter,
 	Gap:        10,
-}
-
-var styledCardsSectionsWrapper = style.Style{
-	Debug: false,
-
-	Direction: style.DirectionHorizontal,
-	Gap:       20,
 }
 
 var styledStatsFrame = style.Style{

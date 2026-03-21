@@ -224,6 +224,7 @@ replay_errors_some_attachments_invalid: "Niektóre z załączonych plików to pr
 replay_errors_too_many_files: "Aftermath może przetworzyć do 5 powtórek na raz. Proszę użyć polecenia `/replay`, aby przesłać dodatkowe pliki."
 session_error_account_was_not_tracked: "Aftermath właśnie zaczął śledzić to konto. Proszę rozegrać kilka bitew przed ponownym użyciem tej komendy."
 session_error_no_session_for_period: "Aftermath nie ma jeszcze sesji na ten okres. Spróbuj zmienić liczbę dni lub zamiast tego użyj `/career`."
+session_errors_too_many_attachment_pages: "Discord pozwala na maksymalnie 10 obrazów na wiadomość. Dołączono tylko pierwsze 10 stron tej sesji."
 stats_account_not_found: "Wygląda na to, że nie znaleziono żadnych kont Blitz odpowiadających Twojemu wyszukiwaniu. Wybierz opcję z listy kont, która zostanie wyświetlona po wpisaniu pseudonimu."
 stats_autocomplete_not_enough_length: "Kontynuuj wpisywanie, aby wyszukać dostępne czołgi..."
 stats_autocomplete_not_found: "Nic nie znaleziono. Wybierz zbiornik z listy autouzupełniania"

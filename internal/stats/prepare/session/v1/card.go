@@ -86,67 +86,67 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		cards.Unrated.Overview = card
 	}
 
-	{ // Regular battles vehicles
-		var unratedVehicles []frame.VehicleStatsFrame
-		for _, vehicle := range session.RegularBattles.Vehicles {
-			unratedVehicles = append(unratedVehicles, vehicle)
-		}
-		slices.SortFunc(unratedVehicles, func(a, b frame.VehicleStatsFrame) int {
-			return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
-		})
-
-		blocks := vehicleBlocks
-		if options.VehicleTags != nil {
-			blocks = options.VehicleTags
-		}
-
-		for _, data := range unratedVehicles {
-			if len(cards.Unrated.Vehicles) >= 10 {
-				break
+	// Single vehicle ID request: overview-only, skip vehicle and highlight cards
+	if len(options.VehicleIDs) != 1 {
+		{ // Regular battles vehicles
+			var unratedVehicles []frame.VehicleStatsFrame
+			for _, vehicle := range session.RegularBattles.Vehicles {
+				unratedVehicles = append(unratedVehicles, vehicle)
 			}
-			if data.Battles < 1 {
-				continue
+			slices.SortFunc(unratedVehicles, func(a, b frame.VehicleStatsFrame) int {
+				return int(b.LastBattleTime.Unix() - a.LastBattleTime.Unix())
+			})
+
+			blocks := vehicleBlocks
+			if options.VehicleTags != nil {
+				blocks = options.VehicleTags
 			}
 
-			card, err := builder.makeVehicleCard(
-				data.VehicleID,
-				blocks,
-				common.CardTypeVehicle,
-				data,
-				career.RegularBattles.Vehicles[data.VehicleID],
+			for _, data := range unratedVehicles {
+				if data.Battles < 1 {
+					continue
+				}
+
+				card, err := builder.makeVehicleCard(
+					data.VehicleID,
+					blocks,
+					common.CardTypeVehicle,
+					data,
+					career.RegularBattles.Vehicles[data.VehicleID],
+					options.Printer(),
+					options.Locale(),
+				)
+				if err != nil {
+					return Cards{}, err
+				}
+				cards.Unrated.Vehicles = append(cards.Unrated.Vehicles, card)
+			}
+		}
+		// Vehicle Highlights
+		var minVehicleBattles = 1
+		if len(session.RegularBattles.Vehicles) > 0 {
+			minVehicleBattles = int(session.RegularBattles.Battles.Float()) / len(session.RegularBattles.Vehicles)
+		}
+
+		highlightedVehicles, err := common.GetHighlightedVehicles(highlights, session.RegularBattles.Vehicles, minVehicleBattles)
+		if err != nil {
+			return Cards{}, err
+		}
+
+		for _, data := range highlightedVehicles {
+			card, err := builder.makeHighlightCard(
+				data.Vehicle.VehicleID,
+				data.Highlight,
+				data.Vehicle,
+				frame.VehicleStatsFrame{},
 				options.Printer(),
 				options.Locale(),
 			)
 			if err != nil {
 				return Cards{}, err
 			}
-			cards.Unrated.Vehicles = append(cards.Unrated.Vehicles, card)
+			cards.Unrated.Highlights = append(cards.Unrated.Highlights, card)
 		}
-	}
-	// Vehicle Highlights
-	var minVehicleBattles = 1
-	if len(session.RegularBattles.Vehicles) > 0 {
-		minVehicleBattles = int(session.RegularBattles.Battles.Float()) / len(session.RegularBattles.Vehicles)
-	}
-
-	highlightedVehicles, err := common.GetHighlightedVehicles(highlights, session.RegularBattles.Vehicles, minVehicleBattles)
-	if err != nil {
-		return Cards{}, err
-	}
-
-	for _, data := range highlightedVehicles {
-		card, err := builder.makeHighlightCard(
-			data.Vehicle.VehicleID,
-			data.Highlight,
-			data.Vehicle,
-			frame.VehicleStatsFrame{},
-			options.Printer(),
-			options.Locale(),
-		)
-		if err != nil {
-			return Cards{}, err
-		}
-		cards.Unrated.Highlights = append(cards.Unrated.Highlights, card)
 	}
 
 	return cards, nil

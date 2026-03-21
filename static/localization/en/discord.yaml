@@ -224,6 +224,7 @@ replay_errors_some_attachments_invalid: "Some of the files you have attached are
 replay_errors_too_many_files: "Aftermath can process up to 5 replays at once. Please use the `/replay` command to upload any additional files."
 session_error_account_was_not_tracked: "Aftermath just started tracking this account. Please play a few battles before using this command again."
 session_error_no_session_for_period: "Aftermath does not yet have a session for this period. Try changing the number of days or using `/career` instead."
+session_errors_too_many_attachment_pages: "Discord allows at most 10 images per message. Only the first 10 pages of this session are attached."
 stats_account_not_found: "It looks like there are no Blitz accounts matching your search. Please select an option from the list of accounts shown as you type in the nickname."
 stats_autocomplete_not_enough_length: "Continue typing to search for available tanks..."
 stats_autocomplete_not_found: "Nothing found. Please select a tank from the autocompletion list."

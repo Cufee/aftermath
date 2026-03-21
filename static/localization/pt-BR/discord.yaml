@@ -224,6 +224,7 @@ replay_errors_some_attachments_invalid: "Alguns dos arquivos que você anexou s�
 replay_errors_too_many_files: "O Aftermath pode processar até 5 replays simultaneamente. Use o comando `/replay` para enviar arquivos adicionais."
 session_error_account_was_not_tracked: "O Aftermath começou a rastrear esta conta. Jogue algumas batalhas antes de usar este comando novamente."
 session_error_no_session_for_period: "O Aftermath ainda não possui uma sessão para este período. Tente alterar o número de dias ou use `/career`."
+session_errors_too_many_attachment_pages: "O Discord permite no máximo 10 imagens por mensagem. Apenas as primeiras 10 páginas desta sessão foram anexadas."
 stats_account_not_found: "Parece que não há contas do Blitz que correspondam à sua pesquisa. Selecione uma opção na lista de contas que é exibida conforme você digita o nome."
 stats_autocomplete_not_enough_length: "Continue digitando para procurar por tanques disponíveis..."
 stats_autocomplete_not_found: "Nada encontrado. Selecione um tanque na lista de preenchimento automático."

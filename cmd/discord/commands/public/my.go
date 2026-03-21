@@ -90,13 +90,16 @@ func init() {
 					accountID = defaultAccount.ReferenceID
 				}
 
+				const maxSessionAttachmentPages = 10
+
 				var err error
-				var image stats.Image
+				var careerImage stats.Image
+				var sessionPages []stats.Image
 				switch subcommand {
 				case "career":
-					image, _, err = ctx.Core().Stats(ctx.Locale()).PeriodImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
+					careerImage, _, err = ctx.Core().Stats(ctx.Locale()).PeriodImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
 				case "session":
-					image, _, err = ctx.Core().Stats(ctx.Locale()).SessionImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
+					sessionPages, _, err = ctx.Core().Stats(ctx.Locale()).SessionImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
 				default:
 					return ctx.Error("invalid subcommand in /my - "+subcommand, common.ApplicationError)
 				}
@@ -117,8 +120,29 @@ func init() {
 					log.Err(saveErr).Str("interactionId", ctx.ID()).Str("command", subcommand).Msg("failed to save discord interaction")
 				}
 
+				if subcommand == "session" {
+					reply := ctx.Reply().WithAds()
+					pages := sessionPages
+					if len(pages) > maxSessionAttachmentPages {
+						reply = reply.Text("-# " + ctx.Localize("session_errors_too_many_attachment_pages"))
+						pages = pages[:maxSessionAttachmentPages]
+					}
+					for i, img := range pages {
+						var buf bytes.Buffer
+						if err := img.PNG(&buf); err != nil {
+							return ctx.Err(err, common.ApplicationError)
+						}
+						name := "session_command_by_aftermath.png"
+						if len(pages) > 1 {
+							name = fmt.Sprintf("session_command_by_aftermath_%d.png", i)
+						}
+						reply = reply.File(buf.Bytes(), name)
+					}
+					return reply.Component(button).Send()
+				}
+
 				var buf bytes.Buffer
-				err = image.PNG(&buf)
+				err = careerImage.PNG(&buf)
 				if err != nil {
 					return ctx.Err(err, common.ApplicationError)
 				}

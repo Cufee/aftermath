@@ -48,13 +48,19 @@ func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts .
 	}
 
 	var vehicles = make(map[string]frame.VehicleStatsFrame)
-	for id := range 10 {
-		if options.VehicleIDs != nil && !slices.Contains(options.VehicleIDs, fmt.Sprint(id)) {
-			continue
+	if options.VehicleIDs != nil {
+		// Generate a vehicle for each requested ID
+		for _, vid := range options.VehicleIDs {
+			f := DefaultVehicleStatsFrameBig1(vid)
+			f.SetWN8(9999)
+			vehicles[vid] = f
 		}
-		f := DefaultVehicleStatsFrameBig1(fmt.Sprint(id))
-		f.SetWN8(9999)
-		vehicles[fmt.Sprint(id)] = f
+	} else {
+		for id := range 10 {
+			f := DefaultVehicleStatsFrameBig1(fmt.Sprint(id))
+			f.SetWN8(9999)
+			vehicles[fmt.Sprint(id)] = f
+		}
 	}
 
 	stats := fetch.AccountStatsOverPeriod{
@@ -89,9 +95,6 @@ func (c *staticTestingFetch) PeriodStats(ctx context.Context, id string, from ti
 	current.PeriodStart = from
 	current.RegularBattles.SetWN8(9999)
 
-	if len(current.RegularBattles.Vehicles) > 0 {
-		current.RegularBattles.StatsFrame.Subtract(DefaultStatsFrameSmall1)
-	}
 	if len(current.RatingBattles.Vehicles) > 0 {
 		current.RatingBattles.StatsFrame.Subtract(DefaultStatsFrameSmall2)
 	}
@@ -103,6 +106,12 @@ func (c *staticTestingFetch) PeriodStats(ctx context.Context, id string, from ti
 		stats.SetWN8(9999)
 		stats.StatsFrame.Subtract(DefaultStatsFrameSmall1)
 		current.RegularBattles.Vehicles[id] = stats
+	}
+	// Re-derive aggregate from vehicles so session minVehicleBattles (battles/len) matches per-tank
+	// battles. A single Subtract on the aggregate made the ratio too high and dropped all highlights.
+	if len(current.RegularBattles.Vehicles) > 0 {
+		current.RegularBattles.StatsFrame = fetch.VehiclesToFrame(current.RegularBattles.Vehicles)
+		current.RegularBattles.SetWN8(9999)
 	}
 	return current, nil
 }
@@ -127,6 +136,10 @@ func (c *staticTestingFetch) SessionStats(ctx context.Context, id string, sessio
 	for id, stats := range career.RegularBattles.Vehicles {
 		stats.SetWN8(rand.Int() % 4000)
 		career.RegularBattles.Vehicles[id] = stats
+	}
+
+	if id == DefaultAccountNASessionNoRating {
+		session.RatingBattles = fetch.StatsWithVehicles{Vehicles: make(map[string]frame.VehicleStatsFrame)}
 	}
 
 	return session, career, nil

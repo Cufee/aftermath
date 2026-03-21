@@ -95,7 +95,7 @@ func (c *client) SessionCards(ctx context.Context, accountId string, from time.T
 	return cards, meta, nil
 }
 
-func (c *client) SessionImage(ctx context.Context, accountId string, from time.Time, o ...common.RequestOption) (common.Image, common.Metadata, error) {
+func (c *client) SessionImage(ctx context.Context, accountId string, from time.Time, o ...common.RequestOption) ([]common.Image, common.Metadata, error) {
 	opts := common.RequestOptions(o).Options()
 
 	cards, meta, err := c.SessionCards(ctx, accountId, from, o...)
@@ -115,14 +115,18 @@ func (c *client) SessionImage(ctx context.Context, accountId string, from time.T
 		}
 	}
 
-	stop := meta.Timer("render#CardsToImage")
-	image, err := render.CardsToImage(meta.Stats["session"], meta.Stats["career"], cards, opts.Subscriptions, opts.RenderOpts(printer)...)
+	stop := meta.Timer("render#CardsToImages")
+	raw, err := render.CardsToImages(meta.Stats["session"], meta.Stats["career"], cards, opts.Subscriptions, opts.RenderOpts(printer)...)
 	stop()
 	if err != nil {
 		return nil, meta, err
 	}
 
-	return &imageImp{image}, meta, err
+	pages := make([]common.Image, len(raw))
+	for i := range raw {
+		pages[i] = &imageImp{raw[i]}
+	}
+	return pages, meta, nil
 }
 
 func (c *client) EmptySessionCards(ctx context.Context, accountId string) (session.Cards, common.Metadata, error) {
