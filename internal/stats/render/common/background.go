@@ -10,7 +10,13 @@ import (
 	"github.com/cufee/aftermath/internal/stats/frame"
 )
 
-func addBackgroundBranding(background image.Image, vehicles map[string]frame.VehicleStatsFrame, patternSeed int) image.Image {
+type vehicleWN8 struct {
+	id      string
+	wn8     frame.Value
+	sortKey int
+}
+
+func AddWN8BackgroundBranding(background image.Image, vehicles map[string]frame.VehicleStatsFrame, patternSeed int) image.Image {
 	var values []vehicleWN8
 	for _, vehicle := range vehicles {
 		if wn8 := vehicle.WN8(); !frame.InvalidValue.Equals(wn8) {

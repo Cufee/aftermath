@@ -4,16 +4,16 @@ import (
 	"errors"
 	"strconv"
 
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
-	"github.com/cufee/facepaint/style"
-	"github.com/nao1215/imaging"
-
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/render/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/period/v1"
+	recom "github.com/cufee/aftermath/internal/stats/render/common"
 	"github.com/cufee/facepaint"
+	"github.com/cufee/facepaint/style"
+	"github.com/nao1215/imaging"
 )
 
 func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []models.UserSubscription, opts common.Options) (*facepaint.Block, error) {
@@ -128,7 +128,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 		opts.Background = imaging.Fill(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Center, imaging.Lanczos)
 		if !opts.BackgroundIsCustom {
 			seed, _ := strconv.Atoi(stats.Account.ID)
-			opts.Background = addBackgroundBranding(opts.Background, stats.RegularBattles.Vehicles, seed)
+			opts.Background = recom.AddWN8BackgroundBranding(opts.Background, stats.RegularBattles.Vehicles, seed)
 		}
 		cardsFrame = facepaint.NewBlocksContent(style.NewStyle(),
 			facepaint.MustNewImageContent(styledCardsBackground, opts.Background), cardsFrame,

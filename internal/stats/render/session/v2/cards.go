@@ -3,20 +3,20 @@ package session
 import (
 	"strconv"
 
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
-	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
-	"github.com/cufee/facepaint/style"
-	"github.com/nao1215/imaging"
-
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/render/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
+	recom "github.com/cufee/aftermath/internal/stats/render/common"
 	"github.com/cufee/facepaint"
+	"github.com/cufee/facepaint/style"
+	"github.com/nao1215/imaging"
 )
 
 func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards session.Cards, _ []models.UserSubscription, opts common.Options) (*facepaint.Block, error) {
 	var (
-		renderUnratedVehiclesCount = 3 // minimum number of vehicle cards
+		renderUnratedVehiclesCount = 10 // maximum number of vehicle cards
 		// primary cards
 		// when there are some unrated battles or no battles at all
 		shouldRenderUnratedOverview = sessionData.RegularBattles.Battles > 0 || sessionData.RatingBattles.Battles < 1
@@ -114,7 +114,7 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 		opts.Background = imaging.Fill(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Center, imaging.Lanczos)
 		if !opts.BackgroundIsCustom {
 			seed, _ := strconv.Atoi(careerData.Account.ID)
-			opts.Background = addBackgroundBranding(opts.Background, sessionData.RegularBattles.Vehicles, seed)
+			opts.Background = recom.AddWN8BackgroundBranding(opts.Background, sessionData.RegularBattles.Vehicles, seed)
 		}
 		cardsFrame = facepaint.NewBlocksContent(style.NewStyle(),
 			facepaint.MustNewImageContent(styledCardsBackground, opts.Background), cardsFrame,
