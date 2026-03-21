@@ -15,7 +15,7 @@ import (
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
 
-	"github.com/cufee/aftermath/internal/external/blitzkit"
+	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/retry"
@@ -30,16 +30,16 @@ type multiSourceClient struct {
 	retriesPerRequest  int
 	retrySleepInterval time.Duration
 
-	database  database.Client
-	wargaming wargaming.Client
-	blitzkit  blitzkit.Client
+	database   database.Client
+	wargaming  wargaming.Client
+	blitzstars blitzstars.Client
 }
 
-func NewMultiSourceClient(wargaming wargaming.Client, blitzkit blitzkit.Client, database database.Client) (*multiSourceClient, error) {
+func NewMultiSourceClient(wargaming wargaming.Client, blitzstars blitzstars.Client, database database.Client) (*multiSourceClient, error) {
 	return &multiSourceClient{
-		database:  database,
-		wargaming: wargaming,
-		blitzkit:  blitzkit,
+		database:   database,
+		wargaming:  wargaming,
+		blitzstars: blitzstars,
 
 		retriesPerRequest:  2,
 		retrySleepInterval: time.Millisecond * 100,
@@ -414,7 +414,7 @@ func (c *multiSourceClient) SessionStats(ctx context.Context, id string, session
 }
 
 func (c *multiSourceClient) CurrentTankAverages(ctx context.Context) (map[string]frame.StatsFrame, error) {
-	return c.blitzkit.CurrentTankAverages(ctx)
+	return c.blitzstars.CurrentTankAverages(ctx)
 }
 
 func (c *multiSourceClient) ReplayRemote(ctx context.Context, fileURL string) (Replay, error) {
