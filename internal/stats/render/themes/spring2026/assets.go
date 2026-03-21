@@ -1,7 +1,5 @@
 package spring2026
 
-//go:generate go run ./generate.go
-
 import (
 	"bytes"
 	"embed"
@@ -14,10 +12,10 @@ import (
 	"github.com/nao1215/imaging"
 )
 
-//go:embed background.jpg
+//go:embed assets/background.jpg
 var backgroundBytes []byte
 
-//go:embed petals/processed
+//go:embed assets/petals/processed
 var petalsFS embed.FS
 
 var (
@@ -34,16 +32,16 @@ func init() {
 	backgroundImage = imaging.Blur(backgroundImage, 3)
 	backgroundBytes = nil
 
-	entries, err := petalsFS.ReadDir("petals/processed")
+	entries, err := petalsFS.ReadDir("assets/petals/processed")
 	if err != nil {
-		panic("spring2026: failed to read petals/processed: " + err.Error())
+		panic("spring2026: failed to read assets/petals/processed: " + err.Error())
 	}
 	for _, entry := range entries {
 		name := entry.Name()
 		if !strings.HasSuffix(strings.ToLower(name), ".png") {
 			continue
 		}
-		data, err := petalsFS.ReadFile(path.Join("petals/processed", name))
+		data, err := petalsFS.ReadFile(path.Join("assets/petals/processed", name))
 		if err != nil {
 			panic("spring2026: failed to read " + name + ": " + err.Error())
 		}
