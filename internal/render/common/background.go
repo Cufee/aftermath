@@ -5,8 +5,11 @@ import (
 	"image/color"
 	"math"
 	"math/rand"
+	"slices"
 	"sync"
+	"time"
 
+	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
 )
@@ -16,6 +19,39 @@ var GlassEffectBackgroundBlur float64 = DefaultBackgroundBlur * 5
 
 var globalLogoCacheMx sync.Mutex
 var globalLogoCache = make(map[color.Color]image.Image)
+
+type vehicleWN8 struct {
+	id      string
+	wn8     frame.Value
+	sortKey int
+}
+
+func AddWN8BackgroundBranding(background image.Image, vehicles map[string]frame.VehicleStatsFrame, patternSeed int) image.Image {
+	var values []vehicleWN8
+	for _, vehicle := range vehicles {
+		if wn8 := vehicle.WN8(); !frame.InvalidValue.Equals(wn8) {
+			values = append(values, vehicleWN8{vehicle.VehicleID, wn8, int(vehicle.LastBattleTime.Unix())})
+		}
+	}
+	slices.SortFunc(values, func(a, b vehicleWN8) int { return b.sortKey - a.sortKey })
+	if len(values) >= 10 {
+		values = values[:9]
+	}
+
+	var accentColors []color.Color
+	for _, value := range values {
+		c := GetWN8Colors(value.wn8.Float()).Background
+		if _, _, _, a := c.RGBA(); a > 0 {
+			accentColors = append(accentColors, c)
+		}
+	}
+
+	if patternSeed == 0 {
+		patternSeed = int(time.Now().Unix())
+	}
+
+	return AddDefaultBrandedOverlay(background, accentColors, patternSeed, 0.5)
+}
 
 func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed int, colorChance float32) image.Image {
 	if len(colors) < 1 {
