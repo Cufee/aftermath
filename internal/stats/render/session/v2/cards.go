@@ -8,7 +8,6 @@ import (
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
-	recom "github.com/cufee/aftermath/internal/stats/render/common"
 	"github.com/cufee/facepaint"
 	"github.com/cufee/facepaint/style"
 	"github.com/nao1215/imaging"
@@ -114,7 +113,7 @@ func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards s
 		opts.Background = imaging.Fill(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Center, imaging.Lanczos)
 		if !opts.BackgroundIsCustom {
 			seed, _ := strconv.Atoi(careerData.Account.ID)
-			opts.Background = recom.AddWN8BackgroundBranding(opts.Background, sessionData.RegularBattles.Vehicles, seed)
+			opts.Background = common.AddWN8BackgroundBranding(opts.Background, sessionData.RegularBattles.Vehicles, seed)
 		}
 		cardsFrame = facepaint.NewBlocksContent(style.NewStyle(),
 			facepaint.MustNewImageContent(styledCardsBackground, opts.Background), cardsFrame,
