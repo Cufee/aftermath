@@ -41,13 +41,17 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 	if shouldRenderUnratedOverview {
 		for _, column := range cards.Overview.Blocks {
 			for _, block := range column.Blocks {
+				key := string(block.Data.Flavor)
+				blockStyle := styledUnratedOverviewCard.styleBlock(block)
 				switch block.Tag {
 				case prepare.TagWN8:
 					block.Label = common.GetWN8TierName(block.Value().Float())
-					maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], iconSizeWN8)
+					maxWidthOverviewBlock[key] = max(maxWidthOverviewBlock[key], iconSizeWN8)
 				}
-				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Label, styledUnratedOverviewCard.styleBlock(block).label.Font).TotalWidth)
-				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Value().String(), styledUnratedOverviewCard.styleBlock(block).value.Font).TotalWidth)
+				maxWidthOverviewBlock[key] = max(maxWidthOverviewBlock[key],
+					facepaint.MeasureStringWidth(block.Label, blockStyle.label.Font),
+					facepaint.MeasureStringWidth(block.Value().String(), blockStyle.value.Font),
+				)
 			}
 		}
 	}
@@ -55,13 +59,17 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 	if shouldRenderRatingOverview {
 		for _, column := range cards.Rating.Blocks {
 			for _, block := range column.Blocks {
+				key := string(block.Data.Flavor)
+				blockStyle := styledRatingOverviewCard.styleBlock(block)
 				switch block.Tag {
 				case prepare.TagRankedRating:
 					block.Label = common.GetRatingTierName(block.Value().Float())
-					maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], iconSizeRating)
+					maxWidthOverviewBlock[key] = max(maxWidthOverviewBlock[key], iconSizeRating)
 				}
-				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Label, styledRatingOverviewCard.styleBlock(block).label.Font).TotalWidth)
-				maxWidthOverviewBlock[string(block.Data.Flavor)] = max(maxWidthOverviewBlock[string(block.Data.Flavor)], facepaint.MeasureString(block.Value().String(), styledRatingOverviewCard.styleBlock(block).value.Font).TotalWidth)
+				maxWidthOverviewBlock[key] = max(maxWidthOverviewBlock[key],
+					facepaint.MeasureStringWidth(block.Label, blockStyle.label.Font),
+					facepaint.MeasureStringWidth(block.Value().String(), blockStyle.value.Font),
+				)
 			}
 		}
 	}
@@ -74,9 +82,10 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 		}
 
 		for _, block := range highlight.Blocks {
-			label := facepaint.MeasureString(block.Label, styledHighlightCard.blockLabel().Font).TotalWidth
-			value := facepaint.MeasureString(block.Value().String(), styledHighlightCard.blockValue().Font).TotalWidth
-			highlightBlockWidth[block.Tag] = max(highlightBlockWidth[block.Tag], label, value)
+			highlightBlockWidth[block.Tag] = max(highlightBlockWidth[block.Tag],
+				facepaint.MeasureStringWidth(block.Label, styledHighlightCard.blockLabel().Font),
+				facepaint.MeasureStringWidth(block.Value().String(), styledHighlightCard.blockValue().Font),
+			)
 		}
 	}
 	var statsCards []*facepaint.Block

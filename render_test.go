@@ -41,7 +41,7 @@ func TestRenderReplay(t *testing.T) {
 
 	env.LoadTestEnv(t)
 	db := tests.StaticTestingDatabase()
-	wg, _ := wargamingClientsFromEnv()
+	wg, _ := wargamingClientsFromEnv(nil)
 
 	printer, err := localization.NewPrinter("stats", language.English)
 	is.NoErr(err)
