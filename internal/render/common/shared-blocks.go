@@ -1,8 +1,9 @@
 package common
 
 import (
+	"time"
+
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/stats/fetch/v1"
 	"github.com/cufee/facepaint"
 	"github.com/cufee/facepaint/style"
 )
@@ -36,20 +37,20 @@ func NewPlayerNameBlock(account models.Account, theme Theme) *facepaint.Block {
 	return facepaint.NewBlocksContent(wrapperStl.Options(), blocks...)
 }
 
-func NewFooterBlock(stats fetch.AccountStatsOverPeriod, opts Options) *facepaint.Block {
+func NewFooterBlock(periodStart, periodEnd time.Time, opts Options) *facepaint.Block {
 	stl := FooterPillStyle(opts.Theme)
 	var footer []*facepaint.Block
 	for _, text := range opts.FooterText {
 		footer = append(footer, facepaint.MustNewTextContent(stl.Options(), text))
 	}
 
-	sessionTo := stats.PeriodEnd.Format("Jan 2, 2006")
+	sessionTo := periodEnd.Format("Jan 2, 2006")
 	sessionFromFormat := "Jan 2, 2006"
-	if stats.PeriodStart.Year() == stats.PeriodEnd.Year() {
+	if periodStart.Year() == periodEnd.Year() {
 		sessionFromFormat = "Jan 2"
 	}
-	sessionFrom := stats.PeriodStart.Format(sessionFromFormat)
-	if stats.PeriodStart.IsZero() || sessionFrom == sessionTo {
+	sessionFrom := periodStart.Format(sessionFromFormat)
+	if periodStart.IsZero() || sessionFrom == sessionTo {
 		footer = append(footer, facepaint.MustNewTextContent(stl.Options(), sessionTo))
 	} else {
 		footer = append(footer, facepaint.MustNewTextContent(stl.Options(), sessionFrom+" - "+sessionTo))

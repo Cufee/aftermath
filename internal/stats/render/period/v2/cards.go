@@ -117,7 +117,7 @@ func generateCards(stats fetch.AccountStatsOverPeriod, cards period.Cards, _ []m
 		return nil, errors.New("no cards to render")
 	}
 
-	footer := common.NewFooterBlock(stats, opts)
+	footer := common.NewFooterBlock(stats.PeriodStart, stats.PeriodEnd, opts)
 	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsFrame)), statsCards...)
 
 	if opts.Background != nil {
