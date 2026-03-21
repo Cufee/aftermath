@@ -29,6 +29,11 @@ cta_command_links_verify_body: |-
 
   This will make your custom background images visible to other users and unlock the `/my` command!
 cta_command_links_verify_head: "Verify your Blitz account!"
+cta_command_theme_body: |-
+  You can customize the look of your stats images with `/theme`!
+
+  Try out our seasonal themes for a fresh new look.
+cta_command_theme_head: "Make your stats stand out!"
 cta_command_replay_body: |-
   You can upload a replay using `/replay` to get an overview of your battle with stats for every player!
 

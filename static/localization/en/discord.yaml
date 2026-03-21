@@ -239,6 +239,17 @@ stats_refresh_interaction_error_expired: "This refresh button has expired. Pleas
 wargaming_error_outage: "It looks like Wargaming is having some temporary issues. Please try again in a few seconds."
 wargaming_error_outage_short: "It looks like Wargaming is having some issues. Please try again."
 wargaming_error_private_account: "This account is marked private by Wargaming and no stats are available for it at this time."
+command_theme_name: "theme"
+command_theme_description: "Change the visual theme of your stats images"
+command_theme_option_select_name: "select"
+command_theme_option_select_description: "Pick a theme to apply to your stats"
+command_theme_option_select_choice_default_name: "Default"
+command_theme_option_select_choice_spring2026_name: "Sakura Flutter"
+command_theme_set_success_fmt: "Your theme has been updated to **%s**! It will be applied to your next stats image."
+command_theme_reset_success: "Your theme has been reset to default."
+command_theme_current_fmt: "Your current theme is **%s**. Use `/theme` with the select option to change it."
+command_theme_not_found: "This theme does not exist. Please select a theme from the available options."
+theme_highlighted_hint: "This image uses a seasonal theme! Use `/theme` to change or disable it."
 automod_unverified_user_message_deleted_fmt: |-
   Hey <@%s>, your message was removed because your account has not been verified yet.
   To start chatting, please use any Aftermath command first (try `/help`).

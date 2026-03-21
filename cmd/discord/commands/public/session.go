@@ -115,6 +115,15 @@ func init() {
 					}
 				}
 
+				themeID, theme, themeHint := resolveTheme(ctx.User(), ioptions.BackgroundID != "")
+				if theme != nil {
+					opts = append(opts, stats.WithTheme(*theme))
+					ioptions.ThemeID = themeID
+					if themeHint != "" && message == "" {
+						message = themeHint
+					}
+				}
+
 				image, meta, err := ctx.Core().Stats(ctx.Locale()).SessionImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
 				if err != nil {
 					if errors.Is(err, stats.ErrAccountNotTracked) || (errors.Is(err, fetch.ErrSessionNotFound) && options.Days < 1) {

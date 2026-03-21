@@ -15,6 +15,7 @@ const (
 	UserContentTypeInModeration       = UserContentType("in-moderation")
 	UserContentTypeClanBackground     = UserContentType("clan-background-image")
 	UserContentTypePersonalBackground = UserContentType("personal-background-image")
+	UserContentTypeThemePreference    = UserContentType("theme-preference")
 )
 
 func (t UserContentType) Valid() bool {

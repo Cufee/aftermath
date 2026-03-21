@@ -92,7 +92,7 @@ func (o requestOptions) RenderOpts(printer func(string) string) []common.Option 
 		copts = append(copts, common.WithBackground(o.backgroundImage, o.backgroundIsCustom))
 	} else if o.backgroundURL != "" {
 		copts = append(copts, common.WithBackgroundURL(o.backgroundURL, o.backgroundIsCustom))
-	} else {
+	} else if o.theme == nil {
 		copts = append(copts, common.WithBackgroundURL("static://bg-default", false))
 	}
 	if o.theme != nil {

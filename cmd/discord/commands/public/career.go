@@ -115,6 +115,15 @@ func careerCommandHandler(ctx common.Context) error {
 		}
 	}
 
+	themeID, theme, themeHint := resolveTheme(ctx.User(), ioptions.BackgroundID != "")
+	if theme != nil {
+		opts = append(opts, stats.WithTheme(*theme))
+		ioptions.ThemeID = themeID
+		if themeHint != "" && message == "" {
+			message = themeHint
+		}
+	}
+
 	image, meta, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(ctx.Ctx(), accountID, options.PeriodStart, opts...)
 	if err != nil {
 		return ctx.Err(err, common.ApplicationError)
