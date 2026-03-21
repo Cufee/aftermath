@@ -24,6 +24,9 @@ type Theme struct {
 	// Optional background image bundled with the theme.
 	// Used as the default background when no explicit background is provided.
 	Background image.Image
+	// BackgroundBlur overrides the default blur applied to the background image
+	// at render time. nil = use DefaultBackgroundBlur, non-nil = use this value.
+	BackgroundBlur *float64
 
 	// BackgroundOverlay is rendered behind cards, on top of the background image.
 	// seed is derived from the account ID for deterministic patterns.

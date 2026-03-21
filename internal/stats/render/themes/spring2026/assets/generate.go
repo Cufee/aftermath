@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/jpeg"
 	"image/png"
 	"math"
 	"os"
@@ -37,6 +38,11 @@ var tints = []tintPreset{
 }
 
 func main() {
+	generatePetals()
+	generateBlurredBackground()
+}
+
+func generatePetals() {
 	sourceDir := filepath.Join("petals", "source")
 	outDir := filepath.Join("petals", "processed")
 
@@ -101,6 +107,70 @@ func main() {
 		}
 	}
 	fmt.Printf("generated %d processed petal images\n", idx)
+}
+
+func generateBlurredBackground() {
+	const (
+		minSigma = 0.5
+		maxSigma = 8.0
+		levels   = 8
+		quality  = 95
+	)
+
+	bg, err := imaging.Open("background.jpg")
+	if err != nil {
+		panic(fmt.Sprintf("failed to open background.jpg: %v", err))
+	}
+
+	dm, err := imaging.Open("depthmap.png")
+	if err != nil {
+		panic(fmt.Sprintf("failed to open depthmap.png: %v", err))
+	}
+
+	w, h := bg.Bounds().Dx(), bg.Bounds().Dy()
+	dm = imaging.Resize(dm, w, h, imaging.Linear)
+
+	stack := make([]*image.NRGBA, levels)
+	for i := range levels {
+		sigma := minSigma + (maxSigma-minSigma)*float64(i)/float64(levels-1)
+		stack[i] = imaging.Blur(bg, sigma)
+		fmt.Printf("  blur level %d/%d (sigma=%.1f)\n", i+1, levels, sigma)
+	}
+
+	out := image.NewNRGBA(image.Rect(0, 0, w, h))
+	for y := range h {
+		for x := range w {
+			r, _, _, _ := dm.At(x, y).RGBA()
+			depth := float64(r>>8) / 255.0 // 1.0 = close (bright), 0.0 = far (dark)
+
+			// close → low index (less blur), far → high index (more blur)
+			idx := (1.0 - depth) * float64(levels-1)
+			lo := int(math.Floor(idx))
+			hi := int(math.Ceil(idx))
+			lo = max(lo, 0)
+			hi = min(hi, levels-1)
+			frac := idx - float64(lo)
+
+			c1 := stack[lo].NRGBAAt(x, y)
+			c2 := stack[hi].NRGBAAt(x, y)
+			out.SetNRGBA(x, y, color.NRGBA{
+				R: uint8(lerp(float64(c1.R), float64(c2.R), frac)),
+				G: uint8(lerp(float64(c1.G), float64(c2.G), frac)),
+				B: uint8(lerp(float64(c1.B), float64(c2.B), frac)),
+				A: 255,
+			})
+		}
+	}
+
+	f, err := os.Create("background_blurred.jpg")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	if err := jpeg.Encode(f, out, &jpeg.Options{Quality: quality}); err != nil {
+		panic(err)
+	}
+	fmt.Println("generated depth-blurred background")
 }
 
 // trimAlpha crops transparent borders, keeping at least minPad pixels of padding.
