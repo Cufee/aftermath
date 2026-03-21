@@ -11,24 +11,24 @@ import (
 	"github.com/cufee/facepaint/style"
 )
 
-func newVehicleCard(data session.VehicleCard, blockWidth map[prepare.Tag]float64) *facepaint.Block {
-	title := facepaint.NewBlocksContent(styledVehicleCard.titleWrapper,
-		facepaint.MustNewTextContent(styledVehicleCard.titleText(), data.Meta+" "+data.Title),
-		newVehicleWN8Icon(data),
+func newVehicleCard(vStyle vehicleCardStyle, data session.VehicleCard, blockWidth map[prepare.Tag]float64) *facepaint.Block {
+	title := facepaint.NewBlocksContent(vStyle.titleWrapper,
+		facepaint.MustNewTextContent(vStyle.titleText(), data.Meta+" "+data.Title),
+		newVehicleWN8Icon(vStyle, data),
 	)
 
 	var statsBlocks []*facepaint.Block
 	for _, block := range data.Blocks {
-		statsBlocks = append(statsBlocks, newVehicleBlockValue(block, blockWidth))
+		statsBlocks = append(statsBlocks, newVehicleBlockValue(vStyle, block, blockWidth))
 	}
 
-	return facepaint.NewBlocksContent(styledVehicleCard.card,
+	return facepaint.NewBlocksContent(vStyle.card,
 		title,
-		facepaint.NewBlocksContent(styledVehicleCard.stats, statsBlocks...),
+		facepaint.NewBlocksContent(vStyle.stats, statsBlocks...),
 	)
 }
 
-func newVehicleBlockValue(block prepare.StatsBlock[session.BlockData, string], blockWidth map[prepare.Tag]float64) *facepaint.Block {
+func newVehicleBlockValue(vStyle vehicleCardStyle, block prepare.StatsBlock[session.BlockData, string], blockWidth map[prepare.Tag]float64) *facepaint.Block {
 	switch block.Tag {
 	default:
 		var indicatorColor color.Color = color.Transparent
@@ -54,36 +54,34 @@ func newVehicleBlockValue(block prepare.StatsBlock[session.BlockData, string], b
 			Bottom:                  20,
 		})))
 
-		return facepaint.NewBlocksContent(styledVehicleCard.valueWrapper(blockWidth[block.Tag]).Options(),
+		return facepaint.NewBlocksContent(vStyle.valueWrapper(blockWidth[block.Tag]).Options(),
 			indicator,
-			facepaint.MustNewTextContent(styledVehicleCard.value().Options(), block.Value().String()),
+			facepaint.MustNewTextContent(vStyle.value().Options(), block.Value().String()),
 		)
 
 	case prepare.TagBattles:
-		return facepaint.NewBlocksContent(styledVehicleCard.valueWrapper(blockWidth[block.Tag]).Options(),
-			facepaint.MustNewTextContent(styledVehicleCard.value().Options(), block.Value().String()),
+		return facepaint.NewBlocksContent(vStyle.valueWrapper(blockWidth[block.Tag]).Options(),
+			facepaint.MustNewTextContent(vStyle.value().Options(), block.Value().String()),
 		)
 	}
-
 }
 
-func newVehicleLegendCard(data session.VehicleCard, blockWidth map[prepare.Tag]float64) *facepaint.Block {
+func newVehicleLegendCard(vStyle vehicleCardStyle, legendPillText *style.Style, data session.VehicleCard, blockWidth map[prepare.Tag]float64) *facepaint.Block {
 	var legendBlocks []*facepaint.Block
 	for _, block := range data.Blocks {
 		legendBlocks = append(legendBlocks,
-			facepaint.NewBlocksContent(styledVehicleLegendPill(blockWidth[block.Tag]),
-				facepaint.MustNewTextContent(styledVehicleLegendPillText().Options(), block.Label),
+			facepaint.NewBlocksContent(newVehicleLegendPill(blockWidth[block.Tag]),
+				facepaint.MustNewTextContent(legendPillText.Options(), block.Label),
 			),
 		)
 	}
 
-	return facepaint.NewBlocksContent(styledVehicleLegendPillWrapper,
-		facepaint.NewBlocksContent(styledVehicleCard.stats, legendBlocks...),
+	return facepaint.NewBlocksContent(newVehicleLegendPillWrapper(),
+		facepaint.NewBlocksContent(vStyle.stats, legendBlocks...),
 	)
-
 }
 
-func newVehicleWN8Icon(data session.VehicleCard) *facepaint.Block {
+func newVehicleWN8Icon(vStyle vehicleCardStyle, data session.VehicleCard) *facepaint.Block {
 	for _, block := range data.Blocks {
 		if block.Tag != prepare.TagWN8 {
 			continue
@@ -92,7 +90,7 @@ func newVehicleWN8Icon(data session.VehicleCard) *facepaint.Block {
 		if block.Value().Float() <= 0 {
 			ratingColors.Background = common.TextAlt
 		}
-		icon := facepaint.NewBlocksContent(styledVehicleCard.titleIconWrapper,
+		icon := facepaint.NewBlocksContent(vStyle.titleIconWrapper,
 			facepaint.MustNewImageContent(
 				style.NewStyle(style.SetWidth(vehicleIconSizeWN8), style.SetWidth(vehicleIconSizeWN8)),
 				common.AftermathLogo(ratingColors.Background, common.TinyLogoOptions()),

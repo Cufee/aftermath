@@ -1,32 +1,28 @@
-package session
+package common
 
 import (
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/render/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/facepaint"
 	"github.com/cufee/facepaint/style"
 )
 
-func newPlayerNameCard(account models.Account) *facepaint.Block {
+func NewPlayerNameBlock(account models.Account, theme Theme) *facepaint.Block {
 	var blocks []*facepaint.Block
 
-	// clan tag
 	var clanTagBlock *facepaint.Block
 	if account.ClanTag != "" {
-		stl := styledPlayerClanTag()
-		clanTagBlock = facepaint.NewBlocksContent(styledPlayerClanTagCard.Options(), facepaint.MustNewTextContent(stl.Options(), account.ClanTag))
+		textStl := ClanTagTextStyle(theme)
+		cardStl := ClanTagCardStyle(theme)
+		clanTagBlock = facepaint.NewBlocksContent(cardStl.Options(), facepaint.MustNewTextContent(textStl.Options(), account.ClanTag))
 		blocks = append(blocks, clanTagBlock)
 	}
 
-	// nickname
-	stl := styledPlayerName()
-	blocks = append(blocks, facepaint.NewBlocksContent(styledPlayerNameCard.Options(),
-		facepaint.MustNewTextContent(stl.Options(), account.Nickname),
+	nameStl := PlayerNameTextStyle(theme)
+	blocks = append(blocks, facepaint.NewBlocksContent(PlayerNameCardLayout.Options(),
+		facepaint.MustNewTextContent(nameStl.Options(), account.Nickname),
 	))
 
-	// spacer
 	if clanTagBlock != nil {
 		size := clanTagBlock.Dimensions()
 		stl := style.Style{
@@ -36,11 +32,12 @@ func newPlayerNameCard(account models.Account) *facepaint.Block {
 		blocks = append(blocks, facepaint.NewEmptyContent(stl.Options()))
 	}
 
-	return facepaint.NewBlocksContent(styledPlayerNameWrapper.Options(), blocks...)
+	wrapperStl := PlayerNameWrapperStyle(theme)
+	return facepaint.NewBlocksContent(wrapperStl.Options(), blocks...)
 }
 
-func newFooterCard(stats fetch.AccountStatsOverPeriod, cards session.Cards, opts common.Options) *facepaint.Block {
-	stl := styledFooterCard()
+func NewFooterBlock(stats fetch.AccountStatsOverPeriod, opts Options) *facepaint.Block {
+	stl := FooterPillStyle(opts.Theme)
 	var footer []*facepaint.Block
 	for _, text := range opts.FooterText {
 		footer = append(footer, facepaint.MustNewTextContent(stl.Options(), text))
@@ -58,5 +55,5 @@ func newFooterCard(stats fetch.AccountStatsOverPeriod, cards session.Cards, opts
 		footer = append(footer, facepaint.MustNewTextContent(stl.Options(), sessionFrom+" - "+sessionTo))
 	}
 
-	return facepaint.NewBlocksContent(styledFooterWrapper.Options(), footer...)
+	return facepaint.NewBlocksContent(FooterWrapperLayout.Options(), footer...)
 }

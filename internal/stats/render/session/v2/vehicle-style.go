@@ -22,13 +22,15 @@ type vehicleCardStyle struct {
 	valueWrapper func(float64) *style.Style
 }
 
-var styledVehicleLegendPillWrapper = style.NewStyle(style.Parent(style.Style{
-	Direction:      style.DirectionHorizontal,
-	JustifyContent: style.JustifyContentSpaceBetween,
-	Gap:            5,
-}))
+func newVehicleLegendPillWrapper() style.StyleOptions {
+	return style.NewStyle(style.Parent(style.Style{
+		Direction:      style.DirectionHorizontal,
+		JustifyContent: style.JustifyContentSpaceBetween,
+		Gap:            5,
+	}))
+}
 
-func styledVehicleLegendPill(width float64) style.StyleOptions {
+func newVehicleLegendPill(width float64) style.StyleOptions {
 	return style.NewStyle(style.Parent(style.Style{
 		Debug: debugVehicleCards,
 		Width: width,
@@ -37,84 +39,72 @@ func styledVehicleLegendPill(width float64) style.StyleOptions {
 	}))
 }
 
-func styledVehicleLegendPillText() *style.Style {
-	return &style.Style{
-		Color:           common.TextAlt,
-		Font:            common.FontSmall(),
-		BackgroundColor: common.DefaultCardColor,
-		BlurBackground:  cardBackgroundBlur,
-
-		BorderRadiusTopLeft:     common.BorderRadiusSM,
-		BorderRadiusTopRight:    common.BorderRadiusSM,
-		BorderRadiusBottomLeft:  common.BorderRadiusSM,
-		BorderRadiusBottomRight: common.BorderRadiusSM,
+func newVehicleLegendPillText(theme common.Theme) *style.Style {
+	pillCard := theme.Card.Chain(style.SetBorderRadius(common.BorderRadiusSM))
+	s := common.ApplyTheme(style.Style{
+		Font: common.FontSmall(),
 
 		PaddingLeft:   15,
 		PaddingRight:  15,
 		PaddingTop:    5,
 		PaddingBottom: 5,
-	}
+	}, pillCard)
+	themed := common.ApplyTheme(s, theme.TextAlt())
+	return &themed
 }
 
-var styledVehicleCard = vehicleCardStyle{
-	card: style.NewStyle(style.Parent(style.Style{
-		Debug: debugVehicleCards,
+func newVehicleCardStyle(theme common.Theme) vehicleCardStyle {
+	return vehicleCardStyle{
+		card: style.NewStyle(style.Parent(common.ApplyTheme(style.Style{
+			Debug: debugVehicleCards,
 
-		Direction: style.DirectionVertical,
+			Direction: style.DirectionVertical,
 
-		BackgroundColor: common.DefaultCardColor,
-		BlurBackground:  cardBackgroundBlur,
-
-		BorderRadiusTopLeft:     common.BorderRadiusLG,
-		BorderRadiusTopRight:    common.BorderRadiusLG,
-		BorderRadiusBottomLeft:  common.BorderRadiusLG,
-		BorderRadiusBottomRight: common.BorderRadiusLG,
-
-		GrowHorizontal: true,
-		Gap:            5,
-
-		PaddingLeft:   cardPaddingX / 1.5,
-		PaddingRight:  cardPaddingX / 1.5,
-		PaddingTop:    cardPaddingY / 2,
-		PaddingBottom: cardPaddingY / 2,
-	})),
-
-	titleIconWrapper: style.NewStyle(style.Parent(style.Style{})),
-	titleWrapper: style.NewStyle(style.Parent(style.Style{
-		Debug:      debugVehicleCards,
-		AlignItems: style.AlignItemsCenter,
-
-		GrowHorizontal: true,
-		Gap:            10,
-	})),
-	titleText: func() style.StyleOptions {
-		return style.NewStyle(style.Parent(style.Style{
-			Color:          common.TextSecondary,
-			Font:           common.FontMedium(),
 			GrowHorizontal: true,
-		}))
-	},
+			Gap:            5,
 
-	stats: style.NewStyle(style.Parent(style.Style{
-		Debug: debugVehicleCards,
+			PaddingLeft:   common.CardPaddingX / 1.5,
+			PaddingRight:  common.CardPaddingX / 1.5,
+			PaddingTop:    common.CardPaddingY / 2,
+			PaddingBottom: common.CardPaddingY / 2,
+		}, theme.Card))),
 
-		Direction:      style.DirectionHorizontal,
-		JustifyContent: style.JustifyContentSpaceBetween,
-		GrowHorizontal: true,
-		Gap:            10,
-	})),
-	value: func() *style.Style {
-		return &style.Style{
-			Color:          common.TextPrimary,
-			Font:           common.FontLarge(),
-			JustifyContent: style.JustifyContentCenter,
-		}
-	},
-	valueWrapper: func(width float64) *style.Style {
-		return &style.Style{
-			Width:          width,
-			JustifyContent: style.JustifyContentCenter,
-			AlignItems:     style.AlignItemsCenter,
-		}
-	},
+		titleIconWrapper: style.NewStyle(style.Parent(style.Style{})),
+		titleWrapper: style.NewStyle(style.Parent(style.Style{
+			Debug:      debugVehicleCards,
+			AlignItems: style.AlignItemsCenter,
+
+			GrowHorizontal: true,
+			Gap:            10,
+		})),
+		titleText: func() style.StyleOptions {
+			return style.NewStyle(style.Parent(common.ApplyTheme(style.Style{
+				Font:           common.FontMedium(),
+				GrowHorizontal: true,
+			}, theme.TextSecondary())))
+		},
+
+		stats: style.NewStyle(style.Parent(style.Style{
+			Debug: debugVehicleCards,
+
+			Direction:      style.DirectionHorizontal,
+			JustifyContent: style.JustifyContentSpaceBetween,
+			GrowHorizontal: true,
+			Gap:            10,
+		})),
+		value: func() *style.Style {
+			s := common.ApplyTheme(style.Style{
+				Font:           common.FontLarge(),
+				JustifyContent: style.JustifyContentCenter,
+			}, theme.TextPrimary())
+			return &s
+		},
+		valueWrapper: func(width float64) *style.Style {
+			return &style.Style{
+				Width:          width,
+				JustifyContent: style.JustifyContentCenter,
+				AlignItems:     style.AlignItemsCenter,
+			}
+		},
+	}
 }

@@ -1,29 +1,29 @@
 package session
 
 import (
+	"github.com/cufee/aftermath/internal/render/common"
 	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
 	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/facepaint"
 	"github.com/cufee/facepaint/style"
 )
 
-func newHighlightCard(data session.VehicleCard, blockSizes map[prepare.Tag]float64) *facepaint.Block {
-	leftSide := facepaint.NewBlocksContent(styledHighlightCard.titleWrapper.Options(),
-		facepaint.MustNewTextContent(styledHighlightCard.titleLabel().Options(), data.Meta),
-		facepaint.MustNewTextContent(styledHighlightCard.titleVehicle().Options(), data.Title),
+func newHighlightCard(hlStyle common.HighlightCardStyle, data session.VehicleCard, blockSizes map[prepare.Tag]float64) *facepaint.Block {
+	leftSide := facepaint.NewBlocksContent(hlStyle.TitleWrapper.Options(),
+		facepaint.MustNewTextContent(hlStyle.TitleLabel().Options(), data.Meta),
+		facepaint.MustNewTextContent(hlStyle.TitleVehicle().Options(), data.Title),
 	)
 
 	var rightSide []*facepaint.Block
 	for _, block := range data.Blocks {
-		rightSide = append(rightSide, facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledHighlightCard.stats), style.SetWidth(blockSizes[block.Tag])),
-			facepaint.MustNewTextContent(styledHighlightCard.blockValue().Options(), block.V.String()),
-			facepaint.MustNewTextContent(styledHighlightCard.blockLabel().Options(), block.Label),
+		rightSide = append(rightSide, facepaint.NewBlocksContent(style.NewStyle(style.Parent(hlStyle.Stats), style.SetWidth(blockSizes[block.Tag])),
+			facepaint.MustNewTextContent(hlStyle.BlockValue().Options(), block.V.String()),
+			facepaint.MustNewTextContent(hlStyle.BlockLabel().Options(), block.Label),
 		))
 	}
 
-	return facepaint.NewBlocksContent(styledHighlightCard.card.Options(),
+	return facepaint.NewBlocksContent(hlStyle.Card.Options(),
 		leftSide,
-		facepaint.NewBlocksContent(styledHighlightCard.statsWrapper.Options(), rightSide...),
+		facepaint.NewBlocksContent(hlStyle.StatsWrapper.Options(), rightSide...),
 	)
-
 }

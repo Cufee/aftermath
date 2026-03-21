@@ -14,10 +14,14 @@ type Options struct {
 	Background         image.Image
 	BackgroundIsCustom bool
 	Printer            func(string) string
+	Theme              Theme
 }
 
 func DefaultOptions() Options {
-	return Options{Printer: func(s string) string { return s }}
+	return Options{
+		Printer: func(s string) string { return s },
+		Theme:   DefaultTheme(),
+	}
 }
 
 type Option func(*Options)
