@@ -38,6 +38,8 @@ import (
 	"github.com/cufee/aftermath/cmd/core/server/handlers/private"
 	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/external/averages"
+	"github.com/cufee/aftermath/internal/external/blitzkit"
 	"github.com/cufee/aftermath/internal/external/blitzstars"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/localization"
@@ -374,16 +376,21 @@ func coreClientsFromEnv(db database.Client, observer metrics.ErrorObserver) (cor
 	if err != nil {
 		log.Fatal().Msgf("failed to init a blitzstars client %s", err)
 	}
+	bkClient, err := blitzkit.NewClient(time.Second * 10)
+	if err != nil {
+		log.Fatal().Msgf("failed to init a blitzkit client %s", err)
+	}
+	avgClient := averages.NewClient(bsClient, bkClient)
 
 	liveClient, cacheClient := wargamingClientsFromEnv(observer)
 
 	// Fetch client
-	liveFetchClient, err := fetch.NewMultiSourceClient(liveClient, bsClient, db)
+	liveFetchClient, err := fetch.NewMultiSourceClient(liveClient, avgClient, db)
 	if err != nil {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}
 
-	cacheFetchClient, err := fetch.NewMultiSourceClient(cacheClient, bsClient, db)
+	cacheFetchClient, err := fetch.NewMultiSourceClient(cacheClient, avgClient, db)
 	if err != nil {
 		log.Fatal().Msgf("fetch#NewMultiSourceClient failed %s", err)
 	}

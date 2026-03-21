@@ -29,6 +29,7 @@ COPY ./ ./
 # COPY --from=builder-node /workspace/static/localization/ ./static/localization/
 
 # generate static assets
+RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/external/blitzkit
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/assets
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./cmd/frontend/assets/generate
 RUN --mount=type=cache,target=$GOPATH/pkg/mod go generate ./internal/stats/render/themes/.../assets

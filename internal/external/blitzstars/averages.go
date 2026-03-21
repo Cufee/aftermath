@@ -40,11 +40,9 @@ func (c client) CurrentTankAverages(ctx context.Context) (map[string]frame.Stats
 	}
 
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-	req.Header.Set("Accept-Encoding", "gzip, deflate, br, zstd")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 	req.Header.Set("Connection", "keep-alive")
 	req.Header.Set("DNT", "1")
-	req.Header.Set("Host", "www.blitzstars.com")
 	req.Header.Set("Sec-Fetch-Dest", "document")
 	req.Header.Set("Sec-Fetch-Mode", "navigate")
 	req.Header.Set("Sec-Fetch-Site", "none")

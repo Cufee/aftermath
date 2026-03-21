@@ -12,3 +12,5 @@ tmp
 .claude
 .playwright-mcp
 
+internal/external/blitzkit/averages.pb.go
+
