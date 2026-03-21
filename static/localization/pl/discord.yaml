@@ -252,12 +252,10 @@ command_theme_option_clear_description: "Usuń aktualny motyw i wróć do domyś
 command_theme_set_success_fmt: "Twój motyw został zmieniony na **%s**! Zostanie zastosowany do następnego obrazu statystyk."
 command_theme_reset_success: "Twój motyw został przywrócony do domyślnego."
 command_theme_current_fmt: |-
-  **Dostępne Motywy**
+  **Motyw Zaktualizowany!**
   %s
-
-  Użyj `/theme select`, aby zmienić lub `/theme clear`, aby zresetować.
 command_theme_not_found: "Ten motyw nie istnieje. Wybierz motyw z dostępnych opcji."
-theme_highlighted_hint: "Ten obraz używa sezonowego motywu! Użyj `/theme`, aby go zmienić lub wyłączyć."
+theme_highlighted_hint: "O! Ten obraz używa sezonowego motywu! Użyj `/theme`, aby dowiedzieć się więcej."
 automod_unverified_user_message_deleted_fmt: |-
   Hej <@%s>, Twoja wiadomość została usunięta, ponieważ Twoje konto nie zostało jeszcze zweryfikowane.
   Aby rozpocząć czat, użyj najpierw dowolnej komendy Aftermath (spróbuj `/help`).

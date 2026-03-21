@@ -252,12 +252,10 @@ command_theme_option_clear_description: "Remova seu tema atual e volte ao padrã
 command_theme_set_success_fmt: "Seu tema foi atualizado para **%s**! Ele será aplicado na sua próxima imagem de estatísticas."
 command_theme_reset_success: "Seu tema foi redefinido para o padrão."
 command_theme_current_fmt: |-
-  **Temas Disponíveis**
+  **Tema Atualizado!**
   %s
-
-  Use `/theme select` para alterar ou `/theme clear` para redefinir.
 command_theme_not_found: "Este tema não existe. Selecione um tema entre as opções disponíveis."
-theme_highlighted_hint: "Esta imagem usa um tema sazonal! Use `/theme` para alterar ou desativar."
+theme_highlighted_hint: "Uau! Esta imagem usa um tema sazonal! Use `/theme` para saber mais."
 automod_unverified_user_message_deleted_fmt: |-
   Olá <@%s>, sua mensagem foi removida porque sua conta ainda não foi verificada.
   Para começar a conversar, use qualquer comando do Aftermath primeiro (tente `/help`).
