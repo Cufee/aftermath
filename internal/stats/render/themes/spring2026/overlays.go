@@ -35,7 +35,9 @@ func makeForegroundOverlay(petals []image.Image) func(image.Image, image.Rectang
 		overlay := image.NewNRGBA(image.Rect(0, 0, w, h))
 
 		band := min(w, h) / 4
-		petalCount := 30 + rng.Intn(15)
+		perimeter := 2 * (w + h)
+		basePetals := float64(perimeter) * 0.024
+		petalCount := max(10, int(basePetals*(0.85+rng.Float64()*0.30)))
 
 		for range petalCount {
 			petal := nrgbaPetals[rng.Intn(len(nrgbaPetals))]

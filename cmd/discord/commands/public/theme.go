@@ -1,6 +1,10 @@
 package public
 
 import (
+	"fmt"
+	"sort"
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
@@ -30,20 +34,51 @@ func init() {
 				builder.NewOption("select", discordgo.ApplicationCommandOptionString).
 					Params(builder.SetNameKey("command_theme_option_select_name"), builder.SetDescKey("command_theme_option_select_description")).
 					Choices(buildThemeChoices()...),
+				builder.NewOption("clear", discordgo.ApplicationCommandOptionBoolean).
+					Params(builder.SetNameKey("command_theme_option_clear_name"), builder.SetDescKey("command_theme_option_clear_description")),
 			).
 			Handler(func(ctx common.Context) error {
+				if clear, ok := common.GetOption[bool](ctx.Options(), "clear"); ok && clear {
+					existing, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypeThemePreference)
+					if err != nil && !database.IsNotFound(err) {
+						return ctx.Err(err, common.ApplicationError)
+					}
+					if !database.IsNotFound(err) {
+						err = ctx.Core().Database().DeleteUserContent(ctx.Ctx(), existing.ID)
+						if err != nil {
+							return ctx.Err(err, common.ApplicationError)
+						}
+					}
+					return ctx.Reply().Send("command_theme_reset_success")
+				}
+
 				selected, hasSelection := common.GetOption[string](ctx.Options(), "select")
 				if !hasSelection {
 					currentTheme, hasTheme := ctx.User().Content(models.UserContentTypeThemePreference)
-
-					var currentName string
+					var currentID string
 					if hasTheme {
-						currentName = string(currentTheme.Value)
+						currentID = string(currentTheme.Value)
 					} else {
-						currentName = "default"
+						currentID = "default"
 					}
 
-					return ctx.Reply().Format("command_theme_current_fmt", currentName).Send()
+					ids := themes.AvailableThemes()
+					sort.Strings(ids)
+
+					var lines []string
+					for _, id := range ids {
+						name := ctx.Localize(fmt.Sprintf("command_theme_option_select_choice_%s_name", id))
+						if name == "" {
+							name = id
+						}
+						if id == currentID {
+							lines = append(lines, "⬢ "+name)
+						} else {
+							lines = append(lines, "⬡ "+name)
+						}
+					}
+
+					return ctx.Reply().Format("command_theme_current_fmt", strings.Join(lines, "\n")).Send()
 				}
 
 				if selected == "default" {
