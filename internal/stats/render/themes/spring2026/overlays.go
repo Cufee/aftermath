@@ -36,7 +36,7 @@ func makeForegroundOverlay(petals []image.Image) func(image.Image, image.Rectang
 
 		band := min(w, h) / 4
 		perimeter := 2 * (w + h)
-		basePetals := float64(perimeter) * 0.024
+		basePetals := float64(perimeter) * 0.020
 		petalCount := max(10, int(basePetals*(0.85+rng.Float64()*0.30)))
 
 		for range petalCount {
