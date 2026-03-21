@@ -24,6 +24,25 @@ func buildThemeChoices() []builder.OptionChoice {
 	return choices
 }
 
+func themeListString(ctx common.Context, currentID string) string {
+	ids := themes.AvailableThemes()
+	sort.Strings(ids)
+
+	var lines []string
+	for _, id := range ids {
+		name := ctx.Localize(fmt.Sprintf("command_theme_select_option_theme_choice_%s_name", id))
+		if name == "" {
+			name = id
+		}
+		if id == currentID {
+			lines = append(lines, "⬢ "+name)
+		} else {
+			lines = append(lines, "⬡ "+name)
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
 func init() {
 	commands.LoadedPublic.Add(
 		builder.NewCommand("theme").
@@ -35,7 +54,8 @@ func init() {
 					Params(builder.SetNameKey("command_theme_option_select_name"), builder.SetDescKey("command_theme_option_select_description")).
 					Options(
 						builder.NewOption("theme", discordgo.ApplicationCommandOptionString).
-							Choices(buildThemeChoices()...),
+							Choices(buildThemeChoices()...).
+							Required(),
 					),
 				builder.NewOption("clear", discordgo.ApplicationCommandOptionSubCommand).
 					Params(builder.SetNameKey("command_theme_option_clear_name"), builder.SetDescKey("command_theme_option_clear_description")),
@@ -56,38 +76,7 @@ func init() {
 						} else {
 							currentID = "default"
 						}
-
-						ids := themes.AvailableThemes()
-						sort.Strings(ids)
-
-						var lines []string
-						for _, id := range ids {
-							name := ctx.Localize(fmt.Sprintf("command_theme_select_option_theme_choice_%s_name", id))
-							if name == "" {
-								name = id
-							}
-							if id == currentID {
-								lines = append(lines, "⬢ "+name)
-							} else {
-								lines = append(lines, "⬡ "+name)
-							}
-						}
-
-						return ctx.Reply().Format("command_theme_current_fmt", strings.Join(lines, "\n")).Send()
-					}
-
-					if selected == "default" {
-						existing, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypeThemePreference)
-						if err != nil && !database.IsNotFound(err) {
-							return ctx.Err(err, common.ApplicationError)
-						}
-						if !database.IsNotFound(err) {
-							err = ctx.Core().Database().DeleteUserContent(ctx.Ctx(), existing.ID)
-							if err != nil {
-								return ctx.Err(err, common.ApplicationError)
-							}
-						}
-						return ctx.Reply().Send("command_theme_reset_success")
+						return ctx.Reply().Format("command_theme_current_fmt", themeListString(ctx, currentID)).Send()
 					}
 
 					if _, ok := themes.GetTheme(selected); !ok {
@@ -112,7 +101,7 @@ func init() {
 						return ctx.Err(err, common.ApplicationError)
 					}
 
-					return ctx.Reply().Format("command_theme_set_success_fmt", selected).Send()
+					return ctx.Reply().Format("command_theme_current_fmt", themeListString(ctx, selected)).Send()
 
 				case "clear":
 					existing, err := ctx.Core().Database().GetUserContentFromRef(ctx.Ctx(), ctx.User().ID, models.UserContentTypeThemePreference)
@@ -125,7 +114,7 @@ func init() {
 							return ctx.Err(err, common.ApplicationError)
 						}
 					}
-					return ctx.Reply().Send("command_theme_reset_success")
+					return ctx.Reply().Format("command_theme_current_fmt", themeListString(ctx, "")).Send()
 				}
 			}),
 	)

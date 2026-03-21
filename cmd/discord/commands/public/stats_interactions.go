@@ -10,7 +10,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/middleware"
-	"github.com/cufee/aftermath/internal/external/blitzkit"
+	"github.com/cufee/aftermath/internal/external/averages"
 	"github.com/cufee/aftermath/internal/glossary"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
@@ -82,7 +82,7 @@ func init() {
 				switch interaction.EventID {
 				case "career", "stats":
 					img, mt, err := ctx.Core().Stats(ctx.Locale()).PeriodImage(ctx.Ctx(), ioptions.AccountID, ioptions.PeriodStart, opts...)
-					if errors.Is(err, blitzkit.ErrServiceUnavailable) {
+					if errors.Is(err, averages.ErrServiceUnavailable) {
 						return ctx.Reply().
 							Hint(ctx.InteractionID()).
 							IsError(common.ApplicationError).

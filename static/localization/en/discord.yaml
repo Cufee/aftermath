@@ -245,19 +245,17 @@ command_theme_option_select_name: "select"
 command_theme_option_select_description: "Select a theme for your stats images"
 command_theme_select_option_theme_name: "theme"
 command_theme_select_option_theme_description: "Pick a theme to apply to your stats"
-command_theme_select_option_theme_choice_default_name: "Default"
+command_theme_select_option_theme_choice_default_name: "Frosty Classic"
 command_theme_select_option_theme_choice_spring2026_name: "Sakura Flutter"
 command_theme_option_clear_name: "clear"
 command_theme_option_clear_description: "Remove your current theme and go back to default"
 command_theme_set_success_fmt: "Your theme has been updated to **%s**! It will be applied to your next stats image."
 command_theme_reset_success: "Your theme has been reset to default."
 command_theme_current_fmt: |-
-  **Available Themes**
+  **Theme Updated!**
   %s
-
-  Use `/theme select` to change or `/theme clear` to reset.
 command_theme_not_found: "This theme does not exist. Please select a theme from the available options."
-theme_highlighted_hint: "This image uses a seasonal theme! Use `/theme` to change or disable it."
+theme_highlighted_hint: "Woah! This image uses a seasonal theme! Use `/theme` to learn more."
 automod_unverified_user_message_deleted_fmt: |-
   Hey <@%s>, your message was removed because your account has not been verified yet.
   To start chatting, please use any Aftermath command first (try `/help`).

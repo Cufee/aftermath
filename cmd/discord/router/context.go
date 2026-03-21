@@ -11,7 +11,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/internal/database"
 	"github.com/cufee/aftermath/internal/database/models"
-	"github.com/cufee/aftermath/internal/external/blitzkit"
+	"github.com/cufee/aftermath/internal/external/averages"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
@@ -238,7 +238,7 @@ func (c *routeContext) Err(err error, e common.Error) error {
 	}()
 
 	// common errors from external services
-	if errors.Is(err, blitzkit.ErrServiceUnavailable) {
+	if errors.Is(err, averages.ErrServiceUnavailable) {
 		isCommonError = true
 		return c.Reply().
 			Hint(c.InteractionID()).
