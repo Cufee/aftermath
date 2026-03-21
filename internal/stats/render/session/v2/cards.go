@@ -3,145 +3,128 @@ package session
 import (
 	"strconv"
 
-	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
-	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
-	"github.com/cufee/facepaint/style"
-	"github.com/nao1215/imaging"
-
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/render/common"
 	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	prepare "github.com/cufee/aftermath/internal/stats/prepare/common/v1"
+	"github.com/cufee/aftermath/internal/stats/prepare/session/v1"
 	"github.com/cufee/facepaint"
+	"github.com/cufee/facepaint/style"
+	"github.com/nao1215/imaging"
 )
 
 func generateCards(sessionData, careerData fetch.AccountStatsOverPeriod, cards session.Cards, _ []models.UserSubscription, opts common.Options) (*facepaint.Block, error) {
+	theme := opts.Theme
+	hlStyle := common.NewHighlightCardStyle(theme)
+	styledOverviewCard := newOverviewCardStyle(theme)
+	vStyle := newVehicleCardStyle(theme)
+	legendPillText := newVehicleLegendPillText(theme)
+
 	var (
-		renderUnratedVehiclesCount = 3 // minimum number of vehicle cards
-		// primary cards
-		// when there are some unrated battles or no battles at all
-		shouldRenderUnratedOverview = sessionData.RegularBattles.Battles > 0 || sessionData.RatingBattles.Battles < 1
-		// when there are 3 vehicle cards and no rating overview cards or there are 6 vehicle cards and some rating battles
-		shouldRenderUnratedHighlights = (sessionData.RegularBattles.Battles > 0 && sessionData.RatingBattles.Battles < 1 && len(cards.Unrated.Vehicles) > renderUnratedVehiclesCount) ||
-			(sessionData.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 3)
-		shouldRenderRatingOverview = sessionData.RatingBattles.Battles > 0 && opts.VehicleIDs == nil
-		// secondary cards
-		shouldRenderUnratedVehicles = sessionData.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > 0
+		renderUnratedVehiclesCount    = 8
+		shouldRenderUnratedOverview   = sessionData.RegularBattles.Battles > 0 || sessionData.RatingBattles.Battles < 1
+		shouldRenderUnratedHighlights = sessionData.RegularBattles.Battles > 0 && len(cards.Unrated.Vehicles) > len(cards.Unrated.Highlights)
+		shouldRenderRatingOverview    = sessionData.RatingBattles.Battles > 0
 	)
 
-	// try to make the columns height roughly similar to primary column
-	if shouldRenderUnratedHighlights {
-		renderUnratedVehiclesCount += len(cards.Unrated.Highlights)
-	}
-	if shouldRenderRatingOverview {
-		renderUnratedVehiclesCount += 1
-	}
-	if len(opts.VehicleIDs) == 1 {
-		renderUnratedVehiclesCount = 0
-	}
-
-	// calculate max overview block width to make all blocks the same size
 	var maxWidthOverviewColumn = make(map[bool]float64)
-	for _, column := range cards.Unrated.Overview.Blocks {
+	for _, column := range append(cards.Unrated.Overview.Blocks, cards.Rating.Overview.Blocks...) {
 		for _, block := range column.Blocks {
+			key := column.Flavor == session.BlockFlavorDefault
+			blockStyle := styledOverviewCard.styleBlock(block)
 			switch block.Tag {
 			case prepare.TagWN8:
 				block.Label = common.GetWN8TierName(block.Value().Float())
-				maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], iconSizeWN8)
-			}
-			maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], facepaint.MeasureString(block.Label, styledOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], facepaint.MeasureString(block.Value().String(), styledOverviewCard.styleBlock(block).value.Font).TotalWidth)
-		}
-	}
-	for _, column := range cards.Rating.Overview.Blocks {
-		for _, block := range column.Blocks {
-			switch block.Tag {
+				maxWidthOverviewColumn[key] = max(maxWidthOverviewColumn[key], iconSizeWN8)
 			case prepare.TagRankedRating:
 				block.Label = common.GetRatingTierName(block.Value().Float())
-				maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], iconSizeRating)
+				maxWidthOverviewColumn[key] = max(maxWidthOverviewColumn[key], iconSizeRating)
 			}
-			maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], facepaint.MeasureString(block.Label, styledOverviewCard.styleBlock(block).label.Font).TotalWidth)
-			maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault] = max(maxWidthOverviewColumn[column.Flavor == session.BlockFlavorDefault], facepaint.MeasureString(block.Value().String(), styledOverviewCard.styleBlock(block).value.Font).TotalWidth)
+			maxWidthOverviewColumn[key] = max(maxWidthOverviewColumn[key],
+				facepaint.MeasureStringWidth(block.Label, blockStyle.label.Font),
+				facepaint.MeasureStringWidth(block.Value().String(), blockStyle.value.Font),
+			)
 		}
 	}
 
-	// calculate per block type width of highlight stats to make things even
-	var highlightBlockWidth = make(map[prepare.Tag]float64)
-	for _, highlight := range cards.Unrated.Highlights {
-		for _, block := range highlight.Blocks {
-			label := facepaint.MeasureString(block.Label, styledHighlightCard.blockLabel().Font).TotalWidth
-			value := facepaint.MeasureString(block.Value().String(), styledHighlightCard.blockValue().Font).TotalWidth
-			highlightBlockWidth[block.Tag] = max(highlightBlockWidth[block.Tag], label, value)
-		}
-	}
-
-	// calculate per block type width of vehicle stats to make things even
 	var vehicleBlockWidth = make(map[prepare.Tag]float64)
 	for _, card := range cards.Unrated.Vehicles {
 		for _, block := range card.Blocks {
-			labelStyle := styledVehicleLegendPillText()
-			label := facepaint.MeasureString(block.Label, labelStyle.Font).TotalWidth + labelStyle.PaddingLeft + labelStyle.PaddingRight
-			value := facepaint.MeasureString(block.Value().String(), styledVehicleCard.value().Font).TotalWidth
-			vehicleBlockWidth[block.Tag] = max(vehicleBlockWidth[block.Tag], label, value)
+			vehicleBlockWidth[block.Tag] = max(vehicleBlockWidth[block.Tag],
+				facepaint.MeasureBlockWidth(block.Label, *legendPillText),
+				facepaint.MeasureStringWidth(block.Value().String(), vStyle.value().Font),
+			)
 		}
 	}
 
-	var overviewCards = []*facepaint.Block{newPlayerNameCard(careerData.Account)}
-	// unrated overview
+	var overviewCards = []*facepaint.Block{common.NewPlayerNameBlock(careerData.Account, theme)}
 	if shouldRenderUnratedOverview {
-		if card := newUnratedOverviewCard(cards.Unrated.Overview, maxWidthOverviewColumn); card != nil {
+		if card := newUnratedOverviewCard(styledOverviewCard, cards.Unrated.Overview, maxWidthOverviewColumn); card != nil {
 			overviewCards = append(overviewCards, card)
 		}
 	}
-	// rating battles
 	if shouldRenderRatingOverview {
-		if card := newRatingOverviewCard(cards.Rating, maxWidthOverviewColumn); card != nil {
+		if card := newRatingOverviewCard(styledOverviewCard, cards.Rating, maxWidthOverviewColumn); card != nil {
 			overviewCards = append(overviewCards, card)
 		}
 	}
-	// highlights
 	if shouldRenderUnratedHighlights {
+		var highlightBlockWidth = make(map[prepare.Tag]float64)
+		for _, highlight := range cards.Unrated.Highlights {
+			for _, block := range highlight.Blocks {
+				highlightBlockWidth[block.Tag] = max(highlightBlockWidth[block.Tag],
+					facepaint.MeasureStringWidth(block.Label, hlStyle.BlockLabel().Font),
+					facepaint.MeasureStringWidth(block.Value().String(), hlStyle.BlockValue().Font),
+				)
+			}
+		}
+
 		for _, card := range cards.Unrated.Highlights {
-			overviewCards = append(overviewCards, newHighlightCard(card, highlightBlockWidth))
+			overviewCards = append(overviewCards, newHighlightCard(hlStyle, card, highlightBlockWidth))
 		}
 	}
 
-	// vehicles
 	var vehicleCards []*facepaint.Block
-	if shouldRenderUnratedVehicles {
-		for i, card := range cards.Unrated.Vehicles {
-			if i == renderUnratedVehiclesCount {
-				break
-			}
-			vehicleCards = append(vehicleCards, newVehicleCard(card, vehicleBlockWidth))
+	for i, card := range cards.Unrated.Vehicles {
+		if i == renderUnratedVehiclesCount {
+			break
 		}
+		vehicleCards = append(vehicleCards, newVehicleCard(vStyle, card, vehicleBlockWidth))
 	}
 
 	var sectionBlocks []*facepaint.Block
 	sectionBlocks = append(sectionBlocks, facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSection)), overviewCards...))
 	if len(vehicleCards) > 0 {
-		vehicleCards = append(vehicleCards, newVehicleLegendCard(cards.Unrated.Vehicles[0], vehicleBlockWidth))
+		vehicleCards = append(vehicleCards, newVehicleLegendCard(vStyle, legendPillText, cards.Unrated.Vehicles[0], vehicleBlockWidth))
 		sectionBlocks = append(sectionBlocks, facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSection)), vehicleCards...))
 	}
 	statsCardsBlock := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledCardsSectionsWrapper)), sectionBlocks...)
 
 	cardsFrame := facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledStatsFrame)), statsCardsBlock)
 
-	// resize and place background
 	if opts.Background != nil {
-		cardsFrameSize := cardsFrame.Dimensions()
-		opts.Background = imaging.Fill(opts.Background, cardsFrameSize.Width, cardsFrameSize.Height, imaging.Center, imaging.Lanczos)
+		bgDims := cardsFrame.Dimensions()
+		seed, _ := strconv.Atoi(careerData.Account.ID)
+		opts.Background = imaging.Fill(opts.Background, bgDims.Width, bgDims.Height, imaging.Center, imaging.Lanczos)
 		if !opts.BackgroundIsCustom {
-			seed, _ := strconv.Atoi(careerData.Account.ID)
-			opts.Background = addBackgroundBranding(opts.Background, sessionData.RegularBattles.Vehicles, seed)
+			opts.Background = common.AddWN8BackgroundBranding(opts.Background, sessionData.RegularBattles.Vehicles, seed)
 		}
-		cardsFrame = facepaint.NewBlocksContent(style.NewStyle(),
-			facepaint.MustNewImageContent(styledCardsBackground, opts.Background), cardsFrame,
-		)
+
+		var layers []*facepaint.Block
+		layers = append(layers, facepaint.MustNewImageContent(common.CardsBackgroundStyle, opts.Background))
+		if theme.BackgroundOverlay != nil {
+			if overlay := theme.BackgroundOverlay(opts.Background.Bounds(), seed); overlay != nil {
+				layers = append(layers, facepaint.MustNewImageContent(common.CardsBackgroundStyle, overlay))
+			}
+		}
+		layers = append(layers, cardsFrame)
+		cardsFrame = facepaint.NewBlocksContent(style.NewStyle(), layers...)
 	}
 
 	var frameCards []*facepaint.Block
 	frameCards = append(frameCards, cardsFrame)
-	frameCards = append(frameCards, newFooterCard(sessionData, cards, opts))
+	frameCards = append(frameCards, common.NewFooterBlock(sessionData.PeriodStart, sessionData.PeriodEnd, opts))
 
-	return facepaint.NewBlocksContent(style.NewStyle(style.Parent(styledFinalFrame)), frameCards...), nil
+	frameStyle := common.FinalFrameStyle(theme)
+	return facepaint.NewBlocksContent(style.NewStyle(style.Parent(frameStyle)), frameCards...), nil
 }

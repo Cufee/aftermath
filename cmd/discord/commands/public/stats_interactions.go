@@ -14,9 +14,9 @@ import (
 	"github.com/cufee/aftermath/internal/glossary"
 	"github.com/cufee/aftermath/internal/logic"
 	"github.com/cufee/aftermath/internal/permissions"
-	"github.com/cufee/aftermath/internal/stats/fetch/v1"
-
 	stats "github.com/cufee/aftermath/internal/stats/client/common"
+	"github.com/cufee/aftermath/internal/stats/fetch/v1"
+	"github.com/cufee/aftermath/internal/stats/render/themes"
 
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/pkg/errors"
@@ -66,7 +66,11 @@ func init() {
 					}
 				}
 
-				if ioptions.BackgroundID != "" {
+				if ioptions.ThemeID != "" {
+					if t, ok := themes.GetTheme(ioptions.ThemeID); ok {
+						opts = append(opts, stats.WithTheme(t))
+					}
+				} else if ioptions.BackgroundID != "" {
 					background, _ := ctx.Core().Database().GetUserContent(ctx.Ctx(), ioptions.BackgroundID)
 					if img, err := logic.UserContentToImage(background); err == nil {
 						opts = append(opts, stats.WithBackground(img, true))

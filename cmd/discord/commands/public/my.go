@@ -90,6 +90,15 @@ func init() {
 					accountID = defaultAccount.ReferenceID
 				}
 
+				themeID, theme, themeHint := resolveTheme(ctx.User(), ioptions.BackgroundID != "")
+				if theme != nil {
+					opts = append(opts, stats.WithTheme(*theme))
+					ioptions.ThemeID = themeID
+					if themeHint != "" && message == "" {
+						message = themeHint
+					}
+				}
+
 				var err error
 				var image stats.Image
 				switch subcommand {
@@ -122,7 +131,7 @@ func init() {
 				if err != nil {
 					return ctx.Err(err, common.ApplicationError)
 				}
-				return ctx.Reply().WithAds().File(buf.Bytes(), "session_command_by_aftermath.png").Component(button).Send()
+				return ctx.Reply().WithAds().Hint(message).File(buf.Bytes(), "session_command_by_aftermath.png").Component(button).Send()
 			}),
 	)
 }

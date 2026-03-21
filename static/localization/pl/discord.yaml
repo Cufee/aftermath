@@ -239,6 +239,23 @@ stats_refresh_interaction_error_expired: "Ten przycisk odświeżania wygasł. Pr
 wargaming_error_outage: "Wygląda na to, że Wargaming ma chwilowe problemy. Spróbuj ponownie za kilka sekund."
 wargaming_error_outage_short: "Wygląda na to, że Wargaming ma pewne problemy. Spróbuj ponownie"
 wargaming_error_private_account: "To konto zostało oznaczone przez Wargaming jako prywatne i w chwili obecnej nie są dla niego dostępne żadne statystyki."
+command_theme_name: "motyw"
+command_theme_description: "Zmień motyw wizualny swoich obrazów statystyk"
+command_theme_option_select_name: "wybierz"
+command_theme_option_select_description: "Wybierz motyw do zastosowania w statystykach"
+command_theme_option_select_choice_default_name: "Domyślny"
+command_theme_option_select_choice_spring2026_name: "Sakura Flutter"
+command_theme_option_clear_name: "wyczyść"
+command_theme_option_clear_description: "Usuń aktualny motyw i wróć do domyślnego"
+command_theme_set_success_fmt: "Twój motyw został zmieniony na **%s**! Zostanie zastosowany do następnego obrazu statystyk."
+command_theme_reset_success: "Twój motyw został przywrócony do domyślnego."
+command_theme_current_fmt: |-
+  **Dostępne Motywy**
+  %s
+
+  Użyj `/theme select`, aby zmienić lub `/theme clear`, aby zresetować.
+command_theme_not_found: "Ten motyw nie istnieje. Wybierz motyw z dostępnych opcji."
+theme_highlighted_hint: "Ten obraz używa sezonowego motywu! Użyj `/theme`, aby go zmienić lub wyłączyć."
 automod_unverified_user_message_deleted_fmt: |-
   Hej <@%s>, Twoja wiadomość została usunięta, ponieważ Twoje konto nie zostało jeszcze zweryfikowane.
   Aby rozpocząć czat, użyj najpierw dowolnej komendy Aftermath (spróbuj `/help`).

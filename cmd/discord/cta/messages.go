@@ -92,6 +92,12 @@ var (
 		buttons:       []discordgo.Button{common.ButtonInviteAftermath("cta_guild_install_button")},
 	}
 
+	ctaCommandTheme = CallToActionMessage{
+		TagsBlacklist: []string{"command_theme"},
+		headKey:       "cta_command_theme_head",
+		bodyKey:       "cta_command_theme_body",
+	}
+
 	ctaAbandonedPositiveGrowth = CallToActionMessage{
 		TagsWhitelist: []string{"growth", "growth_positive"},
 		headKey:       "cta_abandoned_positive_growth_head",
@@ -120,6 +126,7 @@ var defaultCTACollection = MessageCollection{
 	ctaCommandReplay,
 	ctaCommandLinksAdd,
 	ctaCommandLinksVerify,
+	ctaCommandTheme,
 }
 
 func (c MessageCollection) NewEmbed(locale language.Tag, tags []string) (discordgo.MessageEmbed, []discordgo.MessageComponent, bool) {

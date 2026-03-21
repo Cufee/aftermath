@@ -21,6 +21,7 @@ type requestOptions struct {
 	withWN8            bool
 	VehicleIDs         []string
 	Subscriptions      []models.UserSubscription
+	theme              *common.Theme
 
 	vehicleTags    []prepare.Tag
 	ratingColumns  []prepare.TagColumn[string]
@@ -69,6 +70,9 @@ func WithBackgroundURL(url string, isCustom bool) RequestOption {
 func WithBackground(image image.Image, isCustom bool) RequestOption {
 	return func(o *requestOptions) { o.backgroundImage = image; o.backgroundIsCustom = isCustom }
 }
+func WithTheme(theme common.Theme) RequestOption {
+	return func(o *requestOptions) { o.theme = &theme }
+}
 
 func (o requestOptions) RenderOpts(printer func(string) string) []common.Option {
 	var copts []common.Option
@@ -88,8 +92,11 @@ func (o requestOptions) RenderOpts(printer func(string) string) []common.Option 
 		copts = append(copts, common.WithBackground(o.backgroundImage, o.backgroundIsCustom))
 	} else if o.backgroundURL != "" {
 		copts = append(copts, common.WithBackgroundURL(o.backgroundURL, o.backgroundIsCustom))
-	} else {
+	} else if o.theme == nil {
 		copts = append(copts, common.WithBackgroundURL("static://bg-default", false))
+	}
+	if o.theme != nil {
+		copts = append(copts, common.WithTheme(*o.theme))
 	}
 	return copts
 }
@@ -97,6 +104,9 @@ func (o requestOptions) RenderOpts(printer func(string) string) []common.Option 
 func (o requestOptions) PrepareOpts(printer func(string) string, locale language.Tag) []prepare.Option {
 	var popts []prepare.Option
 	popts = append(popts, prepare.WithPrinter(printer, locale))
+	if o.VehicleIDs != nil {
+		popts = append(popts, prepare.WithVehicleIDs(o.VehicleIDs...))
+	}
 	if o.vehicleTags != nil {
 		popts = append(popts, prepare.WithVehicleTags(o.vehicleTags...))
 	}

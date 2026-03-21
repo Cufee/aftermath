@@ -53,6 +53,40 @@ func (c *staticTestingFetch) CurrentStats(ctx context.Context, id string, opts .
 			continue
 		}
 		f := DefaultVehicleStatsFrameBig1(fmt.Sprint(id))
+		// scale some vehicles so they exceed the minBattles threshold in
+		// GetHighlightedVehicles and win different highlight categories
+		switch id {
+		case 0: // high battles leader
+			f.Battles *= 3
+			f.BattlesWon *= 3
+			f.BattlesSurvived *= 3
+			f.DamageDealt *= 3
+			f.DamageReceived *= 3
+			f.ShotsHit *= 3
+			f.ShotsFired *= 3
+			f.Frags *= 3
+			f.EnemiesSpotted *= 3
+		case 1: // high avg damage leader
+			f.Battles *= 2
+			f.BattlesWon *= 2
+			f.BattlesSurvived *= 2
+			f.DamageDealt *= 6
+			f.DamageReceived *= 2
+			f.ShotsHit *= 2
+			f.ShotsFired *= 2
+			f.Frags *= 2
+			f.EnemiesSpotted *= 2
+		case 2: // moderate all-around, eligible for WN8 highlight
+			f.Battles *= 2
+			f.BattlesWon *= 2
+			f.BattlesSurvived *= 2
+			f.DamageDealt *= 2
+			f.DamageReceived *= 2
+			f.ShotsHit *= 2
+			f.ShotsFired *= 2
+			f.Frags *= 2
+			f.EnemiesSpotted *= 2
+		}
 		f.SetWN8(9999)
 		vehicles[fmt.Sprint(id)] = f
 	}

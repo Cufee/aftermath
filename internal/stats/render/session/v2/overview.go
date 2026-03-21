@@ -11,30 +11,28 @@ import (
 	"github.com/cufee/facepaint/style"
 )
 
-func newRatingOverviewCard(data session.RatingCards, columnWidth map[bool]float64) *facepaint.Block {
+func newRatingOverviewCard(stl overviewCardStyle, data session.RatingCards, columnWidth map[bool]float64) *facepaint.Block {
 	if len(data.Overview.Blocks) == 0 {
 		return nil
 	}
 
 	var columns []*facepaint.Block
 	for _, column := range data.Overview.Blocks {
-		columns = append(columns, newOverviewColumn(styledOverviewCard, column, columnWidth[column.Flavor == session.BlockFlavorDefault]))
+		columns = append(columns, newOverviewColumn(stl, column, columnWidth[column.Flavor == session.BlockFlavorDefault]))
 	}
-	// card
-	return facepaint.NewBlocksContent(styledOverviewCard.card.Options(), columns...)
+	return facepaint.NewBlocksContent(stl.card.Options(), columns...)
 }
 
-func newUnratedOverviewCard(data session.OverviewCard, columnWidth map[bool]float64) *facepaint.Block {
+func newUnratedOverviewCard(stl overviewCardStyle, data session.OverviewCard, columnWidth map[bool]float64) *facepaint.Block {
 	if len(data.Blocks) == 0 {
 		return nil
 	}
 
 	var columns []*facepaint.Block
 	for _, column := range data.Blocks {
-		columns = append(columns, newOverviewColumn(styledOverviewCard, column, columnWidth[column.Flavor == session.BlockFlavorDefault]))
+		columns = append(columns, newOverviewColumn(stl, column, columnWidth[column.Flavor == session.BlockFlavorDefault]))
 	}
-	// card
-	return facepaint.NewBlocksContent(styledOverviewCard.card.Options(), columns...)
+	return facepaint.NewBlocksContent(stl.card.Options(), columns...)
 }
 
 func newOverviewColumn(stl overviewCardStyle, data session.OverviewColumn, columnWidth float64) *facepaint.Block {
@@ -49,7 +47,6 @@ func newOverviewColumn(stl overviewCardStyle, data session.OverviewColumn, colum
 			columnBlocks = append(columnBlocks, newOverviewRatingBlock(stl.styleBlock(block), block))
 		}
 	}
-	// column
 	return facepaint.NewBlocksContent(style.NewStyle(
 		style.Parent(stl.column(data)),
 		style.SetMinWidth(columnWidth),
@@ -58,14 +55,10 @@ func newOverviewColumn(stl overviewCardStyle, data session.OverviewColumn, colum
 
 func newOverviewBlockWithIcon(blockStyle blockStyle, block prepare.StatsBlock[session.BlockData, string], icon *facepaint.Block) *facepaint.Block {
 	if icon == nil {
-		// block
 		return facepaint.NewBlocksContent(blockStyle.wrapper.Options(), newOverviewBlock(blockStyle, block))
 	}
-	// wrapper
 	return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
-		// icon
 		facepaint.NewBlocksContent(blockStyle.iconWrapper.Options(), icon),
-		// block
 		newOverviewBlock(blockStyle, block),
 	)
 }
@@ -75,9 +68,7 @@ func newOverviewBlock(blockStyle blockStyle, block prepare.StatsBlock[session.Bl
 	case prepare.TagBattles, prepare.TagWN8, prepare.TagRankedRating:
 		return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
 			facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
-				// value
 				facepaint.MustNewTextContent(blockStyle.value.Options(), block.V.String()),
-				// label
 				facepaint.MustNewTextContent(blockStyle.label.Options(), block.Label),
 			),
 		)
@@ -108,9 +99,7 @@ func newOverviewBlock(blockStyle blockStyle, block prepare.StatsBlock[session.Bl
 
 		return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
 			facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
-				// value
 				facepaint.NewBlocksContent(style.NewStyle(), indicator, facepaint.MustNewTextContent(blockStyle.value.Options(), block.V.String())),
-				// label
 				facepaint.MustNewTextContent(blockStyle.label.Options(), block.Label),
 			),
 		)

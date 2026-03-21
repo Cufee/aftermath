@@ -5,8 +5,11 @@ import (
 	"image/color"
 	"math"
 	"math/rand"
+	"slices"
 	"sync"
+	"time"
 
+	"github.com/cufee/aftermath/internal/stats/frame"
 	"github.com/fogleman/gg"
 	"github.com/nao1215/imaging"
 )
@@ -16,6 +19,39 @@ var GlassEffectBackgroundBlur float64 = DefaultBackgroundBlur * 5
 
 var globalLogoCacheMx sync.Mutex
 var globalLogoCache = make(map[color.Color]image.Image)
+
+type vehicleWN8 struct {
+	id      string
+	wn8     frame.Value
+	sortKey int
+}
+
+func AddWN8BackgroundBranding(background image.Image, vehicles map[string]frame.VehicleStatsFrame, patternSeed int) image.Image {
+	var values []vehicleWN8
+	for _, vehicle := range vehicles {
+		if wn8 := vehicle.WN8(); !frame.InvalidValue.Equals(wn8) {
+			values = append(values, vehicleWN8{vehicle.VehicleID, wn8, int(vehicle.LastBattleTime.Unix())})
+		}
+	}
+	slices.SortFunc(values, func(a, b vehicleWN8) int { return b.sortKey - a.sortKey })
+	if len(values) >= 10 {
+		values = values[:9]
+	}
+
+	var accentColors []color.Color
+	for _, value := range values {
+		c := GetWN8Colors(value.wn8.Float()).Background
+		if _, _, _, a := c.RGBA(); a > 0 {
+			accentColors = append(accentColors, c)
+		}
+	}
+
+	if patternSeed == 0 {
+		patternSeed = int(time.Now().Unix())
+	}
+
+	return AddDefaultBrandedOverlay(background, accentColors, patternSeed, 0.5)
+}
 
 func AddDefaultBrandedOverlay(background image.Image, colors []color.Color, seed int, colorChance float32) image.Image {
 	if len(colors) < 1 {
@@ -77,8 +113,7 @@ func NewBrandedBackground(width, height, logoSize, padding int, colors []color.C
 
 				posX := float64(padding + c*(logoSize+xGap))
 				posY := float64(padding + r*(logoSize+yGap))
-				source := rand.NewSource(int64(hashSeed) + int64(posX)*51 + int64(posY)*37)
-				rnd := rand.New(source)
+				rnd := rand.New(rand.NewSource(cellHash(hashSeed, c, r)))
 
 				if n := rnd.Float32(); n < 0.5 {
 					return
@@ -97,7 +132,7 @@ func NewBrandedBackground(width, height, logoSize, padding int, colors []color.C
 				logoAdjusted = imaging.Rotate(logoAdjusted, rotation, color.Transparent)
 				logoAdjusted = imaging.Resize(logoAdjusted, int(float64(logoSize)*scale), int(float64(logoSize)*scale), imaging.Linear)
 
-				xJ, yJ := pickPositionJitter(rnd)
+				xJ, yJ := pickPositionJitter(rnd, xGap, yGap)
 				posX += xJ
 				posY += yJ
 
@@ -115,7 +150,18 @@ func NewBrandedBackground(width, height, logoSize, padding int, colors []color.C
 	return ctx.Image()
 }
 
-// pickColor function that includes hashSeed in the hash calculation
+// cellHash produces a well-distributed hash from a seed and grid coordinates
+// using splitmix-style bit mixing to decorrelate neighboring cells.
+func cellHash(seed, col, row int) int64 {
+	h := int64(seed) ^ (int64(col)*2654435761 + int64(row)*340573321)
+	h ^= h >> 16
+	h *= 0x45d9f3b
+	h ^= h >> 16
+	h *= 0x45d9f3b
+	h ^= h >> 16
+	return h
+}
+
 func pickColor(colors []color.Color, r *rand.Rand) color.Color {
 	if len(colors) < 1 {
 		return color.White
@@ -132,11 +178,10 @@ func pickScaleFactor(r *rand.Rand) float64 {
 	return scaleFactor
 }
 
-// pickPositionJitter function that generates an x,y  position offset based on the hash seed
-func pickPositionJitter(r *rand.Rand) (float64, float64) {
-	// Clamp between 0.5 and 1.5
-	xJitter := -0.5 + r.Float64()
-	yJitter := -0.5 + r.Float64()
+func pickPositionJitter(r *rand.Rand, xGap, yGap int) (float64, float64) {
+	const jitterFraction = 0.5
+	xJitter := (r.Float64() - 0.5) * float64(xGap) * jitterFraction
+	yJitter := (r.Float64() - 0.5) * float64(yGap) * jitterFraction
 	return xJitter, yJitter
 }
 

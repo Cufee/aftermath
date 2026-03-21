@@ -26,56 +26,51 @@ type overviewCardStyle struct {
 	styleBlock func(block prepare.StatsBlock[period.BlockData, string]) blockStyle
 }
 
-// rating
-
-var styledRatingOverviewCard = overviewCardStyle{
-	styleBlock: styleRatingOverviewBlock,
-	card:       styledUnratedOverviewCard.card,
+func newRatingOverviewCardStyle(theme common.Theme) overviewCardStyle {
+	return overviewCardStyle{
+		styleBlock: newStyleRatingOverviewBlock(theme),
+		card:       newUnratedOverviewCardStyle(theme).card,
+	}
 }
 
-func styleRatingOverviewBlock(block prepare.StatsBlock[period.BlockData, string]) blockStyle {
-	stl := styleUnratedOverviewBlock(block)
-	if block.Data.Flavor != period.BlockFlavorSpecial {
+func newStyleRatingOverviewBlock(theme common.Theme) func(prepare.StatsBlock[period.BlockData, string]) blockStyle {
+	unrated := newStyleUnratedOverviewBlock(theme)
+	return func(block prepare.StatsBlock[period.BlockData, string]) blockStyle {
+		stl := unrated(block)
+		if block.Data.Flavor != period.BlockFlavorSpecial {
+			return stl
+		}
+		stl.wrapper = style.Style{
+			Debug: debugOverviewCards,
+
+			Direction:      style.DirectionVertical,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentCenter,
+			Gap:            10,
+		}
 		return stl
 	}
-	stl.wrapper = style.Style{
-		Debug: debugOverviewCards,
-
-		Direction:      style.DirectionVertical,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentCenter,
-		Gap:            10,
-	}
-	return stl
 }
 
-// unrated
+func newUnratedOverviewCardStyle(theme common.Theme) overviewCardStyle {
+	return overviewCardStyle{
+		styleBlock: newStyleUnratedOverviewBlock(theme),
+		card: common.ApplyTheme(style.Style{
+			Debug: debugOverviewCards,
 
-var styledUnratedOverviewCard = overviewCardStyle{
-	styleBlock: styleUnratedOverviewBlock,
-	card: style.Style{
-		Debug: debugOverviewCards,
+			Direction:      style.DirectionHorizontal,
+			AlignItems:     style.AlignItemsCenter,
+			JustifyContent: style.JustifyContentSpaceBetween,
 
-		Direction:      style.DirectionHorizontal,
-		AlignItems:     style.AlignItemsCenter,
-		JustifyContent: style.JustifyContentSpaceBetween,
+			GrowHorizontal: true,
+			Gap:            10,
 
-		BackgroundColor: common.DefaultCardColor,
-		BlurBackground:  cardBackgroundBlur,
-
-		BorderRadiusTopLeft:     common.BorderRadiusLG,
-		BorderRadiusTopRight:    common.BorderRadiusLG,
-		BorderRadiusBottomLeft:  common.BorderRadiusLG,
-		BorderRadiusBottomRight: common.BorderRadiusLG,
-
-		GrowHorizontal: true,
-		Gap:            10,
-
-		PaddingLeft:   cardPaddingX,
-		PaddingRight:  cardPaddingX,
-		PaddingTop:    cardPaddingY / 2,
-		PaddingBottom: cardPaddingY / 2,
-	},
+			PaddingLeft:   common.CardPaddingX,
+			PaddingRight:  common.CardPaddingX,
+			PaddingTop:    common.CardPaddingY / 2,
+			PaddingBottom: common.CardPaddingY / 2,
+		}, theme.Card),
+	}
 }
 
 func (overviewCardStyle) column(column period.OverviewColumn) style.Style {
@@ -93,8 +88,8 @@ func (overviewCardStyle) column(column period.OverviewColumn) style.Style {
 
 			PaddingLeft:   10,
 			PaddingRight:  10,
-			PaddingTop:    cardPaddingY / 2,
-			PaddingBottom: cardPaddingY / 2,
+			PaddingTop:    common.CardPaddingY / 2,
+			PaddingBottom: common.CardPaddingY / 2,
 		}
 	default:
 		return style.Style{
@@ -106,95 +101,86 @@ func (overviewCardStyle) column(column period.OverviewColumn) style.Style {
 			GrowVertical:   false,
 			Gap:            10,
 
-			PaddingTop:    cardPaddingY / 2,
-			PaddingBottom: cardPaddingY / 2,
+			PaddingTop:    common.CardPaddingY / 2,
+			PaddingBottom: common.CardPaddingY / 2,
 		}
 	}
 }
 
-func styleUnratedOverviewBlock(block prepare.StatsBlock[period.BlockData, string]) blockStyle {
-	switch block.Data.Flavor {
-	case period.BlockFlavorSpecial:
-		return blockStyle{
-			wrapper: style.Style{
-				Debug: debugOverviewCards,
+func newStyleUnratedOverviewBlock(theme common.Theme) func(prepare.StatsBlock[period.BlockData, string]) blockStyle {
+	return func(block prepare.StatsBlock[period.BlockData, string]) blockStyle {
+		switch block.Data.Flavor {
+		case period.BlockFlavorSpecial:
+			return blockStyle{
+				wrapper: style.Style{
+					Debug: debugOverviewCards,
 
-				Direction:      style.DirectionVertical,
-				AlignItems:     style.AlignItemsCenter,
-				JustifyContent: style.JustifyContentSpaceAround,
-				GrowVertical:   true,
-				Gap:            5,
-			},
-			valueContainer: style.Style{
-				Debug: debugOverviewCards,
+					Direction:      style.DirectionVertical,
+					AlignItems:     style.AlignItemsCenter,
+					JustifyContent: style.JustifyContentSpaceAround,
+					GrowVertical:   true,
+					Gap:            5,
+				},
+				valueContainer: style.Style{
+					Debug: debugOverviewCards,
 
-				Direction:      style.DirectionVertical,
-				AlignItems:     style.AlignItemsCenter,
-				JustifyContent: style.JustifyContentEnd,
-				// GrowVertical:   true,
-				Gap: 5,
-			},
-			value: style.Style{
-				Debug: debugOverviewCards,
+					Direction:      style.DirectionVertical,
+					AlignItems:     style.AlignItemsCenter,
+					JustifyContent: style.JustifyContentEnd,
+					Gap:            5,
+				},
+				value: common.ApplyTheme(style.Style{
+					Debug:      debugOverviewCards,
+					PaddingTop: -6,
+					Font:       common.FontXL(),
+				}, theme.TextPrimary()),
+				label: common.ApplyTheme(style.Style{
+					Font:       common.FontSmall(),
+					PaddingTop: -6,
+				}, theme.TextAlt()),
+			}
+		case period.BlockFlavorSecondary:
+			return blockStyle{
+				wrapper: style.Style{},
+				valueContainer: style.Style{
+					Debug: debugOverviewCards,
 
-				PaddingTop: -6,
-				Color:      common.TextPrimary,
-				Font:       common.FontXL(),
-			},
-			label: style.Style{
-				Color:      common.TextAlt,
-				Font:       common.FontSmall(),
-				PaddingTop: -6,
-			},
-		}
-	case period.BlockFlavorSecondary:
-		return blockStyle{
-			wrapper: style.Style{},
-			valueContainer: style.Style{
-				Debug: debugOverviewCards,
+					Direction:      style.DirectionVertical,
+					AlignItems:     style.AlignItemsCenter,
+					JustifyContent: style.JustifyContentCenter,
+				},
+				value: common.ApplyTheme(style.Style{
+					Debug: debugOverviewCards,
+					Font:  common.FontMedium(),
+				}, theme.TextSecondary()),
+				label: common.ApplyTheme(style.Style{
+					Font:       common.FontSmall(),
+					PaddingTop: -3,
+				}, theme.TextAlt()),
+			}
+		default:
+			return blockStyle{
+				wrapper: style.Style{},
+				valueContainer: style.Style{
+					Debug: debugOverviewCards,
 
-				Direction:      style.DirectionVertical,
-				AlignItems:     style.AlignItemsCenter,
-				JustifyContent: style.JustifyContentCenter,
-			},
-			value: style.Style{
-				Debug: debugOverviewCards,
-
-				Color: common.TextSecondary,
-				Font:  common.FontMedium(),
-			},
-			label: style.Style{
-				Color:      common.TextAlt,
-				Font:       common.FontSmall(),
-				PaddingTop: -3,
-			},
-		}
-	default:
-		return blockStyle{
-			wrapper: style.Style{},
-			valueContainer: style.Style{
-				Debug: debugOverviewCards,
-
-				Direction:      style.DirectionVertical,
-				AlignItems:     style.AlignItemsCenter,
-				JustifyContent: style.JustifyContentCenter,
-			},
-			value: style.Style{
-				Debug: debugOverviewCards,
-
-				Color: common.TextPrimary,
-				Font:  common.FontLarge(),
-			},
-			label: style.Style{
-				Color:      common.TextAlt,
-				Font:       common.FontSmall(),
-				PaddingTop: -5,
-			},
+					Direction:      style.DirectionVertical,
+					AlignItems:     style.AlignItemsCenter,
+					JustifyContent: style.JustifyContentCenter,
+				},
+				value: common.ApplyTheme(style.Style{
+					Debug: debugOverviewCards,
+					Font:  common.FontLarge(),
+				}, theme.TextPrimary()),
+				label: common.ApplyTheme(style.Style{
+					Font:       common.FontSmall(),
+					PaddingTop: -5,
+				}, theme.TextAlt()),
+			}
 		}
 	}
 }
 
-// wrapped around special block text and icon
 var styledOverviewSpecialBlockWrapper = style.Style{
 	Debug: debugOverviewCards,
 

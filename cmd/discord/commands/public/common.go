@@ -8,8 +8,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/external/wargaming"
 	"github.com/cufee/aftermath/internal/json"
+	rendercommon "github.com/cufee/aftermath/internal/render/common"
+	"github.com/cufee/aftermath/internal/stats/render/themes"
 	"github.com/cufee/am-wg-proxy-next/v2/types"
 
 	"github.com/bwmarrin/discordgo"
@@ -24,6 +27,26 @@ type statsOptions struct {
 	commands.StatsOptions
 	BackgroundID string
 	ReferenceID  string
+	ThemeID      string
+}
+
+// resolveTheme determines the theme to apply based on user preference and highlighted env.
+// When a non-nil theme is returned, the caller should skip loading custom backgrounds.
+func resolveTheme(user models.User, hasCustomBackground bool) (themeID string, theme *rendercommon.Theme, hintKey string) {
+	if content, ok := user.Content(models.UserContentTypeThemePreference); ok {
+		id := string(content.Value)
+		if t, ok := themes.GetTheme(id); ok {
+			return id, &t, ""
+		}
+	}
+
+	if !hasCustomBackground && constants.HighlightedTheme != "" {
+		if t, ok := themes.GetTheme(constants.HighlightedTheme); ok {
+			return constants.HighlightedTheme, &t, "theme_highlighted_hint"
+		}
+	}
+
+	return "", nil, ""
 }
 
 func (o statsOptions) fromInteraction(data models.DiscordInteraction) (statsOptions, error) {

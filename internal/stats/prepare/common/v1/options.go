@@ -12,6 +12,7 @@ type options struct {
 	localePrinter func(string) string
 	locale        *language.Tag
 
+	VehicleIDs     []string
 	VehicleTags    []Tag
 	RatingColumns  []TagColumn[string]
 	UnratedColumns []TagColumn[string]
@@ -44,4 +45,7 @@ func WithRatingColumns(columns ...TagColumn[string]) func(*options) {
 }
 func WithUnratedColumns(columns ...TagColumn[string]) func(*options) {
 	return func(o *options) { o.UnratedColumns = columns }
+}
+func WithVehicleIDs(ids ...string) func(*options) {
+	return func(o *options) { o.VehicleIDs = ids }
 }

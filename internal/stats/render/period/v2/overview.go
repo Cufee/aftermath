@@ -8,30 +8,28 @@ import (
 	"github.com/cufee/facepaint/style"
 )
 
-func newRatingOverviewCard(data period.RatingOverviewCard, columnWidth map[string]float64) *facepaint.Block {
+func newRatingOverviewCard(stl overviewCardStyle, data period.RatingOverviewCard, columnWidth map[string]float64) *facepaint.Block {
 	if len(data.Blocks) == 0 {
 		return nil
 	}
 
 	var columns []*facepaint.Block
 	for _, column := range data.Blocks {
-		columns = append(columns, newOverviewColumn(styledRatingOverviewCard, column, columnWidth[string(column.Flavor)]))
+		columns = append(columns, newOverviewColumn(stl, column, columnWidth[string(column.Flavor)]))
 	}
-	// card
-	return facepaint.NewBlocksContent(styledRatingOverviewCard.card.Options(), columns...)
+	return facepaint.NewBlocksContent(stl.card.Options(), columns...)
 }
 
-func newUnratedOverviewCard(data period.OverviewCard, columnWidth map[string]float64) *facepaint.Block {
+func newUnratedOverviewCard(stl overviewCardStyle, data period.OverviewCard, columnWidth map[string]float64) *facepaint.Block {
 	if len(data.Blocks) == 0 {
 		return nil
 	}
 
 	var columns []*facepaint.Block
 	for _, column := range data.Blocks {
-		columns = append(columns, newOverviewColumn(styledUnratedOverviewCard, column, columnWidth[string(column.Flavor)]))
+		columns = append(columns, newOverviewColumn(stl, column, columnWidth[string(column.Flavor)]))
 	}
-	// card
-	return facepaint.NewBlocksContent(styledUnratedOverviewCard.card.Options(), columns...)
+	return facepaint.NewBlocksContent(stl.card.Options(), columns...)
 }
 
 func newOverviewColumn(stl overviewCardStyle, data period.OverviewColumn, columnWidth float64) *facepaint.Block {
@@ -46,7 +44,6 @@ func newOverviewColumn(stl overviewCardStyle, data period.OverviewColumn, column
 			columnBlocks = append(columnBlocks, newOverviewRatingBlock(stl.styleBlock(block), block))
 		}
 	}
-	// column
 	return facepaint.NewBlocksContent(style.NewStyle(
 		style.Parent(stl.column(data)),
 		style.SetMinWidth(columnWidth),
@@ -55,22 +52,15 @@ func newOverviewColumn(stl overviewCardStyle, data period.OverviewColumn, column
 
 func newOverviewBlockWithIcon(blockStyle blockStyle, block prepare.StatsBlock[period.BlockData, string], icon *facepaint.Block) *facepaint.Block {
 	if icon == nil {
-		// block
 		return facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
-			// value
 			facepaint.MustNewTextContent(blockStyle.value.Options(), block.V.String()),
-			// label
 			facepaint.MustNewTextContent(blockStyle.label.Options(), block.Label),
 		)
 	}
-	// wrapper
 	return facepaint.NewBlocksContent(blockStyle.wrapper.Options(),
 		icon,
-		// block
 		facepaint.NewBlocksContent(blockStyle.valueContainer.Options(),
-			// value
 			facepaint.MustNewTextContent(blockStyle.value.Options(), block.V.String()),
-			// label
 			facepaint.MustNewTextContent(blockStyle.label.Options(), block.Label),
 		))
 }

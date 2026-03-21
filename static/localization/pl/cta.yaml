@@ -29,6 +29,11 @@ cta_command_links_verify_body: |-
 
   To sprawi, że Twoje niestandardowe obrazy tła będą widoczne dla innych użytkowników i odblokuje polecenie `/my`!
 cta_command_links_verify_head: "Zweryfikuj swoje konto Blitz!"
+cta_command_theme_body: |-
+  Możesz dostosować wygląd swoich statystyk za pomocą `/theme`!
+
+  Wypróbuj nasze sezonowe motywy, aby nadać swoim statystykom nowy wygląd.
+cta_command_theme_head: "Wyróżnij swoje statystyki!"
 cta_command_replay_body: |-
   Możesz przesłać powtórkę za pomocą `/replay`, aby uzyskać przegląd swojej bitwy ze statystykami każdego gracza!
 

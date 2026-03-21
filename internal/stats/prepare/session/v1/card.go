@@ -86,7 +86,9 @@ func NewCards(session, career fetch.AccountStatsOverPeriod, glossary map[string]
 		cards.Unrated.Overview = card
 	}
 
-	{ // Regular battles vehicles
+	// Regular battles vehicles
+	// single vehicle selected means overview will match vehicle stats
+	if len(options.VehicleIDs) != 1 {
 		var unratedVehicles []frame.VehicleStatsFrame
 		for _, vehicle := range session.RegularBattles.Vehicles {
 			unratedVehicles = append(unratedVehicles, vehicle)
