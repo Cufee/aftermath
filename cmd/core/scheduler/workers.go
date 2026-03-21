@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"math/rand/v2"
 	"time"
 
 	"github.com/cufee/aftermath-assets/types"
@@ -78,7 +79,9 @@ func RestartTasksWorker(core core.Client) func() {
 func UpdateAveragesWorker(client core.Client) func() {
 	// we just run the logic directly as it's not a heavy task and it doesn't matter if it fails
 	return func() {
-		log.Info().Msg("updating tank averages cache")
+		jitter := time.Duration(rand.IntN(int(15 * time.Minute)))
+		log.Info().Dur("jitter", jitter).Msg("updating tank averages cache after jitter")
+		time.Sleep(jitter)
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
 		defer cancel()
