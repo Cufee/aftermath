@@ -128,6 +128,7 @@ common_error_command_missing_permissions: "You don't have permission to use this
 common_error_discord_outage: "It looks like Discord is having some temporary issues. Please try again in a few seconds."
 common_error_missing_permissions_dm: "Aftermath is not able to send you a direct message."
 common_error_missing_permissions_dm_mention_fmt: "Hey %s, Aftermath is not able to send you a direct message."
+common_error_missing_permissions_images: "Aftermath is missing permissions to send images in this channel. Please make sure the bot has the **Attach Files** permission enabled."
 common_error_payment_required: |-
   This feature of Aftermath is only available for users with an active subscription.
   You can subscribe by using the `/subscribe` command.

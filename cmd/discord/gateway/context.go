@@ -127,7 +127,15 @@ func (c *eventContext) saveInteractionEvent(msg discordgo.Message, msgErr error,
 	}
 }
 func (c *eventContext) InteractionResponse(reply common.Reply) (discordgo.Message, error) {
-	return c.CreateMessage(c.Context, c.channelID, reply)
+	msg, err := c.CreateMessage(c.Context, c.channelID, reply)
+	// missing permissions with files - send a permissions error instead
+	if errors.Is(err, rest.ErrMissingPermissions) && len(reply.Peek().Files) > 0 {
+		msg, err = c.gw.rest.CreateMessage(c.Context, c.channelID, discordgo.MessageSend{
+			Content:   c.localize("common_error_missing_permissions_images"),
+			Reference: reply.Peek().Reference,
+		}, nil)
+	}
+	return msg, err
 }
 
 func (c *eventContext) InteractionFollowUp(ctx context.Context, reply common.Reply) (discordgo.Message, error) {
