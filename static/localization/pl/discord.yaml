@@ -128,6 +128,7 @@ common_error_command_missing_permissions: "Nie masz uprawnień do użycia tego p
 common_error_discord_outage: "Wygląda na to, że Discord ma chwilowe problemy. Spróbuj ponownie za kilka sekund."
 common_error_missing_permissions_dm: "Aftermath nie jest w stanie wysłać Ci bezpośredniej wiadomości."
 common_error_missing_permissions_dm_mention_fmt: "Hej %s, Aftermath nie jest w stanie wysłać Ci bezpośredniej wiadomości."
+common_error_missing_permissions_images: "Aftermath nie ma uprawnień do wysyłania obrazów na tym kanale. Upewnij się, że bot ma włączone uprawnienie **Attach Files**."
 common_error_payment_required: |-
   Ta funkcja Aftermath jest dostępna tylko dla użytkowników z aktywną subskrypcją.
   Możesz subskrybować, używając polecenia `/subscribe`.

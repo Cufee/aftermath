@@ -10,6 +10,7 @@ import (
 	"github.com/cufee/aftermath/cmd/discord/common"
 	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/internal/database"
+	"github.com/cufee/aftermath/internal/retry"
 	"github.com/cufee/aftermath/internal/database/models"
 	"github.com/cufee/aftermath/internal/external/averages"
 	"github.com/cufee/aftermath/internal/localization"
@@ -122,7 +123,7 @@ func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 		go c.saveInteractionEvent(discordgo.Message{}, c.Context.Err(), reply)
 		return discordgo.Message{}, c.Context.Err()
 	default:
-		msg, err := common.WithRetry(func() (discordgo.Message, error) {
+		res := retry.Retry(func() (discordgo.Message, error) {
 			// since we already finished handling the interaction, there is no need to use the handler context
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 			defer cancel()
@@ -135,7 +136,20 @@ func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 				return discordgo.Message{}, err
 			}
 			return c.rest.UpdateInteractionResponse(ctx, c.interaction.AppID, c.interaction.Token, data.Interaction(), files)
+		}, 5, time.Second, func(err error) bool {
+			// do not retry on missing permissions, they will not change between retries
+			return errors.Is(err, rest.ErrMissingPermissions)
 		})
+		msg, err := res.Data, res.Err
+
+		// missing permissions with files - send a permissions error instead
+		if errors.Is(err, rest.ErrMissingPermissions) && len(files) > 0 {
+			permData := discordgo.InteractionResponseData{Content: c.localize("common_error_missing_permissions_images")}
+			retryCtx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+			defer cancel()
+			msg, err = c.rest.UpdateInteractionResponse(retryCtx, c.interaction.AppID, c.interaction.Token, permData, nil)
+		}
+
 		if errors.Is(err, rest.ErrUnknownInteraction) || errors.Is(err, rest.ErrUnknownWebhook) {
 			// Discord did not propagate the ack, this happens on low usage discord servers sometimes
 			message := data.Message()
@@ -144,6 +158,13 @@ func (c *routeContext) InteractionResponse(reply common.Reply) (discordgo.Messag
 			fallbackCtx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 			defer cancel()
 			msg, err = c.rest.CreateMessage(fallbackCtx, c.interaction.ChannelID, message, files)
+
+			// channel message also failed on permissions with files - send permissions error only
+			if errors.Is(err, rest.ErrMissingPermissions) && len(files) > 0 {
+				msg, err = c.rest.CreateMessage(fallbackCtx, c.interaction.ChannelID, discordgo.MessageSend{
+					Content: c.localize("common_error_missing_permissions_images"),
+				}, nil)
+			}
 		}
 
 		go c.saveInteractionEvent(msg, err, reply)
