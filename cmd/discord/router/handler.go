@@ -16,7 +16,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
-	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/retry"
@@ -50,9 +49,6 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 			return
 		}
 
-		// we validated the request and are working on it
-		w.WriteHeader(http.StatusProcessing)
-
 		cmd, err := router.routeInteraction(data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -69,25 +65,13 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 			return
 		}
 
-		res := retry.Retry(
-			func() (struct{}, error) {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*500)
-				defer cancel()
-
-				err := router.restClient.AckInteractionResponse(ctx, data.ID, data.Token, cmd.Ephemeral)
-				if errors.Is(err, rest.ErrInteractionAlreadyAcked) {
-					err = nil
-				}
-				return struct{}{}, err
-			},
-			5,
-			time.Millisecond*250)
-		if res.Err != nil {
-			log.Warn().Err(res.Err).Str("id", data.ID).Msg("failed to ack an interaction")
-			// cross our fingers and hope discord registered one of those requests, or will propagate the ack from the response body
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if cmd.Ephemeral {
+			w.Write([]byte(`{"type":5,"data":{"flags":64}}`))
+		} else {
+			w.Write([]byte(`{"type":5}`))
 		}
-
-		w.WriteHeader(http.StatusAccepted)
 
 		// run the interaction handler
 		go func() {

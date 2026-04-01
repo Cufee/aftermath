@@ -32,10 +32,10 @@ type multiSourceClient struct {
 
 	database  database.Client
 	wargaming wargaming.Client
-	averages  *averages.Client
+	averages  averages.Source
 }
 
-func NewMultiSourceClient(wargaming wargaming.Client, averages *averages.Client, database database.Client) (*multiSourceClient, error) {
+func NewMultiSourceClient(wargaming wargaming.Client, averages averages.Source, database database.Client) (*multiSourceClient, error) {
 	return &multiSourceClient{
 		database:  database,
 		wargaming: wargaming,

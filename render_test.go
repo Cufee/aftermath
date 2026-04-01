@@ -51,12 +51,12 @@ func TestRenderReplay(t *testing.T) {
 
 	env.LoadTestEnv(t)
 	db := tests.StaticTestingDatabase()
-	wg, _ := wargamingClientsFromEnv(nil)
+	wg, _ := wargamingClientsFromEnv(tests.NewNoopObserver())
 
 	printer, err := localization.NewPrinter("stats", language.English)
 	is.NoErr(err)
 
-	fetch, err := fetch.NewMultiSourceClient(wg, nil, db)
+	fetch, err := fetch.NewMultiSourceClient(wg, tests.StaticTestingFetch(), db)
 	is.NoErr(err)
 
 	replayFiles := []string{"replay_defeat.wotbreplay", "replay_victory.wotbreplay", "replay_draw.wotbreplay", "replay_rating.wotbreplay"}
