@@ -8,6 +8,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/http/cookiejar"
 	"net/textproto"
 	"strconv"
 	"sync"
@@ -53,18 +54,26 @@ func NewClient(token string, opts ...ClientOption) (*Client, error) {
 		apply(&options)
 	}
 
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create a new cookie jar: %w", err)
+	}
+
 	client := &Client{
 		token:            token,
 		rateLimitMx:      sync.Mutex{},
 		rateLimitBuckets: make(map[string]time.Time),
-		http:             http.Client{Timeout: time.Millisecond * 5000}, // discord is very slow sometimes
-		observer:         options.observer,
+		http: http.Client{
+			Timeout: time.Millisecond * 5000, // discord is very slow sometimes
+			Jar:     jar,
+		},
+		observer: options.observer,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	_, err := client.lookupApplicationID(ctx)
+	_, err = client.lookupApplicationID(ctx)
 	if err != nil {
 		return nil, err
 	}
