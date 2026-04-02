@@ -14,8 +14,6 @@ variables:
     DOCKER_TLS_CERTDIR: "/certs"
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker run --rm --privileged tonistiigi/binfmt --install all
-    - docker buildx create --use --name multiarch --driver docker-container
   rules:
     - if: $CI_PIPELINE_SOURCE == "web"
     - if: $CI_COMMIT_BRANCH =~ /^(release|canary|develop)$/
@@ -24,39 +22,42 @@ build-service:
   extends: .build-image
   script:
     - |
-      docker buildx build \
-        --platform linux/amd64,linux/arm64 \
-        --build-arg BRAND_FLAVOR=${BRAND_FLAVOR:-} \
+      if [ "$CI_COMMIT_BRANCH" = "develop" ]; then
+        BRAND_FLAVOR="blue"
+      else
+        BRAND_FLAVOR="red"
+      fi
+
+      docker build \
+        --build-arg BRAND_FLAVOR=$BRAND_FLAVOR \
         --build-arg LOCALIZE_API_KEY=${LOCALIZE_API_KEY:-} \
         -f Dockerfile \
         -t $IMAGE_NAME:$CI_COMMIT_REF_SLUG \
         -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA \
         -t $IMAGE_NAME:latest \
-        --push \
         .
+      docker push --all-tags $IMAGE_NAME
 
 build-migrations:
   extends: .build-image
   script:
     - |
-      docker buildx build \
-        --platform linux/amd64,linux/arm64 \
+      docker build \
         -f Dockerfile.migrate \
         -t $IMAGE_NAME-migrations:$CI_COMMIT_REF_SLUG \
         -t $IMAGE_NAME-migrations:$CI_COMMIT_SHORT_SHA \
         -t $IMAGE_NAME-migrations:latest \
-        --push \
         .
+      docker push --all-tags $IMAGE_NAME-migrations
 
 build-backup:
   extends: .build-image
   script:
     - |
-      docker buildx build \
-        --platform linux/amd64,linux/arm64 \
+      docker build \
         -f Dockerfile.backup \
         -t $IMAGE_NAME-backup:$CI_COMMIT_REF_SLUG \
         -t $IMAGE_NAME-backup:$CI_COMMIT_SHORT_SHA \
         -t $IMAGE_NAME-backup:latest \
-        --push \
         .
+      docker push --all-tags $IMAGE_NAME-backup
