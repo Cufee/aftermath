@@ -16,6 +16,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cufee/aftermath/cmd/discord/commands/builder"
 	"github.com/cufee/aftermath/cmd/discord/common"
+	"github.com/cufee/aftermath/cmd/discord/rest"
 	"github.com/cufee/aftermath/internal/localization"
 	"github.com/cufee/aftermath/internal/log"
 	"github.com/cufee/aftermath/internal/retry"
@@ -71,6 +72,9 @@ func (router *router) HTTPHandler() (http.HandlerFunc, error) {
 			w.Write([]byte(`{"type":5,"data":{"flags":64}}`))
 		} else {
 			w.Write([]byte(`{"type":5}`))
+		}
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
 		}
 
 		// run the interaction handler
@@ -214,6 +218,19 @@ func (r *router) sendInteractionReply(interaction discordgo.Interaction, data di
 		return struct{}{}, err
 	}, 5, time.Second) // better late than never
 	if res.Err != nil {
+		if (errors.Is(res.Err, rest.ErrUnknownWebhook) || errors.Is(res.Err, rest.ErrUnknownInteraction)) && interaction.ChannelID != "" {
+			fallbackCtx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+			defer cancel()
+			_, err := r.restClient.CreateMessage(fallbackCtx, interaction.ChannelID, discordgo.MessageSend{
+				Content:    data.Content,
+				Components: data.Components,
+				Embeds:     data.Embeds,
+			}, nil)
+			if err != nil {
+				log.Err(err).Str("id", interaction.ID).Msg("failed to send a fallback channel message")
+			}
+			return
+		}
 		log.Err(res.Err).Stack().Any("data", data).Str("id", interaction.ID).Msg("failed to send an interaction response")
 		return
 	}
