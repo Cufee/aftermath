@@ -27,7 +27,7 @@ services:
           memory: 2048m
 
   aftermath-migrate-base:
-    image: ghcr.io/cufee/aftermath-migrations:${ENVIRONMENT}
+    image: registry.gitlab.com/amth.one/aftermath/migrations:${ENVIRONMENT}
     build:
       context: .
       dockerfile: Dockerfile.migrate
@@ -42,7 +42,7 @@ services:
           memory: 2048m
 
   aftermath-backup-base:
-    image: ghcr.io/cufee/aftermath-backup:${ENVIRONMENT}
+    image: registry.gitlab.com/amth.one/aftermath/backup:${ENVIRONMENT}
     build:
       context: .
       dockerfile: Dockerfile.backup
@@ -55,7 +55,7 @@ services:
 
   aftermath-service-base:
     pull_policy: always
-    image: ghcr.io/cufee/aftermath:${ENVIRONMENT}
+    image: registry.gitlab.com/amth.one/aftermath:${ENVIRONMENT}
     build:
       context: .
       dockerfile: Dockerfile
@@ -73,7 +73,7 @@ services:
           memory: 256m
 
   aftermath-collector-base:
-    image: ghcr.io/cufee/aftermath-collector:${ENVIRONMENT}
+    image: registry.gitlab.com/amth.one/aftermath/collector:${ENVIRONMENT}
     build:
       context: .
       dockerfile: Dockerfile.collector
