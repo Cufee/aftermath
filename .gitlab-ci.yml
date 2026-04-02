@@ -36,7 +36,9 @@ build-service:
         -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA \
         -t $IMAGE_NAME:latest \
         .
-      docker push --all-tags $IMAGE_NAME
+      docker push $IMAGE_NAME:$CI_COMMIT_REF_SLUG
+      docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+      docker push $IMAGE_NAME:latest
 
 build-migrations:
   extends: .build-image
@@ -48,7 +50,9 @@ build-migrations:
         -t $IMAGE_NAME-migrations:$CI_COMMIT_SHORT_SHA \
         -t $IMAGE_NAME-migrations:latest \
         .
-      docker push --all-tags $IMAGE_NAME-migrations
+      docker push $IMAGE_NAME-migrations:$CI_COMMIT_REF_SLUG
+      docker push $IMAGE_NAME-migrations:$CI_COMMIT_SHORT_SHA
+      docker push $IMAGE_NAME-migrations:latest
 
 build-backup:
   extends: .build-image
@@ -60,4 +64,6 @@ build-backup:
         -t $IMAGE_NAME-backup:$CI_COMMIT_SHORT_SHA \
         -t $IMAGE_NAME-backup:latest \
         .
-      docker push --all-tags $IMAGE_NAME-backup
+      docker push $IMAGE_NAME-backup:$CI_COMMIT_REF_SLUG
+      docker push $IMAGE_NAME-backup:$CI_COMMIT_SHORT_SHA
+      docker push $IMAGE_NAME-backup:latest
