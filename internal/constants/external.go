@@ -8,6 +8,7 @@ import (
 
 var (
 	BlitzStarsApiURL = MustGetEnv("BLITZ_STARS_API_URL")
+	BlitzKitRepoURL  = MustGetEnv("BLITZ_KIT_REPO_URL")
 )
 
 var (
