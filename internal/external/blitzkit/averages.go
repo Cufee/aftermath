@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/cufee/aftermath/internal/constants"
 	"github.com/cufee/aftermath/internal/json"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
@@ -14,7 +15,6 @@ import (
 )
 
 const supportedManifestVersion = 1
-const assetsURL = "https://raw.githubusercontent.com/blitzkit/assets/main"
 
 type averagesManifest struct {
 	Version int    `json:"version"`
@@ -59,7 +59,7 @@ func (c client) CurrentTankAverages(ctx context.Context) (map[string]frame.Stats
 }
 
 func (c client) fetchManifest(ctx context.Context) (averagesManifest, error) {
-	url := assetsURL + "/averages/manifest.json"
+	url := constants.BlitzKitRepoURL + "/averages/manifest.json"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return averagesManifest{}, err
@@ -91,7 +91,7 @@ func (c client) fetchManifest(ctx context.Context) (averagesManifest, error) {
 }
 
 func (c client) fetchAverages(ctx context.Context, latest uint32) (*AverageDefinitions, error) {
-	url := fmt.Sprintf("%s/averages/%d.pb", assetsURL, latest)
+	url := fmt.Sprintf("%s/averages/%d.pb", constants.BlitzKitRepoURL, latest)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
