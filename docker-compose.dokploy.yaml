@@ -85,6 +85,8 @@ services:
       dokploy-network:
         aliases:
           - backend-${ENVIRONMENT}
+    labels:
+      - "prometheus_hostname=aftermath-backend-${ENVIRONMENT}"
 
 networks:
   dokploy-network:
