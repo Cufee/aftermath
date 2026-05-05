@@ -41,7 +41,7 @@ cta_command_replay_body: |-
 cta_command_replay_head: "Aftermath może również przetwarzać Twoje powtórki!"
 cta_guild_install_body: |-
   Po prostu udostępnij ten link właścicielowi serwera!
-  https://amth.one/install
+  https://amth.one/invite
 cta_guild_install_button: "Udostępnij Aftermath"
 cta_guild_install_head: "Chcesz dodać Aftermath do swojego ulubionego serwera?"
 cta_personal_install_body: |-
