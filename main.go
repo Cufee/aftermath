@@ -6,7 +6,6 @@ import (
 	"embed"
 	"encoding/hex"
 	"fmt"
-	"io"
 	"io/fs"
 	"os/signal"
 	"strings"
@@ -101,11 +100,11 @@ func main() {
 		}
 		alertClient = c
 
-		pr, pw := io.Pipe()
+		alertLogs := alerts.NewLogWriter(4096)
 		log.SetupGlobalLogger(func(l zerolog.Logger) zerolog.Logger {
-			return l.Output(zerolog.MultiLevelWriter(os.Stderr, pw))
+			return l.Output(zerolog.MultiLevelWriter(os.Stderr, alertLogs))
 		})
-		c.Reader(pr, zerolog.ErrorLevel)
+		c.Reader(alertLogs, zerolog.ErrorLevel)
 	}
 
 	globalCtx, cancel := context.WithCancel(context.Background())

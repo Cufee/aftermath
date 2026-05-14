@@ -1,12 +1,14 @@
 package alerts
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"os"
 	"slices"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/cufee/aftermath/internal/json"
@@ -25,6 +27,48 @@ type DiscordAlertClient interface {
 type alertClient struct {
 	rest       *rest.Client
 	webhookURL string
+}
+
+// LogWriter bridges zerolog output to the alert reader without letting alert
+// delivery block request logging. Records are dropped when the buffer is full.
+type LogWriter struct {
+	records chan []byte
+	pending []byte
+	dropped atomic.Uint64
+}
+
+func NewLogWriter(bufferSize int) *LogWriter {
+	if bufferSize < 1 {
+		bufferSize = 1
+	}
+	return &LogWriter{records: make(chan []byte, bufferSize)}
+}
+
+func (w *LogWriter) Write(p []byte) (int, error) {
+	record := bytes.Clone(p)
+	select {
+	case w.records <- record:
+	default:
+		w.dropped.Add(1)
+	}
+	return len(p), nil
+}
+
+func (w *LogWriter) Read(p []byte) (int, error) {
+	if len(w.pending) == 0 {
+		record, ok := <-w.records
+		if !ok {
+			return 0, io.EOF
+		}
+		w.pending = record
+	}
+	n := copy(p, w.pending)
+	w.pending = w.pending[n:]
+	return n, nil
+}
+
+func (w *LogWriter) Dropped() uint64 {
+	return w.dropped.Load()
 }
 
 func NewClient(token string, webhookURL string) (*alertClient, error) {
@@ -46,7 +90,7 @@ func (c *alertClient) Error(ctx context.Context, message, codeBlock string) erro
 	}, nil)
 }
 
-func (c *alertClient) Reader(r io.ReadCloser, levels ...zerolog.Level) {
+func (c *alertClient) Reader(r io.Reader, levels ...zerolog.Level) {
 	var levelSlice []string
 	for _, l := range levels {
 		levelSlice = append(levelSlice, l.String())
