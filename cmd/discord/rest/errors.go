@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 )
@@ -12,6 +14,38 @@ var (
 	ErrMissingPermissions      = errors.New("discord api: missing permissions")
 	ErrMissingUserUnreachable  = errors.New("discord api: user unreachable or blocked")
 )
+
+var nonActionableErrors = []error{
+	ErrUnknownWebhook,
+	ErrUnknownInteraction,
+	ErrInteractionAlreadyAcked,
+	ErrMissingPermissions,
+	ErrMissingUserUnreachable,
+}
+
+func IsNonActionable(err error) bool {
+	if err == nil {
+		return false
+	}
+	for _, target := range nonActionableErrors {
+		if errors.Is(err, target) {
+			return true
+		}
+	}
+	return false
+}
+
+func IsNonActionableMessage(msg string) bool {
+	if msg == "" {
+		return false
+	}
+	for _, target := range nonActionableErrors {
+		if strings.Contains(msg, target.Error()) {
+			return true
+		}
+	}
+	return false
+}
 
 func knownError(code int) error {
 	switch code {

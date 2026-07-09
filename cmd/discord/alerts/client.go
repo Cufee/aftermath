@@ -90,6 +90,16 @@ func (c *alertClient) Error(ctx context.Context, message, codeBlock string) erro
 	}, nil)
 }
 
+func shouldAlert(record map[string]any) bool {
+	if errStr, ok := record["error"].(string); ok && rest.IsNonActionableMessage(errStr) {
+		return false
+	}
+	if msg, ok := record["message"].(string); ok && rest.IsNonActionableMessage(msg) {
+		return false
+	}
+	return true
+}
+
 func (c *alertClient) Reader(r io.Reader, levels ...zerolog.Level) {
 	var levelSlice []string
 	for _, l := range levels {
@@ -118,6 +128,9 @@ func (c *alertClient) Reader(r io.Reader, levels ...zerolog.Level) {
 
 			level, ok := decoded["level"].(string)
 			if !ok || !slices.Contains(levelSlice, level) {
+				continue
+			}
+			if !shouldAlert(decoded) {
 				continue
 			}
 			marshaled, err = json.MarshalIndent(decoded, "", "  ")

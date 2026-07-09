@@ -285,23 +285,5 @@ func (c *Client) observe(operation string, err error) error {
 }
 
 func shouldCountDiscordFailure(err error) bool {
-	if err == nil {
-		return false
-	}
-	if errors.Is(err, ErrUnknownWebhook) {
-		return false
-	}
-	if errors.Is(err, ErrUnknownInteraction) {
-		return false
-	}
-	if errors.Is(err, ErrInteractionAlreadyAcked) {
-		return false
-	}
-	if errors.Is(err, ErrMissingPermissions) {
-		return false
-	}
-	if errors.Is(err, ErrMissingUserUnreachable) {
-		return false
-	}
-	return true
+	return err != nil && !IsNonActionable(err)
 }
