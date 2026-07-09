@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/cufee/aftermath/internal/render/common"
+	"github.com/cufee/facepaint"
 	"github.com/cufee/facepaint/style"
 )
 
@@ -31,7 +32,7 @@ func Theme() common.Theme {
 			style.SetBorderRadius(common.BorderRadiusLG),
 			func(s *style.Style) {
 				s.BackgroundColor = cardColor
-				s.BlurBackground = 10.0
+				s.Backdrop = []style.Effect{&facepaint.Blur{Sigma: 10}}
 			},
 		),
 		ClanTag: style.NewStyle(

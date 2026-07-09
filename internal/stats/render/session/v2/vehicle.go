@@ -51,12 +51,14 @@ func newVehicleBlockValue(vStyle vehicleCardStyle, block prepare.StatsBlock[sess
 			BorderRadiusBottomLeft:  1.5,
 			BorderRadiusBottomRight: 1.5,
 			Left:                    1,
-			Bottom:                  20,
+			Bottom:                  4,
 		})))
 
 		return facepaint.NewBlocksContent(vStyle.valueWrapper(blockWidth[block.Tag]).Options(),
-			indicator,
-			facepaint.MustNewTextContent(vStyle.value().Options(), block.Value().String()),
+			facepaint.NewBlocksContent(style.NewStyle(),
+				indicator,
+				facepaint.MustNewTextContent(vStyle.value().Options(), block.Value().String()),
+			),
 		)
 
 	case prepare.TagBattles:

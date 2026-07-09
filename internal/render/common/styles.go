@@ -1,6 +1,9 @@
 package common
 
-import "github.com/cufee/facepaint/style"
+import (
+	"github.com/cufee/facepaint"
+	"github.com/cufee/facepaint/style"
+)
 
 var (
 	CardPaddingX = 35.0
@@ -142,7 +145,7 @@ var (
 
 	CardsBackgroundStyle = style.NewStyle(
 		style.SetBorderRadius(BorderRadius2XL),
-		style.SetBlur(DefaultBackgroundBlur),
+		style.SetFilter(&facepaint.Blur{Sigma: DefaultBackgroundBlur}),
 		style.SetPosition(style.PositionAbsolute),
 		style.SetZIndex(-99),
 	)
@@ -161,7 +164,7 @@ func CardsBackgroundStyleForTheme(theme Theme) style.StyleOptions {
 	}
 	return style.NewStyle(
 		style.SetBorderRadius(BorderRadius2XL),
-		style.SetBlur(blur),
+		style.SetFilter(&facepaint.Blur{Sigma: blur}),
 		style.SetPosition(style.PositionAbsolute),
 		style.SetZIndex(-99),
 	)

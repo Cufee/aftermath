@@ -3,6 +3,7 @@ package common
 import (
 	"image"
 
+	"github.com/cufee/facepaint"
 	"github.com/cufee/facepaint/style"
 )
 
@@ -43,7 +44,7 @@ func DefaultTheme() Theme {
 			style.SetBorderRadius(BorderRadiusLG),
 			func(s *style.Style) {
 				s.BackgroundColor = DefaultCardColor
-				s.BlurBackground = 20.0
+				s.Backdrop = []style.Effect{&facepaint.Blur{Sigma: 20}}
 			},
 		),
 		ClanTag: style.NewStyle(
