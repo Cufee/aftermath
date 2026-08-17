@@ -10,7 +10,7 @@ require (
 	github.com/a-h/templ v0.3.977
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/cufee/aftermath-assets v0.1.0
-	github.com/cufee/am-wg-proxy-next/v2 v2.2.6
+	github.com/cufee/am-wg-proxy-next/v2 v2.2.7
 	github.com/cufee/facepaint v0.2.0
 	github.com/fogleman/gg v1.3.0
 	github.com/go-co-op/gocron v1.37.0
@@ -160,6 +160,7 @@ require (
 	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/term v0.40.0 // indirect
+	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	golang.org/x/tools v0.42.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260226221140-a57be14db171 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260226221140-a57be14db171 // indirect
