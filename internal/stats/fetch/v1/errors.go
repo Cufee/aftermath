@@ -1,6 +1,9 @@
 package fetch
 
-import "github.com/pkg/errors"
+import (
+	"github.com/cufee/am-wg-proxy-next/v2/client/common"
+	"github.com/pkg/errors"
+)
 
 var (
 	ErrAccountNotFound     = errors.New("no results found")
@@ -13,6 +16,9 @@ var (
 func parseWargamingError(err error) error {
 	if err == nil {
 		return nil
+	}
+	if errors.Is(err, common.ErrSourceNotAvailable) || errors.Is(err, common.ErrUnexpectedContentType) {
+		return ErrSourceNotAvailable
 	}
 	switch err.Error() {
 	default:
