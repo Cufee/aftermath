@@ -421,13 +421,13 @@ func loadStaticAssets(static fs.FS) {
 }
 
 func wargamingClientsFromEnv(observer metrics.ErrorObserver) (wargaming.Client, wargaming.Client) {
-	liveClient, err := wargaming.NewClientFromEnv(constants.WargamingPrimaryAppID, constants.WargamingPrimaryAppRPS, constants.WargamingPrimaryAppRequestTimeout, constants.WargamingPrimaryAppProxyHostList)
+	liveClient, err := wargaming.NewClientFromEnv(constants.WargamingPrimaryAppID, constants.WargamingPrimaryAppRPS, constants.WargamingPrimaryAppRequestTimeout, constants.WargamingPrimaryAppProxyHostList, constants.WargamingUserAgent)
 	if err != nil {
 		log.Fatal().Msgf("wargamingClientsFromEnv#NewClientFromEnv failed %s", err)
 	}
 
 	// This wargaming client is using a different proxy as it needs a lot higher rps, but can be slow
-	cacheClient, err := wargaming.NewClientFromEnv(constants.WargamingCacheAppID, constants.WargamingCacheAppRPS, constants.WargamingCacheAppRequestTimeout, constants.WargamingCacheAppProxyHostList)
+	cacheClient, err := wargaming.NewClientFromEnv(constants.WargamingCacheAppID, constants.WargamingCacheAppRPS, constants.WargamingCacheAppRequestTimeout, constants.WargamingCacheAppProxyHostList, constants.WargamingUserAgent)
 	if err != nil {
 		log.Fatal().Msgf("wargamingClientsFromEnv#NewClientFromEnv failed %s", err)
 	}

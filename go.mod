@@ -10,7 +10,7 @@ require (
 	github.com/a-h/templ v0.3.977
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/cufee/aftermath-assets v0.1.0
-	github.com/cufee/am-wg-proxy-next/v2 v2.2.8
+	github.com/cufee/am-wg-proxy-next/v2 v2.2.9
 	github.com/cufee/facepaint v0.2.0
 	github.com/fogleman/gg v1.3.0
 	github.com/go-co-op/gocron v1.37.0

@@ -16,6 +16,7 @@ var (
 	WargamingPrimaryAppRPS            int
 	WargamingPrimaryAppRequestTimeout time.Duration
 	WargamingPrimaryAppProxyHostList  = os.Getenv("WG_PROXY_HOST_LIST")
+	WargamingUserAgent                = MustGetEnv("WG_USER_AGENT")
 	WargamingCacheAppID               = MustGetEnv("WG_CACHE_APP_ID")
 	WargamingCacheAppRPS              int
 	WargamingCacheAppRequestTimeout   time.Duration
