@@ -9,8 +9,8 @@ tmp
 
 **/*_templ.go
 
+.serena
 .claude
 .playwright-mcp
 
 internal/external/blitzkit/averages.pb.go
-
