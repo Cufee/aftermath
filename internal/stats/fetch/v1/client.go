@@ -36,7 +36,11 @@ func (stats *AccountStatsOverPeriod) AddWN8(averages map[string]frame.StatsFrame
 		if !ok || data.Battles < 1 {
 			continue
 		}
-		weightedTotal += data.Battles.Float() * data.WN8(tankAverages).Float()
+		wn8 := data.WN8(tankAverages)
+		if frame.InvalidValue.Equals(wn8) {
+			continue
+		}
+		weightedTotal += data.Battles.Float() * wn8.Float()
 		battlesTotal += data.Battles.Float()
 	}
 	if battlesTotal < 1 {
