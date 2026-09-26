@@ -87,7 +87,7 @@ func main() {
 	liveCoreClient, cacheCoreClient := coreClientsFromEnv(db, errorTracker)
 
 	// Metrics instrument
-	instrument, err := metrics.NewInstrument()
+	instrument, err := metrics.NewInstrument(wargaming.IncompleteVehicleStats)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create a new metrics instrument")
 	}

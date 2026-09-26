@@ -1,0 +1,1 @@
+-- Removed snapshot data can only be recovered from a backup.
