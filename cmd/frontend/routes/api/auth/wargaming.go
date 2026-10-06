@@ -171,6 +171,7 @@ func verifyAccountToken(ctx context.Context, appID string, realm types.Realm, ac
 		return err
 	}
 	req = req.WithContext(ctx)
+	req.Header.Set("User-Agent", constants.WargamingUserAgent)
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
