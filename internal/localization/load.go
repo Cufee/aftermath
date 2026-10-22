@@ -11,8 +11,8 @@ import (
 
 	"github.com/cufee/aftermath/internal/files"
 	"github.com/cufee/aftermath/internal/log"
+	"go.yaml.in/yaml/v3"
 	"golang.org/x/text/language"
-	"gopkg.in/yaml.v3"
 )
 
 type localizationStrings struct {

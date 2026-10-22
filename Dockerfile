@@ -13,7 +13,7 @@
 # RUN npx tolgee pull --api-key "${LOCALIZE_API_KEY}" --states REVIEWED
 
 # Build app
-FROM golang:1.26.0 AS builder-go
+FROM golang:1.27.3 AS builder-go
 
 ARG BRAND_FLAVOR=red
 ENV BRAND_FLAVOR $BRAND_FLAVOR

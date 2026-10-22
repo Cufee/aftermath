@@ -356,8 +356,13 @@ func startSchedulerFromEnv(ctx context.Context, coreClient core.Client) (func(),
 	if !constants.SchedulerEnabled {
 		return func() {}, nil
 	}
-	s := scheduler.New()
-	scheduler.RegisterDefaultTasks(s, coreClient)
+	s, err := scheduler.New()
+	if err != nil {
+		return nil, err
+	}
+	if err := scheduler.RegisterDefaultTasks(s, coreClient); err != nil {
+		return nil, err
+	}
 	return s.Start(ctx)
 }
 

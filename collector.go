@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-co-op/gocron"
+	"github.com/go-co-op/gocron/v2"
 	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/cufee/aftermath/internal/external/wargaming"
@@ -52,14 +52,27 @@ func main() {
 		}
 	}()
 
-	scheduler := gocron.NewScheduler(time.UTC)
-
-	scheduler.Cron("0 0 * * 6").Do(collectRealmIDs, backendApi, types.RealmAsia)
-	scheduler.Cron("0 0 * * 7").Do(collectRealmIDs, backendApi, types.RealmNorthAmerica)
-	scheduler.Cron("0 0 * * 1").Do(collectRealmIDs, backendApi, types.RealmEurope)
-
+	scheduler, err := gocron.NewScheduler(gocron.WithLocation(time.UTC))
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to create collector scheduler")
+	}
+	for _, job := range []struct {
+		cron  string
+		realm types.Realm
+	}{
+		{"0 0 * * 6", types.RealmAsia},
+		{"0 0 * * 0", types.RealmNorthAmerica},
+		{"0 0 * * 1", types.RealmEurope},
+	} {
+		if _, err := scheduler.NewJob(gocron.CronJob(job.cron, false),
+			gocron.NewTask(collectRealmIDs, backendApi, job.realm)); err != nil {
+			_ = scheduler.Shutdown()
+			log.Fatal().Err(err).Str("cron", job.cron).Msg("failed to register collector job")
+		}
+	}
 	log.Info().Msg("started a cron scheduler")
-	scheduler.StartBlocking()
+	scheduler.Start()
+	select {}
 }
 
 func collectRealmIDs(backendApi string, realm types.Realm) {

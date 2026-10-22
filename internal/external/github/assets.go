@@ -5,13 +5,16 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/google/go-github/v63/github"
+	"github.com/google/go-github/v93/github"
 	"github.com/pkg/errors"
 )
 
-var client = github.NewClient(nil)
-
 func GetLatestGameAssets(ctx context.Context) (io.ReadCloser, int64, error) {
+	client, err := github.NewClient()
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to create GitHub client")
+	}
+
 	release, _, err := client.Repositories.GetLatestRelease(ctx, "cufee", "aftermath-assets")
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "gailed to get latest release")

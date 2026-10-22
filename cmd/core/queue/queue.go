@@ -66,7 +66,11 @@ func (q *queue) Start(ctx context.Context) (func(), error) {
 		return nil, err
 	}
 
-	s := scheduler.New()
+	s, err := scheduler.New()
+	if err != nil {
+		qCancel()
+		return nil, err
+	}
 	// on cron, pull and enqueue available tasks
 	s.Add("* * * * *", func() {
 		pctx, cancel := context.WithTimeout(qctx, time.Second*5)

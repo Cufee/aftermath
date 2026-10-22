@@ -2,23 +2,33 @@ package scheduler
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/cufee/aftermath/cmd/core"
-	"github.com/go-co-op/gocron"
+	"github.com/cufee/aftermath/internal/log"
+	"github.com/go-co-op/gocron/v2"
 )
 
 type scheduler struct {
-	cron *gocron.Scheduler
-	jobs []*gocron.Job
+	cron gocron.Scheduler
+	jobs []gocron.Job
 }
 
-func New() *scheduler {
-	return &scheduler{cron: gocron.NewScheduler(time.UTC)}
+func New() (*scheduler, error) {
+	// v1 waited for running jobs indefinitely. Keep that behavior in practice,
+	// including the averages worker's fifteen-minute jitter, instead of v2's
+	// default ten-second timeout. Reserve room for gocron's two-second margin.
+	cron, err := gocron.NewScheduler(gocron.WithLocation(time.UTC),
+		gocron.WithStopTimeout(time.Duration(1<<63-1)-2*time.Second))
+	if err != nil {
+		return nil, err
+	}
+	return &scheduler{cron: cron}, nil
 }
 
-func (s *scheduler) Add(cron string, fn func()) (*gocron.Job, error) {
-	j, err := s.cron.Cron(cron).Do(fn)
+func (s *scheduler) Add(cron string, fn func()) (gocron.Job, error) {
+	j, err := s.cron.NewJob(gocron.CronJob(cron, false), gocron.NewTask(fn))
 	if err != nil {
 		return nil, err
 	}
@@ -27,36 +37,35 @@ func (s *scheduler) Add(cron string, fn func()) (*gocron.Job, error) {
 }
 
 func (s *scheduler) Start(ctx context.Context) (func(), error) {
-	go s.cron.StartBlocking()
-	return s.cron.Stop, nil
+	s.cron.Start()
+	return func() {
+		if err := s.cron.Shutdown(); err != nil {
+			log.Err(err).Msg("failed to shut down scheduler")
+		}
+	}, nil
 }
 
-func RegisterDefaultTasks(s *scheduler, coreClient core.Client) {
-	s.Add("0 * * * *", RestartTasksWorker(coreClient))
-	s.Add("0 15 * * *", CleanupPubSubWorker(coreClient))
-	s.Add("0 5 * * *", CreateCleanupTaskWorker(coreClient)) // delete expired documents
-
-	// Glossary - Do it around the same time WG releases game updates
-	s.Add("10 12 * * *", UpdateGlossaryWorker(coreClient))
-	s.Add("10 10 * * *", UpdateGlossaryWorker(coreClient))
-
-	// Averages - Update averages once daily
-	s.Add("0 0 * * *", UpdateAveragesWorker(coreClient))
-
-	// Snapshots
-	s.Add("0 9 * * *", CreateSnapshotTasksWorker(coreClient, "NA"))  // NA
-	s.Add("0 1 * * *", CreateSnapshotTasksWorker(coreClient, "EU"))  // EU
-	s.Add("0 18 * * *", CreateSnapshotTasksWorker(coreClient, "AS")) // Asia
-
-	// // Achievement leaderboards. ideally, this should not delay snapshots
-	// // hourly
-	// s.Add("25 * * * *", CreateLeaderboardTasksWorker(coreClient, "NA", models.LeaderboardScoreHourly)) // NA
-	// s.Add("30 * * * *", CreateLeaderboardTasksWorker(coreClient, "EU", models.LeaderboardScoreHourly)) // EU
-	// s.Add("35 * * * *", CreateLeaderboardTasksWorker(coreClient, "AS", models.LeaderboardScoreHourly)) // Asia
-	// // daily
-	// s.Add("0 8 * * *", CreateLeaderboardTasksWorker(coreClient, "NA", models.LeaderboardScoreDaily))  // NA
-	// s.Add("0 0 * * *", CreateLeaderboardTasksWorker(coreClient, "EU", models.LeaderboardScoreDaily))  // EU
-	// s.Add("0 17 * * *", CreateLeaderboardTasksWorker(coreClient, "AS", models.LeaderboardScoreDaily)) // Asia
-
-	// Configurations
+func RegisterDefaultTasks(s *scheduler, coreClient core.Client) error {
+	jobs := []struct {
+		cron string
+		fn   func()
+	}{
+		{"0 * * * *", RestartTasksWorker(coreClient)},
+		{"0 15 * * *", CleanupPubSubWorker(coreClient)},
+		{"0 5 * * *", CreateCleanupTaskWorker(coreClient)},
+		// Refresh around the time WG releases game updates.
+		{"10 12 * * *", UpdateGlossaryWorker(coreClient)},
+		{"10 10 * * *", UpdateGlossaryWorker(coreClient)},
+		{"0 0 * * *", UpdateAveragesWorker(coreClient)},
+		{"0 9 * * *", CreateSnapshotTasksWorker(coreClient, "NA")},
+		{"0 1 * * *", CreateSnapshotTasksWorker(coreClient, "EU")},
+		{"0 18 * * *", CreateSnapshotTasksWorker(coreClient, "AS")},
+	}
+	for _, job := range jobs {
+		if _, err := s.Add(job.cron, job.fn); err != nil {
+			_ = s.cron.Shutdown()
+			return fmt.Errorf("register scheduled task %q: %w", job.cron, err)
+		}
+	}
+	return nil
 }
